@@ -209,6 +209,12 @@ public class PhotoLibraryUploader {
                 creationDate: asset.creationDate)
             uploadFile.priority = settings.lastSync.timeIntervalSince1970 > 0 ? .high : .low
             realm.add(uploadFile, update: .modified)
+            if i < assets.count - 1 && i % 99 == 0 {
+                // Commit write every 100 assets
+                try? realm.commitWrite()
+                UploadQueue.instance.addToQueueFromRealm()
+                realm.beginWrite()
+            }
         }
         try? realm.commitWrite()
     }

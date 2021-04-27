@@ -439,8 +439,10 @@ public class UploadQueue {
                 operation.cancel()
             } else {
                 let parentId = file.parentDirectoryId
-                try? realm.safeWrite {
-                    realm.delete(file)
+                autoreleasepool {
+                    try? realm.safeWrite {
+                        realm.delete(file)
+                    }
                 }
                 publishUploadCount(withParent: parentId)
             }
