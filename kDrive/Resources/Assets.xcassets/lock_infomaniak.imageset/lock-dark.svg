@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="187px" height="187px" viewBox="0 0 187 187" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>lock-dark</title>
+    <g id="mobile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Lock-screen" transform="translate(-114.000000, -552.000000)">
+            <g id="lock-dark" transform="translate(114.000000, 552.000000)">
+                <circle id="Oval" fill="#2E2F30" cx="93.5" cy="93.5" r="93.5"></circle>
+                <path d="M93.5,47 C107.583261,47 119,58.4167389 119,72.5 L119,98 L111,98 L111,72.5 C111,62.9448462 103.34204,55.1783049 93.8287703,55.0030264 L93.5,55 C83.8350169,55 76,62.8350169 76,72.5 L76,72.5 L76,98 L68,98 L68,72.5 C68,58.4167389 79.4167389,47 93.5,47 Z" id="Combined-Shape" fill="#BCBCBC"></path>
+                <g id="Rectangle" transform="translate(61.000000, 84.000000)">
+                    <path d="M3,0 L62,0 C63.6568542,-3.04359188e-16 65,1.34314575 65,3 L65,45 C65,51.627417 59.627417,57 53,57 L12,57 C5.372583,57 8.11624501e-16,51.627417 0,45 L0,3 C-2.02906125e-16,1.34314575 1.34314575,3.04359188e-16 3,0 Z" id="Mask" fill="#FFCC01"></path>
+                    <path d="M32.8421815,0 L62,0 C63.6568542,0 65,1.34314575 65,3 L65,45 C65,51.627417 59.627417,57 53,57 L32.5887063,57 L32.8421815,0 Z" id="Path" fill="#FFC000"></path>
+                </g>
+                <polygon id="infomaniak-copy" fill="#FFFFFF" fill-rule="nonzero" points="92.6934835 122 92.6934835 117.66985 95.1552695 115.316508 98.614642 122 106 122 99.5156879 111.174625 105.646018 105.338336 97.5848753 105.338336 92.6934835 110.860846 92.6934835 99 86 99 86 122"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

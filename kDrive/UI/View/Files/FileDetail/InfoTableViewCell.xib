@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="361" id="T0A-5y-FzG" customClass="InfoTableViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="489" height="361"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="T0A-5y-FzG" id="gPT-wz-EfK">
+                <rect key="frame" x="0.0" y="0.0" width="489" height="361"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="info" translatesAutoresizingMaskIntoConstraints="NO" id="BBi-Ps-EiW">
+                        <rect key="frame" x="224.5" y="32" width="40" height="40"/>
+                        <color key="tintColor" name="infomaniakColor"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="40" id="Wq8-je-zfa"/>
+                            <constraint firstAttribute="width" constant="40" id="npp-ce-pyC"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Ouvrez le document pour y ajouter des commentaires. Faites ensuite un clic droit sur l'élément à commenter" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XBO-Oy-eIc">
+                        <rect key="frame" x="44" y="104" width="401" height="65"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="65" id="8n7-Np-e8s"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
+                        <color key="textColor" name="titleColor"/>
+                        <nil key="highlightedColor"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileDetailsCommentsUnavailable"/>
+                        </userDefinedRuntimeAttributes>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mga-tV-4f4">
+                        <rect key="frame" x="44" y="201" width="401" height="60"/>
+                        <color key="backgroundColor" name="infomaniakColor"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="60" id="pZU-LZ-rx9"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
+                        <state key="normal" title="Ouvrir le document">
+                            <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </state>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                <real key="value" value="10"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenDocument"/>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="buttonPressed:" destination="T0A-5y-FzG" eventType="touchUpInside" id="i3y-Qf-ykd"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="mga-tV-4f4" firstAttribute="top" secondItem="XBO-Oy-eIc" secondAttribute="bottom" constant="32" id="2jn-gX-km3"/>
+                    <constraint firstItem="XBO-Oy-eIc" firstAttribute="leading" secondItem="gPT-wz-EfK" secondAttribute="leadingMargin" constant="24" id="Q53-Vi-s6C"/>
+                    <constraint firstAttribute="bottom" secondItem="mga-tV-4f4" secondAttribute="bottom" constant="8" id="TxE-AM-4hA"/>
+                    <constraint firstItem="BBi-Ps-EiW" firstAttribute="centerX" secondItem="gPT-wz-EfK" secondAttribute="centerX" id="Vay-B4-C58"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="XBO-Oy-eIc" secondAttribute="trailing" constant="24" id="cc2-M8-3Xl"/>
+                    <constraint firstItem="BBi-Ps-EiW" firstAttribute="top" secondItem="gPT-wz-EfK" secondAttribute="top" constant="32" id="iLl-A6-KFg"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="mga-tV-4f4" secondAttribute="trailing" constant="24" id="pag-mI-y1F"/>
+                    <constraint firstItem="XBO-Oy-eIc" firstAttribute="top" secondItem="BBi-Ps-EiW" secondAttribute="bottom" constant="32" id="rCs-sf-mRz"/>
+                    <constraint firstItem="mga-tV-4f4" firstAttribute="leading" secondItem="gPT-wz-EfK" secondAttribute="leadingMargin" constant="24" id="zQy-ug-won"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="1Xz-fq-xg2"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <point key="canvasLocation" x="-77.536231884057983" y="213.95089285714286"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="info" width="24" height="24"/>
+        <namedColor name="infomaniakColor">
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="titleColor">
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

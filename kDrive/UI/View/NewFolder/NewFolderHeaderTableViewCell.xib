@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="NewFolderHeaderTableViewCell" rowHeight="260" translatesAutoresizingMaskIntoConstraints="NO" id="KGk-i7-Jjw" customClass="NewFolderHeaderTableViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="378" height="260"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="378" height="260"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aqX-hy-10J">
+                        <rect key="frame" x="24" y="8" width="330" height="244"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s">
+                                <rect key="frame" x="30" y="114" width="270" height="19.5"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                <color key="textColor" name="titleColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="DF6-eQ-9qS" customClass="MaterialOutlinedTextField" customModule="MaterialOutlinedTextField">
+                                <rect key="frame" x="0.0" y="163.5" width="330" height="50"/>
+                                <color key="backgroundColor" name="backgroundCardViewColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="y7B-KW-mLL"/>
+                                </constraints>
+                                <color key="textColor" name="titleColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-fill" translatesAutoresizingMaskIntoConstraints="NO" id="kZU-CD-ye1">
+                                <rect key="frame" x="126.5" y="20" width="77" height="77"/>
+                                <color key="tintColor" name="secondaryTextColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" priority="999" constant="77" id="dRK-sZ-sNb"/>
+                                    <constraint firstAttribute="height" constant="77" id="yj4-hH-cE8"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="kZU-CD-ye1" secondAttribute="trailing" constant="20" id="88d-JA-WbW"/>
+                            <constraint firstItem="kZU-CD-ye1" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" constant="20" id="9wU-An-SjU"/>
+                            <constraint firstItem="DF6-eQ-9qS" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" id="B5n-Mz-7S6"/>
+                            <constraint firstItem="kZU-CD-ye1" firstAttribute="centerX" secondItem="aqX-hy-10J" secondAttribute="centerX" id="Fug-vu-dNf"/>
+                            <constraint firstAttribute="trailing" secondItem="DF6-eQ-9qS" secondAttribute="trailing" id="JyP-CC-B7A"/>
+                            <constraint firstItem="rtI-Wc-46s" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" constant="30" id="OEI-76-3L8"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="DF6-eQ-9qS" secondAttribute="bottom" constant="20" id="OKw-Zj-d6a"/>
+                            <constraint firstItem="DF6-eQ-9qS" firstAttribute="top" secondItem="rtI-Wc-46s" secondAttribute="bottom" constant="30" id="Rfb-Xy-Zhk"/>
+                            <constraint firstItem="rtI-Wc-46s" firstAttribute="top" secondItem="kZU-CD-ye1" secondAttribute="bottom" constant="17" id="dGP-aG-ZEi"/>
+                            <constraint firstItem="kZU-CD-ye1" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="aqX-hy-10J" secondAttribute="leading" constant="20" id="sO8-5C-sr5"/>
+                            <constraint firstAttribute="trailing" secondItem="rtI-Wc-46s" secondAttribute="trailing" constant="30" id="zQ2-wW-QhB"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="CCZ-mR-gNe"/>
+                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" constant="8" id="b3L-GJ-LSF"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="eo3-Nh-xzM"/>
+                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" constant="24" id="vUN-8O-pqH"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="accessoryImageView" destination="kZU-CD-ye1" id="V4o-qX-R0L"/>
+                <outlet property="bottomConstraint" destination="b3L-GJ-LSF" id="Y7h-fG-fCo"/>
+                <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
+                <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
+                <outlet property="titleTextField" destination="DF6-eQ-9qS" id="4JO-Iv-tqX"/>
+                <outlet property="topConstraint" destination="eo3-Nh-xzM" id="zKn-C5-K50"/>
+            </connections>
+            <point key="canvasLocation" x="-24.637681159420293" y="160.04464285714286"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="folder-fill" width="24" height="24"/>
+        <namedColor name="backgroundCardViewColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="secondaryTextColor">
+            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="titleColor">
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

@@ -1,0 +1,282 @@
+/*
+Infomaniak kDrive - iOS App
+Copyright (C) 2021 Infomaniak Network SA
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import UIKit
+import InfomaniakCore
+import kDriveCore
+
+class InviteUserViewController: UIViewController {
+
+    @IBOutlet weak var tableView: UITableView!
+
+    var removeUsers: [Int] = []
+    var removeEmails: [String] = []
+    var emails: [String] = []
+    var users: [DriveUser] = []
+    var message = String()
+    var file: File!
+
+    var emptyInvitation: Bool = false
+
+    private enum InviteUserRows: CaseIterable {
+        case invited
+        case addUser
+        case rights
+        case message
+    }
+    private var rows = InviteUserRows.allCases
+
+    private var newPermission = UserPermission.read
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        tableView.register(cellView: InviteUserTableViewCell.self)
+        tableView.register(cellView: MenuTableViewCell.self)
+        tableView.register(cellView: MessageTableViewCell.self)
+        tableView.register(cellView: InvitedUserTableViewCell.self)
+        hideKeyboardWhenTappedAround()
+        navigationController?.setInfomaniakAppearanceNavigationBar()
+        navigationItem.title = file.isDirectory ? KDriveStrings.Localizable.fileShareFolderTitle : KDriveStrings.Localizable.fileShareFileTitle
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeView))
+        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    @objc func keyboardWillShow(_ notification: Notification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            tableView.contentInset.bottom = keyboardSize.height
+
+            UIView.animate(withDuration: 0.1) {
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+
+    @objc func keyboardWillHide(_ notification: Notification) {
+        tableView.contentInset.bottom = 0
+        UIView.animate(withDuration: 0.1) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc func closeView() {
+        self.dismiss(animated: true)
+    }
+
+    func showConflictDialog(conflictList: [FileCheckResult]) {
+        let message: NSMutableAttributedString
+        if conflictList.count == 1, let userIndex = users.firstIndex(where: { $0.id == conflictList[0].userId }) {
+            let user = users[userIndex]
+            message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictDescription(user.displayName, (user.permission ?? .read).title, newPermission.title), boldText: user.displayName)
+        } else {
+            message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictManyUserDescription(newPermission.title))
+        }
+        let alert = AlertTextViewController(title: KDriveStrings.Localizable.sharedConflictTitle, message: message, action: KDriveStrings.Localizable.buttonShare) {
+            self.shareAndDismiss()
+        }
+        present(alert, animated: true)
+    }
+
+    func shareAndDismiss() {
+        let usersIds = users.map(\.id)
+        let tags = [Int]()
+        AccountManager.instance.currentDriveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { (response, error) in
+
+        }
+        dismiss(animated: true)
+    }
+
+    func reloadInvited() {
+        emptyInvitation = users.count == 0 && emails.count == 0
+        if emptyInvitation {
+            rows = [.addUser, .rights, .message]
+        } else {
+            rows = [.invited, .addUser, .rights, .message]
+        }
+        tableView.reloadSections([0], with: .automatic)
+    }
+
+    class func instantiateInNavigationController() -> TitleSizeAdjustingNavigationController {
+        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate())
+        navigationController.navigationBar.prefersLargeTitles = true
+        return navigationController
+    }
+
+    class func instantiate() -> InviteUserViewController {
+        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "InviteUserViewController") as! InviteUserViewController
+    }
+}
+
+// MARK: - UITableViewDelegate, UITableViewDataSource
+extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return rows.count
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        switch rows[indexPath.row] {
+        case .invited:
+            return UITableView.automaticDimension
+        case .message:
+            return 180
+        default:
+            return UITableView.automaticDimension
+        }
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch rows[indexPath.row] {
+        case .invited:
+            let cell = tableView.dequeueReusableCell(type: InvitedUserTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: true, isLast: false)
+            cell.configureWith(users: users, mails: emails, tableViewWidth: tableView.bounds.width)
+            cell.delegate = self
+            cell.selectionStyle = .none
+            return cell
+        case .addUser:
+            let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
+            cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail
+            cell.removeUsers = removeUsers
+            cell.removeEmails = removeEmails
+            cell.delegate = self
+            return cell
+        case .rights:
+            let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.logoImage.tintColor = KDriveAsset.iconColor.color
+            cell.titleLabel.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.medium)
+            cell.titleLabel.textColor = KDriveAsset.titleColor.color
+            cell.selectionStyle = .none
+            cell.titleLabel.text = newPermission.title
+            cell.logoImage?.image = newPermission.icon
+            return cell
+        case .message:
+            let cell = tableView.dequeueReusableCell(type: MessageTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.selectionStyle = .none
+            cell.textDidChange = { text in
+                self.message = text
+            }
+            return cell
+        }
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        switch rows[indexPath.row] {
+        case .addUser:
+            break
+        case .rights:
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+            rightsSelectionViewController.modalPresentationStyle = .fullScreen
+            if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
+                rightsSelectionVC.delegate = self
+                rightsSelectionVC.selectedRight = newPermission.rawValue
+                rightsSelectionVC.canDelete = false
+                rightsSelectionVC.userType = "multiUser"
+            }
+            present(rightsSelectionViewController, animated: true)
+        default:
+            break
+        }
+    }
+
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 124
+    }
+
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        if section == tableView.numberOfSections - 1 {
+            let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonShare)
+            view.delegate = self
+            return view
+        }
+        return nil
+    }
+}
+
+
+// MARK: - SearchUserDelegate
+extension InviteUserViewController: SearchUserDelegate {
+    func didSelectUser(user: DriveUser) {
+        users.append(user)
+        removeUsers.append(user.id)
+        reloadInvited()
+    }
+
+    func didSelectMail(mail: String) {
+        emails.append(mail)
+        removeEmails.append(mail)
+        reloadInvited()
+    }
+}
+
+
+// MARK: - SelectedUsersDelegate
+extension InviteUserViewController: SelectedUsersDelegate {
+    func didDeleteUser(user: DriveUser) {
+        users.removeAll {
+            $0.id == user.id
+        }
+        removeUsers.removeAll {
+            $0 == user.id
+        }
+        reloadInvited()
+    }
+
+    func didDeleteMail(mail: String) {
+        emails.removeAll {
+            $0 == mail
+        }
+        reloadInvited()
+    }
+}
+
+
+// MARK: - RightsSelectionDelegate
+extension InviteUserViewController: RightsSelectionDelegate {
+    func didUpdateRightValue(newValue value: String) {
+        newPermission = UserPermission(rawValue: value)!
+        tableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .automatic)
+    }
+}
+
+extension InviteUserViewController: FooterButtonDelegate {
+    func didClickOnButton() {
+        let usersIds = users.map(\.id)
+        let tags = [Int]()
+        AccountManager.instance.currentDriveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { (response, error) in
+            let conflictList = response?.data?.filter(\.isConflict) ?? []
+            if conflictList.isEmpty {
+                self.shareAndDismiss()
+            } else {
+                self.showConflictDialog(conflictList: conflictList)
+            }
+        }
+    }
+
+}

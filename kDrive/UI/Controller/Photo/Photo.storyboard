@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Enregistrer sur le kDrive-->
+        <scene sceneID="LP0-nQ-v0F">
+            <objects>
+                <viewController storyboardIdentifier="SavePhotoViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="NSe-LJ-etF" customClass="SavePhotoViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="xrr-06-MgX">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="oAC-DO-hSv">
+                                <rect key="frame" x="0.0" y="88" width="414" height="808"/>
+                                <color key="backgroundColor" name="backgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="NSe-LJ-etF" id="KnK-yd-Mli"/>
+                                    <outlet property="delegate" destination="NSe-LJ-etF" id="uqW-Vf-qUd"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="csl-nE-Fpn"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="oAC-DO-hSv" firstAttribute="top" secondItem="csl-nE-Fpn" secondAttribute="top" id="Ylt-aZ-Wne"/>
+                            <constraint firstItem="csl-nE-Fpn" firstAttribute="trailing" secondItem="oAC-DO-hSv" secondAttribute="trailing" id="dwa-ue-ps4"/>
+                            <constraint firstAttribute="bottom" secondItem="oAC-DO-hSv" secondAttribute="bottom" id="eJY-ww-hCo"/>
+                            <constraint firstItem="oAC-DO-hSv" firstAttribute="leading" secondItem="csl-nE-Fpn" secondAttribute="leading" id="x0d-Jb-K8P"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Enregistrer sur le kDrive" largeTitleDisplayMode="always" id="jeQ-62-SCa">
+                        <barButtonItem key="backBarButtonItem" title=" " id="q0u-cp-CwN"/>
+                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="nWe-lY-E63">
+                            <connections>
+                                <action selector="close:" destination="NSe-LJ-etF" id="Rkn-XW-KBP"/>
+                            </connections>
+                        </barButtonItem>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="saveExternalFileTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
+                    <connections>
+                        <outlet property="closeBarButtonItem" destination="nWe-lY-E63" id="p8R-ej-ryN"/>
+                        <outlet property="tableView" destination="oAC-DO-hSv" id="D1R-UE-E7V"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="FA3-ZV-pLV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-28" y="31"/>
+        </scene>
+    </scenes>
+    <resources>
+        <namedColor name="backgroundColor">
+            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

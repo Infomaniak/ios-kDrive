@@ -1,0 +1,83 @@
+/*
+Infomaniak kDrive - iOS App
+Copyright (C) 2021 Infomaniak Network SA
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import UIKit
+import LocalAuthentication
+
+struct AppLockHelper {
+
+    static var shared = AppLockHelper()
+
+    private var lastAppLock: Double = 0
+    private let appUnlockTime: Double = 10 * 60 // 10 minutes
+
+    private init() { }
+
+    var isAppLocked: Bool {
+        get {
+            return lastAppLock + appUnlockTime < Date().timeIntervalSince1970
+        }
+    }
+
+    mutating func setTime() {
+        lastAppLock = Date().timeIntervalSince1970
+    }
+
+}
+
+class AppLockSettingsViewController: UIViewController {
+
+    @IBOutlet weak var faceIdSwitch: UISwitch!
+
+    var closeActionHandler: (() -> Void)?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        faceIdSwitch.setOn(UserDefaults.isAppLockMode(), animated: false)
+    }
+
+    @IBAction func buttonCloseClicked(_ sender: UIButton) {
+        closeActionHandler?()
+    }
+
+    @IBAction func didChangeSwitchValue(_ sender: UISwitch) {
+        let context = LAContext()
+        let reason = KDriveStrings.Localizable.appSecurityDescription
+        var error: NSError?
+        if #available(iOS 8.0, *) {
+            if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, evaluateError in
+                    DispatchQueue.main.async {
+                        if success {
+                            UserDefaults.store(appLock: sender.isOn)
+                        } else {
+                            sender.setOn(!sender.isOn, animated: true)
+                        }
+                    }
+                }
+            } else {
+                sender.setOn(!sender.isOn, animated: true)
+            }
+        }
+    }
+
+    class func instantiate() -> AppLockSettingsViewController {
+        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "AppLockSettingsViewController") as! AppLockSettingsViewController
+    }
+}

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="160" id="KGk-i7-Jjw" customClass="InvitedUserTableViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="348" height="160"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="348" height="160"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sCL-PI-gFk">
+                        <rect key="frame" x="24" y="0.0" width="300" height="160"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="ddx-uD-n82">
+                                <rect key="frame" x="4" y="4" width="292" height="152"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="152" id="ehL-3t-85f"/>
+                                </constraints>
+                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="8" minimumInteritemSpacing="8" id="tec-Yf-8nb" customClass="AlignedCollectionViewFlowLayout" customModule="kDrive" customModuleProvider="target">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <connections>
+                                    <outlet property="dataSource" destination="KGk-i7-Jjw" id="qF5-sB-X79"/>
+                                    <outlet property="delegate" destination="KGk-i7-Jjw" id="DO1-SX-23F"/>
+                                </connections>
+                            </collectionView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="ddx-uD-n82" firstAttribute="leading" secondItem="sCL-PI-gFk" secondAttribute="leading" constant="4" id="4jz-dB-t88"/>
+                            <constraint firstAttribute="trailing" secondItem="ddx-uD-n82" secondAttribute="trailing" constant="4" id="FSo-nJ-5Tp"/>
+                            <constraint firstItem="ddx-uD-n82" firstAttribute="top" secondItem="sCL-PI-gFk" secondAttribute="top" constant="4" id="Qxp-Kx-FeJ"/>
+                            <constraint firstAttribute="bottom" secondItem="ddx-uD-n82" secondAttribute="bottom" constant="4" id="dkD-LD-fzS"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="sCL-PI-gFk" secondAttribute="trailing" constant="24" id="2YP-Kz-VtF"/>
+                    <constraint firstItem="sCL-PI-gFk" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="d4a-Sr-ect"/>
+                    <constraint firstItem="sCL-PI-gFk" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="gjd-BU-pO3"/>
+                    <constraint firstAttribute="bottom" secondItem="sCL-PI-gFk" secondAttribute="bottom" id="zE1-Fn-oTh"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="contentInsetView" destination="sCL-PI-gFk" id="ukn-YR-en4"/>
+                <outlet property="heightConstraint" destination="ehL-3t-85f" id="Z7i-kX-C2F"/>
+                <outlet property="invitedCollectionView" destination="ddx-uD-n82" id="aYa-I4-Rdm"/>
+            </connections>
+            <point key="canvasLocation" x="140.57971014492756" y="129.24107142857142"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

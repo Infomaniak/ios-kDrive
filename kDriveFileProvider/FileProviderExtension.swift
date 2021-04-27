@@ -1,0 +1,300 @@
+/*
+Infomaniak kDrive - iOS App
+Copyright (C) 2021 Infomaniak Network SA
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import CoreServices
+import FileProvider
+import kDriveCore
+import InfomaniakLogin
+
+class FileProviderExtensionState {
+
+    static let shared = FileProviderExtensionState()
+    var importedDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
+    var workingSet = [NSFileProviderItemIdentifier: FileProviderItem]()
+
+    func importedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
+        return importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier }
+    }
+
+    func unenumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
+        let children = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier && !$0.alreadyEnumerated }
+        children.forEach({ $0.alreadyEnumerated = true })
+        return children
+    }
+
+    func deleteAlreadyEnumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [NSFileProviderItemIdentifier] {
+        let children = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier && $0.alreadyEnumerated }
+        return children.compactMap { importedDocuments.removeValue(forKey: $0.itemIdentifier)?.itemIdentifier }
+    }
+}
+
+class FileProviderExtension: NSFileProviderExtension {
+
+    lazy var fileCoordinator: NSFileCoordinator = {
+        let fileCoordinator = NSFileCoordinator()
+        fileCoordinator.purposeIdentifier = NSFileProviderManager.default.providerIdentifier
+        return fileCoordinator
+    }()
+
+    let accountManager: AccountManager
+    lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
+
+    private func setDriveFileManager() -> DriveFileManager? {
+        if let objectId = domain?.identifier.rawValue,
+            let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
+            let driveFileManager = accountManager.getDriveFileManager(for: drive) {
+            return driveFileManager
+        } else {
+            return accountManager.currentDriveFileManager
+        }
+    }
+
+    override init() {
+        Logging.initLogging()
+        InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
+        accountManager = AccountManager.instance
+        NSFileProviderManager.default.signalEnumerator(for: .workingSet) { _ in }
+        super.init()
+    }
+
+    override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
+        // Try to reload account if user logged in
+        if driveFileManager == nil {
+            accountManager.forceReload()
+            driveFileManager = setDriveFileManager()
+        }
+        guard driveFileManager != nil else {
+            throw nsError(code: .notAuthenticated)
+        }
+
+        if let item = FileProviderExtensionState.shared.workingSet[identifier] {
+            return item
+        } else if let item = FileProviderExtensionState.shared.importedDocuments[identifier] {
+            return item
+        } else if let fileId = identifier.toFileId(),
+            let file = driveFileManager.getCachedFile(id: fileId) {
+            return FileProviderItem(file: file, domain: domain)
+        } else {
+            throw nsError(code: .noSuchItem)
+        }
+    }
+
+    override func urlForItem(withPersistentIdentifier identifier: NSFileProviderItemIdentifier) -> URL? {
+        if let item = FileProviderExtensionState.shared.importedDocuments[identifier] {
+            return item.storageUrl
+        } else if let fileId = identifier.toFileId(),
+            let file = driveFileManager.getCachedFile(id: fileId) {
+            return FileProviderItem(file: file, domain: domain).storageUrl
+        } else {
+            return nil
+        }
+    }
+
+    override func persistentIdentifierForItem(at url: URL) -> NSFileProviderItemIdentifier? {
+        return FileProviderItem.identifier(for: url, domain: domain)
+    }
+
+    override func providePlaceholder(at url: URL, completionHandler: @escaping (_ error: Error?) -> Void) {
+        guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId(),
+            let file = driveFileManager.getCachedFile(id: fileId) else {
+            completionHandler(nsError(code: .noSuchItem))
+            return
+        }
+
+        do {
+            try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+            let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+            try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: FileProviderItem(file: file, domain: domain))
+        }
+        catch let error {
+            print("\(error)")
+        }
+        completionHandler(nil)
+    }
+
+    override func itemChanged(at url: URL) {
+        if let identifier = persistentIdentifierForItem(at: url),
+            let item = try? item(for: identifier) as? FileProviderItem {
+            backgroundUploadItem(item)
+        }
+    }
+
+    override func startProvidingItem(at url: URL, completionHandler: @escaping (Error?) -> Void) {
+        guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId() else {
+            if FileManager.default.fileExists(atPath: url.path) {
+                completionHandler(nil)
+            } else {
+                completionHandler(nsError(code: .noSuchItem))
+            }
+            return
+        }
+
+        if let file = driveFileManager.getCachedFile(id: fileId) {
+            let item = FileProviderItem(file: file, domain: domain)
+
+            if !FileManager.default.fileExists(atPath: item.storageUrl.path) {
+                //File is not in the file provider we have to download/copy it
+                downloadRemoteFile(file: file, for: item, completion: completionHandler)
+            } else if fileStorageIsCurrent(item: item, file: file) {
+                //File is in the file provider and is the same, nothing to do...
+                NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                completionHandler(nil)
+            } else {
+                //File from file provider has changes not synced with cloud, we have to upload the local file
+                if !FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path) {
+                    //This is not optimal because we wait for the item to be uploaded before downloading the remote
+                    backgroundUploadItem(item) {
+                        self.downloadRemoteFile(file: file, for: item, completion: completionHandler)
+                    }
+                } else {
+                    downloadRemoteFile(file: file, for: item, completion: completionHandler)
+                }
+            }
+        }
+    }
+
+    private func fileStorageIsCurrent(item: FileProviderItem, file: File) -> Bool {
+        if file.isLocalVersionOlderThanRemote() {
+            return false
+        } else if FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> ()) {
+        if file.isLocalVersionOlderThanRemote() {
+            DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { (fileId, error) in
+                if error != nil {
+                    NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                    completion(NSFileProviderError(.serverUnreachable))
+                } else {
+                    self.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+                    NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                    completion(nil)
+                }
+            }
+            DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId)
+            NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+        } else {
+            copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+            NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+            completion(nil)
+        }
+    }
+
+    private func copyOrReplace(sourceUrl: URL, destinationUrl: URL) {
+        do {
+            let fileManager = FileManager.default
+            if fileManager.fileExists(atPath: destinationUrl.path) {
+                try fileManager.removeItem(at: destinationUrl)
+            }
+            try fileManager.copyItem(at: sourceUrl, to: destinationUrl)
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
+    }
+
+    override func stopProvidingItem(at url: URL) {
+        if let identifier = persistentIdentifierForItem(at: url),
+            let item = try? item(for: identifier) as? FileProviderItem {
+            if let remoteModificationDate = item.contentModificationDate,
+                let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
+                remoteModificationDate > localModificationDate {
+                backgroundUploadItem(item) {
+                    self.cleanupAt(url: url)
+                }
+            } else {
+                cleanupAt(url: url)
+            }
+        } else {
+            // The document isn't in realm maybe it was recently imported?
+            cleanupAt(url: url)
+        }
+
+    }
+
+    private func cleanupAt(url: URL) {
+        do {
+            try FileManager.default.removeItem(at: url)
+        } catch {
+            // Handle error
+        }
+
+        // write out a placeholder to facilitate future property lookups
+        self.providePlaceholder(at: url, completionHandler: { error in
+            // TODO: handle any error, do any necessary cleanup
+        })
+    }
+
+    func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> ())? = nil) {
+        let fileId = item.itemIdentifier.rawValue
+        let uploadFile = UploadFile(
+            id: fileId,
+            parentDirectoryId: item.parentItemIdentifier.toFileId()!,
+            userId: driveFileManager.drive.userId,
+            driveId: driveFileManager.drive.id,
+            url: item.storageUrl,
+            name: item.filename,
+            shouldRemoveAfterUpload: false)
+        UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { (uploadedFile, driveFile) in
+            if let error = uploadedFile.error {
+                item.setUploadingError(error)
+            }
+            completion?()
+        }
+        UploadQueue.instance.addToQueue(file: uploadFile)
+    }
+
+    // MARK: - Enumeration
+
+    override func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier) throws -> NSFileProviderEnumerator {
+        // Try to reload account if user logged in
+        if driveFileManager == nil {
+            accountManager.forceReload()
+            driveFileManager = setDriveFileManager()
+        }
+        guard driveFileManager != nil else {
+            throw nsError(code: .notAuthenticated)
+        }
+
+        if containerItemIdentifier == .workingSet {
+            return FileProviderEnumerator(containerItemIdentifier: .workingSet, driveFileManager: driveFileManager, domain: domain)
+        }
+        let item = try self.item(for: containerItemIdentifier)
+        return FileProviderEnumerator(containerItem: item, driveFileManager: driveFileManager, domain: domain)
+    }
+
+    // MARK: - Validation
+
+    override func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier) throws -> [NSFileProviderServiceSource] {
+        let validationService = FileProviderValidationServiceSource(fileProviderExtension: self, itemIdentifier: itemIdentifier)!
+        return [validationService]
+    }
+}
+
+// MARK: - Convenient methods
+
+extension FileProviderExtension {
+    // Create an NSError based on the file provider error code
+    func nsError(domain: String = NSFileProviderErrorDomain, code: NSFileProviderError.Code,
+        userInfo dict: [String: Any]? = nil) -> NSError {
+        return NSError(domain: NSFileProviderErrorDomain, code: code.rawValue, userInfo: dict)
+    }
+}

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="e6H-di-QQ2">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="TIs-pL-K65">
+            <objects>
+                <navigationController id="e6H-di-QQ2" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" largeTitles="YES" id="Rnr-LU-eE4">
+                        <rect key="frame" x="0.0" y="44" width="414" height="96"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="eOZ-3O-vB4" kind="relationship" relationship="rootViewController" id="4je-MI-6Dg"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="17r-YG-kDg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-787" y="31"/>
+        </scene>
+        <!--Enregistrer sur le kDrive-->
+        <scene sceneID="81x-Ev-57g">
+            <objects>
+                <viewController storyboardIdentifier="SaveScanViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="eOZ-3O-vB4" customClass="SaveScanViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="eJZ-0R-hBR">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="NOx-4m-krY">
+                                <rect key="frame" x="0.0" y="140" width="414" height="756"/>
+                                <color key="backgroundColor" name="backgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="eOZ-3O-vB4" id="Mho-5w-4EV"/>
+                                    <outlet property="delegate" destination="eOZ-3O-vB4" id="LFj-kJ-Fch"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="mNU-py-FqU"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="NOx-4m-krY" firstAttribute="top" secondItem="mNU-py-FqU" secondAttribute="top" id="4C3-pH-JU0"/>
+                            <constraint firstItem="mNU-py-FqU" firstAttribute="trailing" secondItem="NOx-4m-krY" secondAttribute="trailing" id="P6R-iW-n5Z"/>
+                            <constraint firstItem="NOx-4m-krY" firstAttribute="leading" secondItem="mNU-py-FqU" secondAttribute="leading" id="iTf-bF-Crg"/>
+                            <constraint firstAttribute="bottom" secondItem="NOx-4m-krY" secondAttribute="bottom" id="wLW-mc-zMd"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Enregistrer sur le kDrive" largeTitleDisplayMode="always" id="MLT-vQ-JBR">
+                        <barButtonItem key="backBarButtonItem" title=" " id="Z4k-Ym-J6G"/>
+                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="9Em-LU-o4v">
+                            <connections>
+                                <action selector="close:" destination="eOZ-3O-vB4" id="w8n-mf-hRJ"/>
+                            </connections>
+                        </barButtonItem>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="saveExternalFileTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="closeBarButtonItem" destination="9Em-LU-o4v" id="Doz-6i-5kh"/>
+                        <outlet property="tableView" destination="NOx-4m-krY" id="7PL-C3-snD"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QPY-zq-cCb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-28" y="31"/>
+        </scene>
+    </scenes>
+    <resources>
+        <namedColor name="backgroundColor">
+            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

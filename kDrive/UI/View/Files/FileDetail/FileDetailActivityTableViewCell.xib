@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="FileDetailActivityTableViewCell" rowHeight="81" translatesAutoresizingMaskIntoConstraints="NO" id="KGk-i7-Jjw" customClass="FileDetailActivityTableViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="367" height="81"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="367" height="81"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aqX-hy-10J">
+                        <rect key="frame" x="24" y="8" width="319" height="66"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Zarela Reed" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s">
+                                <rect key="frame" x="57" y="16" width="79" height="17"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                <color key="textColor" name="titleColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="placeholder_avatar" translatesAutoresizingMaskIntoConstraints="NO" id="kZU-CD-ye1">
+                                <rect key="frame" x="12" y="16" width="35" height="35"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="35" id="cQf-CR-ebR"/>
+                                    <constraint firstAttribute="width" constant="35" id="iJa-ct-FjM"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="a modifié le fichier" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f1P-Ts-6EW">
+                                <rect key="frame" x="57" y="33" width="118.5" height="17"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <color key="textColor" name="primaryTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="mrp-Md-ZkI">
+                                <rect key="frame" x="251" y="16" width="52" height="10"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="clock" translatesAutoresizingMaskIntoConstraints="NO" id="MPO-Sh-5Br">
+                                        <rect key="frame" x="0.0" y="0.0" width="10" height="10"/>
+                                        <color key="tintColor" name="iconColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="10" id="4lM-Qi-Cy4"/>
+                                            <constraint firstAttribute="height" constant="10" id="OYf-JR-6A7"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="15 min" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gjL-XR-jdF">
+                                        <rect key="frame" x="15" y="0.0" width="37" height="10"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <color key="textColor" name="primaryTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="f1P-Ts-6EW" secondAttribute="trailing" constant="16" id="238-zk-3dd"/>
+                            <constraint firstAttribute="bottom" secondItem="f1P-Ts-6EW" secondAttribute="bottom" constant="16" id="415-XM-6d4"/>
+                            <constraint firstItem="rtI-Wc-46s" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" constant="16" id="DIS-SH-oQa"/>
+                            <constraint firstItem="f1P-Ts-6EW" firstAttribute="top" secondItem="rtI-Wc-46s" secondAttribute="bottom" id="GaI-gQ-E35"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="kZU-CD-ye1" secondAttribute="bottom" constant="16" id="Ltu-eb-jo5"/>
+                            <constraint firstItem="kZU-CD-ye1" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" constant="12" id="SFu-Sy-dXh"/>
+                            <constraint firstItem="rtI-Wc-46s" firstAttribute="leading" secondItem="kZU-CD-ye1" secondAttribute="trailing" constant="10" id="SOG-ID-1lT"/>
+                            <constraint firstItem="f1P-Ts-6EW" firstAttribute="leading" secondItem="kZU-CD-ye1" secondAttribute="trailing" constant="10" id="hn9-MP-4uj"/>
+                            <constraint firstAttribute="trailing" secondItem="mrp-Md-ZkI" secondAttribute="trailing" constant="16" id="mgw-ZU-pDQ"/>
+                            <constraint firstItem="mrp-Md-ZkI" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="rtI-Wc-46s" secondAttribute="trailing" constant="16" id="pJL-Y8-iPY"/>
+                            <constraint firstItem="mrp-Md-ZkI" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" constant="16" id="qS0-Qa-7UJ"/>
+                            <constraint firstItem="kZU-CD-ye1" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" constant="16" id="zUt-eF-4oz"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="CCZ-mR-gNe"/>
+                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" constant="8" id="b3L-GJ-LSF"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="eo3-Nh-xzM"/>
+                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" constant="24" id="vUN-8O-pqH"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="accessoryImageView" destination="kZU-CD-ye1" id="V4o-qX-R0L"/>
+                <outlet property="bottomConstraint" destination="b3L-GJ-LSF" id="Y7h-fG-fCo"/>
+                <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
+                <outlet property="detailLabel" destination="f1P-Ts-6EW" id="ahT-RV-XY3"/>
+                <outlet property="timeLabel" destination="gjL-XR-jdF" id="HMb-7T-sGn"/>
+                <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
+                <outlet property="topConstraint" destination="eo3-Nh-xzM" id="zKn-C5-K50"/>
+            </connections>
+            <point key="canvasLocation" x="171.73913043478262" y="155.69196428571428"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="clock" width="24" height="24"/>
+        <image name="placeholder_avatar" width="512" height="512"/>
+        <namedColor name="iconColor">
+            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="primaryTextColor">
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="titleColor">
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

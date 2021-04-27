@@ -1,0 +1,187 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Alamofire",
+        "repositoryURL": "https://github.com/Alamofire/Alamofire.git",
+        "state": {
+          "branch": null,
+          "revision": "f96b619bcb2383b43d898402283924b80e2c4bae",
+          "version": "5.4.3"
+        }
+      },
+      {
+        "package": "Atlantis",
+        "repositoryURL": "https://github.com/ProxymanApp/atlantis",
+        "state": {
+          "branch": null,
+          "revision": "4fadd54eca7a0fb9eab8c9ec5ccce646fe116cdc",
+          "version": "1.9.0"
+        }
+      },
+      {
+        "package": "BetterSegmentedControl",
+        "repositoryURL": "https://github.com/gmarm/BetterSegmentedControl.git",
+        "state": {
+          "branch": null,
+          "revision": "a2b2116761f71320cee7e69b4249863f0f372c71",
+          "version": "2.0.1"
+        }
+      },
+      {
+        "package": "CocoaLumberjack",
+        "repositoryURL": "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
+        "state": {
+          "branch": null,
+          "revision": "e518eb6e362df327574ba5e04269cd6d29f40aec",
+          "version": "3.7.2"
+        }
+      },
+      {
+        "package": "DifferenceKit",
+        "repositoryURL": "https://github.com/ra1028/DifferenceKit",
+        "state": {
+          "branch": null,
+          "revision": "14c66681e12a38b81045f44c6c29724a0d4b0e72",
+          "version": "1.1.5"
+        }
+      },
+      {
+        "package": "DropDown",
+        "repositoryURL": "https://github.com/RomanTysiachnik/DropDown.git",
+        "state": {
+          "branch": "master",
+          "revision": "d040a7d331a978d0e6b6568a40bb017aac127720",
+          "version": null
+        }
+      },
+      {
+        "package": "FloatingPanel",
+        "repositoryURL": "https://github.com/SCENEE/FloatingPanel",
+        "state": {
+          "branch": null,
+          "revision": "16fea625be25d9a713630a4a43cbc0778740ebf4",
+          "version": "2.3.0"
+        }
+      },
+      {
+        "package": "InfomaniakCore",
+        "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
+        "state": {
+          "branch": null,
+          "revision": "bf50e84e962e712bb4ff517f9f88f9bbde91406d",
+          "version": "1.0.9"
+        }
+      },
+      {
+        "package": "InfomaniakLogin",
+        "repositoryURL": "https://github.com/Infomaniak/ios-login.git",
+        "state": {
+          "branch": null,
+          "revision": "070e452beb501363973d25396fe8ba54007cc76e",
+          "version": "1.5.2"
+        }
+      },
+      {
+        "package": "Kingfisher",
+        "repositoryURL": "https://github.com/onevcat/Kingfisher",
+        "state": {
+          "branch": null,
+          "revision": "2a10bf41da75599a9f8e872dbd44fe0155a2e00c",
+          "version": "5.15.8"
+        }
+      },
+      {
+        "package": "LocalizeKit",
+        "repositoryURL": "https://github.com/immortal79/LocalizeKit",
+        "state": {
+          "branch": null,
+          "revision": "1abb86ce614ae8d925bf82123c7360ab95827975",
+          "version": "1.0.1"
+        }
+      },
+      {
+        "package": "Lottie",
+        "repositoryURL": "https://github.com/airbnb/lottie-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "b3c60ba1716baab6faeeb217d8ce1da336f92718",
+          "version": "3.2.1"
+        }
+      },
+      {
+        "package": "MaterialOutlinedTextField",
+        "repositoryURL": "https://github.com/flowbe/MaterialOutlinedTextField",
+        "state": {
+          "branch": null,
+          "revision": "0e60b562be2cdc8b3fddc4e95930a245fb804a64",
+          "version": "0.1.1"
+        }
+      },
+      {
+        "package": "Realm",
+        "repositoryURL": "https://github.com/realm/realm-cocoa",
+        "state": {
+          "branch": null,
+          "revision": "239a6a383af5d4b445626a95aa6356925e6acf22",
+          "version": "10.7.4"
+        }
+      },
+      {
+        "package": "RealmDatabase",
+        "repositoryURL": "https://github.com/realm/realm-core",
+        "state": {
+          "branch": null,
+          "revision": "28ed052d10d2245542b4fbdc71d388febb1e9bc4",
+          "version": "10.6.0"
+        }
+      },
+      {
+        "package": "Sentry",
+        "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
+        "state": {
+          "branch": null,
+          "revision": "946cbb6daccedf40d652a12138f78e96f660e1ad",
+          "version": "6.2.1"
+        }
+      },
+      {
+        "package": "SnackBar",
+        "repositoryURL": "https://github.com/PhilippeWeidmann/SnackBar.swift",
+        "state": {
+          "branch": null,
+          "revision": "822ef100ec55f1deb8435d1c1d7488e80cb1cf61",
+          "version": "0.1.2"
+        }
+      },
+      {
+        "package": "SnapKit",
+        "repositoryURL": "https://github.com/SnapKit/SnapKit.git",
+        "state": {
+          "branch": null,
+          "revision": "d458564516e5676af9c70b4f4b2a9178294f1bc6",
+          "version": "5.0.1"
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "state": {
+          "branch": null,
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
+        }
+      },
+      {
+        "package": "SwiftRegex",
+        "repositoryURL": "https://github.com/flowbe/SwiftRegex.git",
+        "state": {
+          "branch": null,
+          "revision": "d8c4846dfbbe04aa8196ae5a5a3cdc6cd7f9f6bc",
+          "version": "1.0.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

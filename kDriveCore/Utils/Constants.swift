@@ -1,0 +1,99 @@
+/*
+Infomaniak kDrive - iOS App
+Copyright (C) 2021 Infomaniak Network SA
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import Foundation
+
+public class Constants {
+
+    public static let isInExtension: Bool = {
+        let bundleUrl: URL = Bundle.main.bundleURL
+        let bundlePathExtension: String = bundleUrl.pathExtension
+        return bundlePathExtension == "appex"
+    }()
+
+    public static let backgroundRefreshIdentifier = "com.infomaniak.background.refresh"
+    public static let longBackgroundRefreshIdentifier = "com.infomaniak.background.long-refresh"
+
+    public static let mailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+
+    private static var dateFormatter = DateFormatter()
+    private static var fileSizeFormatter = MeasurementFormatter()
+
+    public enum DateTimeStyle {
+        case date
+        case time
+        case datetime
+    }
+
+    public static func formatDate(_ date: Date, style: DateTimeStyle = .datetime, relative: Bool = false) -> String {
+        // Relative time
+        let timeInterval = Date().timeIntervalSince(date)
+        if relative && style != .date && timeInterval < 3_600 {
+            let minutes = Int(timeInterval / 60)
+            if minutes < 1 {
+                return KDriveCoreStrings.Localizable.allJustNow
+            } else if minutes < 60 {
+                return KDriveCoreStrings.Localizable.allMinutesShort(minutes)
+            }
+        }
+
+        switch style {
+        case .date:
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .none
+        case .time:
+            dateFormatter.dateStyle = .none
+            dateFormatter.timeStyle = .short
+        case .datetime:
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .short
+        }
+        dateFormatter.doesRelativeDateFormatting = relative
+        return dateFormatter.string(from: date)
+    }
+
+    public static func formatTimestamp(_ timeInterval: TimeInterval, style: DateTimeStyle = .datetime, relative: Bool = false) -> String {
+        return formatDate(Date(timeIntervalSince1970: timeInterval), style: style, relative: relative)
+    }
+
+    public static func formatFileLastModifiedDate(_ lastModified: Date) -> String {
+        dateFormatter.dateFormat = KDriveCoreStrings.Localizable.allLastModifiedFilePattern
+        return dateFormatter.string(from: lastModified)
+    }
+
+    public static func formatFileDeletionDate(_ deletionDate: Date) -> String {
+        dateFormatter.dateFormat = KDriveCoreStrings.Localizable.allDeletedFilePattern
+        return dateFormatter.string(from: deletionDate)
+    }
+
+    public static func formatFileSize(_ size: Int64, decimals: Int = 0, unit: Bool = true) -> String {
+        let byteCountFormatter = ByteCountFormatter()
+        byteCountFormatter.countStyle = .binary
+        byteCountFormatter.includesUnit = unit
+        return byteCountFormatter.string(fromByteCount: size)
+    }
+
+    public static func numberOfDaysBetween(_ from: Date, and to: Date) -> Int {
+        let calendar = Calendar.current
+        let fromDate = calendar.startOfDay(for: from) // <1>
+        let toDate = calendar.startOfDay(for: to) // <2>
+        let numberOfDays = calendar.dateComponents([.day], from: fromDate, to: toDate) // <3>
+
+        return numberOfDays.day!
+    }
+}

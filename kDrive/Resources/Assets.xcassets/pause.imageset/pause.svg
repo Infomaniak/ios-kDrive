@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="70px" height="70px" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>pause</title>
+    <g id="mobile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Drive---App-mobile---Preview-v2---Music" transform="translate(-172.000000, -583.000000)">
+            <g id="Music" transform="translate(40.000000, 243.000000)">
+                <g id="pause" transform="translate(132.000000, 340.000000)">
+                    <circle id="Oval" fill="#0098FF" cx="35" cy="35" r="35"></circle>
+                    <path d="M31.5,24 C32.3284271,24 33,24.6715729 33,25.5 L33,44.5 C33,45.3284271 32.3284271,46 31.5,46 L27.5,46 C26.6715729,46 26,45.3284271 26,44.5 L26,25.5 C26,24.6715729 26.6715729,24 27.5,24 L31.5,24 Z M42.5,24 C43.3284271,24 44,24.6715729 44,25.5 L44,44.5 C44,45.3284271 43.3284271,46 42.5,46 L38.5,46 C37.6715729,46 37,45.3284271 37,44.5 L37,25.5 C37,24.6715729 37.6715729,24 38.5,24 L42.5,24 Z" id="Combined-Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

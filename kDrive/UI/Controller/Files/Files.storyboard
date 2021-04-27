@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
+    <device id="retina5_9" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Westworld-->
+        <scene sceneID="JJW-z8-kTh">
+            <objects>
+                <collectionViewController storyboardIdentifier="FileListCollectionViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="afx-Ig-yDG" customClass="FileListCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="yCM-Om-3CZ" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" sectionInsetReference="safeArea" id="2vQ-MN-Kom">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="afx-Ig-yDG" id="s0S-nW-aft"/>
+                            <outlet property="delegate" destination="afx-Ig-yDG" id="1wH-tV-uZi"/>
+                        </connections>
+                    </collectionView>
+                    <navigationItem key="navigationItem" title="Westworld" largeTitleDisplayMode="always" id="6nN-R6-lch">
+                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="search" id="OAV-22-wNN">
+                            <connections>
+                                <action selector="searchButtonPressed:" destination="afx-Ig-yDG" id="ucx-g1-xVs"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="collectionView" destination="yCM-Om-3CZ" id="Ld6-T6-Bge"/>
+                    </connections>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cIe-lL-Jiy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="792.75362318840587" y="101.78571428571428"/>
+        </scene>
+        <!--Importation en cours-->
+        <scene sceneID="VST-BU-uqD">
+            <objects>
+                <viewController storyboardIdentifier="UploadQueueViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="nN3-5p-EMr" customClass="UploadQueueViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Gsf-qq-7Sa">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="ark-zB-EEg">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" name="backgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="nN3-5p-EMr" id="hcs-o8-q23"/>
+                                    <outlet property="delegate" destination="nN3-5p-EMr" id="bvS-1r-Nw5"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="381-7l-AXC"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="ark-zB-EEg" secondAttribute="bottom" id="1Zl-So-aHd"/>
+                            <constraint firstAttribute="trailing" secondItem="ark-zB-EEg" secondAttribute="trailing" id="7AJ-hk-iQS"/>
+                            <constraint firstItem="ark-zB-EEg" firstAttribute="top" secondItem="Gsf-qq-7Sa" secondAttribute="top" id="hPR-mA-B13"/>
+                            <constraint firstItem="ark-zB-EEg" firstAttribute="leading" secondItem="Gsf-qq-7Sa" secondAttribute="leading" id="nkA-Vc-E7C"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Importation en cours" largeTitleDisplayMode="never" id="hls-Pc-UTS">
+                        <rightBarButtonItems>
+                            <barButtonItem image="close" id="V93-EX-8dV">
+                                <inset key="imageInsets" minX="0.0" minY="0.0" maxX="0.0" maxY="-12"/>
+                                <connections>
+                                    <action selector="cancelButtonPressed:" destination="nN3-5p-EMr" id="kjm-9b-Wn4"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem image="retry" id="ktn-c4-wDY">
+                                <inset key="imageInsets" minX="6" minY="0.0" maxX="0.0" maxY="-11"/>
+                                <connections>
+                                    <action selector="retryButtonPressed:" destination="nN3-5p-EMr" id="yD6-mg-CNe"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadInProgressTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
+                    <connections>
+                        <outlet property="cancelButton" destination="ktn-c4-wDY" id="NVZ-8t-Of3"/>
+                        <outlet property="retryButton" destination="ktn-c4-wDY" id="kIh-Jx-YPK"/>
+                        <outlet property="tableView" destination="ark-zB-EEg" id="b4c-83-HsT"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Xw4-NQ-1e4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1686" y="101"/>
+        </scene>
+        <!--File Detail View Controller-->
+        <scene sceneID="9sZ-cC-ENE">
+            <objects>
+                <viewController storyboardIdentifier="FileDetailViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="mHr-Px-vFn" customClass="FileDetailViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8xO-wI-c0p">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" contentInsetAdjustmentBehavior="never" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="PDX-En-MzT">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6yn-n6-xrf" customClass="IKLargeButton" customModule="kDriveCore">
+                                <rect key="frame" x="24" y="722" width="327" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="4dc-Us-AM6"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
+                                <state key="normal" title="Ajouter un commentaire"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonAddComment"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="addComment:" destination="mHr-Px-vFn" eventType="touchUpInside" id="6Dg-7Z-Cxy"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="gDe-Ib-IbT"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="PDX-En-MzT" firstAttribute="leading" secondItem="8xO-wI-c0p" secondAttribute="leading" id="5Im-Rk-ruh"/>
+                            <constraint firstItem="gDe-Ib-IbT" firstAttribute="trailing" secondItem="6yn-n6-xrf" secondAttribute="trailing" constant="24" id="5Rq-pO-lf6"/>
+                            <constraint firstItem="6yn-n6-xrf" firstAttribute="leading" secondItem="gDe-Ib-IbT" secondAttribute="leading" constant="24" id="Abn-vH-yT8"/>
+                            <constraint firstAttribute="bottom" secondItem="PDX-En-MzT" secondAttribute="bottom" id="DBN-ea-A1s"/>
+                            <constraint firstAttribute="trailing" secondItem="PDX-En-MzT" secondAttribute="trailing" id="JLN-56-RkF"/>
+                            <constraint firstAttribute="bottom" secondItem="6yn-n6-xrf" secondAttribute="bottom" constant="30" id="m1C-lw-F8p"/>
+                            <constraint firstItem="PDX-En-MzT" firstAttribute="top" secondItem="8xO-wI-c0p" secondAttribute="top" id="yRx-wG-aMW"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="d4X-ri-Z8j">
+                        <barButtonItem key="backBarButtonItem" title=" " id="rsh-g3-Qqo"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadInProgressTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <nil key="simulatedTopBarMetrics"/>
+                    <nil key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="commentButton" destination="6yn-n6-xrf" id="4uL-vA-EZG"/>
+                        <outlet property="tableView" destination="PDX-En-MzT" id="u7I-AL-gy8"/>
+                        <segue destination="c84-xf-u0q" kind="show" identifier="toShareLinkSettingsSegue" id="Wg0-JF-5ui"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ce5-at-xMr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="791" y="865"/>
+        </scene>
+        <!--Share Link Settings View Controller-->
+        <scene sceneID="HZ5-Aa-1K1">
+            <objects>
+                <viewController storyboardIdentifier="ShareLinkSettingsViewController" id="c84-xf-u0q" customClass="ShareLinkSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="hWA-co-zIc">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="EQw-wg-TyW">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="u7Y-Pi-jHr"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="EQw-wg-TyW" secondAttribute="bottom" id="Opz-ew-xCo"/>
+                            <constraint firstItem="EQw-wg-TyW" firstAttribute="top" secondItem="hWA-co-zIc" secondAttribute="top" id="ke6-oE-p90"/>
+                            <constraint firstItem="EQw-wg-TyW" firstAttribute="leading" secondItem="hWA-co-zIc" secondAttribute="leading" id="oNN-sv-bpr"/>
+                            <constraint firstAttribute="trailing" secondItem="EQw-wg-TyW" secondAttribute="trailing" id="uNr-ch-0qV"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="PJV-NK-aje">
+                        <barButtonItem key="backBarButtonItem" title=" " id="UZD-Bc-gT7"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="tableview" destination="EQw-wg-TyW" id="AIO-Fa-I0S"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NB5-vl-xdU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1734" y="865"/>
+        </scene>
+        <!--File Detail Comment Popover-->
+        <scene sceneID="qH8-Qv-hvL">
+            <objects>
+                <viewController storyboardIdentifier="FileDetailCommentPopover" id="uA4-dr-G5X" customClass="FileDetailCommentPopover" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8Mp-Ft-5Z4">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="300"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="V8m-Gs-VBW">
+                                <rect key="frame" x="0.0" y="8" width="375" height="284"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Tyc-Ep-cwd"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="Tyc-Ep-cwd" firstAttribute="bottom" secondItem="V8m-Gs-VBW" secondAttribute="bottom" constant="8" id="9vt-Ko-US3"/>
+                            <constraint firstItem="V8m-Gs-VBW" firstAttribute="leading" secondItem="Tyc-Ep-cwd" secondAttribute="leading" id="BcD-B2-qwR"/>
+                            <constraint firstItem="Tyc-Ep-cwd" firstAttribute="trailing" secondItem="V8m-Gs-VBW" secondAttribute="trailing" id="FUy-W4-aBq"/>
+                            <constraint firstItem="V8m-Gs-VBW" firstAttribute="top" secondItem="8Mp-Ft-5Z4" secondAttribute="top" constant="8" id="Mv0-ir-Msa"/>
+                        </constraints>
+                    </view>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="375" height="300"/>
+                    <connections>
+                        <outlet property="tableView" destination="V8m-Gs-VBW" id="Mjm-BF-5gD"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="BOT-gW-fdy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2729" y="865"/>
+        </scene>
+        <!--Preview View Controller-->
+        <scene sceneID="WAk-Xm-vgO">
+            <objects>
+                <viewController storyboardIdentifier="PreviewViewController" extendedLayoutIncludesOpaqueBars="YES" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="cTq-SF-IvZ" customClass="PreviewViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="XG8-QT-Clg">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="qIU-Hu-Zbx">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" name="previewBackgroundColor"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="W6J-lH-hnq">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells/>
+                                <connections>
+                                    <outlet property="dataSource" destination="cTq-SF-IvZ" id="Q8n-wh-JUk"/>
+                                    <outlet property="delegate" destination="cTq-SF-IvZ" id="Ddy-Ru-l7r"/>
+                                </connections>
+                            </collectionView>
+                            <view alpha="0.40000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hjz-3J-y1V">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                <color key="backgroundColor" name="previewBackgroundColor"/>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="hzs-gF-i3p"/>
+                        <color key="backgroundColor" name="previewBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="qIU-Hu-Zbx" firstAttribute="top" secondItem="XG8-QT-Clg" secondAttribute="top" id="B0R-xs-K9J"/>
+                            <constraint firstAttribute="trailing" secondItem="Hjz-3J-y1V" secondAttribute="trailing" id="G27-Qm-9is"/>
+                            <constraint firstItem="qIU-Hu-Zbx" firstAttribute="leading" secondItem="XG8-QT-Clg" secondAttribute="leading" id="MED-X6-zXf"/>
+                            <constraint firstItem="Hjz-3J-y1V" firstAttribute="leading" secondItem="XG8-QT-Clg" secondAttribute="leading" id="MVS-6P-6lz"/>
+                            <constraint firstItem="qIU-Hu-Zbx" firstAttribute="trailing" secondItem="XG8-QT-Clg" secondAttribute="trailing" id="PnR-Dn-Nv4"/>
+                            <constraint firstAttribute="bottom" secondItem="qIU-Hu-Zbx" secondAttribute="bottom" id="Qud-97-aQc"/>
+                            <constraint firstItem="Hjz-3J-y1V" firstAttribute="top" secondItem="XG8-QT-Clg" secondAttribute="top" id="mhr-ad-BHy"/>
+                            <constraint firstItem="hzs-gF-i3p" firstAttribute="top" secondItem="Hjz-3J-y1V" secondAttribute="bottom" id="s4g-Ag-twL"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="0f8-nc-6CP">
+                        <barButtonItem key="backBarButtonItem" title=" " id="m0Y-zd-9KL"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="collectionView" destination="qIU-Hu-Zbx" id="ToR-sc-C7Q"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="k2O-E0-ypf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-119.2" y="864.53201970443354"/>
+        </scene>
+        <!--Title Size Adjusting Navigation Controller-->
+        <scene sceneID="5PS-aw-ccj">
+            <objects>
+                <navigationController storyboardIdentifier="FilesVC" automaticallyAdjustsScrollViewInsets="NO" id="IDg-cP-myB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="" image="folder" selectedImage="folder-fill" id="FVI-Sh-h25">
+                        <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
+                    </tabBarItem>
+                    <toolbarItems/>
+                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="eMQ-BK-erX">
+                        <rect key="frame" x="0.0" y="44" width="375" height="96"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="afx-Ig-yDG" kind="relationship" relationship="rootViewController" id="8X2-I5-9w1"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="IK5-jC-d8D" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-117.39130434782609" y="101.78571428571428"/>
+        </scene>
+        <!--Partage et droits du dossier Name-->
+        <scene sceneID="Meu-fU-x3Z">
+            <objects>
+                <viewController storyboardIdentifier="ShareAndRightsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="jan-Kd-tqe" customClass="ShareAndRightsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="s5J-hM-3Lw">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="FwV-k9-Mfz">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" name="backgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="jan-Kd-tqe" id="ifX-dh-WaG"/>
+                                    <outlet property="delegate" destination="jan-Kd-tqe" id="r7H-e7-Ir3"/>
+                                </connections>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qGi-Yx-e8m" customClass="IKLargeButton" customModule="kDriveCore">
+                                <rect key="frame" x="24" y="720" width="327" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="nxD-4f-Du8"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
+                                <state key="normal" title="Fermer"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonClose"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="closeButtonPressed:" destination="jan-Kd-tqe" eventType="touchUpInside" id="gMC-IZ-bFP"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="RXa-o0-jx2"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="FwV-k9-Mfz" secondAttribute="bottom" id="Fys-6G-Wc1"/>
+                            <constraint firstItem="FwV-k9-Mfz" firstAttribute="top" secondItem="s5J-hM-3Lw" secondAttribute="top" id="HWf-S0-TwV"/>
+                            <constraint firstItem="RXa-o0-jx2" firstAttribute="trailing" secondItem="qGi-Yx-e8m" secondAttribute="trailing" constant="24" id="KxC-YR-ci8"/>
+                            <constraint firstItem="qGi-Yx-e8m" firstAttribute="leading" secondItem="RXa-o0-jx2" secondAttribute="leading" constant="24" id="Sbh-a8-Wau"/>
+                            <constraint firstItem="FwV-k9-Mfz" firstAttribute="leading" secondItem="s5J-hM-3Lw" secondAttribute="leading" id="XFU-Ar-dbb"/>
+                            <constraint firstAttribute="trailing" secondItem="FwV-k9-Mfz" secondAttribute="trailing" id="aRh-dH-gvZ"/>
+                            <constraint firstAttribute="bottom" secondItem="qGi-Yx-e8m" secondAttribute="bottom" constant="32" id="iPz-0s-sF7"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Partage et droits du dossier Name" largeTitleDisplayMode="always" id="bq4-3D-Tsx">
+                        <barButtonItem key="backBarButtonItem" title=" " id="KLl-M5-zCh"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="tableView" destination="FwV-k9-Mfz" id="cRg-N7-IkH"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Bxj-JA-ZsJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-118" y="1661"/>
+        </scene>
+        <!--Sélectionner le droit-->
+        <scene sceneID="4Xd-IM-nVK">
+            <objects>
+                <viewController storyboardIdentifier="RightsSelectionViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="pa0-zX-qJK" customClass="RightsSelectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="vrM-ZE-S6f">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="V03-9s-fmu">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="pa0-zX-qJK" id="bZL-xF-fd1"/>
+                                    <outlet property="delegate" destination="pa0-zX-qJK" id="hZ0-nu-G1C"/>
+                                </connections>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OiI-t5-4G2" customClass="IKLargeButton" customModule="kDriveCore">
+                                <rect key="frame" x="24" y="720" width="327" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="CUG-aQ-dJk"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
+                                <state key="normal" title="Fermer"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonClose"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="closeButtonPressed:" destination="pa0-zX-qJK" eventType="touchUpInside" id="r43-bt-D2t"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="pi0-1l-I7W"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="V03-9s-fmu" firstAttribute="leading" secondItem="vrM-ZE-S6f" secondAttribute="leading" id="1bD-jf-zYT"/>
+                            <constraint firstAttribute="bottom" secondItem="OiI-t5-4G2" secondAttribute="bottom" constant="32" id="6qo-iI-szh"/>
+                            <constraint firstItem="V03-9s-fmu" firstAttribute="top" secondItem="vrM-ZE-S6f" secondAttribute="top" id="CNU-v9-qUm"/>
+                            <constraint firstItem="pi0-1l-I7W" firstAttribute="trailing" secondItem="OiI-t5-4G2" secondAttribute="trailing" constant="24" id="XWj-hB-Ulj"/>
+                            <constraint firstAttribute="bottom" secondItem="V03-9s-fmu" secondAttribute="bottom" id="awD-re-ef9"/>
+                            <constraint firstItem="OiI-t5-4G2" firstAttribute="leading" secondItem="pi0-1l-I7W" secondAttribute="leading" constant="24" id="emx-rp-Db4"/>
+                            <constraint firstAttribute="trailing" secondItem="V03-9s-fmu" secondAttribute="trailing" id="ota-Oo-1Vh"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Sélectionner le droit" largeTitleDisplayMode="always" id="W3S-GM-FjS">
+                        <barButtonItem key="backBarButtonItem" title=" " id="tfP-2v-wQg"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="filePermissionTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="closeButton" destination="OiI-t5-4G2" id="O4M-Lp-pq2"/>
+                        <outlet property="tableView" destination="V03-9s-fmu" id="pco-s3-YPM"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ydt-6g-d6N" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="766" y="1661"/>
+        </scene>
+        <!--Partager le dossier-->
+        <scene sceneID="ZhU-6K-d5L">
+            <objects>
+                <viewController storyboardIdentifier="InviteUserViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Aw1-qf-pda" customClass="InviteUserViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="pd9-N5-6Lf">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="AAq-3c-Ebk">
+                                <rect key="frame" x="0.0" y="60" width="375" height="752"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="Aw1-qf-pda" id="FV8-6p-dbD"/>
+                                    <outlet property="delegate" destination="Aw1-qf-pda" id="AgE-Ea-g6k"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="L7F-LI-5EZ"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="AAq-3c-Ebk" firstAttribute="top" secondItem="L7F-LI-5EZ" secondAttribute="top" constant="16" id="Hk1-rU-Tk8"/>
+                            <constraint firstItem="AAq-3c-Ebk" firstAttribute="leading" secondItem="pd9-N5-6Lf" secondAttribute="leading" id="IPB-pc-6xT"/>
+                            <constraint firstAttribute="bottom" secondItem="AAq-3c-Ebk" secondAttribute="bottom" id="QlT-fz-jjp"/>
+                            <constraint firstAttribute="trailing" secondItem="AAq-3c-Ebk" secondAttribute="trailing" id="Rrx-IA-iSn"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Partager le dossier" largeTitleDisplayMode="always" id="WPm-Tw-wPJ">
+                        <barButtonItem key="backBarButtonItem" title=" " id="A8c-xu-nNu"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileShareFileTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="tableView" destination="AAq-3c-Ebk" id="5aa-6B-Cr9"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="k7Z-Yw-8II" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J1o-HI-upJ">
+                    <rect key="frame" x="0.0" y="0.0" width="327" height="60"/>
+                    <color key="backgroundColor" name="infomaniakColor"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="60" id="cBu-aq-FZK"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <state key="normal" title="Enregistrer"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                            <real key="value" value="10"/>
+                        </userDefinedRuntimeAttribute>
+                        <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonSave"/>
+                    </userDefinedRuntimeAttributes>
+                    <connections>
+                        <action selector="saveSettingsButton:" destination="c84-xf-u0q" eventType="touchUpInside" id="oTx-5t-T9m"/>
+                    </connections>
+                </button>
+            </objects>
+            <point key="canvasLocation" x="1626" y="1661"/>
+        </scene>
+        <!--Gérer la boîte de dépôt-->
+        <scene sceneID="ThO-qS-flQ">
+            <objects>
+                <viewController storyboardIdentifier="ManageDropBoxViewController" hidesBottomBarWhenPushed="YES" id="iUR-vc-8XP" customClass="ManageDropBoxViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="ADM-5M-DdB">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="TPX-ha-etp">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="iUR-vc-8XP" id="juj-Fd-lJ6"/>
+                                    <outlet property="delegate" destination="iUR-vc-8XP" id="tK2-Vp-JB2"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Dgh-C3-nl7"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="TPX-ha-etp" firstAttribute="leading" secondItem="Dgh-C3-nl7" secondAttribute="leading" id="Tol-1Y-Qae"/>
+                            <constraint firstItem="TPX-ha-etp" firstAttribute="top" secondItem="ADM-5M-DdB" secondAttribute="top" id="YwO-jt-F18"/>
+                            <constraint firstItem="TPX-ha-etp" firstAttribute="trailing" secondItem="Dgh-C3-nl7" secondAttribute="trailing" id="gwy-Go-eZM"/>
+                            <constraint firstAttribute="bottom" secondItem="TPX-ha-etp" secondAttribute="bottom" id="iJu-2V-7Ps"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Gérer la boîte de dépôt" id="HA3-9e-jn2">
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonManageDropBox"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="tableView" destination="TPX-ha-etp" id="Rsn-ey-tnq"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cDl-5j-YF5" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2534" y="1661"/>
+        </scene>
+        <!--Activités-->
+        <scene sceneID="jQX-tY-pqn">
+            <objects>
+                <viewController storyboardIdentifier="RecentActivityFileListViewController" hidesBottomBarWhenPushed="YES" id="SXx-tI-VhM" customClass="RecentActivityFileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="KJR-0t-Oxg">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="tCK-Zo-2xk" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" name="backgroundColor"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="e99-uM-yBD">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells/>
+                                <connections>
+                                    <outlet property="dataSource" destination="SXx-tI-VhM" id="lrL-Zn-xAo"/>
+                                    <outlet property="delegate" destination="SXx-tI-VhM" id="bWw-uD-KYe"/>
+                                </connections>
+                            </collectionView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Pev-JJ-2tt"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="tCK-Zo-2xk" firstAttribute="leading" secondItem="KJR-0t-Oxg" secondAttribute="leading" id="Xe5-zS-ktr"/>
+                            <constraint firstItem="tCK-Zo-2xk" firstAttribute="top" secondItem="KJR-0t-Oxg" secondAttribute="top" id="kPi-Vf-ZbQ"/>
+                            <constraint firstAttribute="trailing" secondItem="tCK-Zo-2xk" secondAttribute="trailing" id="sjk-A6-hQP"/>
+                            <constraint firstAttribute="bottom" secondItem="tCK-Zo-2xk" secondAttribute="bottom" id="zeT-mG-teZ"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Activités" id="dy4-zn-GY4">
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileDetailsActivitiesTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="collectionView" destination="tCK-Zo-2xk" id="Dp1-UX-4Kb"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Sog-Va-4MF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2641" y="101"/>
+        </scene>
+    </scenes>
+    <designables>
+        <designable name="6yn-n6-xrf">
+            <size key="intrinsicContentSize" width="169" height="34"/>
+        </designable>
+        <designable name="OiI-t5-4G2">
+            <size key="intrinsicContentSize" width="101" height="34"/>
+        </designable>
+        <designable name="qGi-Yx-e8m">
+            <size key="intrinsicContentSize" width="101" height="34"/>
+        </designable>
+    </designables>
+    <resources>
+        <image name="close" width="24" height="24"/>
+        <image name="folder" width="24" height="24"/>
+        <image name="folder-fill" width="24" height="24"/>
+        <image name="retry" width="24" height="24"/>
+        <namedColor name="backgroundColor">
+            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="infomaniakColor">
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="previewBackgroundColor">
+            <color red="0.066666666666666666" green="0.10980392156862745" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
