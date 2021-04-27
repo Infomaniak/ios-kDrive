@@ -252,6 +252,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
+    
+    override var prefersStatusBarHidden: Bool {
+        return fullScreenPreview
+    }
 
     func updateNavigationBar() {
         if !currentFile.isLocalVersionOlderThanRemote() {
@@ -313,6 +317,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func setFullscreen(_ fullscreen: Bool) {
+        setNeedsStatusBarAppearanceUpdate()
         floatingPanelViewController.move(to: fullscreen ? .hidden : .tip, animated: true)
     }
 
