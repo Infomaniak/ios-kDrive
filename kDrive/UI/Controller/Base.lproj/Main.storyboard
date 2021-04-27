@@ -388,7 +388,7 @@
                                         </constraints>
                                     </imageView>
                                 </subviews>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="204" id="Jwh-uT-7WE"/>
                                     <constraint firstItem="fzr-FE-ijy" firstAttribute="centerY" secondItem="D7m-5I-rWo" secondAttribute="centerY" id="LXb-W0-zCO"/>

@@ -53,7 +53,7 @@ class EmptyTableView: UIView {
         topConstraint.isActive = !enabled
     }
 
-    class func instantiate(logo: UIImage, message: String, details: String = "", button: Bool = false, backgroundColor: UIColor = .white) -> EmptyTableView {
+    class func instantiate(logo: UIImage, message: String, details: String = "", button: Bool = false, backgroundColor: UIColor =  KDriveAsset.backgroundCardViewColor.color) -> EmptyTableView {
         let view = Bundle.main.loadNibNamed("EmptyTableView", owner: nil, options: nil)![0] as! EmptyTableView
         view.emptyImageView.image = logo
         view.emptyMessageLabel.text = message
