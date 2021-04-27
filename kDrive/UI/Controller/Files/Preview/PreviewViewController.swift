@@ -45,6 +45,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private let editButton = UIButton(type: .custom)
     private let backButton = UIButton(type: .custom)
     private var popRecognizer: InteractivePopRecognizer?
+    private var fullScreenPreview = false
 
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
@@ -137,6 +138,11 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         NSLayoutConstraint.activate(constraints)
 
         observeFileUpdated()
+    }
+
+    @objc func tapPreview() {
+        fullScreenPreview = !fullScreenPreview
+        setFullscreen(fullScreenPreview)
     }
 
     func observeFileUpdated() {
@@ -307,7 +313,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func setFullscreen(_ fullscreen: Bool) {
-        navigationController?.setNavigationBarHidden(fullscreen, animated: true)
         floatingPanelViewController.move(to: fullscreen ? .hidden : .tip, animated: true)
     }
 
@@ -389,12 +394,14 @@ extension PreviewViewController: UICollectionViewDataSource {
         let file = previewFiles[indexPath.row]
         //File is already downloaded and up to date OR we can remote play it (audio / video)
         if !file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType) {
+            let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
             switch file.convertedType {
             case .image:
                 if let image = UIImage(contentsOfFile: currentFile.localUrl.path) {
                     let cell = collectionView.dequeueReusableCell(type: ImagePreviewCollectionViewCell.self, for: indexPath)
                     cell.previewDelegate = self
                     cell.imagePreview.image = image
+                    cell.addGestureRecognizer(tap)
                     return cell
                 } else {
                     return getNoLocalPreviewCellFor(file: file, indexPath: indexPath)
@@ -403,6 +410,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: PdfPreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
+                cell.pdfPreview.addGestureRecognizer(tap)
                 return cell
             case .video:
                 let cell = collectionView.dequeueReusableCell(type: VideoCollectionViewCell.self, for: indexPath)
@@ -419,6 +427,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
+                cell.addGestureRecognizer(tap)
                 return cell
             default:
                 return getNoLocalPreviewCellFor(file: file, indexPath: indexPath)
@@ -429,6 +438,7 @@ extension PreviewViewController: UICollectionViewDataSource {
     }
 
     private func getNoLocalPreviewCellFor(file: File, indexPath: IndexPath) -> UICollectionViewCell {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
         if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             cell.parentViewController = self
@@ -437,10 +447,12 @@ extension PreviewViewController: UICollectionViewDataSource {
                 downloadTask.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
+            cell.addGestureRecognizer(tap)
             return cell
         } else if ReachabilityListener.instance.currentStatus == .offline {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file, isOffline: true)
+            cell.addGestureRecognizer(tap)
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
@@ -450,6 +462,8 @@ extension PreviewViewController: UICollectionViewDataSource {
                 downloadTask.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
+            let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
+            cell.addGestureRecognizer(tap)
             return cell
         }
     }
