@@ -45,9 +45,9 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private let editButton = UIButton(type: .custom)
     private let backButton = UIButton(type: .custom)
     private var popRecognizer: InteractivePopRecognizer?
-    private var fullScreenPreview = false
     @IBOutlet weak var statusBarView: UIView!
-    
+    private var fullScreenPreview = false
+
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
 
@@ -254,14 +254,16 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         return .lightContent
     }
 
+    override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        return .slide
+    }
+
     override var prefersStatusBarHidden: Bool {
         return fullScreenPreview
     }
 
     func updateNavigationBar() {
-        if fullScreenPreview {
-            setNavbarFullScreen()
-        } else if !currentFile.isLocalVersionOlderThanRemote() {
+        if !currentFile.isLocalVersionOlderThanRemote() {
             switch currentFile.convertedType {
             case .pdf:
                 if let pdfCell = (self.collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
@@ -284,12 +286,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         } else {
             setNavbarStandard()
         }
-    }
-
-    private func setNavbarFullScreen() {
-        backButton.isHidden = true
-        pdfPageLabel.isHidden = true
-        editButton.isHidden = true
     }
 
     private func setNavbarStandard() {
@@ -329,9 +325,17 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func setFullscreen(_ fullscreen: Bool) {
-        setNeedsStatusBarAppearanceUpdate()
-        statusBarView.backgroundColor = fullscreen ? .clear : KDriveAsset.previewBackgroundColor.color
-        updateNavigationBar()
+        UIView.animate(withDuration: 0.2) {
+            self.setNeedsStatusBarAppearanceUpdate()
+            let hideStatusBar = CGAffineTransform(translationX: 0, y: fullscreen ? -(self.statusBarView.frame.height) : 0)
+            self.statusBarView.transform = hideStatusBar
+        }
+        UIView.animate(withDuration: 0.4) {
+            let hideButton = CGAffineTransform(translationX: 0, y: fullscreen ? -(self.backButton.frame.height + self.backButton.frame.minY) : 0)
+            self.backButton.transform = hideButton
+            self.pdfPageLabel.transform = hideButton
+            self.editButton.transform = hideButton
+        }
         floatingPanelViewController.move(to: fullscreen ? .hidden : .tip, animated: true)
     }
 
