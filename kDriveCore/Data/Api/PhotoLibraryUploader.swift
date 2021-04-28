@@ -34,11 +34,11 @@ public class PhotoLibraryUploader {
     private var phRequests = Set<PHImageRequestID>()
 
     private init() {
-        requestImageOption.deliveryMode = PHImageRequestOptionsDeliveryMode.highQualityFormat
+        requestImageOption.deliveryMode = .highQualityFormat
         requestImageOption.isSynchronous = false
         requestImageOption.isNetworkAccessAllowed = true
 
-        requestVideoOption.deliveryMode = PHVideoRequestOptionsDeliveryMode.highQualityFormat
+        requestVideoOption.deliveryMode = .highQualityFormat
         requestVideoOption.isNetworkAccessAllowed = true
         requestVideoOption.version = .current
 
@@ -66,7 +66,7 @@ public class PhotoLibraryUploader {
     private func updateLastSyncDate(_ date: Date) {
         let realm = DriveFileManager.constants.uploadsRealm
         if let settings = realm.objects(PhotoSyncSettings.self).first {
-            try? realm.write {
+            try? realm.safeWrite {
                 settings.lastSync = date
             }
             self.settings = settings.freeze()
@@ -131,62 +131,46 @@ public class PhotoLibraryUploader {
     }
 
     public func addNewPicturesToUploadQueue() -> Int {
-        var assetCount = 0
+        var assets = PHFetchResult<PHAsset>()
         if isSyncEnabled && (PHPhotoLibrary.authorizationStatus() == .authorized || PHPhotoLibrary.authorizationStatus() == .restricted) {
-            if isSyncEnabled && settings.syncPicturesEnabled {
-                let options = PHFetchOptions()
-                options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-                options.predicate = NSPredicate(
-                    format: "creationDate > %@ AND !((mediaSubtype & %d) != 0)",
-                    settings.lastSync as NSDate,
-                    PHAssetMediaSubtype.photoScreenshot.rawValue
-                )
-                let assets = PHAsset.fetchAssets(with: .image, options: options)
-                addImageAssetsToUploadQueue(assets: assets)
-                assetCount += assets.count
-                DDLogInfo("Photo sync - New pictures count \(assets.count)")
+            let options = PHFetchOptions()
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+            // Create predicate from settings
+            var typesPredicates = [NSPredicate]()
+            if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
+            } else if settings.syncPicturesEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d AND (mediaSubtypes & %d) == 0", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+            } else if settings.syncScreenshotsEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d AND (mediaSubtypes & %d) != 0", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
             }
-            if isSyncEnabled && settings.syncScreenshotsEnabled {
-                let options = PHFetchOptions()
-                options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-                options.predicate = NSPredicate(
-                    format: "creationDate > %@ AND (mediaSubtype & %d) != 0",
-                    settings.lastSync as NSDate,
-                    PHAssetMediaSubtype.photoScreenshot.rawValue
-                )
-                let assets = PHAsset.fetchAssets(with: .image, options: options)
-                addImageAssetsToUploadQueue(assets: assets)
-                assetCount += assets.count
-                DDLogInfo("Photo sync - New screenshots count \(assets.count)")
+            if settings.syncVideosEnabled {
+                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
             }
-            if isSyncEnabled && settings.syncVideosEnabled {
-                let options = PHFetchOptions()
-                options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-                options.predicate = NSPredicate(
-                    format: "creationDate > %@",
-                    settings.lastSync as NSDate
-                )
-                let assets = PHAsset.fetchAssets(with: .video, options: options)
-                addImageAssetsToUploadQueue(assets: assets)
-                assetCount += assets.count
-                DDLogInfo("Photo sync - New videos count \(assets.count)")
-            }
-            updateLastSyncDate(Date())
+            let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
+            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+            DDLogInfo("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+            assets = PHAsset.fetchAssets(with: options)
+            let syncDate = Date()
+            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0)
+            DDLogInfo("Photo sync - New assets count \(assets.count)")
+            updateLastSyncDate(syncDate)
             UploadQueue.instance.addToQueueFromRealm()
         }
-        return assetCount
+        return assets.count
     }
 
-    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>) {
+    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>, initial: Bool) {
         autoreleasepool {
             let realm = DriveFileManager.constants.uploadsRealm
             realm.beginWrite()
-            for i in 0..<assets.count {
+            assets.enumerateObjects { [self] (asset, idx, stop) in
                 guard settings != nil else {
                     realm.cancelWrite()
+                    stop.pointee = true
                     return
                 }
-                let asset = assets[i]
                 var correctName = "No-name-\(Date().timeIntervalSince1970)"
                 var fileExtension = ""
                 for resource in PHAssetResource.assetResources(for: asset) {
@@ -207,12 +191,16 @@ public class PhotoLibraryUploader {
                     driveId: settings.driveId,
                     name: correctName,
                     asset: asset,
-                    creationDate: asset.creationDate)
-                uploadFile.priority = settings.lastSync.timeIntervalSince1970 > 0 ? .high : .low
+                    creationDate: asset.creationDate,
+                    priority: initial ? .low : .high)
                 realm.add(uploadFile, update: .modified)
-                if i < assets.count - 1 && i % 99 == 0 {
-                    // Commit write every 100 assets
+
+                if idx < assets.count - 1 && idx % 99 == 0 {
+                    // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()
+                    if let creationDate = asset.creationDate {
+                        updateLastSyncDate(creationDate)
+                    }
                     UploadQueue.instance.addToQueueFromRealm()
                     realm.beginWrite()
                 }

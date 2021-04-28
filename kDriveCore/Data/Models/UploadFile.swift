@@ -23,9 +23,7 @@ import DifferenceKit
 import UIKit
 
 enum UploadFileType: String {
-    case file
-    case phAsset
-    case unknown
+    case file, phAsset, unknown
 }
 
 public class UploadFile: Object {
@@ -36,22 +34,7 @@ public class UploadFile: Object {
     @objc public dynamic var name: String = ""
     @objc dynamic var relativePath: String = ""
     @objc dynamic var sessionUrl: String = ""
-
-    var urlEncodedName: String {
-        return name.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
-    }
-    var urlEncodedRelativePath: String {
-        return relativePath.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
-    }
     @objc private dynamic var url: String? = nil
-    public var pathURL: URL? {
-        get {
-            return url == nil ? nil : URL(fileURLWithPath: url!)
-        }
-        set {
-            url = newValue?.path
-        }
-    }
     @objc private dynamic var rawType: String = "file"
     @objc public dynamic var parentDirectoryId: Int = 1
     @objc dynamic var userId: Int = 0
@@ -63,6 +46,29 @@ public class UploadFile: Object {
     @objc public dynamic var maxRetryCount: Int = defaultMaxRetryCount
     @objc private dynamic var rawPriority: Int = 0
     @objc private dynamic var _error: String? = nil
+
+    private var localAsset: PHAsset?
+
+    public var isFirstInCollection = false
+    public var isLastInCollection = false
+
+    var urlEncodedName: String {
+        return name.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
+    }
+
+    var urlEncodedRelativePath: String {
+        return relativePath.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
+    }
+
+    public var pathURL: URL? {
+        get {
+            return url == nil ? nil : URL(fileURLWithPath: url!)
+        }
+        set {
+            url = newValue?.path
+        }
+    }
+
     public var error: DriveError? {
         set {
             _error = newValue?.toRealmString()
@@ -101,6 +107,38 @@ public class UploadFile: Object {
         }
     }
 
+    public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+        self.parentDirectoryId = parentDirectoryId
+        self.userId = userId
+        self.driveId = driveId
+        self.url = url.path
+        self.name = name ?? url.lastPathComponent
+        self.id = id
+        self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
+        self.rawType = UploadFileType.file.rawValue
+        self.creationDate = url.creationDate
+        self.taskCreationDate = Date()
+        self.rawPriority = priority.rawValue
+    }
+
+    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+        self.parentDirectoryId = parentDirectoryId
+        self.userId = userId
+        self.driveId = driveId
+        self.name = name
+        self.id = asset.localIdentifier
+        self.localAsset = asset
+        self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
+        self.rawType = UploadFileType.phAsset.rawValue
+        self.creationDate = creationDate
+        self.taskCreationDate = Date()
+        self.rawPriority = priority.rawValue
+    }
+
+    override init() {
+
+    }
+
     public func getIconForUploadFile(placeholder: (UIImage) -> (), completion: @escaping (UIImage) -> ()) {
         if type == .phAsset {
             let asset = getPHAsset()
@@ -128,40 +166,6 @@ public class UploadFile: Object {
         }
     }
 
-    private var localAsset: PHAsset?
-
-    public var isFirstInCollection = false
-    public var isLastInCollection = false
-
-    public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, shouldRemoveAfterUpload: Bool = true) {
-        self.parentDirectoryId = parentDirectoryId
-        self.userId = userId
-        self.driveId = driveId
-        self.url = url.path
-        self.name = name ?? url.lastPathComponent
-        self.id = id
-        self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
-        self.rawType = UploadFileType.file.rawValue
-        self.creationDate = url.creationDate
-        self.taskCreationDate = Date()
-    }
-
-    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, shouldRemoveAfterUpload: Bool = true) {
-        self.parentDirectoryId = parentDirectoryId
-        self.userId = userId
-        self.driveId = driveId
-        self.name = name
-        self.id = asset.localIdentifier
-        self.localAsset = asset
-        self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
-        self.rawType = UploadFileType.phAsset.rawValue
-        self.creationDate = creationDate
-        self.taskCreationDate = Date()
-    }
-
-    override init() {
-
-    }
 
     func getPHAsset() -> PHAsset? {
         if localAsset != nil {
@@ -191,9 +195,7 @@ public class UploadFile: Object {
 extension UploadFile: Differentiable {
 
     public var differenceIdentifier: String {
-        get {
-            return id
-        }
+        return id
     }
 
     public func isContentEqual(to source: UploadFile) -> Bool {
