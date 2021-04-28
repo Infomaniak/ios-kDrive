@@ -54,21 +54,14 @@ import UIKit
 
         // Set text color
         setTitleColor(.white, for: .normal)
-        if #available(iOS 13.0, *) {
-            UITraitCollection.current.userInterfaceStyle == .dark ? setTitleColor(UIColor.white.withAlphaComponent(0.6), for: .disabled) : setTitleColor(UIColor.black.withAlphaComponent(0.37), for: .disabled)
-        } else {
-            backgroundColor = isEnabled ? KDriveCoreAsset.infomaniakColor.color : UIColor.black.withAlphaComponent(0.12)
-        }
+        setTitleColor(KDriveCoreAsset.buttonDisabledTitleColor.color, for: .disabled)
+        
         setBackgroundColor()
         setElevation()
     }
 
     func setBackgroundColor() {
-        if #available(iOS 13.0, *) {
-            backgroundColor = isEnabled ? KDriveCoreAsset.infomaniakColor.color : UITraitCollection.current.userInterfaceStyle == .dark ? UIColor.black.withAlphaComponent(0.6) : UIColor.black.withAlphaComponent(0.12)
-        } else {
-            backgroundColor = isEnabled ? KDriveCoreAsset.infomaniakColor.color : UIColor.black.withAlphaComponent(0.12)
-        }
+        backgroundColor = isEnabled ? KDriveCoreAsset.infomaniakColor.color : KDriveCoreAsset.buttonDisabledBackgroundColor.color
     }
 
     func setElevation() {
