@@ -269,6 +269,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="qIU-Hu-Zbx" id="ToR-sc-C7Q"/>
+                        <outlet property="statusBarView" destination="Hjz-3J-y1V" id="xvj-CC-mlT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="k2O-E0-ypf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

@@ -46,7 +46,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private let backButton = UIButton(type: .custom)
     private var popRecognizer: InteractivePopRecognizer?
     private var fullScreenPreview = false
-
+    @IBOutlet weak var statusBarView: UIView!
+    
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
 
@@ -329,6 +330,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     func setFullscreen(_ fullscreen: Bool) {
         setNeedsStatusBarAppearanceUpdate()
+        statusBarView.backgroundColor = fullscreen ? .clear : KDriveAsset.previewBackgroundColor.color
         updateNavigationBar()
         floatingPanelViewController.move(to: fullscreen ? .hidden : .tip, animated: true)
     }
