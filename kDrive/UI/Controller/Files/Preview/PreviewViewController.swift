@@ -252,13 +252,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
-    
+
     override var prefersStatusBarHidden: Bool {
         return fullScreenPreview
     }
 
     func updateNavigationBar() {
-        if !currentFile.isLocalVersionOlderThanRemote() {
+        if fullScreenPreview {
+            setNavbarFullScreen()
+        } else if !currentFile.isLocalVersionOlderThanRemote() {
             switch currentFile.convertedType {
             case .pdf:
                 if let pdfCell = (self.collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
@@ -283,17 +285,26 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
     }
 
+    private func setNavbarFullScreen() {
+        backButton.isHidden = true
+        pdfPageLabel.isHidden = true
+        editButton.isHidden = true
+    }
+
     private func setNavbarStandard() {
+        backButton.isHidden = false
         pdfPageLabel.isHidden = true
         editButton.isHidden = true
     }
 
     private func setNavbarForEditing() {
+        backButton.isHidden = false
         pdfPageLabel.isHidden = true
         editButton.isHidden = false
     }
 
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
+        backButton.isHidden = false
         editButton.isHidden = true
         pdfPageLabel.text = KDriveStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
@@ -318,6 +329,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     func setFullscreen(_ fullscreen: Bool) {
         setNeedsStatusBarAppearanceUpdate()
+        updateNavigationBar()
         floatingPanelViewController.move(to: fullscreen ? .hidden : .tip, animated: true)
     }
 
