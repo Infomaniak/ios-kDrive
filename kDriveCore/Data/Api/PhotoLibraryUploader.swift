@@ -178,45 +178,47 @@ public class PhotoLibraryUploader {
     }
 
     private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>) {
-        let realm = DriveFileManager.constants.uploadsRealm
-        realm.beginWrite()
-        for i in 0..<assets.count {
-            guard settings != nil else {
-                realm.cancelWrite()
-                return
-            }
-            let asset = assets[i]
-            var correctName = "No-name-\(Date().timeIntervalSince1970)"
-            var fileExtension = ""
-            for resource in PHAssetResource.assetResources(for: asset) {
-                if (resource.type == .photo && asset.mediaType == .image) {
-                    fileExtension = (resource.originalFilename as NSString).pathExtension
-                } else if (resource.type == .video && asset.mediaType == .video) {
-                    fileExtension = (resource.originalFilename as NSString).pathExtension
+        autoreleasepool {
+            let realm = DriveFileManager.constants.uploadsRealm
+            realm.beginWrite()
+            for i in 0..<assets.count {
+                guard settings != nil else {
+                    realm.cancelWrite()
+                    return
+                }
+                let asset = assets[i]
+                var correctName = "No-name-\(Date().timeIntervalSince1970)"
+                var fileExtension = ""
+                for resource in PHAssetResource.assetResources(for: asset) {
+                    if (resource.type == .photo && asset.mediaType == .image) {
+                        fileExtension = (resource.originalFilename as NSString).pathExtension
+                    } else if (resource.type == .video && asset.mediaType == .video) {
+                        fileExtension = (resource.originalFilename as NSString).pathExtension
+                    }
+                }
+                if let creationDate = asset.creationDate {
+                    correctName = dateFormatter.string(from: creationDate)
+                }
+                correctName += "." + fileExtension.lowercased()
+
+                let uploadFile = UploadFile(
+                    parentDirectoryId: settings.parentDirectoryId,
+                    userId: settings.userId,
+                    driveId: settings.driveId,
+                    name: correctName,
+                    asset: asset,
+                    creationDate: asset.creationDate)
+                uploadFile.priority = settings.lastSync.timeIntervalSince1970 > 0 ? .high : .low
+                realm.add(uploadFile, update: .modified)
+                if i < assets.count - 1 && i % 99 == 0 {
+                    // Commit write every 100 assets
+                    try? realm.commitWrite()
+                    UploadQueue.instance.addToQueueFromRealm()
+                    realm.beginWrite()
                 }
             }
-            if let creationDate = asset.creationDate {
-                correctName = dateFormatter.string(from: creationDate)
-            }
-            correctName += "." + fileExtension.lowercased()
-
-            let uploadFile = UploadFile(
-                parentDirectoryId: settings.parentDirectoryId,
-                userId: settings.userId,
-                driveId: settings.driveId,
-                name: correctName,
-                asset: asset,
-                creationDate: asset.creationDate)
-            uploadFile.priority = settings.lastSync.timeIntervalSince1970 > 0 ? .high : .low
-            realm.add(uploadFile, update: .modified)
-            if i < assets.count - 1 && i % 99 == 0 {
-                // Commit write every 100 assets
-                try? realm.commitWrite()
-                UploadQueue.instance.addToQueueFromRealm()
-                realm.beginWrite()
-            }
+            try? realm.commitWrite()
         }
-        try? realm.commitWrite()
     }
 
     func removePicturesFromPhotoLibrary(uploadQueue: [UploadFile]) {

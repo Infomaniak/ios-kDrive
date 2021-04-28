@@ -368,11 +368,11 @@ public class UploadQueue {
 
     public func addToQueueFromRealm() {
         DispatchQueue.global(qos: .default).async {
-            autoreleasepool {
-                self.locks.addToQueueFromRealm.performLocked {
-                    let uploadingFiles = self.realm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
-                    uploadingFiles.forEach { self.addToQueue(file: $0) }
-                }
+            self.locks.addToQueueFromRealm.performLocked {
+                self.compactRealmIfNeeded()
+                let realm = self.realm
+                let uploadingFiles = realm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
+                uploadingFiles.forEach { self.addToQueue(file: $0, using: realm) }
             }
             DispatchQueue.global(qos: .background).async {
                 self.cleanupOrphanFiles()
@@ -380,20 +380,22 @@ public class UploadQueue {
         }
     }
 
-    public func addToQueue(file: UploadFile) {
+    public func addToQueue(file: UploadFile, using realm: Realm? = nil) {
         locks.addToQueue.performLocked {
             guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
                 return
             }
 
-            if file.realm == nil {
-                try? realm.safeWrite {
-                    realm.add(file, update: .modified)
+            autoreleasepool {
+                let uploadsRealm = realm == nil ? self.realm : realm!
+                try? uploadsRealm.safeWrite {
+                    if file.realm == nil {
+                        uploadsRealm.add(file, update: .modified)
+                    }
+                    if file.error != nil {
+                        file.error = nil
+                    }
                 }
-            }
-
-            try? realm.safeWrite {
-                file.error = nil
             }
 
             let operation = FileUploader(file: file, urlSession: bestSession)
@@ -504,6 +506,27 @@ public class UploadQueue {
             if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).count == 0 {
                 try? FileManager.default.removeItem(atPath: filePath)
             }
+        }
+    }
+
+    private func compactRealmIfNeeded() {
+        let compactingCondition: (Int, Int) -> (Bool) = { totalBytes, usedBytes in
+            let fiftyMB = 50 * 1024 * 1024
+            let compactingNeeded = (totalBytes > fiftyMB) && (Double(usedBytes) / Double(totalBytes)) < 0.5
+            DDLogInfo("Compacting uploads realm is needed ? \(compactingNeeded)")
+            return compactingNeeded
+        }
+
+        let config = Realm.Configuration(
+            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/uploads.realm"),
+            schemaVersion: DriveFileManager.constants.currentUploadDbVersion,
+            migrationBlock: DriveFileManager.constants.migrationBlock,
+            shouldCompactOnLaunch: compactingCondition,
+            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
+        do {
+            let _ = try Realm(configuration: config)
+        } catch {
+            DDLogError("Failed to compact uploads realm: \(error)")
         }
     }
 

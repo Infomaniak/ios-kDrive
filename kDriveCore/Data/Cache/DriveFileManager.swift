@@ -153,18 +153,6 @@ public class DriveFileManager {
         }
 
         var config = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/uploads.realm"),
-            schemaVersion: DriveFileManager.constants.currentUploadDbVersion,
-            migrationBlock: DriveFileManager.constants.migrationBlock,
-            shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
-        do {
-            let _ = try Realm(configuration: config)
-        } catch {
-            DDLogError("Failed to compact uploads realm: \(error)")
-        }
-
-        config = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
             shouldCompactOnLaunch: compactingCondition,
             objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveUser.self, Tag.self])
