@@ -20,6 +20,7 @@ import UIKit
 import InfomaniakCore
 import Photos
 import kDriveCore
+import RealmSwift
 
 class PhotoSyncSettingsViewController: UIViewController {
 
@@ -147,13 +148,14 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     @IBAction func saveButtonPressed(_ sender: UIButton) {
         DispatchQueue.global(qos: .utility).async {
-            self.saveSettings()
-            let _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
+            let realm = DriveFileManager.constants.uploadsRealm
+            self.saveSettings(using: realm)
+            let _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
         navigationController?.popViewController(animated: true)
     }
 
-    func saveSettings() {
+    func saveSettings(using realm: Realm) {
         if photoSyncEnabled {
             let lastSyncDate: Date
             if syncMode == .new {

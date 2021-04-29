@@ -33,7 +33,6 @@ public class DriveFileManager {
         public let cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-
         public let currentUploadDbVersion: UInt64 = 3
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
@@ -46,14 +45,14 @@ public class DriveFileManager {
                 }
             }
         }
+        public lazy var uploadsRealmConfiguration = Realm.Configuration(
+            fileURL: rootDocumentsURL.appendingPathComponent("/uploads.realm"),
+            schemaVersion: currentUploadDbVersion,
+            migrationBlock: migrationBlock,
+            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
 
         public var uploadsRealm: Realm {
-            let config = Realm.Configuration(
-                fileURL: rootDocumentsURL.appendingPathComponent("/uploads.realm"),
-                schemaVersion: currentUploadDbVersion,
-                migrationBlock: migrationBlock,
-                objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
-            return try! Realm(configuration: config)
+            return try! Realm(configuration: uploadsRealmConfiguration)
         }
 
         init() {
@@ -113,7 +112,7 @@ public class DriveFileManager {
         }
     }
     let backgroundQueue = DispatchQueue(label: "background-db")
-    private var realmConfiguration: Realm.Configuration
+    public var realmConfiguration: Realm.Configuration
     public var drive: Drive
     public var apiFetcher: DriveApiFetcher
 
@@ -152,19 +151,7 @@ public class DriveFileManager {
             return compactingNeeded
         }
 
-        var config = Realm.Configuration(
-            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/uploads.realm"),
-            schemaVersion: DriveFileManager.constants.currentUploadDbVersion,
-            migrationBlock: DriveFileManager.constants.migrationBlock,
-            shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
-        do {
-            let _ = try Realm(configuration: config)
-        } catch {
-            DDLogError("Failed to compact uploads realm: \(error)")
-        }
-
-        config = Realm.Configuration(
+        let config = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
             shouldCompactOnLaunch: compactingCondition,
             objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveUser.self, Tag.self])
@@ -211,8 +198,9 @@ public class DriveFileManager {
         }
     }
 
-    public func getCachedFile(id: Int, freeze: Bool = true) -> File? {
-        let file = getRealm().object(ofType: File.self, forPrimaryKey: id)
+    public func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm? = nil) -> File? {
+        let realm = realm == nil ? getRealm() : realm!
+        let file = realm.object(ofType: File.self, forPrimaryKey: id)
         return freeze ? file?.freeze() : file
     }
 
