@@ -33,7 +33,6 @@ public class DriveFileManager {
         public let cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-
         public let currentUploadDbVersion: UInt64 = 3
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
@@ -46,14 +45,14 @@ public class DriveFileManager {
                 }
             }
         }
+        public lazy var uploadsRealmConfiguration = Realm.Configuration(
+            fileURL: rootDocumentsURL.appendingPathComponent("/uploads.realm"),
+            schemaVersion: currentUploadDbVersion,
+            migrationBlock: migrationBlock,
+            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
 
         public var uploadsRealm: Realm {
-            let config = Realm.Configuration(
-                fileURL: rootDocumentsURL.appendingPathComponent("/uploads.realm"),
-                schemaVersion: currentUploadDbVersion,
-                migrationBlock: migrationBlock,
-                objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
-            return try! Realm(configuration: config)
+            return try! Realm(configuration: uploadsRealmConfiguration)
         }
 
         init() {
