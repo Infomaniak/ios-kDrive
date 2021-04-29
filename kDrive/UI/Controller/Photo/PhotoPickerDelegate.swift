@@ -52,7 +52,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
 
         savePhotoVC.uti = uti
         savePhotoVC.selectedDirectory = currentDirectory
-        savePhotoVC.items = [.init(name: savePhotoVC.getDefaultFileName(), path: URL(string: "/")!, uti: uti)]
+        savePhotoVC.items = [.init(name: SavePhotoViewController.getDefaultFileName(), path: URL(string: "/")!, uti: uti)]
         savePhotoVC.skipOptionsSelection = true
 
         switch uti {
