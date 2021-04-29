@@ -96,6 +96,7 @@ class PhotoSyncSettingsViewController: UIViewController {
             //We should always have the folder in cache but just in case we don't...
             if let photoSyncDirectory = driveFileManager.getCachedFile(id: currentSyncSettings.parentDirectoryId) {
                 self.selectedDirectory = photoSyncDirectory
+                self.updateSaveButtonState()
             } else {
                 driveFileManager.getFile(id: currentSyncSettings.parentDirectoryId) { (file, _, _) in
                     self.selectedDirectory = file?.freeze()
@@ -122,11 +123,11 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func updateSaveButtonState() {
-        if selectedDirectory == nil && photoSyncEnabled {
-            saveButton.isEnabled = false
-        } else {
-            saveButton.isEnabled =
-                PhotoLibraryUploader.instance.isSyncEnabled != photoSyncEnabled ||
+        var isEdited = false
+        if PhotoLibraryUploader.instance.isSyncEnabled != photoSyncEnabled {
+            isEdited = true
+        } else if PhotoLibraryUploader.instance.isSyncEnabled == photoSyncEnabled && photoSyncEnabled {
+            isEdited = PhotoLibraryUploader.instance.isSyncEnabled != photoSyncEnabled ||
                 currentSyncSettings.driveId != currentDriveId ||
                 currentSyncSettings.userId != currentUserId ||
                 currentSyncSettings.parentDirectoryId != selectedDirectory?.id ||
@@ -134,6 +135,13 @@ class PhotoSyncSettingsViewController: UIViewController {
                 currentSyncSettings.syncVideosEnabled != syncVideosEnabled ||
                 currentSyncSettings.syncScreenshotsEnabled != syncScreenshotsEnabled ||
                 currentSyncSettings.syncMode != syncMode
+        }
+        saveButton.isHidden = !isEdited
+        
+        if selectedDirectory == nil && photoSyncEnabled {
+            saveButton.isEnabled = false
+        } else {
+            saveButton.isEnabled = isEdited
         }
     }
 
