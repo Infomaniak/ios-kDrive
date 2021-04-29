@@ -121,7 +121,7 @@ class SaveFileViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    func getDefaultFileName() -> String {
+    public static func getDefaultFileName() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd_HHmmss"
         return formatter.string(from: Date())
@@ -154,7 +154,7 @@ class SaveFileViewController: UIViewController {
             } else if itemProvider.canLoadObject(ofClass: UIImage.self) {
                 let childProgress = getPhoto(from: itemProvider) { (image) in
                     if let data = image?.jpegData(compressionQuality: self.JPEG_QUALITY) {
-                        var name = itemProvider.suggestedName ?? self.getDefaultFileName()
+                        var name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
                         name = name.hasSuffix(".jpeg") ? name : "\(name).jpeg"
                         self.save(data: data, name: name, uti: .jpeg)
                     }
@@ -163,7 +163,7 @@ class SaveFileViewController: UIViewController {
             } else if itemProvider.canLoadObject(ofClass: PHLivePhoto.self) {
                 let childProgress = getLivePhoto(from: itemProvider) { (data) in
                     if let data = data {
-                        var name = itemProvider.suggestedName ?? self.getDefaultFileName()
+                        var name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
                         name = name.hasSuffix(".jpeg") ? name : "\(name).jpeg"
                         self.save(data: data, name: name, uti: .jpeg)
                     }
