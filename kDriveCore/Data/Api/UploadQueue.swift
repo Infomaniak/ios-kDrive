@@ -288,12 +288,9 @@ public class FileUploader: Operation {
         DDLogError("[FileUploader] Job \(file.id) ended")
         // Save upload file
         result.uploadFile = UploadFile(value: file)
-        BackgroundRealm.uploads.execute { uploadsRealm in
-            try? uploadsRealm.safeWrite {
-                if file.error == .taskCancelled,
-                    let canceledFile = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: file.id) {
-                    uploadsRealm.delete(canceledFile)
-                } else {
+        if file.error != .taskCancelled {
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                try? uploadsRealm.safeWrite {
                     uploadsRealm.add(UploadFile(value: file), update: .modified)
                 }
             }
@@ -497,9 +494,22 @@ public class UploadQueue {
     }
 
     public func cancelAllOperations(withParent parentId: Int) {
-        DispatchQueue.global(qos: .userInteractive).async {
-            let realm = DriveFileManager.constants.uploadsRealm
-            self.getUploadingFiles(withParent: parentId, using: realm).forEach { self.cancel($0, using: realm) }
+        DispatchQueue.global(qos: .userInteractive).async { [self] in
+            self.suspendAllOperations()
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                let uploadingFiles = self.getUploadingFiles(withParent: parentId, using: uploadsRealm)
+                uploadingFiles.forEach { file in
+                    if !file.isInvalidated,
+                        let operation = self.operationsInQueue[file.id] {
+                        operation.cancel()
+                    }
+                }
+                try? uploadsRealm.safeWrite {
+                    uploadsRealm.delete(uploadingFiles)
+                }
+                publishUploadCount(withParent: parentId, using: uploadsRealm)
+            }
+            self.resumeAllOperations()
         }
     }
 
@@ -512,9 +522,16 @@ public class UploadQueue {
     }
 
     public func retryAllOperations(withParent parentId: Int) {
-        let realm = DriveFileManager.constants.uploadsRealm
-        let failedUploadFiles = getUploadingFiles(withParent: parentId, using: realm).filter("_error != nil")
-        failedUploadFiles.forEach { retry($0, using: realm) }
+        BackgroundRealm.uploads.execute { realm in
+            let failedUploadFiles = getUploadingFiles(withParent: parentId, using: realm).filter("_error != nil")
+            try? realm.safeWrite {
+                failedUploadFiles.forEach { file in
+                    file.error = nil
+                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
+                }
+            }
+            failedUploadFiles.forEach { addToQueue(file: $0) }
+        }
     }
 
     public func sendPausedNotificationIfNeeded() {
