@@ -112,7 +112,7 @@ class PhotoListViewController: UIViewController {
                 self.collectionView.insertItems(at: (lastIndex..<self.files.count).map { IndexPath(row: $0, section: 0) })
                 self.page += 1
                 self.hasNextPage = data.count == DriveApiFetcher.itemPerPage
-                AccountManager.instance.currentDriveFileManager.setLocalHomeFiles(self.files, lastPictures: true)
+                AccountManager.instance.currentDriveFileManager.setLocalFiles(self.files, root: DriveFileManager.lastPicturesRootFile)
             }
             self.footerView?.isHidden = true
             self.isLoading = false

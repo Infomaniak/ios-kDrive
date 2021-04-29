@@ -426,11 +426,24 @@ public class DriveFileManager {
         } else {
             apiFetcher.searchFiles(query: query, fileType: fileType, page: page, sortType: sortType) { [self] (response, error) in
                 if let files = response?.data {
-                    let searchRoot = DriveFileManager.searchFilesRootFile
-                    if files.count < DriveApiFetcher.itemPerPage {
-                        searchRoot.fullyDownloaded = true
+                    self.backgroundQueue.async { [self] in
+                        autoreleasepool {
+                            let searchRoot = DriveFileManager.searchFilesRootFile
+                            if files.count < DriveApiFetcher.itemPerPage {
+                                searchRoot.fullyDownloaded = true
+                            }
+                            for file in files {
+                                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false)
+                            }
+
+                            setLocalFiles(files, root: searchRoot) {
+                                let safeRoot = ThreadSafeReference(to: searchRoot)
+                                DispatchQueue.main.async {
+                                    completion(getRealm().resolve(safeRoot), files, nil)
+                                }
+                            }
+                        }
                     }
-                    completion(searchRoot, files, nil)
                 } else {
                     searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
                 }
@@ -559,7 +572,7 @@ public class DriveFileManager {
             try? realm.safeWrite {
                 realm.delete(realm.objects(FileActivity.self))
                 //Delete orphan files which are NOT root
-                deleteOrphanFiles()
+                deleteOrphanFiles(root: DriveFileManager.homeRootFile)
 
                 realm.add(activitiesSafe, update: .modified)
                 realm.add(homeRootFile, update: .modified)
@@ -567,14 +580,13 @@ public class DriveFileManager {
         }
     }
 
-    public func setLocalHomeFiles(_ files: [File], lastPictures: Bool) {
+    public func setLocalFiles(_ files: [File], root: File, completion: (() -> Void)? = nil) {
         backgroundQueue.async { [self] in
             let realm = getRealm()
-            let homeRootFile = lastPictures ? DriveFileManager.lastPicturesRootFile : DriveFileManager.lastModificationsRootFile
             for file in files {
                 let safeFile = File(value: file)
                 keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true)
-                homeRootFile.children.append(safeFile)
+                root.children.append(safeFile)
                 if let rights = file.rights {
                     safeFile.rights = Rights(value: rights)
                 }
@@ -582,10 +594,11 @@ public class DriveFileManager {
 
             try? realm.safeWrite {
                 //Delete orphan files which are NOT root
-                deleteOrphanFiles()
+                deleteOrphanFiles(root: root)
 
-                realm.add(homeRootFile, update: .modified)
+                realm.add(root, update: .modified)
             }
+            completion?()
         }
     }
 
@@ -598,7 +611,7 @@ public class DriveFileManager {
                             keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false)
                         }
 
-                        setLocalHomeFiles(files, lastPictures: false)
+                        setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile)
                         DispatchQueue.main.async {
                             completion(files, nil)
                         }
@@ -619,7 +632,7 @@ public class DriveFileManager {
                             keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false)
                         }
 
-                        setLocalHomeFiles(files, lastPictures: true)
+                        setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile)
                         DispatchQueue.main.async {
                             completion(files, nil)
                         }
@@ -792,7 +805,7 @@ public class DriveFileManager {
                         file.signalChanges()
                         completion(response?.data, error)
                     }
-                    deleteOrphanFiles()
+                    deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile)
                 }
             } else {
                 completion(response?.data, error)
@@ -1037,9 +1050,9 @@ public class DriveFileManager {
         }
     }
 
-    private func deleteOrphanFiles() {
+    private func deleteOrphanFiles(root: File...) {
         let realm = getRealm()
-        let orphanFiles = realm.objects(File.self).filter("parentLink.@count == 1").filter(NSPredicate(format: "ANY parentLink.id IN %@", [DriveFileManager.homeRootFile.id]))
+        let orphanFiles = realm.objects(File.self).filter("parentLink.@count == 1").filter(NSPredicate(format: "ANY parentLink.id IN %@", root.map(\.id)))
         for orphanFile in orphanFiles {
             if fileManager.fileExists(atPath: orphanFile.localContainerUrl.path) {
                 try? fileManager.removeItem(at: orphanFile.localContainerUrl) // Check that it was correctly removed?
