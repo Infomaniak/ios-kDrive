@@ -123,6 +123,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
             disabledView.superview?.sendSubviewToBack(disabledView)
             isUserInteractionEnabled = true
         } else {
+            disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
             disabledView.isHidden = false
             disabledView.superview?.bringSubviewToFront(disabledView)
             isUserInteractionEnabled = false
