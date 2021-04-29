@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import Foundation
 import Photos
 import CocoaLumberjackSwift
+import RealmSwift
 
 public class PhotoLibraryUploader {
 
@@ -46,8 +47,7 @@ public class PhotoLibraryUploader {
         settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first?.freeze()
     }
 
-    public func enableSyncWithSettings(_ newSettings: PhotoSyncSettings) {
-        let realm = DriveFileManager.constants.uploadsRealm
+    public func enableSyncWithSettings(_ newSettings: PhotoSyncSettings, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         try? realm.write {
             realm.delete(realm.objects(PhotoSyncSettings.self))
             realm.add(newSettings)
@@ -55,16 +55,14 @@ public class PhotoLibraryUploader {
         settings = newSettings.freeze()
     }
 
-    public func disableSync() {
-        let realm = DriveFileManager.constants.uploadsRealm
+    public func disableSync(using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         try? realm.write {
             realm.delete(realm.objects(PhotoSyncSettings.self))
         }
         settings = nil
     }
 
-    private func updateLastSyncDate(_ date: Date) {
-        let realm = DriveFileManager.constants.uploadsRealm
+    private func updateLastSyncDate(_ date: Date, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         if let settings = realm.objects(PhotoSyncSettings.self).first {
             try? realm.safeWrite {
                 settings.lastSync = date
@@ -130,7 +128,7 @@ public class PhotoLibraryUploader {
         phRequests.removeAll()
     }
 
-    public func addNewPicturesToUploadQueue() -> Int {
+    public func addNewPicturesToUploadQueue(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
         var assets = PHFetchResult<PHAsset>()
         if isSyncEnabled && (PHPhotoLibrary.authorizationStatus() == .authorized || PHPhotoLibrary.authorizationStatus() == .restricted) {
             let options = PHFetchOptions()
@@ -153,17 +151,16 @@ public class PhotoLibraryUploader {
             DDLogInfo("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
             assets = PHAsset.fetchAssets(with: options)
             let syncDate = Date()
-            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0)
+            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
             DDLogInfo("Photo sync - New assets count \(assets.count)")
-            updateLastSyncDate(syncDate)
+            updateLastSyncDate(syncDate, using: realm)
             UploadQueue.instance.addToQueueFromRealm()
         }
         return assets.count
     }
 
-    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>, initial: Bool) {
+    private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>, initial: Bool, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         autoreleasepool {
-            let realm = DriveFileManager.constants.uploadsRealm
             realm.beginWrite()
             assets.enumerateObjects { [self] (asset, idx, stop) in
                 guard settings != nil else {
@@ -199,7 +196,7 @@ public class PhotoLibraryUploader {
                     // Commit write every 100 assets if it's not the last
                     try? realm.commitWrite()
                     if let creationDate = asset.creationDate {
-                        updateLastSyncDate(creationDate)
+                        updateLastSyncDate(creationDate, using: realm)
                     }
                     UploadQueue.instance.addToQueueFromRealm()
                     realm.beginWrite()
