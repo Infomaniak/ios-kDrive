@@ -287,7 +287,7 @@ public class FileUploader: Operation {
         DDLogError("[FileUploader] Job \(file.id) ended")
         // Save upload file
         result.uploadFile = UploadFile(value: file)
-        BackgroundRealm.instance.execute { uploadsRealm in
+        BackgroundUploadsRealm.instance.execute { uploadsRealm in
             try? uploadsRealm.safeWrite {
                 if file.error == .taskCancelled,
                     let canceledFile = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: file.id) {
@@ -307,12 +307,12 @@ public class FileUploader: Operation {
     }
 }
 
-public class BackgroundRealm {
+public class BackgroundUploadsRealm {
 
-    public static let instance = BackgroundRealm()
+    public static let instance = BackgroundUploadsRealm()
 
-    public lazy var realm = try! Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: queue)
-    public let queue = DispatchQueue(label: "com.infomaniak.drive.realm-upload-dq")
+    private lazy var realm = try! Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: queue)
+    private let queue = DispatchQueue(label: "com.infomaniak.drive.realm-upload-dq")
 
     private init() { }
 
@@ -391,7 +391,7 @@ public class UploadQueue {
         DispatchQueue.global(qos: .default).async {
             self.locks.addToQueueFromRealm.performLocked {
                 self.compactRealmIfNeeded()
-                BackgroundRealm.instance.execute { uploadsRealm in
+                BackgroundUploadsRealm.instance.execute { uploadsRealm in
                     let uploadingFiles = uploadsRealm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
                     uploadingFiles.forEach { self.addToQueue(file: $0, using: uploadsRealm) }
                 }
@@ -422,7 +422,7 @@ public class UploadQueue {
             operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id] in
                 self.operationsInQueue.removeValue(forKey: fileId)
                 self.publishFileUploaded(result: operation.result)
-                BackgroundRealm.instance.execute { realm in
+                BackgroundUploadsRealm.instance.execute { realm in
                     self.publishUploadCount(withParent: parentId, using: realm)
                 }
             }
