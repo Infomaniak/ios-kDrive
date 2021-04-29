@@ -91,7 +91,9 @@ class AlertDocViewController: AlertFieldViewController {
 
             self.dismiss(animated: true) {
                 let message: String
-                if error == nil {
+                if error == nil, let file = file {
+                    guard let mainTabViewController = UIApplication.shared.keyWindow?.rootViewController as? MainTabViewController else { return }
+                    OnlyOfficeViewController.open(driveFileManager: AccountManager.instance.currentDriveFileManager, file: file, viewController: mainTabViewController)
                     message = KDriveStrings.Localizable.snackbarFileCreateConfirmation
                 } else {
                     message = KDriveStrings.Localizable.errorFileCreate
