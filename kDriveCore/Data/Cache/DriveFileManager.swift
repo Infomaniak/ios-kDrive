@@ -112,7 +112,7 @@ public class DriveFileManager {
         }
     }
     let backgroundQueue = DispatchQueue(label: "background-db")
-    private var realmConfiguration: Realm.Configuration
+    public var realmConfiguration: Realm.Configuration
     public var drive: Drive
     public var apiFetcher: DriveApiFetcher
 
@@ -198,8 +198,9 @@ public class DriveFileManager {
         }
     }
 
-    public func getCachedFile(id: Int, freeze: Bool = true) -> File? {
-        let file = getRealm().object(ofType: File.self, forPrimaryKey: id)
+    public func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm? = nil) -> File? {
+        let realm = realm == nil ? getRealm() : realm!
+        let file = realm.object(ofType: File.self, forPrimaryKey: id)
         return freeze ? file?.freeze() : file
     }
 

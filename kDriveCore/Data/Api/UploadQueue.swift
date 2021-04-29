@@ -244,21 +244,22 @@ public class FileUploader: Operation {
             file.uploadDate = Date()
             if let drive = AccountManager.instance.getDrive(for: file.userId, driveId: file.driveId),
                 let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-                let realm = driveFileManager.getRealm()
 
                 //File is already or has parent in DB let's update it
-                if driveFileManager.getCachedFile(id: driveFile.id) != nil || file.relativePath == "" {
-                    let parent = driveFileManager.getCachedFile(id: file.parentDirectoryId, freeze: false)
-                    try? realm.safeWrite {
-                        realm.add(driveFile, update: .all)
-                        if file.relativePath == "" && parent != nil && !parent!.children.contains(driveFile) {
-                            parent?.children.append(driveFile)
+                BackgroundRealm.getQueue(for: driveFileManager.getRealm().configuration).execute { realm in
+                    if driveFileManager.getCachedFile(id: driveFile.id, using: realm) != nil || file.relativePath == "" {
+                        let parent = driveFileManager.getCachedFile(id: file.parentDirectoryId, freeze: false, using: realm)
+                        try? realm.safeWrite {
+                            realm.add(driveFile, update: .all)
+                            if file.relativePath == "" && parent != nil && !parent!.children.contains(driveFile) {
+                                parent?.children.append(driveFile)
+                            }
                         }
+                        if let parent = parent {
+                            driveFileManager.notifyObserversWith(file: parent)
+                        }
+                        result.driveFile = driveFile.freeze()
                     }
-                    if let parent = parent {
-                        driveFileManager.notifyObserversWith(file: parent)
-                    }
-                    result.driveFile = driveFile.freeze()
                 }
             }
         } else {
@@ -287,7 +288,7 @@ public class FileUploader: Operation {
         DDLogError("[FileUploader] Job \(file.id) ended")
         // Save upload file
         result.uploadFile = UploadFile(value: file)
-        BackgroundUploadsRealm.instance.execute { uploadsRealm in
+        BackgroundRealm.uploads.execute { uploadsRealm in
             try? uploadsRealm.safeWrite {
                 if file.error == .taskCancelled,
                     let canceledFile = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: file.id) {
@@ -307,14 +308,37 @@ public class FileUploader: Operation {
     }
 }
 
-public class BackgroundUploadsRealm {
+public class BackgroundRealm {
 
-    public static let instance = BackgroundUploadsRealm()
+    public static let uploads = getQueue(for: DriveFileManager.constants.uploadsRealmConfiguration)
+    private static var instances: [String: BackgroundRealm] = [:]
 
-    private lazy var realm = try! Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: queue)
-    private let queue = DispatchQueue(label: "com.infomaniak.drive.realm-upload-dq")
+    private let realm: Realm
+    private let queue: DispatchQueue
 
-    private init() { }
+    public class func getQueue(for configuration: Realm.Configuration) -> BackgroundRealm {
+        guard let fileURL = configuration.fileURL else {
+            fatalError("Realm configurations without file URL not supported")
+        }
+
+        if let instance = instances[fileURL.absoluteString] {
+            return instance
+        } else {
+            let queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)")
+            var realm: Realm!
+            queue.sync {
+                realm = try! Realm(configuration: configuration, queue: queue)
+            }
+            let instance = BackgroundRealm(realm: realm, queue: queue)
+            instances[fileURL.absoluteString] = instance
+            return instance
+        }
+    }
+
+    private init(realm: Realm, queue: DispatchQueue) {
+        self.realm = realm
+        self.queue = queue
+    }
 
     public func safeWrite(_ block: (() throws -> Void)) throws {
         try queue.sync {
@@ -391,7 +415,7 @@ public class UploadQueue {
         DispatchQueue.global(qos: .default).async {
             self.locks.addToQueueFromRealm.performLocked {
                 self.compactRealmIfNeeded()
-                BackgroundUploadsRealm.instance.execute { uploadsRealm in
+                BackgroundRealm.uploads.execute { uploadsRealm in
                     let uploadingFiles = uploadsRealm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
                     uploadingFiles.forEach { self.addToQueue(file: $0, using: uploadsRealm) }
                 }
@@ -422,7 +446,7 @@ public class UploadQueue {
             operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id] in
                 self.operationsInQueue.removeValue(forKey: fileId)
                 self.publishFileUploaded(result: operation.result)
-                BackgroundUploadsRealm.instance.execute { realm in
+                BackgroundRealm.uploads.execute { realm in
                     self.publishUploadCount(withParent: parentId, using: realm)
                 }
             }
