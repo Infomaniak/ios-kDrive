@@ -54,8 +54,7 @@ public class UploadQueue {
 
     /// Should suspend operation queue based on network status
     private var shouldSuspendQueue: Bool {
-        let status = ReachabilityListener.instance.currentStatus
-        return status == .offline || (status != .wifi && UserDefaults.isWifiOnlyMode())
+        return ReachabilityListener.instance.currentStatus == .offline
     }
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
