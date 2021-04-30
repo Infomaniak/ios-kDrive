@@ -125,7 +125,7 @@ public class UploadQueue {
     public func getUploadingFiles(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         let driveId = AccountManager.instance.currentDriveFileManager.drive.id
         let userId = AccountManager.instance.currentAccount.user.id
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId))
+        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId)).sorted(byKeyPath: "taskCreationDate")
     }
 
     public func suspendAllOperations() {

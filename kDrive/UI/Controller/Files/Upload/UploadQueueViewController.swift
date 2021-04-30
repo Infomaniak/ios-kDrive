@@ -31,6 +31,8 @@ class UploadQueueViewController: UIViewController {
     private var uploadingFiles = [UploadFile]()
     private var progressForFileId = [String: CGFloat]()
 
+    private let realm = DriveFileManager.constants.uploadsRealm
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: UploadTableViewCell.self)
@@ -63,7 +65,7 @@ class UploadQueueViewController: UIViewController {
     }
 
     func reloadData(reloadTableView: Bool = true) {
-        let newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).freeze())
+        let newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, using: realm).freeze())
         newUploadingFiles.first?.isFirstInCollection = true
         newUploadingFiles.last?.isLastInCollection = true
 
