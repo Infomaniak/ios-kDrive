@@ -34,6 +34,7 @@ public class UploadQueue {
         queue.name = "kDrive upload queue"
         queue.qualityOfService = .userInitiated
         queue.maxConcurrentOperationCount = 4
+        queue.isSuspended = shouldSuspendQueue
         return queue
     }()
     private lazy var foregroundSession: URLSession = {
@@ -51,6 +52,14 @@ public class UploadQueue {
         return Constants.isInExtension ? BackgroundSessionManager.instance : foregroundSession
     }
 
+    /// Should suspend operation queue based on network status
+    private var shouldSuspendQueue: Bool {
+        let status = ReachabilityListener.instance.currentStatus
+        return status == .offline || (status != .wifi && UserDefaults.isWifiOnlyMode())
+    }
+
+    /// Should suspend operation queue based on explicit `suspendAllOperations()` call
+    private var forceSuspendQueue = false
     private var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
         didChangeProgress: [UUID: (UploadedFileId, Progress) -> Void](),
@@ -67,6 +76,10 @@ public class UploadQueue {
     private init() {
         // Initialize operation queue with files from Realm
         addToQueueFromRealm()
+        // Observe network changes
+        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
+            self.operationQueue.isSuspended = shouldSuspendQueue || forceSuspendQueue
+        }
     }
 
     public func waitForCompletion(_ completionHandler: @escaping () -> (Void)) {
@@ -129,11 +142,13 @@ public class UploadQueue {
     }
 
     public func suspendAllOperations() {
+        forceSuspendQueue = true
         operationQueue.isSuspended = true
     }
 
     public func resumeAllOperations() {
-        operationQueue.isSuspended = false
+        forceSuspendQueue = false
+        operationQueue.isSuspended = shouldSuspendQueue
     }
 
     public func cancelAllOperations() {
