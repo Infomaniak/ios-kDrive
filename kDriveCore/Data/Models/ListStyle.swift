@@ -39,7 +39,7 @@ public class ListStyleManager {
 
     public var currentStyle: ListStyle {
         get {
-            return UserDefaults.getListStyle()
+            return UserDefaults.shared.listStyle
         }
         set {
             setStyle(newValue)
@@ -47,7 +47,7 @@ public class ListStyleManager {
     }
 
     private func setStyle(_ listStyle: ListStyle) {
-        UserDefaults.store(listStyle: listStyle)
+        UserDefaults.shared.listStyle = listStyle
 
         didChangeListStyleObservers.values.forEach { closure in
             closure(listStyle)

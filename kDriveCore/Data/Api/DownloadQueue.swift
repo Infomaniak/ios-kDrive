@@ -125,7 +125,7 @@ public class DownloadQueue: NSObject, URLSessionDownloadDelegate {
     }
 
     public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId) {
-        if UserDefaults.isWifiOnlyMode() && ReachabilityListener.instance.currentStatus != .wifi {
+        if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
             return
         }
         if !isFileAlreadyInQueue(file) {

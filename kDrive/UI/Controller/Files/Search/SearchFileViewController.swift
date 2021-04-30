@@ -59,7 +59,7 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
     }
 
     override func viewDidLoad() {
-        recentSearches = UserDefaults.getRecentSearches()
+        recentSearches = UserDefaults.shared.recentSearches
         collectionView.register(UINib(nibName: "BasicTitleCollectionReusableView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "BasicTitleCollectionReusableView")
         super.viewDidLoad()
         listStyle = .list
@@ -147,7 +147,7 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
             if recentSearches.count > maxRecentSearch {
                 recentSearches.removeLast()
             }
-            UserDefaults.store(recentSearches: recentSearches)
+            UserDefaults.shared.recentSearches = recentSearches
         }
     }
 
@@ -257,7 +257,7 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
     }
 
     private func showResults() {
-        listStyle = UserDefaults.getListStyle()
+        listStyle = UserDefaults.shared.listStyle
         sortedChildren = [File]()
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadData()
@@ -274,7 +274,7 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
             if recentSearches.count > maxRecentSearch {
                 recentSearches.removeLast()
             }
-            UserDefaults.store(recentSearches: recentSearches)
+            UserDefaults.shared.recentSearches = recentSearches
         }
         updateSearchResults(for: searchController)
     }

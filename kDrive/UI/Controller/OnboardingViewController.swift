@@ -121,7 +121,7 @@ class OnboardingViewController: UIViewController {
 
     private func goToMainScreen() {
         UserDefaults.store(firstLaunch: false)
-        UserDefaults.store(numberOfConnection: 1)
+        UserDefaults.shared.numberOfConnections = 1
         (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate(), animated: true)
     }
 

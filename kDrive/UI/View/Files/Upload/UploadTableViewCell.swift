@@ -54,7 +54,7 @@ class UploadTableViewCell: InsetTableViewCell {
             var status = KDriveStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveStrings.Localizable.uploadNetworkErrorDescription
-            } else if UserDefaults.isWifiOnlyMode() && ReachabilityListener.instance.currentStatus != .wifi {
+            } else if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
                 status = KDriveStrings.Localizable.uploadNetworkErrorWifiRequired
             }
             if uploadFile.size > 0 {
@@ -106,7 +106,7 @@ class UploadTableViewCell: InsetTableViewCell {
             var status = KDriveStrings.Localizable.uploadInProgressTitle
             if ReachabilityListener.instance.currentStatus == .offline {
                 status += " • " + KDriveStrings.Localizable.uploadNetworkErrorDescription
-            } else if UserDefaults.isWifiOnlyMode() && ReachabilityListener.instance.currentStatus != .wifi {
+            } else if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
                 status += " • " + KDriveStrings.Localizable.uploadNetworkErrorWifiRequired
             }
             cardContentView.detailsLabel.text = status

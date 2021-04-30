@@ -55,15 +55,15 @@ class ParameterTableViewController: UITableViewController {
             } else if indexPath.row == 2 {
                 cell.initWithPositionAndShadow()
                 cell.titleLabel.text = KDriveStrings.Localizable.appSecurityTitle
-                cell.valueLabel.text = UserDefaults.isAppLockMode() ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+                cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
             }
             return cell
         } else if indexPath.row == 3 {
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.wifiSwitch.isOn = UserDefaults.isWifiOnlyMode()
+            cell.wifiSwitch.isOn = UserDefaults.shared.isWifiOnly
             cell.switchHandler = { sender in
-                UserDefaults.store(wifiOnly: sender.isOn)
+                UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell
         } else {

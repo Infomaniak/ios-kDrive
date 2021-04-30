@@ -113,6 +113,10 @@ public class DriveInfosManager {
         return driveRemoved
     }
 
+    public static func getObjectId(driveId: Int, userId: Int) -> String {
+        return "\(driveId)_\(userId)"
+    }
+
     public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false) -> [Drive] {
         let realm = getRealm()
         var realmDriveList = realm.objects(Drive.self)
@@ -130,7 +134,7 @@ public class DriveInfosManager {
     }
 
     public func getDrive(id: Int, userId: Int) -> Drive? {
-        return getDrive(objectId: "\(id)_\(userId)")
+        return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId))
     }
 
     public func getDrive(objectId: String) -> Drive? {

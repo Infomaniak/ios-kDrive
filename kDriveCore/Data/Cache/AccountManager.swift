@@ -40,12 +40,12 @@ public class AccountManager: RefreshTokenDelegate {
     public var refreshTokenLock = DispatchGroup()
     public var currentUserId: Int {
         didSet {
-            UserDefaults.store(currentDriveUserId: currentUserId)
+            UserDefaults.shared.currentDriveUserId = currentUserId
         }
     }
     public var currentDriveId: String {
         didSet {
-            UserDefaults.store(currentDriveId: currentDriveId)
+            UserDefaults.shared.currentDriveId = currentDriveId
         }
     }
     public var drives: [Drive] {
@@ -58,15 +58,15 @@ public class AccountManager: RefreshTokenDelegate {
         let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
         accessGroup = appIdentifierPrefix + AccountManager.group
 
-        self.currentDriveId = UserDefaults.getCurrentDriveId()
-        self.currentUserId = UserDefaults.getCurrentDriveUserId()
+        self.currentDriveId = UserDefaults.shared.currentDriveId
+        self.currentUserId = UserDefaults.shared.currentDriveUserId
 
         forceReload()
     }
 
     public func forceReload() {
-        self.currentDriveId = UserDefaults.getCurrentDriveId()
-        self.currentUserId = UserDefaults.getCurrentDriveUserId()
+        self.currentDriveId = UserDefaults.shared.currentDriveId
+        self.currentUserId = UserDefaults.shared.currentDriveUserId
         self.tokens = loadTokens()
         self.accounts = loadAccounts()
 
