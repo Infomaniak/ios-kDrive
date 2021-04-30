@@ -76,6 +76,15 @@ class SaveFileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Set selected drive and directory to last values
+        if selectedDirectory == nil {
+            if let drive = DriveInfosManager.instance.getDrive(id: UserDefaults.shared.lastSelectedDrive, userId: AccountManager.instance.currentUserId),
+                let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+                selectedDriveFileManager = driveFileManager
+            }
+            selectedDirectory = selectedDriveFileManager.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
+        }
+
         closeBarButtonItem.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         tableView.separatorColor = .clear

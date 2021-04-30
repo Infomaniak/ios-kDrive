@@ -108,6 +108,12 @@ public class UploadQueue {
             guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
                 return
             }
+            
+            if file.realm == nil {
+                // Save drive and directory
+                UserDefaults.shared.lastSelectedDrive = file.driveId
+                UserDefaults.shared.lastSelectedDirectory = file.parentDirectoryId
+            }
 
             try? realm.safeWrite {
                 if file.realm == nil {

@@ -141,7 +141,7 @@ public class Drive: Object, Codable {
     @objc private dynamic var _users: DriveUsersCategories? = DriveUsersCategories()
     @objc public dynamic var userId: Int = 0 {
         didSet {
-            let objectId = "\(id)_\(userId)"
+            let objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
             self.objectId = objectId
             _preferences?.objectId = objectId
             packFunctionality?.objectId = objectId

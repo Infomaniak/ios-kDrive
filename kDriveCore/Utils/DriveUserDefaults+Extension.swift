@@ -39,6 +39,8 @@ extension UserDefaults {
         case sharingNotificationsEnabled
         case newCommentNotificationsEnabled
         case didDemoSwipe
+        case lastSelectedDrive
+        case lastSelectedDirectory
     }
 
     private func key(_ key: Keys) -> String {
@@ -195,6 +197,24 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.didDemoSwipe))
+        }
+    }
+
+    public var lastSelectedDrive: Int {
+        get {
+            return integer(forKey: key(.lastSelectedDrive))
+        }
+        set {
+            set(newValue, forKey: key(.lastSelectedDrive))
+        }
+    }
+
+    public var lastSelectedDirectory: Int {
+        get {
+            return integer(forKey: key(.lastSelectedDirectory))
+        }
+        set {
+            set(newValue, forKey: key(.lastSelectedDirectory))
         }
     }
 }
