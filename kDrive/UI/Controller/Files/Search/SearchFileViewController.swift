@@ -117,7 +117,7 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
                 let newChildren = sortedChildren + fetchedChildren
                 let changeset = getChangesetFor(newChildren: newChildren)
 
-                if fetchedChildren.isEmpty {
+                if newChildren.isEmpty {
                     let background = EmptyTableView.instantiate(type: .noSearchResults)
                     collectionView.backgroundView = background
                     headerView?.sortView.isHidden = true
