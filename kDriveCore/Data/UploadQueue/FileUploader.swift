@@ -246,7 +246,7 @@ public class FileUploader: Operation {
                 let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
 
                 //File is already or has parent in DB let's update it
-                BackgroundRealm.getQueue(for: driveFileManager.getRealm().configuration).execute { realm in
+                BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, using: realm) != nil || file.relativePath == "" {
                         let parent = driveFileManager.getCachedFile(id: file.parentDirectoryId, freeze: false, using: realm)
                         try? realm.safeWrite {
