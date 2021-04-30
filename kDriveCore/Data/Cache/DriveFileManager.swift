@@ -570,21 +570,23 @@ public class DriveFileManager {
 
     public func setLocalFiles(_ files: [File], root: File, completion: (() -> Void)? = nil) {
         backgroundQueue.async { [self] in
-            let realm = getRealm()
-            for file in files {
-                let safeFile = File(value: file)
-                keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true)
-                root.children.append(safeFile)
-                if let rights = file.rights {
-                    safeFile.rights = Rights(value: rights)
+            autoreleasepool {
+                let realm = getRealm()
+                for file in files {
+                    let safeFile = File(value: file)
+                    keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true)
+                    root.children.append(safeFile)
+                    if let rights = file.rights {
+                        safeFile.rights = Rights(value: rights)
+                    }
                 }
-            }
 
-            try? realm.safeWrite {
-                //Delete orphan files which are NOT root
-                deleteOrphanFiles(root: root)
+                try? realm.safeWrite {
+                    //Delete orphan files which are NOT root
+                    deleteOrphanFiles(root: root)
 
-                realm.add(root, update: .modified)
+                    realm.add(root, update: .modified)
+                }
             }
             completion?()
         }
@@ -1110,7 +1112,7 @@ public class DriveFileManager {
                 newFile.createdBy = savedChild.createdBy
                 newFile.path = savedChild.path
                 newFile.sizeWithVersion = savedChild.sizeWithVersion
-                newFile.users = savedChild.users
+                newFile.users = savedChild.users.freeze()
             }
             if keepRights {
                 newFile.rights = savedChild.rights
