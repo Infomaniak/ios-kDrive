@@ -20,162 +20,181 @@ import Foundation
 
 extension UserDefaults {
 
-    private static let keyCurrentDriveId = "currentDriveId"
-    private static let keyFileSortMode = "fileSortMode"
-    private static let keyFilesListStyle = "filesListStyle"
-    private static let keyCurrentDriveUserId = "currentDriveUserId"
-    private static let keyWifiOnly = "wifiOnly"
-    private static let keyRecentSearches = "recentSearches"
-    private static let keyNumberOfConnection = "numberOfConnection"
-    private static let keyAppLock = "appLock"
-    private static let keyUpdateLater = "updateLater"
-    private static let keyMigrated = "migrated"
-    private static let keyMigrationPhotoSyncEnabled = "migrationPhotoSyncEnabled"
-    private static let keyNotificationsEnabled = "notificationsEnabled"
-    private static let keyImportNotificationsEnabled = "importNotificationsEnabled"
-    private static let keySharingNotificationsEnabled = "sharingNotificationsEnabled"
-    private static let keyNewCommentNotificationsEnabled = "newCommentNotificationsEnabled"
-    private static let keyDidDemoSwipe = "didDemoSwipe"
+    public static let shared = UserDefaults(suiteName: AccountManager.appGroup)!
 
-    private static var appGroupDefaults = UserDefaults(suiteName: AccountManager.appGroup)!
-
-    public static func store(currentDriveId: String) {
-        appGroupDefaults.set(currentDriveId, forKey: keyCurrentDriveId)
+    private enum Keys: String {
+        case currentDriveId
+        case fileSortMode
+        case filesListStyle
+        case currentDriveUserId
+        case wifiOnly
+        case recentSearches
+        case numberOfConnection
+        case appLock
+        case updateLater
+        case migrated
+        case migrationPhotoSyncEnabled
+        case notificationsEnabled
+        case importNotificationsEnabled
+        case sharingNotificationsEnabled
+        case newCommentNotificationsEnabled
+        case didDemoSwipe
     }
 
-    public static func getCurrentDriveId() -> String {
-        return appGroupDefaults.string(forKey: keyCurrentDriveId) ?? ""
+    private func key(_ key: Keys) -> String {
+        return key.rawValue
     }
 
-    public static func store(sortMode: SortType) {
-        appGroupDefaults.set(sortMode.rawValue, forKey: keyFileSortMode)
-    }
-
-    public static func getSortMode() -> SortType {
-        return SortType(rawValue: appGroupDefaults.string(forKey: keyFileSortMode) ?? "") ?? .nameAZ
-    }
-
-    public static func store(listStyle: ListStyle) {
-        appGroupDefaults.set(listStyle.rawValue, forKey: keyFilesListStyle)
-    }
-
-    public static func getListStyle() -> ListStyle {
-        return ListStyle(rawValue: appGroupDefaults.string(forKey: keyFilesListStyle) ?? "") ?? .list
-    }
-
-    static func store(currentDriveUserId: Int) {
-        appGroupDefaults.set(currentDriveUserId, forKey: keyCurrentDriveUserId)
-    }
-
-    static func getCurrentDriveUserId() -> Int {
-        return appGroupDefaults.integer(forKey: keyCurrentDriveUserId)
-    }
-
-    public static func store(wifiOnly: Bool) {
-        appGroupDefaults.set(wifiOnly, forKey: keyWifiOnly)
-    }
-
-    public static func isWifiOnlyMode() -> Bool {
-        return appGroupDefaults.bool(forKey: keyWifiOnly)
-    }
-
-    public static func store(recentSearches: [String]) {
-        appGroupDefaults.set(recentSearches, forKey: keyRecentSearches)
-    }
-
-    public static func getRecentSearches() -> [String] {
-        return appGroupDefaults.stringArray(forKey: keyRecentSearches) ?? []
-    }
-
-    public static func store(numberOfConnection: Int) {
-        appGroupDefaults.set(numberOfConnection, forKey: keyNumberOfConnection)
-    }
-
-    public static func getNumberOfConnection() -> Int {
-        return appGroupDefaults.integer(forKey: keyNumberOfConnection)
-    }
-
-    public static func store(appLock: Bool) {
-        appGroupDefaults.set(appLock, forKey: keyAppLock)
-    }
-
-    public static func isAppLockMode() -> Bool {
-        return appGroupDefaults.bool(forKey: keyAppLock)
-    }
-
-    public static func store(updateLater: Bool) {
-        appGroupDefaults.set(updateLater, forKey: keyUpdateLater)
-    }
-
-    public static func updateLater() -> Bool {
-        return appGroupDefaults.bool(forKey: keyUpdateLater)
-    }
-
-    static func store(migrated: Bool) {
-        appGroupDefaults.set(migrated, forKey: keyMigrated)
-    }
-
-    static func migrated() -> Bool {
-        return appGroupDefaults.bool(forKey: keyMigrated)
-    }
-
-    static func store(migrationPhotoSyncEnabled: Bool) {
-        appGroupDefaults.set(migrationPhotoSyncEnabled, forKey: keyMigrationPhotoSyncEnabled)
-    }
-
-    static func wasPhotoSyncEnabledBeforeMigration() -> Bool {
-        return appGroupDefaults.bool(forKey: keyMigrationPhotoSyncEnabled)
-    }
-
-    public static func store(notificationsEnabled: Bool) {
-        appGroupDefaults.setValue(notificationsEnabled, forKey: keyNotificationsEnabled)
-    }
-
-    public static func notificationsEnabled() -> Bool {
-        if appGroupDefaults.object(forKey: keyNotificationsEnabled) == nil {
-            appGroupDefaults.setValue(true, forKey: keyNotificationsEnabled)
+    public var currentDriveId: String {
+        get {
+            return string(forKey: key(.currentDriveId)) ?? ""
         }
-        return appGroupDefaults.bool(forKey: keyNotificationsEnabled)
-    }
-
-    public static func store(importNotificationEnabled: Bool) {
-        appGroupDefaults.setValue(importNotificationEnabled, forKey: keyImportNotificationsEnabled)
-    }
-
-    public static func importNotificationsEnabled() -> Bool {
-        if appGroupDefaults.object(forKey: keyImportNotificationsEnabled) == nil {
-            appGroupDefaults.setValue(true, forKey: keyImportNotificationsEnabled)
+        set {
+            set(newValue, forKey: key(.currentDriveId))
         }
-        return appGroupDefaults.bool(forKey: keyImportNotificationsEnabled)
     }
 
-    public static func store(sharingNotificationEnabled: Bool) {
-        appGroupDefaults.setValue(sharingNotificationEnabled, forKey: keySharingNotificationsEnabled)
-    }
-
-    public static func sharingNotificationsEnabled() -> Bool {
-        if appGroupDefaults.object(forKey: keySharingNotificationsEnabled) == nil {
-            appGroupDefaults.setValue(true, forKey: keySharingNotificationsEnabled)
+    public var currentDriveUserId: Int {
+        get {
+            return integer(forKey: key(.currentDriveUserId))
         }
-        return appGroupDefaults.bool(forKey: keySharingNotificationsEnabled)
-    }
-
-    public static func store(newCommentNotificationEnabled: Bool) {
-        appGroupDefaults.setValue(newCommentNotificationEnabled, forKey: keyNewCommentNotificationsEnabled)
-    }
-
-    public static func newCommentNotificationsEnabled() -> Bool {
-        if appGroupDefaults.object(forKey: keyNewCommentNotificationsEnabled) == nil {
-            appGroupDefaults.setValue(true, forKey: keyNewCommentNotificationsEnabled)
+        set {
+            set(newValue, forKey: key(.currentDriveUserId))
         }
-        return appGroupDefaults.bool(forKey: keyNewCommentNotificationsEnabled)
     }
 
-    public static func store(didDemoSwipe: Bool) {
-        appGroupDefaults.setValue(didDemoSwipe, forKey: keyDidDemoSwipe)
+    public var sortType: SortType {
+        get {
+            return SortType(rawValue: string(forKey: key(.fileSortMode)) ?? "") ?? .nameAZ
+        }
+        set {
+            set(newValue.rawValue, forKey: key(.fileSortMode))
+        }
     }
 
-    public static func didDemoSwipe() -> Bool {
-        return appGroupDefaults.bool(forKey: keyDidDemoSwipe)
+    public var listStyle: ListStyle {
+        get {
+            return ListStyle(rawValue: string(forKey: key(.filesListStyle)) ?? "") ?? .list
+        }
+        set {
+            set(newValue.rawValue, forKey: key(.filesListStyle))
+        }
+    }
+
+    public var isWifiOnly: Bool {
+        get {
+            return bool(forKey: key(.wifiOnly))
+        }
+        set {
+            set(newValue, forKey: key(.wifiOnly))
+        }
+    }
+
+    public var recentSearches: [String] {
+        get {
+            return stringArray(forKey: key(.recentSearches)) ?? []
+        }
+        set {
+            set(newValue, forKey: key(.recentSearches))
+        }
+    }
+
+    public var numberOfConnections: Int {
+        get {
+            return integer(forKey: key(.numberOfConnection))
+        }
+        set {
+            set(newValue, forKey: key(.numberOfConnection))
+        }
+    }
+
+    public var isAppLockEnabled: Bool {
+        get {
+            return bool(forKey: key(.appLock))
+        }
+        set {
+            set(newValue, forKey: key(.appLock))
+        }
+    }
+
+    public var updateLater: Bool {
+        get {
+            return bool(forKey: key(.updateLater))
+        }
+        set {
+            set(newValue, forKey: key(.updateLater))
+        }
+    }
+
+    public var isMigrated: Bool {
+        get {
+            return bool(forKey: key(.migrated))
+        }
+        set {
+            set(newValue, forKey: key(.migrated))
+        }
+    }
+
+    public var wasPhotoSyncEnabledBeforeMigration: Bool {
+        get {
+            return bool(forKey: key(.migrationPhotoSyncEnabled))
+        }
+        set {
+            set(newValue, forKey: key(.migrationPhotoSyncEnabled))
+        }
+    }
+
+    public var isNotificationEnabled: Bool {
+        get {
+            return bool(forKey: key(.notificationsEnabled))
+        }
+        set {
+            set(newValue, forKey: key(.notificationsEnabled))
+        }
+    }
+
+    public var importNotificationsEnabled: Bool {
+        get {
+            if object(forKey: key(.importNotificationsEnabled)) == nil {
+                set(true, forKey: key(.importNotificationsEnabled))
+            }
+            return bool(forKey: key(.importNotificationsEnabled))
+        }
+        set {
+            set(newValue, forKey: key(.importNotificationsEnabled))
+        }
+    }
+
+    public var sharingNotificationsEnabled: Bool {
+        get {
+            if object(forKey: key(.sharingNotificationsEnabled)) == nil {
+                set(true, forKey: key(.sharingNotificationsEnabled))
+            }
+            return bool(forKey: key(.sharingNotificationsEnabled))
+        }
+        set {
+            set(newValue, forKey: key(.sharingNotificationsEnabled))
+        }
+    }
+
+    public var newCommentNotificationsEnabled: Bool {
+        get {
+            if object(forKey: key(.newCommentNotificationsEnabled)) == nil {
+                set(true, forKey: key(.newCommentNotificationsEnabled))
+            }
+            return bool(forKey: key(.newCommentNotificationsEnabled))
+        }
+        set {
+            set(newValue, forKey: key(.newCommentNotificationsEnabled))
+        }
+    }
+
+    public var didDemoSwipe: Bool {
+        get {
+            return bool(forKey: key(.didDemoSwipe))
+        }
+        set {
+            set(newValue, forKey: key(.didDemoSwipe))
+        }
     }
 }

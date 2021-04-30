@@ -54,10 +54,10 @@ class NotificationsSettingsTableViewController: UITableViewController {
         case .receiveNotification:
             cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationReceiveNotifications
-            cell.valueSwitch.isOn = UserDefaults.notificationsEnabled()
+            cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
             cell.switchDelegate = { sender in
-                UserDefaults.store(notificationsEnabled: sender.isOn)
-                if UserDefaults.notificationsEnabled() {
+                UserDefaults.shared.isNotificationEnabled = sender.isOn
+                if UserDefaults.shared.isNotificationEnabled {
                     tableView.reloadRows(at: [IndexPath(row: 1, section: 0), IndexPath(row: 2, section: 0), IndexPath(row: 3, section: 0)], with: .none)
                 } else {
                     tableView.reloadRows(at: [IndexPath(row: 1, section: 0), IndexPath(row: 2, section: 0), IndexPath(row: 3, section: 0)], with: .none)
@@ -67,26 +67,26 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationFileUpload
             cell.separator?.isHidden = true
-            cell.valueSwitch.isOn = UserDefaults.importNotificationsEnabled()
+            cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
             cell.switchDelegate = { [self] sender in
-                UserDefaults.store(importNotificationEnabled: sender.isOn)
+                UserDefaults.shared.importNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
         case .sharedWithMe:
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationSharedWithMeChannelName
             cell.separator?.isHidden = true
-            cell.valueSwitch.isOn = UserDefaults.sharingNotificationsEnabled()
+            cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
             cell.switchDelegate = { [self] sender in
-                UserDefaults.store(sharingNotificationEnabled: sender.isOn)
+                UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
         case .newComments:
             cell.initWithPositionAndShadow(isLast: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationCommentChannelName
-            cell.valueSwitch.isOn = UserDefaults.newCommentNotificationsEnabled()
+            cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
             cell.switchDelegate = { [self] sender in
-                UserDefaults.store(newCommentNotificationEnabled: sender.isOn)
+                UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
         }
@@ -94,13 +94,13 @@ class NotificationsSettingsTableViewController: UITableViewController {
     }
 
     private func updateSwitchViews() {
-        if !UserDefaults.importNotificationsEnabled() && !UserDefaults.sharingNotificationsEnabled() && !UserDefaults.newCommentNotificationsEnabled() {
-            UserDefaults.store(notificationsEnabled: false)
+        if !UserDefaults.shared.importNotificationsEnabled && !UserDefaults.shared.sharingNotificationsEnabled && !UserDefaults.shared.newCommentNotificationsEnabled {
+            UserDefaults.shared.isNotificationEnabled = false
             tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             return
         }
-        if UserDefaults.importNotificationsEnabled() || UserDefaults.sharingNotificationsEnabled() || UserDefaults.newCommentNotificationsEnabled() {
-            UserDefaults.store(notificationsEnabled: true)
+        if UserDefaults.shared.importNotificationsEnabled || UserDefaults.shared.sharingNotificationsEnabled || UserDefaults.shared.newCommentNotificationsEnabled {
+            UserDefaults.shared.isNotificationEnabled = true
             tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             return
         }

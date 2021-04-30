@@ -104,7 +104,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         }
 
         if sortType == nil {
-            sortType = UserDefaults.getSortMode()
+            sortType = UserDefaults.shared.sortType
         }
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
@@ -312,12 +312,12 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
                         navigationItem.rightBarButtonItem = selectAllBarButtonItem
                     }*/
                     // Demo swipe action
-                    if !UserDefaults.didDemoSwipe() && sortedChildren.count > 0 {
+                    if !UserDefaults.shared.didDemoSwipe && sortedChildren.count > 0 {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             let row = min(sortedChildren.count, 2)
                             (collectionView as? SwipableCollectionView)?.simulateSwipe(at: IndexPath(item: row, section: 0))
                         }
-                        UserDefaults.store(didDemoSwipe: true)
+                        UserDefaults.shared.didDemoSwipe = true
                     }
                 }
             } else {
@@ -784,7 +784,7 @@ extension FileListCollectionViewController: FilesHeaderViewDelegate, SortOptions
         sortType = type
         headerView?.sortButton.setTitle(sortType.value.translation, for: .normal)
         if !trashSort {
-            UserDefaults.store(sortMode: sortType)
+            UserDefaults.shared.sortType = sortType
         }
         sortedChildren = [File]()
         collectionView.reloadData()

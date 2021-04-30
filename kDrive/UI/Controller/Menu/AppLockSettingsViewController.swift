@@ -49,7 +49,7 @@ class AppLockSettingsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        faceIdSwitch.setOn(UserDefaults.isAppLockMode(), animated: false)
+        faceIdSwitch.setOn(UserDefaults.shared.isAppLockEnabled, animated: false)
     }
 
     @IBAction func buttonCloseClicked(_ sender: UIButton) {
@@ -65,7 +65,7 @@ class AppLockSettingsViewController: UIViewController {
                 context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, evaluateError in
                     DispatchQueue.main.async {
                         if success {
-                            UserDefaults.store(appLock: sender.isOn)
+                            UserDefaults.shared.isAppLockEnabled = sender.isOn
                         } else {
                             sender.setOn(!sender.isOn, animated: true)
                         }

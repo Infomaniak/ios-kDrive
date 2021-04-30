@@ -85,8 +85,8 @@ public class MigrationHelper {
             }
 
             let photoSyncEnabled = isPhotoSyncEnabled()
-            UserDefaults.store(migrated: true)
-            UserDefaults.store(migrationPhotoSyncEnabled: photoSyncEnabled)
+            UserDefaults.shared.isMigrated = true
+            UserDefaults.shared.wasPhotoSyncEnabledBeforeMigration = photoSyncEnabled
             completion(MigrationResult(success: true, error: nil, photoSyncEnabled: photoSyncEnabled))
         }
     }

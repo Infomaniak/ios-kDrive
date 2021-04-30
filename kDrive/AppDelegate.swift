@@ -149,7 +149,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             */
             scheduleBackgroundRefresh()
         }
-        if UserDefaults.isAppLockMode() && !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
+        if UserDefaults.shared.isAppLockEnabled && !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             AppLockHelper.shared.setTime()
         }
     }
@@ -209,24 +209,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 window?.rootViewController = OnboardingViewController.instantiate()
                 window?.makeKeyAndVisible()
             }
-        } else if UserDefaults.isAppLockMode() && AppLockHelper.shared.isAppLocked {
+        } else if UserDefaults.shared.isAppLockEnabled && AppLockHelper.shared.isAppLocked {
             window?.rootViewController = LockedAppViewController.instantiate()
             window?.makeKeyAndVisible()
         } else {
-            let numberOfConnection = UserDefaults.getNumberOfConnection() + 1
-            UserDefaults.store(numberOfConnection: numberOfConnection)
+            UserDefaults.shared.numberOfConnections += 1
             var appVersion = AppVersion()
             appVersion.loadVersionData(handler: { [self] (version) in
                 appVersion.version = version.version
                 appVersion.currentVersionReleaseDate = version.currentVersionReleaseDate
 
                 if appVersion.showUpdateFloatingPanel() {
-                    if !UserDefaults.updateLater() || numberOfConnection % 10 == 0 {
+                    if !UserDefaults.shared.updateLater || UserDefaults.shared.numberOfConnections % 10 == 0 {
                         let floatingPanelViewController = UpdateFloatingPanelViewController.instantiatePanel()
                         (floatingPanelViewController.contentViewController as? UpdateFloatingPanelViewController)?.actionHandler = {
                             sender in
                             if let url = URL(string: "https://apps.apple.com/app/infomaniak-kdrive/id1482778676") {
-                                UserDefaults.store(updateLater: false)
+                                UserDefaults.shared.updateLater = false
                                 UIApplication.shared.open(url)
                             }
                         }
@@ -234,7 +233,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                     }
                 }
             })
-            if numberOfConnection == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
+            if UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
                 let floatingPanelViewController = SavePhotosFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? SavePhotosFloatingPanelViewController)?.actionHandler = { [self] sender in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
@@ -371,7 +370,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 
     private func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
-        guard status != .offline && (!UserDefaults.isWifiOnlyMode() || status == .wifi) else {
+        guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
             return
         }
 

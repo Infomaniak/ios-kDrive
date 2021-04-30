@@ -36,7 +36,7 @@ class UpdateFloatingPanelViewController: InformationFloatingPanelViewController 
 
     override func leftButtonPressed(_ sender: UIButton) {
         super.leftButtonPressed(sender)
-        UserDefaults.store(updateLater: true)
+        UserDefaults.shared.updateLater = true
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {

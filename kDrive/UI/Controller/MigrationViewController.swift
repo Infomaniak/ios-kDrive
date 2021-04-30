@@ -85,7 +85,7 @@ class MigrationViewController: UIViewController {
         MigrationHelper.cleanup()
         if migrationResult?.success == true {
             UserDefaults.store(firstLaunch: false)
-            UserDefaults.store(numberOfConnection: 1)
+            UserDefaults.shared.numberOfConnections = 1
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate(), animated: true)
             if migrationResult?.photoSyncEnabled == true {
                 let mainTabViewController = MainTabViewController.instantiate()

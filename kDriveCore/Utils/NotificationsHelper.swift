@@ -31,20 +31,20 @@ public class NotificationsHelper {
     public static let generalCategoryId = "com.kdrive.notification.general"
     private static let migrateNotificationId = "migrate"
 
-    public static func notificationsEnabled() -> Bool {
-        return UserDefaults.notificationsEnabled()
+    public static var isNotificationEnabled: Bool {
+        return UserDefaults.shared.isNotificationEnabled
     }
 
-    public static func importNotificationsEnabled() -> Bool {
-        return notificationsEnabled() && UserDefaults.importNotificationsEnabled()
+    public static var importNotificationsEnabled: Bool {
+        return isNotificationEnabled && UserDefaults.shared.importNotificationsEnabled
     }
 
-    public static func sharingNotificationsEnabled() -> Bool {
-        return notificationsEnabled() && UserDefaults.sharingNotificationsEnabled()
+    public static var sharingNotificationsEnabled: Bool {
+        return isNotificationEnabled && UserDefaults.shared.sharingNotificationsEnabled
     }
 
-    public static func newCommentNotificationsEnabled() -> Bool {
-        return notificationsEnabled() && UserDefaults.newCommentNotificationsEnabled()
+    public static var newCommentNotificationsEnabled: Bool {
+        return isNotificationEnabled && UserDefaults.shared.newCommentNotificationsEnabled
     }
 
     public static func askForPermissions() {
@@ -128,7 +128,7 @@ public class NotificationsHelper {
     }
 
     private static func sendImmediately(notification: UNMutableNotificationContent, id: String) {
-        if notification.categoryIdentifier == uploadCategoryId && !NotificationsHelper.importNotificationsEnabled() {
+        if notification.categoryIdentifier == uploadCategoryId && !NotificationsHelper.importNotificationsEnabled {
             return
         }
 
