@@ -101,6 +101,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         dropDown.show()
         if let searchText = textField.text {
             filterContent(for: searchText)
+            dropDown.show()
         }
     }
 
