@@ -796,11 +796,11 @@ public class DriveFileManager {
         let fileId = file.id
         apiFetcher.deleteFile(file: file) { (response, error) in
             if error == nil {
+                file.signalChanges()
                 self.backgroundQueue.async { [self] in
                     let localRealm = getRealm()
                     removeFileInDatabase(fileId: fileId, cascade: false, withTransaction: true, using: localRealm)
                     DispatchQueue.main.async {
-                        file.signalChanges()
                         completion(response?.data, error)
                     }
                     deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)
