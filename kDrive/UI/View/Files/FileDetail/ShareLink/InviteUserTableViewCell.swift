@@ -98,11 +98,10 @@ class InviteUserTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func editingDidChanged(_ sender: UITextField) {
-        dropDown.show()
         if let searchText = textField.text {
             filterContent(for: searchText)
-            dropDown.show()
         }
+        dropDown.show()
     }
 
     private func filterContent(for text: String) {
