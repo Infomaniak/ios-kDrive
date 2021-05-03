@@ -17,35 +17,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import Foundation
-import kDriveCore
-import RealmSwift
 
 @testable import kDrive
 
-class Env {
-    static var token: String {
-        return ""
-    }
+struct Env {
+    // Set your token here
+    static let token = "<token>"
 
     // Drive de test dev infomaniak
-    static var driveId: Int {
-        return 140946
-    }
+    static let driveId = 140946
 
-    static var userId: Int {
-        return 0
-    }
+    // Set your user ID here
+    static let userId = 0
 
-    static var inviteUserId: Int {
-        return 0
-    }
+    // Set the user ID to invite
+    static let inviteUserId = 0
 
-    static var inviteMail: String {
-        return ""
-    }
+    // Set the email to invite
+    static let inviteMail = "email@example.com"
 
-    static var commonDocumentsId: Int {
-        return 3
-    }
+    static let commonDocumentsId = 3
 
 }
