@@ -215,7 +215,7 @@ public class UploadOperation: Operation {
         }
     }
 
-    public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
+    func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         guard file.error != .taskExpirationCancelled && file.error != .taskRescheduled else {
             return
         }
