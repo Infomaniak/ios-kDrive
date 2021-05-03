@@ -406,7 +406,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         if identifier == DownloadQueue.downloadQueueIdentifier {
             DownloadQueue.instance.backgroundCompletionHandler = completionHandler
-        } else if identifier == UploadQueue.uploadQueueIdentifier {
+        } else if identifier == UploadQueue.backgroundIdentifier {
             BackgroundSessionManager.instance.backgroundCompletionHandler = completionHandler
         } else {
             completionHandler()

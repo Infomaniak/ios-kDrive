@@ -40,11 +40,11 @@ public class BackgroundSessionManager: NSObject, URLSessionDataDelegate, FileUpl
     private var tasksCompletionHandler: [Int: CompletionHandler] = [:]
     private var tasksData: [Int: Data] = [:]
     private var progressObservers: [Int: NSKeyValueObservation] = [:]
-    private var operations = [FileUploader]()
+    private var operations = [UploadOperation]()
 
     private override init() {
         super.init()
-        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: UploadQueue.uploadQueueIdentifier)
+        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: UploadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
         backgroundUrlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         backgroundUrlSessionConfiguration.allowsCellularAccess = true
@@ -117,7 +117,7 @@ public class BackgroundSessionManager: NSObject, URLSessionDataDelegate, FileUpl
             let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
             .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
 
-            let operation = FileUploader(file: file, task: task, urlSession: self)
+            let operation = UploadOperation(file: file, task: task, urlSession: self)
             tasksCompletionHandler[task.taskIdentifier] = operation.uploadCompletion
             operations.append(operation)
             return operation.uploadCompletion
