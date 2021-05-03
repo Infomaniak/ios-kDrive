@@ -476,14 +476,16 @@ extension File: Differentiable {
     }
 
     public func isContentEqual(to source: File) -> Bool {
-        return lastModifiedAt == source.lastModifiedAt
-            && nameNaturalSorting == source.nameNaturalSorting
-            && isFavorite == source.isFavorite
-            && isAvailableOffline == source.isAvailableOffline
-            && isFirstInCollection == source.isFirstInCollection
-            && isLastInCollection == source.isLastInCollection
-            && visibility == source.visibility
-            && shareLink == source.shareLink
-            && rights.isContentEqual(to: source.rights)
+        autoreleasepool {
+            return lastModifiedAt == source.lastModifiedAt
+                && nameNaturalSorting == source.nameNaturalSorting
+                && isFavorite == source.isFavorite
+                && isAvailableOffline == source.isAvailableOffline
+                && isFirstInCollection == source.isFirstInCollection
+                && isLastInCollection == source.isLastInCollection
+                && visibility == source.visibility
+                && shareLink == source.shareLink
+                && rights.isContentEqual(to: source.rights)
+        }
     }
 }
