@@ -46,11 +46,17 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     var currentDirectory: File!
     var realFiles = [File]()
     var currentPage = 0
-    var sortType: SortType!
+    var sortType: SortType! {
+        didSet {
+            if sortType != nil {
+                headerView?.sortButton.setTitle(sortType.value.translation, for: .normal)
+            }
+        }
+    }
     var sortedChildren = [File]()
     var selectedItems = [File]()
     var uploadingFilesCount: Int = 0
-    var listStyle = ListStyleManager.instance.currentStyle {
+    var listStyle = FileListOptions.instance.currentStyle {
         didSet {
             headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         }
@@ -132,7 +138,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         }
         observeFileUpdated()
         observeNetworkChange()
-        observeListStyleChange()
+        observeOptions()
 
         fetchNextPage()
     }
@@ -205,9 +211,14 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         }
     }
 
-    func observeListStyleChange() {
-        ListStyleManager.instance.observeListStyleChange(self) { [unowned self] (newStyle) in
+    func observeOptions() {
+        FileListOptions.instance.observeListStyleChange(self) { [unowned self] (newStyle) in
             self.listStyle = newStyle
+            self.collectionView.reloadData()
+        }
+
+        FileListOptions.instance.observeSortTypeChange(self) { [unowned self] (newSortType) in
+            self.sortType = newSortType
             self.collectionView.reloadData()
         }
     }
@@ -782,9 +793,8 @@ extension FileListCollectionViewController: FilesHeaderViewDelegate, SortOptions
 
     func didClickOnSortingOption(type: SortType) {
         sortType = type
-        headerView?.sortButton.setTitle(sortType.value.translation, for: .normal)
         if !trashSort {
-            UserDefaults.shared.sortType = sortType
+            FileListOptions.instance.currentSortType = sortType
         }
         sortedChildren = [File]()
         collectionView.reloadData()
@@ -798,7 +808,7 @@ extension FileListCollectionViewController: FilesHeaderViewDelegate, SortOptions
         } else {
             listStyle = .grid
         }
-        ListStyleManager.instance.currentStyle = listStyle
+        FileListOptions.instance.currentStyle = listStyle
 
         UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
             self.collectionViewLayout.invalidateLayout()
