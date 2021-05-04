@@ -43,7 +43,7 @@ public class BackgroundDownloadSessionManager: NSObject, URLSessionDownloadDeleg
 
     private override init() {
         super.init()
-        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue.downloadQueueIdentifier)
+        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue2.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
         backgroundUrlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup

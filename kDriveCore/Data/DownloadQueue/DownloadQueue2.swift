@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import Foundation
+import FileProvider
 
 public class DownloadQueue2 {
 
@@ -25,7 +26,7 @@ public class DownloadQueue2 {
     public static let instance = DownloadQueue2()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
 
-    private(set) var operationsInQueue: [Int: DownloadOperation] = [:]
+    private(set) public var operationsInQueue: [Int: DownloadOperation] = [:]
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive download queue"
@@ -47,14 +48,14 @@ public class DownloadQueue2 {
 
     // MARK: - Public methods
 
-    public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId) {
+    public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         guard !file.isInvalidated && operationsInQueue[file.id] == nil,
             let drive = AccountManager.instance.getDrive(for: userId, driveId: file.driveId),
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
             return
         }
 
-        let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: BackgroundDownloadSessionManager.instance)
+        let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: BackgroundDownloadSessionManager.instance, itemIdentifier: itemIdentifier)
         operation.completionBlock = { [fileId = file.id] in
             self.operationsInQueue.removeValue(forKey: fileId)
             self.publishFileDownloaded(fileId: fileId, error: operation.error)

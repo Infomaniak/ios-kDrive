@@ -472,10 +472,10 @@ public class DriveFileManager {
                 //Already up to date, not downloading
                 completion(file, nil)
             } else {
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+                DownloadQueue2.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
                     completion(file, error)
                 }
-                DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
+                DownloadQueue2.instance.addToQueue(file: file, userId: drive.userId)
             }
 
         }
@@ -504,12 +504,12 @@ public class DriveFileManager {
                     completion(error)
                 }
             } else {
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+                DownloadQueue2.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
                     DispatchQueue.main.async {
                         completion(error)
                     }
                 }
-                DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
+                DownloadQueue2.instance.addToQueue(file: file, userId: drive.userId)
             }
         } else {
             updateFileProperty(fileId: fileId, using: realm) { (file) in

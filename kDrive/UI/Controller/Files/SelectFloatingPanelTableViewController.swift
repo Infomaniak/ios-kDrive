@@ -132,7 +132,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     downloadInProgress = true
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                     group.enter()
-                    DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                    DownloadQueue2.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
                         if error != nil {
                             success = false
                         }
@@ -141,7 +141,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                         }
                         group.leave()
                     }
-                    DownloadQueue.instance.addToQueue(file: file)
+                    DownloadQueue2.instance.addToQueue(file: file)
                 }
             }
         default:

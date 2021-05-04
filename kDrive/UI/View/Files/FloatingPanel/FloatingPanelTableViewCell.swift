@@ -86,7 +86,7 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
             accessoryImageView.tintColor = KDriveAsset.iconColor.color
         }
 
-        observationToken = DownloadQueue.instance.observeFileDownloadedProgress(self, fileId: file.id) { [unowned self] (_, progress) in
+        observationToken = DownloadQueue2.instance.observeFileDownloadProgress(self, fileId: file.id) { [unowned self] (_, progress) in
             let downloadProgress = CGFloat(progress) / 100
             DispatchQueue.main.async {
                 setProgress(downloadProgress)

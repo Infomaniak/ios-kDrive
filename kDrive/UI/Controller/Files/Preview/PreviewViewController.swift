@@ -38,7 +38,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var fromActivities = false
     private var centerIndexPathBeforeRotate: IndexPath?
     private var currentIndex = IndexPath(row: 0, section: 0)
-    private var currentDownloadTask: DownloadTask?
+    private var currentDownloadOperation: DownloadOperation?
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
     private var titleHeightConstraint: NSLayoutConstraint?
@@ -203,7 +203,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         //floatingPanelViewController.move(to: .hidden, animated: true)
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
-        currentDownloadTask?.cancel()
+        currentDownloadOperation?.cancel()
         navigationController?.interactivePopGestureRecognizer?.delegate = nil
 
         UIApplication.shared.endReceivingRemoteControlEvents()
@@ -362,10 +362,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 SentrySDK.capture(message: "Got a file that doesn't exist in Realm in PreviewViewController!")
             }
         }
-        currentDownloadTask?.cancel()
-        currentDownloadTask = nil
+        currentDownloadOperation?.cancel()
+        currentDownloadOperation = nil
         if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
-            currentDownloadTask = DownloadQueue.instance.temporaryDownloadFile(file: currentFile) { (error) in
+            currentDownloadOperation = DownloadQueue2.instance.temporaryDownload(file: currentFile) { (error) in
                 DispatchQueue.main.async { [weak self] in
                     if self?.view.window != nil && error == nil {
                         (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
@@ -373,12 +373,12 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                         self?.updateNavigationBar()
                     } else if let error = error {
                         if error != .taskCancelled {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
+                            UIConstants.showSnackBar(message: error.localizedDescription)
                         }
                     }
                 }
             }
-            if let progress = currentDownloadTask?.task?.progress,
+            if let progress = currentDownloadOperation?.task?.progress,
                 let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
                 cell.setDownloadProgress(progress)
             }
@@ -465,9 +465,9 @@ extension PreviewViewController: UICollectionViewDataSource {
         if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             cell.parentViewController = self
-            if let downloadTask = currentDownloadTask,
-                let progress = downloadTask.task?.progress,
-                downloadTask.fileId == file.id {
+            if let downloadOperation = currentDownloadOperation,
+                let progress = downloadOperation.task?.progress,
+                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
             cell.addGestureRecognizer(tap)
@@ -480,9 +480,9 @@ extension PreviewViewController: UICollectionViewDataSource {
         } else {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file)
-            if let downloadTask = currentDownloadTask,
-                let progress = downloadTask.task?.progress,
-                downloadTask.fileId == file.id {
+            if let downloadOperation = currentDownloadOperation,
+                let progress = downloadOperation.task?.progress,
+                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
             let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))

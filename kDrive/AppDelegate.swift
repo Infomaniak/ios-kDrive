@@ -395,7 +395,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                         try? driveFileManager.renameCachedFile(updatedFile: newFile, oldFile: file)
                         if newFile.isLocalVersionOlderThanRemote() {
                             // Download new version
-                            DownloadQueue.instance.addToQueue(file: newFile, userId: driveFileManager.drive.userId)
+                            DownloadQueue2.instance.addToQueue(file: newFile, userId: driveFileManager.drive.userId)
                         }
                     }
                 }
@@ -404,8 +404,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
-        if identifier == DownloadQueue.downloadQueueIdentifier {
-            DownloadQueue.instance.backgroundCompletionHandler = completionHandler
+        if identifier == DownloadQueue2.backgroundIdentifier {
+            BackgroundDownloadSessionManager.instance.backgroundCompletionHandler = completionHandler
         } else if identifier == UploadQueue.backgroundIdentifier {
             BackgroundSessionManager.instance.backgroundCompletionHandler = completionHandler
         } else {

@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import Foundation
+import FileProvider
 import CocoaLumberjackSwift
 
 public class DownloadOperation: Operation {
@@ -26,6 +27,7 @@ public class DownloadOperation: Operation {
     private let file: File
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
+    private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
 
     public var task: URLSessionDownloadTask?
@@ -67,10 +69,11 @@ public class DownloadOperation: Operation {
 
     // MARK: - Public methods
 
-    public init(file: File, driveFileManager: DriveFileManager, urlSession: FileDownloadSession) {
+    public init(file: File, driveFileManager: DriveFileManager, urlSession: FileDownloadSession, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         self.file = File(value: file)
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
+        self.itemIdentifier = itemIdentifier
     }
 
     public init(file: File, driveFileManager: DriveFileManager, task: URLSessionDownloadTask, urlSession: FileDownloadSession) {
@@ -78,6 +81,7 @@ public class DownloadOperation: Operation {
         self.driveFileManager = driveFileManager
         self.urlSession = urlSession
         self.task = task
+        self.itemIdentifier = nil
     }
 
     public override func start() {
@@ -122,6 +126,9 @@ public class DownloadOperation: Operation {
                         }
                         DownloadQueue2.instance.publishProgress(newValue, for: fileId)
                     })
+                    if let itemIdentifier = itemIdentifier {
+                        NSFileProviderManager.default.register(task!, forItemWithIdentifier: itemIdentifier) { _ in }
+                    }
                     task?.resume()
                 } else {
                     self.error = .localError // Other error?
