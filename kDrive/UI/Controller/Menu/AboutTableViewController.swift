@@ -29,7 +29,7 @@ class AboutTableViewController: UITableViewController {
             case .privacy:
                 link = "https://infomaniak.com/gtl/rgpd"
             case .sourceCode:
-                link = "https://github.com/Infomaniak/ios-drive"
+                link = "https://github.com/Infomaniak/ios-kDrive"
             case .license:
                 link = "https://www.gnu.org/licenses/gpl-3.0.html"
             default:
