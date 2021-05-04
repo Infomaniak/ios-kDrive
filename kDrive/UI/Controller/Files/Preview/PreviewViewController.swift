@@ -191,6 +191,22 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             } else {
                 floatingPanelViewController.move(to: .tip, animated: true)
             }
+            if let _ = (collectionView.cellForItem(at: currentIndex) as? OfficePreviewCollectionViewCell) {
+                DispatchQueue.main.async {
+                    Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { timer in
+                        self.driveFileManager.getFile(id: self.currentFile.id, withExtras: true, forceRefresh: true) { file, _, error in
+                            if let file = file {
+                                file.realm?.refresh()
+                                self.currentFile = file
+                                self.downloadFileAtIndexIfNeeded(at: self.currentIndex)
+                                if self.currentFile.isLocalVersionOlderThanRemote() {
+                                    timer.invalidate()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         initialLoading = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
