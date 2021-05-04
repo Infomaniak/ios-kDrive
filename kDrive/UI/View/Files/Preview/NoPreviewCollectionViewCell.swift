@@ -51,4 +51,8 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
         subtitleLabel.text = KDriveStrings.Localizable.previewDownloadIndication
     }
 
+    func errorDownloading() {
+        progressView.isHidden = true
+        subtitleLabel.text = KDriveStrings.Localizable.errorDownload
+    }
 }
