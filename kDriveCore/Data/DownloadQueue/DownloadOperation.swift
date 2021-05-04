@@ -162,7 +162,7 @@ public class DownloadOperation: Operation {
             }
         } else if let url = url {
             // Success
-            DDLogError("[DownloadOperation] Download of \(file.id) successful")
+            DDLogInfo("[DownloadOperation] Download of \(file.id) successful")
             do {
                 if FileManager.default.fileExists(atPath: file.localUrl.path) {
                     try? FileManager.default.removeItem(at: file.localUrl)
@@ -183,7 +183,7 @@ public class DownloadOperation: Operation {
     }
 
     private func end(sessionUrl: URL?) {
-        DDLogError("[DownloadOperation] Download of \(file.id) ended")
+        DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
         // Delete download task
         if let sessionUrl = sessionUrl {
             BackgroundRealm.uploads.execute { realm in
