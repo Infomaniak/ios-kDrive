@@ -51,6 +51,20 @@ class PhotoListViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        navigationController?.setInfomaniakAppearanceNavigationBar()
+        navigationItem.title = KDriveStrings.Localizable.allPictures
+        if #available(iOS 13.0, *) {
+            let navigationAppearance = UINavigationBarAppearance()
+            navigationAppearance.configureWithTransparentBackground()
+            navigationAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+            navigationAppearance.backgroundImage = generateGradient()
+            navigationItem.standardAppearance = navigationAppearance
+            navigationItem.compactAppearance = navigationAppearance
+            updateNavBarMode()
+        }
+        navigationController?.navigationBar.isTranslucent = true
+
         updateNavBarMode()
     }
 
@@ -66,18 +80,6 @@ class PhotoListViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: footerIdentifier)
-
-        navigationController?.setInfomaniakAppearanceNavigationBar()
-        navigationItem.title = KDriveStrings.Localizable.allPictures
-        if #available(iOS 13.0, *) {
-            let navigationAppearance = UINavigationBarAppearance()
-            navigationAppearance.configureWithTransparentBackground()
-            navigationAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-            navigationAppearance.backgroundImage = generateGradient()
-            navigationItem.standardAppearance = navigationAppearance
-            navigationItem.compactAppearance = navigationAppearance
-            updateNavBarMode()
-        }
 
         fetchNextPage()
     }
