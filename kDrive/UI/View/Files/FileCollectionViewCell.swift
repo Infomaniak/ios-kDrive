@@ -183,7 +183,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
                 DispatchQueue.main.async { [weak self] in
                     self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
                     self?.downloadProgressView?.updateProgress(CGFloat(progress))
-                    self?.availableOfflineImageView.isHidden = !file.isAvailableOffline || progress < 1
+                    self?.availableOfflineImageView?.isHidden = !file.isAvailableOffline || progress < 1
                 }
             }
         }
