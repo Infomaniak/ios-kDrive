@@ -482,29 +482,33 @@ public class DriveFileManager {
     }
 
     public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
-        let fileId = file.id
         let realm = getRealm()
+        guard let file = getCachedFile(id: file.id, freeze: false, using: realm) else {
+            completion(DriveError.fileNotFound)
+            return
+        }
+        
         if available {
-            updateFileProperty(fileId: fileId, using: realm) { (file) in
+            try? realm.safeWrite {
                 file.isAvailableOffline = true
             }
 
             if !file.isLocalVersionOlderThanRemote() {
                 do {
-                    if let updatedFile = getCachedFile(id: fileId, freeze: false) {
-                        try fileManager.createDirectory(at: updatedFile.localContainerUrl, withIntermediateDirectories: true)
-                        try fileManager.moveItem(at: file.localUrl, to: updatedFile.localUrl)
-                        notifyObserversWith(file: updatedFile)
-                    }
+                    try fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
+                    try fileManager.moveItem(at: file.localUrl, to: file.localUrl)
+                    notifyObserversWith(file: file)
                     completion(nil)
                 } catch {
-                    updateFileProperty(fileId: fileId, using: realm) { (file) in
+                    try? realm.safeWrite {
                         file.isAvailableOffline = false
                     }
                     completion(error)
                 }
             } else {
+                let safeFile = file.freeze()
                 DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+                    self.notifyObserversWith(file: safeFile)
                     DispatchQueue.main.async {
                         completion(error)
                     }
@@ -512,15 +516,15 @@ public class DriveFileManager {
                 DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
             }
         } else {
-            updateFileProperty(fileId: fileId, using: realm) { (file) in
+            let oldUrl = file.localUrl
+            try? realm.safeWrite {
                 file.isAvailableOffline = false
             }
-            if let updatedFile = getCachedFile(id: fileId, freeze: false, using: realm) {
-                try? fileManager.createDirectory(at: updatedFile.localContainerUrl, withIntermediateDirectories: true)
-                try? fileManager.moveItem(at: file.localUrl, to: updatedFile.localUrl)
-                notifyObserversWith(file: updatedFile)
-            }
-            try? fileManager.removeItem(at: file.localContainerUrl)
+            try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
+            try? fileManager.moveItem(at: file.localUrl, to: file.localUrl)
+            notifyObserversWith(file: file)
+            
+            try? fileManager.removeItem(at: oldUrl)
             completion(nil)
         }
     }
