@@ -86,11 +86,11 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
             accessoryImageView.tintColor = KDriveAsset.iconColor.color
         }
 
-        observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [unowned self] (_, progress) in
-            DispatchQueue.main.async {
-                setProgress(CGFloat(progress))
+        observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { (_, progress) in
+            DispatchQueue.main.async { [weak self] in
+                self?.setProgress(CGFloat(progress))
                 if progress >= 1 {
-                    configureAvailableOffline(with: file, progress: nil)
+                    self?.configureAvailableOffline(with: file, progress: nil)
                 }
             }
         }
