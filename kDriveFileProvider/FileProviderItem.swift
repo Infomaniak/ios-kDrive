@@ -94,7 +94,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         self.versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
         self.isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote()
         let storageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
-        if DownloadQueue.instance.getDownloadTaskFor(fileId: file.id) != nil {
+        if DownloadQueue.instance.operationsInQueue[file.id] != nil {
             self.isDownloading = true
             self.isDownloaded = false
         } else {

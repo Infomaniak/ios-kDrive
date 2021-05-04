@@ -50,12 +50,12 @@ public class UploadTokenManager {
     }
 }
 
-public struct FileUploadCompletionResult {
+public struct UploadCompletionResult {
     var uploadFile: UploadFile!
     var driveFile: File? = nil
 }
 
-public class FileUploader: Operation {
+public class UploadOperation: Operation {
 
     // MARK: - Attributes
 
@@ -66,7 +66,7 @@ public class FileUploader: Operation {
     private var task: URLSessionUploadTask?
     private var progressObservation: NSKeyValueObservation?
 
-    public var result: FileUploadCompletionResult
+    public var result: UploadCompletionResult
 
     private var _executing = false {
         willSet {
@@ -103,7 +103,7 @@ public class FileUploader: Operation {
     public init(file: UploadFile, urlSession: FileUploadSession = URLSession.shared) {
         self.file = UploadFile(value: file)
         self.urlSession = urlSession
-        self.result = FileUploadCompletionResult()
+        self.result = UploadCompletionResult()
     }
 
     public init(file: UploadFile, task: URLSessionUploadTask, urlSession: FileUploadSession = URLSession.shared) {
@@ -111,16 +111,16 @@ public class FileUploader: Operation {
         self.file.error = nil
         self.task = task
         self.urlSession = urlSession
-        self.result = FileUploadCompletionResult()
+        self.result = UploadCompletionResult()
     }
 
     public override func start() {
         assert(!isExecuting, "Operation is already started")
 
-        DDLogInfo("[FileUploader] Job \(file.id) started")
+        DDLogInfo("[UploadOperation] Job \(file.id) started")
         // Always check for cancellation before launching the task
         if isCancelled {
-            DDLogInfo("[FileUploader] Job \(file.id) canceled")
+            DDLogInfo("[UploadOperation] Job \(file.id) canceled")
             // Must move the operation to the finished state if it is canceled.
             file.error = .taskCancelled
             end()
@@ -129,8 +129,8 @@ public class FileUploader: Operation {
 
         // Start background task
         backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
-            DDLogInfo("[FileUploader] Background task expired")
-            let rescheduled = BackgroundSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
+            DDLogInfo("[UploadOperation] Background task expired")
+            let rescheduled = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
             if rescheduled {
                 self.file.error = .taskRescheduled
             } else {
@@ -152,9 +152,9 @@ public class FileUploader: Operation {
     }
 
     public override func main() {
-        DDLogInfo("[FileUploader] Executing job \(file.id)")
+        DDLogInfo("[UploadOperation] Executing job \(file.id)")
         guard let token = uploadToken else {
-            DDLogInfo("[FileUploader] Failed to fetch upload token for job \(file.id)")
+            DDLogInfo("[UploadOperation] Failed to fetch upload token for job \(file.id)")
             end()
             return
         }
@@ -179,13 +179,13 @@ public class FileUploader: Operation {
             })
             task?.resume()
         } else {
-            DDLogInfo("[FileUploader] No file path found for job \(file.id)")
+            DDLogInfo("[UploadOperation] No file path found for job \(file.id)")
             end()
         }
     }
 
     public override func cancel() {
-        DDLogInfo("[FileUploader] Job \(file.id) canceled")
+        DDLogInfo("[UploadOperation] Job \(file.id) canceled")
         super.cancel()
         task?.cancel()
     }
@@ -204,18 +204,18 @@ public class FileUploader: Operation {
 
     private func getPhAssetIfNeeded() {
         if file.type == .phAsset && file.pathURL == nil {
-            DDLogInfo("[FileUploader] Need to fetch photo asset")
+            DDLogInfo("[UploadOperation] Need to fetch photo asset")
             if let asset = file.getPHAsset(),
                 let url = PhotoLibraryUploader.instance.getUrlForPHAssetSync(asset) {
-                DDLogInfo("[FileUploader] Got photo asset, writing URL")
+                DDLogInfo("[UploadOperation] Got photo asset, writing URL")
                 file.pathURL = url
             } else {
-                DDLogWarn("[FileUploader] Failed to get photo asset")
+                DDLogWarn("[UploadOperation] Failed to get photo asset")
             }
         }
     }
 
-    public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
+    func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         guard file.error != .taskExpirationCancelled && file.error != .taskRescheduled else {
             return
         }
@@ -224,7 +224,7 @@ public class FileUploader: Operation {
 
         if let error = error {
             // Client-side error
-            DDLogError("[FileUploader] Client-side error for job \(file.id): \(error)")
+            DDLogError("[UploadOperation] Client-side error for job \(file.id): \(error)")
             if file.error != .taskRescheduled {
                 file.sessionUrl = ""
             }
@@ -240,7 +240,7 @@ public class FileUploader: Operation {
             let response = try? ApiFetcher.decoder.decode(ApiResponse<[File]>.self, from: data),
             let driveFile = response.data?.first {
             // Success
-            DDLogError("[FileUploader] Job \(file.id) successful")
+            DDLogError("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
             if let drive = AccountManager.instance.getDrive(for: file.userId, driveId: file.driveId),
                 let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
@@ -269,7 +269,7 @@ public class FileUploader: Operation {
                 let apiError = try? ApiFetcher.decoder.decode(ApiResponse<EmptyResponse>.self, from: data).error {
                 error = DriveError(apiError: apiError)
             }
-            DDLogError("[FileUploader] Server error for job \(file.id) (code: \(statusCode)): \(error)")
+            DDLogError("[UploadOperation] Server error for job \(file.id) (code: \(statusCode)): \(error)")
             file.sessionUrl = ""
             file.error = error
             // If we get an ”object not found“ error, we cancel all further uploads in this folder
@@ -285,7 +285,7 @@ public class FileUploader: Operation {
     }
 
     private func end() {
-        DDLogError("[FileUploader] Job \(file.id) ended")
+        DDLogError("[UploadOperation] Job \(file.id) ended")
         // Save upload file
         result.uploadFile = UploadFile(value: file)
         if file.error != .taskCancelled {

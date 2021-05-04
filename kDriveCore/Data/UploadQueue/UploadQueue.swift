@@ -24,11 +24,11 @@ import CocoaLumberjackSwift
 public class UploadQueue {
 
     public static let instance = UploadQueue()
+    public static let backgroundIdentifier = "com.infomaniak.background.upload"
 
     public var pausedNotificationSent = false
-    public static let uploadQueueIdentifier = "com.infomaniak.background.upload"
 
-    private(set) var operationsInQueue: [String: FileUploader] = [:]
+    private(set) var operationsInQueue: [String: UploadOperation] = [:]
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive upload queue"
@@ -49,7 +49,7 @@ public class UploadQueue {
     }()
 
     private var bestSession: FileUploadSession {
-        return Constants.isInExtension ? BackgroundSessionManager.instance : foregroundSession
+        return Constants.isInExtension ? BackgroundUploadSessionManager.instance : foregroundSession
     }
 
     /// Should suspend operation queue based on network status
@@ -108,7 +108,7 @@ public class UploadQueue {
             guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
                 return
             }
-            
+
             if file.realm == nil {
                 // Save drive and directory
                 UserDefaults.shared.lastSelectedDrive = file.driveId
@@ -124,7 +124,7 @@ public class UploadQueue {
                 }
             }
 
-            let operation = FileUploader(file: file, urlSession: bestSession)
+            let operation = UploadOperation(file: file, urlSession: bestSession)
             operation.queuePriority = file.priority
             operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id] in
                 self.operationsInQueue.removeValue(forKey: fileId)
@@ -237,7 +237,7 @@ public class UploadQueue {
         }
     }
 
-    private func publishFileUploaded(result: FileUploadCompletionResult) {
+    private func publishFileUploaded(result: UploadCompletionResult) {
         observations.didUploadFile.values.forEach { closure in
             closure(result.uploadFile, result.driveFile)
         }
