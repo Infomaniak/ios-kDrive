@@ -314,7 +314,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                DownloadQueue2.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         do {
@@ -325,7 +325,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         tableView.reloadSections([1], with: .none)
                     }
                 }
-                DownloadQueue2.instance.addToQueue(file: file)
+                DownloadQueue.instance.addToQueue(file: file)
             }
         case .edit:
             OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
@@ -414,7 +414,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadRows(at: [indexPath], with: .fade)
-                DownloadQueue2.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         if error == nil {
@@ -425,7 +425,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         }
                     }
                 }
-                DownloadQueue2.instance.addToQueue(file: file)
+                DownloadQueue.instance.addToQueue(file: file)
             }
         case .offline:
             downloadProgress = -1
@@ -543,14 +543,14 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                DownloadQueue2.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         presentShareSheetForCurrentFile()
                         tableView.reloadSections([1], with: .none)
                     }
                 }
-                DownloadQueue2.instance.addToQueue(file: file)
+                DownloadQueue.instance.addToQueue(file: file)
             }
         case .shareLink:
             if file.visibility == .isCollaborativeFolder {

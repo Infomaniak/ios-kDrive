@@ -180,7 +180,7 @@ class FileProviderExtension: NSFileProviderExtension {
 
     private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> ()) {
         if file.isLocalVersionOlderThanRemote() {
-            DownloadQueue2.instance.observeFileDownloaded(self, fileId: file.id) { (fileId, error) in
+            DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { (fileId, error) in
                 if error != nil {
                     NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                     completion(NSFileProviderError(.serverUnreachable))
@@ -190,7 +190,7 @@ class FileProviderExtension: NSFileProviderExtension {
                     completion(nil)
                 }
             }
-            DownloadQueue2.instance.addToQueue(file: file, userId: driveFileManager.drive.userId)
+            DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId)
             NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
         } else {
             copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)

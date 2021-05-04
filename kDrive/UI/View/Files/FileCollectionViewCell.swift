@@ -178,7 +178,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
         availableOfflineImageView?.isHidden = !file.isAvailableOffline || !FileManager.default.fileExists(atPath: file.localUrl.path)
         availableOfflineImageView?.accessibilityLabel = KDriveStrings.Localizable.offlineFileTitle
-        downloadObservationToken = DownloadQueue2.instance.observeFileDownloadProgress(self, fileId: file.id) { fileId, progress in
+        downloadObservationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { fileId, progress in
             if fileId == file.id {
                 DispatchQueue.main.async { [weak self] in
                     self?.downloadProgressView?.isHidden = progress >= 100 || progress == 0

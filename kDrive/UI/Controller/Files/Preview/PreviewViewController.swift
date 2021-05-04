@@ -365,7 +365,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
         if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
-            currentDownloadOperation = DownloadQueue2.instance.temporaryDownload(file: currentFile) { (error) in
+            currentDownloadOperation = DownloadQueue.instance.temporaryDownload(file: currentFile) { (error) in
                 DispatchQueue.main.async { [weak self] in
                     if self?.view.window != nil && error == nil {
                         (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()

@@ -124,7 +124,7 @@ public class DownloadOperation: Operation {
                         guard let newValue = value.newValue else {
                             return
                         }
-                        DownloadQueue2.instance.publishProgress(newValue, for: fileId)
+                        DownloadQueue.instance.publishProgress(newValue, for: fileId)
                     })
                     if let itemIdentifier = itemIdentifier {
                         NSFileProviderManager.default.register(task!, forItemWithIdentifier: itemIdentifier) { _ in }

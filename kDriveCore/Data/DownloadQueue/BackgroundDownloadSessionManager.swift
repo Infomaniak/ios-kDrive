@@ -43,7 +43,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
 
     private override init() {
         super.init()
-        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue2.backgroundIdentifier)
+        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
         backgroundUrlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
@@ -60,7 +60,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
                         guard let newValue = value.newValue else {
                             return
                         }
-                        DownloadQueue2.instance.publishProgress(newValue, for: fileId)
+                        DownloadQueue.instance.publishProgress(newValue, for: fileId)
                     })
                 }
             }

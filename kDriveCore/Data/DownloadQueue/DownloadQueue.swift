@@ -18,12 +18,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import Foundation
 import FileProvider
+import RealmSwift
 
-public class DownloadQueue2 {
+public class DownloadTask: Object {
+
+    @objc public dynamic var fileId: Int = 0
+    @objc public dynamic var driveId: Int = 0
+    @objc public dynamic var userId: Int = 0
+    @objc public dynamic var sessionUrl: String = ""
+
+    init(fileId: Int, driveId: Int, userId: Int, sessionUrl: String) {
+        self.fileId = fileId
+        self.driveId = driveId
+        self.sessionUrl = sessionUrl
+        self.userId = userId
+    }
+
+    public override init() {
+    }
+
+}
+
+public class DownloadQueue {
 
     // MARK: - Attributes
 
-    public static let instance = DownloadQueue2()
+    public static let instance = DownloadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.download"
 
     private(set) public var operationsInQueue: [Int: DownloadOperation] = [:]
@@ -115,7 +135,7 @@ public class DownloadQueue2 {
 
 // MARK: - Observation
 
-extension DownloadQueue2 {
+extension DownloadQueue {
 
     public typealias DownloadedFileId = Int
 
