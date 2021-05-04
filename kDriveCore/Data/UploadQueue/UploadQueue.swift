@@ -49,7 +49,7 @@ public class UploadQueue {
     }()
 
     private var bestSession: FileUploadSession {
-        return Constants.isInExtension ? BackgroundSessionManager.instance : foregroundSession
+        return Constants.isInExtension ? BackgroundUploadSessionManager.instance : foregroundSession
     }
 
     /// Should suspend operation queue based on network status

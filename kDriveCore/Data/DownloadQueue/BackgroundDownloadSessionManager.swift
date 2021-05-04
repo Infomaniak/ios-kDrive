@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import Foundation
-import CocoaLumberjackSwift
 
 public protocol FileDownloadSession {
     func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask
@@ -25,21 +24,22 @@ public protocol FileDownloadSession {
 
 extension URLSession: FileDownloadSession { }
 
-public class BackgroundDownloadSessionManager: NSObject, URLSessionDownloadDelegate, FileDownloadSession {
+public final class BackgroundDownloadSessionManager: NSObject, BackgroundSessionManager, URLSessionDownloadDelegate, FileDownloadSession {
 
+    public typealias Task = URLSessionDownloadTask
     public typealias CompletionHandler = (URL?, URLResponse?, Error?) -> Void
-    static let maxBackgroundTasks = 10
-    public static var instance = BackgroundDownloadSessionManager()
+    public typealias Operation = DownloadOperation
+
+    public static let instance = BackgroundDownloadSessionManager()
 
     public var backgroundCompletionHandler: (() -> Void)?
-    public var backgroundTaskCount: Int {
-        return operations.count
-    }
 
-    private var backgroundDownloadSession: URLSession!
-    private var tasksCompletionHandler: [Int: CompletionHandler] = [:]
-    private var progressObservers: [Int: NSKeyValueObservation] = [:]
-    private var operations = [DownloadOperation]()
+    static let maxBackgroundTasks = 10
+
+    var backgroundSession: URLSession!
+    var tasksCompletionHandler: [Int: CompletionHandler] = [:]
+    var progressObservers: [Int: NSKeyValueObservation] = [:]
+    var operations = [Operation]()
 
     private override init() {
         super.init()
@@ -47,11 +47,11 @@ public class BackgroundDownloadSessionManager: NSObject, URLSessionDownloadDeleg
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
         backgroundUrlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
-        backgroundDownloadSession = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
+        backgroundSession = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
     }
 
     public func reconnectBackgroundTasks() {
-        backgroundDownloadSession.getTasksWithCompletionHandler { (_, uploadTasks, _) in
+        backgroundSession.getTasksWithCompletionHandler { (_, uploadTasks, _) in
             let realm = DriveFileManager.constants.uploadsRealm
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
@@ -67,8 +67,8 @@ public class BackgroundDownloadSessionManager: NSObject, URLSessionDownloadDeleg
         }
     }
 
-    public func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask {
-        let task = backgroundDownloadSession.downloadTask(with: request)
+    public func downloadTask(with request: URLRequest, completionHandler: @escaping CompletionHandler) -> Task {
+        let task = backgroundSession.downloadTask(with: request)
         tasksCompletionHandler[task.taskIdentifier] = completionHandler
         return task
     }
@@ -91,7 +91,7 @@ public class BackgroundDownloadSessionManager: NSObject, URLSessionDownloadDeleg
         tasksCompletionHandler[downloadTask.taskIdentifier] = nil
     }
 
-    func getCompletionHandler(for task: URLSessionDownloadTask) -> CompletionHandler? {
+    func getCompletionHandler(for task: Task) -> CompletionHandler? {
         if let completionHandler = tasksCompletionHandler[task.taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,

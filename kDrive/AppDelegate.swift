@@ -302,7 +302,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 }
                 UploadQueue.instance.resumeAllOperations()
                 UploadQueue.instance.addToQueueFromRealm()
-                BackgroundSessionManager.instance.reconnectBackgroundTasks()
+                BackgroundUploadSessionManager.instance.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
                     let _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
                 }
@@ -407,7 +407,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if identifier == DownloadQueue2.backgroundIdentifier {
             BackgroundDownloadSessionManager.instance.backgroundCompletionHandler = completionHandler
         } else if identifier == UploadQueue.backgroundIdentifier {
-            BackgroundSessionManager.instance.backgroundCompletionHandler = completionHandler
+            BackgroundUploadSessionManager.instance.backgroundCompletionHandler = completionHandler
         } else {
             completionHandler()
         }

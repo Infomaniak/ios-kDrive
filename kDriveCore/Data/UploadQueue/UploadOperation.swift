@@ -130,7 +130,7 @@ public class UploadOperation: Operation {
         // Start background task
         backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
             DDLogInfo("[UploadOperation] Background task expired")
-            let rescheduled = BackgroundSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
+            let rescheduled = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
             if rescheduled {
                 self.file.error = .taskRescheduled
             } else {
