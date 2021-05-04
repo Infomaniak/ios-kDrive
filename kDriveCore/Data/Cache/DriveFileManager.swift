@@ -487,7 +487,7 @@ public class DriveFileManager {
             completion(DriveError.fileNotFound)
             return
         }
-        
+
         if available {
             try? realm.safeWrite {
                 file.isAvailableOffline = true
@@ -523,7 +523,7 @@ public class DriveFileManager {
             try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
             try? fileManager.moveItem(at: file.localUrl, to: file.localUrl)
             notifyObserversWith(file: file)
-            
+
             try? fileManager.removeItem(at: oldUrl)
             completion(nil)
         }
@@ -589,9 +589,9 @@ public class DriveFileManager {
                     }
                 }
 
-            try? realm.safeWrite {
-                //Delete orphan files which are NOT root
-                deleteOrphanFiles(root: root, using: realm)
+                try? realm.safeWrite {
+                    //Delete orphan files which are NOT root
+                    deleteOrphanFiles(root: root, using: realm)
 
                     realm.add(root, update: .modified)
                 }
