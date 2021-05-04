@@ -132,3 +132,9 @@ public struct DriveError: Error, Equatable {
         return lhs.code == rhs.code
     }
 }
+
+extension DriveError: LocalizedError {
+    public var errorDescription: String? {
+        return localizedDescription
+    }
+}
