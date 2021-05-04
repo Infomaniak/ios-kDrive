@@ -35,10 +35,18 @@ class MessageTableViewCell: InsetTableViewCell {
 // MARK: - UITextViewDelegate
 extension MessageTableViewCell: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
-        textView.text = ""
+        if textView.text == KDriveStrings.Localizable.fileShareAddMessage {
+            textView.text = ""
+        }
     }
 
     func textViewDidChange(_ textView: UITextView) {
         textDidChange?(textView.text)
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text == "" {
+            textView.text = KDriveStrings.Localizable.fileShareAddMessage
+        }
     }
 }
