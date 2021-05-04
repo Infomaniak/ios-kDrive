@@ -181,9 +181,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         downloadObservationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { fileId, progress in
             if fileId == file.id {
                 DispatchQueue.main.async { [weak self] in
-                    self?.downloadProgressView?.isHidden = progress >= 100 || progress == 0
-                    self?.downloadProgressView?.updateProgress(CGFloat(progress) / 100)
-                    self?.availableOfflineImageView.isHidden = !file.isAvailableOffline || progress < 100
+                    self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
+                    self?.downloadProgressView?.updateProgress(CGFloat(progress))
+                    self?.availableOfflineImageView.isHidden = !file.isAvailableOffline || progress < 1
                 }
             }
         }

@@ -87,10 +87,9 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
         }
 
         observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [unowned self] (_, progress) in
-            let downloadProgress = CGFloat(progress) / 100
             DispatchQueue.main.async {
-                setProgress(downloadProgress)
-                if progress >= 100 {
+                setProgress(CGFloat(progress))
+                if progress >= 1 {
                     configureAvailableOffline(with: file, progress: nil)
                 }
             }
