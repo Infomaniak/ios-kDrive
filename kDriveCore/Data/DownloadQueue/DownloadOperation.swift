@@ -26,10 +26,14 @@ public class DownloadOperation: Operation {
     private let file: File
     private let driveFileManager: DriveFileManager
     private let urlSession: FileDownloadSession
-    private var task: URLSessionDownloadTask?
     private var progressObservation: NSKeyValueObservation?
 
+    public var task: URLSessionDownloadTask?
     public var error: DriveError?
+
+    public var fileId: Int {
+        return file.id
+    }
 
     private var _executing = false {
         willSet {
@@ -84,7 +88,7 @@ public class DownloadOperation: Operation {
         if isCancelled {
             DDLogInfo("[DownloadOperation] Download of \(file.id) canceled")
             // Must move the operation to the finished state if it is canceled.
-            end()
+            end(sessionUrl: nil)
             return
         }
 
@@ -97,6 +101,14 @@ public class DownloadOperation: Operation {
         DDLogInfo("[DownloadOperation] Downloading \(file.id)")
 
         let url = URL(string: ApiRoutes.downloadFile(file: file))!
+
+        // Add download task to Realm
+        let downloadTask = DownloadTask(fileId: file.id, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionUrl: url.absoluteString)
+        BackgroundRealm.uploads.execute { realm in
+            try? realm.safeWrite {
+                realm.add(downloadTask)
+            }
+        }
 
         if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] (token, error) in
@@ -113,12 +125,12 @@ public class DownloadOperation: Operation {
                     task?.resume()
                 } else {
                     self.error = .localError // Other error?
-                    end()
+                    end(sessionUrl: url)
                 }
             }
         } else {
             error = .localError // Other error?
-            end()
+            end(sessionUrl: url)
         }
     }
 
@@ -132,8 +144,6 @@ public class DownloadOperation: Operation {
 
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-
-        // TODO: Delete download task
 
         if let error = error {
             // Client-side error
@@ -162,10 +172,21 @@ public class DownloadOperation: Operation {
             DDLogError("[DownloadOperation] Server error for \(file.id) (code: \(statusCode))")
             self.error = .serverError
         }
-        end()
+        end(sessionUrl: task?.originalRequest?.url)
     }
 
-    private func end() {
+    private func end(sessionUrl: URL?) {
+        DDLogError("[DownloadOperation] Download of \(file.id) ended")
+        // Delete download task
+        if let sessionUrl = sessionUrl {
+            BackgroundRealm.uploads.execute { realm in
+                if let task = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl.absoluteString)).first {
+                    try? realm.safeWrite {
+                        realm.delete(task)
+                    }
+                }
+            }
+        }
         progressObservation?.invalidate()
         _executing = false
         _finished = true

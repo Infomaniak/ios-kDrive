@@ -53,8 +53,6 @@ public class DownloadQueue2 {
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
             return
         }
-    
-        // TODO: Create download task
 
         let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: BackgroundDownloadSessionManager.instance)
         operation.completionBlock = { [fileId = file.id] in
