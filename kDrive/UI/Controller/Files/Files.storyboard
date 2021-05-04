@@ -168,11 +168,11 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="EQw-wg-TyW">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="backgroundColor" name="backgroundCardViewColor"/>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="u7Y-Pi-jHr"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="EQw-wg-TyW" secondAttribute="bottom" id="Opz-ew-xCo"/>
                             <constraint firstItem="EQw-wg-TyW" firstAttribute="top" secondItem="hWA-co-zIc" secondAttribute="top" id="ke6-oE-p90"/>
@@ -571,6 +571,9 @@
         <image name="folder" width="24" height="24"/>
         <image name="folder-fill" width="24" height="24"/>
         <image name="retry" width="24" height="24"/>
+        <namedColor name="backgroundCardViewColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="backgroundColor">
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

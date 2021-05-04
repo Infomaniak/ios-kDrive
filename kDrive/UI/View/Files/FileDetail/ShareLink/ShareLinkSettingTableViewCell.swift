@@ -62,6 +62,14 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         datePickerView.addTarget(self, action: #selector(handleDatePicker), for: UIControl.Event.valueChanged)
     }
 
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+    }
+
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+    }
+
     @objc func donePicker() {
         handleDatePicker()
         dateTextField.endEditing(true)

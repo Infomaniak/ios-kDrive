@@ -23,7 +23,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="ddx-uD-n82">
                                 <rect key="frame" x="4" y="4" width="292" height="152"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="152" id="ehL-3t-85f"/>
                                 </constraints>
@@ -39,7 +39,7 @@
                                 </connections>
                             </collectionView>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstItem="ddx-uD-n82" firstAttribute="leading" secondItem="sCL-PI-gFk" secondAttribute="leading" constant="4" id="4jz-dB-t88"/>
                             <constraint firstAttribute="trailing" secondItem="ddx-uD-n82" secondAttribute="trailing" constant="4" id="FSo-nJ-5Tp"/>
@@ -66,8 +66,8 @@
         </tableViewCell>
     </objects>
     <resources>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
+        <namedColor name="backgroundCardViewColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>
