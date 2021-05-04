@@ -166,6 +166,12 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
         return true
     }
+
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        getCurrentDirectory { currentDirectory in
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory?.rights?.createNewFile.value ?? true
+        }
+    }
 }
 
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
