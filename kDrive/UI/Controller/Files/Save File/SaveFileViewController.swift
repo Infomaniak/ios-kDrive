@@ -268,7 +268,7 @@ class SaveFileViewController: UIViewController {
         let childProgress = itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
             if let error = error {
                 DDLogError("Error while loading file representation: \(error)")
-                completion(url?.lastPathComponent, nil)
+                completion(nil, nil)
             }
 
             guard let url = url else { return }
@@ -282,7 +282,7 @@ class SaveFileViewController: UIViewController {
 
                 try FileManager.default.copyItem(at: url, to: targetURL)
 
-                completion(nil, targetURL)
+                completion(url.lastPathComponent, targetURL)
             } catch {
                 DDLogError("Error while loading file representation: \(error)")
                 completion(nil, nil)
