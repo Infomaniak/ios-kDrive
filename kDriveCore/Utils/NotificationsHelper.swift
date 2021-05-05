@@ -62,51 +62,41 @@ public class NotificationsHelper {
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
 
-    public static func sendUploadDoneNotification(uploadId: String, parentId: Int?, filename: String?, error: DriveError? = nil) {
-        let filename = filename == nil ? "Inconnu" : filename!
+    public static func sendUploadError(filename: String, parentId: Int, error: DriveError) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = uploadCategoryId
         content.sound = .default
 
-        // TODO: Different message if filename is nil
-        if let error = error {
-            content.title = KDriveCoreStrings.Localizable.errorUpload
+        content.title = KDriveCoreStrings.Localizable.errorUpload
+        content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
+        content.userInfo[parentIdKey] = parentId
 
-            content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
+        sendImmediately(notification: content, id: UUID().uuidString)
+    }
+
+    public static func sendUploadDoneNotification(filename: String, parentId: Int) {
+        let content = UNMutableNotificationContent()
+        content.categoryIdentifier = uploadCategoryId
+        content.sound = .default
+
+        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
+            content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
+            content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
             content.userInfo[parentIdKey] = parentId
-            sendImmediately(notification: content, id: uploadDoneNotificationId)
-        } else {
-            UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
-                content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
-                let uploadDoneNotifications = notifications.filter({ $0.request.identifier == uploadDoneNotificationId })
-                var previousCount = 0
-                if uploadDoneNotifications.count > 0 {
-                    previousCount = (uploadDoneNotifications.first?.request.content.userInfo[previousUploadCountKey] as? Int ?? 0) + 1
-                    content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(previousCount)
-                } else {
-                    previousCount += 1
-                    content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
-                }
-                content.userInfo[previousUploadCountKey] = previousCount
-                content.userInfo[parentIdKey] = parentId
 
-                sendImmediately(notification: content, id: uploadDoneNotificationId)
-            }
+            sendImmediately(notification: content, id: uploadDoneNotificationId)
         }
     }
 
-    public static func sendUploadQueueNotification(uploadCount: Int, parentId: Int) {
-        if uploadCount == 0 {
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [uploadQueueCountNotificationId])
-        } else {
-            let content = UNMutableNotificationContent()
-            content.title = KDriveCoreStrings.Localizable.uploadInProgressTitle
-            content.body = KDriveCoreStrings.Localizable.uploadInProgressNumberFile(uploadCount)
-            content.categoryIdentifier = uploadCategoryId
-            content.sound = .default
-            content.userInfo[parentIdKey] = parentId
-            sendImmediately(notification: content, id: uploadQueueCountNotificationId)
-        }
+    public static func sendUploadDoneNotification(uploadCount: Int, parentId: Int?) {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [uploadDoneNotificationId])
+        let content = UNMutableNotificationContent()
+        content.categoryIdentifier = uploadCategoryId
+        content.sound = .default
+        content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
+        content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
+        content.userInfo[parentIdKey] = parentId
+        sendImmediately(notification: content, id: uploadDoneNotificationId)
     }
 
     public static func sendPausedUploadQueueNotification() {
@@ -132,9 +122,23 @@ public class NotificationsHelper {
             return
         }
 
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
-        let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
-        UNUserNotificationCenter.current().add(request)
+        var isInBackground = true
+        if !Constants.isInExtension {
+            DispatchQueue.main.sync {
+                isInBackground = UIApplication.shared.applicationState != .active
+            }
+        }
+
+        if isInBackground {
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+            let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
+            UNUserNotificationCenter.current().add(request)
+        } else {
+            DispatchQueue.main.async {
+                InfomaniakSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
+            }
+        }
+
     }
 
 }

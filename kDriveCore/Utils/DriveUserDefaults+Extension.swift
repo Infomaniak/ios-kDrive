@@ -148,6 +148,9 @@ extension UserDefaults {
 
     public var isNotificationEnabled: Bool {
         get {
+            if object(forKey: key(.notificationsEnabled)) == nil {
+                set(true, forKey: key(.notificationsEnabled))
+            }
             return bool(forKey: key(.notificationsEnabled))
         }
         set {

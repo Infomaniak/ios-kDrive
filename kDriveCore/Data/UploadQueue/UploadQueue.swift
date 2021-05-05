@@ -27,6 +27,7 @@ public class UploadQueue {
     public static let backgroundIdentifier = "com.infomaniak.background.upload"
 
     public var pausedNotificationSent = false
+    private var fileUploadedCount = 0
 
     private(set) var operationsInQueue: [String: UploadOperation] = [:]
     private(set) lazy var operationQueue: OperationQueue = {
@@ -229,15 +230,33 @@ public class UploadQueue {
         }
     }
 
+    private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
+        fileUploadedCount = fileUploadedCount + (result.uploadFile.error == nil ? 1 : 0)
+        if let error = result.uploadFile.error,
+            error != .networkError || error != .taskCancelled || error != .taskRescheduled {
+            NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
+            if operationQueue.operationCount == 0 {
+                fileUploadedCount = 0
+            }
+        } else if operationQueue.operationCount == 0 {
+            if fileUploadedCount == 1 {
+                NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId)
+            } else {
+                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
+            }
+            fileUploadedCount = 0
+        }
+    }
+
     private func publishUploadCount(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         let uploadCount = getUploadingFiles(withParent: parentId, using: realm).count
-        NotificationsHelper.sendUploadQueueNotification(uploadCount: uploadCount, parentId: parentId)
         observations.didChangeUploadCountInParent.values.forEach { closure in
             closure(parentId, uploadCount)
         }
     }
 
     private func publishFileUploaded(result: UploadCompletionResult) {
+        sendFileUploadedNotificationIfNeeded(with: result)
         observations.didUploadFile.values.forEach { closure in
             closure(result.uploadFile, result.driveFile)
         }
