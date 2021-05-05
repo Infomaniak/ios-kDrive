@@ -139,6 +139,7 @@ public class Drive: Object, Codable {
     @objc public dynamic var size: Int64 = 0
     @objc public dynamic var usedSize: Int64 = 0
     @objc private dynamic var _users: DriveUsersCategories? = DriveUsersCategories()
+    @objc public dynamic var maintenance: Bool = false
     @objc public dynamic var userId: Int = 0 {
         didSet {
             let objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
@@ -191,6 +192,7 @@ public class Drive: Object, Codable {
         packFunctionality = try values.decode(DrivePackFunctionality.self, forKey: .packFunctionality)
         hasTechnicalRight = try values.decode(Bool.self, forKey: .hasTechnicalRight)
         canCreateTeamFolder = try values.decode(Bool.self, forKey: .canCreateTeamFolder)
+        maintenance = try values.decode(Bool.self, forKey: .maintenance)
     }
 
     enum CodingKeys: String, CodingKey {
@@ -207,6 +209,7 @@ public class Drive: Object, Codable {
         case packFunctionality = "pack_functionality"
         case hasTechnicalRight = "has_technical_right"
         case canCreateTeamFolder = "can_create_team_folder"
+        case maintenance
     }
 
     public static func == (lhs: Drive, rhs: Drive) -> Bool {
