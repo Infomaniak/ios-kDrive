@@ -232,7 +232,9 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         super.viewWillAppear(animated)
 
         #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.rights?.createNewFile.value ?? true
+        if let centerButton = (tabBarController as? MainTabViewController)?.tabBar.centerButton {
+            centerButton.isEnabled = currentDirectory.rights?.createNewFile.value ?? true
+        }
         #endif
 
         if needsContentUpdate {
