@@ -133,17 +133,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     func setHighlighting() {
         if canBeHighlighted {
             if isHighlighted {
-                disabledView.backgroundColor = KDriveAsset.backgroundCardViewSelectedColor.color
-                if self.isKind(of: FileGridCollectionViewCell.self) {
-                    disabledView.alpha = 0.3
-                    disabledView.superview?.bringSubviewToFront(disabledView)
-                }
-                disabledView.isHidden = false
+                contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewSelectedColor.color
             } else {
-                disabledView.isHidden = true
-                disabledView.superview?.sendSubviewToBack(disabledView)
-                disabledView.alpha = 0.5
-                disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+                contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
             }
         }
     }
