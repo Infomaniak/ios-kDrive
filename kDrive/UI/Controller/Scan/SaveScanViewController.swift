@@ -75,8 +75,8 @@ class SaveScanViewController: SaveFileViewController {
             return
         }
         DispatchQueue.global(qos: .userInteractive).async { [self] in
-            var data: Data!
-            var name: String!
+            let data: Data?
+            let name = filename.hasSuffix(".\(scanType.extension)") ? filename : "\(filename).\(scanType.extension)"
             switch scanType {
             case .pdf:
                 let pdfDocument = PDFDocument()
@@ -84,12 +84,10 @@ class SaveScanViewController: SaveFileViewController {
                     let pdfPage = PDFPage(image: scan.imageOfPage(at: i))
                     pdfDocument.insert(pdfPage!, at: i)
                 }
-                data = pdfDocument.dataRepresentation()!
-                name = filename.hasSuffix(".pdf") ? filename : "\(filename).pdf"
+                data = pdfDocument.dataRepresentation()
             case .image:
                 let image = scan.imageOfPage(at: 0)
-                data = image.jpegData(compressionQuality: JPEG_QUALITY)!
-                name = filename.hasSuffix(".jpg") ? filename : "\(filename).jpg"
+                data = image.jpegData(compressionQuality: JPEG_QUALITY)
             }
             let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
             do {
@@ -106,7 +104,9 @@ class SaveScanViewController: SaveFileViewController {
                     let parent = presentingViewController
                     footer.footerButton.setLoading(false)
                     dismiss(animated: true) {
-                        parent?.dismiss(animated: true)
+                        parent?.dismiss(animated: true) {
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(name))
+                        }
                     }
                 }
             } catch {

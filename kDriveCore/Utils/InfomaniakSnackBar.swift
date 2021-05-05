@@ -45,13 +45,26 @@ public class InfomaniakSnackBar: SnackBar {
     private static func getTopViewController() -> UIViewController? {
         let windows = UIApplication.shared.windows
         let keyWindow = windows.count == 1 ? windows.first : windows.filter(\.isKeyWindow).first
-        if var topController = keyWindow?.rootViewController {
-            while let presentedViewController = topController.presentedViewController {
-                topController = presentedViewController
-            }
-            return topController
+        if let topController = keyWindow?.rootViewController {
+            return getVisibleViewController(from: topController)
         } else {
             return nil
+        }
+    }
+
+    private static func getVisibleViewController(from viewController: UIViewController) -> UIViewController {
+        if let navigationController = viewController as? UINavigationController,
+            let visibleController = navigationController.visibleViewController {
+            return getVisibleViewController(from: visibleController)
+        } else if let tabBarController = viewController as? UITabBarController,
+            let selectedTabController = tabBarController.selectedViewController {
+            return getVisibleViewController(from: selectedTabController)
+        } else {
+            if let presentedViewController = viewController.presentedViewController {
+                return getVisibleViewController(from: presentedViewController)
+            } else {
+                return viewController
+            }
         }
     }
 
