@@ -19,19 +19,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import Foundation
 import InfomaniakCore
 
+public class ErrorUserInfo: Codable {
+    var intValue: Int? = nil
+    var stringValue: String? = nil
+
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let intValue = try? container.decode(Int.self) {
+            self.intValue = intValue
+        } else if let stringValue = try? container.decode(String.self) {
+            self.stringValue = stringValue
+        }
+    }
+
+    public init(stringValue: String) {
+        self.stringValue = stringValue
+    }
+
+    public init(intValue: Int) {
+        self.intValue = intValue
+    }
+}
+
 public struct DriveError: Error, Equatable {
 
-    public enum DriveErrorType: String {
+    public enum DriveErrorType: String, Codable {
         case localError
         case networkError
         case serverError
     }
 
-    public enum UserInfoKey: String {
+    public enum UserInfoKey: String, Codable {
         case fileId
         case status
         case photoAssetId
     }
+
     public typealias FileId = Int
     public typealias Status = Int
     public typealias PhotoAssetId = String
@@ -39,7 +62,7 @@ public struct DriveError: Error, Equatable {
     public let type: DriveErrorType
     public let code: String
     public var localizedDescription: String
-    public var userInfo: [UserInfoKey: Any]?
+    public var userInfo: [UserInfoKey: ErrorUserInfo]?
 
     private init(type: DriveErrorType, code: String, localizedString: String = KDriveCoreStrings.Localizable.errorGeneric) {
         self.type = type
@@ -70,11 +93,14 @@ public struct DriveError: Error, Equatable {
 
     private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict]
 
+    private static let encoder = JSONEncoder()
+    private static let decoder = JSONDecoder()
+
     public init(apiErrorCode: String, httpStatus: Int = 400) {
         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
             self = error
         } else {
-            self = .errorWithUserInfo(.serverError, info: [.status: httpStatus])
+            self = .errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: httpStatus)])
         }
     }
 
@@ -86,43 +112,19 @@ public struct DriveError: Error, Equatable {
         }
     }
 
-    //We code errors in realm with format type##code##key--value##keyn--valuen
-    func toRealmString() -> String {
-        var encodedValue = type.rawValue + "##" + code
-        if let userInfo = userInfo {
-            for (key, value) in userInfo {
-                encodedValue += "##\(key)--\(value)"
-            }
-        }
-        return encodedValue
+    func toRealm() -> Data? {
+        return try? DriveError.encoder.encode(self)
     }
 
-    static func from(realmString: String) -> DriveError {
-        let components = realmString.components(separatedBy: "##")
-        let type = DriveErrorType(rawValue: components[0])
-        let code = components[1]
-        if var error = allErrors.first(where: { $0.type == type && $0.code == code }) {
-            var userInfo = [UserInfoKey: Any]()
-            for i in 2..<components.count {
-                let rawUserInfo = components[i].components(separatedBy: "##")
-                if userInfo.count == 2 {
-                    if let key = UserInfoKey(rawValue: rawUserInfo[0]) {
-                        if key == .photoAssetId {
-                            userInfo[key] = rawUserInfo[1]
-                        } else if let value = Int(rawUserInfo[1]) {
-                            userInfo[key] = value
-                        }
-                    }
-                }
-            }
-            error.userInfo = userInfo
+    static func from(realmData: Data) -> DriveError {
+        if let error = try? decoder.decode(DriveError.self, from: realmData) {
             return error
         } else {
-            return DriveError.unknownError
+            return .unknownError
         }
     }
 
-    static func errorWithUserInfo(_ error: DriveError, info: [UserInfoKey: Any]) -> DriveError {
+    static func errorWithUserInfo(_ error: DriveError, info: [UserInfoKey: ErrorUserInfo]) -> DriveError {
         var error = error
         error.userInfo = info
         return error
@@ -137,4 +139,32 @@ extension DriveError: LocalizedError {
     public var errorDescription: String? {
         return localizedDescription
     }
+}
+
+extension DriveError: Codable {
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        type = try values.decode(DriveErrorType.self, forKey: .type)
+        code = try values.decode(String.self, forKey: .code)
+        userInfo = try values.decodeIfPresent([UserInfoKey: ErrorUserInfo].self, forKey: .userInfo)
+        localizedDescription = DriveError.unknownError.localizedDescription
+        if let errorDescription = DriveError.allErrors.first(where: { $0.type == type && $0.code == code })?.localizedDescription {
+            localizedDescription = errorDescription
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
+        try container.encode(code, forKey: .code)
+        try container.encodeIfPresent(userInfo, forKey: .userInfo)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case code
+        case userInfo
+    }
+
 }

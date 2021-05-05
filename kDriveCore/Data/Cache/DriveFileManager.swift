@@ -33,7 +33,7 @@ public class DriveFileManager {
         public let cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-        public let currentUploadDbVersion: UInt64 = 3
+        public let currentUploadDbVersion: UInt64 = 4
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
             if (oldSchemaVersion < strongSelf.currentUploadDbVersion) {
@@ -43,6 +43,7 @@ public class DriveFileManager {
                         newObject!["maxRetryCount"] = 3
                     }
                 }
+                // Migration to version 4 is not needed
             }
         }
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
@@ -1100,7 +1101,7 @@ public class DriveFileManager {
             }
             return file
         } else {
-            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: file.id])
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
         }
     }
 
