@@ -41,8 +41,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     var downloadObservationToken: ObservationToken?
 
-    var canBeHighlighted = true
-
     override var isSelected: Bool {
         didSet {
             configureForSelection()
@@ -131,12 +129,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func setHighlighting() {
-        if canBeHighlighted {
-            if isHighlighted {
-                contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewSelectedColor.color
-            } else {
-                contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-            }
+        if isHighlighted {
+            contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewSelectedColor.color
+        } else {
+            contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         }
     }
 
