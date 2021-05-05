@@ -236,6 +236,9 @@ public class UploadQueue {
         if let error = result.uploadFile.error,
             error != .networkError || error != .taskCancelled || error != .taskRescheduled {
             NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
+            if operationQueue.operationCount == 0 {
+                fileUploadedCount = 0
+            }
         } else if operationQueue.operationCount == 0 {
             if fileUploadedCount == 1 {
                 NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId)
