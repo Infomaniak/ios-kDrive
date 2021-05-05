@@ -76,12 +76,17 @@ class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableV
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let drive = filteredDrives[indexPath.row]
-        AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
-        AccountManager.instance.saveAccounts()
-        // Download root file
-        AccountManager.instance.currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
-            self.delegate?.didSwitchDrive(newDrive: drive)
-            self.dismiss(animated: true)
+        if drive.maintenance {
+            let maintenanceFloatingPanelViewController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
+            self.present(maintenanceFloatingPanelViewController, animated: true)
+        } else {
+            AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
+            AccountManager.instance.saveAccounts()
+            // Download root file
+            AccountManager.instance.currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+                self.delegate?.didSwitchDrive(newDrive: drive)
+                self.dismiss(animated: true)
+            }
         }
     }
 
