@@ -125,7 +125,7 @@
                                         </variation>
                                     </view>
                                 </subviews>
-                                <color key="backgroundColor" name="backgroundCardView"/>
+                                <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="XIo-Vc-zQ4" secondAttribute="trailing" id="9S9-e4-6mG"/>
                                     <constraint firstAttribute="trailing" secondItem="hE6-GN-a4l" secondAttribute="trailing" id="AJo-d5-YPv"/>
@@ -180,6 +180,9 @@
         <image name="favorite" width="24" height="24"/>
         <image name="folder-filled" width="24" height="24"/>
         <namedColor name="backgroundCardView">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="favoriteColor">
