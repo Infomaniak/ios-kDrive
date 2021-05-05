@@ -48,7 +48,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
     private var content: [[PlusButtonMenuAction]] = [
         [],
-        [.takePictureAction, .importMediaAction, .importAction, .scanAction, .folderAction],
+        [.scanAction, .takePictureAction, .importMediaAction, .importAction, .folderAction],
         [.docsAction, .gridsAction, .pointsAction, .noteAction]
     ]
 
