@@ -132,7 +132,7 @@ class SaveFileViewController: UIViewController {
 
     public static func getDefaultFileName() -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd_HHmmss"
+        formatter.dateFormat = "yyyyMMdd_HHmmssSS"
         return formatter.string(from: Date())
     }
 
@@ -179,9 +179,9 @@ class SaveFileViewController: UIViewController {
                 }
                 importProgress?.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             } else if let typeIdentifier = itemProvider.registeredTypeIdentifiers.first {
-                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { (url) in
+                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { (filename, url) in
                     if let url = url {
-                        var name = itemProvider.suggestedName ?? url.lastPathComponent
+                        var name = itemProvider.suggestedName ?? filename ?? SaveFileViewController.getDefaultFileName()
                         if let ext = UTI(typeIdentifier)?.preferredFilenameExtension {
                             name = name.hasSuffix(".\(ext)") ? name : "\(name).\(ext)"
                         }
@@ -263,12 +263,12 @@ class SaveFileViewController: UIViewController {
         return progress
     }
 
-    func getFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (URL?) -> Void) -> Progress {
+    func getFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
         let progress = Progress(totalUnitCount: 10)
         let childProgress = itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
             if let error = error {
                 DDLogError("Error while loading file representation: \(error)")
-                completion(nil)
+                completion(url?.lastPathComponent, nil)
             }
 
             guard let url = url else { return }
@@ -282,10 +282,10 @@ class SaveFileViewController: UIViewController {
 
                 try FileManager.default.copyItem(at: url, to: targetURL)
 
-                completion(targetURL)
+                completion(nil, targetURL)
             } catch {
                 DDLogError("Error while loading file representation: \(error)")
-                completion(nil)
+                completion(nil, nil)
             }
             progress.completedUnitCount += 2
         }
@@ -486,6 +486,7 @@ extension SaveFileViewController: SelectDriveDelegate {
             AccountManager.instance.saveAccounts()
             selectedDirectory = AccountManager.instance.currentDriveFileManager.getRootFile()
         }
+        updateButton()
     }
 
 }
