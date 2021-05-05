@@ -367,13 +367,18 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
             currentDownloadOperation = DownloadQueue.instance.temporaryDownload(file: currentFile) { (error) in
                 DispatchQueue.main.async { [weak self] in
-                    if self?.view.window != nil && error == nil {
-                        (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
-                        self?.collectionView.reloadItems(at: [indexPath])
-                        self?.updateNavigationBar()
-                    } else if let error = error {
-                        if error != .taskCancelled {
-                            UIConstants.showSnackBar(message: error.localizedDescription)
+                    if self?.view.window != nil {
+                        if let error = error {
+                            if error != .taskCancelled {
+                                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
+                                if let cell = (self?.collectionView.cellForItem(at: indexPath) as? NoPreviewCollectionViewCell) {
+                                    cell.errorDownloading()
+                                }
+                            }
+                        } else {
+                            (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
+                            self?.collectionView.reloadItems(at: [indexPath])
+                            self?.updateNavigationBar()
                         }
                     }
                 }
