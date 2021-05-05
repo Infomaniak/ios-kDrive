@@ -192,6 +192,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         UploadQueue.instance.pausedNotificationSent = false
+        NotificationsHelper.removeUploadNotification()
         launchSetup()
     }
 

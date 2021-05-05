@@ -62,32 +62,21 @@ public class NotificationsHelper {
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
 
-    public static func sendUploadDoneNotification(uploadId: String, parentId: Int?, filename: String?, error: DriveError? = nil) {
-        let filename = filename == nil ? "Inconnu" : filename!
+    public static func sendUploadDoneNotification(filename: String, parentId: Int, error: DriveError? = nil) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = uploadCategoryId
         content.sound = .default
 
-        // TODO: Different message if filename is nil
         if let error = error {
             content.title = KDriveCoreStrings.Localizable.errorUpload
-
             content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
             content.userInfo[parentIdKey] = parentId
+
             sendImmediately(notification: content, id: uploadDoneNotificationId)
         } else {
             UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
                 content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
-                let uploadDoneNotifications = notifications.filter({ $0.request.identifier == uploadDoneNotificationId })
-                var previousCount = 0
-                if uploadDoneNotifications.count > 0 {
-                    previousCount = (uploadDoneNotifications.first?.request.content.userInfo[previousUploadCountKey] as? Int ?? 0) + 1
-                    content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(previousCount)
-                } else {
-                    previousCount += 1
-                    content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
-                }
-                content.userInfo[previousUploadCountKey] = previousCount
+                content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
                 content.userInfo[parentIdKey] = parentId
 
                 sendImmediately(notification: content, id: uploadDoneNotificationId)
@@ -95,18 +84,15 @@ public class NotificationsHelper {
         }
     }
 
-    public static func sendUploadQueueNotification(uploadCount: Int, parentId: Int) {
-        if uploadCount == 0 {
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [uploadQueueCountNotificationId])
-        } else {
-            let content = UNMutableNotificationContent()
-            content.title = KDriveCoreStrings.Localizable.uploadInProgressTitle
-            content.body = KDriveCoreStrings.Localizable.uploadInProgressNumberFile(uploadCount)
-            content.categoryIdentifier = uploadCategoryId
-            content.sound = .default
-            content.userInfo[parentIdKey] = parentId
-            sendImmediately(notification: content, id: uploadQueueCountNotificationId)
-        }
+    public static func sendUploadDoneNotification(uploadCount: Int, parentId: Int?) {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [uploadDoneNotificationId])
+        let content = UNMutableNotificationContent()
+        content.categoryIdentifier = uploadCategoryId
+        content.sound = .default
+        content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
+        content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
+        content.userInfo[parentIdKey] = parentId
+        sendImmediately(notification: content, id: uploadDoneNotificationId)
     }
 
     public static func sendPausedUploadQueueNotification() {
@@ -125,6 +111,10 @@ public class NotificationsHelper {
         content.categoryIdentifier = generalCategoryId
         content.sound = .default
         sendImmediately(notification: content, id: migrateNotificationId)
+    }
+
+    public static func removeUploadNotification() {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [uploadDoneNotificationId])
     }
 
     private static func sendImmediately(notification: UNMutableNotificationContent, id: String) {

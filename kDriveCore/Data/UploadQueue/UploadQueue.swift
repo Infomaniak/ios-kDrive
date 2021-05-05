@@ -27,6 +27,7 @@ public class UploadQueue {
     public static let backgroundIdentifier = "com.infomaniak.background.upload"
 
     public var pausedNotificationSent = false
+    private var fileUploadedCount = 0
 
     private(set) var operationsInQueue: [String: UploadOperation] = [:]
     private(set) lazy var operationQueue: OperationQueue = {
@@ -89,6 +90,7 @@ public class UploadQueue {
     }
 
     public func addToQueueFromRealm() {
+        fileUploadedCount = 0
         DispatchQueue.global(qos: .default).async {
             self.locks.addToQueueFromRealm.performLocked {
                 self.compactRealmIfNeeded()
@@ -231,13 +233,21 @@ public class UploadQueue {
 
     private func publishUploadCount(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         let uploadCount = getUploadingFiles(withParent: parentId, using: realm).count
-        NotificationsHelper.sendUploadQueueNotification(uploadCount: uploadCount, parentId: parentId)
         observations.didChangeUploadCountInParent.values.forEach { closure in
             closure(parentId, uploadCount)
         }
     }
 
     private func publishFileUploaded(result: UploadCompletionResult) {
+        fileUploadedCount = fileUploadedCount + (result.uploadFile.error == nil ? 1 : 0)
+        if operationQueue.operationCount == 0 {
+            if fileUploadedCount <= 1  {
+                NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: result.uploadFile.error)
+            } else {
+                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
+            }
+            fileUploadedCount = 0
+        }
         observations.didUploadFile.values.forEach { closure in
             closure(result.uploadFile, result.driveFile)
         }
