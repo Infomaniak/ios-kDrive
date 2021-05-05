@@ -45,7 +45,7 @@ public class UploadFile: Object {
     @objc dynamic var shouldRemoveAfterUpload: Bool = true
     @objc public dynamic var maxRetryCount: Int = defaultMaxRetryCount
     @objc private dynamic var rawPriority: Int = 0
-    @objc private dynamic var _error: String? = nil
+    @objc private dynamic var _error: Data? = nil
 
     private var localAsset: PHAsset?
 
@@ -71,11 +71,11 @@ public class UploadFile: Object {
 
     public var error: DriveError? {
         set {
-            _error = newValue?.toRealmString()
+            _error = newValue?.toRealm()
         }
         get {
-            if let errorString = _error {
-                return DriveError.from(realmString: errorString)
+            if let error = _error {
+                return DriveError.from(realmData: error)
             } else {
                 return nil
             }
