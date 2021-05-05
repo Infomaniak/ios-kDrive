@@ -231,6 +231,21 @@ public class UploadQueue {
         }
     }
 
+    private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
+        fileUploadedCount = fileUploadedCount + (result.uploadFile.error == nil ? 1 : 0)
+        if let error = result.uploadFile.error,
+            error != .networkError || error != .taskCancelled || error != .taskRescheduled {
+            NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
+        } else if operationQueue.operationCount == 0 {
+            if fileUploadedCount == 1 {
+                NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId)
+            } else {
+                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
+            }
+            fileUploadedCount = 0
+        }
+    }
+
     private func publishUploadCount(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         let uploadCount = getUploadingFiles(withParent: parentId, using: realm).count
         observations.didChangeUploadCountInParent.values.forEach { closure in
@@ -239,15 +254,7 @@ public class UploadQueue {
     }
 
     private func publishFileUploaded(result: UploadCompletionResult) {
-        fileUploadedCount = fileUploadedCount + (result.uploadFile.error == nil ? 1 : 0)
-        if operationQueue.operationCount == 0 {
-            if fileUploadedCount <= 1  {
-                NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: result.uploadFile.error)
-            } else {
-                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
-            }
-            fileUploadedCount = 0
-        }
+        sendFileUploadedNotificationIfNeeded(with: result)
         observations.didUploadFile.values.forEach { closure in
             closure(result.uploadFile, result.driveFile)
         }

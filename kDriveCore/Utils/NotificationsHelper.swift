@@ -25,6 +25,7 @@ public class NotificationsHelper {
     public static let uploadCategoryId = "com.kdrive.notification.upload"
     private static let uploadQueueCountNotificationId = "uploadQueueCount"
     private static let uploadDoneNotificationId = "uploadDone"
+    private static let uploadErrorNotificationId = "uploadError"
     private static let uploadPausedNotificationId = "uploadPaused"
     public static let previousUploadCountKey = "previousUploadCountKey"
     public static let parentIdKey = "parentIdKey"
@@ -62,25 +63,29 @@ public class NotificationsHelper {
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
 
-    public static func sendUploadDoneNotification(filename: String, parentId: Int, error: DriveError? = nil) {
+    public static func sendUploadError(filename: String, parentId: Int, error: DriveError) {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = uploadCategoryId
         content.sound = .default
 
-        if let error = error {
-            content.title = KDriveCoreStrings.Localizable.errorUpload
-            content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
+        content.title = KDriveCoreStrings.Localizable.errorUpload
+        content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
+        content.userInfo[parentIdKey] = parentId
+
+        sendImmediately(notification: content, id: uploadErrorNotificationId)
+    }
+
+    public static func sendUploadDoneNotification(filename: String, parentId: Int) {
+        let content = UNMutableNotificationContent()
+        content.categoryIdentifier = uploadCategoryId
+        content.sound = .default
+
+        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
+            content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
+            content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
             content.userInfo[parentIdKey] = parentId
 
             sendImmediately(notification: content, id: uploadDoneNotificationId)
-        } else {
-            UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
-                content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
-                content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
-                content.userInfo[parentIdKey] = parentId
-
-                sendImmediately(notification: content, id: uploadDoneNotificationId)
-            }
         }
     }
 
