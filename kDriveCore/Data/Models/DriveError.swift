@@ -145,9 +145,9 @@ extension DriveError: Codable {
 
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        type = (try? values.decode(DriveErrorType.self, forKey: .type)) ?? DriveError.unknownError.type
-        code = (try? values.decode(String.self, forKey: .code)) ?? DriveError.unknownError.code
-        userInfo = try? values.decode([UserInfoKey: ErrorUserInfo].self, forKey: .userInfo)
+        type = try values.decode(DriveErrorType.self, forKey: .type)
+        code = try values.decode(String.self, forKey: .code)
+        userInfo = try values.decodeIfPresent([UserInfoKey: ErrorUserInfo].self, forKey: .userInfo)
         localizedDescription = DriveError.unknownError.localizedDescription
         if let errorDescription = DriveError.allErrors.first(where: { $0.type == type && $0.code == code })?.localizedDescription {
             localizedDescription = errorDescription
