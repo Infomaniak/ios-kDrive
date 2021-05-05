@@ -75,12 +75,11 @@ class SavePhotoViewController: SaveFileViewController {
         }
 
         var data: Data!
-        var name: String!
+        let name: String
         if uti == .image {
             switch format {
             case .jpg:
                 data = photo.jpegData(compressionQuality: JPEG_QUALITY)
-                name = filename.hasSuffix(".jpg") ? filename : "\(filename).jpg"
             case .png:
                 if photo.imageOrientation != .up {
                     let format = photo.imageRendererFormat
@@ -89,8 +88,8 @@ class SavePhotoViewController: SaveFileViewController {
                     }
                 }
                 data = photo.pngData()
-                name = filename.hasSuffix(".png") ? filename : "\(filename).png"
             }
+            name = filename.hasSuffix(".\(format.extension)") ? filename : "\(filename).\(format.extension)"
         } else {
             data = try? Data(contentsOf: videoUrl)
             name = filename.hasSuffix(".mov") ? filename : "\(filename).mov"
@@ -106,9 +105,14 @@ class SavePhotoViewController: SaveFileViewController {
                 name: name
             )
             UploadQueue.instance.addToQueue(file: newFile)
-            let parent = presentingViewController
             dismiss(animated: true) {
-                parent?.dismiss(animated: true)
+                if let parent = self.presentingViewController {
+                    parent.dismiss(animated: true) {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(name))
+                    }
+                } else {
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(name))
+                }
             }
         } catch {
             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)

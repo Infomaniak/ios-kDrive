@@ -101,8 +101,8 @@ public class NotificationsHelper {
 
     public static func sendPausedUploadQueueNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Importation en pause"
-        content.body = "Des importations sont toujours en cours dans kDrive. Elles ont été mise en pause et reprendront cette nuit ou quand vous relancerez l’app."
+        content.title = KDriveCoreStrings.Localizable.uploadPausedTitle
+        content.body = KDriveCoreStrings.Localizable.uploadPausedDescription
         content.categoryIdentifier = uploadCategoryId
         content.sound = .default
         sendImmediately(notification: content, id: uploadPausedNotificationId)

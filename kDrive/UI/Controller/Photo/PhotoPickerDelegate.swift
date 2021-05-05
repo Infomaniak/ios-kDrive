@@ -47,7 +47,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
 
         guard let savePhotoVC = savePhotoNavigationViewController.viewControllers.first as? SavePhotoViewController,
             let mediaType = info[.mediaType] as? String, let uti = UTI(mediaType) else {
-            return picker.dismiss(animated: true)
+            return
         }
 
         savePhotoVC.uti = uti
@@ -70,7 +70,14 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
             break
         }
 
-        viewController.present(savePhotoNavigationViewController, animated: true)
+        if picker.sourceType == .camera {
+            // Don't present view
+            picker.dismiss(animated: true) {
+                savePhotoVC.didClickOnButton()
+            }
+        } else {
+            viewController.present(savePhotoNavigationViewController, animated: true)
+        }
     }
 
 }

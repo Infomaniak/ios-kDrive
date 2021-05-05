@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import UIKit
 import VisionKit
+import kDriveCore
 
 enum ScanFileFormat: Int, CaseIterable {
     case pdf, image
@@ -30,18 +31,44 @@ enum ScanFileFormat: Int, CaseIterable {
             return "Image (.JPG)"
         }
     }
+
+    var uti: UTI {
+        switch self {
+        case .pdf:
+            return .pdf
+        case .image:
+            return .jpeg
+        }
+    }
+
+    var `extension`: String {
+        return uti.preferredFilenameExtension!
+    }
 }
 
 enum PhotoFileFormat: Int, CaseIterable {
-    case png, jpg
+    case jpg, png
 
     var title: String {
         switch self {
-        case .png:
-            return "PNG"
         case .jpg:
             return "JPG"
+        case .png:
+            return "PNG"
         }
+    }
+
+    var uti: UTI {
+        switch self {
+        case .jpg:
+            return .jpeg
+        case .png:
+            return .png
+        }
+    }
+
+    var `extension`: String {
+        return uti.preferredFilenameExtension!
     }
 }
 

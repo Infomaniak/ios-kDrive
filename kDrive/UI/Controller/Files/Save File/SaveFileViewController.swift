@@ -519,6 +519,9 @@ extension SaveFileViewController: FooterButtonDelegate {
             AccountManager.instance.setCurrentDriveForCurrentAccount(drive: originalDrive)
             AccountManager.instance.saveAccounts()
         }
-        navigationController?.dismiss(animated: true)
+        navigationController?.dismiss(animated: true) { [self] in
+            let message = items.count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveStrings.Localizable.allUploadInProgress(items[0].name)
+            UIConstants.showSnackBar(message: message)
+        }
     }
 }
