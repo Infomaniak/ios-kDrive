@@ -127,9 +127,23 @@ public class NotificationsHelper {
             return
         }
 
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
-        let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
-        UNUserNotificationCenter.current().add(request)
+        var isInBackground = true
+        if !Constants.isInExtension {
+            DispatchQueue.main.sync {
+                isInBackground = UIApplication.shared.applicationState != .active
+            }
+        }
+
+        if isInBackground {
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+            let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
+            UNUserNotificationCenter.current().add(request)
+        } else {
+            DispatchQueue.main.async {
+                InfomaniakSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
+            }
+        }
+
     }
 
 }
