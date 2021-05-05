@@ -90,7 +90,6 @@ public class UploadQueue {
     }
 
     public func addToQueueFromRealm() {
-        fileUploadedCount = 0
         DispatchQueue.global(qos: .default).async {
             self.locks.addToQueueFromRealm.performLocked {
                 self.compactRealmIfNeeded()

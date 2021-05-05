@@ -25,7 +25,6 @@ public class NotificationsHelper {
     public static let uploadCategoryId = "com.kdrive.notification.upload"
     private static let uploadQueueCountNotificationId = "uploadQueueCount"
     private static let uploadDoneNotificationId = "uploadDone"
-    private static let uploadErrorNotificationId = "uploadError"
     private static let uploadPausedNotificationId = "uploadPaused"
     public static let previousUploadCountKey = "previousUploadCountKey"
     public static let parentIdKey = "parentIdKey"
@@ -72,7 +71,7 @@ public class NotificationsHelper {
         content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
         content.userInfo[parentIdKey] = parentId
 
-        sendImmediately(notification: content, id: uploadErrorNotificationId)
+        sendImmediately(notification: content, id: UUID().uuidString)
     }
 
     public static func sendUploadDoneNotification(filename: String, parentId: Int) {
@@ -116,10 +115,6 @@ public class NotificationsHelper {
         content.categoryIdentifier = generalCategoryId
         content.sound = .default
         sendImmediately(notification: content, id: migrateNotificationId)
-    }
-
-    public static func removeUploadNotification() {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [uploadDoneNotificationId])
     }
 
     private static func sendImmediately(notification: UNMutableNotificationContent, id: String) {
