@@ -60,6 +60,7 @@ class TrashFloatingPanelTableViewController: UITableViewController, FloatingPane
         super.viewDidLoad()
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
+        tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         tableView.register(cellView: FloatingPanelTableViewCell.self)
     }
 

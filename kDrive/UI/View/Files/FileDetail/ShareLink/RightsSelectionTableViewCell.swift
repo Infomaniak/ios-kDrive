@@ -49,7 +49,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        contentInsetView.backgroundColor = .white
+        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         if isSelectable {
             if selected {
                 contentInsetView.borderColor = KDriveAsset.infomaniakColor.color

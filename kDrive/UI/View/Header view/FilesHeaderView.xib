@@ -157,7 +157,7 @@
                                             </subviews>
                                         </stackView>
                                     </subviews>
-                                    <color key="backgroundColor" name="backgroundCardView"/>
+                                    <color key="backgroundColor" name="backgroundCardViewColor"/>
                                     <constraints>
                                         <constraint firstItem="5yn-rD-wNf" firstAttribute="centerY" secondItem="B1K-xA-pKn" secondAttribute="centerY" id="8Ib-Ed-udR"/>
                                         <constraint firstAttribute="height" constant="45" id="9Zz-LA-jVT"/>
@@ -235,7 +235,7 @@
                                     <color key="tintColor" name="fileDescColor"/>
                                 </stackView>
                             </subviews>
-                            <color key="backgroundColor" name="backgroundCardView"/>
+                            <color key="backgroundColor" name="backgroundCardViewColor"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="68" id="1r9-8s-ZPa"/>
                                 <constraint firstItem="sqn-AP-75R" firstAttribute="leading" secondItem="DyE-08-LRW" secondAttribute="trailing" constant="8" id="3lz-CW-BKx"/>
@@ -368,7 +368,7 @@
         <namedColor name="actionColor">
             <color red="0.33333333333333331" green="0.40392156862745099" blue="0.44705882352941179" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <namedColor name="backgroundCardView">
+        <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="backgroundColor">
