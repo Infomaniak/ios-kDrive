@@ -69,10 +69,10 @@
         <!--NavigationSwitchDriveController-->
         <scene sceneID="idN-o1-ZM6">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="LtV-Jh-xYn" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <viewControllerPlaceholder storyboardName="Home" referencedIdentifier="NavigationSwitchDriveController" id="brm-hJ-BJq" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" id="1XT-kc-qoA"/>
                 </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="LtV-Jh-xYn" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3292" y="92"/>
         </scene>
@@ -715,19 +715,6 @@
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="Lbz-PD-KrR"/>
                                 </constraints>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qVA-oy-iZP">
-                                <rect key="frame" x="340" y="32" width="58" height="34"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
-                                <state key="normal" title="Fermer">
-                                    <color key="titleColor" name="infomaniakColor"/>
-                                </state>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonClose"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="buttonCloseClicked:" destination="c0t-5c-eBh" eventType="touchUpInside" id="naa-cR-Cb0"/>
-                                </connections>
-                            </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm">
                                 <rect key="frame" x="32" y="318" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
@@ -789,12 +776,23 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </view>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="31R-ua-Vke">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="56"/>
+                                <items>
+                                    <navigationItem id="Yoo-8c-fB5">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="yGV-IZ-Ryx">
+                                            <connections>
+                                                <action selector="buttonCloseClicked:" destination="c0t-5c-eBh" id="sXl-If-8kb"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="cUS-U3-4VN"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="cUS-U3-4VN" firstAttribute="trailing" secondItem="0Ow-gT-FNm" secondAttribute="trailing" constant="32" id="0kw-aY-tEg"/>
-                            <constraint firstItem="cUS-U3-4VN" firstAttribute="trailing" secondItem="qVA-oy-iZP" secondAttribute="trailing" constant="16" id="4FV-gr-Vec"/>
                             <constraint firstItem="0Ow-gT-FNm" firstAttribute="top" secondItem="Wii-vB-zWo" secondAttribute="bottom" constant="48" id="Ehl-W4-aVE"/>
                             <constraint firstItem="RCf-P4-yUy" firstAttribute="top" secondItem="gJI-rA-NpO" secondAttribute="bottom" constant="32" id="HDe-jy-Xzs"/>
                             <constraint firstItem="0Ow-gT-FNm" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="KUF-Cm-cdP"/>
@@ -808,14 +806,17 @@
                             <constraint firstItem="Wii-vB-zWo" firstAttribute="leading" secondItem="9eh-5H-O68" secondAttribute="leading" constant="16" id="c1O-aK-cIV"/>
                             <constraint firstItem="gJI-rA-NpO" firstAttribute="top" secondItem="M26-GT-YZh" secondAttribute="bottom" constant="16" id="ecp-hp-W2p"/>
                             <constraint firstItem="gJI-rA-NpO" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="gW9-BM-hbr"/>
-                            <constraint firstItem="qVA-oy-iZP" firstAttribute="top" secondItem="cUS-U3-4VN" secondAttribute="top" constant="32" id="jSN-qB-2wR"/>
+                            <constraint firstItem="31R-ua-Vke" firstAttribute="leading" secondItem="9eh-5H-O68" secondAttribute="leading" id="iJl-6h-SWA"/>
                             <constraint firstItem="M26-GT-YZh" firstAttribute="top" secondItem="0Ow-gT-FNm" secondAttribute="bottom" constant="16" id="qRS-4T-kKO"/>
                             <constraint firstItem="RCf-P4-yUy" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="uhP-lK-OIm"/>
+                            <constraint firstItem="31R-ua-Vke" firstAttribute="top" secondItem="9eh-5H-O68" secondAttribute="top" id="wGL-ir-TRJ"/>
+                            <constraint firstAttribute="trailing" secondItem="31R-ua-Vke" secondAttribute="trailing" id="yKC-UC-Ln5"/>
                         </constraints>
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
                         <outlet property="faceIdSwitch" destination="Tl5-GF-GQi" id="BWP-7N-b7q"/>
+                        <outlet property="navigationBar" destination="31R-ua-Vke" id="igV-Iq-7Hw"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cuo-YB-vAU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -871,7 +872,7 @@
     </scenes>
     <designables>
         <designable name="abC-af-U6z">
-            <size key="intrinsicContentSize" width="95" height="34"/>
+            <size key="intrinsicContentSize" width="91" height="34"/>
         </designable>
     </designables>
     <resources>

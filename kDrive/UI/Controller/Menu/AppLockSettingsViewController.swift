@@ -43,16 +43,24 @@ struct AppLockHelper {
 class AppLockSettingsViewController: UIViewController {
 
     @IBOutlet weak var faceIdSwitch: UISwitch!
+    @IBOutlet weak var navigationBar: UINavigationBar!
 
     var closeActionHandler: (() -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationBar.shadowImage = UIImage()
+        navigationBar.setBackgroundImage(UIImage(), for: .default)
 
         faceIdSwitch.setOn(UserDefaults.shared.isAppLockEnabled, animated: false)
     }
 
-    @IBAction func buttonCloseClicked(_ sender: UIButton) {
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        closeActionHandler?()
+    }
+
+    @IBAction func buttonCloseClicked(_ sender: Any) {
         closeActionHandler?()
     }
 
