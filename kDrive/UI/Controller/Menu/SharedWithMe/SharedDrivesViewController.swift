@@ -42,13 +42,13 @@ class SharedDrivesViewController: UIViewController {
     }
 
     private func showEmptyView() {
-        if ReachabilityListener.instance.currentStatus == .offline {
+        if drives.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
             let background = EmptyTableView.instantiate(type: .noNetwork, button: true)
             background.actionHandler = { sender in
                 self.tableView.reloadData()
             }
             tableView.backgroundView = background
-        } else if drives.count == 0 {
+        } else if drives.isEmpty {
             let background = EmptyTableView.instantiate(type: .noSharedWithMe)
             tableView.backgroundView = background
         } else {
