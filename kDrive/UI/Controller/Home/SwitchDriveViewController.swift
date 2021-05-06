@@ -78,6 +78,7 @@ class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableV
         let drive = filteredDrives[indexPath.row]
         if drive.maintenance {
             let maintenanceFloatingPanelViewController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
+            (maintenanceFloatingPanelViewController.contentViewController as? DriveMaintenanceFloatingPanelViewController)?.setTitleLabel(with: drive.name)
             self.present(maintenanceFloatingPanelViewController, animated: true)
         } else {
             AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)

@@ -28,14 +28,17 @@ class DriveMaintenanceFloatingPanelViewController: InformationFloatingPanelViewC
         imageView.image = KDriveAsset.maintenance.image
         imageView.tintColor = KDriveAsset.iconColor.color
         animationView.isHidden = true
-        titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitle(AccountManager.instance.currentDriveFileManager.drive.name)
         descriptionLabel.text = KDriveStrings.Localizable.driveMaintenanceDescription
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
         leftButton.isHidden = true
         rightButton.setTitle(KDriveStrings.Localizable.buttonClose, for: .normal)
     }
-    
+
+    func setTitleLabel(with driveName: String) {
+        titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitle(driveName)
+    }
+
     override func rightButtonPressed(_ sender: UIButton) {
         floatingPanelViewController.dismiss(animated: true)
     }

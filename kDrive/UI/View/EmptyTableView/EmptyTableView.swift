@@ -33,6 +33,7 @@ class EmptyTableView: UIView {
         case noActivitiesSolo
         case noImages
         case noComments
+        case maintenance
     }
 
     @IBOutlet weak var bottomToButtonConstraint: NSLayoutConstraint!
@@ -67,7 +68,7 @@ class EmptyTableView: UIView {
         return view
     }
 
-    class func instantiate(type: EmptyTableViewType, button: Bool = false, setCenteringEnabled: Bool = true) -> EmptyTableView {
+    class func instantiate(type: EmptyTableViewType, button: Bool = false, setCenteringEnabled: Bool = true, name: String = "") -> EmptyTableView {
         let view: EmptyTableView
         switch type {
         case .noNetwork:
@@ -95,7 +96,10 @@ class EmptyTableView: UIView {
             view = self.instantiate(logo: KDriveAsset.images.image, message: KDriveStrings.Localizable.homeNoPictures)
         case .noComments:
             view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
+        case .maintenance:
+            view = self.instantiate(logo: KDriveAsset.maintenance.image, message: KDriveStrings.Localizable.driveMaintenanceTitle(name), details: KDriveStrings.Localizable.driveMaintenanceDescription)
         }
+
         if !setCenteringEnabled {
             view.setCenteringEnabled(false)
         }
