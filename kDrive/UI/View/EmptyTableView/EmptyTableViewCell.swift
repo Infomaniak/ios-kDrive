@@ -30,7 +30,7 @@ class EmptyTableViewCell: UITableViewCell {
     }
 
     func configureCell(with type: EmptyTableView.EmptyTableViewType) {
-        emptyView = EmptyTableView.instantiate(type: type)
+        emptyView = EmptyTableView.instantiate(type: type, setCenteringEnabled: false)
         contentHoldingView.addArrangedSubview(emptyView)
     }
 }

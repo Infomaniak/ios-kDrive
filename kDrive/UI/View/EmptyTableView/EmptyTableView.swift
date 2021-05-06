@@ -67,49 +67,36 @@ class EmptyTableView: UIView {
         return view
     }
 
-    class func instantiate(type: EmptyTableViewType, button: Bool = false, setCenteringEnabled: Bool? = nil) -> EmptyTableView {
+    class func instantiate(type: EmptyTableViewType, button: Bool = false, setCenteringEnabled: Bool = true) -> EmptyTableView {
         let view: EmptyTableView
-        let defaultCentering: Bool
         switch type {
         case .noNetwork:
             view = self.instantiate(logo: KDriveAsset.offline.image, message: KDriveStrings.Localizable.noFilesDescriptionNoNetwork, button: button)
-            defaultCentering = false
         case .noOffline:
             view = self.instantiate(logo: KDriveAsset.availableOffline.image, message: KDriveStrings.Localizable.offlineFileNoFile, details: KDriveStrings.Localizable.offlineFileNoFileDescription)
-            defaultCentering = false
         case .noTrash:
             view = self.instantiate(logo: KDriveAsset.delete.image, message: KDriveStrings.Localizable.trashNoFile)
-            defaultCentering = false
         case .emptyFolder:
             view = self.instantiate(logo: KDriveAsset.folderFilled.image, message: KDriveStrings.Localizable.noFilesDescription)
-            defaultCentering = false
         case .noFavorite:
             view = self.instantiate(logo: KDriveAsset.favorite.image, message: KDriveStrings.Localizable.favoritesNoFile)
             view.emptyImageView.tintColor = KDriveAsset.favoriteColor.color
-            defaultCentering = false
         case .noShared:
             view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.mySharesNoFile)
-            defaultCentering = false
         case .noSharedWithMe:
             view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.sharedWithMeNoFile)
-            defaultCentering = false
         case .noSearchResults:
             view = self.instantiate(logo: KDriveAsset.search.image, message: KDriveStrings.Localizable.searchNoFile)
-            defaultCentering = false
         case .noActivities:
             view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescription)
-            defaultCentering = true
         case .noActivitiesSolo:
             view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescriptionSolo)
-            defaultCentering = true
         case .noImages:
             view = self.instantiate(logo: KDriveAsset.images.image, message: KDriveStrings.Localizable.homeNoPictures)
-            defaultCentering = true
         case .noComments:
             view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
-            defaultCentering = true
         }
-        if setCenteringEnabled ?? defaultCentering {
+        if !setCenteringEnabled {
             view.setCenteringEnabled(false)
         }
         return view
