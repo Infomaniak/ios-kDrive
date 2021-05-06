@@ -32,6 +32,10 @@ let shareExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CON
 
 let debugShareExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG"]) { (first, _) in first }
 
+let actionExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION", "ASSETCATALOG_COMPILER_APPICON_NAME": "ExtensionIcon"]) { (first, _) in first }
+
+let debugActionExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG", "ASSETCATALOG_COMPILER_APPICON_NAME": "ExtensionIcon"]) { (first, _) in first }
+
 let project = Project(name: "kDrive",
     packages: [
             .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.2.2")),
@@ -73,6 +77,7 @@ let project = Project(name: "kDrive",
                     .target(name: "kDriveFileProvider"),
                     .target(name: "kDriveCore"),
                     .target(name: "kDriveShareExtension"),
+                    .target(name: "kDriveActionExtension"),
                     .package(product: "FloatingPanel"),
                     .package(product: "BetterSegmentedControl"),
                     .package(product: "Lottie"),
@@ -243,5 +248,99 @@ let project = Project(name: "kDrive",
                     .package(product: "DropDown")
             ],
             settings: Settings(base: shareExtensionSettings, debug: Configuration(settings: debugShareExtensionSettings))),
+        Target(name: "kDriveActionExtension",
+            platform: .iOS,
+            product: .appExtension,
+            bundleId: "com.infomaniak.drive.ActionExtension",
+            deploymentTarget: .iOS(targetVersion: "12.0", devices: [.iphone, .ipad]),
+            infoPlist: .extendingDefault(with: [
+                "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
+                "CFBundleShortVersionString": "$(MARKETING_VERSION)",
+                "CFBundleDisplayName": "Enregistrer dans kDrive",
+                "AppIdentifierPrefix": "$(AppIdentifierPrefix)",
+                "NSExtension": [
+                    "NSExtensionMainStoryboard": "MainInterface",
+                    "NSExtensionPointIdentifier": "com.apple.ui-services",
+                    "NSExtensionAttributes": ["NSExtensionActivationRule": "SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, (ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.data\")).@count == $extensionItem.attachments.@count ).@count > 0",
+                        "NSExtensionServiceAllowsFinderPreviewItem": true,
+                        "NSExtensionServiceAllowsTouchBarItem": true,
+                        "NSExtensionServiceFinderPreviewIconName": "NSActionTemplate",
+                        "NSExtensionServiceTouchBarBezelColorName": "TouchBarBezel",
+                        "NSExtensionServiceTouchBarIconName": "NSActionTemplate"]
+                ]
+                ]),
+            sources: ["kDriveActionExtension/**",
+                "kDrive/UI/Controller/Alert/AlertFieldViewController.swift",
+                "kDrive/UI/Controller/Alert/AlertTextViewController.swift",
+                "kDrive/UI/Controller/Alert/AlertViewController.swift",
+                "kDrive/UI/Controller/Create File/FloatingPanelUtils.swift",
+                "kDrive/UI/Controller/Files/Rights and Share/**",
+                "kDrive/UI/Controller/Files/Save File/**",
+                "kDrive/UI/Controller/Files/Search/**",
+                "kDrive/UI/Controller/Files/FileListCollectionViewController.swift",
+                "kDrive/UI/Controller/Files/FloatingPanelSortOptionTableViewController.swift",
+                "kDrive/UI/Controller/Floating Panel Information/**",
+                "kDrive/UI/Controller/NewFolder/**",
+                "kDrive/UI/View/EmptyTableView/**",
+                "kDrive/UI/View/Header view/**",
+                "kDrive/UI/View/Files/FileDetail/ShareLink/**",
+                "kDrive/UI/View/Files/SaveFile/**",
+                "kDrive/UI/View/Files/Search/**",
+                "kDrive/UI/View/Files/Upload/**",
+                "kDrive/UI/View/Files/FileCollectionViewCell.swift",
+                "kDrive/UI/View/Files/FileGridCollectionViewCell.swift",
+                "kDrive/UI/View/Files/SwipableCell.swift",
+                "kDrive/UI/View/Files/SwipableCollectionView.swift",
+                "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.swift",
+                "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.swift",
+                "kDrive/UI/View/Footer view/**",
+                "kDrive/UI/View/Menu/SwitchUser/**",
+                "kDrive/UI/View/Menu/MenuTableViewCell.swift",
+                "kDrive/UI/View/NewFolder/**",
+                "kDrive/Utils/**",
+                "Derived/Sources/Assets+KDrive.swift",
+                "Derived/Sources/Bundle+kDrive.swift",
+                "Derived/Sources/Strings+kDrive.swift"],
+            resources: [
+                "kDriveActionExtension/**/*.storyboard",
+                "kDrive/UI/Controller/Files/**/*.storyboard",
+                "kDrive/UI/Controller/Floating Panel Information/*.storyboard",
+                "kDrive/UI/Controller/NewFolder/*.storyboard",
+                "kDrive/UI/View/EmptyTableView/**/*.xib",
+                "kDrive/UI/View/Header view/**/*.xib",
+                "kDrive/UI/View/Files/FileCollectionViewCell.xib",
+                "kDrive/UI/View/Files/FileGridCollectionViewCell.xib",
+                "kDrive/UI/View/Files/FileDetail/ShareLink/*.xib",
+                "kDrive/UI/View/Files/SaveFile/*.xib",
+                "kDrive/UI/View/Files/Search/*.xib",
+                "kDrive/UI/View/Files/Upload/*.xib",
+                "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.xib",
+                "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.xib",
+                "kDrive/UI/View/Footer view/*.xib",
+                "kDrive/UI/View/Menu/MenuTableViewCell.xib",
+                "kDrive/UI/View/Menu/SwitchUser/*.xib",
+                "kDrive/UI/View/NewFolder/*.xib",
+                "kDriveActionExtension/**/*.xcassets",
+                "kDrive/**/*.xcassets",
+                "kDriveActionExtension/**/*.strings",
+                "kDrive/**/Localizable.strings",
+                "kDrive/**/*.stringsdict"
+            ],
+            entitlements: "kDriveActionExtension/ActionExtension.entitlements",
+            actions: [
+                /* This prevents Tuist from generating automatic resources definition for this extension
+                  as disabling it seems only possible at a project level (.disableSynthesizedResourceAccessors */
+                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Bundle+kDriveActionExtension.swift"], name: "Fix Tuist"),
+                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Assets+KDriveActionExtension.swift"], name: "Fix Tuist"),
+                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Strings+KDriveActionExtension.swift"], name: "Fix Tuist")
+            ],
+            dependencies: [
+                    .target(name: "kDriveCore"),
+                    .package(product: "FloatingPanel"),
+                    .package(product: "BetterSegmentedControl"),
+                    .package(product: "Lottie"),
+                    .package(product: "DropDown")
+            ],
+            settings: Settings(base: actionExtensionSettings, debug: Configuration(settings: debugActionExtensionSettings))),
     ],
     fileHeaderTemplate: .file("file-header-template.txt"))
