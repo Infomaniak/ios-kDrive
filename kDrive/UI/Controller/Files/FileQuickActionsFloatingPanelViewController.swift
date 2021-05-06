@@ -190,7 +190,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             case .manageDropbox:
                 return file.visibility == .isCollaborativeFolder
             case .seeFolder:
-                return !normalFolderHierarchy
+                return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
                 return !sharedWithMe
             case .move:
