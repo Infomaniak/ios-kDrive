@@ -130,7 +130,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func setHighlighting() {
-        highlightedView.isHidden = !isHighlighted
+        highlightedView?.isHidden = !isHighlighted
     }
 
     func setThumbnailFor(file: File) {
