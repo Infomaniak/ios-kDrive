@@ -47,6 +47,9 @@ class LastModificationsViewController: FileListCollectionViewController {
                 if let data = response?.data {
                     self.getNewChildren(newChildren: data)
                 }
+                if !self.currentDirectory.fullyDownloaded && self.sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+                    self.showEmptyView(.noNetwork, children: self.sortedChildren)
+                }
             }
         } else {
             driveFileManager.apiFetcher.getFileListForDirectory(parentId: currentDirectory.id, page: currentPage) { (response, error) in
@@ -56,10 +59,10 @@ class LastModificationsViewController: FileListCollectionViewController {
                     children.append(contentsOf: data.children)
                     self.getNewChildren(newChildren: children)
                 }
+                if !self.currentDirectory.fullyDownloaded && self.sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+                    self.showEmptyView(.noNetwork, children: self.sortedChildren)
+                }
             }
-        }
-        if !currentDirectory.fullyDownloaded && sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
-            showEmptyView(.noActivitiesSolo, children: sortedChildren)
         }
     }
 
@@ -85,7 +88,7 @@ class LastModificationsViewController: FileListCollectionViewController {
         }
         setSelectedCells()
 
-        showEmptyView(.noShared, children: newSortedChildren)
+        showEmptyView(.noActivitiesSolo, children: newSortedChildren)
     }
 
     override func forceRefresh() {
@@ -95,7 +98,7 @@ class LastModificationsViewController: FileListCollectionViewController {
         collectionView.reloadData()
         fetchNextPage(forceRefresh: true)
     }
-    
+
     override func getFileActivities(directory: File) {
         //We don't have incremental changes for LastModifications so we just fetch everything again
         forceRefresh()

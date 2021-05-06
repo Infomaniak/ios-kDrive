@@ -64,7 +64,6 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
                 let changeset = getChangesetFor(newChildren: newChildren)
 
                 collectionView.reload(using: changeset) { newChildren in
-
                     sortedChildren = newChildren
                     updateSelectedItems(newChildren: newChildren)
                 }
@@ -76,7 +75,7 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
                 }
             } else {
             }
-            if !currentDirectory.fullyDownloaded && sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+            if sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
                 showEmptyView(.noNetwork, children: sortedChildren)
             }
         }

@@ -54,6 +54,9 @@ class TrashCollectionViewController: FileListCollectionViewController {
                     getNewChildren(newChildren: trashedList)
                 }
 
+                if !currentDirectory.fullyDownloaded && sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+                    showEmptyView(.noNetwork, children: sortedChildren, showButton: true)
+                }
             }
         } else {
             driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: currentPage, sortType: sortType) { [self] (response, error) in
@@ -64,10 +67,11 @@ class TrashCollectionViewController: FileListCollectionViewController {
                     children.append(contentsOf: file.children)
                     getNewChildren(newChildren: children)
                 }
+
+                if !currentDirectory.fullyDownloaded && sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+                    showEmptyView(.noNetwork, children: sortedChildren, showButton: true)
+                }
             }
-        }
-        if !currentDirectory.fullyDownloaded && sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
-            showEmptyView(.noNetwork, children: sortedChildren, showButton: true)
         }
     }
 
