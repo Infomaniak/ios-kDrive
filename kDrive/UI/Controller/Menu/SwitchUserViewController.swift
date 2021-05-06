@@ -52,9 +52,18 @@ extension SwitchUserViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let account = accountManager.accounts[indexPath.row]
-        AccountManager.instance.switchAccount(newAccount: account)
-        (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
-        self.navigationController?.popViewController(animated: true)
+        
+        let drives = DriveInfosManager.instance.getDrives(for: account.userId)
+        if drives.count == 1 && drives[0].maintenance {
+            let driveErrorVC = DriveErrorViewController.instantiate()
+            driveErrorVC.driveErrorViewType = .maintenance
+            driveErrorVC.driveName = drives[0].name
+            self.present(driveErrorVC, animated: true, completion: nil)
+        } else {
+            AccountManager.instance.switchAccount(newAccount: account)
+            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+            self.navigationController?.popViewController(animated: true)
+        }
     }
 
 }

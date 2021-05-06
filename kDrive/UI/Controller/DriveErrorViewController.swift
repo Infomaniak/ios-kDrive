@@ -21,13 +21,27 @@ import InfomaniakLogin
 import InfomaniakCore
 import kDriveCore
 
-class NoDriveViewController: UIViewController {
+class DriveErrorViewController: UIViewController {
+
+    enum DriveErrorViewType {
+        case noDrive
+        case maintenance
+    }
 
     @IBOutlet weak var circleView: UIView!
     @IBOutlet weak var otherProfileButton: UIButton!
+    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet weak var mainButton: IKLargeButton!
 
+    var driveErrorViewType = DriveErrorViewType.noDrive
+    var driveName = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupView()
         setupCircleView()
     }
 
@@ -41,11 +55,26 @@ class NoDriveViewController: UIViewController {
         dismiss(animated: true)
     }
 
+    private func setupView() {
+        switch driveErrorViewType {
+        case .noDrive:
+            imageView.image = KDriveAsset.noDrive.image
+            titleLabel.text = KDriveStrings.Localizable.noDriveTitle
+            descriptionLabel.text = KDriveStrings.Localizable.noDriveDescription
+        case .maintenance:
+            imageView.image = KDriveAsset.maintenance.image
+            imageView.tintColor = KDriveAsset.iconColor.color
+            titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitle(driveName)
+            descriptionLabel.text = KDriveStrings.Localizable.driveMaintenanceDescription
+            mainButton.isHidden = true
+        }
+    }
+    
     private func setupCircleView() {
         circleView.cornerRadius = circleView.bounds.width / 2
     }
 
-    class func instantiate() -> NoDriveViewController {
-        return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "NoDriveViewController") as! NoDriveViewController
+    class func instantiate() -> DriveErrorViewController {
+        return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DriveErrorViewController") as! DriveErrorViewController
     }
 }

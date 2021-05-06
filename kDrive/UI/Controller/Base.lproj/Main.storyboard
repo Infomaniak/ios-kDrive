@@ -345,10 +345,10 @@
             </objects>
             <point key="canvasLocation" x="108.69565217391305" y="643.52678571428567"/>
         </scene>
-        <!--No Drive View Controller-->
+        <!--Drive Error View Controller-->
         <scene sceneID="Zye-tK-ZkE">
             <objects>
-                <viewController storyboardIdentifier="NoDriveViewController" modalPresentationStyle="overCurrentContext" useStoryboardIdentifierAsRestorationIdentifier="YES" id="8Hf-Au-xo5" customClass="NoDriveViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="DriveErrorViewController" modalPresentationStyle="overCurrentContext" useStoryboardIdentifierAsRestorationIdentifier="YES" id="8Hf-Au-xo5" customClass="DriveErrorViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qid-Rp-c7E">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -469,7 +469,11 @@
                     </view>
                     <connections>
                         <outlet property="circleView" destination="D7m-5I-rWo" id="Olt-pt-DPS"/>
+                        <outlet property="descriptionLabel" destination="aqN-bN-aqi" id="LPZ-RD-0O8"/>
+                        <outlet property="imageView" destination="fzr-FE-ijy" id="YR0-dC-xj3"/>
+                        <outlet property="mainButton" destination="1ka-pK-vme" id="mh2-i1-wh8"/>
                         <outlet property="otherProfileButton" destination="OXD-Rc-0Y2" id="EVt-Ys-vcZ"/>
+                        <outlet property="titleLabel" destination="gpt-af-Fsa" id="HwU-HM-5gp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2RX-eI-0VB" sceneMemberID="firstResponder"/>
