@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
@@ -25,6 +25,10 @@
                             <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aCp-2c-Jek">
                                 <rect key="frame" x="0.0" y="0.0" width="174" height="130"/>
                                 <subviews>
+                                    <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z0E-HT-fIs">
+                                        <rect key="frame" x="0.0" y="0.0" width="174" height="130"/>
+                                        <color key="backgroundColor" name="backgroundCardViewSelectedColor"/>
+                                    </view>
                                     <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7D5-S4-5JV">
                                         <rect key="frame" x="0.0" y="0.0" width="174" height="130"/>
                                         <color key="backgroundColor" name="backgroundCardView"/>
@@ -123,13 +127,17 @@
                                 <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="7D5-S4-5JV" secondAttribute="bottom" id="3dL-pD-vTc"/>
+                                    <constraint firstAttribute="bottom" secondItem="z0E-HT-fIs" secondAttribute="bottom" id="71l-in-4nJ"/>
+                                    <constraint firstItem="z0E-HT-fIs" firstAttribute="leading" secondItem="aCp-2c-Jek" secondAttribute="leading" id="8aP-K0-xVU"/>
                                     <constraint firstAttribute="bottom" secondItem="4Ut-eJ-Jw7" secondAttribute="bottom" constant="35" id="9DY-6t-ggP"/>
+                                    <constraint firstItem="z0E-HT-fIs" firstAttribute="top" secondItem="aCp-2c-Jek" secondAttribute="top" id="Cu0-oT-IuZ"/>
                                     <constraint firstAttribute="trailing" secondItem="Ehl-Yp-Xhl" secondAttribute="trailing" id="DGt-5W-eA5"/>
                                     <constraint firstItem="Ehl-Yp-Xhl" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="bottom" id="Fa6-V1-PQI"/>
                                     <constraint firstAttribute="bottom" secondItem="Ehl-Yp-Xhl" secondAttribute="bottom" id="G4L-7x-jF2"/>
                                     <constraint firstItem="4Ut-eJ-Jw7" firstAttribute="top" secondItem="aCp-2c-Jek" secondAttribute="top" id="KFO-eV-YJW"/>
                                     <constraint firstItem="7D5-S4-5JV" firstAttribute="leading" secondItem="aCp-2c-Jek" secondAttribute="leading" id="Kx4-4J-9kt"/>
                                     <constraint firstItem="Ehl-Yp-Xhl" firstAttribute="leading" secondItem="aCp-2c-Jek" secondAttribute="leading" id="MHn-3i-ORU"/>
+                                    <constraint firstAttribute="trailing" secondItem="z0E-HT-fIs" secondAttribute="trailing" id="Mvk-oC-rxT"/>
                                     <constraint firstItem="7D5-S4-5JV" firstAttribute="top" secondItem="aCp-2c-Jek" secondAttribute="top" id="TDT-lk-a6G"/>
                                     <constraint firstAttribute="trailing" secondItem="7D5-S4-5JV" secondAttribute="trailing" id="grw-k8-WlX"/>
                                     <constraint firstAttribute="trailing" secondItem="4Ut-eJ-Jw7" secondAttribute="trailing" id="wJn-o4-hNH"/>
@@ -160,6 +168,7 @@
                 <outlet property="contentInsetView" destination="aCp-2c-Jek" id="lBq-mi-KfS"/>
                 <outlet property="disabledView" destination="7D5-S4-5JV" id="l0k-fh-f20"/>
                 <outlet property="favoriteImageView" destination="ffD-D7-NRt" id="4mW-nJ-9jj"/>
+                <outlet property="highlightedView" destination="z0E-HT-fIs" id="MK3-dU-BxN"/>
                 <outlet property="iconImageView" destination="m0U-12-qPF" id="5uU-yD-5hK"/>
                 <outlet property="largeIconImageView" destination="5Sk-df-fP8" id="q19-Hr-dG3"/>
                 <outlet property="logoImage" destination="j9K-4i-jdP" id="kHe-3O-R1o"/>
@@ -180,6 +189,9 @@
         </namedColor>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="backgroundCardViewSelectedColor">
+            <color red="0.78823529411764703" green="0.78823529411764703" blue="0.81568627450980391" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="favoriteColor">
             <color red="1" green="0.75686274509803919" blue="0.039215686274509803" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
