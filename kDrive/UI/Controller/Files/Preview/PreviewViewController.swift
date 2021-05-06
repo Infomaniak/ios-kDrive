@@ -425,7 +425,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
             switch file.convertedType {
             case .image:
-                if let image = UIImage(contentsOfFile: currentFile.localUrl.path) {
+                if let image = UIImage(contentsOfFile: file.localUrl.path) {
                     let cell = collectionView.dequeueReusableCell(type: ImagePreviewCollectionViewCell.self, for: indexPath)
                     cell.previewDelegate = self
                     cell.imagePreview.image = image
