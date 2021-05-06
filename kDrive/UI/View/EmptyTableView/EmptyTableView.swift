@@ -53,7 +53,7 @@ class EmptyTableView: UIView {
         topConstraint.isActive = !enabled
     }
 
-    class func instantiate(logo: UIImage, message: String, details: String = "", button: Bool = false, backgroundColor: UIColor =  KDriveAsset.backgroundCardViewColor.color) -> EmptyTableView {
+    class func instantiate(logo: UIImage, message: String, details: String = "", button: Bool = false, backgroundColor: UIColor = KDriveAsset.backgroundCardViewColor.color) -> EmptyTableView {
         let view = Bundle.main.loadNibNamed("EmptyTableView", owner: nil, options: nil)![0] as! EmptyTableView
         view.emptyImageView.image = logo
         view.emptyMessageLabel.text = message
@@ -67,50 +67,52 @@ class EmptyTableView: UIView {
         return view
     }
 
-    class func instantiate(type: EmptyTableViewType, button: Bool = false) -> EmptyTableView {
+    class func instantiate(type: EmptyTableViewType, button: Bool = false, setCenteringEnabled: Bool? = nil) -> EmptyTableView {
+        let view: EmptyTableView
+        let defaultCentering: Bool
         switch type {
         case .noNetwork:
-            let view = self.instantiate(logo: KDriveAsset.offline.image, message: KDriveStrings.Localizable.noFilesDescriptionNoNetwork, button: button)
-            return view
+            view = self.instantiate(logo: KDriveAsset.offline.image, message: KDriveStrings.Localizable.noFilesDescriptionNoNetwork, button: button)
+            defaultCentering = false
         case .noOffline:
-            let view = self.instantiate(logo: KDriveAsset.availableOffline.image, message: KDriveStrings.Localizable.offlineFileNoFile, details: KDriveStrings.Localizable.offlineFileNoFileDescription)
-            return view
+            view = self.instantiate(logo: KDriveAsset.availableOffline.image, message: KDriveStrings.Localizable.offlineFileNoFile, details: KDriveStrings.Localizable.offlineFileNoFileDescription)
+            defaultCentering = false
         case .noTrash:
-            let view = self.instantiate(logo: KDriveAsset.delete.image, message: KDriveStrings.Localizable.trashNoFile)
-            return view
+            view = self.instantiate(logo: KDriveAsset.delete.image, message: KDriveStrings.Localizable.trashNoFile)
+            defaultCentering = false
         case .emptyFolder:
-            let view = self.instantiate(logo: KDriveAsset.folderFilled.image, message: KDriveStrings.Localizable.noFilesDescription)
-            return view
+            view = self.instantiate(logo: KDriveAsset.folderFilled.image, message: KDriveStrings.Localizable.noFilesDescription)
+            defaultCentering = false
         case .noFavorite:
-            let view = self.instantiate(logo: KDriveAsset.favorite.image, message: KDriveStrings.Localizable.favoritesNoFile)
+            view = self.instantiate(logo: KDriveAsset.favorite.image, message: KDriveStrings.Localizable.favoritesNoFile)
             view.emptyImageView.tintColor = KDriveAsset.favoriteColor.color
-            return view
+            defaultCentering = false
         case .noShared:
-            let view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.mySharesNoFile)
-            return view
+            view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.mySharesNoFile)
+            defaultCentering = false
         case .noSharedWithMe:
-            let view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.sharedWithMeNoFile)
-            return view
+            view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.sharedWithMeNoFile)
+            defaultCentering = false
         case .noSearchResults:
-            let view = self.instantiate(logo: KDriveAsset.search.image, message: KDriveStrings.Localizable.searchNoFile)
-            return view
+            view = self.instantiate(logo: KDriveAsset.search.image, message: KDriveStrings.Localizable.searchNoFile)
+            defaultCentering = false
         case .noActivities:
-            let view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescription)
-            view.setCenteringEnabled(false)
-            return view
+            view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescription)
+            defaultCentering = true
         case .noActivitiesSolo:
-            let view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescriptionSolo)
-            view.setCenteringEnabled(false)
-            return view
+            view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescriptionSolo)
+            defaultCentering = true
         case .noImages:
-            let view = self.instantiate(logo: KDriveAsset.images.image, message: KDriveStrings.Localizable.homeNoPictures)
-            view.setCenteringEnabled(false)
-            return view
+            view = self.instantiate(logo: KDriveAsset.images.image, message: KDriveStrings.Localizable.homeNoPictures)
+            defaultCentering = true
         case .noComments:
-            let view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
-            view.setCenteringEnabled(false)
-            return view
+            view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
+            defaultCentering = true
         }
+        if setCenteringEnabled ?? defaultCentering {
+            view.setCenteringEnabled(false)
+        }
+        return view
     }
 
     @IBAction func reloadButtonClicked(_ sender: UIButton) {

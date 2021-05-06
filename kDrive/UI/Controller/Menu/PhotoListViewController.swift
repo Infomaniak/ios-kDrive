@@ -104,6 +104,12 @@ class PhotoListViewController: UIViewController {
         setNeedsStatusBarAppearanceUpdate()
     }
 
+    func forceRefresh() {
+        page = 1
+        files = []
+        fetchNextPage()
+    }
+
     func fetchNextPage() {
         footerView?.isHidden = false
         isLoading = true
@@ -112,12 +118,29 @@ class PhotoListViewController: UIViewController {
                 let lastIndex = self.files.count
                 self.files += data
                 self.collectionView.insertItems(at: (lastIndex..<self.files.count).map { IndexPath(row: $0, section: 0) })
+                self.showEmptyView(.noImages)
                 self.page += 1
                 self.hasNextPage = data.count == DriveApiFetcher.itemPerPage
                 AccountManager.instance.currentDriveFileManager.setLocalFiles(self.files, root: DriveFileManager.lastPicturesRootFile)
             }
             self.footerView?.isHidden = true
             self.isLoading = false
+            if self.files.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+                self.hasNextPage = false
+                self.showEmptyView(.noNetwork, showButton: true)
+            }
+        }
+    }
+
+    func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
+        if files.isEmpty {
+            let background = EmptyTableView.instantiate(type: type, button: showButton, setCenteringEnabled: false)
+            background.actionHandler = { _ in
+                self.forceRefresh()
+            }
+            collectionView.backgroundView = background
+        } else {
+            collectionView.backgroundView = nil
         }
     }
 
