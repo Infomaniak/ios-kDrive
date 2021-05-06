@@ -29,7 +29,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="174" height="130"/>
                                         <color key="backgroundColor" name="backgroundCardView"/>
                                     </view>
-                                    <view contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Ut-eJ-Jw7">
+                                    <view clipsSubviews="YES" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Ut-eJ-Jw7">
                                         <rect key="frame" x="0.0" y="0.0" width="174" height="95"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="j9K-4i-jdP">
