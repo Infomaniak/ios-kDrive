@@ -39,6 +39,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var stackViewTrailingConstraint: NSLayoutConstraint?
     @IBOutlet weak var detailsStackView: UIStackView?
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
+    @IBOutlet weak var highlightedView: UIView!
     var downloadObservationToken: ObservationToken?
 
     override var isSelected: Bool {
@@ -129,11 +130,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func setHighlighting() {
-        if isHighlighted {
-            contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewSelectedColor.color
-        } else {
-            contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-        }
+        highlightedView?.isHidden = !isHighlighted
     }
 
     func setThumbnailFor(file: File) {
