@@ -150,8 +150,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if currentFile.id == file.id {
                 currentFile = file
-                collectionView.endEditing(true)
-                collectionView.reloadItems(at: [currentIndex])
+                DispatchQueue.main.async {
+                    collectionView.endEditing(true)
+                    collectionView.reloadItems(at: [currentIndex])
+                }
             }
         }
     }
