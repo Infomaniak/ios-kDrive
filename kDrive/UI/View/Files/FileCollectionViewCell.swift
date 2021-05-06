@@ -41,8 +41,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     var downloadObservationToken: ObservationToken?
 
-    var canBeHighlighted = true
-
     override var isSelected: Bool {
         didSet {
             configureForSelection()
@@ -131,20 +129,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func setHighlighting() {
-        if canBeHighlighted {
-            if isHighlighted {
-                disabledView.backgroundColor = KDriveAsset.backgroundCardViewSelectedColor.color
-                if self.isKind(of: FileGridCollectionViewCell.self) {
-                    disabledView.alpha = 0.3
-                    disabledView.superview?.bringSubviewToFront(disabledView)
-                }
-                disabledView.isHidden = false
-            } else {
-                disabledView.isHidden = true
-                disabledView.superview?.sendSubviewToBack(disabledView)
-                disabledView.alpha = 0.5
-                disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-            }
+        if isHighlighted {
+            contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewSelectedColor.color
+        } else {
+            contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         }
     }
 
