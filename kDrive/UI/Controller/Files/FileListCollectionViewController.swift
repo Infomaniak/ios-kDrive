@@ -732,6 +732,41 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         #endif
     }
 
+    // MARK: - State restoration
+
+    var driveId: Int?
+    var directoryId: Int?
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveID")
+        if let currentDirectory = currentDirectory {
+            coder.encode(currentDirectory.id, forKey: "DirectoryID")
+        }
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        driveId = coder.decodeInteger(forKey: "DriveID")
+        directoryId = coder.decodeInteger(forKey: "DirectoryID")
+
+        super.decodeRestorableState(with: coder)
+    }
+
+    override func applicationFinishedRestoringState() {
+        guard let driveId = driveId,
+            let directoryId = directoryId,
+            let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: AccountManager.instance.currentUserId),
+            let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+            let directory = driveFileManager.getCachedFile(id: directoryId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        currentDirectory = directory
+        navigationItem.title = currentDirectory.name
+        fetchNextPage()
+    }
+
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
