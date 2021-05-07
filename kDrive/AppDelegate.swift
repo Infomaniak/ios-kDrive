@@ -461,6 +461,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         setRootViewController(SwitchUserViewController.instantiateInNavigationController())
     }
 
+    // MARK: - State restoration
+
+    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        return true
+    }
+
+    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
+        return true
+    }
+
     // MARK: - User notification center delegate
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
