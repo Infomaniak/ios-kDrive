@@ -89,21 +89,22 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         super.viewDidLoad()
 
         // Set up collection view
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        (collectionView as? SwipableCollectionView)?.swipeDataSource = self
+        (collectionView as? SwipableCollectionView)?.swipeDelegate = self
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.register(UINib(nibName: headerViewIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier)
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-        collectionView.refreshControl = refreshControl
+        collectionViewLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
+        collectionViewLayout?.sectionHeadersPinToVisibleBounds = true
 
         // Set up current directory
         if currentDirectory == nil {
             currentDirectory = driveFileManager.getRootFile()
         }
-        if currentDirectory.id <= DriveFileManager.constants.rootID {
-            navigationItem.title = configuration.rootTitle
-        } else {
-            navigationItem.title = currentDirectory.name
-        }
+        navigationItem.title = currentDirectory.id <= DriveFileManager.constants.rootID ? configuration.rootTitle : currentDirectory.name
 
         // Set up multiple selection gesture
         if configuration.isMultipleSelectionEnabled {
@@ -120,6 +121,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     deinit {
         // Cancel observers
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        navigationController?.setInfomaniakAppearanceNavigationBar()
     }
 
     @objc func refreshData() {
@@ -145,13 +152,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 let fetchedChildren = children {
                 currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
 
-                showEmptyView()
-
                 // Add items to collection view
                 let changeset = StagedChangeset(source: sortedFiles, target: fetchedChildren)
                 collectionView.reload(using: changeset, interrupt: { $0.changeCount > maxDiffChanges }) { newChildren in
                     sortedFiles = newChildren
                     updateSelectedItems(newChildren: newChildren)
+                    showEmptyView()
                 }
                 setSelectedCells()
 
@@ -187,17 +193,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 self.refreshData()
             }
             collectionView.backgroundView = background
-            if let headerView = headerView {
-                setUpHeaderView(headerView, isListEmpty: true)
-            }
         } else {
             collectionView.backgroundView = nil
-            if let headerView = headerView {
-                setUpHeaderView(headerView, isListEmpty: false)
-            }
+        }
+        if let headerView = headerView {
+            setUpHeaderView(headerView, isListEmpty: sortedFiles.isEmpty)
         }
     }
 
+    /// Override this method to setup the collection view header
     func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
         //headerView.delegate = self
 
@@ -346,8 +350,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         let file = sortedFiles[indexPath.row]
         cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == sortedFiles.count - 1)
-        cell.configureWith(file: file)
-        cell.selectionMode = selectionMode
+        cell.configureWith(file: file, selectionMode: selectionMode)
         (cell as? FileGridCollectionViewCell)?.delegate = self
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             cell.setEnabled(false)
