@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import UIKit
 import kDriveCore
+import CocoaLumberjackSwift
 import DifferenceKit
 
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource {
@@ -85,11 +86,19 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif*/
 
+    var trashSort: Bool {
+        #if ISEXTENSION
+            return false
+        #else
+            return self is TrashCollectionViewController && currentDirectory.id == DriveFileManager.trashRootFile.id
+        #endif
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Set up collection view
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
         collectionView.refreshControl = refreshControl
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
@@ -114,7 +123,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
 
         // First load
-        refreshData()
+        forceRefresh()
 
         // Set up observers
     }
@@ -129,7 +138,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
     }
 
-    @objc func refreshData() {
+    @objc func forceRefresh() {
         nextPage = 1
         fetchNextPage()
     }
@@ -189,12 +198,57 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // TODO
     }
 
+    @discardableResult
+    private func deleteFiles(_ files: [File], async: Bool = true) -> Bool? {
+        let group = DispatchGroup()
+        var success = true
+        var cancelId: String?
+        for file in files {
+            group.enter()
+            driveFileManager.deleteFile(file: file) { response, error in
+                cancelId = response?.id
+                if let error = error {
+                    success = false
+                    DDLogError("Error while deleting file: \(error)")
+                }
+                group.leave()
+            }
+        }
+        if async {
+            group.notify(queue: DispatchQueue.main) {
+                if success {
+                    if files.count == 1 {
+                        UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: KDriveStrings.Localizable.buttonCancel) {
+                            guard let cancelId = cancelId else { return }
+                            self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { (error) in
+                                self.getFileActivities()
+                                if error == nil {
+                                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
+                                }
+                            }
+                        }
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
+                    }
+                } else {
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
+                }
+                self.selectionMode = false
+                self.getFileActivities()
+            }
+            return nil
+        } else {
+            let result = group.wait(timeout: .now() + 5)
+            return success && result != .timedOut
+        }
+    }
+
     func showEmptyView(type: EmptyTableView.EmptyTableViewType? = nil) {
         let type = type ?? configuration.emptyViewType
         if sortedFiles.isEmpty {
             let background = EmptyTableView.instantiate(type: type, button: false)
             background.actionHandler = { _ in
-                self.refreshData()
+                self.forceRefresh()
             }
             collectionView.backgroundView = background
         } else {
@@ -276,7 +330,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func selectChild(at indexPath: IndexPath) {
         let wasDisabled = selectedFiles.count == 0
-        sortedFiles.append(sortedFiles[indexPath.row])
+        selectedFiles.append(sortedFiles[indexPath.row])
         if wasDisabled {
             setSelectionButtonsEnabled(true)
         }
@@ -457,27 +511,126 @@ extension FileListViewController: FileGridCellDelegate {
 extension FileListViewController: FilesHeaderViewDelegate {
 
     func filterButtonPressed() {
-        // TODO
+        let floatingPanelViewController = DriveFloatingPanelController()
+        let sortOptionsViewController = FloatingPanelSortOptionTableViewController()
+
+        sortOptionsViewController.sortType = sortType
+        sortOptionsViewController.trashSort = trashSort
+        sortOptionsViewController.delegate = self
+
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = sortOptionsViewController
+
+        floatingPanelViewController.set(contentViewController: sortOptionsViewController)
+        floatingPanelViewController.track(scrollView: sortOptionsViewController.tableView)
+        present(floatingPanelViewController, animated: true)
     }
 
     func gridButtonPressed() {
-        // TODO
+        // Toggle grid/list
+        if listStyle == .grid {
+            listStyle = .list
+        } else {
+            listStyle = .grid
+        }
+        FileListOptions.instance.currentStyle = listStyle
+
+        UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
+            self.collectionViewLayout.invalidateLayout()
+            self.collectionView.reloadData()
+        } completion: { _ in }
     }
 
-    func uploadCardSelected() {
-        // TODO
-    }
+    #if !ISEXTENSION
+        func uploadCardSelected() {
+            let uploadViewController = UploadQueueViewController.instantiate()
+            uploadViewController.currentDirectory = currentDirectory
+            navigationController?.pushViewController(uploadViewController, animated: true)
+        }
 
-    func moveButtonPressed() {
-        // TODO
-    }
+        func moveButtonPressed() {
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
+            selectFolderViewController?.disabledDirectoriesSelection = [selectedFiles.first?.parent ?? driveFileManager.getRootFile()]
+            selectFolderViewController?.selectHandler = { selectedFolder in
+                let group = DispatchGroup()
+                var success = true
+                for file in self.selectedFiles {
+                    group.enter()
+                    self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { (response, _, error) in
+                        if let error = error {
+                            success = false
+                            DDLogError("Error while moving file: \(error)")
+                        }
+                        group.leave()
+                    }
+                }
+                group.notify(queue: DispatchQueue.main) {
+                    let message = success ? KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedFiles.count, selectedFolder.name) : KDriveStrings.Localizable.errorMove
+                    UIConstants.showSnackBar(message: message)
+                    self.selectionMode = false
+                    self.getFileActivities()
+                }
+            }
+            present(selectFolderNavigationController, animated: true)
+        }
 
-    func deleteButtonPressed() {
-        // TODO
-    }
+        func deleteButtonPressed() {
+            let message: NSMutableAttributedString
+            if selectedFiles.count == 1 {
+                message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescription(selectedFiles[0].name), boldText: selectedFiles[0].name)
+            } else {
+                message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedFiles.count))
+            }
 
-    func menuButtonPressed() {
-        // TODO
+            let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true, loading: true) {
+                let message: String
+                if let success = self.deleteFiles(self.selectedFiles, async: false), success {
+                    if self.selectedFiles.count == 1 {
+                        message = KDriveStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedFiles[0].name)
+                    } else {
+                        message = KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(self.selectedFiles.count)
+                    }
+                } else {
+                    message = KDriveStrings.Localizable.errorMove
+                }
+                DispatchQueue.main.async {
+                    UIConstants.showSnackBar(message: message)
+                    self.selectionMode = false
+                    self.getFileActivities()
+                }
+            }
+            present(alert, animated: true)
+        }
+
+        func menuButtonPressed() {
+            let floatingPanelViewController = DriveFloatingPanelController()
+            let selectViewController = SelectFloatingPanelTableViewController()
+            floatingPanelViewController.isRemovalInteractionEnabled = true
+            selectViewController.files = selectedFiles
+            floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
+            selectViewController.reloadAction = {
+                self.selectionMode = false
+                self.forceRefresh()
+            }
+            floatingPanelViewController.set(contentViewController: selectViewController)
+            floatingPanelViewController.track(scrollView: selectViewController.tableView)
+            self.present(floatingPanelViewController, animated: true)
+        }
+    #endif
+
+}
+
+// MARK: - Sort options delegate
+
+extension FileListViewController: SortOptionsDelegate {
+
+    func didClickOnSortingOption(type: SortType) {
+        sortType = type
+        if !trashSort {
+            FileListOptions.instance.currentSortType = sortType
+        }
+        forceRefresh()
     }
 
 }
