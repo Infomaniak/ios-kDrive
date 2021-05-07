@@ -66,7 +66,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var rightBarButtonItems: [UIBarButtonItem]?
 
     var driveFileManager: DriveFileManager = AccountManager.instance.currentDriveFileManager
-    var currentDirectory: File!
+    var currentDirectory: File! {
+        didSet {
+            setTitle()
+        }
+    }
     lazy var configuration = Configuration(rootTitle: driveFileManager.drive.name, emptyViewType: .emptyFolder)
     var uploadingFilesCount = 0
     var nextPage = 1
@@ -103,6 +107,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        setTitle()
+
+        navigationItem.backButtonTitle = ""
+
         // Set up collection view
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
         collectionView.refreshControl = refreshControl
@@ -122,8 +130,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if configuration.showUploadingFiles {
             uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
         }
-        navigationItem.title = currentDirectory.id <= DriveFileManager.constants.rootID ? configuration.rootTitle : currentDirectory.name
-        navigationItem.backButtonTitle = ""
 
         // Set up multiple selection gesture
         if configuration.isMultipleSelectionEnabled {
@@ -143,6 +149,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate { (context) in
+            self.collectionView?.collectionViewLayout.invalidateLayout()
+        }
     }
 
     @objc func forceRefresh() {
@@ -169,11 +182,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
 
                 // Add items to collection view
+                showEmptyViewIfNeeded(files: fetchedChildren)
                 let changeset = StagedChangeset(source: sortedFiles, target: fetchedChildren)
                 collectionView.reload(using: changeset, interrupt: { $0.changeCount > maxDiffChanges }) { newChildren in
                     sortedFiles = newChildren
                     updateSelectedItems(newChildren: newChildren)
-                    showEmptyView()
                 }
                 setSelectedCells()
 
@@ -196,7 +209,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             }
             // No network
             if !currentDirectory.fullyDownloaded && sortedFiles.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
-                showEmptyView(type: .noNetwork)
+                showEmptyViewIfNeeded(type: .noNetwork, files: sortedFiles)
             }
         }
     }
@@ -265,8 +278,17 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    private func setTitle() {
+        guard currentDirectory != nil else { return }
+        navigationItem.title = currentDirectory.id <= DriveFileManager.constants.rootID ? configuration.rootTitle : currentDirectory.name
+    }
+
     private func getFileActivities() {
-        // TODO
+        driveFileManager.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
+            if results != nil {
+                //refreshDataSource(withActivities: false)
+            }
+        }
     }
 
     @discardableResult
@@ -331,9 +353,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     #endif
 
-    func showEmptyView(type: EmptyTableView.EmptyTableViewType? = nil) {
+    func showEmptyViewIfNeeded(type: EmptyTableView.EmptyTableViewType? = nil, files: [File]) {
         let type = type ?? configuration.emptyViewType
-        if sortedFiles.isEmpty {
+        if files.isEmpty {
             let background = EmptyTableView.instantiate(type: type, button: false)
             background.actionHandler = { _ in
                 self.forceRefresh()
@@ -343,7 +365,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             collectionView.backgroundView = nil
         }
         if let headerView = headerView {
-            setUpHeaderView(headerView, isListEmpty: sortedFiles.isEmpty)
+            setUpHeaderView(headerView, isListEmpty: files.isEmpty)
         }
     }
 
@@ -388,7 +410,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
             navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
-            //navigationItem.rightBarButtonItem = currentDirectory.fullyDownloaded ? selectAllBarButtonItem : loadingBarButtonItem
             navigationItem.rightBarButtonItem = nil
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
@@ -541,6 +562,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         #if !ISEXTENSION
             filePresenter.present(driveFileManager: driveFileManager, file: file, files: sortedFiles, normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
         #endif
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if selectionMode {
+            deselectChild(at: indexPath)
+        }
     }
 
     // MARK: - Swipe action collection view delegate
@@ -771,6 +798,36 @@ extension FileListViewController: SortOptionsDelegate {
             FileListOptions.instance.currentSortType = sortType
         }
         forceRefresh()
+    }
+
+}
+
+// MARK: - Switch drive delegate
+
+#if !ISEXTENSION
+    extension FileListViewController: SwitchDriveDelegate {
+
+        func didSwitchDrive(newDrive: Drive) {
+            guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: newDrive) else { return }
+            self.driveFileManager = driveFileManager
+            configuration.rootTitle = newDrive.name
+            currentDirectory = driveFileManager.getRootFile()
+            uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
+            forceRefresh()
+            navigationController?.popToRootViewController(animated: false)
+        }
+
+    }
+#endif
+
+// MARK: - Top scrollable
+
+extension FileListViewController: TopScrollable {
+
+    func scrollToTop() {
+        if isViewLoaded {
+            collectionView.scrollToTop(animated: true, navigationController: navigationController)
+        }
     }
 
 }
