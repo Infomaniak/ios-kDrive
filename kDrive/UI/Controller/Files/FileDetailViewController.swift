@@ -443,7 +443,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 if indexPath.row == 0 {
                     let cell = tableView.dequeueReusableCell(type: FileDetailActivitySeparatorTableViewCell.self, for: indexPath)
                     if indexPath.section == 1 {
-                        cell.topSeparator.isHidden = true
+                        cell.topSeparatorHeight.constant = 0
                     }
                     cell.dateLabel.text = Constants.formatTimestamp(TimeInterval(activities[indexPath.section - 1][0].createdAt), style: .date, relative: true)
                     return cell

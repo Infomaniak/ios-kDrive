@@ -21,6 +21,7 @@ import UIKit
 class FileDetailActivitySeparatorTableViewCell: UITableViewCell {
 
     @IBOutlet weak var topSeparator: UIView!
+    @IBOutlet weak var topSeparatorHeight: NSLayoutConstraint!
     @IBOutlet weak var textView: UIView!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var bottomSeparator: UIView!
@@ -40,6 +41,7 @@ class FileDetailActivitySeparatorTableViewCell: UITableViewCell {
         super.prepareForReuse()
         topSeparator.isHidden = false
         bottomSeparator.isHidden = false
+        topSeparatorHeight.constant = 30
     }
 
 }
