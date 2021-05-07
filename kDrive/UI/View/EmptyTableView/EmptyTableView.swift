@@ -96,6 +96,7 @@ class EmptyTableView: UIView {
         case .noComments:
             view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
         }
+
         if !setCenteringEnabled {
             view.setCenteringEnabled(false)
         }
