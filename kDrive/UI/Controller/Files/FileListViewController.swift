@@ -21,6 +21,12 @@ import kDriveCore
 import CocoaLumberjackSwift
 import DifferenceKit
 
+extension SwipeCellAction {
+    static let share = SwipeCellAction(identifier: "share", title: KDriveStrings.Localizable.buttonFileRights, backgroundColor: KDriveAsset.infomaniakColor.color, icon: KDriveAsset.share.image)
+    static let delete = SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image)
+    static let more = SwipeCellAction(identifier: "more", title: KDriveStrings.Localizable.buttonMenu, backgroundColor: KDriveAsset.darkBlueColor.color, icon: KDriveAsset.menu.image)
+}
+
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource {
 
     // MARK: - Constants
@@ -243,6 +249,23 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    #if !ISEXTENSION
+        private func showQuickActionsPanel(file: File) {
+            if fileInformationsViewController == nil {
+                fileInformationsViewController = FileQuickActionsFloatingPanelViewController()
+                fileInformationsViewController.presentingParent = self
+                fileInformationsViewController.normalFolderHierarchy = configuration.normalFolderHierarchy
+                floatingPanelViewController = DriveFloatingPanelController()
+                floatingPanelViewController.isRemovalInteractionEnabled = true
+                floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
+                floatingPanelViewController.set(contentViewController: fileInformationsViewController)
+                floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
+            }
+            fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
+            present(floatingPanelViewController, animated: true)
+        }
+    #endif
+
     func showEmptyView(type: EmptyTableView.EmptyTableViewType? = nil) {
         let type = type ?? configuration.emptyViewType
         if sortedFiles.isEmpty {
@@ -456,14 +479,39 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Swipe action collection view delegate
 
     func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
-        // TODO
+        #if !ISEXTENSION
+            let file = sortedFiles[indexPath.row]
+            switch action {
+            case .share:
+                let shareVC = ShareAndRightsViewController.instantiate()
+                shareVC.file = file
+                navigationController?.pushViewController(shareVC, animated: true)
+            case .more:
+                showQuickActionsPanel(file: file)
+            case .delete:
+                deleteFiles([file])
+            default:
+                break
+            }
+        #endif
     }
 
     // MARK: - Swipe action collection view data source
 
     func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        // TODO
-        return nil
+        if configuration.fromActivities || listStyle == .grid {
+            return nil
+        }
+        var actions = [SwipeCellAction]()
+        let right = sortedFiles[indexPath.row].rights
+        if right?.share.value ?? false {
+            actions.append(.share)
+        }
+        actions.append(.more)
+        if right?.delete.value ?? false {
+            actions.append(.delete)
+        }
+        return actions
     }
 
 }
@@ -521,7 +569,12 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
 extension FileListViewController: FileGridCellDelegate {
 
     func didTapMoreButton(_ cell: FileCollectionViewCell) {
-        // TODO
+        #if !ISEXTENSION
+            guard let indexPath = collectionView.indexPath(for: cell) else {
+                return
+            }
+            showQuickActionsPanel(file: sortedFiles[indexPath.row])
+        #endif
     }
 
 }
