@@ -77,6 +77,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var uploadingFilesCount = 0
     var nextPage = 1
     var isLoading = false
+    var isContentLoaded = false
     var listStyle = FileListOptions.instance.currentStyle {
         didSet {
             headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
@@ -155,6 +156,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+
+        // Refresh data
+        if isContentLoaded {
+            getFileActivities()
+        }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -181,6 +187,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    func getFileActivities() {
+        driveFileManager.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
+            if results != nil {
+                // TODO
+            }
+        }
+    }
+
     func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
         headerView.delegate = self
 
@@ -194,6 +208,20 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             headerView.uploadCardView.titleLabel.text = KDriveStrings.Localizable.uploadInThisFolderTitle
             headerView.uploadCardView.setUploadCount(uploadingFilesCount)
             headerView.uploadCardView.progressView.enableIndeterminate()
+        }
+    }
+
+    func updateChild(_ file: File, at index: Int) {
+        let oldFile = sortedFiles[index]
+        sortedFiles[index] = file
+
+        // We don't need to call reload data if only the children were updated
+        if oldFile.isContentEqual(to: file) {
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
         }
     }
 
@@ -238,6 +266,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
                 if moreComing {
                     self.reloadData(page: page + 1, forceRefresh: forceRefresh)
+                } else {
+                    isContentLoaded = true
                 }
             case .failure(let error):
                 UIConstants.showSnackBar(message: error.localizedDescription)
@@ -278,17 +308,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             if file.id == self.currentDirectory.id {
                 refreshDataSource(withActivities: true)
             } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
-                let oldFile = sortedFiles[index]
-                sortedFiles[index] = file
-
-                // We don't need to call reload data if only the children were updated
-                if oldFile.isContentEqual(to: file) {
-                    return
-                }
-
-                DispatchQueue.main.async { [weak self] in
-                    self?.collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
-                }
+                updateChild(file, at: index)
             }
         }
         // Network observer
@@ -334,15 +354,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private func setTitle() {
         guard currentDirectory != nil else { return }
         navigationItem.title = currentDirectory.id <= DriveFileManager.constants.rootID ? configuration.rootTitle : currentDirectory.name
-    }
-
-    private func getFileActivities() {
-        // TODO
-        driveFileManager.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
-            if results != nil {
-                refreshDataSource(withActivities: false)
-            }
-        }
     }
 
     private func refreshDataSource(withActivities: Bool) {
@@ -834,6 +845,8 @@ extension FileListViewController: SortOptionsDelegate {
             configuration.rootTitle = newDrive.name
             currentDirectory = driveFileManager.getRootFile()
             uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
+            sortedFiles = []
+            collectionView.reloadData()
             forceRefresh()
             navigationController?.popToRootViewController(animated: false)
         }
