@@ -45,6 +45,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         var showUploadingFiles: Bool = true
         /// Enable or disable multiple selection (enabled by default)
         var isMultipleSelectionEnabled: Bool = true
+        /// Enable or disable refresh control (enabled by default)
+        var isRefreshControlEnabled: Bool = true
         /// Is displayed from activities
         var fromActivities: Bool = false
         /// Root folder title
@@ -114,8 +116,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationItem.backButtonTitle = ""
 
         // Set up collection view
-        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
-        collectionView.refreshControl = refreshControl
+        if configuration.isRefreshControlEnabled {
+            refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+            collectionView.refreshControl = refreshControl
+        }
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
@@ -268,7 +272,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // File observer
         driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
-                //refreshDataSource(withActivities: true)
+                refreshDataSource(withActivities: true)
             } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
                 let oldFile = sortedFiles[index]
                 sortedFiles[index] = file
@@ -300,10 +304,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // Sort type observer
         FileListOptions.instance.observeSortTypeChange(self) { [unowned self] (newSortType) in
             self.sortType = newSortType
-            // TODO: Fetch with new sort
-            DispatchQueue.main.async { [weak self] in
-                self?.collectionView.reloadData()
-            }
+            sortedFiles = []
+            reloadData(page: 1)
         }
     }
 
@@ -331,11 +333,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     private func getFileActivities() {
+        // TODO
         driveFileManager.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
             if results != nil {
-                //refreshDataSource(withActivities: false)
+                refreshDataSource(withActivities: false)
             }
         }
+    }
+
+    private func refreshDataSource(withActivities: Bool) {
+        // TODO
     }
 
     @discardableResult
