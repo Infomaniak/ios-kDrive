@@ -82,9 +82,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
     var selectedFiles: [File] = []
-    /*#if !ISEXTENSION
+    #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
-    #endif*/
+    #endif
 
     var trashSort: Bool {
         #if ISEXTENSION
@@ -274,6 +274,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    class func instantiate() -> FileListViewController {
+        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListCollectionViewController") as! FileListViewController
+    }
+
     // MARK: - Multiple selection
 
     @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
@@ -431,6 +435,22 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 cell.moreButton.tintColor = file.isDirectory || !file.hasThumbnail ? KDriveAsset.iconColor.color : .white
             }
         }
+    }
+
+    // MARK: - Collection view delegate
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if selectionMode {
+            selectChild(at: indexPath)
+            return
+        }
+        let file = sortedFiles[indexPath.row]
+        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
+            return
+        }
+        #if !ISEXTENSION
+            filePresenter.present(driveFileManager: driveFileManager, file: file, files: sortedFiles, normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
+        #endif
     }
 
     // MARK: - Swipe action collection view delegate

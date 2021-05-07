@@ -23,8 +23,6 @@ class FilePresenter {
     weak var viewController: UIViewController?
     weak var floatingPanelViewController: DriveFloatingPanelController?
 
-    var listType: FileListCollectionViewController.Type = FileListCollectionViewController.self
-
     var navigationController: UINavigationController? {
         return viewController?.navigationController
     }
@@ -57,14 +55,16 @@ class FilePresenter {
     func present(driveFileManager: DriveFileManager, file: File, files: [File], normalFolderHierarchy: Bool, fromActivities: Bool = false) {
         if file.isDirectory {
             // Show files list
-            let nextVC: FileListCollectionViewController
+            /*let nextVC: FileListViewController
             if driveFileManager.drive.sharedWithMe {
                 nextVC = SharedWithMeCollectionViewController.instantiate(driveFileManager: driveFileManager)
             } else if file.isTrashed {
                 nextVC = TrashCollectionViewController.instantiate(driveFileManager: driveFileManager)
             } else {
                 nextVC = listType.instantiate(driveFileManager: driveFileManager)
-            }
+            }*/
+            let nextVC = FileListViewController.instantiate()
+            nextVC.driveFileManager = driveFileManager
             nextVC.currentDirectory = file
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {

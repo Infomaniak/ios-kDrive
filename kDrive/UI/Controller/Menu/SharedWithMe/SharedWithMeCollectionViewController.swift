@@ -32,8 +32,6 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
         if currentDirectory.id == DriveFileManager.sharedWithMeRootFile.id && driveFileManager != nil {
             navigationItem.title = driveFileManager.drive.name
         }
-
-        filePresenter.listType = SharedWithMeCollectionViewController.self
     }
 
     override func getFileActivities(directory: File) {
@@ -43,7 +41,7 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
             super.getFileActivities(directory: directory)
         }
     }
-    
+
     override func toggleMultipleSelection() {
         if selectionMode {
             navigationItem.title = nil
