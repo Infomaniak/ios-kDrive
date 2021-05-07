@@ -68,6 +68,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var driveFileManager: DriveFileManager = AccountManager.instance.currentDriveFileManager
     var currentDirectory: File!
     lazy var configuration = Configuration(rootTitle: driveFileManager.drive.name, emptyViewType: .emptyFolder)
+    var uploadingFilesCount = 0
     var nextPage = 1
     var isLoading = false
     var listStyle = FileListOptions.instance.currentStyle {
@@ -75,7 +76,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         }
     }
-    var files: [File] = []
     var sortType = FileListOptions.instance.currentSortType {
         didSet {
             headerView?.sortButton.setTitle(sortType.value.translation, for: .normal)
@@ -119,7 +119,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if currentDirectory == nil {
             currentDirectory = driveFileManager.getRootFile()
         }
+        if configuration.showUploadingFiles {
+            uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
+        }
         navigationItem.title = currentDirectory.id <= DriveFileManager.constants.rootID ? configuration.rootTitle : currentDirectory.name
+        navigationItem.backButtonTitle = ""
 
         // Set up multiple selection gesture
         if configuration.isMultipleSelectionEnabled {
@@ -132,10 +136,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         forceRefresh()
 
         // Set up observers
-    }
-
-    deinit {
-        // Cancel observers
+        setUpObservers()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -196,6 +197,70 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             // No network
             if !currentDirectory.fullyDownloaded && sortedFiles.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
                 showEmptyView(type: .noNetwork)
+            }
+        }
+    }
+
+    func setUpObservers() {
+        // Upload files observer
+        if configuration.showUploadingFiles {
+            UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] _, count in
+                self.uploadingFilesCount = count
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self, self.isViewLoaded else { return }
+
+                    let shouldHideUploadCard: Bool
+                    if count > 0 {
+                        self.headerView?.uploadCardView.setUploadCount(count)
+                        shouldHideUploadCard = false
+                    } else {
+                        shouldHideUploadCard = true
+                    }
+                    // Only perform reload if needed
+                    if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
+                        self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
+                        self.collectionView.performBatchUpdates(nil)
+                    }
+                }
+            }
+        }
+        // File observer
+        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+            if file.id == self.currentDirectory.id {
+                //refreshDataSource(withActivities: true)
+            } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
+                let oldFile = sortedFiles[index]
+                sortedFiles[index] = file
+
+                // We don't need to call reload data if only the children were updated
+                if oldFile.isContentEqual(to: file) {
+                    return
+                }
+
+                DispatchQueue.main.async { [weak self] in
+                    self?.collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
+                }
+            }
+        }
+        // Network observer
+        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
+            // Observer is called on main queue
+            headerView?.offlineView.isHidden = status != .offline
+            collectionView.collectionViewLayout.invalidateLayout()
+            collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+        }
+        // List style observer
+        FileListOptions.instance.observeListStyleChange(self) { [unowned self] (newStyle) in
+            self.listStyle = newStyle
+            DispatchQueue.main.async { [weak self] in
+                self?.collectionView.reloadData()
+            }
+        }
+        // Sort type observer
+        FileListOptions.instance.observeSortTypeChange(self) { [unowned self] (newSortType) in
+            self.sortType = newSortType
+            DispatchQueue.main.async { [weak self] in
+                self?.collectionView.reloadData()
             }
         }
     }
@@ -292,8 +357,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         headerView.listOrGridButton.setImage(listStyle.icon, for: .normal)
 
         if configuration.showUploadingFiles {
-            //configureUploadHeaderView()
-            //headerView?.uploadCardView.isHidden = uploadingFilesCount == 0
+            headerView.uploadCardView.isHidden = uploadingFilesCount == 0
+            headerView.uploadCardView.titleLabel.text = KDriveStrings.Localizable.uploadInThisFolderTitle
+            headerView.uploadCardView.setUploadCount(uploadingFilesCount)
+            headerView.uploadCardView.progressView.enableIndeterminate()
         }
     }
 

@@ -35,6 +35,10 @@ class UploadCardView: UIView {
         cancelButton?.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
     }
 
+    func setUploadCount(_ count: Int) {
+        detailsLabel.text = KDriveStrings.Localizable.uploadInProgressNumberFile(count)
+    }
+
     @objc private func retryButtonPressed() {
         retryButtonPressedHandler?()
     }
