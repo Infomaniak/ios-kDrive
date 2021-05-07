@@ -20,7 +20,7 @@ import UIKit
 import kDriveCore
 import DifferenceKit
 
-class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FileGridCellDelegate {
+class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource {
 
     // MARK: - Constants
 
@@ -167,7 +167,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     fetchNextPage()
                 } else {
                     // Get activities
-                    //getFileActivities(directory: currentDirectory)
+                    getFileActivities()
                     // Demo swipe action
                     if !UserDefaults.shared.didDemoSwipe && sortedFiles.count > 0 {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -183,6 +183,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 showEmptyView(type: .noNetwork)
             }
         }
+    }
+
+    private func getFileActivities() {
+        // TODO
     }
 
     func showEmptyView(type: EmptyTableView.EmptyTableViewType? = nil) {
@@ -203,7 +207,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     /// Override this method to setup the collection view header
     func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
-        //headerView.delegate = self
+        headerView.delegate = self
 
         headerView.sortView.isHidden = isListEmpty
 
@@ -388,12 +392,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         return nil
     }
 
-    // MARK: - File grid cell delegate
-
-    func didTapMoreButton(_ cell: FileCollectionViewCell) {
-        // TODO
-    }
-
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
@@ -442,4 +440,44 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         }
         return headerView!.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
     }
+}
+
+// MARK: - File grid cell delegate
+
+extension FileListViewController: FileGridCellDelegate {
+
+    func didTapMoreButton(_ cell: FileCollectionViewCell) {
+        // TODO
+    }
+
+}
+
+// MARK: - Files header view delegate
+
+extension FileListViewController: FilesHeaderViewDelegate {
+
+    func filterButtonPressed() {
+        // TODO
+    }
+
+    func gridButtonPressed() {
+        // TODO
+    }
+
+    func uploadCardSelected() {
+        // TODO
+    }
+
+    func moveButtonPressed() {
+        // TODO
+    }
+
+    func deleteButtonPressed() {
+        // TODO
+    }
+
+    func menuButtonPressed() {
+        // TODO
+    }
+
 }

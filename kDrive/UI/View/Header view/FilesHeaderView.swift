@@ -29,6 +29,16 @@ protocol FilesHeaderViewDelegate: AnyObject {
     func menuButtonPressed()
 }
 
+extension FilesHeaderViewDelegate {
+    func filterButtonPressed() { }
+    func gridButtonPressed() { }
+    func uploadCardSelected() { }
+    func removeFileTypeButtonPressed() { }
+    func moveButtonPressed() { }
+    func deleteButtonPressed() { }
+    func menuButtonPressed() { }
+}
+
 class FilesHeaderView: UICollectionReusableView {
 
     @IBOutlet weak var sortView: UIView!
