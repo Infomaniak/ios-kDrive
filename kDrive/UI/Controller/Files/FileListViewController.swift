@@ -164,6 +164,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    @IBAction func searchButtonPressed(_ sender: Any) {
+        present(SearchFileViewController.instantiateInNavigationController(), animated: true)
+    }
+
     // MARK: - Overridable methods
 
     func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
@@ -194,7 +198,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     class func instantiate() -> FileListViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListCollectionViewController") as! FileListViewController
+        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListViewController") as! FileListViewController
     }
 
     // MARK: - Public methods

@@ -13,7 +13,7 @@
         <!--Westworld-->
         <scene sceneID="JJW-z8-kTh">
             <objects>
-                <collectionViewController storyboardIdentifier="FileListCollectionViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="afx-Ig-yDG" customClass="FileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="FileListViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="afx-Ig-yDG" customClass="FileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="yCM-Om-3CZ" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -33,7 +33,7 @@
                     <navigationItem key="navigationItem" title="Westworld" largeTitleDisplayMode="always" id="6nN-R6-lch">
                         <barButtonItem key="rightBarButtonItem" style="done" systemItem="search" id="OAV-22-wNN">
                             <connections>
-                                <action selector="searchButtonPressed:" destination="afx-Ig-yDG" id="ucx-g1-xVs"/>
+                                <action selector="searchButtonPressed:" destination="afx-Ig-yDG" id="UEV-hJ-7h0"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
