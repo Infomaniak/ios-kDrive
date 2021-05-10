@@ -66,7 +66,7 @@ extension SwitchUserViewController: UITableViewDelegate {
 
         if !account.isConnected {
             // Ask to reconnect
-            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
+            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self, defaultEmail: account.user?.email)
             return
         }
 

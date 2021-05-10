@@ -69,7 +69,7 @@
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
-          "revision": "c355bb5cf83279c846a00e6269555d0251604cfc",
+          "revision": "923fca95594eb1e90a9295213a1d05b0ff781b31",
           "version": "1.0.10"
         }
       },
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/Infomaniak/ios-login.git",
         "state": {
           "branch": null,
-          "revision": "070e452beb501363973d25396fe8ba54007cc76e",
-          "version": "1.5.2"
+          "revision": "e5e9aa7183bc1b8b5fbf30eef7edc461db09010e",
+          "version": "1.5.3"
         }
       },
       {
@@ -87,7 +87,7 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "2a10bf41da75599a9f8e872dbd44fe0155a2e00c",
+          "revision": "1a0c2df04b31ed7aa318354f3583faea24f006fc",
           "version": "5.15.8"
         }
       },
