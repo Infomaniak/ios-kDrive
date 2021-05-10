@@ -19,19 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 
-class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
+class SwitchDriveViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
-    var drives = AccountManager.instance.drives
-    var filteredDrives: [Drive]!
-    let searchController = UISearchController(searchResultsController: nil)
+    private var drives = AccountManager.instance.drives
+    private var filteredDrives: [Drive]!
+    private let searchController = UISearchController(searchResultsController: nil)
     weak var delegate: SwitchDriveDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         filteredDrives = drives
         tableView.register(cellView: DriveSwitchTableViewCell.self)
-        self.navigationController?.setTransparentStandardAppearanceNavigationBar()
+        navigationController?.setTransparentStandardAppearanceNavigationBar()
+
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
         definesPresentationContext = true
@@ -48,6 +49,10 @@ class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableV
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTapToDismiss(_:)))
         tap.cancelsTouchesInView = false
         tableView.addGestureRecognizer(tap)
+        
+        let backgroundBlureView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+        backgroundBlureView.alpha = 0.8
+        tableView.backgroundView = backgroundBlureView
     }
 
     @objc func handleTapToDismiss(_ sender: UITapGestureRecognizer? = nil) {
@@ -57,22 +62,14 @@ class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 72
+    class func instantiate() -> SwitchDriveViewController {
+        return UIStoryboard(name: "Home", bundle: nil).instantiateViewController(withIdentifier: "SwitchDriveViewController") as! SwitchDriveViewController
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredDrives.count
-    }
+}
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        let drive = filteredDrives[indexPath.row]
-        cell.configureWith(drive: drive)
-
-        return cell
-    }
+// MARK: - UITableViewDelegate
+extension SwitchDriveViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let drive = filteredDrives[indexPath.row]
@@ -95,6 +92,33 @@ class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
 
+}
+
+// MARK: - UITableViewDataSource
+extension SwitchDriveViewController: UITableViewDataSource {
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 72
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return filteredDrives.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
+        cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+        let drive = filteredDrives[indexPath.row]
+        cell.configureWith(drive: drive)
+
+        return cell
+    }
+
+}
+
+// MARK: - UISearchResultsUpdating
+extension SwitchDriveViewController: UISearchResultsUpdating {
+
     func updateSearchResults(for searchController: UISearchController) {
         if let text = searchController.searchBar.text {
             filterOrganisationsWithText(text)
@@ -110,11 +134,6 @@ class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableV
             filteredDrives = drives
         }
         tableView.reloadData()
-    }
-
-
-    class func instantiate() -> SwitchDriveViewController {
-        return UIStoryboard(name: "Home", bundle: nil).instantiateViewController(withIdentifier: "SwitchDriveViewController") as! SwitchDriveViewController
     }
 
 }

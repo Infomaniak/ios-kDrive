@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="iMt-sa-khV">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="iMt-sa-khV">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -64,14 +64,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <visualEffectView opaque="NO" alpha="0.80000001192092896" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="d8F-jT-uHT">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="tnt-na-JHS">
-                                    <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                </view>
-                                <blurEffect style="dark"/>
-                            </visualEffectView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="hlU-Wy-Uo8">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -86,15 +78,10 @@
                         <viewLayoutGuide key="safeArea" id="LFt-0G-9gA"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="hlU-Wy-Uo8" secondAttribute="bottom" id="36s-DN-G6l"/>
-                            <constraint firstAttribute="trailing" secondItem="hlU-Wy-Uo8" secondAttribute="trailing" id="9At-d7-ehF"/>
-                            <constraint firstItem="d8F-jT-uHT" firstAttribute="leading" secondItem="npi-uu-Brr" secondAttribute="leading" id="DC6-RZ-3kC"/>
                             <constraint firstAttribute="bottom" secondItem="hlU-Wy-Uo8" secondAttribute="bottom" id="Uaw-i0-aXP"/>
-                            <constraint firstAttribute="bottom" secondItem="d8F-jT-uHT" secondAttribute="bottom" id="c2H-k3-7pK"/>
-                            <constraint firstAttribute="trailing" secondItem="d8F-jT-uHT" secondAttribute="trailing" id="qJb-WT-ZtY"/>
+                            <constraint firstAttribute="trailing" secondItem="hlU-Wy-Uo8" secondAttribute="trailing" id="XmG-a5-j9e"/>
                             <constraint firstItem="hlU-Wy-Uo8" firstAttribute="top" secondItem="npi-uu-Brr" secondAttribute="top" id="qgI-7f-fGc"/>
-                            <constraint firstItem="d8F-jT-uHT" firstAttribute="top" secondItem="npi-uu-Brr" secondAttribute="top" id="sEC-ce-aou"/>
-                            <constraint firstItem="hlU-Wy-Uo8" firstAttribute="leading" secondItem="npi-uu-Brr" secondAttribute="leading" id="t6h-Nv-5Pd"/>
+                            <constraint firstItem="hlU-Wy-Uo8" firstAttribute="leading" secondItem="npi-uu-Brr" secondAttribute="leading" id="xbh-7Q-HbC"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="Jmq-hY-EJN"/>
