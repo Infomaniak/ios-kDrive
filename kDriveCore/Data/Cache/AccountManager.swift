@@ -27,6 +27,10 @@ public protocol SwitchAccountDelegate {
     func didSwitchCurrentAccount(_ newAccount: Account)
 }
 
+public protocol AccountManagerDelegate: AnyObject {
+    func currentAccountNeedsAuthentication()
+}
+
 public class AccountManager: RefreshTokenDelegate {
 
     private static let group = "com.infomaniak.drive"
@@ -38,6 +42,7 @@ public class AccountManager: RefreshTokenDelegate {
     public var accounts = [Account]()
     public var tokens = [ApiToken]()
     public var refreshTokenLock = DispatchGroup()
+    public weak var delegate: AccountManagerDelegate?
     public var currentUserId: Int {
         didSet {
             UserDefaults.shared.currentDriveUserId = currentUserId
@@ -143,6 +148,9 @@ public class AccountManager: RefreshTokenDelegate {
         self.deleteToken(token)
         if let account = getAccountForToken(token: token) {
             account.token = nil
+            if account.userId == currentUserId {
+                delegate?.currentAccountNeedsAuthentication()
+            }
         }
     }
 

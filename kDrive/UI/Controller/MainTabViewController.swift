@@ -169,6 +169,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             } else {
                 // Invalid token or unknown error
                 (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDisconnected)
             }
         }
     }
