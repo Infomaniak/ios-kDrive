@@ -104,13 +104,20 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func getDriveFileManager(for drive: Drive) -> DriveFileManager? {
-        if drive == currentDriveFileManager?.drive {
+        return getDriveFileManager(for: drive.id, userId: drive.userId)
+    }
+
+    public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
+        let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
+
+        if currentDriveFileManager?.drive.objectId == objectId {
             return currentDriveFileManager
-        } else if let driveFileManager = driveFileManagers[drive.objectId] {
+        } else if let driveFileManager = driveFileManagers[objectId] {
             return driveFileManager
-        } else if let token = getTokenForUserId(drive.userId) {
-            driveFileManagers[drive.objectId] = DriveFileManager(drive: drive, apiToken: token, refreshTokenDelegate: self)
-            return driveFileManagers[drive.objectId]
+        } else if let token = getTokenForUserId(userId),
+            let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
+            driveFileManagers[objectId] = DriveFileManager(drive: drive, apiToken: token, refreshTokenDelegate: self)
+            return driveFileManagers[objectId]
         } else {
             return nil
         }
