@@ -35,8 +35,9 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // TODO: Safely unwrap
-        driveFileManager = AccountManager.instance.currentDriveFileManager
+        setDriveFileManager(AccountManager.instance.currentDriveFileManager) { currentDriveFileManager in
+            self.driveFileManager = currentDriveFileManager
+        }
         for viewController in viewControllers ?? [] {
             ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
         }
@@ -157,6 +158,21 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         }
     }
 
+    private func setDriveFileManager(_ driveFileManager: DriveFileManager?, completion: (DriveFileManager) -> Void) {
+        if let driveFileManager = driveFileManager {
+            completion(driveFileManager)
+        } else {
+            if AccountManager.instance.drives.isEmpty {
+                let driveErrorVC = DriveErrorViewController.instantiate()
+                driveErrorVC.driveErrorViewType = .noDrive
+                self.present(driveErrorVC, animated: true, completion: nil)
+            } else {
+                // Invalid token or unknown error
+                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+            }
+        }
+    }
+
     class func instantiate() -> MainTabViewController {
         return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MainTabViewController") as! MainTabViewController
     }
@@ -202,8 +218,9 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
                 ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didSwitchCurrentAccount(newAccount)
             }
         }
-        // TODO: Safely unwrap
-        didSwitchDriveFileManager(newDriveFileManager: AccountManager.instance.currentDriveFileManager!)
+        setDriveFileManager(AccountManager.instance.currentDriveFileManager) { currentDriveFileManager in
+            self.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
+        }
     }
 
     func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {

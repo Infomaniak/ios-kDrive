@@ -79,6 +79,13 @@ public class AccountManager: RefreshTokenDelegate {
         self.tokens = loadTokens()
         self.accounts = loadAccounts()
 
+        //remove accounts with no user
+        for account in accounts {
+            if account.user == nil {
+                removeAccount(toDeleteAccount: account)
+            }
+        }
+
         for token in tokens {
             if let account = self.accounts.first(where: { (account) -> Bool in
                 return account.userId == token.userId
@@ -90,24 +97,11 @@ public class AccountManager: RefreshTokenDelegate {
             }
         }
 
-        //remove accounts with no token or no user
-        for account in accounts {
-            if account.token == nil {
-                removeAccount(toDeleteAccount: account)
-            }
-            if account.user == nil {
-                removeAccount(toDeleteAccount: account)
-            }
-        }
-
         if let account = accounts.first(where: { $0.userId == currentUserId }) ?? accounts.first {
             setCurrentAccount(account: account)
 
             if let currentDrive = DriveInfosManager.instance.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
                 setCurrentDriveForCurrentAccount(drive: currentDrive)
-            } else {
-                removeTokenAndAccount(token: account.token)
-                saveAccounts()
             }
         }
     }
@@ -135,12 +129,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
-        for account in accounts {
-            if account.userId == id {
-                return account.token
-            }
-        }
-        return nil
+        return accounts.first(where: { $0.userId == id })?.token
     }
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
@@ -148,7 +137,13 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
-        self.removeTokenAndAccount(token: token)
+        tokens.removeAll { (token) -> Bool in
+            token.accessToken == token.accessToken
+        }
+        self.deleteToken(token)
+        if let account = getAccountForToken(token: token) {
+            account.token = nil
+        }
     }
 
 
@@ -167,7 +162,7 @@ public class AccountManager: RefreshTokenDelegate {
         self.addAccount(account: newAccount)
         self.setCurrentAccount(account: newAccount)
         let apiFetcher = ApiFetcher(token: token, delegate: self)
-        apiFetcher.getUserForAccount() { (response, error) in
+        apiFetcher.getUserForAccount { (response, error) in
             if let user = response?.data {
                 newAccount.user = user
 
@@ -192,7 +187,7 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func updateUserForAccount(_ account: Account, completion: @escaping (Account?, Drive?, Error?) -> Void) {
         let apiFetcher = ApiFetcher(token: account.token, delegate: self)
-        apiFetcher.getUserForAccount() { (response, error) in
+        apiFetcher.getUserForAccount { (response, error) in
             if let user = response?.data {
                 account.user = user
                 apiFetcher.getUserDrives { (response, error) in

@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/SCENEE/FloatingPanel",
         "state": {
           "branch": null,
-          "revision": "16fea625be25d9a713630a4a43cbc0778740ebf4",
-          "version": "2.3.0"
+          "revision": "da4668aa2b8277dd8ce2741ac5c39394431400fc",
+          "version": "2.3.1"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
-          "revision": "bf50e84e962e712bb4ff517f9f88f9bbde91406d",
-          "version": "1.0.9"
+          "revision": "c355bb5cf83279c846a00e6269555d0251604cfc",
+          "version": "1.0.10"
         }
       },
       {
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "239a6a383af5d4b445626a95aa6356925e6acf22",
-          "version": "10.7.4"
+          "revision": "b481f2cc637bd101a03dba52ad1bef6eadfdac9f",
+          "version": "10.7.5"
         }
       },
       {
