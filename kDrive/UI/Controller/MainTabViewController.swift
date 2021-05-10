@@ -165,7 +165,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             if AccountManager.instance.drives.isEmpty {
                 let driveErrorVC = DriveErrorViewController.instantiate()
                 driveErrorVC.driveErrorViewType = .noDrive
-                self.present(driveErrorVC, animated: true, completion: nil)
+                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(UINavigationController(rootViewController: driveErrorVC))
             } else {
                 // Invalid token or unknown error
                 (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(SwitchUserViewController.instantiateInNavigationController())

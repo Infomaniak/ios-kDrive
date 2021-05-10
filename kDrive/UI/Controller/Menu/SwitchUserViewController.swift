@@ -25,6 +25,14 @@ class SwitchUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     let accountManager = AccountManager.instance
 
+    var isRootViewController: Bool {
+        if let navigationController = UIApplication.shared.keyWindow?.rootViewController as? UINavigationController {
+            return navigationController.visibleViewController == self
+        } else {
+            return UIApplication.shared.keyWindow?.rootViewController == self
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: UserAccountTableViewCell.self)
@@ -79,7 +87,11 @@ extension SwitchUserViewController: UITableViewDelegate {
         } else {
             AccountManager.instance.switchAccount(newAccount: account)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
-            self.navigationController?.popViewController(animated: true)
+            if isRootViewController {
+                (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(MainTabViewController.instantiate())
+            } else {
+                self.navigationController?.popViewController(animated: true)
+            }
         }
     }
 
@@ -98,6 +110,7 @@ extension SwitchUserViewController: UITableViewDataSource {
         cell.titleLabel.text = account.user.displayName
         cell.userEmailLabel.text = account.user.email
         cell.logoImage.image = KDriveAsset.placeholderAvatar.image
+        cell.isUserInteractionEnabled = DriveInfosManager.instance.getDrives(for: account.userId).count > 0
 
         account.user.getAvatar { (image) in
             cell.logoImage.image = image
