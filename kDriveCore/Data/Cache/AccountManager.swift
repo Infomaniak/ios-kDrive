@@ -43,7 +43,7 @@ public class AccountManager: RefreshTokenDelegate {
             UserDefaults.shared.currentDriveUserId = currentUserId
         }
     }
-    public var currentDriveId: String {
+    public var currentDriveId: Int {
         didSet {
             UserDefaults.shared.currentDriveId = currentDriveId
         }
@@ -51,7 +51,16 @@ public class AccountManager: RefreshTokenDelegate {
     public var drives: [Drive] {
         return DriveInfosManager.instance.getDrives(for: currentUserId)
     }
-    public var currentDriveFileManager: DriveFileManager!
+    public var currentDriveFileManager: DriveFileManager? {
+        if let currentDriveFileManager = getDriveFileManager(for: currentDriveId, userId: currentUserId) {
+            return currentDriveFileManager
+        } else if let newCurrentDrive = drives.first {
+            setCurrentDriveForCurrentAccount(drive: newCurrentDrive)
+            return getDriveFileManager(for: newCurrentDrive)
+        } else {
+            return nil
+        }
+    }
     private var driveFileManagers = [String: DriveFileManager]()
 
     private init() {
@@ -92,9 +101,9 @@ public class AccountManager: RefreshTokenDelegate {
         }
 
         if let account = accounts.first(where: { $0.userId == currentUserId }) ?? accounts.first {
+            setCurrentAccount(account: account)
 
-            if let currentDrive = DriveInfosManager.instance.getDrive(objectId: currentDriveId) ?? drives.first {
-                setCurrentAccount(account: account)
+            if let currentDrive = DriveInfosManager.instance.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
                 setCurrentDriveForCurrentAccount(drive: currentDrive)
             } else {
                 removeTokenAndAccount(token: account.token)
@@ -104,13 +113,18 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func getDriveFileManager(for drive: Drive) -> DriveFileManager? {
-        if drive == currentDriveFileManager?.drive {
-            return currentDriveFileManager
-        } else if let driveFileManager = driveFileManagers[drive.objectId] {
+        return getDriveFileManager(for: drive.id, userId: drive.userId)
+    }
+
+    public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
+        let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
+
+        if let driveFileManager = driveFileManagers[objectId] {
             return driveFileManager
-        } else if let token = getTokenForUserId(drive.userId) {
-            driveFileManagers[drive.objectId] = DriveFileManager(drive: drive, apiToken: token, refreshTokenDelegate: self)
-            return driveFileManagers[drive.objectId]
+        } else if let token = getTokenForUserId(userId),
+            let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
+            driveFileManagers[objectId] = DriveFileManager(drive: drive, apiToken: token, refreshTokenDelegate: self)
+            return driveFileManagers[objectId]
         } else {
             return nil
         }
@@ -190,7 +204,7 @@ public class AccountManager: RefreshTokenDelegate {
                             if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings.userId == user.id && PhotoLibraryUploader.instance.settings.driveId == driveRemoved.id {
                                 PhotoLibraryUploader.instance.disableSync()
                             }
-                            if self.currentDriveFileManager.drive.id == driveRemoved.id {
+                            if self.currentDriveFileManager?.drive.id == driveRemoved.id {
                                 switchedDrive = self.drives.first
                                 self.setCurrentDriveForCurrentAccount(drive: switchedDrive!)
                             }
@@ -259,9 +273,8 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func setCurrentDriveForCurrentAccount(drive: Drive) {
-        currentDriveFileManager = DriveFileManager(drive: drive, apiToken: currentAccount.token, refreshTokenDelegate: self)
-        driveFileManagers[drive.objectId] = currentDriveFileManager
-        currentDriveId = drive.objectId
+        currentDriveId = drive.id
+        _ = getDriveFileManager(for: drive)
     }
 
     public func addAccount(account: Account) {
@@ -276,7 +289,7 @@ public class AccountManager: RefreshTokenDelegate {
     public func removeAccount(toDeleteAccount: Account) {
         if currentAccount == toDeleteAccount {
             currentAccount = nil
-            currentDriveId = ""
+            currentDriveId = 0
         }
         if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings.userId == toDeleteAccount.userId {
             PhotoLibraryUploader.instance.disableSync()
@@ -316,7 +329,7 @@ public class AccountManager: RefreshTokenDelegate {
         tokens.append(newToken)
 
         //Update token for the other drive file manager
-        for driveFileManager in driveFileManagers.values where driveFileManager.drive != currentDriveFileManager.drive {
+        for driveFileManager in driveFileManagers.values where driveFileManager.drive != currentDriveFileManager?.drive {
             if driveFileManager.apiFetcher.currentToken?.userId == newToken.userId {
                 driveFileManager.apiFetcher.currentToken = newToken
             }

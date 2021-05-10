@@ -31,7 +31,7 @@ class SelectDriveViewController: UIViewController {
     private var driveList: [Drive]!
     private var currentAccount: Account!
     private var accounts: [Account]!
-    var selectedDrive: Drive = AccountManager.instance.currentDriveFileManager.drive
+    var selectedDrive: Drive!
     weak var delegate: SelectDriveDelegate?
 
     private enum Section {

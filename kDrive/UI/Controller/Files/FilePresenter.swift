@@ -34,7 +34,7 @@ class FilePresenter {
         self.floatingPanelViewController = floatingPanelViewController
     }
 
-    func presentParent(of file: File, driveFileManager: DriveFileManager = AccountManager.instance.currentDriveFileManager) {
+    func presentParent(of file: File, driveFileManager: DriveFileManager) {
         if var parent = file.parent {
             // Fix for weird bug: root container of shared with me is not what is expected
             if driveFileManager.drive.sharedWithMe && parent.id == DriveFileManager.constants.rootID {
@@ -54,7 +54,7 @@ class FilePresenter {
         }
     }
 
-    func present(driveFileManager: DriveFileManager = AccountManager.instance.currentDriveFileManager, file: File, files: [File], normalFolderHierarchy: Bool, fromActivities: Bool = false) {
+    func present(driveFileManager: DriveFileManager, file: File, files: [File], normalFolderHierarchy: Bool, fromActivities: Bool = false) {
         if file.isDirectory {
             // Show files list
             let nextVC: FileListCollectionViewController

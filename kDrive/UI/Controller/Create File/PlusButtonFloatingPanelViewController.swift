@@ -27,6 +27,7 @@ import kDriveCore
 class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
 
     var currentDirectory: File!
+    var driveFileManager: DriveFileManager!
 
     private struct PlusButtonMenuAction: Equatable {
         let name: String
@@ -106,9 +107,9 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
-            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveStrings.Localizable.allRootName(AccountManager.instance.currentDriveFileManager.drive.name) : currentDirectory.name
+            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveStrings.Localizable.allRootName(driveFileManager.drive.name) : currentDirectory.name
             cell.accessoryImageView.image = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveAsset.drive.image : KDriveAsset.folderFilled.image
-            cell.accessoryImageView.tintColor = currentDirectory.id == DriveFileManager.constants.rootID ? UIColor(hex: AccountManager.instance.currentDriveFileManager.drive.preferences.color) : nil
+            cell.accessoryImageView.tintColor = currentDirectory.id == DriveFileManager.constants.rootID ? UIColor(hex: driveFileManager.drive.preferences.color) : nil
             cell.separator?.isHidden = false
             cell.selectionStyle = .none
             cell.accessibilityTraits = .header
@@ -149,7 +150,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
             documentPicker.delegate = mainTabViewController
             mainTabViewController.present(documentPicker, animated: true)
         case .folderAction:
-            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: currentDirectory, driveFileManager: AccountManager.instance.currentDriveFileManager)
+            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: currentDirectory, driveFileManager: driveFileManager)
             mainTabViewController.present(newFolderViewController, animated: true)
         case .scanAction:
             if #available(iOS 13.0, *), VNDocumentCameraViewController.isSupported {
@@ -199,7 +200,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 }
             }
         case .docsAction, .gridsAction, .pointsAction, .noteAction:
-            let alertViewController = AlertDocViewController(fileType: action.docType, directory: currentDirectory)
+            let alertViewController = AlertDocViewController(fileType: action.docType, directory: currentDirectory, driveFileManager: driveFileManager)
             mainTabViewController.present(alertViewController, animated: true)
         default:
             break

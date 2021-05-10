@@ -55,8 +55,8 @@ public class IconUtils {
                 }
             }
         } else {
-            if file.hasThumbnail {
-                KingfisherManager.shared.retrieveImage(with: file.thumbnailURL, options: [.requestModifier(AccountManager.instance.currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
+            if file.hasThumbnail, let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
+                KingfisherManager.shared.retrieveImage(with: file.thumbnailURL, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
                     if let image = try? result.get().image {
                         completion(image, true)
                     } else {

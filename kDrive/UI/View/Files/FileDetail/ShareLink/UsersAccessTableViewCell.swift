@@ -84,7 +84,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(tag: Tag) {
+    func configureWith(tag: Tag, drive: Drive) {
         notAcceptedView.isHidden = true
         avatarHeightConstraint.constant = 18
         avatarImage.layer.cornerRadius = 0
@@ -92,7 +92,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         if tag.isAllDriveUsersTag() {
             titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
             avatarImage.image = KDriveAsset.drive.image
-            avatarView.backgroundColor = UIColor(hex: AccountManager.instance.currentDriveFileManager.drive.preferences.color)
+            avatarView.backgroundColor = UIColor(hex: drive.preferences.color)
         } else {
             titleLabel.text = tag.name
             avatarImage.image = KDriveAsset.tag.image

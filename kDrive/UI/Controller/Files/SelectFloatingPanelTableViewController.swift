@@ -99,11 +99,11 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             }
             for file in files where !file.isDirectory {
                 group.enter()
-                AccountManager.instance.currentDriveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { (error) in
+                driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { (error) in
                     if error != nil {
                         success = false
                     }
-                    if let file = AccountManager.instance.currentDriveFileManager.getCachedFile(id: file.id) {
+                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
                         self.changedFiles?.append(file)
                     }
                     group.leave()
@@ -114,11 +114,11 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             addAction = !isFavorite
             for file in files {
                 group.enter()
-                AccountManager.instance.currentDriveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { (error) in
+                driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { (error) in
                     if error != nil {
                         success = false
                     }
-                    if let file = AccountManager.instance.currentDriveFileManager.getCachedFile(id: file.id) {
+                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
                         self.changedFiles?.append(file)
                     }
                     group.leave()

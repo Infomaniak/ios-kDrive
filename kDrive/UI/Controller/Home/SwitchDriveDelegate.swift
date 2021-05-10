@@ -20,5 +20,6 @@ import Foundation
 import kDriveCore
 
 protocol SwitchDriveDelegate: AnyObject {
-    func didSwitchDrive(newDrive: Drive)
+    var driveFileManager: DriveFileManager! { get set }
+    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager)
 }

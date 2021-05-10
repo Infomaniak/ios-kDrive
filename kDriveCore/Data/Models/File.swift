@@ -354,12 +354,16 @@ public class File: Object, Codable {
 
     @discardableResult
     public func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
-        return KingfisherManager.shared.retrieveImage(with: self.imagePreviewUrl, options: [.requestModifier(AccountManager.instance.currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
-            if let image = try? result.get().image {
-                completion(image)
-            } else {
-                completion(nil)
+        if let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
+            return KingfisherManager.shared.retrieveImage(with: self.imagePreviewUrl, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
+                if let image = try? result.get().image {
+                    completion(image)
+                } else {
+                    completion(nil)
+                }
             }
+        } else {
+            return nil
         }
     }
 

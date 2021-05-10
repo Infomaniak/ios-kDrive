@@ -89,7 +89,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkStackView.isHidden = false
             copyTextField.text = link.url
             shareLinkRightsView.isHidden = !isOfficeFile
-            let right = RightsSelectionViewController.onlyOfficeRights[link.canEdit ? 1 : 0]
+            let right = Right.onlyOfficeRights[link.canEdit ? 1 : 0]
             rightsIconImageView.image = right.icon
             rightsLabel.text = right.title
             shareLinkRightsView.accessibilityLabel = right.title

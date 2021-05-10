@@ -32,8 +32,10 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
         accountManager = AccountManager.instance
 
         let saveViewController = SaveFileViewController.instantiate()
-        if let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments {
+        if let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments,
+            let currentDriveFileManager = accountManager.currentDriveFileManager {
             saveViewController.setItemProviders(attachments)
+            saveViewController.selectedDriveFileManager = currentDriveFileManager
             viewControllers = [saveViewController]
         } else {
             dismiss(animated: true)

@@ -21,6 +21,8 @@ import kDriveCore
 
 class ParameterTableViewController: UITableViewController {
 
+    var driveFileManager: DriveFileManager!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)
@@ -88,6 +90,12 @@ class ParameterTableViewController: UITableViewController {
             present(appLockSettingsVC, animated: true)
         } else if indexPath.row == 4 {
             self.performSegue(withIdentifier: "aboutSegue", sender: nil)
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let photoSyncSettingsViewController = segue.destination as? PhotoSyncSettingsViewController {
+            photoSyncSettingsViewController.driveFileManager = driveFileManager
         }
     }
 }

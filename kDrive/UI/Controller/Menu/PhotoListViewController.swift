@@ -48,6 +48,8 @@ class PhotoListViewController: UIViewController {
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return isLargeTitle ? .default : .lightContent
     }
+    
+    var driveFileManager: DriveFileManager!
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -113,7 +115,7 @@ class PhotoListViewController: UIViewController {
     func fetchNextPage() {
         footerView?.isHidden = false
         isLoading = true
-        AccountManager.instance.currentDriveFileManager.apiFetcher.getLastPictures(page: page) { (response, error) in
+        driveFileManager.apiFetcher.getLastPictures(page: page) { (response, error) in
             if let data = response?.data {
                 let lastIndex = self.files.count
                 self.files += data
@@ -121,7 +123,7 @@ class PhotoListViewController: UIViewController {
                 self.showEmptyView(.noImages)
                 self.page += 1
                 self.hasNextPage = data.count == DriveApiFetcher.itemPerPage
-                AccountManager.instance.currentDriveFileManager.setLocalFiles(self.files, root: DriveFileManager.lastPicturesRootFile)
+                self.driveFileManager.setLocalFiles(self.files, root: DriveFileManager.lastPicturesRootFile)
             }
             self.footerView?.isHidden = true
             self.isLoading = false
@@ -197,7 +199,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        filePresenter.present(driveFileManager: AccountManager.instance.currentDriveFileManager, file: files[indexPath.row], files: files, normalFolderHierarchy: false)
+        filePresenter.present(driveFileManager: driveFileManager, file: files[indexPath.row], files: files, normalFolderHierarchy: false)
     }
 }
 

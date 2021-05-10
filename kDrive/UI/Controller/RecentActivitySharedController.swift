@@ -36,7 +36,7 @@ class RecentActivitySharedController: RecentActivityDelegate {
     private let mergeFileCreateDelay = 43_200 // 12h
     private var isInvalidated = false
 
-    init(driveFileManager: DriveFileManager = AccountManager.instance.currentDriveFileManager, filePresenter: FilePresenter) {
+    init(driveFileManager: DriveFileManager, filePresenter: FilePresenter) {
         self.driveFileManager = driveFileManager
         self.filePresenter = filePresenter
     }

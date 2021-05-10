@@ -674,6 +674,7 @@ extension FileDetailViewController: FileDetailDelegate {
 extension FileDetailViewController: FileUsersDelegate {
     func shareButtonTapped() {
         let shareVC = ShareAndRightsViewController.instantiate()
+        shareVC.driveFileManager = driveFileManager
         shareVC.file = file
         navigationController?.pushViewController(shareVC, animated: true)
     }
@@ -751,6 +752,7 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
         let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
         rightsSelectionViewController.modalPresentationStyle = .fullScreen
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
+            rightsSelectionVC.driveFileManager = driveFileManager
             rightsSelectionVC.delegate = self
             rightsSelectionVC.rightSelectionType = .officeOnly
             rightsSelectionVC.selectedRight = sharedLink.canEdit ? "write" : "read"
