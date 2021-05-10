@@ -30,7 +30,7 @@ import StoreKit
 import Sentry
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
@@ -302,7 +302,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
                 }
                 if let drive = switchedDrive,
-                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive) {
+                    let driveFileManager = self.accountManager.getDriveFileManager(for: drive) {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
                 UploadQueue.instance.resumeAllOperations()
@@ -432,6 +432,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         window.rootViewController = vc
         window.makeKeyAndVisible()
         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
+    }
+
+    // MARK: - Account manager delegate
+
+    func currentAccountNeedsAuthentication() {
+        setRootViewController(SwitchUserViewController.instantiateInNavigationController())
+        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDisconnected)
     }
 
     // MARK: - User notification center delegate

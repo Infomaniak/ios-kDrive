@@ -46,13 +46,30 @@ class SwitchUserViewController: UIViewController {
         present(nextViewController, animated: true)
     }
 
+    class func instantiate() -> SwitchUserViewController {
+        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "SwitchUserViewController") as! SwitchUserViewController
+    }
+
+    class func instantiateInNavigationController() -> UINavigationController {
+        let switchUserViewController = instantiate()
+        let navigationController = UINavigationController(rootViewController: switchUserViewController)
+        navigationController.setInfomaniakAppearanceNavigationBar()
+        return navigationController
+    }
+
 }
 // MARK: - UITableViewDelegate
 extension SwitchUserViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let account = accountManager.accounts[indexPath.row]
-        
+
+        if !account.isConnected {
+            // Ask to reconnect
+            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self, defaultEmail: account.user?.email)
+            return
+        }
+
         let drives = DriveInfosManager.instance.getDrives(for: account.userId)
         if drives.count == 1 && drives[0].maintenance {
             let driveErrorVC = DriveErrorViewController.instantiate()
@@ -88,4 +105,25 @@ extension SwitchUserViewController: UITableViewDataSource {
         return cell
     }
 
+}
+
+// MARK: - Infomaniak Login Delegate
+extension SwitchUserViewController: InfomaniakLoginDelegate {
+
+    func didCompleteLoginWith(code: String, verifier: String) {
+        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { (account, error) in
+            if account != nil {
+                // Download root file
+                AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+                    (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate())
+                }
+            } else {
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorConnection)
+            }
+        }
+    }
+
+    func didFailLoginWith(error: String) {
+        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorConnection)
+    }
 }

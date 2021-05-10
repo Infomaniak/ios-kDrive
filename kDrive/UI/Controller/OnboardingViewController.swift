@@ -102,11 +102,7 @@ class OnboardingViewController: UIViewController {
     }
 
     @IBAction func signInButtonPressed(_ sender: Any) {
-        if addUser {
-            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
-        } else {
-            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
-        }
+        InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
