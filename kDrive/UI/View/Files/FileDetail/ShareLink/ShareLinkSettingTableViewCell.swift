@@ -87,14 +87,14 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         delegate?.didUpdateExpirationDateSettingValue(for: .expirationDate, newValue: settingSwitch.isOn, date: expirationDate?.timeIntervalSince1970)
     }
 
-    func configureWith(option: ShareLinkSettingsViewController.Option, optionValue: Bool, expirationTime: TimeInterval? = nil) {
+    func configureWith(option: ShareLinkSettingsViewController.Option, optionValue: Bool, drive: Drive, expirationTime: TimeInterval? = nil) {
         self.option = option
 
         titleLabel.text = option.title
         settingDetail.text = option.description
         settingSwitch.isOn = optionValue
-        settingSwitch.isEnabled = option.isEnabled
-        updateButton.isHidden = option.isEnabled
+        settingSwitch.isEnabled = option.isEnabled(drive: drive)
+        updateButton.isHidden = option.isEnabled(drive: drive)
 
         if option == .expirationDate {
             self.expirationDate = expirationTime != nil ? Date(timeIntervalSince1970: expirationTime!) : nil

@@ -21,12 +21,12 @@ import InfomaniakCore
 import kDriveCore
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+
     @IBOutlet weak var tableView: UITableView!
 
-    private(set) var drive: Drive?
+    var driveFileManager: DriveFileManager!
     var folder: File! {
         didSet {
-            drive = AccountManager.instance.getDrive(for: AccountManager.instance.currentUserId, driveId: folder.driveId)
             setTitle()
             getSettings()
         }
@@ -123,7 +123,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             ]
             self.newPassword = false
         } else {
-            AccountManager.instance.currentDriveFileManager.apiFetcher.getDropBoxSettings(directory: folder) { (response, error) in
+            driveFileManager.apiFetcher.getDropBoxSettings(directory: folder) { (response, error) in
                 self.dropBox = response?.data
                 if let dropBox = response?.data {
                     self.settings = [
@@ -235,7 +235,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.section == 2 {
-            AccountManager.instance.currentDriveFileManager.apiFetcher.disableDropBox(directory: folder) { (_, error) in
+            driveFileManager.apiFetcher.disableDropBox(directory: folder) { (_, error) in
                 if error == nil {
                     self.dismissAndRefreshDataSource()
                 } else {
@@ -280,7 +280,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
         let limitFileSize = getSetting(for: .optionSize) ? (getValue(for: .optionSize) as? Int) : nil
 
         if convertingFolder {
-            AccountManager.instance.currentDriveFileManager.apiFetcher.setupDropBox(directory: folder, password: (password?.isEmpty ?? false) ? nil : password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { (response, error) in
+            driveFileManager.apiFetcher.setupDropBox(directory: folder, password: (password?.isEmpty ?? false) ? nil : password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { (response, error) in
                 if let dropBox = response?.data {
                     let floatingPanelViewController = ShareFloatingPanelViewController.instantiatePanel()
                     (floatingPanelViewController.contentViewController as? ShareFloatingPanelViewController)?.copyTextField.text = dropBox.url
@@ -291,7 +291,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                 }
             }
         } else {
-            AccountManager.instance.currentDriveFileManager.apiFetcher.updateDropBox(directory: folder, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { (_, error) in
+            driveFileManager.apiFetcher.updateDropBox(directory: folder, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { (_, error) in
                 if error == nil {
                     self.navigationController?.popViewController(animated: true)
                 } else {

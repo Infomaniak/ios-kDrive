@@ -232,9 +232,9 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         super.viewWillAppear(animated)
 
         #if !ISEXTENSION
-        if let centerButton = (tabBarController as? MainTabViewController)?.tabBar.centerButton {
-            centerButton.isEnabled = currentDirectory.rights?.createNewFile.value ?? true
-        }
+            if let centerButton = (tabBarController as? MainTabViewController)?.tabBar.centerButton {
+                centerButton.isEnabled = currentDirectory.rights?.createNewFile.value ?? true
+            }
         #endif
 
         if needsContentUpdate {
@@ -918,11 +918,11 @@ extension FileListCollectionViewController: FilesHeaderViewDelegate, SortOptions
 // MARK: - SwitchDriveDelegate
     extension FileListCollectionViewController: SwitchDriveDelegate {
 
-        func didSwitchDrive(newDrive: Drive) {
-            driveFileManager = AccountManager.instance.getDriveFileManager(for: newDrive)
+        func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
+            driveFileManager = newDriveFileManager
             currentDirectory = driveFileManager.getRootFile()
             uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory?.id ?? 1).count
-            navigationItem.title = currentDirectory?.name ?? newDrive.name
+            navigationItem.title = currentDirectory?.name ?? newDriveFileManager.drive.name
             sortedChildren = [File]()
             currentPage = 0
             needsContentUpdate = true

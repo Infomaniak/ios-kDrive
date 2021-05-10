@@ -203,9 +203,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if MigrationHelper.canMigrate() {
             window?.rootViewController = MigrationViewController.instantiate()
             window?.makeKeyAndVisible()
-        } else if (UserDefaults.isFirstLaunch() || AccountManager.instance.accounts.count == 0) {
+        } else if (UserDefaults.isFirstLaunch() || accountManager.accounts.count == 0) {
             if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
-                AccountManager.instance.deleteAllTokens()
+                accountManager.deleteAllTokens()
                 window?.rootViewController = OnboardingViewController.instantiate()
                 window?.makeKeyAndVisible()
             }
@@ -233,9 +233,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                     }
                 }
             })
-            if UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
+            if let currentDriveFileManager = accountManager.currentDriveFileManager,
+                UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
                 let floatingPanelViewController = SavePhotosFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SavePhotosFloatingPanelViewController)?.actionHandler = { [self] sender in
+                let savePhotosFloatingPanelViewController = (floatingPanelViewController.contentViewController as? SavePhotosFloatingPanelViewController)
+                savePhotosFloatingPanelViewController?.driveFileManager = currentDriveFileManager
+                savePhotosFloatingPanelViewController?.actionHandler = { [self] sender in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     let mainTabViewVC = self.window?.rootViewController as? UITabBarController
                     guard let currentVC = mainTabViewVC?.selectedViewController as? UINavigationController else {
@@ -287,7 +290,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             }
         }
 
-        AccountManager.instance.updateUserForAccount(currentAccount) { (account, switchedDrive, error) in
+        accountManager.updateUserForAccount(currentAccount) { (account, switchedDrive, error) in
             if let error = error {
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")
@@ -297,8 +300,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 } else {
                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
                 }
-                if let drive = switchedDrive {
-                    (rootViewController as? SwitchDriveDelegate)?.didSwitchDrive(newDrive: drive)
+                if let drive = switchedDrive,
+                   let driveFileManager = self.accountManager.getDriveFileManager(for: drive) {
+                    (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
                 UploadQueue.instance.resumeAllOperations()
                 UploadQueue.instance.addToQueueFromRealm()
@@ -374,9 +378,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             return
         }
 
-        let drives = DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: false)
+        let drives = DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false)
         for drive in drives {
-            guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
+            guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
             }
 
@@ -454,7 +458,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                     // Pop to root
                     navController.popToRootViewController(animated: false)
                     // Present folder (if it's not root)
-                    if let parentId = parentId, parentId > DriveFileManager.constants.rootID, let directory = accountManager.currentDriveFileManager.getCachedFile(id: parentId) {
+                    if let parentId = parentId, parentId > DriveFileManager.constants.rootID, let directory = accountManager.currentDriveFileManager?.getCachedFile(id: parentId) {
                         let filesList = FileListCollectionViewController.instantiate()
                         filesList.currentDirectory = directory
                         navController.pushViewController(filesList, animated: false)

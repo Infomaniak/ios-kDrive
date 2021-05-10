@@ -52,7 +52,14 @@ public class AccountManager: RefreshTokenDelegate {
         return DriveInfosManager.instance.getDrives(for: currentUserId)
     }
     public var currentDriveFileManager: DriveFileManager? {
-        return getDriveFileManager(for: currentDriveId, userId: currentUserId)
+        if let currentDriveFileManager = getDriveFileManager(for: currentDriveId, userId: currentUserId) {
+            return currentDriveFileManager
+        } else if let newCurrentDrive = drives.first {
+            setCurrentDriveForCurrentAccount(drive: newCurrentDrive)
+            return getDriveFileManager(for: newCurrentDrive)
+        } else {
+            return nil
+        }
     }
     private var driveFileManagers = [String: DriveFileManager]()
 
@@ -112,9 +119,7 @@ public class AccountManager: RefreshTokenDelegate {
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
 
-        if currentDriveFileManager?.drive.objectId == objectId {
-            return currentDriveFileManager
-        } else if let driveFileManager = driveFileManagers[objectId] {
+        if let driveFileManager = driveFileManagers[objectId] {
             return driveFileManager
         } else if let token = getTokenForUserId(userId),
             let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
@@ -269,7 +274,7 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func setCurrentDriveForCurrentAccount(drive: Drive) {
         currentDriveId = drive.id
-        _ = currentDriveFileManager
+        _ = getDriveFileManager(for: drive)
     }
 
     public func addAccount(account: Account) {

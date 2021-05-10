@@ -48,7 +48,7 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
 
     override func fetchNextPage(forceRefresh: Bool = false) {
         currentPage += 1
-        AccountManager.instance.currentDriveFileManager.getFavorites(page: currentPage, sortType: sortType, forceRefresh: forceRefresh) { [self] (root, favorites, error) in
+        driveFileManager.getFavorites(page: currentPage, sortType: sortType, forceRefresh: forceRefresh) { [self] (root, favorites, error) in
             collectionView.refreshControl?.endRefreshing()
             if let fetchedCurrentDirectory = root,
                 let fetchedChildren = favorites {
@@ -82,7 +82,7 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
     }
 
     override func observeFileUpdated() {
-        AccountManager.instance.currentDriveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
                 DispatchQueue.main.async { [weak self] in
                     guard let strongSelf = self else { return }

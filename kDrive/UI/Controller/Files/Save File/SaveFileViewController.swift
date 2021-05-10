@@ -48,7 +48,7 @@ class SaveFileViewController: UIViewController {
 
     private var originalDriveId = AccountManager.instance.currentDriveId
     private var originalUserId = AccountManager.instance.currentUserId
-    var selectedDriveFileManager: DriveFileManager = AccountManager.instance.currentDriveFileManager
+    var selectedDriveFileManager: DriveFileManager!
     var selectedDirectory: File?
     var items = [ImportedFile]()
     var skipOptionsSelection = false
@@ -468,7 +468,7 @@ extension SaveFileViewController: SelectFolderDelegate {
 
     func didSelectFolder(_ folder: File) {
         if folder.id == DriveFileManager.constants.rootID {
-            selectedDirectory = AccountManager.instance.currentDriveFileManager.getRootFile()
+            selectedDirectory = selectedDriveFileManager.getRootFile()
         } else {
             selectedDirectory = folder
         }
@@ -480,11 +480,9 @@ extension SaveFileViewController: SelectFolderDelegate {
 extension SaveFileViewController: SelectDriveDelegate {
 
     func didSelectDrive(_ drive: Drive) {
-        if let selectedDrive = AccountManager.instance.getDriveFileManager(for: drive) {
-            selectedDriveFileManager = selectedDrive
-            AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
-            AccountManager.instance.saveAccounts()
-            selectedDirectory = AccountManager.instance.currentDriveFileManager.getRootFile()
+        if let selectedDriveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+            self.selectedDriveFileManager = selectedDriveFileManager
+            selectedDirectory = selectedDriveFileManager.getRootFile()
         }
         updateButton()
     }
@@ -513,12 +511,7 @@ extension SaveFileViewController: FooterButtonDelegate {
             )
             UploadQueue.instance.addToQueue(file: newFile)
         }
-        //Restore original drive only if the user didn't switch account
-        if originalUserId == AccountManager.instance.currentUserId && originalDriveId != selectedDriveFileManager.drive.objectId,
-            let originalDrive = DriveInfosManager.instance.getDrive(objectId: originalDriveId) {
-            AccountManager.instance.setCurrentDriveForCurrentAccount(drive: originalDrive)
-            AccountManager.instance.saveAccounts()
-        }
+
         navigationController?.dismiss(animated: true) { [self] in
             let message = items.count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveStrings.Localizable.allUploadInProgress(items[0].name)
             UIConstants.showSnackBar(message: message)

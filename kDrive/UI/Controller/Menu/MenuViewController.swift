@@ -28,6 +28,8 @@ class MenuViewController: UIViewController {
     @IBOutlet weak var userAvatarImageView: UIImageView!
     @IBOutlet weak var userDisplayNameLabel: UILabel!
 
+    var driveFileManager: DriveFileManager!
+
     private struct MenuAction: Equatable {
         let name: String
         let image: UIImage
@@ -50,7 +52,6 @@ class MenuViewController: UIViewController {
         [.sharedWithMeAction, .lastModificationAction, .imagesAction, .offlineAction, .mySharedAction, .trashAction],
         [.switchUserAction, .parametersAction, .disconnectAction]
     ]
-    private var currentDrive: Drive!
     private var currentAccount: Account!
 
     private var needsContentUpdate = false
@@ -60,7 +61,6 @@ class MenuViewController: UIViewController {
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MenuTopTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
-        currentDrive = AccountManager.instance.currentDriveFileManager.drive
         currentAccount = AccountManager.instance.currentAccount
         updateTableContent()
     }
@@ -108,6 +108,8 @@ class MenuViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let navController = segue.destination as? UINavigationController, let switchDriveAccountViewController = navController.topViewController as? SwitchDriveViewController {
             switchDriveAccountViewController.delegate = tabBarController as? MainTabViewController
+        } else if let photoListViewController = segue.destination as? PhotoListViewController {
+            photoListViewController.driveFileManager = driveFileManager
         }
     }
 }
@@ -142,7 +144,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.section == 0 {
             let cell = tableView.dequeueReusableCell(type: MenuTopTableViewCell.self, for: indexPath)
             cell.selectionStyle = .none
-            cell.configureCell(with: currentDrive, and: currentAccount)
+            cell.configureCell(with: driveFileManager.drive, and: currentAccount)
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else {
@@ -203,11 +205,12 @@ extension MenuViewController: SwitchDriveDelegate, SwitchAccountDelegate {
         needsContentUpdate = true
     }
 
-    func didSwitchDrive(newDrive: Drive) {
-        currentDrive = newDrive
+    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
+        driveFileManager = newDriveFileManager
         needsContentUpdate = true
         updateContentIfNeeded()
     }
+
 }
 
 // MARK: - Top scrollable

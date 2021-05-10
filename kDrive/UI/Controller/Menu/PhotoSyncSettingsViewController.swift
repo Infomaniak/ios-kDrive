@@ -65,6 +65,8 @@ class PhotoSyncSettingsViewController: UIViewController {
     private var syncMode: PhotoSyncMode = .new
     private var selectedDirectory: File?
 
+    var driveFileManager: DriveFileManager!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)
@@ -87,7 +89,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         let savedCurrentId = currentSyncSettings.userId
         currentUserId = savedCurrentId == -1 ? AccountManager.instance.currentAccount.userId : savedCurrentId
         let savedCurrentDrive = currentSyncSettings.driveId
-        currentDriveId = savedCurrentDrive == -1 ? AccountManager.instance.currentDriveFileManager.drive.id : savedCurrentDrive
+        currentDriveId = savedCurrentDrive == -1 ? driveFileManager.drive.id : savedCurrentDrive
         syncMode = currentSyncSettings.syncMode
         updateSaveButtonState()
         updateSectionList()
@@ -248,7 +250,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                         self.requestAuthorization { (status) in
                             DispatchQueue.main.async {
                                 self.currentUserId = AccountManager.instance.currentAccount.userId
-                                self.currentDriveId = AccountManager.instance.currentDriveFileManager.drive.id
+                                self.currentDriveId = self.driveFileManager.drive.id
                                 if status == .authorized {
                                     self.photoSyncEnabled = true
                                 } else {
@@ -351,15 +353,15 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
                 let selectDriveViewController = SelectDriveViewController.instantiate()
                 if let selectedDrive = AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId) {
                     selectDriveViewController.selectedDrive = selectedDrive
+                    selectDriveViewController.delegate = self
+                    navigationController?.pushViewController(selectDriveViewController, animated: true)
                 }
-                selectDriveViewController.delegate = self
-                navigationController?.pushViewController(selectDriveViewController, animated: true)
             } else if row == .folderSelection {
                 let drive = AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId)!
                 let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)!
                 let selectFolderNavigationViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
                 (selectFolderNavigationViewController.viewControllers.first as? SelectFolderViewController)?.delegate = self
-                (selectFolderNavigationViewController.viewControllers.first as? SelectFolderViewController)?.disabledDirectoriesSelection = [AccountManager.instance.currentDriveFileManager.getRootFile()]
+                (selectFolderNavigationViewController.viewControllers.first as? SelectFolderViewController)?.disabledDirectoriesSelection = [driveFileManager.getRootFile()]
                 navigationController?.present(selectFolderNavigationViewController, animated: true)
             }
 
@@ -394,6 +396,7 @@ extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
         currentUserId = drive.userId
         currentDriveId = drive.id
+        driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)!
         selectedDirectory = nil
         self.updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 0, section: 1), IndexPath(row: 1, section: 1)], with: .fade)

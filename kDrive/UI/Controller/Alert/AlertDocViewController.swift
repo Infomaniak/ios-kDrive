@@ -23,6 +23,7 @@ import kDriveCore
 class AlertDocViewController: AlertFieldViewController {
     private let fileType: String
     private let directory: File
+    private let driveFileManager: DriveFileManager
 
     /**
      Creates a new alert to create a new office document.
@@ -30,9 +31,10 @@ class AlertDocViewController: AlertFieldViewController {
         - fileType: Type of the office file to create (docx, pptx, xlsx, or txt)
         - directory: Directory where to create the document
      */
-    init(fileType: String, directory: File) {
+    init(fileType: String, directory: File, driveFileManager: DriveFileManager) {
         self.fileType = fileType
         self.directory = directory
+        self.driveFileManager = driveFileManager
         super.init(title: KDriveStrings.Localizable.modalCreateFileTitle, label: KDriveStrings.Localizable.hintInputFileName, placeholder: nil, action: KDriveStrings.Localizable.buttonCreate, handler: nil)
         self.textFieldConfiguration = .fileNameConfiguration
     }
@@ -86,14 +88,14 @@ class AlertDocViewController: AlertFieldViewController {
 
         name = name.hasSuffix(".\(fileType)") ? name : "\(name).\(fileType)"
         setLoading(true)
-        AccountManager.instance.currentDriveFileManager.createOfficeFile(parentDirectory: directory, name: name, type: fileType) { (file, error) in
+        driveFileManager.createOfficeFile(parentDirectory: directory, name: name, type: fileType) { (file, error) in
             self.setLoading(false)
 
             self.dismiss(animated: true) {
                 let message: String
                 if error == nil, let file = file {
                     guard let mainTabViewController = UIApplication.shared.keyWindow?.rootViewController as? MainTabViewController else { return }
-                    OnlyOfficeViewController.open(driveFileManager: AccountManager.instance.currentDriveFileManager, file: file, viewController: mainTabViewController)
+                    OnlyOfficeViewController.open(driveFileManager: self.driveFileManager, file: file, viewController: mainTabViewController)
                     message = KDriveStrings.Localizable.snackbarFileCreateConfirmation
                 } else {
                     message = KDriveStrings.Localizable.errorFileCreate

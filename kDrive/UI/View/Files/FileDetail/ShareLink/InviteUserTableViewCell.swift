@@ -36,7 +36,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     var removeUsers: [Int] = [] {
         didSet {
-            users = DriveInfosManager.instance.getUsers(for: AccountManager.instance.currentDriveFileManager.drive.id)
+            users = DriveInfosManager.instance.getUsers(for: drive.id)
             users.removeAll {
                 $0.id == AccountManager.instance.currentAccount.user.id ||
                     removeUsers.contains($0.id)
@@ -49,13 +49,14 @@ class InviteUserTableViewCell: InsetTableViewCell {
     var users: [DriveUser] = []
     var results: [DriveUser] = []
     var mail: String?
+    var drive: Drive!
 
     override func awakeFromNib() {
         super.awakeFromNib()
 
         textField.delegate = self
 
-        users = DriveInfosManager.instance.getUsers(for: AccountManager.instance.currentDriveFileManager.drive.id)
+        users = DriveInfosManager.instance.getUsers(for: drive.id)
         users.sort { (user1, user2) -> Bool in
             return user1.displayName < user2.displayName
         }

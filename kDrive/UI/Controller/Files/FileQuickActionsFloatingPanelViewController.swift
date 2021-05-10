@@ -95,7 +95,7 @@ protocol FileActionDelegate: AnyObject {
 
 class FileQuickActionsFloatingPanelViewController: UITableViewController {
 
-    private var driveFileManager: DriveFileManager!
+    var driveFileManager: DriveFileManager!
     private(set) var file: File!
     var sharedWithMe: Bool {
         return driveFileManager?.drive.sharedWithMe ?? false
@@ -527,6 +527,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             #if !ISEXTENSION
                 let floatingPanelViewController = DriveFloatingPanelController()
                 let fileInformationsViewController = PlusButtonFloatingPanelViewController()
+                fileInformationsViewController.driveFileManager = driveFileManager
                 fileInformationsViewController.currentDirectory = file
                 floatingPanelViewController.isRemovalInteractionEnabled = true
                 floatingPanelViewController.delegate = fileInformationsViewController

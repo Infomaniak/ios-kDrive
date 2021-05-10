@@ -25,6 +25,7 @@ class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelega
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var heightConstraint: NSLayoutConstraint!
     var path: [String] = []
+    var drive: Drive!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -48,7 +49,7 @@ class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelega
         cell.titleLabel.text = path[indexPath.row]
         if indexPath.item == 0 {
             cell.accessoryImage.image = KDriveAsset.drive.image
-            cell.accessoryImage.tintColor = UIColor(hex: AccountManager.instance.currentDriveFileManager.drive.preferences.color)
+            cell.accessoryImage.tintColor = UIColor(hex: drive.preferences.color)
         } else {
             cell.accessoryImage.image = KDriveAsset.folderCommonDocuments.image
         }

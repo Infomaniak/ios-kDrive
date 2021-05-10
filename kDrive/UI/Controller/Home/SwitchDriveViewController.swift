@@ -84,8 +84,12 @@ class SwitchDriveViewController: UIViewController, UITableViewDelegate, UITableV
             AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
             AccountManager.instance.saveAccounts()
             // Download root file
-            AccountManager.instance.currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
-                self.delegate?.didSwitchDrive(newDrive: drive)
+            guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
+                return
+            }
+            
+            currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+                self.delegate?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
                 self.dismiss(animated: true)
             }
         }

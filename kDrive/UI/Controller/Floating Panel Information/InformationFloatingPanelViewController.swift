@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import FloatingPanel
 import Lottie
+import kDriveCore
 
 class InformationFloatingPanelViewController: UIViewController {
 
@@ -36,6 +37,8 @@ class InformationFloatingPanelViewController: UIViewController {
 
     var cancelHandler: ((UIButton) -> Void)?
     var actionHandler: ((UIButton) -> Void)?
+    
+    var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()

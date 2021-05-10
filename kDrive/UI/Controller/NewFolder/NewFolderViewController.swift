@@ -348,6 +348,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(type: NewFolderLocationTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.path = commonFolderPath
+            cell.drive = driveFileManager.drive
             cell.collectionView.reloadData()
             return cell
         case .options:

@@ -42,6 +42,8 @@ class InviteUserViewController: UIViewController {
     private var rows = InviteUserRows.allCases
 
     private var newPermission = UserPermission.read
+    
+    var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -103,7 +105,7 @@ class InviteUserViewController: UIViewController {
     func shareAndDismiss() {
         let usersIds = users.map(\.id)
         let tags = [Int]()
-        AccountManager.instance.currentDriveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { (response, error) in
+        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { (response, error) in
 
         }
         dismiss(animated: true)
@@ -160,6 +162,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
+            cell.drive = driveFileManager.drive
             cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail
             cell.removeUsers = removeUsers
             cell.removeEmails = removeEmails
@@ -269,7 +272,7 @@ extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let usersIds = users.map(\.id)
         let tags = [Int]()
-        AccountManager.instance.currentDriveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { (response, error) in
+        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { (response, error) in
             let conflictList = response?.data?.filter(\.isConflict) ?? []
             if conflictList.isEmpty {
                 self.shareAndDismiss()

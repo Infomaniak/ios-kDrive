@@ -61,9 +61,9 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureCell(right: Right, type: RightsSelectionType, disable: Bool) {
+    func configureCell(right: Right, type: RightsSelectionType, driveName: String, disable: Bool) {
         rightsTitleLabel.text = right.title
-        rightsDetailLabel.text = right.description
+        rightsDetailLabel.text = right.description(driveName)
         rightsIconImageView.image = right.icon
 
         if disable {

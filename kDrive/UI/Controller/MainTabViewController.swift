@@ -31,8 +31,16 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         return super.tabBar as! MainTabBar
     }
 
+    var driveFileManager: DriveFileManager!
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        // TODO: Safely unwrap
+        driveFileManager = AccountManager.instance.currentDriveFileManager
+        for viewController in viewControllers ?? [] {
+            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+        }
+
         tabBar.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         delegate = self
     }
@@ -127,6 +135,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             if let currentDirectory = file {
                 let floatingPanelViewController = DriveFloatingPanelController()
                 let fileInformationsViewController = PlusButtonFloatingPanelViewController()
+                fileInformationsViewController.driveFileManager = self.driveFileManager
                 fileInformationsViewController.currentDirectory = currentDirectory
                 floatingPanelViewController.isRemovalInteractionEnabled = true
                 floatingPanelViewController.delegate = fileInformationsViewController
@@ -142,7 +151,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         if let filesViewController = (selectedViewController as? UINavigationController)?.topViewController as? FileListCollectionViewController {
             completion(filesViewController.currentDirectory)
         } else {
-            AccountManager.instance.currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, children, error) in
+            driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, children, error) in
                 completion(file)
             }
         }
@@ -193,16 +202,20 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
                 ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didSwitchCurrentAccount(newAccount)
             }
         }
-        didSwitchDrive(newDrive: AccountManager.instance.currentDriveFileManager.drive)
+        // TODO: Safely unwrap
+        didSwitchDriveFileManager(newDriveFileManager: AccountManager.instance.currentDriveFileManager!)
     }
 
-    func didSwitchDrive(newDrive: Drive) {
+    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
+        driveFileManager = newDriveFileManager
         //Tell Files app that the drive changed
         NSFileProviderManager.default.signalEnumerator(for: .workingSet) { (_) in }
         NSFileProviderManager.default.signalEnumerator(for: .rootContainer) { (_) in }
         for viewController in viewControllers ?? [] {
             if viewController.isViewLoaded {
-                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.didSwitchDrive(newDrive: newDrive)
+                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
+            } else {
+                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
             }
         }
     }
@@ -218,7 +231,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                         UploadFile(
                         parentDirectoryId: documentPicker.importDriveDirectory.id,
                         userId: AccountManager.instance.currentAccount.userId,
-                        driveId: AccountManager.instance.currentDriveFileManager.drive.id,
+                        driveId: driveFileManager.drive.id,
                         url: url))
             }
         }

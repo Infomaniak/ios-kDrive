@@ -28,7 +28,7 @@ class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewControl
         imageView.isHidden = true
         animationView.animation = Animation.named("illu_photos")
         titleLabel.text = KDriveStrings.Localizable.syncConfigureTitle
-        descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.syncConfigureDescription(AccountManager.instance.currentDriveFileManager.drive.name), boldText: AccountManager.instance.currentDriveFileManager.drive.name)
+        descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.syncConfigureDescription(driveFileManager.drive.name), boldText: driveFileManager.drive.name)
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)

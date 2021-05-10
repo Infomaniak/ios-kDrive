@@ -55,7 +55,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     private var lastModifyRows: [HomeLastModifyRows] = [.lastModify]
     private var activityOrPicturesRowType: HomeActivityOrPicturesRows = .recentActivity
 
-    private var currentDrive: Drive!
     private var lastModifiedFiles = [File]()
     private var lastModifyIsLoading = true
     private var lastPictures = [File]()
@@ -67,7 +66,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     private var lastPicturesInfo = (page: 1, hasNextPage: true, isLoading: true)
     private var activityOrPicturesIsLoading = true
     private var shouldLoadMore: Bool {
-        if currentDrive?.isProOrTeam ?? false {
+        if driveFileManager.drive.isProOrTeam {
             return recentActivityController?.shouldLoadMore ?? false
         } else {
             return false // lastPicturesInfo.hasNextPage && !lastPicturesInfo.isLoading -> infinite scroll is disabled for now
@@ -98,6 +97,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         return navigationController?.navigationBar.frame.height ?? 0
     }
     private var isPortait = true
+    
+    var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -127,7 +128,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         initViewWithCurrentDrive()
 
         // Table view footer
-        showFooter(!currentDrive.isProOrTeam)
+        showFooter(!driveFileManager.drive.isProOrTeam)
 
         NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
 
@@ -210,16 +211,13 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func initViewWithCurrentDrive() {
-        // Set current drive
-        currentDrive = AccountManager.instance.currentDriveFileManager.drive
-
         // Load last modified files
         lastModifiedFiles.removeAll()
         loadLastModifiedFiles()
 
         // Load activity/pictures
-        if currentDrive.isProOrTeam {
-            recentActivityController = RecentActivitySharedController(driveFileManager: AccountManager.instance.getDriveFileManager(for: currentDrive)!, filePresenter: filePresenter)
+        if driveFileManager.drive.isProOrTeam {
+            recentActivityController = RecentActivitySharedController(driveFileManager: AccountManager.instance.getDriveFileManager(for: driveFileManager.drive)!, filePresenter: filePresenter)
             loadNextRecentActivities()
         } else {
             lastPicturesInfo.page = 1
@@ -250,17 +248,17 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             topRows = [.drive, .search]
         }
 
-        guard currentDrive.size > 0 else {
+        guard driveFileManager.drive.size > 0 else {
             return
         }
-        let storagePercentage = Double(currentDrive.usedSize) / Double(currentDrive.size) * 100
+        let storagePercentage = Double(driveFileManager.drive.usedSize) / Double(driveFileManager.drive.size) * 100
         if (storagePercentage > UIConstants.insufficientStorageMinimumPercentage) && showInsufficientStorage {
             topRows.append(.insufficientStorage)
         }
     }
 
     private func updateActivityOrPicturesRowType() {
-        if currentDrive.isProOrTeam {
+        if driveFileManager.drive.isProOrTeam {
             if recentActivities.isEmpty && !activityOrPicturesIsLoading {
                 activityOrPicturesRowType = .emptyActivity
             } else {
@@ -308,7 +306,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     func loadLastModifiedFiles() {
         lastUpdate = Date()
         lastModifyIsLoading = true
-        AccountManager.instance.currentDriveFileManager.getLastModifiedFiles { [self] (files, error) in
+        driveFileManager.getLastModifiedFiles { [self] (files, error) in
             if let files = files, files.map(\.id) != lastModifiedFiles.map(\.id) {
                 lastModifiedFiles = files
                 lastModifyIsLoading = false
@@ -322,7 +320,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         lastUpdate = Date()
         lastPicturesInfo.isLoading = true
         activityOrPicturesIsLoading = lastPicturesInfo.page == 1
-        AccountManager.instance.currentDriveFileManager.getLastPictures(page: lastPicturesInfo.page) { (files, error) in
+        driveFileManager.getLastPictures(page: lastPicturesInfo.page) { (files, error) in
             if let files = files {
                 self.lastPictures += files
 
@@ -366,7 +364,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
         lastModifiedFiles.removeAll()
         loadLastModifiedFiles()
-        if currentDrive.isProOrTeam {
+        if driveFileManager.drive.isProOrTeam {
             recentActivityController?.prepareForReload()
             loadNextRecentActivities()
         } else {
@@ -379,15 +377,16 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func showFooter(_ show: Bool) {
-        tableView.tableFooterView = currentDrive.isProOrTeam ? footerLoader : footerAllImages
+        tableView.tableFooterView = driveFileManager.drive.isProOrTeam ? footerLoader : footerAllImages
         tableView.tableFooterView?.isHidden = !show
         tableView.tableFooterView?.frame.size.height = show ? 44 : 0
-        let inset: CGFloat = currentDrive.isProOrTeam ? 76 : 68
+        let inset: CGFloat = driveFileManager.drive.isProOrTeam ? 76 : 68
         tableView.contentInset.bottom = show ? UIConstants.listPaddingBottom + inset : UIConstants.listPaddingBottom
     }
 
     @objc func showAllImages() {
         let photoListViewController = PhotoListViewController.instantiate()
+        photoListViewController.driveFileManager = driveFileManager
         navigationController?.pushViewController(photoListViewController, animated: true)
     }
 
@@ -457,7 +456,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             case .drive:
                 let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                cell.configureWith(drive: currentDrive)
+                cell.configureWith(drive: driveFileManager.drive)
                 return cell
             case .search:
                 let cell = tableView.dequeueReusableCell(type: HomeFileSearchTableViewCell.self, for: indexPath)
@@ -466,10 +465,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             case .insufficientStorage:
                 let cell = tableView.dequeueReusableCell(type: InsufficientStorageTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                cell.configureCell(with: currentDrive)
+                cell.configureCell(with: driveFileManager.drive)
                 cell.selectionStyle = .none
                 cell.actionHandler = { [self] sender in
-                    if let url = URL(string: "\(ApiRoutes.orderDrive())/\(currentDrive.id)") {
+                    if let url = URL(string: "\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)") {
                         UIApplication.shared.open(url)
                     }
                 }
@@ -576,7 +575,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         let contentHeight = scrollView.contentSize.height - tableView.frame.size.height
         // isDragging and isDecelerating make sure this is a user scroll
         if scrollPosition > contentHeight && (scrollView.isDragging || scrollView.isDecelerating) && shouldLoadMore {
-            if currentDrive.isProOrTeam {
+            if driveFileManager.drive.isProOrTeam {
                 loadNextRecentActivities()
             } else {
                 loadNextLastPictures()
@@ -595,7 +594,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             isPortait = false
         }
         if isPortait {
-            navigationItem.title = (currentDrive?.name ?? "")
+            navigationItem.title = (driveFileManager.drive.name)
             navigationBar.alpha = min(1, max(0, (scrollOffset + tableView.contentInset.top) / navbarHeight))
             navigationBar.isUserInteractionEnabled = navigationBar.alpha > 0.5
         } else {
@@ -608,12 +607,12 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     // MARK: - Switch drive delegate
 
-    func didSwitchDrive(newDrive: Drive) {
+    func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
+        driveFileManager = newDriveFileManager
         lastModifiedFiles.removeAll()
         lastPictures.removeAll()
         recentActivityController?.invalidate()
         recentActivityController = nil
-        currentDrive = newDrive
         needsContentUpdate = true
         updateContentIfNeeded()
     }
@@ -625,14 +624,13 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
-        currentDrive = AccountManager.instance.currentDriveFileManager.drive
         reload(sections: [.top])
     }
 
     // MARK: - Home file delegate
 
     func didSelect(index: Int, files: [File]) {
-        filePresenter.present(driveFileManager: AccountManager.instance.getDriveFileManager(for: currentDrive)!, file: files[index], files: files, normalFolderHierarchy: false)
+        filePresenter.present(driveFileManager: AccountManager.instance.getDriveFileManager(for: driveFileManager.drive)!, file: files[index], files: files, normalFolderHierarchy: false)
     }
 
     // MARK: - Top scrollable

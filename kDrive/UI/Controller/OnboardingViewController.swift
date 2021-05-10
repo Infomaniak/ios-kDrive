@@ -232,7 +232,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
         AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { (account, error) in
             if account != nil {
                 // Download root file
-                AccountManager.instance.currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+                AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
                     self.goToMainScreen()
