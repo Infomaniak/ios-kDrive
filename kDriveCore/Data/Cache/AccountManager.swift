@@ -186,6 +186,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func updateUserForAccount(_ account: Account, completion: @escaping (Account?, Drive?, Error?) -> Void) {
+        guard account.isConnected else { return }
         let apiFetcher = ApiFetcher(token: account.token, delegate: self)
         apiFetcher.getUserForAccount { (response, error) in
             if let user = response?.data {

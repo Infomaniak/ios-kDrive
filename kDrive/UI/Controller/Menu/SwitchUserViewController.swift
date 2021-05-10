@@ -52,7 +52,9 @@ class SwitchUserViewController: UIViewController {
 
     class func instantiateInNavigationController() -> UINavigationController {
         let switchUserViewController = instantiate()
-        return UINavigationController(rootViewController: switchUserViewController)
+        let navigationController = UINavigationController(rootViewController: switchUserViewController)
+        navigationController.setInfomaniakAppearanceNavigationBar()
+        return navigationController
     }
 
 }
