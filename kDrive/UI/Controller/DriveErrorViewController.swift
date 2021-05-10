@@ -37,12 +37,27 @@ class DriveErrorViewController: UIViewController {
 
     var driveErrorViewType = DriveErrorViewType.noDrive
     var driveName = ""
-    
+
+    var isRootViewController: Bool {
+        if let navigationController = UIApplication.shared.keyWindow?.rootViewController as? UINavigationController {
+            return navigationController.visibleViewController == self
+        } else {
+            return UIApplication.shared.keyWindow?.rootViewController == self
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        navigationItem.backButtonTitle = ""
+
         setupView()
         setupCircleView()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setInfomaniakAppearanceNavigationBar()
     }
 
     @IBAction func testButtonPressed(_ sender: Any) {
@@ -52,7 +67,11 @@ class DriveErrorViewController: UIViewController {
     }
 
     @IBAction func otherProfileButtonPressed(_ sender: Any) {
-        dismiss(animated: true)
+        if isRootViewController {
+            navigationController?.pushViewController(SwitchUserViewController.instantiate(), animated: true)
+        } else {
+            dismiss(animated: true)
+        }
     }
 
     private func setupView() {
@@ -69,7 +88,7 @@ class DriveErrorViewController: UIViewController {
             mainButton.isHidden = true
         }
     }
-    
+
     private func setupCircleView() {
         circleView.cornerRadius = circleView.bounds.width / 2
     }

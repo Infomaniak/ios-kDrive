@@ -25,13 +25,19 @@ import CocoaLumberjackSwift
 public class DriveInfosManager {
 
     public static let instance = DriveInfosManager()
+    private static let currentDbVersion: UInt64 = 1
     private let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
 
     private init() {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
-            deleteRealmIfMigrationNeeded: true,
+            schemaVersion: DriveInfosManager.currentDbVersion,
+            migrationBlock: { (migration, oldSchemaVersion) in
+                if (oldSchemaVersion < DriveInfosManager.currentDbVersion) {
+                    // No migration needed from version 0 to version 1
+                }
+            },
             objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveUser.self, Tag.self])
     }
 
