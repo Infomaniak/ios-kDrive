@@ -240,6 +240,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 savePhotosFloatingPanelViewController?.driveFileManager = currentDriveFileManager
                 savePhotosFloatingPanelViewController?.actionHandler = { [self] sender in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
+                    photoSyncSettingsVC.driveFileManager = currentDriveFileManager
                     let mainTabViewVC = self.window?.rootViewController as? UITabBarController
                     guard let currentVC = mainTabViewVC?.selectedViewController as? UINavigationController else {
                         return

@@ -126,6 +126,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.drive = driveFileManager.drive
             cell.removeUsers = removeUsers
             cell.removeEmails = removeEmails
             cell.delegate = self

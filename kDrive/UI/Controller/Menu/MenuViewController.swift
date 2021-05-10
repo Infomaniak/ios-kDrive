@@ -110,6 +110,8 @@ class MenuViewController: UIViewController {
             switchDriveAccountViewController.delegate = tabBarController as? MainTabViewController
         } else if let photoListViewController = segue.destination as? PhotoListViewController {
             photoListViewController.driveFileManager = driveFileManager
+        } else if let parameterTableViewController = segue.destination as? ParameterTableViewController {
+            parameterTableViewController.driveFileManager = driveFileManager
         }
     }
 }

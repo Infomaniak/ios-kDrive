@@ -620,6 +620,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
                 break
             case UIConstants.swipeActionShareIdentifier:
                 let shareVC = ShareAndRightsViewController.instantiate()
+                shareVC.driveFileManager = driveFileManager
                 shareVC.file = sortedChildren[indexPath.row]
                 self.navigationController?.pushViewController(shareVC, animated: true)
                 break

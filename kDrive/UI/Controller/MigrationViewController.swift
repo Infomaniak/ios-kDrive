@@ -86,21 +86,21 @@ class MigrationViewController: UIViewController {
         if migrationResult?.success == true {
             UserDefaults.store(firstLaunch: false)
             UserDefaults.shared.numberOfConnections = 1
-            (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate(), animated: true)
+            let mainTabBarViewController = MainTabViewController.instantiate()
+            (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabBarViewController, animated: true)
             if migrationResult?.photoSyncEnabled == true {
-                let mainTabViewController = MainTabViewController.instantiate()
-                (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabViewController, animated: true)
                 let floatingPanelViewController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController)?.actionHandler = { sender in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
-                    guard let currentVC = mainTabViewController.selectedViewController as? UINavigationController else {
+                    photoSyncSettingsVC.driveFileManager = mainTabBarViewController.driveFileManager
+                    guard let currentVC = mainTabBarViewController.selectedViewController as? UINavigationController else {
                         return
                     }
                     currentVC.dismiss(animated: true)
                     currentVC.setInfomaniakAppearanceNavigationBar()
                     currentVC.pushViewController(photoSyncSettingsVC, animated: true)
                 }
-                mainTabViewController.present(floatingPanelViewController, animated: true)
+                mainTabBarViewController.present(floatingPanelViewController, animated: true)
             }
         } else {
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(OnboardingViewController.instantiate(), animated: true)

@@ -46,23 +46,26 @@ class InviteUserTableViewCell: InsetTableViewCell {
     }
     var removeEmails: [String] = []
 
-    var users: [DriveUser] = []
-    var results: [DriveUser] = []
-    var mail: String?
-    var drive: Drive!
+    private var users: [DriveUser] = []
+    private var results: [DriveUser] = []
+    private var mail: String?
+
+    var drive: Drive! {
+        didSet {
+            users = DriveInfosManager.instance.getUsers(for: drive.id)
+            users.sort { (user1, user2) -> Bool in
+                return user1.displayName < user2.displayName
+            }
+            results = users
+
+            configureDropDown()
+        }
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
 
         textField.delegate = self
-
-        users = DriveInfosManager.instance.getUsers(for: drive.id)
-        users.sort { (user1, user2) -> Bool in
-            return user1.displayName < user2.displayName
-        }
-        results = users
-
-        configureDropDown()
     }
 
     func configureDropDown() {

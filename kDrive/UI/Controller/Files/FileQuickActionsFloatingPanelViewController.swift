@@ -521,6 +521,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         case .shareAndRights:
             let shareVC = ShareAndRightsViewController.instantiate()
             shareVC.file = file
+            shareVC.driveFileManager = driveFileManager
             presentingParent?.navigationController?.pushViewController(shareVC, animated: true)
             dismiss(animated: true)
         case .add:
