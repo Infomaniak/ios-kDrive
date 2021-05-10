@@ -49,7 +49,7 @@ extension UserDefaults {
 
     public var currentDriveId: Int {
         get {
-            return integer(forKey: key(.currentDriveUserId))
+            return integer(forKey: key(.currentDriveId))
         }
         set {
             set(newValue, forKey: key(.currentDriveId))
