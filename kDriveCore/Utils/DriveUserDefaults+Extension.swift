@@ -47,9 +47,9 @@ extension UserDefaults {
         return key.rawValue
     }
 
-    public var currentDriveId: String {
+    public var currentDriveId: Int {
         get {
-            return string(forKey: key(.currentDriveId)) ?? ""
+            return integer(forKey: key(.currentDriveUserId))
         }
         set {
             set(newValue, forKey: key(.currentDriveId))
