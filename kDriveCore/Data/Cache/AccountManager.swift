@@ -260,11 +260,9 @@ public class AccountManager: RefreshTokenDelegate {
         currentAccount = account
         currentUserId = account.userId
         // Set Sentry user
-        if let userId = account.userId {
-            let user = Sentry.User(userId: "\(userId)")
-            user.ipAddress = "{{auto}}"
-            SentrySDK.setUser(user)
-        }
+        let user = Sentry.User(userId: "\(account.userId)")
+        user.ipAddress = "{{auto}}"
+        SentrySDK.setUser(user)
     }
 
     public func setCurrentDriveForCurrentAccount(drive: Drive) {
