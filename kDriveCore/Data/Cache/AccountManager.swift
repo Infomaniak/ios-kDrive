@@ -92,9 +92,9 @@ public class AccountManager: RefreshTokenDelegate {
         }
 
         if let account = accounts.first(where: { $0.userId == currentUserId }) ?? accounts.first {
+            setCurrentAccount(account: account)
 
             if let currentDrive = DriveInfosManager.instance.getDrive(objectId: currentDriveId) ?? drives.first {
-                setCurrentAccount(account: account)
                 setCurrentDriveForCurrentAccount(drive: currentDrive)
             } else {
                 removeTokenAndAccount(token: account.token)
