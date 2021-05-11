@@ -32,7 +32,7 @@ class ActionNavigationController: TitleSizeAdjustingNavigationController {
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         accountManager = AccountManager.instance
 
-        let saveFileViewController = SaveFileViewController.instantiate()
+        let saveFileViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
 
         if let itemProviders = (self.extensionContext?.inputItems as? [NSExtensionItem])?.compactMap(\.attachments).flatMap({ $0 }) {
             saveFileViewController.setItemProviders(itemProviders)
