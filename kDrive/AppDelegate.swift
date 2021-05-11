@@ -317,7 +317,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                         let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
                         let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
                         driveErrorViewController?.driveErrorViewType = .maintenance
-                        driveErrorViewController?.driveName = currentDrive.name
+                        if DriveInfosManager.instance.getDrives(for: currentAccount.userId).count == 1 {
+                            driveErrorViewController?.driveName = currentDrive.name
+                        }
                         setRootViewController(driveErrorViewControllerNav)
                     }
                 }
