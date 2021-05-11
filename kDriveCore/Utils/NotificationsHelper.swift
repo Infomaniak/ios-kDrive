@@ -111,9 +111,9 @@ public class NotificationsHelper {
     
     public static func sendDisconnectedNotification() {
         let content = UNMutableNotificationContent()
-        content.title = KDriveCoreStrings.Localizable.uploadPausedTitle
+        content.title = KDriveCoreStrings.Localizable.errorGeneric
         content.body = KDriveCoreStrings.Localizable.refreshTokenError
-        content.categoryIdentifier = uploadCategoryId
+        content.categoryIdentifier = generalCategoryId
         content.sound = .default
         sendImmediately(notification: content, id: disconnectedNotificationId)
     }
