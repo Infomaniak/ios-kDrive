@@ -84,7 +84,12 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "toSharedWithMeSegue", sender: drives[indexPath.row])
-
+        if ((drives[indexPath.row]?.maintenance) == false) {
+            performSegue(withIdentifier: "toSharedWithMeSegue", sender: drives[indexPath.row])
+        } else {
+            let maintenanceFloatingPanelViewController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
+            (maintenanceFloatingPanelViewController.contentViewController as? DriveMaintenanceFloatingPanelViewController)?.setTitleLabel(with: drives[indexPath.row]!.name)
+            present(maintenanceFloatingPanelViewController, animated: true)
+        }
     }
 }
