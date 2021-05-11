@@ -179,7 +179,7 @@ public class AccountManager: RefreshTokenDelegate {
                         driveResponse.drives.main.count > 0 {
                         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
 
-                        guard let mainDrive = driveResponse.drives.main.first(where: { $0.maintenance == false }) else {
+                        guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
                             self.removeAccount(toDeleteAccount: newAccount)
                             completion(nil, DriveError.maintenance)
                             return
