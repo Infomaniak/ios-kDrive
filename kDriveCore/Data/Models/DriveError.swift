@@ -88,10 +88,11 @@ public struct DriveError: Error, Equatable {
     public static let forbidden = DriveError(type: .serverError, code: "forbidden_error", localizedString: KDriveCoreStrings.Localizable.accessDeniedTitle)
     public static let noDrive = DriveError(type: .serverError, code: "no_drive")
     public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveCoreStrings.Localizable.errorConflict)
+    public static let maintenance = DriveError(type: .localError, code: "maintenance")
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
-    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict]
+    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()

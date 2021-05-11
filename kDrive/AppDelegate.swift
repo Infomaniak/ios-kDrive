@@ -291,7 +291,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             }
         }
 
-        accountManager.updateUserForAccount(currentAccount) { (account, switchedDrive, error) in
+        accountManager.updateUserForAccount(currentAccount) { [self] (account, switchedDrive, error) in
             if let error = error {
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")
@@ -302,9 +302,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
                 }
                 if let drive = switchedDrive,
-                    let driveFileManager = self.accountManager.getDriveFileManager(for: drive) {
+                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
+                    !drive.maintenance {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
+                
+                if let currentDrive = accountManager.getDrive(for: accountManager.currentUserId, driveId: accountManager.currentDriveId),
+                    currentDrive.maintenance {
+                    if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId).first(where: { !$0.maintenance }),
+                       let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
+                        accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
+                        (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
+                    } else {
+                        let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
+                        let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
+                        driveErrorViewController?.driveErrorViewType = .maintenance
+                        if DriveInfosManager.instance.getDrives(for: currentAccount.userId).count == 1 {
+                            driveErrorViewController?.driveName = currentDrive.name
+                        }
+                        setRootViewController(driveErrorViewControllerNav)
+                    }
+                }
+
                 UploadQueue.instance.resumeAllOperations()
                 UploadQueue.instance.addToQueueFromRealm()
                 BackgroundUploadSessionManager.instance.reconnectBackgroundTasks()

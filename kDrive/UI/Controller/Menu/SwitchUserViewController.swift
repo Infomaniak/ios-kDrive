@@ -37,6 +37,10 @@ class SwitchUserViewController: UIViewController {
         super.viewDidLoad()
         InfomaniakLogin.setupWebviewNavbar(title: "", titleColor: nil, color: nil, buttonColor: nil, clearCookie: true, timeOutMessage: "Timeout")
         tableView.register(cellView: UserAccountTableViewCell.self)
+        // Try to update other accounts infos
+        for account in accountManager.accounts where account != accountManager.currentAccount {
+            accountManager.updateUserForAccount(account, completion: { _, _, _ in })
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -81,10 +85,12 @@ extension SwitchUserViewController: UITableViewDelegate {
 
         let drives = DriveInfosManager.instance.getDrives(for: account.userId)
         if drives.count == 1 && drives[0].maintenance {
-            let driveErrorVC = DriveErrorViewController.instantiate()
-            driveErrorVC.driveErrorViewType = .maintenance
-            driveErrorVC.driveName = drives[0].name
-            self.present(driveErrorVC, animated: true, completion: nil)
+            let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
+            let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
+            driveErrorViewController?.driveErrorViewType = .maintenance
+            driveErrorViewController?.driveName = drives[0].name
+            tableView.deselectRow(at: indexPath, animated: true)
+            present(driveErrorViewControllerNav, animated: true)
         } else {
             AccountManager.instance.switchAccount(newAccount: account)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
