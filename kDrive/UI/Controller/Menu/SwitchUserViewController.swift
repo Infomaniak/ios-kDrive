@@ -35,6 +35,7 @@ class SwitchUserViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        InfomaniakLogin.setupWebviewNavbar(title: "", titleColor: nil, color: nil, buttonColor: nil, clearCookie: true, timeOutMessage: "Timeout")
         tableView.register(cellView: UserAccountTableViewCell.self)
     }
 
@@ -74,7 +75,7 @@ extension SwitchUserViewController: UITableViewDelegate {
 
         if !account.isConnected {
             // Ask to reconnect
-            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self, defaultEmail: account.user?.email)
+            InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
             return
         }
 
