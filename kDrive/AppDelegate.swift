@@ -171,7 +171,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        if url.isFileURL {
+        if url.isFileURL, let currentDriveFileManager = accountManager.currentDriveFileManager {
             let filename = url.lastPathComponent
             let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(filename)
             do {
@@ -179,7 +179,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     try FileManager.default.removeItem(atPath: importPath.path)
                 }
                 try FileManager.default.moveItem(at: url, to: importPath)
-                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(file: .init(name: filename, path: importPath, uti: importPath.typeIdentifier ?? .data))
+                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager, file: .init(name: filename, path: importPath, uti: importPath.typeIdentifier ?? .data))
                 window?.rootViewController?.present(saveNavigationViewController, animated: true)
                 return true
             } catch {

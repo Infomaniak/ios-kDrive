@@ -48,7 +48,7 @@ class SaveFileViewController: UIViewController {
 
     private var originalDriveId = AccountManager.instance.currentDriveId
     private var originalUserId = AccountManager.instance.currentUserId
-    var selectedDriveFileManager: DriveFileManager!
+    var selectedDriveFileManager: DriveFileManager?
     var selectedDirectory: File?
     var items = [ImportedFile]()
     var skipOptionsSelection = false
@@ -82,7 +82,7 @@ class SaveFileViewController: UIViewController {
                 let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
                 selectedDriveFileManager = driveFileManager
             }
-            selectedDirectory = selectedDriveFileManager.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
+            selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
         }
 
         closeBarButtonItem.accessibilityLabel = KDriveStrings.Localizable.buttonClose
@@ -319,12 +319,14 @@ class SaveFileViewController: UIViewController {
         tableView.reloadData()
     }
 
-    class func instantiate() -> SaveFileViewController {
-        return UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
+    class func instantiate(driveFileManager: DriveFileManager?) -> SaveFileViewController {
+        let viewController = UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
+        viewController.selectedDriveFileManager = driveFileManager
+        return viewController
     }
 
-    class func instantiateInNavigationController(file: ImportedFile? = nil) -> TitleSizeAdjustingNavigationController {
-        let saveViewController = instantiate()
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager?, file: ImportedFile? = nil) -> TitleSizeAdjustingNavigationController {
+        let saveViewController = instantiate(driveFileManager: driveFileManager)
         if let file = file {
             saveViewController.items = [file]
         }
@@ -382,12 +384,12 @@ extension SaveFileViewController: UITableViewDataSource {
         case .driveSelection:
             let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.configure(with: selectedDriveFileManager.drive)
+            cell.configure(with: selectedDriveFileManager?.drive)
             return cell
         case .directorySelection:
             let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.configure(with: selectedDirectory, drive: selectedDriveFileManager.drive)
+            cell.configure(with: selectedDirectory, drive: selectedDriveFileManager!.drive)
             return cell
         case .importing:
             let cell = tableView.dequeueReusableCell(type: ImportingTableViewCell.self, for: indexPath)
@@ -448,7 +450,7 @@ extension SaveFileViewController: UITableViewDelegate {
             }
         case .driveSelection:
             let selectDriveViewController = SelectDriveViewController.instantiate()
-            selectDriveViewController.selectedDrive = selectedDriveFileManager.drive
+            selectDriveViewController.selectedDrive = selectedDriveFileManager?.drive
             selectDriveViewController.delegate = self
             navigationController?.pushViewController(selectDriveViewController, animated: true)
         case .directorySelection:
@@ -468,7 +470,7 @@ extension SaveFileViewController: SelectFolderDelegate {
 
     func didSelectFolder(_ folder: File) {
         if folder.id == DriveFileManager.constants.rootID {
-            selectedDirectory = selectedDriveFileManager.getRootFile()
+            selectedDirectory = selectedDriveFileManager?.getRootFile()
         } else {
             selectedDirectory = folder
         }
@@ -492,7 +494,8 @@ extension SaveFileViewController: SelectDriveDelegate {
 // MARK: - FooterButtonDelegate
 extension SaveFileViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
-        guard let selectedDirectory = selectedDirectory else {
+        guard let selectedDriveFileManager = selectedDriveFileManager,
+            let selectedDirectory = selectedDirectory else {
             return
         }
 
