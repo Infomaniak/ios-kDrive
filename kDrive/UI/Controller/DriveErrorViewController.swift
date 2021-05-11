@@ -36,7 +36,7 @@ class DriveErrorViewController: UIViewController {
     @IBOutlet weak var mainButton: IKLargeButton!
 
     var driveErrorViewType = DriveErrorViewType.noDrive
-    var driveName = ""
+    var driveName: String?
 
     var isRootViewController: Bool {
         if let navigationController = UIApplication.shared.keyWindow?.rootViewController as? UINavigationController {
@@ -83,7 +83,11 @@ class DriveErrorViewController: UIViewController {
         case .maintenance:
             imageView.image = KDriveAsset.maintenance.image
             imageView.tintColor = KDriveAsset.iconColor.color
-            titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitle(driveName)
+            if let driveName = driveName {
+                titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitle(driveName)
+            } else {
+                titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitlePlural
+            }
             descriptionLabel.text = KDriveStrings.Localizable.driveMaintenanceDescription
             mainButton.isHidden = true
         }
