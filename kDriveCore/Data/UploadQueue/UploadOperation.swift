@@ -167,7 +167,8 @@ public class UploadOperation: Operation {
         file.sessionUrl = url.absoluteString
         file.maxRetryCount -= 1
 
-        if let filePath = file.pathURL {
+        if let filePath = file.pathURL,
+            FileManager.default.isReadableFile(atPath: filePath.path) {
             task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
             task?.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
             task?.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
