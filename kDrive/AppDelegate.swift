@@ -438,7 +438,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
 
     func currentAccountNeedsAuthentication() {
         setRootViewController(SwitchUserViewController.instantiateInNavigationController())
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDisconnected)
     }
 
     // MARK: - User notification center delegate

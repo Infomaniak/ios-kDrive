@@ -26,6 +26,7 @@ public class NotificationsHelper {
     private static let uploadQueueCountNotificationId = "uploadQueueCount"
     private static let uploadDoneNotificationId = "uploadDone"
     private static let uploadPausedNotificationId = "uploadPaused"
+    private static let disconnectedNotificationId = "accountDisconnected"
     public static let previousUploadCountKey = "previousUploadCountKey"
     public static let parentIdKey = "parentIdKey"
     public static let generalCategoryId = "com.kdrive.notification.general"
@@ -106,6 +107,15 @@ public class NotificationsHelper {
         content.categoryIdentifier = uploadCategoryId
         content.sound = .default
         sendImmediately(notification: content, id: uploadPausedNotificationId)
+    }
+    
+    public static func sendDisconnectedNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = KDriveCoreStrings.Localizable.uploadPausedTitle
+        content.body = KDriveCoreStrings.Localizable.refreshTokenError
+        content.categoryIdentifier = uploadCategoryId
+        content.sound = .default
+        sendImmediately(notification: content, id: disconnectedNotificationId)
     }
 
     public static func sendMigrateNotification() {

@@ -150,6 +150,7 @@ public class AccountManager: RefreshTokenDelegate {
             account.token = nil
             if account.userId == currentUserId {
                 delegate?.currentAccountNeedsAuthentication()
+                NotificationsHelper.sendDisconnectedNotification()
             }
         }
     }
