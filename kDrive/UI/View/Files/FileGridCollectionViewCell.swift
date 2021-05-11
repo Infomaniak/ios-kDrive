@@ -19,18 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 
-protocol FileGridCellDelegate: AnyObject {
-    func didTapMoreButton(_ cell: FileCollectionViewCell)
-}
-
 class FileGridCollectionViewCell: FileCollectionViewCell {
     @IBOutlet weak var _checkmarkImage: UIImageView!
     @IBOutlet weak var largeIconImageView: UIImageView!
     @IBOutlet weak var iconImageView: UIImageView!
-    @IBOutlet weak var moreButton: UIButton!
     @IBOutlet var stackViewCenterConstraint: NSLayoutConstraint!
-
-    weak var delegate: FileGridCellDelegate?
 
     override var checkmarkImage: UIImageView {
         return _checkmarkImage
@@ -65,7 +58,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         if file.isDirectory || !file.hasThumbnail {
             logoImage.isHidden = true
             largeIconImageView.isHidden = false
-            moreButton.tintColor = KDriveAsset.iconColor.color
+            moreButton.tintColor = KDriveAsset.primaryTextColor.color
             moreButton.backgroundColor = nil
         } else {
             logoImage.isHidden = false
@@ -78,7 +71,6 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         logoImage.contentMode = .scaleAspectFill
         stackViewCenterConstraint.isActive = file.isDirectory
         titleLabel.textAlignment = file.isDirectory ? .center : .natural
-        moreButton.isHidden = selectionMode
         checkmarkImage.isHidden = !selectionMode
         iconImageView.image = file.icon
         largeIconImageView.image = file.icon
@@ -119,7 +111,4 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         checkmarkImage.isHidden = true
     }
 
-    @IBAction func moreButtonTap(_ sender: Any) {
-        delegate?.didTapMoreButton(self)
-    }
 }

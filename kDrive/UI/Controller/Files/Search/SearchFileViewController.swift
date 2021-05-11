@@ -181,6 +181,7 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
         } else {
             let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
             cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == self.collectionView(collectionView, numberOfItemsInSection: indexPath.section) - 1)
+            cell.moreButton.isHidden = true
             if indexPath.section == 0 {
                 let recentSearch = recentSearches[indexPath.row]
                 cell.configureWith(recentSearch: recentSearch)

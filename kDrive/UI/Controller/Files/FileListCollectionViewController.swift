@@ -24,7 +24,7 @@ import DifferenceKit
 import kDriveCore
 import CocoaLumberjackSwift
 
-class FileListCollectionViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FileGridCellDelegate {
+class FileListCollectionViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FileCellDelegate {
 
     @IBOutlet weak var collectionView: UICollectionView!
     private var collectionViewLayout: UICollectionViewFlowLayout!
@@ -553,14 +553,14 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         cell.selectionMode = selectionMode
         cell.initStyle(isFirst: file.isFirstInCollection, isLast: file.isLastInCollection)
         cell.configureWith(file: file)
-        (cell as? FileGridCollectionViewCell)?.delegate = self
+        cell.delegate = self
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             cell.setEnabled(false)
         } else {
             cell.setEnabled(true)
         }
         if fromActivities {
-            (cell as? FileGridCollectionViewCell)?.moreButton.isHidden = true
+            cell.moreButton.isHidden = true
         }
         return cell
     }
@@ -720,7 +720,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListCollectionViewController") as! FileListCollectionViewController
     }
 
-    // MARK: - File grid cell delegate
+    // MARK: - File cell delegate
 
     func didTapMoreButton(_ cell: FileCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else {

@@ -186,7 +186,6 @@ class TrashCollectionViewController: FileListCollectionViewController {
         switch action.identifier {
         case UIConstants.swipeActionDeleteIdentifier:
             deleteActionSelected(files: [file])
-            break
         case UIConstants.swipeActionMoreIdentifier:
             showFloatingPanel(files: [file])
             break
@@ -207,6 +206,17 @@ class TrashCollectionViewController: FileListCollectionViewController {
         case .grid:
             return nil
         }
+    }
+
+    // MARK: - File cell delegate
+
+    override func didTapMoreButton(_ cell: FileCollectionViewCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else {
+            return
+        }
+
+        let file = sortedChildren[indexPath.row]
+        showFloatingPanel(files: [file])
     }
 
     private func deleteActionSelected(files: [File]) {
@@ -256,13 +266,13 @@ class TrashCollectionViewController: FileListCollectionViewController {
 
     private func showFloatingPanel(files: [File]) {
         let floatingPanelViewController = DriveFloatingPanelController()
-        let trashFloatingPanelTableVViewController = TrashFloatingPanelTableViewController()
+        let trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
         floatingPanelViewController.isRemovalInteractionEnabled = true
-        trashFloatingPanelTableVViewController.delegate = self
-        trashFloatingPanelTableVViewController.trashedFiles = files
+        trashFloatingPanelTableViewController.delegate = self
+        trashFloatingPanelTableViewController.trashedFiles = files
         floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
 
-        floatingPanelViewController.set(contentViewController: trashFloatingPanelTableVViewController)
+        floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController)
         self.present(floatingPanelViewController, animated: true)
     }
 
