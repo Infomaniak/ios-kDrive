@@ -240,9 +240,13 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 DispatchQueue.main.async {
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
-                    if let error = error as? InfomaniakCore.ApiError, error.code == DriveError.noDrive.code {
+                    if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
                         let driveErrorVC = DriveErrorViewController.instantiate()
                         driveErrorVC.driveErrorViewType = .noDrive
+                        self.present(driveErrorVC, animated: true, completion: nil)
+                    } else if let maintenanceError = error as? DriveError, maintenanceError.code == DriveError.maintenance.code {
+                        let driveErrorVC = DriveErrorViewController.instantiate()
+                        driveErrorVC.driveErrorViewType = .maintenance
                         self.present(driveErrorVC, animated: true, completion: nil)
                     } else {
                         self.okAlert(title: KDriveStrings.Localizable.errorTitle, message: KDriveStrings.Localizable.errorConnection, completion: nil)

@@ -179,7 +179,12 @@ public class AccountManager: RefreshTokenDelegate {
                         driveResponse.drives.main.count > 0 {
                         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
 
-                        self.setCurrentDriveForCurrentAccount(drive: driveResponse.drives.main.first!.freeze())
+                        guard let mainDrive = driveResponse.drives.main.first(where: { $0.maintenance == false }) else {
+                            self.removeAccount(toDeleteAccount: newAccount)
+                            completion(nil, DriveError.maintenance)
+                            return
+                        }
+                        self.setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
                         self.saveAccounts()
                         completion(newAccount, nil)
                     } else {
