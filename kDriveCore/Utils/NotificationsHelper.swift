@@ -118,27 +118,21 @@ public class NotificationsHelper {
     }
 
     private static func sendImmediately(notification: UNMutableNotificationContent, id: String) {
-        if notification.categoryIdentifier == uploadCategoryId && !NotificationsHelper.importNotificationsEnabled {
-            return
-        }
-
-        var isInBackground = true
-        if !Constants.isInExtension {
-            DispatchQueue.main.sync {
-                isInBackground = UIApplication.shared.applicationState != .active
+        DispatchQueue.main.async {
+            if notification.categoryIdentifier == uploadCategoryId && !NotificationsHelper.importNotificationsEnabled {
+                return
             }
-        }
 
-        if isInBackground {
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
-            let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
-            UNUserNotificationCenter.current().add(request)
-        } else {
-            DispatchQueue.main.async {
+            let isInBackground = Constants.isInExtension || UIApplication.shared.applicationState != .active
+
+            if isInBackground {
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+                let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
+                UNUserNotificationCenter.current().add(request)
+            } else {
                 InfomaniakSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
             }
         }
-
     }
 
 }
