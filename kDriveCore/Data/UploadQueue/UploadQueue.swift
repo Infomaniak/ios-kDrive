@@ -146,7 +146,7 @@ public class UploadQueue {
             let userId = AccountManager.instance.currentAccount.user.id
             return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId)).sorted(byKeyPath: "taskCreationDate")
         } else {
-            return realm.objects(UploadFile.self).filter("false")
+            return realm.objects(UploadFile.self).filter("FALSEPREDICATE")
         }
     }
 
