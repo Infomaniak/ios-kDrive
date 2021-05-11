@@ -65,7 +65,9 @@ class SavePhotoViewController: SaveFileViewController {
     }
 
     override func didClickOnButton() {
-        guard let filename = items.first?.name, let selectedDirectory = selectedDirectory else {
+        guard let filename = items.first?.name,
+            let selectedDriveFileManager = selectedDriveFileManager,
+            let selectedDirectory = selectedDirectory else {
             return
         }
 
@@ -119,7 +121,9 @@ class SavePhotoViewController: SaveFileViewController {
         }
     }
 
-    override class func instantiate() -> SavePhotoViewController {
-        return UIStoryboard(name: "Photo", bundle: nil).instantiateViewController(withIdentifier: "SavePhotoViewController") as! SavePhotoViewController
+    override class func instantiate(driveFileManager: DriveFileManager?) -> SavePhotoViewController {
+        let viewController = UIStoryboard(name: "Photo", bundle: nil).instantiateViewController(withIdentifier: "SavePhotoViewController") as! SavePhotoViewController
+        viewController.selectedDriveFileManager = driveFileManager
+        return viewController
     }
 }

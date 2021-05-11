@@ -24,6 +24,7 @@ import CocoaLumberjackSwift
 
 class PhotoPickerDelegate: NSObject {
 
+    var driveFileManager: DriveFileManager!
     var currentDirectory: File!
     var viewController: UIViewController!
 
@@ -43,9 +44,9 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true)
 
-        let savePhotoNavigationViewController = SavePhotoViewController.instantiateInNavigationController()
+        let savePhotoNavigationController = SavePhotoViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
 
-        guard let savePhotoVC = savePhotoNavigationViewController.viewControllers.first as? SavePhotoViewController,
+        guard let savePhotoVC = savePhotoNavigationController.viewControllers.first as? SavePhotoViewController,
             let mediaType = info[.mediaType] as? String, let uti = UTI(mediaType) else {
             return
         }
@@ -76,7 +77,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
                 savePhotoVC.didClickOnButton()
             }
         } else {
-            viewController.present(savePhotoNavigationViewController, animated: true)
+            viewController.present(savePhotoNavigationController, animated: true)
         }
     }
 
@@ -91,16 +92,16 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
         picker.dismiss(animated: true)
 
         if results.count > 0 {
-            let saveFileNavigationViewController = SaveFileViewController.instantiateInNavigationController()
+            let saveFileNavigationController = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
 
-            guard let saveFileVC = saveFileNavigationViewController.viewControllers.first as? SaveFileViewController else {
+            guard let saveFileVC = saveFileNavigationController.viewControllers.first as? SaveFileViewController else {
                 return
             }
             saveFileVC.selectedDirectory = currentDirectory
             saveFileVC.skipOptionsSelection = true
             saveFileVC.setItemProviders(results.map(\.itemProvider))
 
-            viewController.present(saveFileNavigationViewController, animated: true)
+            viewController.present(saveFileNavigationController, animated: true)
         }
     }
 

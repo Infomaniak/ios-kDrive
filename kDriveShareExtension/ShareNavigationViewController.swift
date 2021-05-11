@@ -31,11 +31,10 @@ class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         accountManager = AccountManager.instance
 
-        let saveViewController = SaveFileViewController.instantiate()
         if let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments,
             let currentDriveFileManager = accountManager.currentDriveFileManager {
+            let saveViewController = SaveFileViewController.instantiate(driveFileManager: currentDriveFileManager)
             saveViewController.setItemProviders(attachments)
-            saveViewController.selectedDriveFileManager = currentDriveFileManager
             viewControllers = [saveViewController]
         } else {
             dismiss(animated: true)

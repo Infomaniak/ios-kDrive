@@ -157,6 +157,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 let scanDoc = VNDocumentCameraViewController()
                 let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
                 navigationViewController.modalPresentationStyle = .fullScreen
+                navigationViewController.currentDriveFileManager = driveFileManager
                 navigationViewController.currentDirectory = currentDirectory
                 scanDoc.delegate = navigationViewController
                 mainTabViewController.present(navigationViewController, animated: true)
@@ -164,6 +165,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 print("VNDocumentCameraViewController is not supported on this device")
             }
         case .takePictureAction, .importMediaAction:
+            mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
             mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory
             mainTabViewController.photoPickerDelegate.viewController = mainTabViewController
 

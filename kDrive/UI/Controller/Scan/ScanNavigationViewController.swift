@@ -23,6 +23,7 @@ import kDriveCore
 
 class ScanNavigationViewController: UINavigationController {
 
+    var currentDriveFileManager: DriveFileManager?
     var currentDirectory: File!
 
     override func viewDidLoad() {
@@ -41,7 +42,7 @@ extension ScanNavigationViewController: VNDocumentCameraViewControllerDelegate {
             controller.dismiss(animated: true)
             return
         }
-        let saveScanNavigationViewController = SaveScanViewController.instantiateInNavigationController()
+        let saveScanNavigationViewController = SaveScanViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager)
         saveScanNavigationViewController.modalPresentationStyle = .fullScreen
         if let saveScanVC = saveScanNavigationViewController.viewControllers.first as? SaveScanViewController {
             saveScanVC.items = [.init(name: SaveFileViewController.getDefaultFileName(), path: URL(string: "/")!, uti: .data)]

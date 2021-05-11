@@ -65,7 +65,9 @@ class SaveScanViewController: SaveFileViewController {
     override func didClickOnButton() {
         let footer = tableView.footerView(forSection: sections.count - 1) as! FooterButtonView
         footer.footerButton.setLoading(true)
-        guard let filename = items.first?.name, let selectedDirectory = selectedDirectory else {
+        guard let filename = items.first?.name,
+            let selectedDriveFileManager = selectedDriveFileManager,
+            let selectedDirectory = selectedDirectory else {
             footer.footerButton.setLoading(false)
             return
         }
@@ -118,7 +120,9 @@ class SaveScanViewController: SaveFileViewController {
         }
     }
 
-    override class func instantiate() -> SaveScanViewController {
-        return UIStoryboard(name: "Scan", bundle: nil).instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
+    override class func instantiate(driveFileManager: DriveFileManager?) -> SaveScanViewController {
+        let viewController = UIStoryboard(name: "Scan", bundle: nil).instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
+        viewController.selectedDriveFileManager = driveFileManager
+        return viewController
     }
 }
