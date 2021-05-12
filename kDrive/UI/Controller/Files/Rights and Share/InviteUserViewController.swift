@@ -172,8 +172,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.logoImage.tintColor = KDriveAsset.iconColor.color
-            cell.titleLabel.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.medium)
-            cell.titleLabel.textColor = KDriveAsset.titleColor.color
+            (cell.titleLabel as? IKLabel)?.style = .header3
             cell.selectionStyle = .none
             cell.titleLabel.text = newPermission.title
             cell.logoImage?.image = newPermission.icon

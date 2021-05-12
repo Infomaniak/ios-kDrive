@@ -118,6 +118,9 @@
         </view>
     </objects>
     <designables>
+        <designable name="0Jv-j5-tP1">
+            <size key="intrinsicContentSize" width="95" height="29"/>
+        </designable>
         <designable name="I0w-c4-6se">
             <size key="intrinsicContentSize" width="44.5" height="17"/>
         </designable>
