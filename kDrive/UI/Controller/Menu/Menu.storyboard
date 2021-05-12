@@ -350,6 +350,7 @@
                                 </state>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonSave"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="primaryButton"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="saveButtonPressed:" destination="cZK-V1-h3I" eventType="touchUpInside" id="yGu-RH-eok"/>
