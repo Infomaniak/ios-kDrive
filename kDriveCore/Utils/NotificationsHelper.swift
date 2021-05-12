@@ -140,7 +140,7 @@ public class NotificationsHelper {
                 let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
                 UNUserNotificationCenter.current().add(request)
             } else {
-                InfomaniakSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
+                IKSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
             }
         }
     }

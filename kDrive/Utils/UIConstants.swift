@@ -37,11 +37,11 @@ class UIConstants {
     static let swipeActionDeleteIdentifier = "delete"
 
     static func showSnackBar(message: String, view: UIView? = nil) {
-        InfomaniakSnackBar.make(message: message, duration: .lengthLong, view: view)?.show()
+        IKSnackBar.make(message: message, duration: .lengthLong, view: view)?.show()
     }
 
     static func showSnackBarWithAction(message: String, view: UIView? = nil, action: String, completion: @escaping () -> Void) {
-        InfomaniakSnackBar.make(message: message, duration: .lengthLong, view: view, action: action, completion: completion)?.show()
+        IKSnackBar.make(message: message, duration: .lengthLong, view: view, action: action, completion: completion)?.show()
     }
 
     static func openUrl(_ string: String, from viewController: UIViewController) {

@@ -1,4 +1,3 @@
-//
 /*
 Infomaniak kDrive - iOS App
 Copyright (C) 2021 Infomaniak Network SA
@@ -56,10 +55,29 @@ public struct TextStyle: RawRepresentable {
 
 @IBDesignable public class IKLabel: UILabel {
 
-    @IBInspectable public var style: String = TextStyle.header2.rawValue {
-        didSet {
-            setUpLabel()
+    /// Set label style.
+    @IBInspectable public var styleName: String = TextStyle.body1.rawValue {
+        didSet { setUpLabel() }
+    }
+
+    /// Set label style.
+    public var style: TextStyle {
+        get {
+            return TextStyle(rawValue: styleName) ?? .body1
         }
+        set {
+            styleName = newValue.rawValue
+        }
+    }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setUpLabel()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setUpLabel()
     }
 
     public override func prepareForInterfaceBuilder() {
@@ -68,9 +86,6 @@ public struct TextStyle: RawRepresentable {
     }
 
     func setUpLabel() {
-        guard let style = TextStyle(rawValue: style) else {
-            return
-        }
         font = style.font
         textColor = style.color
     }

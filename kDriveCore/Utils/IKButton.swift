@@ -1,4 +1,3 @@
-//
 /*
 Infomaniak kDrive - iOS App
 Copyright (C) 2021 Infomaniak Network SA
@@ -21,10 +20,29 @@ import UIKit
 
 @IBDesignable public class IKButton: UIButton {
 
-    @IBInspectable public var style: String = TextStyle.action.rawValue {
-        didSet {
-            setUpButton()
+    /// Set button style.
+    @IBInspectable public var styleName: String = TextStyle.action.rawValue {
+        didSet { setUpButton() }
+    }
+
+    /// Set button style.
+    public var style: TextStyle {
+        get {
+            return TextStyle(rawValue: styleName) ?? .action
         }
+        set {
+            styleName = newValue.rawValue
+        }
+    }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setUpButton()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setUpButton()
     }
 
     public override func prepareForInterfaceBuilder() {
@@ -33,9 +51,6 @@ import UIKit
     }
 
     func setUpButton() {
-        guard let style = TextStyle(rawValue: style) else {
-            return
-        }
         titleLabel?.font = style.font
         setTitleColor(style.color, for: .normal)
     }

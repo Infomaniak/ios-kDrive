@@ -29,14 +29,22 @@ import UIKit
     @IBInspectable public var elevation: Int = 1 {
         didSet { setElevation() }
     }
-    
-    /// Set title style
-    @IBInspectable public var style: String = Style.primaryButton.rawValue {
-        didSet {
-            setUpButton()
+
+    /// Set button style.
+    @IBInspectable public var styleName: String = Style.primaryButton.rawValue {
+        didSet { setUpButton() }
+    }
+
+    /// Set button style.
+    public var style: Style {
+        get {
+            return Style(rawValue: styleName) ?? .primaryButton
+        }
+        set {
+            styleName = newValue.rawValue
         }
     }
-    
+
     public struct Style: RawRepresentable {
 
         var titleFont: UIFont
@@ -89,9 +97,7 @@ import UIKit
     func setUpButton() {
         layer.cornerRadius = 10
 
-        guard let style = Style(rawValue: style) else {
-            return
-        }
+        // Set text font & color
         titleLabel?.font = style.titleFont
         setTitleColor(style.titleColor, for: .normal)
         setTitleColor(KDriveCoreAsset.buttonDisabledTitleColor.color, for: .disabled)
@@ -99,11 +105,8 @@ import UIKit
         setBackgroundColor()
         setElevation()
     }
-    
+
     func setBackgroundColor() {
-        guard let style = Style(rawValue: style) else {
-            return
-        }
         backgroundColor = isEnabled ? style.backgroundColor : KDriveCoreAsset.buttonDisabledBackgroundColor.color
     }
 

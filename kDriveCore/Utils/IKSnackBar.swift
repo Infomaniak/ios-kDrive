@@ -19,8 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import SnackBar
 
-
-public class InfomaniakSnackBar: SnackBar {
+public class IKSnackBar: SnackBar {
 
     required init(contextView: UIView, message: String, duration: Duration) {
         super.init(contextView: contextView, message: message, duration: duration)
@@ -32,13 +31,16 @@ public class InfomaniakSnackBar: SnackBar {
     }
 
     public override var style: SnackBarStyle {
+        let textStyle = TextStyle.subtitle2
+        let buttonStyle = TextStyle.action
         var style = SnackBarStyle()
         style.padding = 24
         style.background = KDriveCoreAsset.backgroundCardViewColor.color
-        style.textColor = KDriveCoreAsset.titleColor.color
-        style.actionTextColor = KDriveCoreAsset.infomaniakColor.color
+        style.textColor = textStyle.color
+        style.font = textStyle.font
+        style.actionTextColor = buttonStyle.color
         style.actionTextColorAlpha = 1
-        style.actionFont = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)
+        style.actionFont = buttonStyle.font
         return style
     }
 
