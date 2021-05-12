@@ -42,7 +42,6 @@ class InformationFloatingPanelViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        leftButton.addShadow()
     }
 
     override func viewDidAppear(_ animated: Bool) {
