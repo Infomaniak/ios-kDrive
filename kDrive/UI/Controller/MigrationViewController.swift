@@ -59,6 +59,7 @@ class MigrationViewController: UIViewController {
                 buttonView.isHidden = false
                 retryButton.isHidden = result.success
                 migrationFailedLabel.isHidden = result.success
+                migrationDoneButton.setTitle(result.success ? KDriveStrings.Localizable.buttonMigrationDone : KDriveStrings.Localizable.buttonLogin, for: .normal)
 
                 UIView.animate(withDuration: 0.5) {
                     self.buttonView.alpha = 1
