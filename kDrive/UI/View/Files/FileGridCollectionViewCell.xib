@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
@@ -59,11 +59,11 @@
                                                     <constraint firstAttribute="height" constant="26" id="Fcs-6n-8ik"/>
                                                     <constraint firstAttribute="width" constant="26" id="vAs-tt-Xbq"/>
                                                 </constraints>
-                                                <color key="tintColor" name="iconColor"/>
+                                                <color key="tintColor" name="primaryTextColor"/>
                                                 <inset key="imageEdgeInsets" minX="4" minY="4" maxX="4" maxY="4"/>
                                                 <state key="normal" image="menu"/>
                                                 <connections>
-                                                    <action selector="moreButtonTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="aSm-MA-jdY"/>
+                                                    <action selector="moreButtonTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="bLk-d8-1DS"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -97,11 +97,14 @@
                                                             <constraint firstAttribute="width" secondItem="m0U-12-qPF" secondAttribute="height" multiplier="1:1" id="aRq-X5-QkX"/>
                                                         </constraints>
                                                     </imageView>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzB-wT-0Da">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzB-wT-0Da" customClass="IKLabel" customModule="kDriveCore">
                                                         <rect key="frame" x="27" y="9" width="111" height="17"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <color key="textColor" name="titleColor"/>
                                                         <nil key="highlightedColor"/>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                                                        </userDefinedRuntimeAttributes>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="favorite" translatesAutoresizingMaskIntoConstraints="NO" id="ffD-D7-NRt">
                                                         <rect key="frame" x="146" y="11.5" width="12" height="12"/>
@@ -172,13 +175,18 @@
                 <outlet property="iconImageView" destination="m0U-12-qPF" id="5uU-yD-5hK"/>
                 <outlet property="largeIconImageView" destination="5Sk-df-fP8" id="q19-Hr-dG3"/>
                 <outlet property="logoImage" destination="j9K-4i-jdP" id="kHe-3O-R1o"/>
-                <outlet property="moreButton" destination="tJz-u0-DMk" id="FAe-zU-Fqe"/>
+                <outlet property="moreButton" destination="tJz-u0-DMk" id="T8v-YL-DVg"/>
                 <outlet property="stackViewCenterConstraint" destination="USy-Iy-Yd1" id="5LJ-hz-jXG"/>
                 <outlet property="titleLabel" destination="IzB-wT-0Da" id="uAE-nF-XlS"/>
             </connections>
             <point key="canvasLocation" x="37.681159420289859" y="181.47321428571428"/>
         </collectionViewCell>
     </objects>
+    <designables>
+        <designable name="IzB-wT-0Da">
+            <size key="intrinsicContentSize" width="36" height="17"/>
+        </designable>
+    </designables>
     <resources>
         <image name="favorite" width="24" height="24"/>
         <image name="file-image" width="24" height="24"/>
@@ -196,8 +204,8 @@
         <namedColor name="favoriteColor">
             <color red="1" green="0.75686274509803919" blue="0.039215686274509803" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        <namedColor name="primaryTextColor">
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

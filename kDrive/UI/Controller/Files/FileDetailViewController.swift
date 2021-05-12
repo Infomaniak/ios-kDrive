@@ -330,6 +330,7 @@ class FileDetailViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toShareLinkSettingsSegue" {
             let nextVC = segue.destination as! ShareLinkSettingsViewController
+            nextVC.driveFileManager = driveFileManager
             nextVC.shareFile = sharedFile
             nextVC.file = file
         }

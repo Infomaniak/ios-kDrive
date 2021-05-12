@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -26,22 +26,23 @@
                                 <rect key="frame" x="16" y="16" width="506" height="207"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9G9-wN-sCa">
-                                        <rect key="frame" x="0.0" y="0.0" width="506" height="46"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="506" height="47"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="ZSx-2r-Qvo">
-                                                <rect key="frame" x="0.0" y="0.0" width="124.5" height="16"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="122.5" height="16"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lien de partage" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0dO-5m-k3M">
-                                                        <rect key="frame" x="0.0" y="0.0" width="103.5" height="16"/>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lien de partage" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0dO-5m-k3M" customClass="IKLabel" customModule="kDriveCore">
+                                                        <rect key="frame" x="0.0" y="0.0" width="101.5" height="16"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <color key="textColor" name="titleColor"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="sharedLinkTitle"/>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="link" translatesAutoresizingMaskIntoConstraints="NO" id="CK7-c2-fMN">
-                                                        <rect key="frame" x="108.5" y="0.0" width="16" height="16"/>
+                                                        <rect key="frame" x="106.5" y="0.0" width="16" height="16"/>
                                                         <color key="tintColor" name="titleColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="16" id="3cx-dc-xhf"/>
@@ -57,13 +58,14 @@
                                                     <action selector="shareLinkSwitchChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="MtU-7f-mRo"/>
                                                 </connections>
                                             </switch>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activé" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mgb-o7-K8K">
-                                                <rect key="frame" x="0.0" y="26" width="40" height="20"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activé" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mgb-o7-K8K" customClass="IKLabel" customModule="kDriveCore">
+                                                <rect key="frame" x="0.0" y="26" width="75.5" height="21"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <color key="textColor" name="primaryTextColor"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="allActivated"/>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
                                         </subviews>
@@ -80,7 +82,7 @@
                                         </constraints>
                                     </view>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="dJW-Ri-FCD">
-                                        <rect key="frame" x="0.0" y="57" width="506" height="150"/>
+                                        <rect key="frame" x="0.0" y="58" width="506" height="149"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="gcj-bA-dGz">
                                                 <rect key="frame" x="0.0" y="0.0" width="506" height="36"/>
@@ -128,12 +130,15 @@
                                                             <constraint firstAttribute="width" constant="20" id="h29-8Q-ege"/>
                                                         </constraints>
                                                     </imageView>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Consulter" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SoY-U0-IAH">
-                                                        <rect key="frame" x="44" y="16.5" width="72.5" height="19.5"/>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Consulter" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SoY-U0-IAH" customClass="IKLabel" customModule="kDriveCore">
+                                                        <rect key="frame" x="44" y="16.5" width="74" height="19.5"/>
                                                         <color key="tintColor" name="actionColor"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                         <color key="textColor" name="titleColor"/>
                                                         <nil key="highlightedColor"/>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
+                                                        </userDefinedRuntimeAttributes>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-down" translatesAutoresizingMaskIntoConstraints="NO" id="wX7-aa-YBA">
                                                         <rect key="frame" x="480" y="21" width="10" height="10"/>
@@ -155,13 +160,14 @@
                                                     <constraint firstItem="SoY-U0-IAH" firstAttribute="leading" secondItem="qkT-Bu-aNW" secondAttribute="trailing" constant="8" id="tQj-DR-bbs"/>
                                                 </constraints>
                                             </view>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I4m-zt-myD">
-                                                <rect key="frame" x="0.0" y="120" width="506" height="30"/>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I4m-zt-myD" customClass="IKButton" customModule="kDriveCore">
+                                                <rect key="frame" x="0.0" y="120" width="506" height="29"/>
                                                 <state key="normal" title="Paramètres du lien de partage">
                                                     <color key="titleColor" name="infomaniakColor"/>
                                                 </state>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileShareLinkSettingsTitle"/>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="action"/>
                                                 </userDefinedRuntimeAttributes>
                                                 <connections>
                                                     <action selector="shareLinkSettingsButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="GQh-vB-d1U"/>
@@ -220,6 +226,18 @@
         </tableViewCell>
     </objects>
     <designables>
+        <designable name="0dO-5m-k3M">
+            <size key="intrinsicContentSize" width="101.5" height="17"/>
+        </designable>
+        <designable name="I4m-zt-myD">
+            <size key="intrinsicContentSize" width="164" height="29"/>
+        </designable>
+        <designable name="SoY-U0-IAH">
+            <size key="intrinsicContentSize" width="74" height="19.5"/>
+        </designable>
+        <designable name="mgb-o7-K8K">
+            <size key="intrinsicContentSize" width="75.5" height="17"/>
+        </designable>
         <designable name="v5H-Mw-FXc">
             <size key="intrinsicContentSize" width="24" height="24"/>
         </designable>

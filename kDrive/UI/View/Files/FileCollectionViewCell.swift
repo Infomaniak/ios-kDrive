@@ -19,6 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 
+protocol FileCellDelegate: AnyObject {
+    func didTapMoreButton(_ cell: FileCollectionViewCell)
+}
+
 class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     internal var swipeStartPoint: CGPoint = .zero
@@ -30,6 +34,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var detailLabel: UILabel?
     @IBOutlet weak var logoImage: UIImageView!
     @IBOutlet weak var accessoryImage: UIImageView?
+    @IBOutlet weak var moreButton: UIButton!
     @IBOutlet weak var favoriteImageView: UIImageView!
     @IBOutlet weak var availableOfflineImageView: UIImageView!
     @IBOutlet weak var centerTitleConstraint: NSLayoutConstraint!
@@ -40,7 +45,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var detailsStackView: UIStackView?
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
+
     var downloadObservationToken: ObservationToken?
+    weak var delegate: FileCellDelegate?
 
     override var isSelected: Bool {
         didSet {
@@ -156,6 +163,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         favoriteImageView.isHidden = !file.isFavorite
         favoriteImageView.accessibilityLabel = KDriveStrings.Localizable.favoritesTitle
         logoImage.image = file.icon
+        moreButton.isHidden = selectionMode
         if !selectionMode || checkmarkImage != logoImage {
             // We don't fetch the thumbnail if we are in selection mode. In list mode we fetch thumbnail for images only
             setThumbnailFor(file: file)
@@ -181,11 +189,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
 
         if file.type == "file" {
-            accessoryImage?.isHidden = true
             stackViewTrailingConstraint?.constant = -12
             detailLabel?.text = file.getFileSize() + " • " + formattedDate
         } else {
-            accessoryImage?.isHidden = false
             stackViewTrailingConstraint?.constant = 16
             detailLabel?.text = formattedDate
         }
@@ -239,4 +245,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         titleLabel.text = recentSearch
     }
 
+    @IBAction func moreButtonTap(_ sender: Any) {
+        delegate?.didTapMoreButton(self)
+    }
 }

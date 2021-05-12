@@ -1,4 +1,3 @@
-//
 /*
 Infomaniak kDrive - iOS App
 Copyright (C) 2021 Infomaniak Network SA
@@ -21,20 +20,22 @@ import UIKit
 
 public struct TextStyle: RawRepresentable {
 
-    var font: UIFont
-    var color: UIColor
+    public var font: UIFont
+    public var color: UIColor
 
-    static let header2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 18), weight: .bold), color: KDriveCoreAsset.titleColor.color, rawValue: "header2")
-    static let subtitle1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle1")
-    static let subtitle2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle2")
-    static let body1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "body1")
-    static let caption = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: KDriveCoreAsset.primaryTextColor.color, rawValue: "caption")
-    static let header1FileInfo = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: .white, rawValue: "header1FileInfo")
-    static let captionFileInfo = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: .white, rawValue: "captionFileInfo")
-    static let bodyFileInfo = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: .white, rawValue: "bodyFileInfo")
-    static let action = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.infomaniakColor.color, rawValue: "buttonLink")
+    public static let header1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: KDriveCoreAsset.titleColor.color, rawValue: "header1")
+    public static let header2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 18), weight: .semibold), color: KDriveCoreAsset.titleColor.color, rawValue: "header2")
+    public static let header3 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .semibold), color: KDriveCoreAsset.titleColor.color, rawValue: "header3")
+    public static let subtitle1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle1")
+    public static let subtitle2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle2")
+    public static let body1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "body1")
+    public static let caption = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: KDriveCoreAsset.primaryTextColor.color, rawValue: "caption")
+    public static let header1Light = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: .white, rawValue: "header1Light")
+    public static let captionLight = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: .white, rawValue: "captionLight")
+    public static let body1Light = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: .white, rawValue: "body1Light")
+    public static let action = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.infomaniakColor.color, rawValue: "action")
 
-    static let allValues = [header2, subtitle1, subtitle2, body1, caption, header1FileInfo, captionFileInfo, bodyFileInfo, action]
+    static let allValues = [header1, header2, header3, subtitle1, subtitle2, body1, caption, header1Light, captionLight, body1Light, action]
 
     public typealias RawValue = String
     public var rawValue: String
@@ -56,10 +57,29 @@ public struct TextStyle: RawRepresentable {
 
 @IBDesignable public class IKLabel: UILabel {
 
-    @IBInspectable public var style: String = TextStyle.header2.rawValue {
-        didSet {
-            setUpLabel()
+    /// Set label style.
+    @IBInspectable public var styleName: String = TextStyle.body1.rawValue {
+        didSet { setUpLabel() }
+    }
+
+    /// Set label style.
+    public var style: TextStyle {
+        get {
+            return TextStyle(rawValue: styleName) ?? .body1
         }
+        set {
+            styleName = newValue.rawValue
+        }
+    }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setUpLabel()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setUpLabel()
     }
 
     public override func prepareForInterfaceBuilder() {
@@ -68,9 +88,6 @@ public struct TextStyle: RawRepresentable {
     }
 
     func setUpLabel() {
-        guard let style = TextStyle(rawValue: style) else {
-            return
-        }
         font = style.font
         textColor = style.color
     }

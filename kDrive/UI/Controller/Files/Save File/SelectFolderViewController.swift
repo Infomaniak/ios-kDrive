@@ -71,7 +71,7 @@ class SelectFolderViewController: FileListCollectionViewController {
         let file = sortedChildren[indexPath.row]
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! FileCollectionViewCell
         cell.setEnabled(file.isDirectory)
-        (cell as? FileGridCollectionViewCell)?.moreButton.isHidden = true
+        cell.moreButton.isHidden = true
         return cell
     }
 

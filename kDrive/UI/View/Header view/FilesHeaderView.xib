@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -33,13 +33,14 @@
                                                 <constraint firstAttribute="width" constant="24" id="iYa-EI-wA0"/>
                                             </constraints>
                                         </imageView>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1xA-38-wIp">
-                                            <rect key="frame" x="32" y="4" width="240" height="16"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1xA-38-wIp" customClass="IKLabel" customModule="kDriveCore">
+                                            <rect key="frame" x="32" y="5" width="240" height="14.5"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <color key="textColor" name="actionColor"/>
                                             <nil key="highlightedColor"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="allNoNetwork"/>
+                                                <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                             </userDefinedRuntimeAttributes>
                                         </label>
                                     </subviews>
@@ -56,11 +57,14 @@
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="e6M-e1-pOF" customClass="SelectView" customModule="kDrive" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="272" height="44"/>
                             <subviews>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ug6-Jg-W6r">
-                                    <rect key="frame" x="0.0" y="9" width="132" height="26.5"/>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ug6-Jg-W6r" customClass="IKLabel" customModule="kDriveCore">
+                                    <rect key="frame" x="0.0" y="13.5" width="132" height="17"/>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
+                                    </userDefinedRuntimeAttributes>
                                 </label>
                                 <stackView opaque="NO" contentMode="scaleToFill" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="2wa-8Z-vq0">
                                     <rect key="frame" x="152" y="10" width="120" height="24"/>
@@ -136,11 +140,14 @@
                                                         <constraint firstAttribute="height" constant="20" id="iKR-Iu-iBO"/>
                                                     </constraints>
                                                 </imageView>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dl2-72-lEj">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dl2-72-lEj" customClass="IKLabel" customModule="kDriveCore">
                                                     <rect key="frame" x="28" y="1.5" width="36" height="17"/>
                                                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                     <color key="textColor" name="titleColor"/>
                                                     <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                                                    </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B0X-WW-G8f">
                                                     <rect key="frame" x="72" y="2" width="16" height="16"/>
@@ -184,10 +191,10 @@
                             <rect key="frame" x="0.0" y="0.0" width="272" height="68"/>
                             <subviews>
                                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="DyE-08-LRW">
-                                    <rect key="frame" x="16" y="13" width="220" height="42"/>
+                                    <rect key="frame" x="16" y="14.5" width="220" height="39.5"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xiY-Ct-w9c" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
-                                            <rect key="frame" x="0.0" y="9" width="24" height="24"/>
+                                            <rect key="frame" x="0.0" y="7.5" width="24" height="24"/>
                                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="24" id="07h-7G-RJk"/>
@@ -195,26 +202,32 @@
                                             </constraints>
                                         </view>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XQm-FH-k7g">
-                                            <rect key="frame" x="32" y="2" width="38" height="38"/>
+                                            <rect key="frame" x="32" y="0.5" width="38" height="38"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="38" id="wa9-hZ-S9j"/>
                                                 <constraint firstAttribute="width" constant="38" id="yGL-IJ-iOw"/>
                                             </constraints>
                                         </imageView>
                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="BcR-qh-Ym5">
-                                            <rect key="frame" x="78" y="0.0" width="142" height="42"/>
+                                            <rect key="frame" x="78" y="0.0" width="142" height="39.5"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YIY-ah-68A">
-                                                    <rect key="frame" x="0.0" y="0.0" width="142" height="18"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YIY-ah-68A" customClass="IKLabel" customModule="kDriveCore">
+                                                    <rect key="frame" x="0.0" y="0.0" width="142" height="17"/>
                                                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                                     <color key="textColor" name="titleColor"/>
                                                     <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                                                    </userDefinedRuntimeAttributes>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uYH-Mq-qZt">
-                                                    <rect key="frame" x="0.0" y="26" width="142" height="16"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uYH-Mq-qZt" customClass="IKLabel" customModule="kDriveCore">
+                                                    <rect key="frame" x="0.0" y="25" width="142" height="14.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                     <color key="textColor" name="secondaryTextColor"/>
                                                     <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
+                                                    </userDefinedRuntimeAttributes>
                                                 </label>
                                             </subviews>
                                         </stackView>
@@ -225,7 +238,7 @@
                                     <subviews>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="1Hf-fp-SIT">
                                             <rect key="frame" x="0.0" y="0.0" width="12" height="12"/>
-                                            <color key="tintColor" name="iconColor"/>
+                                            <color key="tintColor" name="primaryTextColor"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="12" id="13r-lM-bCo"/>
                                                 <constraint firstAttribute="width" constant="12" id="xW5-Hw-Y7G"/>
@@ -270,11 +283,14 @@
                                                 </userDefinedRuntimeAttribute>
                                             </userDefinedRuntimeAttributes>
                                         </imageView>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ATr-sQ-1YC">
-                                            <rect key="frame" x="32" y="4" width="240" height="16"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ATr-sQ-1YC" customClass="IKLabel" customModule="kDriveCore">
+                                            <rect key="frame" x="32" y="5" width="240" height="14.5"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <color key="textColor" name="actionColor"/>
                                             <nil key="highlightedColor"/>
+                                            <userDefinedRuntimeAttributes>
+                                                <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
+                                            </userDefinedRuntimeAttributes>
                                         </label>
                                     </subviews>
                                 </stackView>
@@ -290,24 +306,23 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M4N-HE-jPw">
                             <rect key="frame" x="0.0" y="0.0" width="272" height="24"/>
                             <subviews>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bAx-uw-yHB">
-                                    <rect key="frame" x="0.0" y="0.0" width="55" height="24"/>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bAx-uw-yHB" customClass="IKButton" customModule="kDriveCore">
+                                    <rect key="frame" x="0.0" y="0.0" width="51" height="24"/>
                                     <constraints>
                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="50" id="yl0-ph-QLT"/>
                                     </constraints>
-                                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                    <color key="tintColor" name="iconColor"/>
                                     <inset key="imageEdgeInsets" minX="0.0" minY="7" maxX="0.0" maxY="7"/>
-                                    <state key="normal" title="Nom" image="chevron-down">
-                                        <color key="titleColor" name="actionColor"/>
-                                    </state>
+                                    <state key="normal" title="Nom" image="chevron-down"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
+                                    </userDefinedRuntimeAttributes>
                                     <connections>
                                         <action selector="filterButtonPressed:" destination="U6b-Vx-4bR" eventType="touchUpInside" id="Sr9-Mn-mw5"/>
                                     </connections>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mhu-wK-ohw">
                                     <rect key="frame" x="248" y="0.0" width="24" height="24"/>
-                                    <color key="tintColor" name="actionColor"/>
+                                    <color key="tintColor" name="primaryTextColor"/>
                                     <inset key="imageEdgeInsets" minX="4" minY="4" maxX="4" maxY="4"/>
                                     <state key="normal" image="list"/>
                                     <connections>
@@ -354,6 +369,29 @@
             <point key="canvasLocation" x="-317.39130434782612" y="225.33482142857142"/>
         </collectionReusableView>
     </objects>
+    <designables>
+        <designable name="1xA-38-wIp">
+            <size key="intrinsicContentSize" width="76.5" height="14.5"/>
+        </designable>
+        <designable name="ATr-sQ-1YC">
+            <size key="intrinsicContentSize" width="31" height="14.5"/>
+        </designable>
+        <designable name="Ug6-Jg-W6r">
+            <size key="intrinsicContentSize" width="104.5" height="17"/>
+        </designable>
+        <designable name="YIY-ah-68A">
+            <size key="intrinsicContentSize" width="36" height="17"/>
+        </designable>
+        <designable name="bAx-uw-yHB">
+            <size key="intrinsicContentSize" width="51" height="24"/>
+        </designable>
+        <designable name="dl2-72-lEj">
+            <size key="intrinsicContentSize" width="36" height="17"/>
+        </designable>
+        <designable name="uYH-Mq-qZt">
+            <size key="intrinsicContentSize" width="31" height="14.5"/>
+        </designable>
+    </designables>
     <resources>
         <image name="chevron-down" width="24" height="24"/>
         <image name="chevron-right" width="24" height="24"/>

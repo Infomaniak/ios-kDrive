@@ -18,21 +18,23 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="137"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'accès à vos photos est désactivé, pouvez changer ce paramètre dans les réglages." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O86-Nn-Dhm">
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'accès à vos photos est désactivé, pouvez changer ce paramètre dans les réglages." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O86-Nn-Dhm" customClass="IKLabel" customModule="kDriveCore">
                         <rect key="frame" x="24" y="8" width="272" height="50.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="textColor" name="primaryTextColor"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="photoAccessDeniedDescription"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                         </userDefinedRuntimeAttributes>
                     </label>
-                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fDF-73-Tfc">
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fDF-73-Tfc" customClass="IKButton" customModule="kDriveCore">
                         <rect key="frame" x="80.5" y="99" width="159" height="30"/>
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                         <state key="normal" title="Aller dans les réglages"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonGoToSettings"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="action"/>
                         </userDefinedRuntimeAttributes>
                         <connections>
                             <action selector="goToSettingsButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="CoR-8O-nAk"/>

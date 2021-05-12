@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import UIKit
+import kDriveCore
 
 extension UINavigationController {
 
@@ -54,6 +55,10 @@ extension UINavigationController {
             let navbarAppearance = UINavigationBarAppearance()
             navbarAppearance.configureWithTransparentBackground()
             navbarAppearance.backgroundColor = KDriveAsset.backgroundColor.color
+            let largeTitleStyle = TextStyle.header1
+            let titleStyle = TextStyle.header3
+            navbarAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
+            navbarAppearance.titleTextAttributes = [.foregroundColor: titleStyle.color, .font: titleStyle.font]
             self.navigationBar.standardAppearance = navbarAppearance
             self.navigationBar.compactAppearance = navbarAppearance
             self.navigationBar.scrollEdgeAppearance = navbarAppearance
