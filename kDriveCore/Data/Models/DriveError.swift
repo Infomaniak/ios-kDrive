@@ -88,7 +88,7 @@ public struct DriveError: Error, Equatable {
     public static let forbidden = DriveError(type: .serverError, code: "forbidden_error", localizedString: KDriveCoreStrings.Localizable.accessDeniedTitle)
     public static let noDrive = DriveError(type: .serverError, code: "no_drive")
     public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveCoreStrings.Localizable.errorConflict)
-    public static let maintenance = DriveError(type: .localError, code: "maintenance")
+    public static let maintenance = DriveError(type: .serverError, code: "product_maintenance", localizedString: KDriveCoreStrings.Localizable.errorConflict)
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
