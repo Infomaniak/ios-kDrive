@@ -29,6 +29,43 @@ import UIKit
     @IBInspectable public var elevation: Int = 1 {
         didSet { setElevation() }
     }
+    
+    /// Set title style
+    @IBInspectable public var style: String = Style.primaryButton.rawValue {
+        didSet {
+            setUpButton()
+        }
+    }
+    
+    public struct Style: RawRepresentable {
+
+        var titleFont: UIFont
+        var titleColor: UIColor
+        var backgroundColor: UIColor
+
+        static let primaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: .white, backgroundColor: KDriveCoreAsset.infomaniakColor.color, rawValue: "primaryButton")
+        static let secondaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveCoreAsset.titleColor.color, backgroundColor: KDriveCoreAsset.backgroundColor.color, rawValue: "secondaryButton")
+
+        static let allValues = [primaryButton, secondaryButton]
+
+        public typealias RawValue = String
+        public var rawValue: String
+
+        internal init(titleFont: UIFont, titleColor: UIColor, backgroundColor: UIColor, rawValue: RawValue) {
+            self.titleFont = titleFont
+            self.titleColor = titleColor
+            self.backgroundColor = backgroundColor
+            self.rawValue = rawValue
+        }
+
+        public init?(rawValue: String) {
+            if let style = Style.allValues.first(where: { $0.rawValue == rawValue }) {
+                self = style
+            } else {
+                return nil
+            }
+        }
+    }
 
     public override var isEnabled: Bool {
         didSet { setEnabled() }
@@ -52,16 +89,22 @@ import UIKit
     func setUpButton() {
         layer.cornerRadius = 10
 
-        // Set text color
-        setTitleColor(.white, for: .normal)
+        guard let style = Style(rawValue: style) else {
+            return
+        }
+        titleLabel?.font = style.titleFont
+        setTitleColor(style.titleColor, for: .normal)
         setTitleColor(KDriveCoreAsset.buttonDisabledTitleColor.color, for: .disabled)
-        
+
         setBackgroundColor()
         setElevation()
     }
-
+    
     func setBackgroundColor() {
-        backgroundColor = isEnabled ? KDriveCoreAsset.infomaniakColor.color : KDriveCoreAsset.buttonDisabledBackgroundColor.color
+        guard let style = Style(rawValue: style) else {
+            return
+        }
+        backgroundColor = isEnabled ? style.backgroundColor : KDriveCoreAsset.buttonDisabledBackgroundColor.color
     }
 
     func setElevation() {
