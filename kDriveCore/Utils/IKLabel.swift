@@ -31,7 +31,7 @@ public struct TextStyle: RawRepresentable {
     static let header1FileInfo = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: .white, rawValue: "header1FileInfo")
     static let captionFileInfo = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: .white, rawValue: "captionFileInfo")
     static let bodyFileInfo = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: .white, rawValue: "bodyFileInfo")
-    static let action = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.infomaniakColor.color, rawValue: "buttonLink")
+    static let action = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.infomaniakColor.color, rawValue: "action")
 
     static let allValues = [header2, subtitle1, subtitle2, body1, caption, header1FileInfo, captionFileInfo, bodyFileInfo, action]
 
