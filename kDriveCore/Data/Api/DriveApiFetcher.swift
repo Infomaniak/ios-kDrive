@@ -474,6 +474,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.getFileActivitiesFromDate(file: file, date: date) + pagination(page: page)
 
         authenticatedSession.request(url, method: .get)
+            .validate()
             .responseDecodable(of: ApiResponse<[FileActivity]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
@@ -539,6 +540,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = "\(ApiRoutes.getTrashFiles(driveId: drive.id, fileId: fileId, sortType: sortType))\(pagination(page: page))"
 
         authenticatedSession.request(url, method: .get)
+            .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }

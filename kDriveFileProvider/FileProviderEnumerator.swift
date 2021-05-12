@@ -100,6 +100,8 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             } else {
                                 observer.finishEnumerating(upTo: nil)
                             }
+                        } else if let error = error as? DriveError, error == DriveError.maintenance {
+                            observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found
                             observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
@@ -138,6 +140,8 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             observer.didDeleteItems(withIdentifiers: deletedItems)
 
                             observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(timestamp), moreComing: false)
+                        } else if let error = error as? DriveError, error == DriveError.maintenance {
+                            observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
                         }
@@ -148,6 +152,8 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         if let file = response?.data {
                             observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
                             observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
+                        } else if let error = error as? DriveError, error == DriveError.maintenance {
+                            observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found
                             observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
