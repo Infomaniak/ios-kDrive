@@ -52,6 +52,6 @@ import UIKit
 
     func setUpButton() {
         titleLabel?.font = style.font
-        setTitleColor(style.color, for: .normal)
+        tintColor = style.color
     }
 }

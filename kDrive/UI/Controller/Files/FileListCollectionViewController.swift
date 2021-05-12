@@ -28,7 +28,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
 
     @IBOutlet weak var collectionView: UICollectionView!
     private var collectionViewLayout: UICollectionViewFlowLayout!
-    let leftRightInset: CGFloat = 24
+    let leftRightInset: CGFloat = 12
     private let gridInnerSpacing: CGFloat = 16
     private let maxActivitiesBeforeReload = 100
 
