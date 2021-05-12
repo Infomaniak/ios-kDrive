@@ -128,6 +128,14 @@
             <point key="canvasLocation" x="148.55072463768118" y="213.61607142857142"/>
         </tableViewCell>
     </objects>
+    <designables>
+        <designable name="K1i-a0-oIy">
+            <size key="intrinsicContentSize" width="31" height="14.5"/>
+        </designable>
+        <designable name="rtI-Wc-46s">
+            <size key="intrinsicContentSize" width="36" height="17"/>
+        </designable>
+    </designables>
     <resources>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
