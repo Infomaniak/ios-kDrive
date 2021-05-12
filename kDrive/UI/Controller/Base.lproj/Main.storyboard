@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="9yd-Vx-ISo">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="9yd-Vx-ISo">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -107,7 +107,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Rkb-an-uwN">
-                                <rect key="frame" x="0.0" y="0.0" width="390" height="630.66666666666663"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="631.66666666666663"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="9ub-9i-xp5">
                                     <size key="itemSize" width="128" height="128"/>
@@ -154,6 +154,7 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonLogin"/>
                                             <userDefinedRuntimeAttribute type="boolean" keyPath="elevated" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="primaryButton"/>
                                         </userDefinedRuntimeAttributes>
                                         <variation key="default">
                                             <mask key="constraints">
@@ -169,7 +170,7 @@
                                             <action selector="signInButtonPressed:" destination="wQU-0Z-Dua" eventType="touchUpInside" id="9ED-hk-qgY"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1Ws-Ei-OPK">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1Ws-Ei-OPK" customClass="IKButton" customModule="kDriveCore">
                                         <rect key="frame" x="0.0" y="76" width="342" height="60"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
@@ -188,6 +189,7 @@
                                                 <real key="value" value="10"/>
                                             </userDefinedRuntimeAttribute>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonSignIn"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="action"/>
                                         </userDefinedRuntimeAttributes>
                                         <variation key="default">
                                             <mask key="constraints">
@@ -282,7 +284,7 @@
                                 </connections>
                             </button>
                             <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="3" translatesAutoresizingMaskIntoConstraints="NO" id="Ygk-pb-gfq">
-                                <rect key="frame" x="24" y="630.66666666666663" width="342" height="27.333333333333371"/>
+                                <rect key="frame" x="24" y="631.66666666666663" width="342" height="26.333333333333371"/>
                                 <color key="pageIndicatorTintColor" systemColor="systemGray4Color"/>
                                 <color key="currentPageIndicatorTintColor" name="infomaniakColor"/>
                             </pageControl>
@@ -724,19 +726,19 @@
     </scenes>
     <designables>
         <designable name="1ka-pK-vme">
-            <size key="intrinsicContentSize" width="191" height="34"/>
+            <size key="intrinsicContentSize" width="172" height="32"/>
         </designable>
         <designable name="53t-Hq-IZI">
             <size key="intrinsicContentSize" width="24" height="24"/>
         </designable>
         <designable name="QKz-Y6-C7W">
-            <size key="intrinsicContentSize" width="112" height="34"/>
+            <size key="intrinsicContentSize" width="101" height="32"/>
         </designable>
         <designable name="iEM-pL-yBh">
-            <size key="intrinsicContentSize" width="100" height="34"/>
+            <size key="intrinsicContentSize" width="90" height="32"/>
         </designable>
         <designable name="t82-BD-FpT">
-            <size key="intrinsicContentSize" width="176" height="34"/>
+            <size key="intrinsicContentSize" width="159" height="32"/>
         </designable>
     </designables>
     <resources>
