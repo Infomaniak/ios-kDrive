@@ -83,7 +83,6 @@ class MigrationViewController: UIViewController {
     }
 
     @IBAction func migrationDoneButtonPressed(_ sender: Any) {
-        MigrationHelper.cleanup()
         if migrationResult?.success == true {
             UserDefaults.store(firstLaunch: false)
             UserDefaults.shared.numberOfConnections = 1
@@ -104,6 +103,7 @@ class MigrationViewController: UIViewController {
                 }
                 mainTabBarViewController.present(floatingPanelViewController, animated: true)
             }
+            MigrationHelper.cleanup()
         } else {
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(OnboardingViewController.instantiate(), animated: true)
         }
