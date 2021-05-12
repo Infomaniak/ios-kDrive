@@ -30,6 +30,14 @@ class SwitchDriveViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         filteredDrives = drives
+        let accountManager = AccountManager.instance
+        accountManager.updateUserForAccount(accountManager.currentAccount) { _, _, error in
+            if error == nil {
+                self.drives = accountManager.drives
+                self.filteredDrives = self.drives
+                self.tableView.reloadData()
+            }
+        }
         tableView.register(cellView: DriveSwitchTableViewCell.self)
         navigationController?.setTransparentStandardAppearanceNavigationBar()
 
