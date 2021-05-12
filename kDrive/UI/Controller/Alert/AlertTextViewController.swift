@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import UIKit
+import kDriveCore
 
 /// Alert with text content
 class AlertTextViewController: AlertViewController {
@@ -51,11 +52,10 @@ class AlertTextViewController: AlertViewController {
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
     init(title: String, message: NSAttributedString, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
-        let label = UILabel()
+        let label = IKLabel()
         label.attributedText = message
         label.numberOfLines = 0
-        label.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 15))
-        label.textColor = KDriveAsset.secondaryTextColor.color
+        label.style = .body1
         label.sizeToFit()
         super.init(title: title, action: action, hasCancelButton: hasCancelButton, destructive: destructive, loading: loading, handler: handler, cancelHandler: cancelHandler)
         contentView = label

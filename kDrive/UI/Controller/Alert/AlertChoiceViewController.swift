@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import UIKit
+import kDriveCore
 
 /// Alert with choices
 class AlertChoiceViewController: AlertViewController {
@@ -73,10 +74,9 @@ class AlertChoiceViewController: AlertViewController {
         var index = 0
         for choice in choices {
             // Label
-            let label = UILabel()
+            let label = IKLabel()
             label.text = choice
-            label.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 15))
-            label.textColor = KDriveAsset.titleColor.color
+            label.style = .body1
             label.numberOfLines = 0
             label.sizeToFit()
             label.translatesAutoresizingMaskIntoConstraints = false

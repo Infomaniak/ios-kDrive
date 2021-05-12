@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import UIKit
+import kDriveCore
 
 /**
  Alert view controller superclass.
@@ -68,9 +69,9 @@ class AlertViewController: UIViewController {
         view.addSubview(alertView)
 
         // Title label
-        let titleLabel = UILabel()
+        let titleLabel = IKLabel()
         titleLabel.text = title
-        titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        titleLabel.style = .header3
         titleLabel.sizeToFit()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         alertView.addSubview(titleLabel)
