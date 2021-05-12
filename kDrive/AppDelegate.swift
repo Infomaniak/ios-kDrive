@@ -200,7 +200,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         window?.tintColor = KDriveAsset.infomaniakColor.color
         UITabBar.appearance().unselectedItemTintColor = KDriveAsset.iconColor.color
 
-        if MigrationHelper.canMigrate() {
+        if MigrationHelper.canMigrate() && accountManager.accounts.count == 0 {
             window?.rootViewController = MigrationViewController.instantiate()
             window?.makeKeyAndVisible()
         } else if (UserDefaults.isFirstLaunch() || accountManager.accounts.count == 0) {

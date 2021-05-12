@@ -47,7 +47,7 @@ public class MigrationHelper {
     private static let group = "com.infomaniak.Crypto-Cloud"
     private static let accessGroup = appIdentifierPrefix + group
     private static let nextcloudGroup: String = "group." + group
-    private static let nextcloudRealmUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("nextcloud.realm")
+    private static let nextcloudRealmUrl = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup)?.appendingPathComponent("Library/Application Support/Nextcloud/nextcloud.realm")
     private static let databaseSchemaVersion: UInt64 = 153
 
     public static func migrate(completion: @escaping (MigrationResult) -> Void) {
@@ -108,10 +108,10 @@ public class MigrationHelper {
         }
 
         var values = [String: String]()
-        if lastResultCode == noErr {
-            let array = result as? Array<Dictionary<String, Any>>
+        if lastResultCode == noErr,
+            let array = result as? Array<Dictionary<String, Any>> {
 
-            for item in array! {
+            for item in array {
                 if let key = item[kSecAttrAccount as String] as? String,
                     let value = item[kSecValueData as String] as? Data {
                     values[key] = String(data: value, encoding: .utf8)
@@ -155,24 +155,29 @@ public class MigrationHelper {
     }
 
     public static func canMigrate() -> Bool {
-        return FileManager.default.fileExists(atPath: nextcloudRealmUrl!.path)
+        if let path = nextcloudRealmUrl?.path {
+            return FileManager.default.fileExists(atPath: path)
+        } else {
+            return false
+        }
     }
 
     public static func cleanup() {
         DispatchQueue.global(qos: .background).async {
             let fileManager = FileManager.default
-            let documentBaseUrl = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let groupBaseUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup)!
+            if let documentBaseUrl = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first,
+                let groupBaseUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup) {
 
-            if let groupFiles = try? fileManager.contentsOfDirectory(atPath: groupBaseUrl.path) {
-                for filePath in groupFiles {
-                    try? fileManager.removeItem(atPath: groupBaseUrl.appendingPathComponent(filePath).path)
+                if let groupFiles = try? fileManager.contentsOfDirectory(atPath: groupBaseUrl.path) {
+                    for filePath in groupFiles {
+                        try? fileManager.removeItem(atPath: groupBaseUrl.appendingPathComponent(filePath).path)
+                    }
                 }
-            }
 
-            if let documentFiles = try? fileManager.contentsOfDirectory(atPath: documentBaseUrl.path) {
-                for filePath in documentFiles {
-                    try? fileManager.removeItem(atPath: documentBaseUrl.appendingPathComponent(filePath).path)
+                if let documentFiles = try? fileManager.contentsOfDirectory(atPath: documentBaseUrl.path) {
+                    for filePath in documentFiles {
+                        try? fileManager.removeItem(atPath: documentBaseUrl.appendingPathComponent(filePath).path)
+                    }
                 }
             }
 
