@@ -23,7 +23,7 @@ public struct TextStyle: RawRepresentable {
     var font: UIFont
     var color: UIColor
 
-    static let header2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 18), weight: .bold), color: KDriveCoreAsset.titleColor.color, rawValue: "header2")
+    static let header2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 18), weight: .semibold), color: KDriveCoreAsset.titleColor.color, rawValue: "header2")
     static let subtitle1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle1")
     static let subtitle2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle2")
     static let body1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "body1")
