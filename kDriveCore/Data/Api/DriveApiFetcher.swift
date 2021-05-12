@@ -99,7 +99,8 @@ public class DriveApiFetcher: ApiFetcher {
             "only_for_me": onlyForMe,
             "share": false]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default).validate()
+        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
+            .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }
@@ -110,7 +111,8 @@ public class DriveApiFetcher: ApiFetcher {
         let body: [String: Any] = ["name": name,
             "for_all_user": forAllUser]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default).validate()
+        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
+            .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }
@@ -193,7 +195,8 @@ public class DriveApiFetcher: ApiFetcher {
     public func getFileListForDirectory(parentId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFileListForDirectory(driveId: drive.id, parentId: parentId, sortType: sortType))\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get).validate()
+        authenticatedSession.request(url, method: .get)
+            .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }
@@ -248,7 +251,9 @@ public class DriveApiFetcher: ApiFetcher {
     public func activateShareLinkFor(file: File, completion: @escaping (ApiResponse<ShareLink>?, Error?) -> Void) {
         let url = ApiRoutes.activateShareLinkFor(file: file)
 
-        authenticatedSession.request(url, method: .post).validate().responseDecodable(of: ApiResponse<ShareLink>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .post)
+            .validate()
+            .responseDecodable(of: ApiResponse<ShareLink>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -334,7 +339,9 @@ public class DriveApiFetcher: ApiFetcher {
     public func getFileDetail(fileId: Int, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.getFileDetail(driveId: drive.id, fileId: fileId)
 
-        authenticatedSession.request(url, method: .get).validate().responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .get)
+            .validate()
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -540,7 +547,8 @@ public class DriveApiFetcher: ApiFetcher {
     public func restoreTrashedFile(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.restoreTrashedFile(file: file)
 
-        authenticatedSession.request(url, method: .post).validate()
+        authenticatedSession.request(url, method: .post)
+            .validate()
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }
@@ -550,7 +558,8 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.restoreTrashedFile(file: file)
         let body: [String: Any] = ["destination_directory_id": folderId as Any]
 
-        authenticatedSession.request(url, method: .post, parameters: body).validate()
+        authenticatedSession.request(url, method: .post, parameters: body)
+            .validate()
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
             self.handleResponse(response: response, completion: completion)
         }
