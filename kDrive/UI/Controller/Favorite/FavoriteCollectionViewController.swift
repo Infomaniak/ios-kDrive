@@ -122,4 +122,14 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
         return UIStoryboard(name: "Favorite", bundle: nil).instantiateViewController(withIdentifier: "FavoriteCollectionViewController") as! FavoriteCollectionViewController
     }
 
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id <= DriveFileManager.constants.rootID {
+            navigationItem.title = KDriveStrings.Localizable.favoritesTitle
+        }
+    }
+
 }

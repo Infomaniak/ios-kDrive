@@ -147,4 +147,13 @@ class MySharedCollectionViewController: FileListCollectionViewController {
         return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "MySharedCollectionViewController") as! MySharedCollectionViewController
     }
 
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
+            navigationItem.title = KDriveStrings.Localizable.mySharesTitle
+        }
+    }
 }

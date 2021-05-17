@@ -30,7 +30,7 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
         super.viewDidLoad()
 
         if currentDirectory.id == DriveFileManager.sharedWithMeRootFile.id {
-            title = "\(driveFileManager.drive.name)"
+            navigationItem.title = driveFileManager.drive.name
         }
 
         filePresenter.listType = SharedWithMeCollectionViewController.self
@@ -80,5 +80,15 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
 
     override class func instantiate() -> SharedWithMeCollectionViewController {
         return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "SharedWithMeCollectionViewController") as! SharedWithMeCollectionViewController
+    }
+
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id <= DriveFileManager.constants.rootID {
+            navigationItem.title = KDriveStrings.Localizable.sharedWithMeTitle
+        }
     }
 }

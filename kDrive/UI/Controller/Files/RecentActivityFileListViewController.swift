@@ -132,4 +132,25 @@ class RecentActivityFileListViewController: FileListCollectionViewController {
         }
         return super.collectionView(collectionView, actionsFor: cell, at: indexPath)
     }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(activity, forKey: "Activity")
+        coder.encode(activityFiles.map(\.id), forKey: "Files")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        activity = coder.decodeObject(forKey: "Activity") as? FileActivity
+        let activityFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
+        if driveFileManager != nil {
+            let realm = driveFileManager.getRealm()
+            activityFiles = activityFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        }
+    }
+
 }

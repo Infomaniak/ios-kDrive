@@ -218,6 +218,16 @@ class TrashCollectionViewController: FileListCollectionViewController {
         showFloatingPanel(files: [file])
     }
 
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id == DriveFileManager.trashRootFile.id {
+            navigationItem.title = KDriveStrings.Localizable.trashTitle
+        }
+    }
+
     private func deleteActionSelected(files: [File]) {
         let message: NSMutableAttributedString
         if files.count == 1 {

@@ -129,4 +129,14 @@ class LastModificationsViewController: FileListCollectionViewController {
         return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "LastModificationsViewController") as! LastModificationsViewController
     }
 
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
+            navigationItem.title = KDriveStrings.Localizable.lastEditsTitle
+        }
+    }
+
 }

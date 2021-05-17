@@ -97,4 +97,12 @@ class OfflineCollectionViewController: FileListCollectionViewController {
     override class func instantiate() -> OfflineCollectionViewController {
         return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "OfflineCollectionViewController") as! OfflineCollectionViewController
     }
+
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        navigationItem.title = KDriveStrings.Localizable.offlineFileTitle
+    }
 }

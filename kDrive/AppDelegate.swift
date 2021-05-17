@@ -38,7 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     private var uploadQueue: UploadQueue!
     private var reachabilityListener: ReachabilityListener!
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
 
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
@@ -78,6 +78,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         }
 
+        return true
+    }
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         return true
     }
 
