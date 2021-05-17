@@ -82,6 +82,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     private var footerLoader: UIView = {
         let indicator = UIActivityIndicatorView(style: .gray)
+        indicator.color = KDriveAsset.loaderDarkerDefaultColor.color
         indicator.startAnimating()
         return indicator
     }()

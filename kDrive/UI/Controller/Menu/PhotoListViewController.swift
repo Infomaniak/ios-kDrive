@@ -186,6 +186,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
         if footerView == nil {
             let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: footerIdentifier, for: indexPath)
             let indicator = UIActivityIndicatorView(style: .gray)
+            indicator.color = KDriveAsset.loaderDarkerDefaultColor.color
             indicator.startAnimating()
             footerView.addSubview(indicator)
             indicator.translatesAutoresizingMaskIntoConstraints = false
