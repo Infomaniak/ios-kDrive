@@ -734,9 +734,6 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
 
     // MARK: - State restoration
 
-    var driveId: Int?
-    var directoryId: Int?
-
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
 
@@ -747,18 +744,15 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     override func decodeRestorableState(with coder: NSCoder) {
-        driveId = coder.decodeInteger(forKey: "DriveID")
-        directoryId = coder.decodeInteger(forKey: "DirectoryID")
-
         super.decodeRestorableState(with: coder)
-    }
 
-    override func applicationFinishedRestoringState() {
-        guard let driveId = driveId,
-            let directoryId = directoryId,
-            let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: AccountManager.instance.currentUserId),
+        let driveId = coder.decodeInteger(forKey: "DriveID")
+        let directoryId = coder.decodeInteger(forKey: "DirectoryID")
+
+        guard let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: AccountManager.instance.currentUserId),
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
             let directory = driveFileManager.getCachedFile(id: directoryId) else {
+            // Handle error?
             return
         }
         self.driveFileManager = driveFileManager
