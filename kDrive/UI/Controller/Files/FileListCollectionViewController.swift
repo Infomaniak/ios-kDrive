@@ -900,6 +900,7 @@ extension FileListCollectionViewController: FilesHeaderViewDelegate, SortOptions
         #if !ISEXTENSION
             let floatingPanelViewController = DriveFloatingPanelController()
             let selectViewController = SelectFloatingPanelTableViewController()
+            selectViewController.driveFileManager = driveFileManager
             floatingPanelViewController.isRemovalInteractionEnabled = true
             selectViewController.files = selectedItems
             floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
