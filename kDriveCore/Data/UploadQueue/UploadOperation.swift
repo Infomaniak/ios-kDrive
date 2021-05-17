@@ -273,8 +273,11 @@ public class UploadOperation: Operation {
             DDLogError("[UploadOperation] Server error for job \(file.id) (code: \(statusCode)): \(error)")
             file.sessionUrl = ""
             file.error = error
-            // If we get an ”object not found“ error, we cancel all further uploads in this folder
-            if error == .objectNotFound {
+            if error == .quotaExceeded {
+                file.maxRetryCount = 0
+            } else if error == .objectNotFound {
+                // If we get an ”object not found“ error, we cancel all further uploads in this folder
+                file.maxRetryCount = 0
                 UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId)
                 if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings.parentDirectoryId == file.parentDirectoryId {
                     PhotoLibraryUploader.instance.disableSync()
