@@ -20,37 +20,6 @@ import Foundation
 import CocoaLumberjack
 import Atlantis
 import Sentry
-import MetricKit
-
-@available(iOS 14.0, *)
-class AppMetrics: NSObject, MXMetricManagerSubscriber {
-
-    static let shared = AppMetrics()
-    private let shared = MXMetricManager.shared
-
-    func receiveReports() {
-        let shared = MXMetricManager.shared
-        shared.add(self)
-        processMetrics(payloads: shared.pastPayloads)
-    }
-
-    private func processMetrics(payloads: [MXMetricPayload]) {
-        for payload in payloads {
-            if let exitMetrics = payload.applicationExitMetrics {
-                SentrySDK.capture(message: "Exit metrics") { (scope) in
-                    let attachement = Attachment(data: exitMetrics.jsonRepresentation(), filename: "Exit-metrics.json")
-                    scope.add(attachement)
-                }
-            }
-        }
-    }
-
-    func didReceive(_ payloads: [MXMetricPayload]) {
-        processMetrics(payloads: payloads)
-    }
-
-}
-
 
 public class Logging {
 
@@ -58,7 +27,6 @@ public class Logging {
         initLogger()
         initNetworkLogging()
         initSentry()
-        initMetrics()
     }
 
     private static func initLogger() {
@@ -67,12 +35,6 @@ public class Logging {
         fileLogger.rollingFrequency = 60 * 60 * 24 // 24 hours
         fileLogger.logFileManager.maximumNumberOfLogFiles = 7
         DDLog.add(fileLogger)
-    }
-
-    private static func initMetrics() {
-        if #available(iOS 14.0, *) {
-            AppMetrics.shared.receiveReports()
-        }
     }
 
     private static func initNetworkLogging() {
