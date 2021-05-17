@@ -33,7 +33,13 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         return files.filter(\.isFavorite).count == files.count
     }
 
-    let actions = FloatingPanelAction.multipleSelectionActions
+    lazy var actions: [FloatingPanelAction] = {
+        if sharedWithMe {
+            return FloatingPanelAction.multipleSelectionSharedWithMeActions
+        } else {
+            return FloatingPanelAction.multipleSelectionActions
+        }
+    }()
 
     var reloadAction: (() -> Void)?
 
@@ -112,7 +118,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         case .favorite:
             let isFavorite = filesAreFavorite
             addAction = !isFavorite
-            for file in files {
+            for file in files where (file.rights?.canFavorite.value ?? false) {
                 group.enter()
                 driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { (error) in
                     if error != nil {

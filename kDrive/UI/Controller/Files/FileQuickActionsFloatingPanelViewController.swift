@@ -84,6 +84,10 @@ public class FloatingPanelAction: Equatable {
         return [offline, favorite, download].map { $0.reset() }
     }
 
+    static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
+        return [download].map { $0.reset() }
+    }
+
     public static func == (lhs: FloatingPanelAction, rhs: FloatingPanelAction) -> Bool {
         return lhs.id == rhs.id
     }
