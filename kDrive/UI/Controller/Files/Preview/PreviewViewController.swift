@@ -147,7 +147,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func observeFileUpdated() {
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if currentFile.id == file.id {
                 currentFile = file
                 DispatchQueue.main.async {
@@ -175,7 +175,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
             collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
             updateNavigationBar()
-            downloadFileAtIndexIfNeeded(at: currentIndex)
+            downloadFileIfNeeded(at: currentIndex)
             present(floatingPanelViewController, animated: true, completion: nil)
         }
         setInteractiveRecognizer()
@@ -351,11 +351,11 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             updateFileForCurrentIndex()
 
             updateNavigationBar()
-            downloadFileAtIndexIfNeeded(at: currentIndex)
+            downloadFileIfNeeded(at: currentIndex)
         }
     }
 
-    private func downloadFileAtIndexIfNeeded(at indexPath: IndexPath) {
+    private func downloadFileIfNeeded(at indexPath: IndexPath) {
         var currentFile = previewFiles[indexPath.row]
         if currentFile.realm == nil {
             if let file = driveFileManager.getCachedFile(id: currentFile.id, freeze: false) {
@@ -400,6 +400,52 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.fromActivities = fromActivities
         return previewPageViewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        coder.encode(previewFiles.map(\.id), forKey: "Files")
+        coder.encode(currentIndex.row, forKey: "CurrentIndex")
+        coder.encode(normalFolderHierarchy, forKey: "NormalFolderHierarchy")
+        coder.encode(fromActivities, forKey: "FromActivities")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        normalFolderHierarchy = coder.decodeBool(forKey: "NormalFolderHierarchy")
+        fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
+        fromActivities = coder.decodeBool(forKey: "FromActivities")
+        if fromActivities {
+            floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
+        }
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
+        let realm = driveFileManager.getRealm()
+        previewFiles = previewFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        currentIndex = IndexPath(row: coder.decodeInteger(forKey: "CurrentIndex"), section: 0)
+        // Update UI
+        DispatchQueue.main.async { [self] in
+            collectionView.reloadData()
+            updateFileForCurrentIndex()
+            collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
+            updateNavigationBar()
+            downloadFileIfNeeded(at: currentIndex)
+            if floatingPanelViewController.parent == nil {
+                present(floatingPanelViewController, animated: true)
+            } else {
+                floatingPanelViewController.move(to: .tip, animated: false)
+            }
+        }
+        observeFileUpdated()
     }
 }
 

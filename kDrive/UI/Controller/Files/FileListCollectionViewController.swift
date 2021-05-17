@@ -749,8 +749,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         let driveId = coder.decodeInteger(forKey: "DriveID")
         let directoryId = coder.decodeInteger(forKey: "DirectoryID")
 
-        guard let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: AccountManager.instance.currentUserId),
-            let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId),
             let directory = driveFileManager.getCachedFile(id: directoryId) else {
             // Handle error?
             return
