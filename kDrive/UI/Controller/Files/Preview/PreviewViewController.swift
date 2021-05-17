@@ -410,6 +410,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
         coder.encode(previewFiles.map(\.id), forKey: "Files")
         coder.encode(currentIndex.row, forKey: "CurrentIndex")
+        coder.encode(initialLoading, forKey: "InitialLoading")
         coder.encode(normalFolderHierarchy, forKey: "NormalFolderHierarchy")
         coder.encode(fromActivities, forKey: "FromActivities")
     }
@@ -418,6 +419,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         super.decodeRestorableState(with: coder)
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
+        initialLoading = coder.decodeBool(forKey: "InitialLoading")
         normalFolderHierarchy = coder.decodeBool(forKey: "NormalFolderHierarchy")
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
         fromActivities = coder.decodeBool(forKey: "FromActivities")
@@ -439,11 +441,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
-            if floatingPanelViewController.parent == nil {
-                present(floatingPanelViewController, animated: true)
-            } else {
-                floatingPanelViewController.move(to: .tip, animated: false)
-            }
         }
         observeFileUpdated()
     }
