@@ -299,6 +299,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 return
             } else {
                 let viewController = ManageDropBoxViewController.instantiate()
+                viewController.driveFileManager = driveFileManager
                 viewController.convertingFolder = true
                 viewController.folder = file
                 presentingParent?.navigationController?.pushViewController(viewController, animated: true)
