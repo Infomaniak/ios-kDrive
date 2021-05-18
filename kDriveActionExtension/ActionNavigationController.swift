@@ -17,32 +17,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import UIKit
-import InfomaniakCore
-import InfomaniakLogin
 import kDriveCore
+import InfomaniakLogin
+import InfomaniakCore
 
-class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
+class ActionNavigationController: TitleSizeAdjustingNavigationController {
 
     private var accountManager: AccountManager!
 
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
+
         Logging.initLogging()
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         accountManager = AccountManager.instance
 
-        let saveViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
+        let saveFileViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
 
-        if let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments {
-            saveViewController.setItemProviders(attachments)
-            viewControllers = [saveViewController]
+        if let itemProviders = (self.extensionContext?.inputItems as? [NSExtensionItem])?.compactMap(\.attachments).flatMap({ $0 }) {
+            saveFileViewController.setItemProviders(itemProviders)
+            viewControllers = [saveFileViewController]
         } else {
+            // No items found
             dismiss(animated: true)
         }
     }
 
     override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
-        self.extensionContext!.completeRequest(returningItems: nil, completionHandler: nil)
+        self.extensionContext!.completeRequest(returningItems: self.extensionContext!.inputItems, completionHandler: nil)
     }
 
 }
