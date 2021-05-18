@@ -41,7 +41,7 @@ public class DriveInfosManager {
             objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveUser.self, Tag.self])
     }
 
-    private func getRealm() -> Realm {
+    public func getRealm() -> Realm {
         return try! Realm(configuration: realmConfiguration)
     }
 
@@ -129,9 +129,9 @@ public class DriveInfosManager {
 
         initFileProviderDomains(drives: driveResponse.drives.main, user: user)
 
-        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil).filter { currentDrive in !driveList.contains(where: { newDrive in newDrive.objectId == currentDrive.objectId }) }
-        let driveRemovedIds = driveRemoved.map(\.objectId)
         let realm = getRealm()
+        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm).filter { currentDrive in !driveList.contains(where: { newDrive in newDrive.objectId == currentDrive.objectId }) }
+        let driveRemovedIds = driveRemoved.map(\.objectId)
         try? realm.write {
             realm.delete(realm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds))
             realm.add(driveList, update: .modified)
@@ -145,8 +145,8 @@ public class DriveInfosManager {
         return "\(driveId)_\(userId)"
     }
 
-    public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false) -> [Drive] {
-        let realm = getRealm()
+    public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false, using realm: Realm? = nil) -> [Drive] {
+        let realm = realm ?? getRealm()
         var realmDriveList = realm.objects(Drive.self)
             .sorted(byKeyPath: "id", ascending: true)
         if let userId = userId {
@@ -161,16 +161,17 @@ public class DriveInfosManager {
         return Array(realmDriveList.map({ $0.freeze() }))
     }
 
-    public func getDrive(id: Int, userId: Int) -> Drive? {
-        return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId))
+    public func getDrive(id: Int, userId: Int, using realm: Realm? = nil) -> Drive? {
+        return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId), using: realm)
     }
 
-    public func getDrive(objectId: String) -> Drive? {
-        return getRealm().object(ofType: Drive.self, forPrimaryKey: objectId)?.freeze()
+    public func getDrive(objectId: String, using realm: Realm? = nil) -> Drive? {
+        let realm = realm ?? getRealm()
+        return realm.object(ofType: Drive.self, forPrimaryKey: objectId)?.freeze()
     }
 
-    public func getUsers(for driveId: Int) -> [DriveUser] {
-        let realm = getRealm()
+    public func getUsers(for driveId: Int, using realm: Realm? = nil) -> [DriveUser] {
+        let realm = realm ?? getRealm()
         let drive = getDrive(id: driveId, userId: AccountManager.instance.currentAccount.userId)
         let realmUserList = realm.objects(DriveUser.self)
             .sorted(byKeyPath: "id", ascending: true)
@@ -185,17 +186,18 @@ public class DriveInfosManager {
         return users
     }
 
-    public func getUser(id: Int) -> DriveUser? {
-        return getRealm().object(ofType: DriveUser.self, forPrimaryKey: id)?.freeze()
+    public func getUser(id: Int, using realm: Realm? = nil) -> DriveUser? {
+        let realm = realm ?? getRealm()
+        return realm.object(ofType: DriveUser.self, forPrimaryKey: id)?.freeze()
     }
 
-    public func getTags() -> [Tag] {
-        let realm = getRealm()
+    public func getTags(using realm: Realm? = nil) -> [Tag] {
+        let realm = realm ?? getRealm()
         return realm.objects(Tag.self).sorted(byKeyPath: "id", ascending: true).map({ $0 })
     }
 
-    public func getTag(id: Int) -> Tag? {
-        let realm = getRealm()
+    public func getTag(id: Int, using realm: Realm? = nil) -> Tag? {
+        let realm = realm ?? getRealm()
         return realm.object(ofType: Tag.self, forPrimaryKey: id)?.freeze()
     }
 }
