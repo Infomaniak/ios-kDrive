@@ -350,7 +350,7 @@
         <!--Drive Error View Controller-->
         <scene sceneID="Zye-tK-ZkE">
             <objects>
-                <viewController storyboardIdentifier="DriveErrorViewController" modalPresentationStyle="overCurrentContext" useStoryboardIdentifierAsRestorationIdentifier="YES" id="8Hf-Au-xo5" customClass="DriveErrorViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="DriveErrorViewController" modalPresentationStyle="overCurrentContext" id="8Hf-Au-xo5" customClass="DriveErrorViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qid-Rp-c7E">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -372,7 +372,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="aqN-bN-aqi" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="543.33333333333337" width="342" height="33.666666666666629"/>
+                                <rect key="frame" x="24" y="543.33333333333337" width="342" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -489,7 +489,7 @@
         <!--Locked App View Controller-->
         <scene sceneID="oEM-1X-mG4">
             <objects>
-                <viewController storyboardIdentifier="LockedAppViewController" modalPresentationStyle="overCurrentContext" useStoryboardIdentifierAsRestorationIdentifier="YES" id="KGa-QI-iN2" customClass="LockedAppViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LockedAppViewController" modalPresentationStyle="overCurrentContext" id="KGa-QI-iN2" customClass="LockedAppViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="hFu-Wv-d7v">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -519,7 +519,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Application verrouillée" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="eyg-Oq-wrC" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="497.33333333333331" width="342" height="21.666666666666686"/>
+                                <rect key="frame" x="24" y="497.33333333333331" width="342" height="16.999999999999943"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -573,13 +573,13 @@
         <!--Migration View Controller-->
         <scene sceneID="MpX-G6-aeW">
             <objects>
-                <viewController storyboardIdentifier="MigrationViewController" modalPresentationStyle="overCurrentContext" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Mc1-Q4-Zh6" customClass="MigrationViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MigrationViewController" modalPresentationStyle="overCurrentContext" id="Mc1-Q4-Zh6" customClass="MigrationViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cQ0-9P-Pju">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Zkn-3x-vMJ">
-                                <rect key="frame" x="0.0" y="0.0" width="390" height="657.66666666666663"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="658.66666666666663"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="9Im-hm-zse">
                                     <size key="itemSize" width="128" height="128"/>
@@ -594,10 +594,10 @@
                                 </connections>
                             </collectionView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="y3W-9c-Z7I">
-                                <rect key="frame" x="24" y="745.66666666666663" width="342" height="48.333333333333371"/>
+                                <rect key="frame" x="24" y="746.66666666666663" width="342" height="47.333333333333371"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Migration en cours, veuillez patienter..." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d35-jP-p8E" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="0.0" width="342" height="20.333333333333332"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="342" height="19.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="secondaryTextColor"/>
                                         <nil key="highlightedColor"/>
@@ -607,7 +607,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="NFo-sA-fCC">
-                                        <rect key="frame" x="161" y="28.333333333333371" width="20" height="20"/>
+                                        <rect key="frame" x="161" y="27.333333333333371" width="20" height="20"/>
                                     </activityIndicatorView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -627,10 +627,10 @@
                                 </constraints>
                             </imageView>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bca-Af-84s">
-                                <rect key="frame" x="24" y="637" width="342" height="173"/>
+                                <rect key="frame" x="24" y="638.66666666666663" width="342" height="171.33333333333337"/>
                                 <subviews>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tdc-Rl-QKP" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="113" width="342" height="60"/>
+                                        <rect key="frame" x="0.0" y="111.33333333333337" width="342" height="60"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="60" id="1Ff-bX-m3E"/>
@@ -654,7 +654,7 @@
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="La migration a échoué." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0jU-Cm-uht" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="0.0" width="342" height="21"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="342" height="19.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -664,7 +664,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t82-BD-FpT" customClass="IKLargeButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="37" width="342" height="60"/>
+                                        <rect key="frame" x="0.0" y="35.333333333333371" width="342" height="60"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="60" id="4jS-Fu-yaJ"/>
                                         </constraints>
@@ -735,11 +735,38 @@
         </scene>
     </scenes>
     <designables>
+        <designable name="0jU-Cm-uht">
+            <size key="intrinsicContentSize" width="111" height="19.333333333333332"/>
+        </designable>
+        <designable name="1Ws-Ei-OPK">
+            <size key="intrinsicContentSize" width="83" height="29"/>
+        </designable>
         <designable name="1ka-pK-vme">
             <size key="intrinsicContentSize" width="172" height="32"/>
         </designable>
+        <designable name="53t-Hq-IZI">
+            <size key="intrinsicContentSize" width="24" height="24"/>
+        </designable>
+        <designable name="OXD-Rc-0Y2">
+            <size key="intrinsicContentSize" width="176" height="29"/>
+        </designable>
         <designable name="QKz-Y6-C7W">
             <size key="intrinsicContentSize" width="101" height="32"/>
+        </designable>
+        <designable name="Tdc-Rl-QKP">
+            <size key="intrinsicContentSize" width="77" height="29"/>
+        </designable>
+        <designable name="aqN-bN-aqi">
+            <size key="intrinsicContentSize" width="123.66666666666667" height="17"/>
+        </designable>
+        <designable name="d35-jP-p8E">
+            <size key="intrinsicContentSize" width="145.66666666666666" height="19.333333333333332"/>
+        </designable>
+        <designable name="eyg-Oq-wrC">
+            <size key="intrinsicContentSize" width="79.666666666666671" height="17"/>
+        </designable>
+        <designable name="gpt-af-Fsa">
+            <size key="intrinsicContentSize" width="100" height="21.666666666666668"/>
         </designable>
         <designable name="iEM-pL-yBh">
             <size key="intrinsicContentSize" width="90" height="32"/>
