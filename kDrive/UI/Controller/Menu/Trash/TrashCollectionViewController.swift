@@ -186,9 +186,6 @@ class TrashCollectionViewController: FileListCollectionViewController {
         switch action.identifier {
         case UIConstants.swipeActionDeleteIdentifier:
             deleteActionSelected(files: [file])
-        case UIConstants.swipeActionMoreIdentifier:
-            showFloatingPanel(files: [file])
-            break
         default:
             break
         }

@@ -615,9 +615,6 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
             case UIConstants.swipeActionDeleteIdentifier:
                 deleteAction(files: [file])
                 break
-            case UIConstants.swipeActionMoreIdentifier:
-                showQuickActionsPanel(file: file)
-                break
             case UIConstants.swipeActionShareIdentifier:
                 let shareVC = ShareAndRightsViewController.instantiate()
                 shareVC.driveFileManager = driveFileManager
