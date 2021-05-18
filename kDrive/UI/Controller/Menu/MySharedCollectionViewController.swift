@@ -41,8 +41,11 @@ class MySharedCollectionViewController: FileListCollectionViewController {
 
     override func fetchNextPage(forceRefresh: Bool = false) {
         currentPage += 1
+        startLoading()
+        
         if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
             driveFileManager.getMyShared(page: currentPage, sortType: sortType, forceRefresh: forceRefresh) { [self] (root, myShared, error) in
+                self.isLoading = false
                 collectionView.refreshControl?.endRefreshing()
                 if let fetchedCurrentDirectory = root,
                     let fetchedChildren = myShared {
@@ -75,6 +78,7 @@ class MySharedCollectionViewController: FileListCollectionViewController {
             }
         } else {
             driveFileManager.apiFetcher.getFileListForDirectory(parentId: currentDirectory.id, page: currentPage, sortType: sortType) { (response, error) in
+                self.isLoading = false
                 self.collectionView.refreshControl?.endRefreshing()
                 if let data = response?.data {
                     var children = [File]()
