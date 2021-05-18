@@ -200,7 +200,6 @@ class TrashCollectionViewController: FileListCollectionViewController {
         switch listStyle {
         case .list:
             return [
-                SwipeCellAction(identifier: "more", title: KDriveStrings.Localizable.buttonMenu, backgroundColor: KDriveAsset.darkBlueColor.color, icon: KDriveAsset.menu.image),
                 SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image)
             ]
         case .grid:
