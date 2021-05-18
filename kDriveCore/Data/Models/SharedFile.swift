@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import Foundation
 
-public class SharedFile: Codable {
+public class SharedFile: NSObject, NSCoding, Codable {
     public var id: Int = 0
     public var path: String
     public var canUseTag: Bool
@@ -36,9 +36,36 @@ public class SharedFile: Codable {
         case invitations = "invitations"
         case tags = "tags"
     }
+
+    public func encode(with coder: NSCoder) {
+        coder.encode(id, forKey: "Id")
+        coder.encode(path, forKey: "Path")
+        coder.encode(canUseTag, forKey: "CanUseTag")
+        coder.encode(users.map(\.id), forKey: "Users")
+        coder.encode(link, forKey: "Link")
+        //coder.encode(invitations, forKey: "Invitations")
+        //coder.encode(tags, forKey: "Tags")
+    }
+
+    public required init?(coder: NSCoder) {
+        guard let path = coder.decodeObject(forKey: "Path") as? String,
+            let users = coder.decodeObject(forKey: "Users") as? [Int]/*,
+            let invitations = coder.decodeObject(forKey: "Invitations") as? [Invitation?],
+            let tags = coder.decodeObject(forKey: "Tags") as? [Tag?]*/ else {
+            return nil
+        }
+        self.id = coder.decodeInteger(forKey: "Id")
+        self.path = path
+        self.canUseTag = coder.decodeBool(forKey: "CanUseTag")
+        let realm = DriveInfosManager.instance.getRealm()
+        self.users = users.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
+        self.link = coder.decodeObject(forKey: "Link") as? ShareLink
+        self.invitations = []//invitations
+        self.tags = []//tags
+    }
 }
 
-public class ShareLink: Codable {
+public class ShareLink: NSObject, NSCoding, Codable {
     public var canEdit: Bool
     public var url: String
     public var permission: String
@@ -55,6 +82,30 @@ public class ShareLink: Codable {
         case blockDownloads = "block_downloads"
         case blockInformation = "block_information"
         case validUntil = "valid_until"
+    }
+
+    public func encode(with coder: NSCoder) {
+        coder.encode(canEdit, forKey: "CanEdit")
+        coder.encode(url, forKey: "URL")
+        coder.encode(permission, forKey: "Permission")
+        coder.encode(blockComments, forKey: "BlockComments")
+        coder.encode(blockDownloads, forKey: "BlockDownloads")
+        coder.encode(blockInformation, forKey: "BlockInformation")
+        coder.encode(validUntil, forKey: "ValidUntil")
+    }
+
+    public required init?(coder: NSCoder) {
+        guard let url = coder.decodeObject(forKey: "URL") as? String,
+            let permission = coder.decodeObject(forKey: "Permission") as? String else {
+            return nil
+        }
+        self.canEdit = coder.decodeBool(forKey: "CanEdit")
+        self.url = url
+        self.permission = permission
+        self.blockComments = coder.decodeBool(forKey: "BlockComments")
+        self.blockDownloads = coder.decodeBool(forKey: "BlockDownloads")
+        self.blockInformation = coder.decodeBool(forKey: "BlockInformation")
+        self.validUntil = coder.decodeObject(forKey: "ValidUntil") as? Int
     }
 }
 
