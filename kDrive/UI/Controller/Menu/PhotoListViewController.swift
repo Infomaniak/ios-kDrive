@@ -48,7 +48,7 @@ class PhotoListViewController: UIViewController {
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return isLargeTitle ? .default : .lightContent
     }
-    
+
     var driveFileManager: DriveFileManager!
 
     override func viewWillAppear(_ animated: Bool) {
@@ -115,7 +115,7 @@ class PhotoListViewController: UIViewController {
     func fetchNextPage() {
         footerView?.isHidden = false
         isLoading = true
-        driveFileManager.apiFetcher.getLastPictures(page: page) { (response, error) in
+        driveFileManager?.apiFetcher.getLastPictures(page: page) { (response, error) in
             if let data = response?.data {
                 let lastIndex = self.files.count
                 self.files += data
@@ -162,6 +162,25 @@ class PhotoListViewController: UIViewController {
         if scrollPosition > contentHeight && shouldLoadMore {
             fetchNextPage()
         }
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        forceRefresh()
     }
 
 }

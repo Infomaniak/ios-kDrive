@@ -66,7 +66,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     private var selectedDirectory: File?
 
     var driveFileManager: DriveFileManager!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)
@@ -89,7 +89,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         let savedCurrentId = currentSyncSettings.userId
         currentUserId = savedCurrentId == -1 ? AccountManager.instance.currentAccount.userId : savedCurrentId
         let savedCurrentDrive = currentSyncSettings.driveId
-        currentDriveId = savedCurrentDrive == -1 ? driveFileManager.drive.id : savedCurrentDrive
+        currentDriveId = savedCurrentDrive == -1 ? driveFileManager?.drive.id : savedCurrentDrive
         syncMode = currentSyncSettings.syncMode
         updateSaveButtonState()
         updateSectionList()
@@ -147,7 +147,7 @@ class PhotoSyncSettingsViewController: UIViewController {
                 currentSyncSettings.syncMode != syncMode
         }
         saveButton.isHidden = !isEdited
-        
+
         if selectedDirectory == nil && photoSyncEnabled {
             saveButton.isEnabled = false
         } else {
@@ -201,6 +201,27 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     class func instantiate() -> PhotoSyncSettingsViewController {
         return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        if currentDriveId == nil {
+            currentDriveId = driveFileManager.drive.id
+        }
     }
 
 }

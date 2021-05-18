@@ -104,7 +104,26 @@ class MenuViewController: UIViewController {
         }
     }
 
-    // MARK: Navigation
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+    }
+
+    // MARK: - Navigation
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let navController = segue.destination as? UINavigationController, let switchDriveAccountViewController = navController.topViewController as? SwitchDriveViewController {
             switchDriveAccountViewController.delegate = tabBarController as? MainTabViewController
