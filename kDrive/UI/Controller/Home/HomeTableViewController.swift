@@ -131,8 +131,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         // Table view footer
         showFooter(!driveFileManager.drive.isProOrTeam)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
-
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
             self.reload(sections: [.top])
             if status != .offline {
@@ -164,6 +162,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
         reload(sections: [.top])
         updateNavbarAppearance()
+        NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -176,6 +175,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         navigationController?.navigationBar.alpha = 1
         navigationController?.navigationBar.isUserInteractionEnabled = true
         navigationController?.navigationBar.layoutIfNeeded()
+        NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
     }
 
     @objc func rotated() {
