@@ -41,8 +41,11 @@ class LastModificationsViewController: FileListCollectionViewController {
 
     override func fetchNextPage(forceRefresh: Bool = false) {
         currentPage += 1
+        startLoading()
+        
         if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
             driveFileManager.apiFetcher.getLastModifiedFiles(page: currentPage) { (response, error) in
+                self.isLoading = false
                 self.collectionView.refreshControl?.endRefreshing()
                 if let data = response?.data {
                     self.getNewChildren(newChildren: data)
@@ -53,6 +56,7 @@ class LastModificationsViewController: FileListCollectionViewController {
             }
         } else {
             driveFileManager.apiFetcher.getFileListForDirectory(parentId: currentDirectory.id, page: currentPage) { (response, error) in
+                self.isLoading = false
                 self.collectionView.refreshControl?.endRefreshing()
                 if let data = response?.data {
                     var children = [File]()
