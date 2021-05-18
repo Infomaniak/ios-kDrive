@@ -144,9 +144,6 @@ extension SwipableCell {
     }
 
     func hideSwipeActions() {
-        if initialTrailingConstraintValue == 0 && innerViewTrailingConstraint.constant == 0 {
-            return
-        }
         innerViewTrailingConstraint.constant = 0
         innerViewLeadingConstraint.constant = 0
         updateConstraintsWithAnimationIfNeeded(animated: true) { (_) in
