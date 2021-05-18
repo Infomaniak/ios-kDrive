@@ -36,7 +36,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        contentInsetView.cornerRadius = UIConstants.buttonCornerRadius
+        contentInsetView.cornerRadius = UIConstants.cornerRadius
     }
 
     override func prepareForReuse() {
