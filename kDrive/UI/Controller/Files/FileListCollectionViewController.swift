@@ -615,9 +615,6 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
             case UIConstants.swipeActionDeleteIdentifier:
                 deleteAction(files: [file])
                 break
-            case UIConstants.swipeActionMoreIdentifier:
-                showQuickActionsPanel(file: file)
-                break
             case UIConstants.swipeActionShareIdentifier:
                 let shareVC = ShareAndRightsViewController.instantiate()
                 shareVC.driveFileManager = driveFileManager
@@ -701,7 +698,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         }
         switch listStyle {
         case .list:
-            var actionsArray = [SwipeCellAction(identifier: "more", title: KDriveStrings.Localizable.buttonMenu, backgroundColor: KDriveAsset.darkBlueColor.color, icon: KDriveAsset.menu.image)]
+            var actionsArray = [SwipeCellAction]()
             if let right = sortedChildren[indexPath.row].rights {
                 if right.delete.value ?? false {
                     actionsArray.append(SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image))

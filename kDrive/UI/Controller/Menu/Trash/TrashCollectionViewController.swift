@@ -186,9 +186,6 @@ class TrashCollectionViewController: FileListCollectionViewController {
         switch action.identifier {
         case UIConstants.swipeActionDeleteIdentifier:
             deleteActionSelected(files: [file])
-        case UIConstants.swipeActionMoreIdentifier:
-            showFloatingPanel(files: [file])
-            break
         default:
             break
         }
@@ -200,7 +197,6 @@ class TrashCollectionViewController: FileListCollectionViewController {
         switch listStyle {
         case .list:
             return [
-                SwipeCellAction(identifier: "more", title: KDriveStrings.Localizable.buttonMenu, backgroundColor: KDriveAsset.darkBlueColor.color, icon: KDriveAsset.menu.image),
                 SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image)
             ]
         case .grid:
