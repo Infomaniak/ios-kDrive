@@ -39,7 +39,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
 
     var headerView: FilesHeaderView?
     var refreshControl: UIRefreshControl!
-    private var isLoading = false
+    var isLoading = false
     private var initialAppearance = true
 
     var driveFileManager: DriveFileManager!
@@ -283,9 +283,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         }
     }
 
-    func fetchNextPage(forceRefresh: Bool = false) {
-        currentPage += 1
-
+    func startLoading() {
         isLoading = currentPage == 1
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             if self.isLoading && !self.refreshControl.isRefreshing {
@@ -294,6 +292,11 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
                 self.collectionView.setContentOffset(offsetPoint, animated: true)
             }
         }
+    }
+    
+    func fetchNextPage(forceRefresh: Bool = false) {
+        currentPage += 1
+        startLoading()
 
         let parentId = currentDirectory.isRoot ? 1 : currentDirectory.id
         driveFileManager.getFile(id: parentId, page: currentPage, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
