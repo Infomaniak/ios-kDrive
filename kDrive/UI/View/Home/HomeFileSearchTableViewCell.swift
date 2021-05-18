@@ -21,7 +21,7 @@ import InfomaniakCore
 
 class HomeFileSearchTableViewCell: InsetTableViewCell {
 
-    override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 10) {
+    override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = UIConstants.cornerRadius) {
         super.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast, elevation: elevation, radius: radius)
         bottomConstraint?.constant = 2
         accessibilityTraits = .button
