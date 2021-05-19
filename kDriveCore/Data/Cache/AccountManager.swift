@@ -322,8 +322,10 @@ public class AccountManager: RefreshTokenDelegate {
     public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
         self.deleteToken(oldToken)
         self.storeToken(newToken)
-        if oldToken.accessToken == currentAccount.token?.accessToken {
-            currentAccount.token = newToken
+        for account in accounts {
+            if oldToken.userId == account.userId {
+                account.token = newToken
+            }
         }
         tokens.removeAll { $0.accessToken == oldToken.accessToken }
         tokens.append(newToken)
