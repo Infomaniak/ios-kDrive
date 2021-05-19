@@ -140,7 +140,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
-        tokens.removeAll { $0.accessToken == token.accessToken }
+        tokens.removeAll { $0.userId == token.userId }
         self.deleteToken(token)
         if let account = getAccountForToken(token: token) {
             account.token = nil
@@ -306,7 +306,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func removeTokenAndAccount(token: ApiToken) {
-        tokens.removeAll { $0.accessToken == token.accessToken }
+        tokens.removeAll { $0.userId == token.userId }
         self.deleteToken(token)
         if let account = getAccountForToken(token: token) {
             self.removeAccount(toDeleteAccount: account)
@@ -315,17 +315,19 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func getAccountForToken(token: ApiToken) -> Account? {
         return accounts.first { (account) -> Bool in
-            account.token?.accessToken == token.accessToken
+            account.token?.userId == token.userId
         }
     }
 
     public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
         self.deleteToken(oldToken)
         self.storeToken(newToken)
-        if oldToken.accessToken == currentAccount.token?.accessToken {
-            currentAccount.token = newToken
+        for account in accounts {
+            if oldToken.userId == account.userId {
+                account.token = newToken
+            }
         }
-        tokens.removeAll { $0.accessToken == oldToken.accessToken }
+        tokens.removeAll { $0.userId == oldToken.userId }
         tokens.append(newToken)
 
         //Update token for the other drive file manager
