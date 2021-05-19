@@ -125,7 +125,7 @@ public class DriveFileManager {
         apiFetcher.setToken(apiToken, authenticator: SyncedAuthenticator(refreshTokenDelegate: refreshTokenDelegate))
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
-            fileURL: DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent(realmName),
+            fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
             deleteRealmIfMigrationNeeded: true,
             objectTypes: [File.self, Rights.self, FileActivity.self])
 
@@ -162,7 +162,7 @@ public class DriveFileManager {
             DDLogError("Failed to compact drive infos realm: \(error)")
         }
 
-        let files = (try? fileManager.contentsOfDirectory(at: DriveFileManager.constants.cacheDirectoryURL, includingPropertiesForKeys: nil)) ?? []
+        let files = (try? fileManager.contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil)) ?? []
         for file in files where file.pathExtension == "realm" {
             do {
                 let realmConfiguration = Realm.Configuration(
@@ -186,7 +186,7 @@ public class DriveFileManager {
     ///   - userId: User ID
     ///   - driveId: Drive ID (`nil` if all user drives)
     public static func deleteUserDriveFiles(userId: Int, driveId: Int? = nil) {
-        let files = (try? FileManager.default.contentsOfDirectory(at: DriveFileManager.constants.cacheDirectoryURL, includingPropertiesForKeys: nil))
+        let files = (try? FileManager.default.contentsOfDirectory(at: DriveFileManager.constants.rootDocumentsURL, includingPropertiesForKeys: nil))
         files?.forEach { file in
             if let matches = Regex(pattern: "(\\d+)-(\\d+).realm.*")?.firstMatch(in: file.lastPathComponent), matches.count > 2 {
                 let fileUserId = matches[1]
