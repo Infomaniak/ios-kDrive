@@ -50,6 +50,7 @@ class FileDetailViewController: UIViewController {
         case sizeAll
     }
 
+    private var isLoading: Bool = true
     private var currentTab = Tabs.informations
     private var fileInformationRows = [FileInformationRow]()
     private var oldSections = 2
@@ -175,6 +176,7 @@ class FileDetailViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+            self.isLoading = false
             if let data = response?.data {
                 self.sharedFile = data
                 if self.currentTab == .informations {
@@ -349,6 +351,30 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             return activities.count + 1
         }
         return 2
+    }
+
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        if (section == tableView.numberOfSections - 1) && isLoading {
+            return 50
+        }
+        return .leastNormalMagnitude
+    }
+
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        if (section == tableView.numberOfSections - 1) && isLoading {
+            let footerView = UIView()
+            let indicator = UIActivityIndicatorView(style: .gray)
+            indicator.color = KDriveAsset.loaderDarkerDefaultColor.color
+            indicator.startAnimating()
+            footerView.addSubview(indicator)
+            indicator.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                indicator.centerXAnchor.constraint(equalTo: footerView.centerXAnchor),
+                indicator.centerYAnchor.constraint(equalTo: footerView.centerYAnchor)
+                ])
+            return footerView
+        }
+        return nil
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
