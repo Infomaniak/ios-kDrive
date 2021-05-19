@@ -328,7 +328,7 @@ public class AccountManager: RefreshTokenDelegate {
     public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
         self.deleteToken(oldToken)
         self.storeToken(newToken)
-        if oldToken.accessToken == currentAccount.token.accessToken {
+        if oldToken.accessToken == currentAccount.token?.accessToken {
             currentAccount.token = newToken
         }
         tokens.removeAll { (token) -> Bool in
