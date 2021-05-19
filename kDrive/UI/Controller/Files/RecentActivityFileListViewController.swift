@@ -43,9 +43,13 @@ class RecentActivityFileListViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        sortedChildren.first?.isFirstInCollection = false
+        sortedChildren.last?.isLastInCollection = false
         sortedChildren = sortFiles(files: activityFiles)
+        sortedChildren.first?.isFirstInCollection = true
+        sortedChildren.last?.isLastInCollection = true
     }
-    
+
     private func sortFiles(files: [File]) -> [File] {
         var sortedList = files
         sortedList.sort { (firstFile, secondFile) -> Bool in
