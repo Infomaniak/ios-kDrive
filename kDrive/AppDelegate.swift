@@ -253,7 +253,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
                 }
             }
-             if numberOfConnection == 10 {
+             if UserDefaults.shared.numberOfConnections == 10 {
                 if #available(iOS 14.0, *) {
                     if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
                         SKStoreReviewController.requestReview(in: scene)
