@@ -35,7 +35,7 @@ class SelectThemeTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Thème"
+        title = KDriveStrings.Localizable.settingDarkmodeTitle
 
         tableView.register(cellView: ThemeSelectionTableViewCell.self)
         tableView.separatorColor = .clear
