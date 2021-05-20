@@ -49,7 +49,7 @@ class TrashCollectionViewController: FileListCollectionViewController {
         startLoading()
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            driveFileManager.apiFetcher.getTrashedFiles(page: currentPage, sortType: sortType) { [self] (response, error) in
+            driveFileManager?.apiFetcher.getTrashedFiles(page: currentPage, sortType: sortType) { [self] (response, error) in
                 self.isLoading = false
                 collectionView.refreshControl?.endRefreshing()
                 if let trashedList = response?.data {
@@ -61,7 +61,7 @@ class TrashCollectionViewController: FileListCollectionViewController {
                 }
             }
         } else {
-            driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: currentPage, sortType: sortType) { [self] (response, error) in
+            driveFileManager?.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: currentPage, sortType: sortType) { [self] (response, error) in
                 self.isLoading = false
                 collectionView.refreshControl?.endRefreshing()
 
@@ -167,7 +167,7 @@ class TrashCollectionViewController: FileListCollectionViewController {
 
         let file = sortedChildren[indexPath.row]
         if file.isDirectory {
-            let trashCV = TrashCollectionViewController.instantiate()
+            let trashCV = TrashCollectionViewController.instantiate(driveFileManager: driveFileManager)
             trashCV.currentDirectory = file
             self.navigationController?.pushViewController(trashCV, animated: true)
         } else {
@@ -285,8 +285,10 @@ class TrashCollectionViewController: FileListCollectionViewController {
         self.present(floatingPanelViewController, animated: true)
     }
 
-    override class func instantiate() -> TrashCollectionViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "TrashCollectionViewController") as! TrashCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> FileListCollectionViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "TrashCollectionViewController") as! TrashCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     override func deleteButtonPressed() {

@@ -84,10 +84,9 @@ class SelectFolderViewController: FileListCollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedFile = sortedChildren[indexPath.row]
         if selectedFile.isDirectory {
-            let nextVC = SelectFolderViewController.instantiate()
+            let nextVC = SelectFolderViewController.instantiate(driveFileManager: driveFileManager)
             nextVC.disabledDirectoriesSelection = disabledDirectoriesSelection
             nextVC.fileToMove = fileToMove
-            nextVC.driveFileManager = driveFileManager
             nextVC.currentDirectory = selectedFile
             nextVC.delegate = delegate
             nextVC.selectHandler = selectHandler
@@ -118,15 +117,16 @@ class SelectFolderViewController: FileListCollectionViewController {
     }
 
     class func instantiateInNavigationController(driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
-        let selectFolderViewController = instantiate()
-        selectFolderViewController.driveFileManager = driveFileManager
+        let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: selectFolderViewController)
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }
 
-    override class func instantiate() -> SelectFolderViewController {
-        return UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SelectFolderViewController") as! SelectFolderViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> SelectFolderViewController {
+        let viewController = UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SelectFolderViewController") as! SelectFolderViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - State restoration

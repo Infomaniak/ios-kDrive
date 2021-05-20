@@ -127,6 +127,8 @@ class MenuViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let navController = segue.destination as? UINavigationController, let switchDriveAccountViewController = navController.topViewController as? SwitchDriveViewController {
             switchDriveAccountViewController.delegate = tabBarController as? MainTabViewController
+        } else if let fileListViewController = segue.destination as? FileListCollectionViewController {
+            fileListViewController.driveFileManager = driveFileManager
         } else if let photoListViewController = segue.destination as? PhotoListViewController {
             photoListViewController.driveFileManager = driveFileManager
         } else if let parameterTableViewController = segue.destination as? ParameterTableViewController {

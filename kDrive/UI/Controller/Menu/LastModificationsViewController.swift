@@ -117,7 +117,7 @@ class LastModificationsViewController: FileListCollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if sortedChildren[indexPath.row].isDirectory {
-            let sharedCV = LastModificationsViewController.instantiate()
+            let sharedCV = LastModificationsViewController.instantiate(driveFileManager: driveFileManager)
             sharedCV.currentDirectory = sortedChildren[indexPath.row]
             self.navigationController?.pushViewController(sharedCV, animated: true)
         } else {
@@ -125,8 +125,10 @@ class LastModificationsViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> LastModificationsViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "LastModificationsViewController") as! LastModificationsViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> LastModificationsViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "LastModificationsViewController") as! LastModificationsViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - State restoration

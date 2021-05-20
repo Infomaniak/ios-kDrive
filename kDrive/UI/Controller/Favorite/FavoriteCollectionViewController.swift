@@ -118,8 +118,10 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> FavoriteCollectionViewController {
-        return UIStoryboard(name: "Favorite", bundle: nil).instantiateViewController(withIdentifier: "FavoriteCollectionViewController") as! FavoriteCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> FavoriteCollectionViewController {
+        let viewController = UIStoryboard(name: "Favorite", bundle: nil).instantiateViewController(withIdentifier: "FavoriteCollectionViewController") as! FavoriteCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - State restoration

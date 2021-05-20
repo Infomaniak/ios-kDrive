@@ -135,7 +135,7 @@ class MySharedCollectionViewController: FileListCollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if sortedChildren[indexPath.row].isDirectory {
-            let sharedCV = MySharedCollectionViewController.instantiate()
+            let sharedCV = MySharedCollectionViewController.instantiate(driveFileManager: driveFileManager)
             sharedCV.currentDirectory = sortedChildren[indexPath.row]
             self.navigationController?.pushViewController(sharedCV, animated: true)
         } else {
@@ -143,8 +143,10 @@ class MySharedCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> MySharedCollectionViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "MySharedCollectionViewController") as! MySharedCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> MySharedCollectionViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "MySharedCollectionViewController") as! MySharedCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - State restoration

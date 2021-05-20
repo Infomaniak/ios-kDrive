@@ -172,12 +172,14 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
         }
     }
 
-    override class func instantiate() -> SearchFileViewController {
-        return UIStoryboard(name: "Search", bundle: nil).instantiateViewController(withIdentifier: "SearchFileViewController") as! SearchFileViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> SearchFileViewController {
+        let viewController = UIStoryboard(name: "Search", bundle: nil).instantiateViewController(withIdentifier: "SearchFileViewController") as! SearchFileViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
-    class func instantiateInNavigationController() -> UINavigationController {
-        let searchViewController = instantiate()
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager) -> UINavigationController {
+        let searchViewController = instantiate(driveFileManager: driveFileManager)
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.restorationIdentifier = "SearchNavigationController"
         navigationController.modalPresentationStyle = .fullScreen

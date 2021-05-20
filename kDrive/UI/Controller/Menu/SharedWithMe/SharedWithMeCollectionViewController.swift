@@ -78,8 +78,10 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> SharedWithMeCollectionViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "SharedWithMeCollectionViewController") as! SharedWithMeCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> SharedWithMeCollectionViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "SharedWithMeCollectionViewController") as! SharedWithMeCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - State restoration

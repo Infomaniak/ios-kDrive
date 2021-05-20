@@ -94,8 +94,10 @@ class OfflineCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> OfflineCollectionViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "OfflineCollectionViewController") as! OfflineCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> OfflineCollectionViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "OfflineCollectionViewController") as! OfflineCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - State restoration

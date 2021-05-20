@@ -102,9 +102,6 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if driveFileManager == nil {
-            driveFileManager = AccountManager.instance.currentDriveFileManager
-        }
         if currentDirectory == nil {
             currentDirectory = driveFileManager.getRootFile()
         }
@@ -150,7 +147,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchFileViewController.instantiateInNavigationController(), animated: true)
+        present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
     }
 
     func observeNetworkChange() {
@@ -190,7 +187,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     func observeFileUpdated() {
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
                 refreshDataSource(withActivities: true)
             } else if let index = sortedChildren.firstIndex(where: { $0.id == file.id }) {
@@ -716,8 +713,10 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         }
     }
 
-    class func instantiate() -> FileListCollectionViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListCollectionViewController") as! FileListCollectionViewController
+    class func instantiate(driveFileManager: DriveFileManager) -> FileListCollectionViewController {
+        let viewController = UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListCollectionViewController") as! FileListCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - File cell delegate
@@ -757,7 +756,8 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         self.driveFileManager = driveFileManager
         currentDirectory = directory
         navigationItem.title = currentDirectory.name
-        fetchNextPage()
+        forceRefresh()
+        observeFileUpdated()
     }
 
 }

@@ -500,8 +500,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     // Pop to root
                     navController.popToRootViewController(animated: false)
                     // Present folder (if it's not root)
-                    if let parentId = parentId, parentId > DriveFileManager.constants.rootID, let directory = accountManager.currentDriveFileManager?.getCachedFile(id: parentId) {
-                        let filesList = FileListCollectionViewController.instantiate()
+                    if let parentId = parentId, parentId > DriveFileManager.constants.rootID,
+                       let driveFileManager = accountManager.currentDriveFileManager,
+                       let directory = driveFileManager.getCachedFile(id: parentId) {
+                        let filesList = FileListCollectionViewController.instantiate(driveFileManager: driveFileManager)
                         filesList.currentDirectory = directory
                         navController.pushViewController(filesList, animated: false)
                     }

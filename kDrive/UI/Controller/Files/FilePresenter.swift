@@ -59,13 +59,12 @@ class FilePresenter {
             // Show files list
             let nextVC: FileListCollectionViewController
             if driveFileManager.drive.sharedWithMe {
-                nextVC = SharedWithMeCollectionViewController.instantiate()
+                nextVC = SharedWithMeCollectionViewController.instantiate(driveFileManager: driveFileManager)
             } else if file.isTrashed {
-                nextVC = TrashCollectionViewController.instantiate()
+                nextVC = TrashCollectionViewController.instantiate(driveFileManager: driveFileManager)
             } else {
-                nextVC = listType.instantiate()
+                nextVC = listType.instantiate(driveFileManager: driveFileManager)
             }
-            nextVC.driveFileManager = driveFileManager
             nextVC.currentDirectory = file
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {
