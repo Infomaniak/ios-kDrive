@@ -41,7 +41,8 @@ class ShareAndRightsViewController: UIViewController {
     private var selectedTagIndex: Int?
     private var selectedInvitationIndex: Int?
     private var shareLinkRights = false
-    
+    private var initialLoading: Bool = true
+
     var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {
@@ -60,7 +61,11 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        updateShareList()
+        super.viewDidAppear(animated)
+        if !initialLoading {
+            updateShareList()
+        }
+        initialLoading = false
     }
 
     func updateShareList() {
