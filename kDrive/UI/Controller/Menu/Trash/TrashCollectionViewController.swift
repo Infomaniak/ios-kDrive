@@ -45,11 +45,12 @@ class TrashCollectionViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil && currentDirectory != nil else { return }
         currentPage += 1
         startLoading()
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            driveFileManager?.apiFetcher.getTrashedFiles(page: currentPage, sortType: sortType) { [self] (response, error) in
+            driveFileManager.apiFetcher.getTrashedFiles(page: currentPage, sortType: sortType) { [self] (response, error) in
                 self.isLoading = false
                 collectionView.refreshControl?.endRefreshing()
                 if let trashedList = response?.data {
@@ -61,7 +62,7 @@ class TrashCollectionViewController: FileListCollectionViewController {
                 }
             }
         } else {
-            driveFileManager?.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: currentPage, sortType: sortType) { [self] (response, error) in
+            driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: currentPage, sortType: sortType) { [self] (response, error) in
                 self.isLoading = false
                 collectionView.refreshControl?.endRefreshing()
 
@@ -102,6 +103,9 @@ class TrashCollectionViewController: FileListCollectionViewController {
     }
 
     override func forceRefresh() {
+        if currentDirectory == nil {
+            currentDirectory = DriveFileManager.trashRootFile
+        }
         currentPage = 0
         reachedEnd = false
         sortedChildren = []

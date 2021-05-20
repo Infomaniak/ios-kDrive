@@ -34,6 +34,7 @@ class OfflineCollectionViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil else { return }
         sortedChildren = driveFileManager.getAvailableOfflineFiles(sortType: sortType)
         updateSelectedItems(newChildren: sortedChildren)
         sortedChildren.first?.isFirstInCollection = true
@@ -60,7 +61,7 @@ class OfflineCollectionViewController: FileListCollectionViewController {
     }
 
     override func observeFileUpdated() {
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
                 DispatchQueue.main.async {
                     getFileActivities(directory: self.currentDirectory)

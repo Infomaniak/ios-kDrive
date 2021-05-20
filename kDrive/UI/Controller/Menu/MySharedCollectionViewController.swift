@@ -40,9 +40,11 @@ class MySharedCollectionViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil && currentDirectory != nil else { return }
+
         currentPage += 1
         startLoading()
-        
+
         if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
             driveFileManager.getMyShared(page: currentPage, sortType: sortType, forceRefresh: forceRefresh) { [self] (root, myShared, error) in
                 self.isLoading = false
