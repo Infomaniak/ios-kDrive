@@ -253,7 +253,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
                 }
             }
-            /* TODO: uncomment when app will be ready for reviews
              if numberOfConnection == 10 {
                 if #available(iOS 14.0, *) {
                     if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
@@ -263,7 +262,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     SKStoreReviewController.requestReview()
                 }
             }
-            */
             refreshCacheData(preload: false, isSwitching: false)
             uploadEditedFiles()
         }
