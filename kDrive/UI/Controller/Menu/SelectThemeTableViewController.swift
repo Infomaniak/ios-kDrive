@@ -35,7 +35,7 @@ class SelectThemeTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Sélection du thème"
+        title = "Thème"
 
         tableView.register(cellView: ThemeSelectionTableViewCell.self)
         tableView.separatorColor = .clear
@@ -62,11 +62,11 @@ class SelectThemeTableViewController: UITableViewController {
         }
         switch currentTheme {
         case .dark:
-            cell.themeLabel.text = "sombre"
+            cell.themeLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle2
         case .light:
-            cell.themeLabel.text = "clair"
+            cell.themeLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle1
         case .system:
-            cell.themeLabel.text = "système"
+            cell.themeLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle3
         }
         return cell
     }
@@ -83,6 +83,7 @@ class SelectThemeTableViewController: UITableViewController {
 
         let defaults = UserDefaults.standard
         defaults.setValue(tableContent[indexPath.row].rawValue, forKey: "Theme")
+        navigationController?.popViewController(animated: true)
     }
 
 }

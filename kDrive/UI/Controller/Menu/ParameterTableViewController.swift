@@ -71,8 +71,19 @@ class ParameterTableViewController: UITableViewController {
         case .theme:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.titleLabel.text = "Thème"
-            cell.valueLabel.text = "Clair"
+            cell.titleLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle
+            let defaults = UserDefaults.standard
+            let theme = defaults.object(forKey: "Theme") as! String
+            switch theme {
+            case "light":
+                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle1
+            case "dark":
+                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle2
+            case "system":
+                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle4
+            default:
+                break
+            }
             return cell
         case .notifications:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
