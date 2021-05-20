@@ -50,6 +50,7 @@ class FileDetailViewController: UIViewController {
         case sizeAll
     }
 
+    private var initialLoading: Bool = true
     private var currentTab = Tabs.informations
     private var fileInformationRows: [FileInformationRow] = [.users, .share, .owner, .creation, .added, .size]
     private var oldSections = 2
@@ -185,14 +186,17 @@ class FileDetailViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
-            if let data = response?.data {
-                self.sharedFile = data
-                if self.currentTab == .informations {
-                    self.reloadTableView()
+        if !initialLoading {
+            driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+                if let data = response?.data {
+                    self.sharedFile = data
+                    if self.currentTab == .informations {
+                        self.reloadTableView()
+                    }
                 }
             }
         }
+        initialLoading = false
     }
 
     private func reloadTableView(animation: UITableView.RowAnimation = .none) {
