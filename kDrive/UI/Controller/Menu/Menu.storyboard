@@ -294,6 +294,7 @@
                         <segue destination="cZK-V1-h3I" kind="show" identifier="photoSyncSegue" id="2H9-XI-PH6"/>
                         <segue destination="6Iz-rf-sb0" kind="show" identifier="aboutSegue" id="FcK-H4-v1m"/>
                         <segue destination="gfb-Up-kOo" kind="show" identifier="notificationsSegue" id="reO-Fp-cjy"/>
+                        <segue destination="MCZ-rj-Suy" kind="show" identifier="themeSelectionSegue" id="bgg-d7-ne2"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4Kq-PW-o7g" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -827,7 +828,27 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cuo-YB-vAU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="7258" y="1669"/>
+            <point key="canvasLocation" x="8030" y="1669"/>
+        </scene>
+        <!--Select Theme Table View Controller-->
+        <scene sceneID="pbm-gZ-Aoh">
+            <objects>
+                <tableViewController storyboardIdentifier="SelectThemeTableViewController" id="MCZ-rj-Suy" customClass="SelectThemeTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="BNd-1L-UFl">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <connections>
+                            <outlet property="dataSource" destination="MCZ-rj-Suy" id="Xiu-t7-Qci"/>
+                            <outlet property="delegate" destination="MCZ-rj-Suy" id="3mz-8S-28x"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" id="jTL-Js-Zhl"/>
+                    <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="GuQ-eD-LUX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="7200" y="1669"/>
         </scene>
         <!--Dernières modifications-->
         <scene sceneID="vra-n0-jT0">
@@ -877,8 +898,23 @@
         </scene>
     </scenes>
     <designables>
+        <designable name="0Ow-gT-FNm">
+            <size key="intrinsicContentSize" width="66.5" height="24"/>
+        </designable>
+        <designable name="Orz-m0-bIR">
+            <size key="intrinsicContentSize" width="188.5" height="24"/>
+        </designable>
         <designable name="abC-af-U6z">
-            <size key="intrinsicContentSize" width="95" height="34"/>
+            <size key="intrinsicContentSize" width="91" height="34"/>
+        </designable>
+        <designable name="ahf-mt-ZbI">
+            <size key="intrinsicContentSize" width="987" height="20.5"/>
+        </designable>
+        <designable name="gJI-rA-NpO">
+            <size key="intrinsicContentSize" width="916.5" height="20.5"/>
+        </designable>
+        <designable name="xyY-1J-PGU">
+            <size key="intrinsicContentSize" width="208" height="19.5"/>
         </designable>
     </designables>
     <resources>

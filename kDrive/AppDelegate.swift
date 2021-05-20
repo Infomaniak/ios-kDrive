@@ -74,6 +74,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             UIView.setAnimationsEnabled(false)
         }
 
+        if #available(iOS 13.0, *) {
+            let defaults = UserDefaults.standard
+            let theme = defaults.object(forKey: "Theme") as? String
+            switch theme {
+            case "light":
+                window?.overrideUserInterfaceStyle = .light
+            case "dark":
+                window?.overrideUserInterfaceStyle = .dark
+            case "system":
+                window?.overrideUserInterfaceStyle = .unspecified
+            default:
+                window?.overrideUserInterfaceStyle = .unspecified
+                UserDefaults.standard.setValue("system", forKey: "Theme")
+            }
+        }
+
         return true
     }
 
