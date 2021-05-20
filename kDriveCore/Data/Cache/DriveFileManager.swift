@@ -251,10 +251,10 @@ public class DriveFileManager {
                                         updatedFile = try self.updateFileInDatabase(updatedFile: file, using: localRealm)
                                     }
 
-                                    let safeFile = ThreadSafeReference(to: updatedFile)
+                                    let frozenFile = updatedFile.freeze()
                                     let sortedChildren = getLocalSortedDirectoryFiles(directory: updatedFile, sortType: sortType)
                                     DispatchQueue.main.async {
-                                        completion(realm.resolve(safeFile), sortedChildren, nil)
+                                        completion(frozenFile, sortedChildren, nil)
                                     }
                                 } catch {
                                     DispatchQueue.main.async {
