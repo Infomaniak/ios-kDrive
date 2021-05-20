@@ -823,20 +823,22 @@ public class DriveFileManager {
             if error == nil {
                 // Add the moved file to the realm db
                 let realm = self.getRealm()
-                if let parent = realm.resolve(safeParent),
-                    let file = realm.resolve(safeFile),
-                    let index = file.parent?.children.index(of: file) {
+                if let newParent = realm.resolve(safeParent),
+                    let file = realm.resolve(safeFile) {
+
                     let oldParent = file.parent
                     try? realm.write {
-                        file.parent?.children.remove(at: index)
-                        parent.children.append(file)
+                        if let index = oldParent?.children.index(of: file) {
+                            oldParent?.children.remove(at: index)
+                        }
+                        newParent.children.append(file)
                     }
                     if let oldParent = oldParent {
                         oldParent.signalChanges()
                         self.notifyObserversWith(file: oldParent)
                     }
-                    parent.signalChanges()
-                    self.notifyObserversWith(file: parent)
+                    newParent.signalChanges()
+                    self.notifyObserversWith(file: newParent)
                     completion(response?.data, file, error)
                 } else {
                     completion(response?.data, nil, error)
