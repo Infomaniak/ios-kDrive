@@ -25,11 +25,11 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
 
     override func viewDidLoad() {
         if currentDirectory == nil {
-            currentDirectory = driveFileManager.getCachedFile(id: DriveFileManager.constants.rootID) ?? DriveFileManager.sharedWithMeRootFile
+            currentDirectory = driveFileManager?.getCachedFile(id: DriveFileManager.constants.rootID) ?? DriveFileManager.sharedWithMeRootFile
         }
         super.viewDidLoad()
 
-        if currentDirectory.id == DriveFileManager.sharedWithMeRootFile.id {
+        if currentDirectory.id == DriveFileManager.sharedWithMeRootFile.id && driveFileManager != nil {
             navigationItem.title = driveFileManager.drive.name
         }
 
@@ -88,7 +88,7 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
         super.decodeRestorableState(with: coder)
 
         if currentDirectory.id <= DriveFileManager.constants.rootID {
-            navigationItem.title = KDriveStrings.Localizable.sharedWithMeTitle
+            navigationItem.title = driveFileManager.drive.name
         }
     }
 }
