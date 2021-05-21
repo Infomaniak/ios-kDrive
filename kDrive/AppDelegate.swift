@@ -75,16 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         }
 
         if #available(iOS 13.0, *) {
-            switch UserDefaults.shared.theme {
-            case "light":
-                window?.overrideUserInterfaceStyle = .light
-            case "dark":
-                window?.overrideUserInterfaceStyle = .dark
-            case "system":
-                window?.overrideUserInterfaceStyle = .unspecified
-            default:
-                break
-            }
+            window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         }
 
         return true

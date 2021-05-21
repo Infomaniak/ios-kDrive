@@ -73,11 +73,11 @@ class ParameterTableViewController: UITableViewController {
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle
             switch UserDefaults.shared.theme {
-            case "light":
+            case .light:
                 cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle1
-            case "dark":
+            case .dark:
                 cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle2
-            case "system":
+            case .system:
                 cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle4
             default:
                 break

@@ -222,16 +222,16 @@ extension UserDefaults {
         }
     }
 
-    public var theme: String {
+    public var theme: Theme {
         get {
             guard let theme = object(forKey: key(.theme)) as? String else {
-                setValue("system", forKey: key(.theme))
-                return "system"
+                setValue(Theme.system.rawValue, forKey: key(.theme))
+                return Theme.system
             }
-            return theme
+            return Theme(rawValue: theme)!
         }
         set {
-            setValue(newValue, forKey: key(.theme))
+            setValue(newValue.rawValue, forKey: key(.theme))
         }
     }
 }

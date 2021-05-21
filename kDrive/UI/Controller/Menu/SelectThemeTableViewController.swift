@@ -17,15 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import UIKit
+import kDriveCore
 
 @available(iOS 13.0, *)
 class SelectThemeTableViewController: UITableViewController {
-
-    private enum Theme: String, CaseIterable {
-        case light
-        case dark
-        case system
-    }
 
     private var tableContent: [Theme] = Theme.allCases
     private let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -40,7 +35,7 @@ class SelectThemeTableViewController: UITableViewController {
         tableView.separatorColor = .clear
         tableView.allowsMultipleSelection = false
 
-        selectedTheme = Theme(rawValue: UserDefaults.shared.theme)!
+        selectedTheme = UserDefaults.shared.theme
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -69,16 +64,8 @@ class SelectThemeTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        switch tableContent[indexPath.row] {
-        case .light:
-            appDelegate.window?.overrideUserInterfaceStyle = .light
-        case .dark:
-            appDelegate.window?.overrideUserInterfaceStyle = .dark
-        case .system:
-            appDelegate.window?.overrideUserInterfaceStyle = .unspecified
-        }
-
-        UserDefaults.shared.theme = tableContent[indexPath.row].rawValue
+        UserDefaults.shared.theme = tableContent[indexPath.row]
+        appDelegate.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         navigationController?.popViewController(animated: true)
     }
 
