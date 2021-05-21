@@ -40,9 +40,11 @@ class LastModificationsViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil else { return }
+
         currentPage += 1
         startLoading()
-        
+
         if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
             driveFileManager.apiFetcher.getLastModifiedFiles(page: currentPage) { (response, error) in
                 self.isLoading = false
