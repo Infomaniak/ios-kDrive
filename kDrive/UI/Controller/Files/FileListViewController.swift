@@ -96,7 +96,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             toggleMultipleSelection()
         }
     }
-    var selectedFiles: [File] = []
+    var selectedFiles = Set<File>()
     #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
@@ -468,7 +468,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     @objc final func selectAllChildren() {
         let wasDisabled = selectedFiles.count == 0
-        selectedFiles = sortedFiles
+        selectedFiles = Set(sortedFiles)
         for index in 0..<selectedFiles.count {
             let indexPath = IndexPath(row: index, section: 0)
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredVertically)
@@ -481,7 +481,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     final func selectChild(at indexPath: IndexPath) {
         let wasDisabled = selectedFiles.count == 0
-        selectedFiles.append(sortedFiles[indexPath.row])
+        selectedFiles.insert(sortedFiles[indexPath.row])
         if wasDisabled {
             setSelectionButtonsEnabled(true)
         }
@@ -512,7 +512,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     /// Update selected items with new objects
     final func updateSelectedItems(newChildren: [File]) {
         let selectedFileId = selectedFiles.map(\.id)
-        selectedFiles = newChildren.filter { selectedFileId.contains($0.id) }
+        selectedFiles = Set(newChildren.filter { selectedFileId.contains($0.id) })
     }
 
     /// Select collection view cells based on `selectedItems`
@@ -735,10 +735,13 @@ extension FileListViewController: FilesHeaderViewDelegate {
         }
         FileListOptions.instance.currentStyle = listStyle
 
+        // FIXME: Can we do it differently so the selection appears instantly?
         UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
             self.collectionViewLayout.invalidateLayout()
             self.collectionView.reloadData()
-        } completion: { _ in }
+        } completion: { _ in
+            self.setSelectedCells()
+        }
     }
 
     #if !ISEXTENSION
@@ -778,16 +781,16 @@ extension FileListViewController: FilesHeaderViewDelegate {
         func deleteButtonPressed() {
             let message: NSMutableAttributedString
             if selectedFiles.count == 1 {
-                message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescription(selectedFiles[0].name), boldText: selectedFiles[0].name)
+                message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescription(selectedFiles.first!.name), boldText: selectedFiles.first!.name)
             } else {
                 message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedFiles.count))
             }
 
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true, loading: true) {
                 let message: String
-                if let success = self.deleteFiles(self.selectedFiles, async: false), success {
+                if let success = self.deleteFiles(Array(self.selectedFiles), async: false), success {
                     if self.selectedFiles.count == 1 {
-                        message = KDriveStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedFiles[0].name)
+                        message = KDriveStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedFiles.first!.name)
                     } else {
                         message = KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(self.selectedFiles.count)
                     }
@@ -807,7 +810,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
             let floatingPanelViewController = DriveFloatingPanelController()
             let selectViewController = SelectFloatingPanelTableViewController()
             floatingPanelViewController.isRemovalInteractionEnabled = true
-            selectViewController.files = selectedFiles
+            selectViewController.files = Array(selectedFiles)
             floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
             selectViewController.reloadAction = {
                 self.selectionMode = false
@@ -848,6 +851,7 @@ extension FileListViewController: SortOptionsDelegate {
             sortedFiles = []
             collectionView.reloadData()
             forceRefresh()
+            setTitle()
             navigationController?.popToRootViewController(animated: false)
         }
 

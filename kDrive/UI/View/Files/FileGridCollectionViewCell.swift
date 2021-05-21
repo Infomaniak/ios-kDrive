@@ -53,7 +53,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
     override func initStyle(isFirst: Bool, isLast: Bool) { }
 
     override func configureWith(file: File, selectionMode: Bool = false) {
-        super.configureWith(file: file)
+        super.configureWith(file: file, selectionMode: selectionMode)
         iconImageView.isHidden = file.isDirectory
         if file.isDirectory || !file.hasThumbnail {
             logoImage.isHidden = true
