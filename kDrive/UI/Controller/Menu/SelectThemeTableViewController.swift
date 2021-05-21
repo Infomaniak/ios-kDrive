@@ -1,4 +1,3 @@
-//
 /*
 Infomaniak kDrive - iOS App
 Copyright (C) 2021 Infomaniak Network SA
@@ -22,13 +21,13 @@ import UIKit
 @available(iOS 13.0, *)
 class SelectThemeTableViewController: UITableViewController {
 
-    private enum Theme: String {
-        case dark
+    private enum Theme: String, CaseIterable {
         case light
+        case dark
         case system
     }
 
-    private var tableContent: [Theme] = [.light, .dark, .system]
+    private var tableContent: [Theme] = Theme.allCases
     private let appDelegate = UIApplication.shared.delegate as! AppDelegate
     private var selectedTheme: Theme!
 
