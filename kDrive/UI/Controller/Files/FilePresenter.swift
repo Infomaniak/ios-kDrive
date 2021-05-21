@@ -63,8 +63,7 @@ class FilePresenter {
             } else {
                 nextVC = listType.instantiate(driveFileManager: driveFileManager)
             }*/
-            let nextVC = FileListViewController.instantiate()
-            nextVC.driveFileManager = driveFileManager
+            let nextVC = FileListViewController.instantiate(driveFileManager: driveFileManager)
             nextVC.currentDirectory = file
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {

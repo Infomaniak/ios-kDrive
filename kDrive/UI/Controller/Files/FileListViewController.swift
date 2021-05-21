@@ -24,14 +24,16 @@ import DifferenceKit
 extension SwipeCellAction {
     static let share = SwipeCellAction(identifier: "share", title: KDriveStrings.Localizable.buttonFileRights, backgroundColor: KDriveAsset.infomaniakColor.color, icon: KDriveAsset.share.image)
     static let delete = SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image)
-    static let more = SwipeCellAction(identifier: "more", title: KDriveStrings.Localizable.buttonMenu, backgroundColor: KDriveAsset.darkBlueColor.color, icon: KDriveAsset.menu.image)
 }
 
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource {
 
+    static let storyboard: UIStoryboard = Storyboard.files
+    static let storyboardIdentifier: String = "FileListViewController"
+
     // MARK: - Constants
 
-    let leftRightInset: CGFloat = 24
+    let leftRightInset: CGFloat = 12
     let gridInnerSpacing: CGFloat = 16
     let maxDiffChanges = 100
     let headerViewIdentifier = "FilesHeaderView"
@@ -67,7 +69,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     #endif
     var rightBarButtonItems: [UIBarButtonItem]?
 
-    var driveFileManager: DriveFileManager = AccountManager.instance.currentDriveFileManager
+    var driveFileManager: DriveFileManager!
     var currentDirectory: File! {
         didSet {
             setTitle()
@@ -225,10 +227,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
-    class func instantiate() -> FileListViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListViewController") as! FileListViewController
-    }
-
     // MARK: - Public methods
 
     final func reloadData(page: Int = 1, forceRefresh: Bool = false) {
@@ -347,6 +345,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if let headerView = headerView {
             setUpHeaderView(headerView, isListEmpty: files.isEmpty)
         }
+    }
+
+    final class func instantiate(driveFileManager: DriveFileManager) -> Self {
+        let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - Private methods
@@ -556,14 +560,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let file = sortedFiles[indexPath.row]
         cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == sortedFiles.count - 1)
         cell.configureWith(file: file, selectionMode: selectionMode)
-        (cell as? FileGridCollectionViewCell)?.delegate = self
+        cell.delegate = self
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             cell.setEnabled(false)
         } else {
             cell.setEnabled(true)
         }
         if configuration.fromActivities {
-            (cell as? FileGridCollectionViewCell)?.moreButton.isHidden = true
+            cell.moreButton.isHidden = true
         }
 
         return cell
@@ -612,8 +616,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 let shareVC = ShareAndRightsViewController.instantiate()
                 shareVC.file = file
                 navigationController?.pushViewController(shareVC, animated: true)
-            case .more:
-                showQuickActionsPanel(file: file)
             case .delete:
                 deleteFiles([file])
             default:
@@ -629,12 +631,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             return nil
         }
         var actions = [SwipeCellAction]()
-        let right = sortedFiles[indexPath.row].rights
-        if right?.share.value ?? false {
+        let rights = sortedFiles[indexPath.row].rights
+        if rights?.share.value ?? false {
             actions.append(.share)
         }
-        actions.append(.more)
-        if right?.delete.value ?? false {
+        if rights?.delete.value ?? false {
             actions.append(.delete)
         }
         return actions
@@ -690,9 +691,9 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-// MARK: - File grid cell delegate
+// MARK: - File cell delegate
 
-extension FileListViewController: FileGridCellDelegate {
+extension FileListViewController: FileCellDelegate {
 
     func didTapMoreButton(_ cell: FileCollectionViewCell) {
         #if !ISEXTENSION
@@ -839,10 +840,9 @@ extension FileListViewController: SortOptionsDelegate {
 #if !ISEXTENSION
     extension FileListViewController: SwitchDriveDelegate {
 
-        func didSwitchDrive(newDrive: Drive) {
-            guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: newDrive) else { return }
-            self.driveFileManager = driveFileManager
-            configuration.rootTitle = newDrive.name
+        func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
+            self.driveFileManager = newDriveFileManager
+            configuration.rootTitle = newDriveFileManager.drive.name
             currentDirectory = driveFileManager.getRootFile()
             uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
             sortedFiles = []
