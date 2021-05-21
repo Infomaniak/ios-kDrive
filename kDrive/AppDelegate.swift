@@ -74,6 +74,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             UIView.setAnimationsEnabled(false)
         }
 
+        if #available(iOS 13.0, *) {
+            window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
+        }
+
         return true
     }
 
@@ -304,11 +308,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     !drive.maintenance {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
-                
+
                 if let currentDrive = accountManager.getDrive(for: accountManager.currentUserId, driveId: accountManager.currentDriveId),
                     currentDrive.maintenance {
                     if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId).first(where: { !$0.maintenance }),
-                       let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
+                        let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
                         accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
                         (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                     } else {

@@ -23,6 +23,23 @@ class ParameterTableViewController: UITableViewController {
 
     var driveFileManager: DriveFileManager!
     
+    private enum parameterOption {
+        case photos
+        case theme
+        case notifications
+        case appLock
+        case wifi
+        case about
+    }
+    
+    private var tableContent: [parameterOption] {
+        if #available(iOS 13.0, *) {
+            return [.photos, .theme, .notifications, .appLock, .wifi, .about]
+        } else {
+            return [.photos, .notifications, .appLock, .wifi, .about]
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)
@@ -40,27 +57,45 @@ class ParameterTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return tableContent.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row >= 0 && indexPath.row <= 2 {
+        switch tableContent[indexPath.row] {
+        case .photos:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            if indexPath.row == 0 {
-                cell.initWithPositionAndShadow(isFirst: true)
-                cell.titleLabel.text = KDriveStrings.Localizable.syncSettingsTitle
-                cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
-            } else if indexPath.row == 1 {
-                cell.initWithPositionAndShadow()
-                cell.titleLabel.text = KDriveStrings.Localizable.notificationTitle
-                cell.valueLabel.text = KDriveStrings.Localizable.notificationAll
-            } else if indexPath.row == 2 {
-                cell.initWithPositionAndShadow()
-                cell.titleLabel.text = KDriveStrings.Localizable.appSecurityTitle
-                cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+            cell.initWithPositionAndShadow(isFirst: true)
+            cell.titleLabel.text = KDriveStrings.Localizable.syncSettingsTitle
+            cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+            return cell
+        case .theme:
+            let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow()
+            cell.titleLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle
+            switch UserDefaults.shared.theme {
+            case .light:
+                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle1
+            case .dark:
+                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle2
+            case .system:
+                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle4
+            default:
+                break
             }
             return cell
-        } else if indexPath.row == 3 {
+        case .notifications:
+            let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow()
+            cell.titleLabel.text = KDriveStrings.Localizable.notificationTitle
+            cell.valueLabel.text = KDriveStrings.Localizable.notificationAll
+            return cell
+        case .appLock:
+            let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow()
+            cell.titleLabel.text = KDriveStrings.Localizable.appSecurityTitle
+            cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+            return cell
+        case .wifi:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.wifiSwitch.isOn = UserDefaults.shared.isWifiOnly
@@ -68,7 +103,7 @@ class ParameterTableViewController: UITableViewController {
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell
-        } else {
+        case .about:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isLast: true)
             cell.titleLabel.text = KDriveStrings.Localizable.aboutTitle
@@ -77,19 +112,24 @@ class ParameterTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 0 {
+        switch tableContent[indexPath.row] {
+        case .photos:
             self.performSegue(withIdentifier: "photoSyncSegue", sender: nil)
-        } else if indexPath.row == 1 {
+        case .notifications:
             self.performSegue(withIdentifier: "notificationsSegue", sender: nil)
-        } else if indexPath.row == 2 {
+        case .appLock:
             let appLockSettingsVC = AppLockSettingsViewController.instantiate()
             appLockSettingsVC.closeActionHandler = {
                 appLockSettingsVC.dismiss(animated: true)
                 self.tableView.reloadData()
             }
             present(appLockSettingsVC, animated: true)
-        } else if indexPath.row == 4 {
+        case .about:
             self.performSegue(withIdentifier: "aboutSegue", sender: nil)
+        case .theme:
+            performSegue(withIdentifier: "themeSelectionSegue", sender: nil)
+        default:
+            break
         }
     }
     

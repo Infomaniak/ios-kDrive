@@ -41,6 +41,7 @@ extension UserDefaults {
         case didDemoSwipe
         case lastSelectedDrive
         case lastSelectedDirectory
+        case theme
     }
 
     private func key(_ key: Keys) -> String {
@@ -218,6 +219,19 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.lastSelectedDirectory))
+        }
+    }
+
+    public var theme: Theme {
+        get {
+            guard let theme = object(forKey: key(.theme)) as? String else {
+                setValue(Theme.system.rawValue, forKey: key(.theme))
+                return Theme.system
+            }
+            return Theme(rawValue: theme)!
+        }
+        set {
+            setValue(newValue.rawValue, forKey: key(.theme))
         }
     }
 }
