@@ -701,7 +701,7 @@ public class DriveFileManager {
             let fileId = activity.fileId
             if pagedActions[fileId] == nil {
                 switch activity.action {
-                case .fileDelete, .fileMoveOut, .fileTrash:
+                case .fileDelete, .fileTrash:
                     if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
                         deletedFiles.append(file.freeze())
                     }
@@ -739,7 +739,14 @@ public class DriveFileManager {
                     }
                 case .fileMoveIn, .fileRestore, .fileCreate:
                     if let newFile = activity.file {
+                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                         realm.add(newFile, update: .modified)
+                        // If was already had a local parent, remove it
+                        if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
+                            let oldParent = file.parent,
+                            let index = oldParent.children.index(of: file) {
+                            oldParent.children.remove(at: index)
+                        }
                         //It shouldn't be necessary to check for duplicates before adding the child
                         if !file.children.contains(newFile) {
                             file.children.append(newFile)
