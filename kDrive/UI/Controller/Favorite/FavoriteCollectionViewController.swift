@@ -129,8 +129,13 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
 
     // MARK: - State restoration
 
+    override func encodeRestorableState(with coder: NSCoder) {
+        // We don't need to encode anything for Favorites
+    }
+
     override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
+        // We don't need to decode anything for Favorites
+        // DriveFileManager will be recovered from tab bar controller
     }
 
 }
