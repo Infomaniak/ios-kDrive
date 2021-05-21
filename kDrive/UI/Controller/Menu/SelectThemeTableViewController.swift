@@ -40,9 +40,7 @@ class SelectThemeTableViewController: UITableViewController {
         tableView.separatorColor = .clear
         tableView.allowsMultipleSelection = false
 
-        let defaults = UserDefaults.standard
-        let theme = defaults.object(forKey: "Theme") as! String
-        selectedTheme = Theme(rawValue: theme)!
+        selectedTheme = Theme(rawValue: UserDefaults.shared.theme)!
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -80,8 +78,7 @@ class SelectThemeTableViewController: UITableViewController {
             appDelegate.window?.overrideUserInterfaceStyle = .unspecified
         }
 
-        let defaults = UserDefaults.standard
-        defaults.setValue(tableContent[indexPath.row].rawValue, forKey: "Theme")
+        UserDefaults.shared.theme = tableContent[indexPath.row].rawValue
         navigationController?.popViewController(animated: true)
     }
 

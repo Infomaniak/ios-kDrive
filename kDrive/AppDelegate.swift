@@ -75,9 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         }
 
         if #available(iOS 13.0, *) {
-            let defaults = UserDefaults.standard
-            let theme = defaults.object(forKey: "Theme") as? String
-            switch theme {
+            switch UserDefaults.shared.theme {
             case "light":
                 window?.overrideUserInterfaceStyle = .light
             case "dark":
@@ -85,8 +83,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             case "system":
                 window?.overrideUserInterfaceStyle = .unspecified
             default:
-                window?.overrideUserInterfaceStyle = .unspecified
-                UserDefaults.standard.setValue("system", forKey: "Theme")
+                break
             }
         }
 
@@ -322,11 +319,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     !drive.maintenance {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
-                
+
                 if let currentDrive = accountManager.getDrive(for: accountManager.currentUserId, driveId: accountManager.currentDriveId),
                     currentDrive.maintenance {
                     if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId).first(where: { !$0.maintenance }),
-                       let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
+                        let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
                         accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
                         (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                     } else {
