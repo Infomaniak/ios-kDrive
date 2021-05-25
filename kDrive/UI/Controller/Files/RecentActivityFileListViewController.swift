@@ -149,6 +149,7 @@ class RecentActivityFileListViewController: FileListCollectionViewController {
 
         let activityId = coder.decodeInteger(forKey: "ActivityId")
         let activityFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
+        navigationItem.title = KDriveStrings.Localizable.fileDetailsActivitiesTitle
         if driveFileManager != nil {
             let realm = driveFileManager.getRealm()
             activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)
