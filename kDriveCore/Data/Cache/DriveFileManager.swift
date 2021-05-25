@@ -719,10 +719,10 @@ public class DriveFileManager {
 
                         realm.add(renamedFile, update: .modified)
                         if !file.children.contains(renamedFile) {
-                            file.children.append(renamedFile.freeze())
+                            file.children.append(renamedFile)
                         }
                         renamedFile.applyLastModifiedDateToLocalFile()
-                        updatedFiles.append(File(value: renamedFile))
+                        updatedFiles.append(renamedFile)
                         pagedActions[fileId] = .fileUpdate
                     }
                 case .fileFavoriteCreate:
@@ -734,7 +734,7 @@ public class DriveFileManager {
                 case .fileFavoriteRemove:
                     if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
                         file.isFavorite = false
-                        updatedFiles.append(file.freeze())
+                        updatedFiles.append(file)
                         pagedActions[fileId] = .fileUpdate
                     }
                 case .fileMoveIn, .fileRestore, .fileCreate:
@@ -758,7 +758,7 @@ public class DriveFileManager {
                     if let newFile = activity.file {
                         keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                         realm.add(newFile, update: .modified)
-                        updatedFiles.append(File(value: newFile))
+                        updatedFiles.append(newFile)
                         pagedActions[fileId] = .fileUpdate
                     }
                 default:
@@ -768,7 +768,7 @@ public class DriveFileManager {
         }
         file.responseAt = timestamp
         try? realm.commitWrite()
-        return (inserted: insertedFiles.map { $0.freeze() }, updated: updatedFiles, deleted: deletedFiles)
+        return (inserted: insertedFiles.map { $0.freeze() }, updated: updatedFiles.map({ $0.freeze() }), deleted: deletedFiles)
     }
 
     public func getWorkingSet() -> [File] {

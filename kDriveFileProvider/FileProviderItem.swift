@@ -78,7 +78,8 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         self.itemIdentifier = NSFileProviderItemIdentifier(file.id)
         self.filename = file.name
         self.typeIdentifier = file.typeIdentifier.identifier
-        if let rights = file.rights?.freeze() {
+        if let rights = file.rights {
+            let rights = rights.realm == nil ? rights : rights.freeze()
             self.capabilities = FileProviderItem.rightsToCapabilities(rights)
         } else {
             self.capabilities = [.allowsContentEnumerating, .allowsReading]
