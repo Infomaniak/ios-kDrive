@@ -85,6 +85,15 @@ class SaveFileViewController: UIViewController {
             selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
         }
 
+        // Set table view content
+        if !importInProgress {
+            if selectedDriveFileManager == nil {
+                sections = [.fileName, .driveSelection]
+            } else {
+                sections = [.fileName, .driveSelection, .directorySelection]
+            }
+        }
+
         closeBarButtonItem.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         tableView.separatorColor = .clear
@@ -304,7 +313,12 @@ class SaveFileViewController: UIViewController {
                     didClickOnButton()
                 }
             } else {
-                sections = [.fileName, .driveSelection, .directorySelection]
+                // Update UI
+                if selectedDriveFileManager == nil {
+                    sections = [.fileName, .driveSelection]
+                } else {
+                    sections = [.fileName, .driveSelection, .directorySelection]
+                }
                 if isViewLoaded {
                     updateButton()
                     tableView.reloadData()
@@ -485,6 +499,7 @@ extension SaveFileViewController: SelectDriveDelegate {
         if let selectedDriveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
             self.selectedDriveFileManager = selectedDriveFileManager
             selectedDirectory = selectedDriveFileManager.getRootFile()
+            sections = [.fileName, .driveSelection, .directorySelection]
         }
         updateButton()
     }

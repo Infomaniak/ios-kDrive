@@ -44,16 +44,22 @@ class SelectDriveViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        DropDown.startListeningToKeyboard()
-        initForCurrentAccount(AccountManager.instance.currentAccount)
 
-        if accounts.count > 0 {
-            sections = [.selectAccount, .selectDrive]
-        } else {
-            sections = [.selectDrive]
-        }
         tableView.register(cellView: DriveSwitchTableViewCell.self)
         tableView.register(cellView: UserAccountTableViewCell.self)
+
+        DropDown.startListeningToKeyboard()
+
+        if let account = AccountManager.instance.currentAccount {
+            initForCurrentAccount(account)
+            if !accounts.isEmpty {
+                sections = [.selectAccount, .selectDrive]
+            } else {
+                sections = [.selectDrive]
+            }
+        } else {
+            sections = []
+        }
     }
 
     private func initForCurrentAccount(_ account: Account) {
