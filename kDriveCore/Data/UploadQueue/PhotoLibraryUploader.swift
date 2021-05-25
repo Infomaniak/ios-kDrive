@@ -43,7 +43,7 @@ public class PhotoLibraryUploader {
         requestVideoOption.isNetworkAccessAllowed = true
         requestVideoOption.version = .current
 
-        dateFormatter.dateFormat = "MM-dd-yyyy HHmmss"
+        dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
         settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first?.freeze()
     }
 
