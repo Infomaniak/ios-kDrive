@@ -110,8 +110,6 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
             sortType = UserDefaults.shared.sortType
         }
 
-        navigationController?.setInfomaniakAppearanceNavigationBar()
-
         setTitle()
         navigationItem.backButtonTitle = ""
         collectionView.register(cellView: FileCollectionViewCell.self)
@@ -231,6 +229,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
             if let centerButton = (tabBarController as? MainTabViewController)?.tabBar.centerButton {
