@@ -51,7 +51,7 @@ class FileDetailViewController: UIViewController {
     }
 
     private var currentTab = Tabs.informations
-    private var fileInformationRows = [FileInformationRow]()
+    private var fileInformationRows = FileInformationRow.allCases
     private var oldSections = 2
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -126,6 +126,19 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: InfoTableViewCell.self)
 
         tableView.separatorColor = .clear
+        
+        if self.file.createdAtDate == nil {
+            self.fileInformationRows.remove(at: 4)
+        }
+        if self.file.fileCreatedAtDate == nil {
+            self.fileInformationRows.remove(at: 3)
+        }
+        if !(self.file.rights?.share.value ?? false) {
+            self.fileInformationRows.remove(at: 1)
+        }
+        if self.file.isDirectory {
+            self.fileInformationRows.removeLast(2)
+        }
 
         guard file != nil else { return }
 
