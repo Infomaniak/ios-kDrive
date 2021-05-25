@@ -305,6 +305,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             dismiss(animated: true)
         case .manageDropbox:
             let viewController = ManageDropBoxViewController.instantiate()
+            viewController.driveFileManager = driveFileManager
             viewController.folder = file
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
