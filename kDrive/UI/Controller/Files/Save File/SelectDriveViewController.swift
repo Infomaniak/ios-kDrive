@@ -35,6 +35,7 @@ class SelectDriveViewController: UIViewController {
     weak var delegate: SelectDriveDelegate?
 
     private enum Section {
+        case noAccount
         case selectAccount
         case selectDrive
     }
@@ -45,6 +46,7 @@ class SelectDriveViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.register(cellView: NoAccountTableViewCell.self)
         tableView.register(cellView: DriveSwitchTableViewCell.self)
         tableView.register(cellView: UserAccountTableViewCell.self)
 
@@ -58,7 +60,7 @@ class SelectDriveViewController: UIViewController {
                 sections = [.selectDrive]
             }
         } else {
-            sections = []
+            sections = [.noAccount]
         }
     }
 
@@ -102,7 +104,7 @@ extension SelectDriveViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch sections[section] {
-        case .selectAccount:
+        case .selectAccount, .noAccount:
             return 1
         case .selectDrive:
             return driveList.count
@@ -111,6 +113,9 @@ extension SelectDriveViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch sections[indexPath.section] {
+        case .noAccount:
+            let cell = tableView.dequeueReusableCell(type: NoAccountTableViewCell.self, for: indexPath)
+            return cell
         case .selectAccount:
             let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
@@ -140,6 +145,8 @@ extension SelectDriveViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch sections[indexPath.section] {
+        case .noAccount:
+            break
         case .selectAccount:
             tableView.deselectRow(at: indexPath, animated: true)
             dropDown.setupCornerRadius(UIConstants.cornerRadius)
