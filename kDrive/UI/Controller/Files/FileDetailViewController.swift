@@ -51,7 +51,7 @@ class FileDetailViewController: UIViewController {
     }
 
     private var currentTab = Tabs.informations
-    private var fileInformationRows = FileInformationRow.allCases
+    private var fileInformationRows: [FileInformationRow] = [.users, .share, .owner, .creation, .added, .size]
     private var oldSections = 2
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -137,7 +137,7 @@ class FileDetailViewController: UIViewController {
             self.fileInformationRows.remove(at: 1)
         }
         if self.file.isDirectory {
-            self.fileInformationRows.removeLast(2)
+            self.fileInformationRows.removeLast()
         }
 
         guard file != nil else { return }
