@@ -12,7 +12,7 @@
         <!--Home Table View Controller-->
         <scene sceneID="Feb-K5-dfc">
             <objects>
-                <tableViewController id="fCM-CW-jfK" customClass="HomeTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="HomeTableViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="fCM-CW-jfK" customClass="HomeTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="reD-qD-7DS">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -37,7 +37,7 @@
         <!--Title Size Adjusting Navigation Controller-->
         <scene sceneID="KcT-Wb-dPZ">
             <objects>
-                <navigationController storyboardIdentifier="HomeVC" automaticallyAdjustsScrollViewInsets="NO" id="iMt-sa-khV" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="HomeVC" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="iMt-sa-khV" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="" image="house" selectedImage="house-fill" id="siB-Vw-bM9">
                         <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
                     </tabBarItem>
@@ -97,7 +97,7 @@
         <!--Navigation Controller-->
         <scene sceneID="6Z3-TH-F6f">
             <objects>
-                <navigationController storyboardIdentifier="NavigationSwitchDriveController" automaticallyAdjustsScrollViewInsets="NO" id="Gku-Kw-V1T" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="NavigationSwitchDriveController" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Gku-Kw-V1T" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="6ey-iD-d7A">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>

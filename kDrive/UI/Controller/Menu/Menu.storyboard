@@ -13,7 +13,7 @@
         <!--Menu View Controller-->
         <scene sceneID="nkw-9W-ukx">
             <objects>
-                <viewController extendedLayoutIncludesOpaqueBars="YES" id="kg4-Ce-VlF" customClass="MenuViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MenuViewController" extendedLayoutIncludesOpaqueBars="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="kg4-Ce-VlF" customClass="MenuViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="blq-De-kFb">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -79,7 +79,7 @@
         <!--Shared With Me Collection View Controller-->
         <scene sceneID="rIZ-ST-S3h">
             <objects>
-                <viewController storyboardIdentifier="SharedWithMeCollectionViewController" id="5uZ-j3-nnx" customClass="SharedWithMeCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SharedWithMeCollectionViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5uZ-j3-nnx" customClass="SharedWithMeCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="QeU-vC-Rve">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -121,7 +121,7 @@
         <!--Shared Drives View Controller-->
         <scene sceneID="KtL-Ub-qLh">
             <objects>
-                <viewController storyboardIdentifier="DriveListViewController" hidesBottomBarWhenPushed="YES" id="FVV-mz-rrp" customClass="SharedDrivesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="DriveListViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="FVV-mz-rrp" customClass="SharedDrivesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Wnk-0e-vBU">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -159,7 +159,7 @@
         <!--Photo List View Controller-->
         <scene sceneID="o5v-5A-Uxe">
             <objects>
-                <viewController storyboardIdentifier="PhotoListViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="5Sh-8l-zI9" customClass="PhotoListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhotoListViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5Sh-8l-zI9" customClass="PhotoListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="HTJ-aD-7V4">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -274,7 +274,7 @@
         <!--Paramètres-->
         <scene sceneID="y6v-Ie-BNX">
             <objects>
-                <tableViewController modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="jNB-aI-vQT" customClass="ParameterTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="ParameterTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="jNB-aI-vQT" customClass="ParameterTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="ZjA-WC-gaF">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -326,7 +326,7 @@
         <!--Sauvegarde des photos-->
         <scene sceneID="sII-wC-jln">
             <objects>
-                <viewController storyboardIdentifier="PhotoSyncSettingsViewController" hidesBottomBarWhenPushed="YES" id="cZK-V1-h3I" customClass="PhotoSyncSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhotoSyncSettingsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="cZK-V1-h3I" customClass="PhotoSyncSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="CG6-wn-Ezl">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -388,7 +388,7 @@
         <!--My Shared Collection View Controller-->
         <scene sceneID="j2U-To-L2y">
             <objects>
-                <viewController storyboardIdentifier="MySharedCollectionViewController" hidesBottomBarWhenPushed="YES" id="XvF-Yr-0F4" customClass="MySharedCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MySharedCollectionViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="XvF-Yr-0F4" customClass="MySharedCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="PWA-yM-cwO">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -430,7 +430,7 @@
         <!--Corbeille-->
         <scene sceneID="bxf-3T-qSF">
             <objects>
-                <viewController storyboardIdentifier="TrashCollectionViewController" hidesBottomBarWhenPushed="YES" id="Qoj-Kl-8FL" customClass="TrashCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="TrashCollectionViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Qoj-Kl-8FL" customClass="TrashCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="P0D-aA-bNc">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -616,7 +616,7 @@
         <!--A Propos-->
         <scene sceneID="QGu-aW-zne">
             <objects>
-                <tableViewController title="A Propos" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="6Iz-rf-sb0" customClass="AboutTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="AboutTableViewController" title="A Propos" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="6Iz-rf-sb0" customClass="AboutTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="O1B-x1-98T">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -639,7 +639,7 @@
         <!--Notifications-->
         <scene sceneID="kcj-KO-Hyu">
             <objects>
-                <tableViewController modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" id="gfb-Up-kOo" customClass="NotificationsSettingsTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="NotificationsSettingsTableViewController" modalPresentationStyle="fullScreen" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="gfb-Up-kOo" customClass="NotificationsSettingsTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="nqr-nQ-uJw">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -662,7 +662,7 @@
         <!--Hors Ligne-->
         <scene sceneID="DmR-rf-evK">
             <objects>
-                <viewController storyboardIdentifier="OfflineCollectionViewController" hidesBottomBarWhenPushed="YES" id="UJN-BO-Tu3" customClass="OfflineCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="OfflineCollectionViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="UJN-BO-Tu3" customClass="OfflineCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qpq-Px-T9t">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -708,7 +708,7 @@
         <!--App Lock Settings View Controller-->
         <scene sceneID="0Gq-HL-lDR">
             <objects>
-                <viewController storyboardIdentifier="AppLockSettingsViewController" id="c0t-5c-eBh" customClass="AppLockSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AppLockSettingsViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="c0t-5c-eBh" customClass="AppLockSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="9eh-5H-O68">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -853,7 +853,7 @@
         <!--Dernières modifications-->
         <scene sceneID="vra-n0-jT0">
             <objects>
-                <viewController storyboardIdentifier="LastModificationsViewController" hidesBottomBarWhenPushed="YES" id="6wp-0R-3mI" customClass="LastModificationsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LastModificationsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="6wp-0R-3mI" customClass="LastModificationsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="r7w-Qi-u7D">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

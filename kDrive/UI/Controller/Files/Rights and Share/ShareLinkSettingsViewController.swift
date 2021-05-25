@@ -165,6 +165,7 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     private func initOptions() {
+        guard shareFile != nil else { return }
         // Access right
         accessRightValue = shareFile.link!.permission
         // Options
@@ -183,6 +184,33 @@ class ShareLinkSettingsViewController: UIViewController {
 
     class func instantiate() -> ShareLinkSettingsViewController {
         return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "ShareLinkSettingsViewController") as! ShareLinkSettingsViewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        coder.encode(file.id, forKey: "FileId")
+        coder.encode(shareFile, forKey: "ShareFile")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let fileId = coder.decodeInteger(forKey: "FileId")
+        shareFile = coder.decodeObject(forKey: "ShareFile") as? SharedFile
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        file = driveFileManager.getCachedFile(id: fileId)
+        // Update UI
+        initOptions()
+        updateButton()
+        tableview.reloadData()
     }
 }
 

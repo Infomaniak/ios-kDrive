@@ -41,7 +41,7 @@ class ShareAndRightsViewController: UIViewController {
     private var selectedTagIndex: Int?
     private var selectedInvitationIndex: Int?
     private var shareLinkRights = false
-    
+
     var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {
@@ -56,24 +56,29 @@ class ShareAndRightsViewController: UIViewController {
 
         updateShareList()
         hideKeyboardWhenTappedAround()
-        title = file.isDirectory ? KDriveStrings.Localizable.fileShareDetailsFolderTitle(file.name) : KDriveStrings.Localizable.fileShareDetailsFileTitle(file.name)
+        setTitle()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         updateShareList()
     }
 
+    func setTitle() {
+        guard file != nil else { return }
+        title = file.isDirectory ? KDriveStrings.Localizable.fileShareDetailsFolderTitle(file.name) : KDriveStrings.Localizable.fileShareDetailsFileTitle(file.name)
+    }
+
     func updateShareList() {
-        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+        driveFileManager?.apiFetcher.getShareListFor(file: file) { (response, error) in
             if let data = response?.data {
                 self.sharedFile = data
-                self.removeUsers = data.users.map(\.id) + data.invitations.compactMap({ $0?.userId })
-                self.removeEmails = data.invitations.compactMap({ (invitation) -> String? in
+                self.removeUsers = data.users.map(\.id) + data.invitations.compactMap { $0?.userId }
+                self.removeEmails = data.invitations.compactMap { (invitation) -> String? in
                     if let _ = invitation?.userId {
                         return nil
                     }
                     return invitation?.email
-                })
+                }
                 self.tableView.reloadData()
             }
         }
@@ -85,6 +90,28 @@ class ShareAndRightsViewController: UIViewController {
 
     class func instantiate() -> ShareAndRightsViewController {
         return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        coder.encode(file.id, forKey: "FileId")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let fileId = coder.decodeInteger(forKey: "FileId")
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        file = driveFileManager.getCachedFile(id: fileId)
+        setTitle()
     }
 }
 
@@ -126,7 +153,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.drive = driveFileManager.drive
+            cell.drive = driveFileManager?.drive
             cell.removeUsers = removeUsers
             cell.removeEmails = removeEmails
             cell.delegate = self
@@ -135,7 +162,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink.value ?? false) || file.shareLink != nil)
+            cell.configureWith(sharedFile: sharedFile, isOfficeFile: (file?.isOfficeFile ?? false), enabled: (file?.rights?.canBecomeLink.value ?? false) || file?.shareLink != nil)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)

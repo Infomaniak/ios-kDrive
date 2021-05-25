@@ -28,17 +28,16 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = KDriveStrings.Localizable.favoritesTitle
     }
 
     override func forceRefresh() {
+        if currentDirectory == nil {
+            currentDirectory = DriveFileManager.favoriteRootFile
+        }
         currentPage = 0
         sortedChildren = []
         collectionView.reloadData()
         fetchNextPage()
-        if currentDirectory.id == DriveFileManager.favoriteRootFile.id {
-            navigationItem.title = KDriveStrings.Localizable.favoritesTitle
-        }
     }
 
     override func getFileActivities(directory: File) {
@@ -82,7 +81,7 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
     }
 
     override func observeFileUpdated() {
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
                 DispatchQueue.main.async { [weak self] in
                     guard let strongSelf = self else { return }
@@ -118,8 +117,25 @@ class FavoriteCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> FavoriteCollectionViewController {
-        return UIStoryboard(name: "Favorite", bundle: nil).instantiateViewController(withIdentifier: "FavoriteCollectionViewController") as! FavoriteCollectionViewController
+    override func setTitle() {
+        navigationItem.title = KDriveStrings.Localizable.favoritesTitle
+    }
+
+    override class func instantiate(driveFileManager: DriveFileManager) -> FavoriteCollectionViewController {
+        let viewController = UIStoryboard(name: "Favorite", bundle: nil).instantiateViewController(withIdentifier: "FavoriteCollectionViewController") as! FavoriteCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        // We don't need to encode anything for Favorites
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        // We don't need to decode anything for Favorites
+        // DriveFileManager will be recovered from tab bar controller
     }
 
 }

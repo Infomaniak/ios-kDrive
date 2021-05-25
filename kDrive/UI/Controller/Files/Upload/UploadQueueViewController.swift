@@ -96,6 +96,32 @@ class UploadQueueViewController: UIViewController {
     class func instantiate() -> UploadQueueViewController {
         return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "UploadQueueViewController") as! UploadQueueViewController
     }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(currentDirectory.driveId, forKey: "DriveID")
+        coder.encode(currentDirectory.id, forKey: "DirectoryID")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveID")
+        let directoryId = coder.decodeInteger(forKey: "DirectoryID")
+
+        guard let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: AccountManager.instance.currentUserId),
+            let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+            let directory = driveFileManager.getCachedFile(id: directoryId) else {
+            // Handle error?
+            return
+        }
+        currentDirectory = directory
+        reloadData(reloadTableView: true)
+    }
+
 }
 
 // MARK: Table view data source

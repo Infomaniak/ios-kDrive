@@ -120,6 +120,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         tableView.register(cellView: FloatingPanelCollectionTableViewCell.self)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
+            guard file != nil else { return }
             self.setupContent()
             UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
                 self.tableView.reloadData()
@@ -298,6 +299,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 return
             } else {
                 let viewController = ManageDropBoxViewController.instantiate()
+                viewController.driveFileManager = driveFileManager
                 viewController.convertingFolder = true
                 viewController.folder = file
                 presentingParent?.navigationController?.pushViewController(viewController, animated: true)
@@ -688,6 +690,34 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         let view = tableView.cellForRow(at: indexPath)?.frame ?? .zero
         // Present document interaction controller
         interactionController.presentOpenInMenu(from: view, in: tableView, animated: true)
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        coder.encode(file.id, forKey: "FileId")
+        coder.encode(normalFolderHierarchy, forKey: "NormalFolderHierarchy")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let fileId = coder.decodeInteger(forKey: "FileId")
+        normalFolderHierarchy = coder.decodeBool(forKey: "NormalFolderHierarchy")
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        file = driveFileManager.getCachedFile(id: fileId)
+        // Update UI
+        setupContent()
+        UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
+            self.tableView.reloadData()
+        }
     }
 
 }

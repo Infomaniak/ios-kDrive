@@ -40,9 +40,11 @@ class LastModificationsViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil else { return }
+
         currentPage += 1
         startLoading()
-        
+
         if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
             driveFileManager.apiFetcher.getLastModifiedFiles(page: currentPage) { (response, error) in
                 self.isLoading = false
@@ -117,7 +119,7 @@ class LastModificationsViewController: FileListCollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if sortedChildren[indexPath.row].isDirectory {
-            let sharedCV = LastModificationsViewController.instantiate()
+            let sharedCV = LastModificationsViewController.instantiate(driveFileManager: driveFileManager)
             sharedCV.currentDirectory = sortedChildren[indexPath.row]
             self.navigationController?.pushViewController(sharedCV, animated: true)
         } else {
@@ -125,8 +127,20 @@ class LastModificationsViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> LastModificationsViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "LastModificationsViewController") as! LastModificationsViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> LastModificationsViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "LastModificationsViewController") as! LastModificationsViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
+    }
+
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
+            navigationItem.title = KDriveStrings.Localizable.lastEditsTitle
+        }
     }
 
 }

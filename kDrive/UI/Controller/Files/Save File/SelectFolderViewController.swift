@@ -52,10 +52,15 @@ class SelectFolderViewController: FileListCollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
+        setUpDirectory()
+    }
+
+    private func setUpDirectory() {
         addFolderButton.isEnabled = currentDirectory.rights?.createNewFolder.value ?? false
         addFolderButton.accessibilityLabel = KDriveStrings.Localizable.createFolderTitle
         selectFolderButton.isEnabled = !(disabledDirectoriesSelection.map(\.id).contains(currentDirectory.id)) && (currentDirectory.rights?.moveInto.value ?? false || currentDirectory.rights?.createNewFile.value ?? false)
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         if currentDirectory.id == DriveFileManager.constants.rootID {
             // Root directory
             navigationItem.title = KDriveStrings.Localizable.selectFolderTitle
@@ -79,10 +84,9 @@ class SelectFolderViewController: FileListCollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedFile = sortedChildren[indexPath.row]
         if selectedFile.isDirectory {
-            let nextVC = SelectFolderViewController.instantiate()
+            let nextVC = SelectFolderViewController.instantiate(driveFileManager: driveFileManager)
             nextVC.disabledDirectoriesSelection = disabledDirectoriesSelection
             nextVC.fileToMove = fileToMove
-            nextVC.driveFileManager = driveFileManager
             nextVC.currentDirectory = selectedFile
             nextVC.delegate = delegate
             nextVC.selectHandler = selectHandler
@@ -113,14 +117,34 @@ class SelectFolderViewController: FileListCollectionViewController {
     }
 
     class func instantiateInNavigationController(driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
-        let selectFolderViewController = instantiate()
-        selectFolderViewController.driveFileManager = driveFileManager
+        let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: selectFolderViewController)
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }
 
-    override class func instantiate() -> SelectFolderViewController {
-        return UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SelectFolderViewController") as! SelectFolderViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> SelectFolderViewController {
+        let viewController = UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SelectFolderViewController") as! SelectFolderViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(disabledDirectoriesSelection.map(\.id), forKey: "DisabledDirectories")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let disabledDirectoriesIds = coder.decodeObject(forKey: "DisabledDirectories") as? [Int] ?? []
+        if driveFileManager != nil {
+            let realm = driveFileManager.getRealm()
+            disabledDirectoriesSelection = disabledDirectoriesIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        }
+        setUpDirectory()
     }
 }

@@ -43,6 +43,7 @@ class RecentActivityFileListViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard activityFiles != nil else { return }
         sortedChildren.first?.isFirstInCollection = false
         sortedChildren.last?.isLastInCollection = false
         sortedChildren = sortFiles(files: activityFiles)
@@ -76,8 +77,9 @@ class RecentActivityFileListViewController: FileListCollectionViewController {
     override func addRefreshControl() {
     }
 
-    class func instantiate(activities: [FileActivity]) -> RecentActivityFileListViewController {
+    class func instantiate(activities: [FileActivity], driveFileManager: DriveFileManager) -> RecentActivityFileListViewController {
         let vc = UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "RecentActivityFileListViewController") as! RecentActivityFileListViewController
+        vc.driveFileManager = driveFileManager
         vc.activityFiles = activities.compactMap(\.file)
         vc.sortedChildren = activities.compactMap(\.file)
         vc.sortedChildren.first?.isFirstInCollection = true
@@ -132,4 +134,28 @@ class RecentActivityFileListViewController: FileListCollectionViewController {
         }
         return super.collectionView(collectionView, actionsFor: cell, at: indexPath)
     }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(activity?.id ?? 0, forKey: "ActivityId")
+        coder.encode(activityFiles.map(\.id), forKey: "Files")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let activityId = coder.decodeInteger(forKey: "ActivityId")
+        let activityFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
+        navigationItem.title = KDriveStrings.Localizable.fileDetailsActivitiesTitle
+        if driveFileManager != nil {
+            let realm = driveFileManager.getRealm()
+            activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)
+            activityFiles = activityFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+            forceRefresh()
+        }
+    }
+
 }

@@ -42,7 +42,7 @@ class InviteUserViewController: UIViewController {
     private var rows = InviteUserRows.allCases
 
     private var newPermission = UserPermission.read
-    
+
     var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {
@@ -54,7 +54,7 @@ class InviteUserViewController: UIViewController {
         tableView.register(cellView: InvitedUserTableViewCell.self)
         hideKeyboardWhenTappedAround()
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        navigationItem.title = file.isDirectory ? KDriveStrings.Localizable.fileShareFolderTitle : KDriveStrings.Localizable.fileShareFileTitle
+        setTitle()
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeView))
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
@@ -86,6 +86,11 @@ class InviteUserViewController: UIViewController {
 
     @objc func closeView() {
         self.dismiss(animated: true)
+    }
+
+    func setTitle() {
+        guard file != nil else { return }
+        navigationItem.title = file.isDirectory ? KDriveStrings.Localizable.fileShareFolderTitle : KDriveStrings.Localizable.fileShareFileTitle
     }
 
     func showConflictDialog(conflictList: [FileCheckResult]) {
@@ -123,12 +128,47 @@ class InviteUserViewController: UIViewController {
 
     class func instantiateInNavigationController() -> TitleSizeAdjustingNavigationController {
         let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate())
+        navigationController.restorationIdentifier = "InviteUserNavigationController"
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }
 
     class func instantiate() -> InviteUserViewController {
         return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "InviteUserViewController") as! InviteUserViewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        coder.encode(file.id, forKey: "FileId")
+        coder.encode(emails, forKey: "Emails")
+        coder.encode(users.map(\.id), forKey: "UserIds")
+        coder.encode(newPermission.rawValue, forKey: "NewPermission")
+        coder.encode(message, forKey: "Message")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let fileId = coder.decodeInteger(forKey: "FileId")
+        emails = coder.decodeObject(forKey: "Emails") as? [String] ?? []
+        let userIds = coder.decodeObject(forKey: "UserIds") as? [Int] ?? []
+        newPermission = UserPermission(rawValue: coder.decodeObject(forKey: "NewPermission") as? String ?? "") ?? .read
+        message = coder.decodeObject(forKey: "Message") as? String ?? ""
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        file = driveFileManager.getCachedFile(id: fileId)
+        let realm = DriveInfosManager.instance.getRealm()
+        users = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
+        // Update UI
+        setTitle()
+        reloadInvited()
     }
 }
 
@@ -180,6 +220,9 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .message:
             let cell = tableView.dequeueReusableCell(type: MessageTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            if !message.isEmpty {
+                cell.messageTextView.text = message
+            }
             cell.selectionStyle = .none
             cell.textDidChange = { text in
                 self.message = text

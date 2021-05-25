@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -161,7 +161,7 @@
         <!--Share Link Settings View Controller-->
         <scene sceneID="HZ5-Aa-1K1">
             <objects>
-                <viewController storyboardIdentifier="ShareLinkSettingsViewController" id="c84-xf-u0q" customClass="ShareLinkSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ShareLinkSettingsViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="c84-xf-u0q" customClass="ShareLinkSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="hWA-co-zIc">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -279,7 +279,7 @@
         <!--Title Size Adjusting Navigation Controller-->
         <scene sceneID="5PS-aw-ccj">
             <objects>
-                <navigationController storyboardIdentifier="FilesVC" automaticallyAdjustsScrollViewInsets="NO" id="IDg-cP-myB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="FilesVC" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="IDg-cP-myB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="" image="folder" selectedImage="folder-fill" id="FVI-Sh-h25">
                         <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
                     </tabBarItem>
@@ -472,7 +472,7 @@
         <!--Gérer la boîte de dépôt-->
         <scene sceneID="ThO-qS-flQ">
             <objects>
-                <viewController storyboardIdentifier="ManageDropBoxViewController" hidesBottomBarWhenPushed="YES" id="iUR-vc-8XP" customClass="ManageDropBoxViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ManageDropBoxViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="iUR-vc-8XP" customClass="ManageDropBoxViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ADM-5M-DdB">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -511,7 +511,7 @@
         <!--Activités-->
         <scene sceneID="jQX-tY-pqn">
             <objects>
-                <viewController storyboardIdentifier="RecentActivityFileListViewController" hidesBottomBarWhenPushed="YES" id="SXx-tI-VhM" customClass="RecentActivityFileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RecentActivityFileListViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="SXx-tI-VhM" customClass="RecentActivityFileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="KJR-0t-Oxg">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

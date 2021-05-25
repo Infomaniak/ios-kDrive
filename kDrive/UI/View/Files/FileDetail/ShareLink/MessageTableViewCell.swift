@@ -45,7 +45,7 @@ extension MessageTableViewCell: UITextViewDelegate {
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text == "" {
+        if textView.text.isEmpty {
             textView.text = KDriveStrings.Localizable.fileShareAddMessage
         }
     }

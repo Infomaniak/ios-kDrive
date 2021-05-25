@@ -38,7 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     private var uploadQueue: UploadQueue!
     private var reachabilityListener: ReachabilityListener!
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
 
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
@@ -78,6 +78,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         }
 
+        return true
+    }
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         return true
     }
 
@@ -461,6 +465,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         setRootViewController(SwitchUserViewController.instantiateInNavigationController())
     }
 
+    // MARK: - State restoration
+
+    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        return true
+    }
+
+    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
+        return true
+    }
+
     // MARK: - User notification center delegate
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
@@ -486,8 +500,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     // Pop to root
                     navController.popToRootViewController(animated: false)
                     // Present folder (if it's not root)
-                    if let parentId = parentId, parentId > DriveFileManager.constants.rootID, let directory = accountManager.currentDriveFileManager?.getCachedFile(id: parentId) {
-                        let filesList = FileListCollectionViewController.instantiate()
+                    if let parentId = parentId, parentId > DriveFileManager.constants.rootID,
+                       let driveFileManager = accountManager.currentDriveFileManager,
+                       let directory = driveFileManager.getCachedFile(id: parentId) {
+                        let filesList = FileListCollectionViewController.instantiate(driveFileManager: driveFileManager)
                         filesList.currentDirectory = directory
                         navController.pushViewController(filesList, animated: false)
                     }

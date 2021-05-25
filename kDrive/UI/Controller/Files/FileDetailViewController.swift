@@ -127,11 +127,9 @@ class FileDetailViewController: UIViewController {
 
         tableView.separatorColor = .clear
 
-        if let drive = DriveInfosManager.instance.getDrive(id: file.driveId, userId: AccountManager.instance.currentUserId) {
-            driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
-        } else {
-            driveFileManager = AccountManager.instance.currentDriveFileManager
-        }
+        guard file != nil else { return }
+
+        driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: AccountManager.instance.currentUserId)
 
         // Load file informations
         let group = DispatchGroup()
@@ -338,6 +336,50 @@ class FileDetailViewController: UIViewController {
 
     class func instantiate() -> FileDetailViewController {
         return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileDetailViewController") as! FileDetailViewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        coder.encode(file.id, forKey: "FileId")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let fileId = coder.decodeInteger(forKey: "FileId")
+        sharedFile = coder.decodeObject(forKey: "SharedFile") as? SharedFile
+
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        file = driveFileManager.getCachedFile(id: fileId)
+        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+            self.sharedFile = response?.data
+            self.fileInformationRows = FileInformationRow.allCases
+            if self.file.createdAtDate == nil {
+                self.fileInformationRows.remove(at: 4)
+            }
+            if self.file.fileCreatedAtDate == nil {
+                self.fileInformationRows.remove(at: 3)
+            }
+            if !(self.file.rights?.share.value ?? false) {
+                self.fileInformationRows.remove(at: 1)
+            }
+            if self.file.isDirectory {
+                self.fileInformationRows.removeLast(2)
+            }
+            if self.currentTab == .informations {
+                DispatchQueue.main.async {
+                    self.reloadTableView()
+                }
+            }
+        }
     }
 }
 

@@ -102,20 +102,15 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if driveFileManager == nil {
-            driveFileManager = AccountManager.instance.currentDriveFileManager
-        }
         if currentDirectory == nil {
-            currentDirectory = driveFileManager.getRootFile()
+            currentDirectory = driveFileManager?.getRootFile()
         }
 
         if sortType == nil {
             sortType = UserDefaults.shared.sortType
         }
 
-        navigationController?.setInfomaniakAppearanceNavigationBar()
-
-        navigationItem.title = currentDirectory.name
+        setTitle()
         navigationItem.backButtonTitle = ""
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
@@ -150,7 +145,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchFileViewController.instantiateInNavigationController(), animated: true)
+        present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
     }
 
     func observeNetworkChange() {
@@ -166,6 +161,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     func observeUploadQueue() {
+        guard currentDirectory != nil else { return }
         uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
         UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { _, count in
             DispatchQueue.main.async { [weak self] in
@@ -190,7 +186,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     func observeFileUpdated() {
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
                 refreshDataSource(withActivities: true)
             } else if let index = sortedChildren.firstIndex(where: { $0.id == file.id }) {
@@ -224,16 +220,20 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     @objc func forceRefresh() {
+        if currentDirectory == nil {
+            currentDirectory = driveFileManager.getRootFile()
+        }
         currentPage = 0
         fetchNextPage(forceRefresh: true)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
             if let centerButton = (tabBarController as? MainTabViewController)?.tabBar.centerButton {
-                centerButton.isEnabled = currentDirectory.rights?.createNewFile.value ?? true
+                centerButton.isEnabled = currentDirectory?.rights?.createNewFile.value ?? true
             }
         #endif
 
@@ -251,7 +251,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
     }
 
     private func refreshDataSource(withActivities: Bool) {
-        currentDirectory?.realm?.refresh()
+        currentDirectory.realm?.refresh()
         let parentId = currentDirectory.isRoot ? DriveFileManager.constants.rootID : currentDirectory.id
         driveFileManager.getFile(id: parentId, page: 1, sortType: sortType, forceRefresh: false) { [self] (directory, children, _) in
             if let updatedDirectory = directory, let updatedChildren = children {
@@ -293,8 +293,10 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
             }
         }
     }
-    
+
     func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil && currentDirectory != nil else { return }
+
         currentPage += 1
         startLoading()
 
@@ -342,6 +344,10 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
                 showEmptyView(.noNetwork, children: sortedChildren)
             }
         }
+    }
+
+    func setTitle() {
+        navigationItem.title = currentDirectory?.name ?? driveFileManager?.drive.name
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -433,7 +439,7 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
-            navigationItem.title = currentDirectory.name
+            setTitle()
             navigationItem.leftBarButtonItem = nil
             navigationItem.rightBarButtonItems = rightBarButtonItems
         }
@@ -716,8 +722,10 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         }
     }
 
-    class func instantiate() -> FileListCollectionViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListCollectionViewController") as! FileListCollectionViewController
+    class func instantiate(driveFileManager: DriveFileManager) -> FileListCollectionViewController {
+        let viewController = UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileListCollectionViewController") as! FileListCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - File cell delegate
@@ -730,6 +738,37 @@ class FileListCollectionViewController: UIViewController, UICollectionViewDataSo
         #if !ISEXTENSION
             showQuickActionsPanel(file: sortedChildren[indexPath.row])
         #endif
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveID")
+        if let currentDirectory = currentDirectory {
+            coder.encode(currentDirectory.id, forKey: "DirectoryID")
+        }
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveID")
+        let directoryId = coder.decodeInteger(forKey: "DirectoryID")
+
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            // Handle error?
+            return
+        }
+        self.driveFileManager = driveFileManager
+        currentDirectory = driveFileManager.getCachedFile(id: directoryId)
+        setTitle()
+        if showUploadingFiles {
+            observeUploadQueue()
+        }
+        observeFileUpdated()
+        forceRefresh()
     }
 
 }
@@ -924,7 +963,7 @@ extension FileListCollectionViewController: FilesHeaderViewDelegate, SortOptions
             driveFileManager = newDriveFileManager
             currentDirectory = driveFileManager.getRootFile()
             uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory?.id ?? 1).count
-            navigationItem.title = currentDirectory?.name ?? newDriveFileManager.drive.name
+            setTitle()
             sortedChildren = [File]()
             currentPage = 0
             needsContentUpdate = true

@@ -34,6 +34,7 @@ class OfflineCollectionViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil else { return }
         sortedChildren = driveFileManager.getAvailableOfflineFiles(sortType: sortType)
         updateSelectedItems(newChildren: sortedChildren)
         sortedChildren.first?.isFirstInCollection = true
@@ -60,7 +61,7 @@ class OfflineCollectionViewController: FileListCollectionViewController {
     }
 
     override func observeFileUpdated() {
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
                 DispatchQueue.main.async {
                     getFileActivities(directory: self.currentDirectory)
@@ -94,7 +95,17 @@ class OfflineCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> OfflineCollectionViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "OfflineCollectionViewController") as! OfflineCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> OfflineCollectionViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "OfflineCollectionViewController") as! OfflineCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
+    }
+
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        navigationItem.title = KDriveStrings.Localizable.offlineFileTitle
     }
 }

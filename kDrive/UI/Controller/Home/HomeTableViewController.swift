@@ -559,7 +559,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 performSegue(withIdentifier: "switchDriveSegue", sender: nil)
                 tableView.deselectRow(at: indexPath, animated: true)
             case .search:
-                present(SearchFileViewController.instantiateInNavigationController(), animated: true)
+                present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
             }
         default:
             return

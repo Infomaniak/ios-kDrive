@@ -244,6 +244,27 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             }
         }
     }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        coder.encode(folder.id, forKey: "FolderId")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let folderId = coder.decodeInteger(forKey: "FolderId")
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        folder = driveFileManager.getCachedFile(id: folderId)
+    }
 }
 
 // MARK: - NewFolderSettingsDelegate

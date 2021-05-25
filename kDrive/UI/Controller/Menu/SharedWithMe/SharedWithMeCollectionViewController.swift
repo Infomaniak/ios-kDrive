@@ -25,12 +25,12 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
 
     override func viewDidLoad() {
         if currentDirectory == nil {
-            currentDirectory = driveFileManager.getCachedFile(id: DriveFileManager.constants.rootID) ?? DriveFileManager.sharedWithMeRootFile
+            currentDirectory = driveFileManager?.getCachedFile(id: DriveFileManager.constants.rootID) ?? DriveFileManager.sharedWithMeRootFile
         }
         super.viewDidLoad()
 
-        if currentDirectory.id == DriveFileManager.sharedWithMeRootFile.id {
-            title = "\(driveFileManager.drive.name)"
+        if currentDirectory.id == DriveFileManager.sharedWithMeRootFile.id && driveFileManager != nil {
+            navigationItem.title = driveFileManager.drive.name
         }
 
         filePresenter.listType = SharedWithMeCollectionViewController.self
@@ -78,7 +78,19 @@ class SharedWithMeCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> SharedWithMeCollectionViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "SharedWithMeCollectionViewController") as! SharedWithMeCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> SharedWithMeCollectionViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "SharedWithMeCollectionViewController") as! SharedWithMeCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
+    }
+
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id <= DriveFileManager.constants.rootID {
+            navigationItem.title = driveFileManager.drive.name
+        }
     }
 }

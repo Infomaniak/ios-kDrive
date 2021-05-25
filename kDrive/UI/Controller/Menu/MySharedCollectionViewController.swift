@@ -40,9 +40,11 @@ class MySharedCollectionViewController: FileListCollectionViewController {
     }
 
     override func fetchNextPage(forceRefresh: Bool = false) {
+        guard driveFileManager != nil && currentDirectory != nil else { return }
+
         currentPage += 1
         startLoading()
-        
+
         if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
             driveFileManager.getMyShared(page: currentPage, sortType: sortType, forceRefresh: forceRefresh) { [self] (root, myShared, error) in
                 self.isLoading = false
@@ -135,7 +137,7 @@ class MySharedCollectionViewController: FileListCollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if sortedChildren[indexPath.row].isDirectory {
-            let sharedCV = MySharedCollectionViewController.instantiate()
+            let sharedCV = MySharedCollectionViewController.instantiate(driveFileManager: driveFileManager)
             sharedCV.currentDirectory = sortedChildren[indexPath.row]
             self.navigationController?.pushViewController(sharedCV, animated: true)
         } else {
@@ -143,8 +145,19 @@ class MySharedCollectionViewController: FileListCollectionViewController {
         }
     }
 
-    override class func instantiate() -> MySharedCollectionViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "MySharedCollectionViewController") as! MySharedCollectionViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> MySharedCollectionViewController {
+        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "MySharedCollectionViewController") as! MySharedCollectionViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
+    // MARK: - State restoration
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
+            navigationItem.title = KDriveStrings.Localizable.mySharesTitle
+        }
+    }
 }

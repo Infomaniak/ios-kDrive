@@ -19,19 +19,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 
-public struct FileTypeRow {
+public struct FileTypeRow: RawRepresentable {
+
+    public typealias RawValue = String
+
+    public var rawValue: String
     let name: String
     let icon: UIImage
     let type: String
-    static let imagesRow = FileTypeRow(name: KDriveStrings.Localizable.allPictures, icon: KDriveAsset.fileImage.image, type: ConvertedType.image.rawValue)
-    static let videosRow = FileTypeRow(name: KDriveStrings.Localizable.allVideo, icon: KDriveAsset.fileVideo.image, type: ConvertedType.video.rawValue)
-    static let audioRow = FileTypeRow(name: KDriveStrings.Localizable.allAudio, icon: KDriveAsset.fileAudio.image, type: ConvertedType.audio.rawValue)
-    static let pdfRow = FileTypeRow(name: KDriveStrings.Localizable.allPdf, icon: KDriveAsset.filePdf.image, type: ConvertedType.pdf.rawValue)
-    static let docsRow = FileTypeRow(name: KDriveStrings.Localizable.allOfficeDocs, icon: KDriveAsset.fileText.image, type: ConvertedType.text.rawValue)
-    static let pointsRow = FileTypeRow(name: KDriveStrings.Localizable.allOfficePoints, icon: KDriveAsset.filePresentation.image, type: ConvertedType.presentation.rawValue)
-    static let gridsRow = FileTypeRow(name: KDriveStrings.Localizable.allOfficeGrids, icon: KDriveAsset.fileSheets.image, type: ConvertedType.spreadsheet.rawValue)
-    static let folderRow = FileTypeRow(name: KDriveStrings.Localizable.allFolder, icon: KDriveAsset.folderFilled.image, type: ConvertedType.folder.rawValue)
-    static let dropboxRow = FileTypeRow(name: KDriveStrings.Localizable.dropBoxTitle, icon: KDriveAsset.folderDropBox.image, type: "")
+
+    public init?(rawValue: String) {
+        if let type = FileTypeRow.allValues.first(where: { $0.rawValue == rawValue }) {
+            self = type
+        } else {
+            return nil
+        }
+    }
+
+    init(rawValue: String, name: String, icon: UIImage, type: String) {
+        self.rawValue = rawValue
+        self.name = name
+        self.icon = icon
+        self.type = type
+    }
+
+    static let imagesRow = FileTypeRow(rawValue: "images", name: KDriveStrings.Localizable.allPictures, icon: KDriveAsset.fileImage.image, type: ConvertedType.image.rawValue)
+    static let videosRow = FileTypeRow(rawValue: "videos", name: KDriveStrings.Localizable.allVideo, icon: KDriveAsset.fileVideo.image, type: ConvertedType.video.rawValue)
+    static let audioRow = FileTypeRow(rawValue: "audio", name: KDriveStrings.Localizable.allAudio, icon: KDriveAsset.fileAudio.image, type: ConvertedType.audio.rawValue)
+    static let pdfRow = FileTypeRow(rawValue: "pdf", name: KDriveStrings.Localizable.allPdf, icon: KDriveAsset.filePdf.image, type: ConvertedType.pdf.rawValue)
+    static let docsRow = FileTypeRow(rawValue: "docs", name: KDriveStrings.Localizable.allOfficeDocs, icon: KDriveAsset.fileText.image, type: ConvertedType.text.rawValue)
+    static let pointsRow = FileTypeRow(rawValue: "points", name: KDriveStrings.Localizable.allOfficePoints, icon: KDriveAsset.filePresentation.image, type: ConvertedType.presentation.rawValue)
+    static let gridsRow = FileTypeRow(rawValue: "grid", name: KDriveStrings.Localizable.allOfficeGrids, icon: KDriveAsset.fileSheets.image, type: ConvertedType.spreadsheet.rawValue)
+    static let folderRow = FileTypeRow(rawValue: "folder", name: KDriveStrings.Localizable.allFolder, icon: KDriveAsset.folderFilled.image, type: ConvertedType.folder.rawValue)
+    static let dropboxRow = FileTypeRow(rawValue: "dropbox", name: KDriveStrings.Localizable.dropBoxTitle, icon: KDriveAsset.folderDropBox.image, type: "")
+    static let allValues = [imagesRow, videosRow, audioRow, pdfRow, docsRow, pointsRow, gridsRow, folderRow, dropboxRow]
 }
 
 class SearchFileViewController: FileListCollectionViewController, UISearchBarDelegate {
@@ -151,13 +172,16 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
         }
     }
 
-    override class func instantiate() -> SearchFileViewController {
-        return UIStoryboard(name: "Search", bundle: nil).instantiateViewController(withIdentifier: "SearchFileViewController") as! SearchFileViewController
+    override class func instantiate(driveFileManager: DriveFileManager) -> SearchFileViewController {
+        let viewController = UIStoryboard(name: "Search", bundle: nil).instantiateViewController(withIdentifier: "SearchFileViewController") as! SearchFileViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
-    class func instantiateInNavigationController() -> UINavigationController {
-        let searchViewController = instantiate()
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager) -> UINavigationController {
+        let searchViewController = instantiate(driveFileManager: driveFileManager)
         let navigationController = UINavigationController(rootViewController: searchViewController)
+        navigationController.restorationIdentifier = "SearchNavigationController"
         navigationController.modalPresentationStyle = .fullScreen
         return navigationController
     }
@@ -279,6 +303,30 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
         }
         updateSearchResults(for: searchController)
     }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(currentSearchText, forKey: "CurrentSearchText")
+        coder.encode(selectedFileType?.rawValue, forKey: "SelectedFileType")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        currentSearchText = coder.decodeObject(forKey: "CurrentSearchText") as? String ?? ""
+        if let rawValue = coder.decodeObject(forKey: "SelectedFileType") as? String {
+            selectedFileType = FileTypeRow(rawValue: rawValue)
+        }
+
+        if currentSearchText.count >= minSearchCount || selectedFileType != nil {
+            showResults()
+        }
+        navigationItem.title = KDriveStrings.Localizable.searchTitle
+    }
+
 }
 
 //MARK: UISearchResultsUpdating

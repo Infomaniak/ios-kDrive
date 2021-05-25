@@ -135,7 +135,7 @@ class RecentActivitySharedController: RecentActivityDelegate {
         }
 
         if activities.count > 3 && index > 1 {
-            let nextVC = RecentActivityFileListViewController.instantiate(activities: activities)
+            let nextVC = RecentActivityFileListViewController.instantiate(activities: activities, driveFileManager: driveFileManager)
             filePresenter.navigationController?.pushViewController(nextVC, animated: true)
         } else {
             filePresenter.present(driveFileManager: driveFileManager, file: file, files: activities.compactMap(\.file), normalFolderHierarchy: false)
