@@ -75,7 +75,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             setTitle()
         }
     }
-    lazy var configuration = Configuration(rootTitle: driveFileManager.drive.name, emptyViewType: .emptyFolder)
+    lazy var configuration = Configuration(rootTitle: driveFileManager?.drive.name ?? "", emptyViewType: .emptyFolder)
     var uploadingFilesCount = 0
     var nextPage = 1
     var isLoading = false
@@ -134,10 +134,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         // Set up current directory
         if currentDirectory == nil {
-            currentDirectory = driveFileManager.getRootFile()
+            currentDirectory = driveFileManager?.getRootFile()
         }
         if configuration.showUploadingFiles {
-            uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
+            updateUploadCount()
         }
 
         // Set up multiple selection gesture
@@ -179,7 +179,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Overridable methods
 
     func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
+        driveFileManager?.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
@@ -190,7 +190,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func getNewChanges() {
-        driveFileManager.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
+        driveFileManager?.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
             if results != nil {
                 reloadData()
             }
@@ -279,6 +279,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     final func setUpObservers() {
+        guard driveFileManager != nil && currentDirectory != nil else { return }
+
         // Upload files observer
         if configuration.showUploadingFiles {
             UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] _, count in
@@ -329,6 +331,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             sortedFiles = []
             reloadData(page: 1)
         }
+    }
+
+    final func updateUploadCount() {
+        guard currentDirectory != nil else {
+            return
+        }
+        uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
     }
 
     final func showEmptyViewIfNeeded(type: EmptyTableView.EmptyTableViewType? = nil, files: [File]) {
@@ -641,6 +650,35 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         return actions
     }
 
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveID")
+        if let currentDirectory = currentDirectory {
+            coder.encode(currentDirectory.id, forKey: "DirectoryID")
+        }
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveID")
+        let directoryId = coder.decodeInteger(forKey: "DirectoryID")
+
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            // Handle error?
+            return
+        }
+        self.driveFileManager = driveFileManager
+        currentDirectory = driveFileManager.getCachedFile(id: directoryId)
+        configuration.rootTitle = driveFileManager.drive.name
+        setTitle()
+        setUpObservers()
+        forceRefresh()
+    }
+
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
@@ -847,7 +885,9 @@ extension FileListViewController: SortOptionsDelegate {
             self.driveFileManager = newDriveFileManager
             configuration.rootTitle = newDriveFileManager.drive.name
             currentDirectory = driveFileManager.getRootFile()
-            uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
+            if configuration.showUploadingFiles {
+                updateUploadCount()
+            }
             sortedFiles = []
             collectionView.reloadData()
             forceRefresh()
