@@ -47,12 +47,18 @@ class FileProviderExtension: NSFileProviderExtension {
 
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
-        fileCoordinator.purposeIdentifier = NSFileProviderManager.default.providerIdentifier
+        fileCoordinator.purposeIdentifier = manager.providerIdentifier
         return fileCoordinator
     }()
 
     let accountManager: AccountManager
     lazy var driveFileManager: DriveFileManager! = setDriveFileManager()
+    lazy var manager: NSFileProviderManager = {
+        if let domain = domain {
+            return NSFileProviderManager(for: domain) ?? .default
+        }
+        return .default
+    }()
 
     private func setDriveFileManager() -> DriveFileManager? {
         if let objectId = domain?.identifier.rawValue,
@@ -68,7 +74,6 @@ class FileProviderExtension: NSFileProviderExtension {
         Logging.initLogging()
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         accountManager = AccountManager.instance
-        NSFileProviderManager.default.signalEnumerator(for: .workingSet) { _ in }
         super.init()
     }
 
@@ -135,7 +140,8 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     override func startProvidingItem(at url: URL, completionHandler: @escaping (Error?) -> Void) {
-        guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId() else {
+        guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId(),
+            let file = driveFileManager.getCachedFile(id: fileId) else {
             if FileManager.default.fileExists(atPath: url.path) {
                 completionHandler(nil)
             } else {
@@ -144,26 +150,24 @@ class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
-        if let file = driveFileManager.getCachedFile(id: fileId) {
-            let item = FileProviderItem(file: file, domain: domain)
+        let item = FileProviderItem(file: file, domain: domain)
 
-            if !FileManager.default.fileExists(atPath: item.storageUrl.path) {
-                //File is not in the file provider we have to download/copy it
-                downloadRemoteFile(file: file, for: item, completion: completionHandler)
-            } else if fileStorageIsCurrent(item: item, file: file) {
-                //File is in the file provider and is the same, nothing to do...
-                NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-                completionHandler(nil)
-            } else {
-                //File from file provider has changes not synced with cloud, we have to upload the local file
-                if !FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path) {
-                    //This is not optimal because we wait for the item to be uploaded before downloading the remote
-                    backgroundUploadItem(item) {
-                        self.downloadRemoteFile(file: file, for: item, completion: completionHandler)
-                    }
-                } else {
-                    downloadRemoteFile(file: file, for: item, completion: completionHandler)
+        if !FileManager.default.fileExists(atPath: item.storageUrl.path) {
+            // File is not in the file provider we have to download/copy it
+            downloadRemoteFile(file: file, for: item, completion: completionHandler)
+        } else if fileStorageIsCurrent(item: item, file: file) {
+            // File is in the file provider and is the same, nothing to do...
+            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+            completionHandler(nil)
+        } else {
+            // File from file provider has changes not synced with cloud, we have to upload the local file
+            if !FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path) {
+                // This is not optimal because we wait for the item to be uploaded before downloading the remote
+                backgroundUploadItem(item) {
+                    self.downloadRemoteFile(file: file, for: item, completion: completionHandler)
                 }
+            } else {
+                downloadRemoteFile(file: file, for: item, completion: completionHandler)
             }
         }
     }
@@ -180,21 +184,26 @@ class FileProviderExtension: NSFileProviderExtension {
 
     private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> ()) {
         if file.isLocalVersionOlderThanRemote() {
+            // Prevent observing file multiple times
+            guard DownloadQueue.instance.operationsInQueue[file.id] == nil else {
+                completion(nil)
+                return
+            }
             DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { (fileId, error) in
                 if error != nil {
-                    NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                     completion(NSFileProviderError(.serverUnreachable))
                 } else {
                     self.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                    NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                     completion(nil)
                 }
             }
-            DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId)
-            NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+            DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId, itemIdentifier: item.itemIdentifier)
+            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
         } else {
             copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-            NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completion(nil)
         }
     }

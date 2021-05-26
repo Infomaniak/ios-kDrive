@@ -227,8 +227,10 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
     func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
         driveFileManager = newDriveFileManager
         //Tell Files app that the drive changed
-        NSFileProviderManager.default.signalEnumerator(for: .workingSet) { (_) in }
-        NSFileProviderManager.default.signalEnumerator(for: .rootContainer) { (_) in }
+        DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
+            manager.signalEnumerator(for: .workingSet) { (_) in }
+            manager.signalEnumerator(for: .rootContainer) { (_) in }
+        }
         for viewController in viewControllers ?? [] {
             if viewController.isViewLoaded {
                 ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)

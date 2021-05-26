@@ -78,7 +78,8 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         self.itemIdentifier = NSFileProviderItemIdentifier(file.id)
         self.filename = file.name
         self.typeIdentifier = file.typeIdentifier.identifier
-        if let rights = file.rights?.freeze() {
+        if let rights = file.rights {
+            let rights = rights.realm == nil ? rights : rights.freeze()
             self.capabilities = FileProviderItem.rightsToCapabilities(rights)
         } else {
             self.capabilities = [.allowsContentEnumerating, .allowsReading]
@@ -189,7 +190,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     class func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
         let rootStorageURL: URL
         if let domain = domain {
-            rootStorageURL = NSFileProviderManager.default.documentStorageURL.appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
+            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL.appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
         } else {
             rootStorageURL = NSFileProviderManager.default.documentStorageURL
         }
@@ -203,7 +204,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     class func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String, domain: NSFileProviderDomain?) -> URL {
         let rootStorageURL: URL
         if let domain = domain {
-            rootStorageURL = NSFileProviderManager.default.documentStorageURL.appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
+            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL.appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
         } else {
             rootStorageURL = NSFileProviderManager.default.documentStorageURL
         }
