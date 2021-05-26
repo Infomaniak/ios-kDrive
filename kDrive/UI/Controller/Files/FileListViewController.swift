@@ -161,7 +161,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         // Refresh data
         if isContentLoaded {
-            getFileActivities()
+            getNewChanges()
         }
     }
 
@@ -173,7 +173,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchFileViewController.instantiateInNavigationController(), animated: true)
+        present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
     }
 
     // MARK: - Overridable methods
@@ -189,10 +189,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
-    func getFileActivities() {
+    func getNewChanges() {
         driveFileManager.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
             if results != nil {
-                // TODO
+                reloadData()
             }
         }
     }
@@ -275,7 +275,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     @objc final func forceRefresh() {
         sortedFiles = []
-        reloadData(page: 1, forceRefresh: true)
+        reloadData(forceRefresh: true)
     }
 
     final func setUpObservers() {
@@ -387,7 +387,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                         UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: KDriveStrings.Localizable.buttonCancel) {
                             guard let cancelId = cancelId else { return }
                             self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { (error) in
-                                self.getFileActivities()
+                                self.getNewChanges()
                                 if error == nil {
                                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
                                 }
@@ -400,7 +400,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
                 }
                 self.selectionMode = false
-                self.getFileActivities()
+                self.getNewChanges()
             }
             return nil
         } else {
@@ -772,7 +772,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
                     let message = success ? KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedFiles.count, selectedFolder.name) : KDriveStrings.Localizable.errorMove
                     UIConstants.showSnackBar(message: message)
                     self.selectionMode = false
-                    self.getFileActivities()
+                    self.getNewChanges()
                 }
             }
             present(selectFolderNavigationController, animated: true)
@@ -800,7 +800,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
                 DispatchQueue.main.async {
                     UIConstants.showSnackBar(message: message)
                     self.selectionMode = false
-                    self.getFileActivities()
+                    self.getNewChanges()
                 }
             }
             present(alert, animated: true)
