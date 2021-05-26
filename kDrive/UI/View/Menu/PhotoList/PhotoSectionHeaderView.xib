@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionReusableView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoSectionHeaderView" id="U6b-Vx-4bR" customClass="PhotoSectionHeaderView" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <subviews>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jWG-9l-JoG" customClass="IKLabel" customModule="kDriveCore">
+                    <rect key="frame" x="16" y="8" width="288" height="34"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
+                    </userDefinedRuntimeAttributes>
+                </label>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="VXr-Tz-HHm"/>
+            <constraints>
+                <constraint firstItem="jWG-9l-JoG" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" constant="16" id="JhC-gM-Ce7"/>
+                <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" secondItem="jWG-9l-JoG" secondAttribute="bottom" constant="8" id="MDR-qb-YCW"/>
+                <constraint firstAttribute="trailing" secondItem="jWG-9l-JoG" secondAttribute="trailing" constant="16" id="mx2-TN-HIQ"/>
+                <constraint firstItem="jWG-9l-JoG" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="8" id="yQz-UW-CEc"/>
+            </constraints>
+            <connections>
+                <outlet property="titleLabel" destination="jWG-9l-JoG" id="Mom-ZO-6QP"/>
+            </connections>
+            <point key="canvasLocation" x="132" y="131"/>
+        </collectionReusableView>
+    </objects>
+    <designables>
+        <designable name="jWG-9l-JoG">
+            <size key="intrinsicContentSize" width="46" height="21.5"/>
+        </designable>
+    </designables>
+</document>
