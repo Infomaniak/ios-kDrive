@@ -245,7 +245,7 @@ class TrashCollectionViewController: FileListCollectionViewController {
             for file in files {
                 group.enter()
                 self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { (response, error) in
-                    file.signalChanges()
+                    file.signalChanges(userId: self.driveFileManager.drive.userId)
                     if let error = error {
                         success = false
                         DDLogError("Error while deleting file: \(error)")
@@ -324,7 +324,7 @@ extension TrashCollectionViewController: TrashOptionsDelegate {
                 group.enter()
                 driveFileManager.apiFetcher.restoreTrashedFile(file: file) { [self] (response, error) in
                     // TODO: Find parent to signal changes
-                    file.signalChanges()
+                    file.signalChanges(userId: self.driveFileManager.drive.userId)
                     if error == nil {
                         getNewChildren(deletedChild: file)
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
@@ -351,7 +351,7 @@ extension TrashCollectionViewController: SelectFolderDelegate {
         for file in currentTrashedFiles ?? [] {
             group.enter()
             driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: folder.id) { [self] (response, error) in
-                folder.signalChanges()
+                folder.signalChanges(userId: self.driveFileManager.drive.userId)
                 if error == nil {
                     getNewChildren(deletedChild: file)
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, folder.name), view: self.view)

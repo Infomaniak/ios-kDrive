@@ -368,8 +368,7 @@ public class File: Object, Codable {
     }
 
     /// Signal changes on this file to the File Provider Extension
-    public func signalChanges() {
-        NSFileProviderManager.default.signalEnumerator(for: .workingSet) { _ in }
+    public func signalChanges(userId: Int) {
         let identifier: NSFileProviderItemIdentifier
         if isDirectory {
             identifier = id == DriveFileManager.constants.rootID ? .rootContainer : NSFileProviderItemIdentifier("\(id)")
@@ -378,7 +377,10 @@ public class File: Object, Codable {
         } else {
             identifier = .rootContainer
         }
-        NSFileProviderManager.default.signalEnumerator(for: identifier) { _ in }
+        DriveInfosManager.instance.getFileProviderManager(driveId: driveId, userId: userId) { manager in
+            manager.signalEnumerator(for: .workingSet) { _ in }
+            manager.signalEnumerator(for: identifier) { _ in }
+        }
     }
 
     required public init(from decoder: Decoder) throws {

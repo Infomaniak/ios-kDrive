@@ -56,8 +56,8 @@ extension FileProviderExtension {
             if let file = response?.data {
                 self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { (response, error) in
                     FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                    NSFileProviderManager.default.signalEnumerator(for: .workingSet) { _ in }
-                    NSFileProviderManager.default.signalEnumerator(for: itemIdentifier) { _ in }
+                    self.manager.signalEnumerator(for: .workingSet) { _ in }
+                    self.manager.signalEnumerator(for: itemIdentifier) { _ in }
                     completionHandler(error)
                 }
             } else {
@@ -103,7 +103,7 @@ extension FileProviderExtension {
 
         backgroundUploadItem(importedItem)
 
-        NSFileProviderManager.default.signalEnumerator(for: parentItemIdentifier) { _ in }
+        manager.signalEnumerator(for: parentItemIdentifier) { _ in }
         completionHandler(importedItem, nil)
     }
 
@@ -111,7 +111,7 @@ extension FileProviderExtension {
         // Doc says we should do network request after renaming local file but we could end up with model desync
         if let item = FileProviderExtensionState.shared.importedDocuments[itemIdentifier] {
             item.filename = itemName
-            NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completionHandler(item, nil)
             return
         }
@@ -144,7 +144,7 @@ extension FileProviderExtension {
     override func reparentItem(withIdentifier itemIdentifier: NSFileProviderItemIdentifier, toParentItemWithIdentifier parentItemIdentifier: NSFileProviderItemIdentifier, newName: String?, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
         if let item = FileProviderExtensionState.shared.importedDocuments[itemIdentifier] {
             item.parentItemIdentifier = parentItemIdentifier
-            NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completionHandler(item, nil)
             return
         }
@@ -230,8 +230,8 @@ extension FileProviderExtension {
                         item.parentItemIdentifier = parentItemIdentifier
                         item.isTrashed = false
                         FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                        NSFileProviderManager.default.signalEnumerator(for: .workingSet) { _ in }
-                        NSFileProviderManager.default.signalEnumerator(for: parentItemIdentifier) { _ in }
+                        self.manager.signalEnumerator(for: .workingSet) { _ in }
+                        self.manager.signalEnumerator(for: parentItemIdentifier) { _ in }
                         if let error = error {
                             completionHandler(nil, error)
                         } else {
@@ -244,8 +244,8 @@ extension FileProviderExtension {
                         let item = FileProviderItem(file: file, domain: self.domain)
                         item.isTrashed = false
                         FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                        NSFileProviderManager.default.signalEnumerator(for: .workingSet) { _ in }
-                        NSFileProviderManager.default.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                        self.manager.signalEnumerator(for: .workingSet) { _ in }
+                        self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                         if let error = error {
                             completionHandler(nil, error)
                         } else {

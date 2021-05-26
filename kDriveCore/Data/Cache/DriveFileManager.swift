@@ -808,7 +808,7 @@ public class DriveFileManager {
         let fileId = file.id
         apiFetcher.deleteFile(file: file) { (response, error) in
             if error == nil {
-                file.signalChanges()
+                file.signalChanges(userId: self.drive.userId)
                 self.backgroundQueue.async { [self] in
                     let localRealm = getRealm()
                     removeFileInDatabase(fileId: fileId, cascade: false, withTransaction: true, using: localRealm)
@@ -841,10 +841,10 @@ public class DriveFileManager {
                         newParent.children.append(file)
                     }
                     if let oldParent = oldParent {
-                        oldParent.signalChanges()
+                        oldParent.signalChanges(userId: self.drive.userId)
                         self.notifyObserversWith(file: oldParent)
                     }
-                    newParent.signalChanges()
+                    newParent.signalChanges(userId: self.drive.userId)
                     self.notifyObserversWith(file: newParent)
                     completion(response?.data, file, error)
                 } else {
@@ -865,7 +865,7 @@ public class DriveFileManager {
                 do {
                     updatedFile.isAvailableOffline = file.isAvailableOffline
                     let updatedFile = try self.updateFileInDatabase(updatedFile: updatedFile, oldFile: file, using: realm)
-                    updatedFile.signalChanges()
+                    updatedFile.signalChanges(userId: drive.userId)
                     self.notifyObserversWith(file: updatedFile)
                     completion(updatedFile, nil)
                 } catch {
@@ -889,9 +889,9 @@ public class DriveFileManager {
                         parent?.children.append(duplicateFile)
                     }
 
-                    duplicateFile.signalChanges()
+                    duplicateFile.signalChanges(userId: self.drive.userId)
                     if let parent = file.parent {
-                        parent.signalChanges()
+                        parent.signalChanges(userId: self.drive.userId)
                         self.notifyObserversWith(file: parent)
                     }
                     completion(duplicateFile, nil)
@@ -917,7 +917,7 @@ public class DriveFileManager {
                         parent?.children.append(createdDirectory)
                     }
                     if let parent = createdDirectory.parent {
-                        parent.signalChanges()
+                        parent.signalChanges(userId: self.drive.userId)
                         self.notifyObserversWith(file: parent)
                     }
                     completion(createdDirectory, error)
@@ -936,7 +936,7 @@ public class DriveFileManager {
                 do {
                     let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
                     if let parent = createdDirectory.parent {
-                        parent.signalChanges()
+                        parent.signalChanges(userId: self.drive.userId)
                         self.notifyObserversWith(file: parent)
                     }
                     completion(createdDirectory, error)
@@ -972,7 +972,7 @@ public class DriveFileManager {
                                 parent?.children.append(createdDirectory)
                             }
                             if let parent = createdDirectory.parent {
-                                parent.signalChanges()
+                                parent.signalChanges(userId: self.drive.userId)
                                 self.notifyObserversWith(file: parent)
                             }
                             completion(createdDirectory, dropbox, error)
@@ -999,10 +999,10 @@ public class DriveFileManager {
                 try? realm.write {
                     parent?.children.append(createdFile)
                 }
-                createdFile.signalChanges()
+                createdFile.signalChanges(userId: self.drive.userId)
 
                 if let parent = createdFile.parent {
-                    parent.signalChanges()
+                    parent.signalChanges(userId: self.drive.userId)
                     self.notifyObserversWith(file: parent)
                 }
 

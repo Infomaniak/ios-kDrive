@@ -127,7 +127,9 @@ public class DownloadOperation: Operation {
                         DownloadQueue.instance.publishProgress(newValue, for: fileId)
                     })
                     if let itemIdentifier = itemIdentifier {
-                        NSFileProviderManager.default.register(task!, forItemWithIdentifier: itemIdentifier) { _ in }
+                        DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
+                            manager.register(task!, forItemWithIdentifier: itemIdentifier) { _ in }
+                        }
                     }
                     task?.resume()
                 } else {

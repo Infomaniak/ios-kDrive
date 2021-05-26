@@ -28,6 +28,7 @@ public class DriveInfosManager {
     private static let currentDbVersion: UInt64 = 1
     private let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
+    private var fileProviderManagers: [String: NSFileProviderManager] = [:]
 
     private init() {
         realmConfiguration = Realm.Configuration(
@@ -110,6 +111,36 @@ public class DriveInfosManager {
                         DDLogError("Error while removing domain \(domain.displayName): \(error)")
                     }
                 }
+            }
+        }
+    }
+
+    func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
+        NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
+            if let error = error {
+                DDLogError("Error while getting domains: \(error)")
+                completion(nil)
+            } else {
+                completion(domains.first(where: { $0.identifier.rawValue == driveId }))
+            }
+        }
+    }
+
+    public func getFileProviderManager(for drive: Drive, completion: @escaping (NSFileProviderManager) -> Void) {
+        getFileProviderManager(for: drive.objectId, completion: completion)
+    }
+
+    public func getFileProviderManager(driveId: Int, userId: Int, completion: @escaping (NSFileProviderManager) -> Void) {
+        let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
+        getFileProviderManager(for: objectId, completion: completion)
+    }
+
+    public func getFileProviderManager(for driveId: String, completion: @escaping (NSFileProviderManager) -> Void) {
+        getFileProviderDomain(for: driveId) { domain in
+            if let domain = domain {
+                completion(NSFileProviderManager(for: domain) ?? .default)
+            } else {
+                completion(.default)
             }
         }
     }
