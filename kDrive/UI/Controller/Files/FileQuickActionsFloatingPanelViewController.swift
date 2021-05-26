@@ -163,8 +163,6 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         quickActions.forEach { (action) in
             let offline = ReachabilityListener.instance.currentStatus == .offline
             switch action {
-            case .informations:
-                action.isEnabled = !offline
             case .shareAndRights:
                 if !(file.rights?.share.value ?? false) || offline {
                     action.isEnabled = false

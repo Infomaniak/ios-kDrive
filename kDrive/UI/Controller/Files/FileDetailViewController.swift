@@ -50,8 +50,9 @@ class FileDetailViewController: UIViewController {
         case sizeAll
     }
 
+    private var initialLoading: Bool = true
     private var currentTab = Tabs.informations
-    private var fileInformationRows = [FileInformationRow]()
+    private var fileInformationRows: [FileInformationRow] = [.users, .share, .owner, .creation, .added, .size]
     private var oldSections = 2
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -126,6 +127,19 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: InfoTableViewCell.self)
 
         tableView.separatorColor = .clear
+        
+        if self.file.createdAtDate == nil {
+            self.fileInformationRows.remove(at: 4)
+        }
+        if self.file.fileCreatedAtDate == nil {
+            self.fileInformationRows.remove(at: 3)
+        }
+        if !(self.file.rights?.share.value ?? false) {
+            self.fileInformationRows.remove(at: 1)
+        }
+        if self.file.isDirectory {
+            self.fileInformationRows.removeLast()
+        }
 
         guard file != nil else { return }
 
@@ -172,14 +186,17 @@ class FileDetailViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
-            if let data = response?.data {
-                self.sharedFile = data
-                if self.currentTab == .informations {
-                    self.reloadTableView()
+        if !initialLoading {
+            driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+                if let data = response?.data {
+                    self.sharedFile = data
+                    if self.currentTab == .informations {
+                        self.reloadTableView()
+                    }
                 }
             }
         }
+        initialLoading = false
     }
 
     private func reloadTableView(animation: UITableView.RowAnimation = .none) {
@@ -431,7 +448,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .users:
                     let cell = tableView.dequeueReusableCell(type: FileInformationUsersTableViewCell.self, for: indexPath)
                     cell.sharedFile = sharedFile
-                    cell.fallbackUsers = file.users.compactMap { DriveInfosManager.instance.getUser(id: $0) }
+                    let userIds = file.users.isEmpty ? [file.createdBy] : Array(file.users)
+                    cell.fallbackUsers = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0) }
                     cell.shareButton.isHidden = !(file.rights?.share.value ?? false)
                     cell.delegate = self
                     cell.collectionView.reloadData()
