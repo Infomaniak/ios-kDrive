@@ -448,7 +448,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .users:
                     let cell = tableView.dequeueReusableCell(type: FileInformationUsersTableViewCell.self, for: indexPath)
                     cell.sharedFile = sharedFile
-                    cell.fallbackUsers = file.users.compactMap { DriveInfosManager.instance.getUser(id: $0) }
+                    cell.fallbackUsers = file.users.isEmpty ? [DriveInfosManager.instance.getUser(id: file.createdBy)!]: file.users.compactMap { DriveInfosManager.instance.getUser(id: $0) }
                     cell.shareButton.isHidden = !(file.rights?.share.value ?? false)
                     cell.delegate = self
                     cell.collectionView.reloadData()
