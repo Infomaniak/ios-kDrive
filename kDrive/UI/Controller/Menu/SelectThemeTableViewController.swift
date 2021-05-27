@@ -29,7 +29,7 @@ class SelectThemeTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = KDriveStrings.Localizable.settingDarkmodeTitle
+        title = KDriveStrings.Localizable.themeSettingsTitle
 
         tableView.register(cellView: ThemeSelectionTableViewCell.self)
         tableView.separatorColor = .clear
@@ -52,14 +52,7 @@ class SelectThemeTableViewController: UITableViewController {
         if currentTheme == selectedTheme {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
-        switch currentTheme {
-        case .dark:
-            cell.themeLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle2
-        case .light:
-            cell.themeLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle1
-        case .system:
-            cell.themeLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle3
-        }
+        cell.themeLabel.text = currentTheme.selectionTitle
         return cell
     }
 
