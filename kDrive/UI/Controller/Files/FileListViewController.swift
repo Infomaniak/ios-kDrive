@@ -52,7 +52,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         /// Is displayed from activities
         var fromActivities: Bool = false
         /// Root folder title
-        var rootTitle: String
+        var rootTitle: String?
         /// Type of empty view to display
         var emptyViewType: EmptyTableView.EmptyTableViewType
     }
@@ -75,7 +75,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             setTitle()
         }
     }
-    lazy var configuration = Configuration(rootTitle: driveFileManager?.drive.name ?? "", emptyViewType: .emptyFolder)
+    lazy var configuration = Configuration(emptyViewType: .emptyFolder)
     var uploadingFilesCount = 0
     var nextPage = 1
     var isLoading = false
@@ -105,7 +105,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         #if ISEXTENSION
             return false
         #else
-            return self is TrashCollectionViewController && currentDirectory.id == DriveFileManager.trashRootFile.id
+            return self is TrashCollectionViewController && currentDirectory.isRoot
         #endif
     }
 
@@ -306,7 +306,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // File observer
         driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory.id {
-                refreshDataSource(withActivities: true)
+                reloadData()
             } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
                 updateChild(file, at: index)
             }
@@ -366,11 +366,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     private func setTitle() {
         guard currentDirectory != nil else { return }
-        navigationItem.title = currentDirectory.id <= DriveFileManager.constants.rootID ? configuration.rootTitle : currentDirectory.name
-    }
-
-    private func refreshDataSource(withActivities: Bool) {
-        // TODO
+        if currentDirectory.isRoot {
+            if let rootTitle = configuration.rootTitle {
+                navigationItem.title = rootTitle
+            } else {
+                navigationItem.title = driveFileManager?.drive.name ?? ""
+            }
+        } else {
+            navigationItem.title = currentDirectory.name
+        }
     }
 
     @discardableResult
@@ -673,7 +677,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
         self.driveFileManager = driveFileManager
         currentDirectory = driveFileManager.getCachedFile(id: directoryId)
-        configuration.rootTitle = driveFileManager.drive.name
         setTitle()
         setUpObservers()
         forceRefresh()
@@ -883,15 +886,14 @@ extension FileListViewController: SortOptionsDelegate {
 
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
             self.driveFileManager = newDriveFileManager
-            configuration.rootTitle = newDriveFileManager.drive.name
             currentDirectory = driveFileManager.getRootFile()
+            setTitle()
             if configuration.showUploadingFiles {
                 updateUploadCount()
             }
             sortedFiles = []
             collectionView.reloadData()
             forceRefresh()
-            setTitle()
             navigationController?.popToRootViewController(animated: false)
         }
 
