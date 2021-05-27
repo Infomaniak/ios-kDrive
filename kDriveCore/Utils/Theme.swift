@@ -31,4 +31,24 @@ public enum Theme: String, CaseIterable {
         ]
         return styles[self] ?? .unspecified
     }
+
+    public var title: String {
+        switch self {
+        case .light:
+            return KDriveCoreStrings.Localizable.themeSettingsLightLabel
+        case .dark:
+            return KDriveCoreStrings.Localizable.themeSettingsDarkLabel
+        case .system:
+            return KDriveCoreStrings.Localizable.themeSettingsSystemLabel
+        }
+    }
+
+    public var selectionTitle: String {
+        switch self {
+        case .light, .dark:
+            return title
+        case .system:
+            return KDriveCoreStrings.Localizable.themeSettingsSystemDefaultLabel
+        }
+    }
 }

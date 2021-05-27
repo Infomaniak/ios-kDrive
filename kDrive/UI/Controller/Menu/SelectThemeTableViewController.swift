@@ -52,14 +52,7 @@ class SelectThemeTableViewController: UITableViewController {
         if currentTheme == selectedTheme {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
-        switch currentTheme {
-        case .dark:
-            cell.themeLabel.text = KDriveStrings.Localizable.themeSettingsDarkLabel
-        case .light:
-            cell.themeLabel.text = KDriveStrings.Localizable.themeSettingsLightLabel
-        case .system:
-            cell.themeLabel.text = KDriveStrings.Localizable.themeSettingsSystemDefaultLabel
-        }
+        cell.themeLabel.text = currentTheme.selectionTitle
         return cell
     }
 
