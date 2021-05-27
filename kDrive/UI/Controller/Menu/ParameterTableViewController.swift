@@ -71,14 +71,14 @@ class ParameterTableViewController: UITableViewController {
         case .theme:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle
+            cell.titleLabel.text = KDriveStrings.Localizable.themeSettingsTitle
             switch UserDefaults.shared.theme {
             case .light:
-                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle1
+                cell.valueLabel.text = KDriveStrings.Localizable.themeSettingsLightLabel
             case .dark:
-                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle2
+                cell.valueLabel.text = KDriveStrings.Localizable.themeSettingsDarkLabel
             case .system:
-                cell.valueLabel.text = KDriveStrings.Localizable.settingDarkmodeTitle4
+                cell.valueLabel.text = KDriveStrings.Localizable.themeSettingsSystemLabel
             default:
                 break
             }
