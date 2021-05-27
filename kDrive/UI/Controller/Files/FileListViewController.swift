@@ -28,8 +28,8 @@ extension SwipeCellAction {
 
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource {
 
-    static let storyboard: UIStoryboard = Storyboard.files
-    static let storyboardIdentifier: String = "FileListViewController"
+    class var storyboard: UIStoryboard { Storyboard.files }
+    class var storyboardIdentifier: String { "FileListViewController" }
 
     // MARK: - Constants
 
@@ -105,7 +105,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         #if ISEXTENSION
             return false
         #else
-            return self is TrashCollectionViewController && currentDirectory.isRoot
+            return self is TrashViewController && currentDirectory.isRoot
         #endif
     }
 
@@ -356,7 +356,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
-    final class func instantiate(driveFileManager: DriveFileManager) -> Self {
+    static func instantiate(driveFileManager: DriveFileManager) -> Self {
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
         viewController.driveFileManager = driveFileManager
         return viewController

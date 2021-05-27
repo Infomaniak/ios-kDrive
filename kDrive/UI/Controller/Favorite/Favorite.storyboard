@@ -8,10 +8,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Favorite Collection View Controller-->
+        <!--Favorite View Controller-->
         <scene sceneID="cIU-g2-50A">
             <objects>
-                <collectionViewController storyboardIdentifier="FavoriteCollectionViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5bk-r2-ze4" customClass="FavoriteCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="FavoriteViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5bk-r2-ze4" customClass="FavoriteViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="Sp7-zh-MMM" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

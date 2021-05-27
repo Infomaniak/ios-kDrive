@@ -58,7 +58,7 @@ class SharedDrivesViewController: UIViewController {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toSharedWithMeSegue",
-            let nextVC = segue.destination as? SharedWithMeCollectionViewController,
+            let nextVC = segue.destination as? SharedWithMeViewController,
             let drive = sender as? Drive,
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
             nextVC.driveFileManager = driveFileManager
