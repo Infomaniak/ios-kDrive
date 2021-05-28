@@ -19,17 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 
-class MySharesViewController: FileListViewController {
+class LastModificationsViewController2: FileListViewController {
 
     override class var storyboard: UIStoryboard { Storyboard.menu }
-    override class var storyboardIdentifier: String { "MySharesViewController" }
+    override class var storyboardIdentifier: String { "LastModificationsViewController" }
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, rootTitle: KDriveStrings.Localizable.mySharesTitle, emptyViewType: .noShared)
-        filePresenter.listType = MySharesViewController.self
+        configuration = Configuration(normalFolderHierarchy: false, rootTitle: KDriveStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo)
+        filePresenter.listType = LastModificationsViewController2.self
         if currentDirectory == nil {
-            currentDirectory = DriveFileManager.mySharedRootFile
+            currentDirectory = DriveFileManager.lastModificationsRootFile
         }
 
         super.viewDidLoad()
@@ -41,17 +41,16 @@ class MySharesViewController: FileListViewController {
             return
         }
 
-        if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
-            driveFileManager.getMyShared(page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
-                if let fetchedCurrentDirectory = file, let fetchedChildren = children {
-                    currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
-                    completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
+        if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
+            driveFileManager.apiFetcher.getLastModifiedFiles(page: page) { (response, error) in
+                if let data = response?.data {
+                    completion(.success(data), data.count == DriveApiFetcher.itemPerPage, false)
                 } else {
-                    completion(.failure(error ?? DriveError.localError), false, true)
+                    completion(.failure(error ?? DriveError.localError), false, false)
                 }
             }
         } else {
-            driveFileManager.apiFetcher.getFileListForDirectory(parentId: currentDirectory.id, page: page, sortType: sortType) { (response, error) in
+            driveFileManager.apiFetcher.getFileListForDirectory(parentId: currentDirectory.id, page: page) { (response, error) in
                 if let data = response?.data {
                     let children = data.children
                     completion(.success(Array(children)), children.count == DriveApiFetcher.itemPerPage, false)
@@ -63,8 +62,14 @@ class MySharesViewController: FileListViewController {
     }
 
     override func getNewChanges() {
-        // We don't have incremental changes for My Shared so we just fetch everything again
+        // We don't have incremental changes for Last Modifications so we just fetch everything again
         forceRefresh()
+    }
+
+    override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
+        super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
+        // Hide sort button
+        headerView.sortButton.isHidden = true
     }
 
 }

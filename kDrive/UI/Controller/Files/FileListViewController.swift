@@ -179,7 +179,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Overridable methods
 
     func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        driveFileManager?.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
+        guard driveFileManager != nil && currentDirectory != nil else {
+            completion(.success([]), false, true)
+            return
+        }
+
+        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)

@@ -44,8 +44,13 @@ class TrashViewController: FileListViewController {
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
+        guard driveFileManager != nil && currentDirectory != nil else {
+            completion(.success([]), false, true)
+            return
+        }
+
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            driveFileManager?.apiFetcher.getTrashedFiles(page: page, sortType: sortType) { (response, error) in
+            driveFileManager.apiFetcher.getTrashedFiles(page: page, sortType: sortType) { (response, error) in
                 if let trashedList = response?.data {
                     completion(.success(trashedList), trashedList.count == DriveApiFetcher.itemPerPage, false)
                 } else {
@@ -53,7 +58,7 @@ class TrashViewController: FileListViewController {
                 }
             }
         } else {
-            driveFileManager?.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: page, sortType: sortType) { (response, error) in
+            driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: page, sortType: sortType) { (response, error) in
                 if let file = response?.data {
                     let children = file.children
                     completion(.success(Array(children)), children.count == DriveApiFetcher.itemPerPage, false)

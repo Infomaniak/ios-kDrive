@@ -19,48 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 
-class FavoriteViewController: FileListViewController {
+class OfflineViewController: FileListViewController {
 
-    override class var storyboard: UIStoryboard { Storyboard.favorite }
-    override class var storyboardIdentifier: String { "FavoriteViewController" }
+    override class var storyboard: UIStoryboard { Storyboard.menu }
+    override class var storyboardIdentifier: String { "OfflineViewController" }
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, rootTitle: KDriveStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
+        configuration = Configuration(normalFolderHierarchy: false, rootTitle: KDriveStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
 
         super.viewDidLoad()
-
-        // If we didn't get any directory, use the fake root
-        if currentDirectory == nil {
-            currentDirectory = DriveFileManager.favoriteRootFile
-        }
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        guard driveFileManager != nil else {
-            completion(.success([]), false, true)
-            return
-        }
-
-        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
-            if let fetchedCurrentDirectory = file, let fetchedChildren = children {
-                currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
-                completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
-            } else {
-                completion(.failure(error ?? DriveError.localError), false, true)
-            }
-        }
+        let files = driveFileManager?.getAvailableOfflineFiles(sortType: sortType)
+        completion(.success(files ?? []), false, true)
     }
 
     override func getNewChanges() {
-        // We don't have incremental changes for favorites so we just fetch everything again
-        // But maybe we shouldn't?
+        // We don't have incremental changes for offline so we just fetch everything again
         forceRefresh()
     }
 
     override func updateChild(_ file: File, at index: Int) {
-        // Remove file from list if it was unfavorited
-        if !file.isFavorite {
+        // Remove file from list if it is not available offline anymore
+        if !file.isAvailableOffline {
             sortedFiles.remove(at: index)
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
@@ -81,17 +64,6 @@ class FavoriteViewController: FileListViewController {
         DispatchQueue.main.async { [weak self] in
             self?.collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
         }
-    }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        // We don't need to encode anything for Favorites
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        // We don't need to decode anything for Favorites
-        // DriveFileManager will be recovered from tab bar controller
     }
 
 }
