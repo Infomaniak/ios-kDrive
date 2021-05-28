@@ -35,6 +35,11 @@ class SharedWithMeViewController: FileListViewController {
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
+        guard currentDirectory != nil else {
+            completion(.success([]), false, true)
+            return
+        }
+
         if currentDirectory.isRoot && currentDirectory.fullyDownloaded && !forceRefresh {
             // We don't have file activities for the root in shared with me
             // Get the files from the cache

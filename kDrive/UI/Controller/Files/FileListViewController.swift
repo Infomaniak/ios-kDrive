@@ -736,7 +736,7 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
 
 extension FileListViewController: FileCellDelegate {
 
-    func didTapMoreButton(_ cell: FileCollectionViewCell) {
+    @objc func didTapMoreButton(_ cell: FileCollectionViewCell) {
         #if !ISEXTENSION
             guard let indexPath = collectionView.indexPath(for: cell) else {
                 return
@@ -819,7 +819,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
             present(selectFolderNavigationController, animated: true)
         }
 
-        func deleteButtonPressed() {
+        @objc func deleteButtonPressed() {
             let message: NSMutableAttributedString
             if selectedFiles.count == 1 {
                 message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescription(selectedFiles.first!.name), boldText: selectedFiles.first!.name)
@@ -847,7 +847,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
             present(alert, animated: true)
         }
 
-        func menuButtonPressed() {
+        @objc func menuButtonPressed() {
             let floatingPanelViewController = DriveFloatingPanelController()
             let selectViewController = SelectFloatingPanelTableViewController()
             floatingPanelViewController.isRemovalInteractionEnabled = true

@@ -38,6 +38,11 @@ class MySharesViewController: FileListViewController {
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
+        guard currentDirectory != nil else {
+            completion(.success([]), false, true)
+            return
+        }
+
         if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
             driveFileManager?.getMyShared(page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
                 if let fetchedCurrentDirectory = file, let fetchedChildren = children {
