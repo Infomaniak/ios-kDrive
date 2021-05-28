@@ -817,7 +817,7 @@ extension FileListCollectionViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - FilesHeaderViewDelegate
 extension FileListCollectionViewController: FilesHeaderViewDelegate, SortOptionsDelegate {
 
-    func filterButtonPressed() {
+    func sortButtonPressed() {
         let floatingPanelViewController = DriveFloatingPanelController()
         let sortOptionsViewController = FloatingPanelSortOptionTableViewController()
 

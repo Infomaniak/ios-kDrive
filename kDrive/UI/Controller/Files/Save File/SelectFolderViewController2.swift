@@ -59,7 +59,7 @@ class SelectFolderViewController2: FileListViewController {
             // Root directory: set back button if the view controller is presented modally
             let viewControllersCount = navigationController?.viewControllers.count ?? 0
             if isModal && viewControllersCount < 2 {
-                navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(close))
+                navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
                 navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
             }
         }
@@ -74,7 +74,7 @@ class SelectFolderViewController2: FileListViewController {
 
     // MARK: - Actions
 
-    @objc func close() {
+    @objc func closeButtonPressed() {
         dismiss(animated: true)
     }
 

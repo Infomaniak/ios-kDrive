@@ -20,7 +20,7 @@ import UIKit
 import kDriveCore
 
 protocol FilesHeaderViewDelegate: AnyObject {
-    func filterButtonPressed()
+    func sortButtonPressed()
     func gridButtonPressed()
     func uploadCardSelected()
     func removeFileTypeButtonPressed()
@@ -30,10 +30,7 @@ protocol FilesHeaderViewDelegate: AnyObject {
 }
 
 extension FilesHeaderViewDelegate {
-    func filterButtonPressed() { }
-    func gridButtonPressed() { }
     func uploadCardSelected() { }
-    func removeFileTypeButtonPressed() { }
     func moveButtonPressed() { }
     func deleteButtonPressed() { }
     func menuButtonPressed() { }
@@ -88,7 +85,7 @@ class FilesHeaderView: UICollectionReusableView {
     }
 
     @IBAction func filterButtonPressed(_ sender: UIButton) {
-        delegate?.filterButtonPressed()
+        delegate?.sortButtonPressed()
     }
 
     @IBAction func gridButtonPressed(_ sender: UIButton) {

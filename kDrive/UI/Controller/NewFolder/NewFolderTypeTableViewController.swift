@@ -32,7 +32,7 @@ class NewFolderTypeTableViewController: UITableViewController {
         tableView.register(cellView: FolderTypeTableViewCell.self)
         tableView.separatorColor = .clear
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeView))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
@@ -63,7 +63,7 @@ class NewFolderTypeTableViewController: UITableViewController {
         tableView.reloadData()
     }
 
-    @objc func closeView() {
+    @objc func closeButtonPressed() {
         self.dismiss(animated: true)
     }
 

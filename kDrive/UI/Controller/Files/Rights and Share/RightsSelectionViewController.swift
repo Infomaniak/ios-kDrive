@@ -95,7 +95,7 @@ class RightsSelectionViewController: UIViewController {
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeView))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelButtonPressed))
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
         navigationItem.largeTitleDisplayMode = .always
 
@@ -146,7 +146,7 @@ class RightsSelectionViewController: UIViewController {
         self.dismiss(animated: true)
     }
 
-    @objc func closeView() {
+    @objc func cancelButtonPressed() {
         self.dismiss(animated: true)
     }
 

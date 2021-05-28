@@ -9,10 +9,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Search File View Controller-->
+        <!--Search View Controller-->
         <scene sceneID="5xB-eg-ZH7">
             <objects>
-                <viewController storyboardIdentifier="SearchFileViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="DMC-wj-wr8" customClass="SearchFileViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="DMC-wj-wr8" customClass="SearchViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Sy2-R0-Z47">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -36,9 +36,9 @@
                         <viewLayoutGuide key="safeArea" id="MSE-jU-LyO"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="nQW-zP-jCE" secondAttribute="trailing" id="H6V-Mb-e5m"/>
+                            <constraint firstItem="MSE-jU-LyO" firstAttribute="trailing" secondItem="nQW-zP-jCE" secondAttribute="trailing" id="H6V-Mb-e5m"/>
                             <constraint firstAttribute="bottom" secondItem="nQW-zP-jCE" secondAttribute="bottom" id="UB8-AX-aUJ"/>
-                            <constraint firstItem="nQW-zP-jCE" firstAttribute="leading" secondItem="Sy2-R0-Z47" secondAttribute="leading" id="uNo-qs-x9U"/>
+                            <constraint firstItem="nQW-zP-jCE" firstAttribute="leading" secondItem="MSE-jU-LyO" secondAttribute="leading" id="uNo-qs-x9U"/>
                             <constraint firstItem="nQW-zP-jCE" firstAttribute="top" secondItem="Sy2-R0-Z47" secondAttribute="top" id="uOS-AF-L6P"/>
                         </constraints>
                     </view>

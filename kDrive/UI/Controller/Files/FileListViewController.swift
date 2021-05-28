@@ -173,7 +173,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
+        present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
     }
 
     // MARK: - Overridable methods
@@ -235,7 +235,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Public methods
 
     final func reloadData(page: Int = 1, forceRefresh: Bool = false) {
-        if page == 1 {
+        if page == 1 && configuration.isRefreshControlEnabled {
             // Show refresh control if loading is slow
             isLoading = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -249,7 +249,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (result, moreComing, replaceFiles) in
             isLoading = false
-            refreshControl.endRefreshing()
+            if configuration.isRefreshControlEnabled {
+                refreshControl.endRefreshing()
+            }
             switch result {
             case .success(let newFiles):
                 let files: [File]
@@ -689,7 +691,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
 }
 
-// MARK: - UICollectionViewDelegateFlowLayout
+// MARK: - Collection view delegate flow layout
 
 extension FileListViewController: UICollectionViewDelegateFlowLayout {
 
@@ -756,7 +758,7 @@ extension FileListViewController: FileCellDelegate {
 
 extension FileListViewController: FilesHeaderViewDelegate {
 
-    func filterButtonPressed() {
+    func sortButtonPressed() {
         let floatingPanelViewController = DriveFloatingPanelController()
         let sortOptionsViewController = FloatingPanelSortOptionTableViewController()
 
@@ -867,6 +869,8 @@ extension FileListViewController: FilesHeaderViewDelegate {
             self.present(floatingPanelViewController, animated: true)
         }
     #endif
+
+    @objc func removeFileTypeButtonPressed() { }
 
 }
 
