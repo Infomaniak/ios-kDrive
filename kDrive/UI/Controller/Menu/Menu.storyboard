@@ -86,7 +86,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="d4c-3A-5ea" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="qto-Hs-mLN">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -101,12 +101,12 @@
                             </collectionView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="3Nt-DW-DQw"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="d4c-3A-5ea" secondAttribute="bottom" id="5tO-4u-6Xv"/>
-                            <constraint firstAttribute="trailing" secondItem="d4c-3A-5ea" secondAttribute="trailing" id="8te-55-3Ws"/>
+                            <constraint firstItem="3Nt-DW-DQw" firstAttribute="trailing" secondItem="d4c-3A-5ea" secondAttribute="trailing" id="8te-55-3Ws"/>
                             <constraint firstItem="d4c-3A-5ea" firstAttribute="top" secondItem="QeU-vC-Rve" secondAttribute="top" id="OhK-FT-ffQ"/>
-                            <constraint firstItem="d4c-3A-5ea" firstAttribute="leading" secondItem="QeU-vC-Rve" secondAttribute="leading" id="Whw-iY-WCP"/>
+                            <constraint firstItem="d4c-3A-5ea" firstAttribute="leading" secondItem="3Nt-DW-DQw" secondAttribute="leading" id="Whw-iY-WCP"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="yB6-mv-wht"/>
@@ -359,7 +359,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="KX7-BT-RpP" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Krb-aq-yI3">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -374,12 +374,12 @@
                             </collectionView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="z6N-6g-2ng"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="KX7-BT-RpP" secondAttribute="trailing" id="LsY-FI-mXN"/>
+                            <constraint firstItem="z6N-6g-2ng" firstAttribute="trailing" secondItem="KX7-BT-RpP" secondAttribute="trailing" id="LsY-FI-mXN"/>
                             <constraint firstAttribute="bottom" secondItem="KX7-BT-RpP" secondAttribute="bottom" id="MZM-DY-n76"/>
                             <constraint firstItem="KX7-BT-RpP" firstAttribute="top" secondItem="PWA-yM-cwO" secondAttribute="top" id="hDx-VH-bkI"/>
-                            <constraint firstItem="KX7-BT-RpP" firstAttribute="leading" secondItem="PWA-yM-cwO" secondAttribute="leading" id="qv5-4H-Jw3"/>
+                            <constraint firstItem="KX7-BT-RpP" firstAttribute="leading" secondItem="z6N-6g-2ng" secondAttribute="leading" id="qv5-4H-Jw3"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="55U-WK-kHf"/>
@@ -401,7 +401,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="jSV-9q-qG1" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="4tH-xa-47R">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -416,10 +416,10 @@
                             </collectionView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="t0Y-7N-Rfa"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
-                            <constraint firstItem="jSV-9q-qG1" firstAttribute="leading" secondItem="P0D-aA-bNc" secondAttribute="leading" id="0nJ-1G-0o4"/>
-                            <constraint firstAttribute="trailing" secondItem="jSV-9q-qG1" secondAttribute="trailing" id="BeH-4i-ovY"/>
+                            <constraint firstItem="jSV-9q-qG1" firstAttribute="leading" secondItem="t0Y-7N-Rfa" secondAttribute="leading" id="0nJ-1G-0o4"/>
+                            <constraint firstItem="t0Y-7N-Rfa" firstAttribute="trailing" secondItem="jSV-9q-qG1" secondAttribute="trailing" id="BeH-4i-ovY"/>
                             <constraint firstItem="jSV-9q-qG1" firstAttribute="top" secondItem="P0D-aA-bNc" secondAttribute="top" id="fv9-Hu-InL"/>
                             <constraint firstAttribute="bottom" secondItem="jSV-9q-qG1" secondAttribute="bottom" id="gcV-TL-Dpl"/>
                         </constraints>
@@ -461,7 +461,7 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Changer d'utilisateur" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Orz-m0-bIR" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="294" width="350" height="21.5"/>
+                                <rect key="frame" x="32" y="294" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -471,7 +471,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6cc-pK-yXN">
-                                <rect key="frame" x="32" y="331.5" width="46" height="2"/>
+                                <rect key="frame" x="32" y="334" width="46" height="2"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="2" id="0s8-rW-ZlD"/>
@@ -479,7 +479,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ahf-mt-ZbI" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="349.5" width="350" height="17"/>
+                                <rect key="frame" x="32" y="352" width="350" height="81.5"/>
                                 <string key="text">Consulter les notifications de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez. </string>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
@@ -490,7 +490,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="L3K-dK-zvk">
-                                <rect key="frame" x="0.0" y="382.5" width="414" height="513.5"/>
+                                <rect key="frame" x="0.0" y="449.5" width="414" height="446.5"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="180" id="Bqe-NE-eMP"/>
@@ -633,7 +633,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Ru8-RK-H97" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="rXr-Ru-fDC">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -648,10 +648,10 @@
                             </collectionView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="eqa-2E-bpF"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="Ru8-RK-H97" secondAttribute="trailing" id="N41-iD-DCm"/>
-                            <constraint firstItem="Ru8-RK-H97" firstAttribute="leading" secondItem="qpq-Px-T9t" secondAttribute="leading" id="NcG-1P-2aj"/>
+                            <constraint firstItem="eqa-2E-bpF" firstAttribute="trailing" secondItem="Ru8-RK-H97" secondAttribute="trailing" id="N41-iD-DCm"/>
+                            <constraint firstItem="Ru8-RK-H97" firstAttribute="leading" secondItem="eqa-2E-bpF" secondAttribute="leading" id="NcG-1P-2aj"/>
                             <constraint firstItem="Ru8-RK-H97" firstAttribute="top" secondItem="qpq-Px-T9t" secondAttribute="top" id="ohP-qu-nTX"/>
                             <constraint firstAttribute="bottom" secondItem="Ru8-RK-H97" secondAttribute="bottom" id="wHF-T8-tjV"/>
                         </constraints>
@@ -684,7 +684,7 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="318" width="350" height="21.5"/>
+                                <rect key="frame" x="32" y="318" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -694,7 +694,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M26-GT-YZh">
-                                <rect key="frame" x="32" y="355.5" width="46" height="2"/>
+                                <rect key="frame" x="32" y="358" width="46" height="2"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="46" id="EjK-HW-r8M"/>
@@ -702,7 +702,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="373.5" width="350" height="17"/>
+                                <rect key="frame" x="32" y="376" width="350" height="81.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -712,7 +712,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RCf-P4-yUy" customClass="ShadowView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="32" y="422.5" width="350" height="80"/>
+                                <rect key="frame" x="32" y="489.5" width="350" height="80"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activer le verouillage Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="xyY-1J-PGU" customClass="IKLabel" customModule="kDriveCore">
                                         <rect key="frame" x="16" y="30.5" width="261" height="19.5"/>
@@ -824,7 +824,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="qfd-KY-ZkM" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="5Uu-5h-S7X">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -839,11 +839,11 @@
                             </collectionView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="CvF-Dc-QP2"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="qfd-KY-ZkM" secondAttribute="trailing" id="ZWF-1p-6Qd"/>
+                            <constraint firstItem="CvF-Dc-QP2" firstAttribute="trailing" secondItem="qfd-KY-ZkM" secondAttribute="trailing" id="ZWF-1p-6Qd"/>
                             <constraint firstItem="qfd-KY-ZkM" firstAttribute="top" secondItem="r7w-Qi-u7D" secondAttribute="top" id="ohQ-Ct-fYU"/>
-                            <constraint firstItem="qfd-KY-ZkM" firstAttribute="leading" secondItem="r7w-Qi-u7D" secondAttribute="leading" id="okk-bs-Won"/>
+                            <constraint firstItem="qfd-KY-ZkM" firstAttribute="leading" secondItem="CvF-Dc-QP2" secondAttribute="leading" id="okk-bs-Won"/>
                             <constraint firstAttribute="bottom" secondItem="qfd-KY-ZkM" secondAttribute="bottom" id="tV5-rj-oWc"/>
                         </constraints>
                     </view>
@@ -863,23 +863,23 @@
     </scenes>
     <designables>
         <designable name="0Ow-gT-FNm">
-            <size key="intrinsicContentSize" width="138" height="21.5"/>
+            <size key="intrinsicContentSize" width="66.5" height="24"/>
         </designable>
         <designable name="Orz-m0-bIR">
-            <size key="intrinsicContentSize" width="130.5" height="21.5"/>
+            <size key="intrinsicContentSize" width="188.5" height="24"/>
         </designable>
         <designable name="SeG-hp-Rwt"/>
         <designable name="abC-af-U6z">
-            <size key="intrinsicContentSize" width="76" height="29"/>
+            <size key="intrinsicContentSize" width="91" height="34"/>
         </designable>
         <designable name="ahf-mt-ZbI">
-            <size key="intrinsicContentSize" width="146" height="17"/>
+            <size key="intrinsicContentSize" width="987" height="20.5"/>
         </designable>
         <designable name="gJI-rA-NpO">
-            <size key="intrinsicContentSize" width="152" height="17"/>
+            <size key="intrinsicContentSize" width="916.5" height="20.5"/>
         </designable>
         <designable name="xyY-1J-PGU">
-            <size key="intrinsicContentSize" width="171.5" height="19.5"/>
+            <size key="intrinsicContentSize" width="208" height="19.5"/>
         </designable>
     </designables>
     <resources>

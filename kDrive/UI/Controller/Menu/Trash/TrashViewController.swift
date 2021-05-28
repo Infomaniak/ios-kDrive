@@ -244,9 +244,9 @@ extension TrashViewController: TrashOptionsDelegate {
         switch option {
         case .restoreIn:
             filesToRestore = files
-            selectFolderViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+            selectFolderViewController = SelectFolderViewController2.instantiateInNavigationController(driveFileManager: driveFileManager)
             selectFolderViewController.modalPresentationStyle = .fullScreen
-            if let selectFolderVC = selectFolderViewController.topViewController as? SelectFolderViewController {
+            if let selectFolderVC = selectFolderViewController.topViewController as? SelectFolderViewController2 {
                 selectFolderVC.delegate = self
             }
             present(selectFolderViewController, animated: true)

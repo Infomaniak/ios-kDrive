@@ -473,10 +473,11 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
             present(alert, animated: true)
         case .move:
-            let selectFolderNavigationViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-            (selectFolderNavigationViewController.viewControllers.first as? SelectFolderViewController)?.disabledDirectoriesSelection = [file.parent ?? driveFileManager.getRootFile()]
-            (selectFolderNavigationViewController.viewControllers.first as? SelectFolderViewController)?.fileToMove = file.id
-            (selectFolderNavigationViewController.viewControllers.first as! SelectFolderViewController).selectHandler = { selectedFolder in
+            let selectFolderNavigationController = SelectFolderViewController2.instantiateInNavigationController(driveFileManager: driveFileManager)
+            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController2
+            selectFolderViewController?.disabledDirectoriesSelection = [file.parent ?? driveFileManager.getRootFile()]
+            selectFolderViewController?.fileToMove = file.id
+            selectFolderViewController?.selectHandler = { selectedFolder in
                 self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { (response, _, error) in
                     if error != nil {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove, view: self.view)
@@ -494,7 +495,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     }
                 }
             }
-            present(selectFolderNavigationViewController, animated: true)
+            present(selectFolderNavigationController, animated: true)
             tableView.reloadRows(at: [indexPath], with: .fade)
         case .leaveShare:
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)

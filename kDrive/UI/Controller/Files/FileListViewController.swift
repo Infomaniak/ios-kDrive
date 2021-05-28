@@ -798,8 +798,8 @@ extension FileListViewController: FilesHeaderViewDelegate {
         }
 
         func moveButtonPressed() {
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
+            let selectFolderNavigationController = SelectFolderViewController2.instantiateInNavigationController(driveFileManager: driveFileManager)
+            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController2
             selectFolderViewController?.disabledDirectoriesSelection = [selectedFiles.first?.parent ?? driveFileManager.getRootFile()]
             selectFolderViewController?.selectHandler = { selectedFolder in
                 let group = DispatchGroup()
