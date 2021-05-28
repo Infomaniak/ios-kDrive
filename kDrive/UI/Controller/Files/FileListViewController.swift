@@ -160,7 +160,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         // Refresh data
-        if isContentLoaded {
+        if isContentLoaded && currentDirectory != nil && currentDirectory.fullyDownloaded {
             getNewChanges()
         }
     }

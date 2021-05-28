@@ -34,7 +34,7 @@ class TrashViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(emptyViewType: .noTrash)
+        configuration = Configuration(rootTitle: KDriveStrings.Localizable.trashTitle, emptyViewType: .noTrash)
         sortType = .newerDelete
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile
