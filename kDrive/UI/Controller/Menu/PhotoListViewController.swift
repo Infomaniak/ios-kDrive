@@ -112,8 +112,8 @@ class PhotoListViewController: UIViewController {
     }
 
     private func setPhotosNavigationBar() {
-        navigationController?.navigationBar.layoutMargins.left = 24
-        navigationController?.navigationBar.layoutMargins.right = 24
+        navigationController?.navigationBar.layoutMargins.left = 16
+        navigationController?.navigationBar.layoutMargins.right = 16
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
         if #available(iOS 13.0, *) {
             let navbarAppearance = UINavigationBarAppearance()

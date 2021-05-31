@@ -15,7 +15,7 @@
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jWG-9l-JoG" customClass="IKLabel" customModule="kDriveCore">
-                    <rect key="frame" x="24" y="8" width="272" height="34"/>
+                    <rect key="frame" x="16" y="8" width="288" height="34"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
@@ -26,9 +26,9 @@
             </subviews>
             <viewLayoutGuide key="safeArea" id="VXr-Tz-HHm"/>
             <constraints>
-                <constraint firstItem="jWG-9l-JoG" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" constant="24" id="JhC-gM-Ce7"/>
+                <constraint firstItem="jWG-9l-JoG" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" constant="16" id="JhC-gM-Ce7"/>
                 <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" secondItem="jWG-9l-JoG" secondAttribute="bottom" constant="8" id="MDR-qb-YCW"/>
-                <constraint firstAttribute="trailing" secondItem="jWG-9l-JoG" secondAttribute="trailing" constant="24" id="mx2-TN-HIQ"/>
+                <constraint firstAttribute="trailing" secondItem="jWG-9l-JoG" secondAttribute="trailing" constant="16" id="mx2-TN-HIQ"/>
                 <constraint firstItem="jWG-9l-JoG" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="8" id="yQz-UW-CEc"/>
             </constraints>
             <connections>
