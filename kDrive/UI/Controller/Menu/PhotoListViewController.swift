@@ -28,22 +28,19 @@ class PhotoListViewController: UIViewController {
     @IBOutlet weak var headerTitleLabel: IKLabel!
 
     private let dateFormatter = DateFormatter()
-    private class YearMonthPictures {
+    private class GroupedPictures {
         let referenceDate: Date
-        let year: Int
-        let month: Int
+        let dateComponents: DateComponents
         var pictures: [File]
 
         init(referenceDate: Date) {
             self.referenceDate = referenceDate
-            let components = Calendar.current.dateComponents([.year, .month], from: referenceDate)
-            self.year = components.year!
-            self.month = components.month!
+            dateComponents = Calendar.current.dateComponents([.year, .month], from: referenceDate)
             self.pictures = [File]()
         }
     }
 
-    private var pictureForYearMonth = [YearMonthPictures]()
+    private var pictureForYearMonth = [GroupedPictures]()
     private var pictures = [File]()
     private var page = 1
     private var hasNextPage = true
@@ -102,7 +99,7 @@ class PhotoListViewController: UIViewController {
     @IBAction func searchButtonPressed(_ sender: Any) {
         present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
     }
-    
+
     func applyGradient(view: UIImageView) {
         let gradient = CAGradientLayer()
         let bounds = view.frame
@@ -150,21 +147,19 @@ class PhotoListViewController: UIViewController {
 
                 self.collectionView.performBatchUpdates {
                     for picture in fetchedPictures {
-                        let components = Calendar.current.dateComponents([.year, .month], from: picture.lastModifiedDate)
+                        let currentDateComponents = Calendar.current.dateComponents([.year, .month], from: picture.lastModifiedDate)
 
                         var currentSectionIndex: Int!
-                        var currentYearMonth: YearMonthPictures!
+                        var currentYearMonth: GroupedPictures!
                         let lastYearMonth = self.pictureForYearMonth.last
-                        let currentPictureMonth = components.month!
-                        let currentPictureYear = components.year!
-                        if lastYearMonth?.month == currentPictureMonth && lastYearMonth?.year == currentPictureYear {
+                        if lastYearMonth?.dateComponents == currentDateComponents {
                             currentYearMonth = lastYearMonth
                             currentSectionIndex = self.pictureForYearMonth.count - 1
-                        } else if let yearMonthIndex = self.pictureForYearMonth.firstIndex(where: { $0.month == currentPictureMonth && $0.year == currentPictureYear }) {
+                        } else if let yearMonthIndex = self.pictureForYearMonth.firstIndex(where: { $0.dateComponents == currentDateComponents }) {
                             currentYearMonth = self.pictureForYearMonth[yearMonthIndex]
                             currentSectionIndex = yearMonthIndex
                         } else {
-                            currentYearMonth = YearMonthPictures(referenceDate: picture.lastModifiedDate)
+                            currentYearMonth = GroupedPictures(referenceDate: picture.lastModifiedDate)
                             self.pictureForYearMonth.append(currentYearMonth)
                             currentSectionIndex = self.pictureForYearMonth.count - 1
                             self.collectionView.insertSections([currentSectionIndex + 1])
