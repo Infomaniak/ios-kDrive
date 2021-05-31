@@ -330,6 +330,6 @@ extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
         }
         let width = collectionView.frame.width - collectionViewLayout.minimumInteritemSpacing * CGFloat(numberOfColumns - 1)
         let cellWidth = width / CGFloat(numberOfColumns)
-        return CGSize(width: Int(cellWidth), height: Int(cellWidth))
+        return CGSize(width: floor(cellWidth), height: floor(cellWidth))
     }
 }
