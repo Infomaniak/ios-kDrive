@@ -23,6 +23,9 @@ import InfomaniakCore
 class PhotoListViewController: UIViewController {
 
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var headerView: UIView!
+    @IBOutlet weak var headerImageView: UIImageView!
+    @IBOutlet weak var headerTitleLabel: IKLabel!
 
     private let dateFormatter = DateFormatter()
     private class YearMonthPictures {
@@ -49,9 +52,7 @@ class PhotoListViewController: UIViewController {
             collectionView?.collectionViewLayout.invalidateLayout()
         }
     }
-    private var isLargeTitle = true {
-        didSet { updateNavBarMode() }
-    }
+    private var isLargeTitle = true
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var floatingPanelViewController: DriveFloatingPanelController?
 
@@ -74,8 +75,8 @@ class PhotoListViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        headerTitleLabel.textColor = .white
         dateFormatter.dateFormat = "MMMM YYYY"
-
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
@@ -84,22 +85,13 @@ class PhotoListViewController: UIViewController {
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = true
         fetchNextPage()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        navigationController?.setInfomaniakAppearanceNavigationBar()
+        setPhotosNavigationBar()
         navigationItem.title = KDriveStrings.Localizable.allPictures
-        if #available(iOS 13.0, *) {
-            let navigationAppearance = UINavigationBarAppearance()
-            navigationAppearance.configureWithTransparentBackground()
-            navigationAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-            navigationAppearance.backgroundImage = generateGradient()
-            navigationItem.standardAppearance = navigationAppearance
-            navigationItem.compactAppearance = navigationAppearance
-            updateNavBarMode()
-        }
-        navigationController?.navigationBar.isTranslucent = true
+        applyGradient(view: headerImageView)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -107,24 +99,41 @@ class PhotoListViewController: UIViewController {
         navigationController?.navigationBar.tintColor = nil
     }
 
-    func generateGradient() -> UIImage? {
-        guard let navigationBar = navigationController?.navigationBar else {
-            return nil
-        }
+    @IBAction func searchButtonPressed(_ sender: Any) {
+        present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
+    }
+    
+    func applyGradient(view: UIImageView) {
         let gradient = CAGradientLayer()
-        var bounds = navigationBar.bounds
-        bounds.size.height += UIApplication.shared.statusBarFrame.size.height
+        let bounds = view.frame
         gradient.frame = bounds
-        gradient.colors = [UIColor.black.withAlphaComponent(0.5).cgColor, UIColor.clear.cgColor]
+        gradient.colors = [UIColor.black.withAlphaComponent(0.8).cgColor, UIColor.clear.cgColor]
         let renderer = UIGraphicsImageRenderer(size: gradient.frame.size)
-        return renderer.image { ctx in
+        view.image = renderer.image { ctx in
             gradient.render(in: ctx.cgContext)
         }.resizableImage(withCapInsets: .zero, resizingMode: .stretch)
     }
 
-    func updateNavBarMode() {
+    private func setPhotosNavigationBar() {
+        navigationController?.navigationBar.layoutMargins.left = 24
+        navigationController?.navigationBar.layoutMargins.right = 24
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
-        setNeedsStatusBarAppearanceUpdate()
+        if #available(iOS 13.0, *) {
+            let navbarAppearance = UINavigationBarAppearance()
+            navbarAppearance.configureWithTransparentBackground()
+            navbarAppearance.shadowImage = UIImage()
+            let largeTitleStyle = TextStyle.header1
+            let titleStyle = TextStyle.header3
+            navbarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white, .font: titleStyle.font]
+            navbarAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
+
+            navigationController?.navigationBar.standardAppearance = navbarAppearance
+            navigationController?.navigationBar.compactAppearance = navbarAppearance
+            navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+        } else {
+            navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+            navigationController?.navigationBar.shadowImage = UIImage()
+        }
     }
 
     func forceRefresh() {
@@ -201,6 +210,21 @@ class PhotoListViewController: UIViewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if #available(iOS 13.0, *) {
             isLargeTitle = UIDevice.current.orientation.isPortrait ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+            headerView.isHidden = isLargeTitle
+            navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
+            navigationController?.setNeedsStatusBarAppearanceUpdate()
+        }
+
+        for view in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
+            if let view = view as? PhotoSectionHeaderView {
+                if view.lastPositionY != view.frame.minY {
+                    view.titleLabel.isHidden = true
+                    headerTitleLabel.text = view.titleLabel.text
+                } else {
+                    view.titleLabel.isHidden = false
+                }
+                view.lastPositionY = view.frame.minY
+            }
         }
 
         // Infinite scroll
@@ -292,6 +316,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
             if indexPath.section > 0 {
                 let yearMonth = pictureForYearMonth[indexPath.section - 1]
                 headerView.titleLabel.text = dateFormatter.string(from: yearMonth.referenceDate)
+                headerView.lastPositionY = 0
             }
             return headerView
         }

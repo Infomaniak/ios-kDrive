@@ -22,6 +22,11 @@ import kDriveCore
 
 class PhotoSectionHeaderView: UICollectionReusableView {
 
+    var lastPositionY: CGFloat = 0
     @IBOutlet weak var titleLabel: IKLabel!
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        titleLabel.text = ""
+    }
 }
