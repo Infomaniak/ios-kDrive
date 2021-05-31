@@ -73,7 +73,7 @@ class PhotoListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         headerTitleLabel.textColor = .white
-        dateFormatter.dateFormat = "MMMM YYYY"
+        dateFormatter.dateFormat = KDriveStrings.Localizable.photosHeaderDateFormat
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
