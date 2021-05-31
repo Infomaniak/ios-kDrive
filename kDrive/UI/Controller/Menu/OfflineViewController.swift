@@ -26,7 +26,7 @@ class OfflineViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, rootTitle: KDriveStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
+        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, rootTitle: KDriveStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
 
         super.viewDidLoad()
     }

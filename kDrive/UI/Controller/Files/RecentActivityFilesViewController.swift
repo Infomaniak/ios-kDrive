@@ -29,7 +29,7 @@ class RecentActivityFilesViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, fromActivities: true, rootTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle, emptyViewType: .emptyFolder)
+        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, fromActivities: true, rootTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle, emptyViewType: .emptyFolder)
 
         super.viewDidLoad()
     }

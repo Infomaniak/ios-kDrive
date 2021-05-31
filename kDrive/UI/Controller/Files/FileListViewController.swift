@@ -101,6 +101,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
 
+    var uploadsObserver: ObservationToken?
+    var filesObserver: ObservationToken?
+    var networkObserver: ObservationToken?
+    var listStyleObserver: ObservationToken?
+    var sortTypeObserver: ObservationToken?
+
     var trashSort: Bool {
         #if ISEXTENSION
             return false
@@ -286,54 +292,72 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     final func setUpObservers() {
-        guard driveFileManager != nil && currentDirectory != nil else { return }
-
         // Upload files observer
-        if configuration.showUploadingFiles {
-            UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] _, count in
-                self.uploadingFilesCount = count
-                DispatchQueue.main.async { [weak self] in
-                    guard let self = self, self.isViewLoaded else { return }
+        observeUploads()
+        // File observer
+        observeFiles()
+        // Network observer
+        observeNetwork()
+        // Options observer
+        observeListOptions()
+    }
 
-                    let shouldHideUploadCard: Bool
-                    if count > 0 {
-                        self.headerView?.uploadCardView.setUploadCount(count)
-                        shouldHideUploadCard = false
-                    } else {
-                        shouldHideUploadCard = true
-                    }
-                    // Only perform reload if needed
-                    if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
-                        self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
-                        self.collectionView.performBatchUpdates(nil)
-                    }
+    final func observeUploads() {
+        guard configuration.showUploadingFiles && currentDirectory != nil && uploadsObserver == nil else { return }
+
+        uploadsObserver = UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] (_, count) in
+            self.uploadingFilesCount = count
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.isViewLoaded else { return }
+
+                let shouldHideUploadCard: Bool
+                if count > 0 {
+                    self.headerView?.uploadCardView.setUploadCount(count)
+                    shouldHideUploadCard = false
+                } else {
+                    shouldHideUploadCard = true
+                }
+                // Only perform reload if needed
+                if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
+                    self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
+                    self.collectionView.performBatchUpdates(nil)
                 }
             }
         }
-        // File observer
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
-            if file.id == self.currentDirectory.id {
+    }
+
+    final func observeFiles() {
+        guard filesObserver == nil else { return }
+        filesObserver = driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] (file) in
+            if file.id == self.currentDirectory?.id {
                 reloadData()
             } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
                 updateChild(file, at: index)
             }
         }
-        // Network observer
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
+    }
+
+    final func observeNetwork() {
+        guard networkObserver == nil else { return }
+        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
             // Observer is called on main queue
             headerView?.offlineView.isHidden = status != .offline
             collectionView.collectionViewLayout.invalidateLayout()
             collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
         }
+    }
+
+    final func observeListOptions() {
+        guard listStyleObserver == nil && sortTypeObserver == nil else { return }
         // List style observer
-        FileListOptions.instance.observeListStyleChange(self) { [unowned self] (newStyle) in
+        listStyleObserver = FileListOptions.instance.observeListStyleChange(self) { [unowned self] (newStyle) in
             self.listStyle = newStyle
             DispatchQueue.main.async { [weak self] in
                 self?.collectionView.reloadData()
             }
         }
         // Sort type observer
-        FileListOptions.instance.observeSortTypeChange(self) { [unowned self] (newSortType) in
+        sortTypeObserver = FileListOptions.instance.observeSortTypeChange(self) { [unowned self] (newSortType) in
             self.sortType = newSortType
             sortedFiles = []
             reloadData(page: 1)
@@ -341,9 +365,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     final func updateUploadCount() {
-        guard currentDirectory != nil else {
-            return
-        }
+        guard currentDirectory != nil else { return }
         uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
     }
 
@@ -685,7 +707,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         self.driveFileManager = driveFileManager
         currentDirectory = driveFileManager.getCachedFile(id: directoryId)
         setTitle()
-        setUpObservers()
+        observeUploads()
+        observeFiles()
         forceRefresh()
     }
 
@@ -899,6 +922,9 @@ extension FileListViewController: SortOptionsDelegate {
             setTitle()
             if configuration.showUploadingFiles {
                 updateUploadCount()
+                // We stop observing the old directory and observe the new one instead
+                uploadsObserver?.cancel()
+                observeUploads()
             }
             sortedFiles = []
             collectionView.reloadData()
