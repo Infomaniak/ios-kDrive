@@ -206,20 +206,21 @@ class PhotoListViewController: UIViewController {
         if #available(iOS 13.0, *) {
             isLargeTitle = UIDevice.current.orientation.isPortrait ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
             headerView.isHidden = isLargeTitle
+            (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
             navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
             navigationController?.setNeedsStatusBarAppearanceUpdate()
         }
 
-        for view in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
-            if let view = view as? PhotoSectionHeaderView {
-                if view.lastPositionY != view.frame.minY {
-                    view.titleLabel.isHidden = true
-                    headerTitleLabel.text = view.titleLabel.text
-                } else {
-                    view.titleLabel.isHidden = false
-                }
-                view.lastPositionY = view.frame.minY
+        for headerView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
+            if let headerView = headerView as? PhotoSectionHeaderView {
+                let position = collectionView.convert(headerView.frame.origin, to: view)
+                headerView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
             }
+        }
+        if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerView.frame.minX, y: headerView.frame.maxY), from: headerView)) {
+            headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[indexPath.section - 1].referenceDate)
+        } else if pictureForYearMonth.count > 0 && headerTitleLabel.text == "" {
+            headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[0].referenceDate)
         }
 
         // Infinite scroll
@@ -311,7 +312,6 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
             if indexPath.section > 0 {
                 let yearMonth = pictureForYearMonth[indexPath.section - 1]
                 headerView.titleLabel.text = dateFormatter.string(from: yearMonth.referenceDate)
-                headerView.lastPositionY = 0
             }
             return headerView
         }

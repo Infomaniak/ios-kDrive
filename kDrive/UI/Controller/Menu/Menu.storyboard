@@ -181,8 +181,8 @@
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="i9M-AV-rfJ">
                                         <rect key="frame" x="0.0" y="0.0" width="414" height="94"/>
                                     </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SeG-hp-Rwt" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="16" y="57" width="382" height="21"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SeG-hp-Rwt" customClass="IKLabel" customModule="kDriveCore">
+                                        <rect key="frame" x="16" y="78" width="382" height="0.0"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <nil key="highlightedColor"/>
@@ -868,9 +868,7 @@
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="188.5" height="24"/>
         </designable>
-        <designable name="SeG-hp-Rwt">
-            <size key="intrinsicContentSize" width="41.5" height="20.5"/>
-        </designable>
+        <designable name="SeG-hp-Rwt"/>
         <designable name="abC-af-U6z">
             <size key="intrinsicContentSize" width="91" height="34"/>
         </designable>
