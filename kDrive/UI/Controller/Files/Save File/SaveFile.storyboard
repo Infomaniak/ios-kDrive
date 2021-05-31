@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="hLG-Tj-0NS">
-    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -30,11 +28,11 @@
             <objects>
                 <viewController storyboardIdentifier="SelectDriveViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="o7y-8W-99b" customClass="SelectDriveViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qnc-gq-Ddr">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="3ab-oF-eeb">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="o7y-8W-99b" id="cGr-33-sAv"/>
@@ -64,16 +62,16 @@
             </objects>
             <point key="canvasLocation" x="1592" y="-1194"/>
         </scene>
-        <!--Select Folder View Controller2-->
+        <!--Select Folder View Controller-->
         <scene sceneID="uDx-cY-d43">
             <objects>
-                <viewController storyboardIdentifier="SelectFolderViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="M4y-LZ-Tfr" customClass="SelectFolderViewController2" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SelectFolderViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="M4y-LZ-Tfr" customClass="SelectFolderViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="w4H-fN-Usb">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="5nx-k1-kRF">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="HHO-8J-Uo4">
                                     <size key="itemSize" width="128" height="128"/>
@@ -88,7 +86,7 @@
                                 </connections>
                             </collectionView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gLb-rt-aBR" customClass="IKLargeButton" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="804" width="366" height="60"/>
+                                <rect key="frame" x="24" y="508" width="552" height="60"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="qVE-9h-Olj"/>
                                 </constraints>
@@ -137,11 +135,11 @@
             <objects>
                 <viewController storyboardIdentifier="SaveFileViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="IIc-LF-U4I" customClass="SaveFileViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="7Fh-1c-lZR">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="KPo-kb-AjL">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="IIc-LF-U4I" id="kcT-Jo-ts7"/>
@@ -179,11 +177,6 @@
             <point key="canvasLocation" x="791" y="-550"/>
         </scene>
     </scenes>
-    <designables>
-        <designable name="gLb-rt-aBR">
-            <size key="intrinsicContentSize" width="85" height="32"/>
-        </designable>
-    </designables>
     <resources>
         <image name="folder-add" width="24" height="24"/>
         <namedColor name="backgroundColor">

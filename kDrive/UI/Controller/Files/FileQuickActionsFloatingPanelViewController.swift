@@ -473,8 +473,8 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
             present(alert, animated: true)
         case .move:
-            let selectFolderNavigationController = SelectFolderViewController2.instantiateInNavigationController(driveFileManager: driveFileManager)
-            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController2
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
             selectFolderViewController?.disabledDirectoriesSelection = [file.parent ?? driveFileManager.getRootFile()]
             selectFolderViewController?.fileToMove = file.id
             selectFolderViewController?.selectHandler = { selectedFolder in

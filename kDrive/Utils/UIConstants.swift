@@ -32,9 +32,6 @@ class UIConstants {
     static let floatingPanelHeaderHeight: CGFloat = 70
     static let largeTitleHeight: CGFloat = 96
     static let insufficientStorageMinimumPercentage: Double = 90.0
-    static let swipeActionShareIdentifier = "share"
-    static let swipeActionMoreIdentifier = "more"
-    static let swipeActionDeleteIdentifier = "delete"
 
     static func showSnackBar(message: String, view: UIView? = nil) {
         IKSnackBar.make(message: message, duration: .lengthLong, view: view)?.show()

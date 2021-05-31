@@ -503,7 +503,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     if let parentId = parentId, parentId > DriveFileManager.constants.rootID,
                        let driveFileManager = accountManager.currentDriveFileManager,
                        let directory = driveFileManager.getCachedFile(id: parentId) {
-                        let filesList = FileListCollectionViewController.instantiate(driveFileManager: driveFileManager)
+                        let filesList = FileListViewController.instantiate(driveFileManager: driveFileManager)
                         filesList.currentDirectory = directory
                         navController.pushViewController(filesList, animated: false)
                     }

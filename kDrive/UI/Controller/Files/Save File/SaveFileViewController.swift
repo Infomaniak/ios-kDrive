@@ -469,7 +469,7 @@ extension SaveFileViewController: UITableViewDelegate {
             navigationController?.pushViewController(selectDriveViewController, animated: true)
         case .directorySelection:
             guard let driveFileManager = selectedDriveFileManager else { return }
-            let selectFolderViewController = SelectFolderViewController2.instantiate(driveFileManager: driveFileManager)
+            let selectFolderViewController = SelectFolderViewController.instantiate(driveFileManager: driveFileManager)
             selectFolderViewController.delegate = self
             navigationController?.pushViewController(selectFolderViewController, animated: true)
         default:

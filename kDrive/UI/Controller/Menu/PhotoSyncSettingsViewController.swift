@@ -387,8 +387,8 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
             } else if row == .folderSelection {
                 let drive = AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId)!
                 let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)!
-                let selectFolderNavigationController = SelectFolderViewController2.instantiateInNavigationController(driveFileManager: driveFileManager)
-                let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController2
+                let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+                let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
                 selectFolderViewController?.delegate = self
                 selectFolderViewController?.disabledDirectoriesSelection = [driveFileManager.getRootFile()]
                 navigationController?.present(selectFolderNavigationController, animated: true)

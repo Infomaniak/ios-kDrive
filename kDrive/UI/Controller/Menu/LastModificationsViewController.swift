@@ -19,128 +19,57 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 
-class LastModificationsViewController: FileListCollectionViewController {
+class LastModificationsViewController: FileListViewController {
 
-    override var normalFolderHierarchy: Bool {
-        return false
-    }
-
-    private var reachedEnd = false
+    override class var storyboard: UIStoryboard { Storyboard.menu }
+    override class var storyboardIdentifier: String { "LastModificationsViewController" }
 
     override func viewDidLoad() {
+        // Set configuration
+        configuration = Configuration(normalFolderHierarchy: false, rootTitle: KDriveStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo)
+        filePresenter.listType = LastModificationsViewController.self
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.lastModificationsRootFile
         }
 
         super.viewDidLoad()
-
-        if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
-            navigationItem.title = KDriveStrings.Localizable.lastEditsTitle
-        }
     }
 
-    override func fetchNextPage(forceRefresh: Bool = false) {
-        guard driveFileManager != nil else { return }
-
-        currentPage += 1
-        startLoading()
+    override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
+        guard driveFileManager != nil && currentDirectory != nil else {
+            completion(.success([]), false, true)
+            return
+        }
 
         if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
-            driveFileManager.apiFetcher.getLastModifiedFiles(page: currentPage) { (response, error) in
-                self.isLoading = false
-                self.collectionView.refreshControl?.endRefreshing()
+            driveFileManager.apiFetcher.getLastModifiedFiles(page: page) { (response, error) in
                 if let data = response?.data {
-                    self.getNewChildren(newChildren: data)
-                }
-                if !self.currentDirectory.fullyDownloaded && self.sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
-                    self.showEmptyView(.noNetwork, children: self.sortedChildren)
+                    completion(.success(data), data.count == DriveApiFetcher.itemPerPage, false)
+                } else {
+                    completion(.failure(error ?? DriveError.localError), false, false)
                 }
             }
         } else {
-            driveFileManager.apiFetcher.getFileListForDirectory(parentId: currentDirectory.id, page: currentPage) { (response, error) in
-                self.isLoading = false
-                self.collectionView.refreshControl?.endRefreshing()
+            driveFileManager.apiFetcher.getFileListForDirectory(parentId: currentDirectory.id, page: page) { (response, error) in
                 if let data = response?.data {
-                    var children = [File]()
-                    children.append(contentsOf: data.children)
-                    self.getNewChildren(newChildren: children)
-                }
-                if !self.currentDirectory.fullyDownloaded && self.sortedChildren.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
-                    self.showEmptyView(.noNetwork, children: self.sortedChildren)
+                    let children = data.children
+                    completion(.success(Array(children)), children.count == DriveApiFetcher.itemPerPage, false)
+                } else {
+                    completion(.failure(error ?? DriveError.localError), false, false)
                 }
             }
         }
     }
 
-    private func getNewChildren(newChildren: [File] = [], deletedChild: File? = nil) {
-        sortedChildren.first?.isFirstInCollection = false
-        sortedChildren.last?.isLastInCollection = false
-        var newSortedChildren = sortedChildren.map({ File(value: $0) }) + newChildren
-
-        if deletedChild != nil {
-            newSortedChildren = newSortedChildren.filter { $0.id != deletedChild!.id }
-        }
-
-        newSortedChildren.first?.isFirstInCollection = true
-        newSortedChildren.last?.isLastInCollection = true
-
-        let changeSet = getChangesetFor(newChildren: newSortedChildren)
-        collectionView.reload(using: changeSet) { (data) in
-            sortedChildren = data
-            updateSelectedItems(newChildren: data)
-        }
-        if newChildren.count < DriveApiFetcher.itemPerPage {
-            reachedEnd = true
-        }
-        setSelectedCells()
-
-        showEmptyView(.noActivitiesSolo, children: newSortedChildren)
-    }
-
-    override func forceRefresh() {
-        currentPage = 0
-        reachedEnd = false
-        sortedChildren = []
-        collectionView.reloadData()
-        fetchNextPage(forceRefresh: true)
-    }
-
-    override func getFileActivities(directory: File) {
-        //We don't have incremental changes for LastModifications so we just fetch everything again
+    override func getNewChanges() {
+        // We don't have incremental changes for Last Modifications so we just fetch everything again
         forceRefresh()
     }
 
-    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let headerView = super.collectionView(collectionView, viewForSupplementaryElementOfKind: kind, at: indexPath)
-        (headerView as? FilesHeaderView)?.sortButton.isHidden = true
-
-        return headerView
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if sortedChildren[indexPath.row].isDirectory {
-            let sharedCV = LastModificationsViewController.instantiate(driveFileManager: driveFileManager)
-            sharedCV.currentDirectory = sortedChildren[indexPath.row]
-            self.navigationController?.pushViewController(sharedCV, animated: true)
-        } else {
-            super.collectionView(collectionView, didSelectItemAt: indexPath)
-        }
-    }
-
-    override class func instantiate(driveFileManager: DriveFileManager) -> LastModificationsViewController {
-        let viewController = UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "LastModificationsViewController") as! LastModificationsViewController
-        viewController.driveFileManager = driveFileManager
-        return viewController
-    }
-
-    // MARK: - State restoration
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
-            navigationItem.title = KDriveStrings.Localizable.lastEditsTitle
-        }
+    override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
+        super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
+        // Hide sort button
+        headerView.sortButton.isHidden = true
     }
 
 }
