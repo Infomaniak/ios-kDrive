@@ -31,11 +31,6 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         darkLayer.isHidden = true
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        contentInsetView.cornerRadius = UIConstants.cornerRadius
-    }
-
     override func prepareForReuse() {
         super.prepareForReuse()
         darkLayer.isHidden = true
