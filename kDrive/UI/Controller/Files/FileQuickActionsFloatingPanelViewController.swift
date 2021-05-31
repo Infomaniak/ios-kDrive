@@ -395,17 +395,36 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 _ = group.wait(timeout: .now() + 5)
                 DispatchQueue.main.async {
                     if success {
-                        UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), view: self.view, action: KDriveStrings.Localizable.buttonCancel) {
-                            if let cancelId = cancelId {
-                                self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { (error) in
-                                    if error == nil {
-                                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled, view: self.view)
+                        let group = DispatchGroup()
+                        if let presentingParent = self.presentingParent {
+                            // Update file list
+                            (presentingParent as? FileListViewController)?.getNewChanges()
+                            // Close preview
+                            if presentingParent is PreviewViewController {
+                                presentingParent.navigationController?.popViewController(animated: true)
+                            }
+                            // Dismiss panel
+                            group.enter()
+                            self.dismiss(animated: true) {
+                                group.leave()
+                            }
+                            group.enter()
+                            presentingParent.dismiss(animated: true) {
+                                group.leave()
+                            }
+                        }
+                        // Show snackbar (wait for panel dismissal)
+                        group.notify(queue: .main) {
+                            UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: KDriveStrings.Localizable.buttonCancel) {
+                                if let cancelId = cancelId {
+                                    self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { (error) in
+                                        if error == nil {
+                                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
+                                        }
                                     }
                                 }
                             }
                         }
-                        self.presentingParent?.navigationController?.popViewController(animated: true)
-                        self.dismiss(animated: true)
                     } else {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete, view: self.view)
                     }
