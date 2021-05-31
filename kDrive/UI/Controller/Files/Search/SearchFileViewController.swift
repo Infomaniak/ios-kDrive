@@ -59,12 +59,12 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
 
     private let searchController = UISearchController(searchResultsController: nil)
     private var currentSearchText = ""
-    private var isDisplayingSearchResults = false
+    var isDisplayingSearchResults = false
     private let sectionTitles = [KDriveStrings.Localizable.searchLastTitle, KDriveStrings.Localizable.searchFilterTitle]
 
     private let fileTypeRows: [FileTypeRow] = [.imagesRow, .videosRow, .audioRow, .pdfRow, .docsRow, .pointsRow, .gridsRow, .folderRow, .dropboxRow]
     private var recentSearches = [String]()
-    private var selectedFileType: FileTypeRow?
+    var selectedFileType: FileTypeRow?
     private let minSearchCount = 1
     private let maxRecentSearch = 5
     private var showedNetworkError = false
@@ -178,8 +178,10 @@ class SearchFileViewController: FileListCollectionViewController, UISearchBarDel
         return viewController
     }
 
-    class func instantiateInNavigationController(driveFileManager: DriveFileManager) -> UINavigationController {
+    class func instantiateInNavigationController(driveFileManager: DriveFileManager, fileType: FileTypeRow? = nil) -> UINavigationController {
         let searchViewController = instantiate(driveFileManager: driveFileManager)
+        searchViewController.selectedFileType = fileType
+        searchViewController.isDisplayingSearchResults = fileType != nil
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.restorationIdentifier = "SearchNavigationController"
         navigationController.modalPresentationStyle = .fullScreen
