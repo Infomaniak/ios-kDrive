@@ -166,7 +166,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         // Refresh data
-        if isContentLoaded && currentDirectory != nil && currentDirectory.fullyDownloaded {
+        if isContentLoaded && !isLoading && currentDirectory != nil && currentDirectory.fullyDownloaded {
             getNewChanges()
         }
     }
@@ -286,7 +286,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
-    @objc final func forceRefresh() {
+    @objc func forceRefresh() {
         sortedFiles = []
         reloadData(forceRefresh: true)
     }

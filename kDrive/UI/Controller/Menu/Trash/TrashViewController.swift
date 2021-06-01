@@ -43,6 +43,13 @@ class TrashViewController: FileListViewController {
         super.viewDidLoad()
     }
 
+    override func forceRefresh() {
+        if currentDirectory == nil {
+            currentDirectory = DriveFileManager.trashRootFile
+        }
+        super.forceRefresh()
+    }
+
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
         guard driveFileManager != nil && currentDirectory != nil else {
             completion(.success([]), false, true)
