@@ -98,7 +98,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         return navigationController?.navigationBar.frame.height ?? 0
     }
     private var isPortait = true
-    
+
     var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {
@@ -625,7 +625,9 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
-        reload(sections: [.top])
+        if isViewLoaded {
+            reload(sections: [.top])
+        }
     }
 
     // MARK: - Home file delegate
