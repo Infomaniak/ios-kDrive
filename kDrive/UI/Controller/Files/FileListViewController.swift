@@ -33,10 +33,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - Constants
 
-    let leftRightInset: CGFloat = 12
-    let gridInnerSpacing: CGFloat = 16
-    let maxDiffChanges = 100
-    let headerViewIdentifier = "FilesHeaderView"
+    private let leftRightInset: CGFloat = 12
+    private let gridInnerSpacing: CGFloat = 16
+    private let maxDiffChanges = 100
+    private let headerViewIdentifier = "FilesHeaderView"
 
     // MARK: - Configuration
 
@@ -62,12 +62,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     @IBOutlet weak var collectionView: UICollectionView!
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
-    var headerView: FilesHeaderView?
-    var floatingPanelViewController: DriveFloatingPanelController!
+    private var headerView: FilesHeaderView?
+    private var floatingPanelViewController: DriveFloatingPanelController!
     #if !ISEXTENSION
-        var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
+        private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
     #endif
-    var rightBarButtonItems: [UIBarButtonItem]?
+    private var rightBarButtonItems: [UIBarButtonItem]?
 
     var driveFileManager: DriveFileManager!
     var currentDirectory: File! {
@@ -76,10 +76,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
     lazy var configuration = Configuration(emptyViewType: .emptyFolder)
-    var uploadingFilesCount = 0
-    var nextPage = 1
-    var isLoading = false
-    var isContentLoaded = false
+    private var uploadingFilesCount = 0
+    private var nextPage = 1
+    private var isLoading = false
+    private var isContentLoaded = false
     var listStyle = FileListOptions.instance.currentStyle {
         didSet {
             headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
@@ -101,11 +101,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
 
-    var uploadsObserver: ObservationToken?
-    var filesObserver: ObservationToken?
-    var networkObserver: ObservationToken?
-    var listStyleObserver: ObservationToken?
-    var sortTypeObserver: ObservationToken?
+    private var uploadsObserver: ObservationToken?
+    private var filesObserver: ObservationToken?
+    private var networkObserver: ObservationToken?
+    private var listStyleObserver: ObservationToken?
+    private var sortTypeObserver: ObservationToken?
 
     var trashSort: Bool {
         #if ISEXTENSION

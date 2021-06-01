@@ -24,8 +24,8 @@ class RecentActivityFilesViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.files }
     override class var storyboardIdentifier: String { "RecentActivityFilesViewController" }
 
-    var activity: FileActivity?
-    var activityFiles: [File] = []
+    private var activity: FileActivity?
+    private var activityFiles: [File] = []
 
     override func viewDidLoad() {
         // Set configuration

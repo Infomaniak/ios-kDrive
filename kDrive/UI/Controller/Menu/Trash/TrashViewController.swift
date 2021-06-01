@@ -29,8 +29,8 @@ class TrashViewController: FileListViewController {
 
     @IBOutlet weak var emptyTrashBarButtonItem: UIBarButtonItem!
 
-    var filesToRestore: [File] = []
-    var selectFolderViewController: TitleSizeAdjustingNavigationController!
+    private var filesToRestore: [File] = []
+    private var selectFolderViewController: TitleSizeAdjustingNavigationController!
 
     override func viewDidLoad() {
         // Set configuration

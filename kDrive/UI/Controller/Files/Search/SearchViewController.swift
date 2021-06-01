@@ -181,7 +181,7 @@ class SearchViewController: FileListViewController {
         // Update UI
         listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
         collectionView.refreshControl = isDisplayingSearchResults ? refreshControl : nil
-        (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isDisplayingSearchResults
+        collectionViewLayout?.sectionHeadersPinToVisibleBounds = isDisplayingSearchResults
         sortedFiles = []
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadData()
