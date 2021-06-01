@@ -269,7 +269,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: HomeLastPicCollectionViewCell.self, for: indexPath)
-        cell.configureWith(file: pictureForYearMonth[indexPath.section - 1].pictures[indexPath.row])
+        cell.configureWith(file: pictureForYearMonth[indexPath.section - 1].pictures[indexPath.row], roundedCorners: false)
         return cell
     }
 
