@@ -499,22 +499,26 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
-        AccountManager.instance.reloadTokensAndAccounts()
-        if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
-            if reloadedToken.requiresRefresh {
-                InfomaniakLogin.refreshToken(token: reloadedToken) { (newToken, error) in
-                    if let newToken = newToken {
-                        AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
-                        request(newToken, nil)
-                    } else {
-                        request(nil, error)
+        if token.requiresRefresh {
+            AccountManager.instance.reloadTokensAndAccounts()
+            if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
+                if reloadedToken.requiresRefresh {
+                    InfomaniakLogin.refreshToken(token: reloadedToken) { (newToken, error) in
+                        if let newToken = newToken {
+                            AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
+                            request(newToken, nil)
+                        } else {
+                            request(nil, error)
+                        }
                     }
+                } else {
+                    request(reloadedToken, nil)
                 }
             } else {
-                request(reloadedToken, nil)
+                request(nil, DriveError.unknownToken)
             }
         } else {
-            request(nil, DriveError.unknownToken)
+            request(token, nil)
         }
     }
 
