@@ -77,7 +77,9 @@ class SearchViewController: FileListViewController {
     private var selectedFileType: FileTypeRow? {
         didSet { updateList() }
     }
-    private var isDisplayingSearchResults = false
+    private var isDisplayingSearchResults: Bool {
+        (currentSearchText ?? "").count >= minSearchCount || selectedFileType != nil
+    }
     private var recentSearches = UserDefaults.shared.recentSearches
 
     // MARK: - View controller lifecycle
@@ -147,8 +149,9 @@ class SearchViewController: FileListViewController {
         }
     }
 
-    static func instantiateInNavigationController(driveFileManager: DriveFileManager) -> UINavigationController {
+    static func instantiateInNavigationController(driveFileManager: DriveFileManager, fileType: FileTypeRow? = nil) -> UINavigationController {
         let searchViewController = instantiate(driveFileManager: driveFileManager)
+        searchViewController.selectedFileType = fileType
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.modalPresentationStyle = .fullScreen
         return navigationController
@@ -174,8 +177,7 @@ class SearchViewController: FileListViewController {
     }
 
     private func updateList() {
-        let searchText = currentSearchText ?? String()
-        isDisplayingSearchResults = searchText.count >= minSearchCount || selectedFileType != nil
+        guard isViewLoaded else { return }
         // Update UI
         listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
         collectionView.refreshControl = isDisplayingSearchResults ? refreshControl : nil
