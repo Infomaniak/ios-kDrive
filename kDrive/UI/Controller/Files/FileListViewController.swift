@@ -261,7 +261,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             switch result {
             case .success(let newFiles):
                 let files: [File]
-                if replaceFiles {
+                if replaceFiles || page == 1 {
                     files = newFiles
                 } else {
                     files = sortedFiles + newFiles
@@ -287,7 +287,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     @objc func forceRefresh() {
-        sortedFiles = []
         reloadData(forceRefresh: true)
     }
 
@@ -353,14 +352,17 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         listStyleObserver = FileListOptions.instance.observeListStyleChange(self) { [unowned self] (newStyle) in
             self.listStyle = newStyle
             DispatchQueue.main.async { [weak self] in
-                self?.collectionView.reloadData()
+                UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
+                    self?.collectionViewLayout.invalidateLayout()
+                    self?.collectionView.reloadData()
+                    self?.setSelectedCells()
+                }
             }
         }
         // Sort type observer
         sortTypeObserver = FileListOptions.instance.observeSortTypeChange(self) { [unowned self] (newSortType) in
             self.sortType = newSortType
-            sortedFiles = []
-            reloadData(page: 1)
+            reloadData()
         }
     }
 
@@ -805,14 +807,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
             listStyle = .grid
         }
         FileListOptions.instance.currentStyle = listStyle
-
-        // FIXME: Can we do it differently so the selection appears instantly?
-        UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
-            self.collectionViewLayout.invalidateLayout()
-            self.collectionView.reloadData()
-        } completion: { _ in
-            self.setSelectedCells()
-        }
+        // Collection view will be reloaded via the observer
     }
 
     #if !ISEXTENSION
@@ -906,7 +901,7 @@ extension FileListViewController: SortOptionsDelegate {
         if !trashSort {
             FileListOptions.instance.currentSortType = sortType
         }
-        forceRefresh()
+        // Collection view will be reloaded via the observer
     }
 
 }
