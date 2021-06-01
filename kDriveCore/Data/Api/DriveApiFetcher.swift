@@ -500,13 +500,29 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
         if token.requiresRefresh {
-            InfomaniakLogin.refreshToken(token: token) { (newToken, error) in
-                if let newToken = newToken {
-                    AccountManager.instance.updateToken(newToken: newToken, oldToken: token)
-                    request(newToken, nil)
+            let lock = AccountManager.instance.refreshTokenLock
+            lock.wait()
+            lock.enter()
+            AccountManager.instance.reloadTokensAndAccounts()
+            if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
+                if reloadedToken.requiresRefresh {
+                    InfomaniakLogin.refreshToken(token: reloadedToken) { (newToken, error) in
+                        if let newToken = newToken {
+                            AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
+                            lock.leave()
+                            request(newToken, nil)
+                        } else {
+                            lock.leave()
+                            request(nil, error)
+                        }
+                    }
                 } else {
-                    request(nil, error)
+                    lock.leave()
+                    request(reloadedToken, nil)
                 }
+            } else {
+                lock.leave()
+                request(nil, DriveError.unknownToken)
             }
         } else {
             request(token, nil)
@@ -618,6 +634,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
         lock.wait()
         lock.enter()
         //Maybe someone else refreshed our token
+        AccountManager.instance.reloadTokensAndAccounts()
         if let token = AccountManager.instance.getTokenForUserId(credential.userId),
             token.expirationDate > credential.expirationDate {
             lock.leave()
