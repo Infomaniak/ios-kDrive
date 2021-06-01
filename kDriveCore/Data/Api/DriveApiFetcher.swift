@@ -499,17 +499,22 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
-        if token.requiresRefresh {
-            InfomaniakLogin.refreshToken(token: token) { (newToken, error) in
-                if let newToken = newToken {
-                    AccountManager.instance.updateToken(newToken: newToken, oldToken: token)
-                    request(newToken, nil)
-                } else {
-                    request(nil, error)
+        AccountManager.instance.reloadTokensAndAccounts()
+        if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
+            if reloadedToken.requiresRefresh {
+                InfomaniakLogin.refreshToken(token: reloadedToken) { (newToken, error) in
+                    if let newToken = newToken {
+                        AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
+                        request(newToken, nil)
+                    } else {
+                        request(nil, error)
+                    }
                 }
+            } else {
+                request(reloadedToken, nil)
             }
         } else {
-            request(token, nil)
+            request(nil, DriveError.unknownToken)
         }
     }
 
@@ -618,6 +623,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
         lock.wait()
         lock.enter()
         //Maybe someone else refreshed our token
+        AccountManager.instance.reloadTokensAndAccounts()
         if let token = AccountManager.instance.getTokenForUserId(credential.userId),
             token.expirationDate > credential.expirationDate {
             lock.leave()

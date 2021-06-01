@@ -81,6 +81,19 @@ public class AccountManager: RefreshTokenDelegate {
     public func forceReload() {
         self.currentDriveId = UserDefaults.shared.currentDriveId
         self.currentUserId = UserDefaults.shared.currentDriveUserId
+
+        reloadTokensAndAccounts()
+
+        if let account = accounts.first(where: { $0.userId == currentUserId }) ?? accounts.first {
+            setCurrentAccount(account: account)
+
+            if let currentDrive = DriveInfosManager.instance.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
+                setCurrentDriveForCurrentAccount(drive: currentDrive)
+            }
+        }
+    }
+
+    public func reloadTokensAndAccounts() {
         self.tokens = loadTokens()
         self.accounts = loadAccounts()
 
@@ -97,14 +110,6 @@ public class AccountManager: RefreshTokenDelegate {
             } else {
                 //Remove token with no account
                 removeTokenAndAccount(token: token)
-            }
-        }
-
-        if let account = accounts.first(where: { $0.userId == currentUserId }) ?? accounts.first {
-            setCurrentAccount(account: account)
-
-            if let currentDrive = DriveInfosManager.instance.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
-                setCurrentDriveForCurrentAccount(drive: currentDrive)
             }
         }
     }
