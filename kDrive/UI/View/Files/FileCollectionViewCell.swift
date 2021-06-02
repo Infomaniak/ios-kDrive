@@ -88,6 +88,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        moreButton.accessibilityLabel = KDriveStrings.Localizable.buttonMenu
         downloadProgressView?.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
         downloadProgressView?.progressTintColor = KDriveAsset.infomaniakColor.color
         downloadProgressView?.thicknessRatio = 0.15
