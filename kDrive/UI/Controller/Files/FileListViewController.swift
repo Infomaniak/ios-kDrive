@@ -165,6 +165,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
+        #if !ISEXTENSION
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.rights?.createNewFile.value ?? true
+        #endif
+
         // Refresh data
         if isContentLoaded && !isLoading && currentDirectory != nil && currentDirectory.fullyDownloaded {
             getNewChanges()
