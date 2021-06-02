@@ -189,7 +189,10 @@ class FileProviderExtension: NSFileProviderExtension {
                 completion(nil)
                 return
             }
-            DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { (fileId, error) in
+
+            var observationToken: ObservationToken?
+            observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { (fileId, error) in
+                observationToken?.cancel()
                 if error != nil {
                     self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                     completion(NSFileProviderError(.serverUnreachable))
