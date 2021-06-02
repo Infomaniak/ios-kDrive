@@ -470,9 +470,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             sortedFiles = files
             updateSelectedItems(newChildren: files)
         }
-        setSelectedCells()
         // Reload corners
-        if let oldFirstFileId = firstFileId,
+        if listStyle == .list,
+            let oldFirstFileId = firstFileId,
             let oldLastFileId = lastFileId,
             let newFirstFileId = sortedFiles.first?.id,
             let newLastFileId = sortedFiles.last?.id {
@@ -493,6 +493,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 collectionView.reloadItems(at: indexPaths)
             }
         }
+        setSelectedCells()
     }
 
     #if !ISEXTENSION
