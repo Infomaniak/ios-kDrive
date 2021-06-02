@@ -710,6 +710,16 @@ public class DriveFileManager {
                         deletedFiles.append(file)
                     }
                     pagedActions[fileId] = .fileDelete
+                case .fileMoveOut:
+                    if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
+                        let oldParent = file.parent,
+                        let index = oldParent.children.index(of: file) {
+                        oldParent.children.remove(at: index)
+                    }
+                    if let file = activity.file {
+                        deletedFiles.append(file)
+                    }
+                    pagedActions[fileId] = .fileDelete
                 case .fileRename:
                     if let oldFile = realm.object(ofType: File.self, forPrimaryKey: fileId),
                         let renamedFile = activity.file {
