@@ -272,12 +272,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 }
 
                 showEmptyViewIfNeeded(files: files)
-                let changeset = StagedChangeset(source: self.sortedFiles, target: files)
-                collectionView.reload(using: changeset, interrupt: { $0.changeCount > maxDiffChanges }) { newChildren in
-                    sortedFiles = newChildren
-                    updateSelectedItems(newChildren: newChildren)
-                }
-                setSelectedCells()
+                reloadCollectionView(with: files)
 
                 if moreComing {
                     self.reloadData(page: page + 1, forceRefresh: forceRefresh)
@@ -393,12 +388,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     final func removeFileFromList(id: Int) {
         let newSortedFiles = sortedFiles.filter { $0.id != id }
-
-        let changeSet = StagedChangeset(source: sortedFiles, target: newSortedFiles)
-        collectionView.reload(using: changeSet) { newChildren in
-            sortedFiles = newChildren
-        }
-
+        reloadCollectionView(with: newSortedFiles)
         showEmptyViewIfNeeded(files: newSortedFiles)
     }
 
@@ -467,6 +457,40 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         } else {
             let result = group.wait(timeout: .now() + 5)
             return success && result != .timedOut
+        }
+    }
+
+    private func reloadCollectionView(with files: [File]) {
+        let firstFileId = sortedFiles.first?.id
+        let lastFileId = sortedFiles.last?.id
+        // Reload file list with DifferenceKit
+        let changeSet = StagedChangeset(source: sortedFiles, target: files)
+        collectionView.reload(using: changeSet, interrupt: { $0.changeCount > self.maxDiffChanges }) { files in
+            sortedFiles = files
+            updateSelectedItems(newChildren: files)
+        }
+        setSelectedCells()
+        // Reload corners
+        if let oldFirstFileId = firstFileId,
+            let oldLastFileId = lastFileId,
+            let newFirstFileId = sortedFiles.first?.id,
+            let newLastFileId = sortedFiles.last?.id {
+            var indexPaths = [IndexPath]()
+            if oldFirstFileId != newFirstFileId {
+                indexPaths.append(IndexPath(item: 0, section: 0))
+                if let index = sortedFiles.firstIndex(where: { $0.id == oldFirstFileId }) {
+                    indexPaths.append(IndexPath(item: index, section: 0))
+                }
+            }
+            if oldLastFileId != newLastFileId {
+                indexPaths.append(IndexPath(item: sortedFiles.count - 1, section: 0))
+                if let index = sortedFiles.firstIndex(where: { $0.id == oldLastFileId }) {
+                    indexPaths.append(IndexPath(item: index, section: 0))
+                }
+            }
+            if indexPaths.count > 0 {
+                collectionView.reloadItems(at: indexPaths)
+            }
         }
     }
 
