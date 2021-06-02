@@ -391,6 +391,17 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    final func removeFileFromList(id: Int) {
+        let newSortedFiles = sortedFiles.filter { $0.id != id }
+
+        let changeSet = StagedChangeset(source: sortedFiles, target: newSortedFiles)
+        collectionView.reload(using: changeSet) { newChildren in
+            sortedFiles = newChildren
+        }
+
+        showEmptyViewIfNeeded(files: newSortedFiles)
+    }
+
     static func instantiate(driveFileManager: DriveFileManager) -> Self {
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
         viewController.driveFileManager = driveFileManager
@@ -447,7 +458,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 } else {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
                 }
-                self.selectionMode = false
+                if self.selectionMode {
+                    self.selectionMode = false
+                }
                 self.getNewChanges()
             }
             return nil
@@ -904,8 +917,10 @@ extension FileListViewController: SortOptionsDelegate {
         sortType = type
         if !trashSort {
             FileListOptions.instance.currentSortType = sortType
+            // Collection view will be reloaded via the observer
+        } else {
+            reloadData()
         }
-        // Collection view will be reloaded via the observer
     }
 
 }

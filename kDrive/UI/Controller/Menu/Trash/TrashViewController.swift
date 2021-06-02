@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import kDriveCore
 import InfomaniakCore
-import DifferenceKit
 import CocoaLumberjackSwift
 
 class TrashViewController: FileListViewController {
@@ -112,17 +111,6 @@ class TrashViewController: FileListViewController {
 
     // MARK: - Private methods
 
-    private func removeFileFromList(id: Int) {
-        let newSortedFiles = sortedFiles.filter { $0.id != id }
-
-        let changeSet = StagedChangeset(source: sortedFiles, target: newSortedFiles)
-        collectionView.reload(using: changeSet) { newChildren in
-            sortedFiles = newChildren
-        }
-
-        showEmptyViewIfNeeded(files: newSortedFiles)
-    }
-
     private func showFloatingPanel(files: [File]) {
         let floatingPanelViewController = DriveFloatingPanelController()
         let trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
@@ -174,7 +162,9 @@ class TrashViewController: FileListViewController {
                     message = KDriveStrings.Localizable.errorDelete
                 }
                 UIConstants.showSnackBar(message: message, view: self.view)
-                self.selectionMode = false
+                if self.selectionMode {
+                    self.selectionMode = false
+                }
             }
         }
         present(alert, animated: true)
@@ -274,7 +264,9 @@ extension TrashViewController: TrashOptionsDelegate {
                 }
             }
             group.notify(queue: DispatchQueue.main) {
-                self.selectionMode = false
+                if self.selectionMode {
+                    self.selectionMode = false
+                }
             }
         case .delete:
             deleteFiles(files)
@@ -304,7 +296,9 @@ extension TrashViewController: SelectFolderDelegate {
         }
         group.notify(queue: DispatchQueue.main) {
             self.selectFolderViewController.dismiss(animated: true)
-            self.selectionMode = false
+            if self.selectionMode {
+                self.selectionMode = false
+            }
         }
     }
 

@@ -44,11 +44,10 @@ class OfflineViewController: FileListViewController {
     override func updateChild(_ file: File, at index: Int) {
         // Remove file from list if it is not available offline anymore
         if !file.isAvailableOffline {
-            sortedFiles.remove(at: index)
+            let fileId = sortedFiles[index].id
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.collectionView.deleteItems(at: [IndexPath(row: index, section: 0)])
-                self.showEmptyViewIfNeeded(files: self.sortedFiles)
+                self.removeFileFromList(id: fileId)
             }
             return
         }
