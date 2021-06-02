@@ -150,8 +150,9 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     func getCurrentDirectory(completion: @escaping (File?) -> Void) {
         if let filesViewController = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController,
-            filesViewController.currentDirectory.id >= DriveFileManager.constants.rootID {
-            completion(filesViewController.currentDirectory)
+            let directory = filesViewController.currentDirectory,
+            directory.id >= DriveFileManager.constants.rootID {
+            completion(directory)
         } else {
             driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, children, error) in
                 completion(file)
