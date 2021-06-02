@@ -257,10 +257,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             }
         }
 
-        getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (result, moreComing, replaceFiles) in
-            isLoading = false
-            if configuration.isRefreshControlEnabled {
-                refreshControl.endRefreshing()
+        getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] (result, moreComing, replaceFiles) in
+            guard let self = self else { return }
+            self.isLoading = false
+            if self.configuration.isRefreshControlEnabled {
+                self.refreshControl.endRefreshing()
             }
             switch result {
             case .success(let newFiles):
@@ -268,16 +269,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 if replaceFiles || page == 1 {
                     files = newFiles
                 } else {
-                    files = sortedFiles + newFiles
+                    files = self.sortedFiles + newFiles
                 }
 
-                showEmptyViewIfNeeded(files: files)
-                reloadCollectionView(with: files)
+                self.showEmptyViewIfNeeded(files: files)
+                self.reloadCollectionView(with: files)
 
                 if moreComing {
                     self.reloadData(page: page + 1, forceRefresh: forceRefresh)
                 } else {
-                    isContentLoaded = true
+                    self.isContentLoaded = true
                 }
             case .failure(let error):
                 UIConstants.showSnackBar(message: error.localizedDescription)
