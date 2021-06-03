@@ -52,9 +52,9 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     func configureWith(file: File, roundedCorners: Bool = true) {
         darkLayer.isHidden = false
-        file.getThumbnail { (image, _) in
+        file.getThumbnail { (image, isThumbnail) in
             self.darkLayer.isHidden = true
-            self.fileImage.image = image
+            self.fileImage.image = isThumbnail ? image : KDriveAsset.fileImageSmall.image
         }
         accessibilityLabel = file.name
         isAccessibilityElement = true
@@ -62,5 +62,4 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
             contentInsetView.cornerRadius = UIConstants.cornerRadius
         }
     }
-
 }
