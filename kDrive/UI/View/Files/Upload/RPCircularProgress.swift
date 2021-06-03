@@ -105,9 +105,7 @@ open class RPCircularProgress: UIView {
       Getter for the current progress (not observed from any active animations)
      */
     @IBInspectable open var progress: CGFloat {
-        get {
-            return progressLayer.progress
-        }
+        return progressLayer.progress
     }
 
     /**
@@ -454,4 +452,3 @@ extension RPCircularProgress: CAAnimationDelegate {
     }
 
 }
-

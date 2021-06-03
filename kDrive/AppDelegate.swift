@@ -96,7 +96,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 task.setTaskCompleted(success: false)
             }
 
-            self.handleBackgroundRefresh { (newData) in
+            self.handleBackgroundRefresh { (_) in
                 task.setTaskCompleted(success: true)
             }
         }
@@ -110,7 +110,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 task.setTaskCompleted(success: false)
             }
 
-            self.handleBackgroundRefresh { (newData) in
+            self.handleBackgroundRefresh { (_) in
                 task.setTaskCompleted(success: true)
             }
         }
@@ -118,13 +118,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
-        //User installed the app but never logged in
+        // User installed the app but never logged in
         if accountManager.accounts.count == 0 {
             completion(false)
             return
         }
 
-        let _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
+        _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
         UploadQueue.instance.waitForCompletion {
             completion(true)
         }
@@ -163,7 +163,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        //Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the background.
+        // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the background.
         if MigrationHelper.canMigrate() {
             NotificationsHelper.sendMigrateNotification()
             return
@@ -211,7 +211,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         if MigrationHelper.canMigrate() && accountManager.accounts.count == 0 {
             window?.rootViewController = MigrationViewController.instantiate()
             window?.makeKeyAndVisible()
-        } else if (UserDefaults.isFirstLaunch() || accountManager.accounts.count == 0) {
+        } else if UserDefaults.isFirstLaunch() || accountManager.accounts.count == 0 {
             if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
                 accountManager.deleteAllTokens()
                 window?.rootViewController = OnboardingViewController.instantiate()
@@ -230,8 +230,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 if appVersion.showUpdateFloatingPanel() {
                     if !UserDefaults.shared.updateLater || UserDefaults.shared.numberOfConnections % 10 == 0 {
                         let floatingPanelViewController = UpdateFloatingPanelViewController.instantiatePanel()
-                        (floatingPanelViewController.contentViewController as? UpdateFloatingPanelViewController)?.actionHandler = {
-                            sender in
+                        (floatingPanelViewController.contentViewController as? UpdateFloatingPanelViewController)?.actionHandler = { _ in
                             if let url = URL(string: "https://apps.apple.com/app/infomaniak-kdrive/id1482778676") {
                                 UserDefaults.shared.updateLater = false
                                 UIApplication.shared.open(url)
@@ -246,7 +245,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 let floatingPanelViewController = SavePhotosFloatingPanelViewController.instantiatePanel()
                 let savePhotosFloatingPanelViewController = (floatingPanelViewController.contentViewController as? SavePhotosFloatingPanelViewController)
                 savePhotosFloatingPanelViewController?.driveFileManager = currentDriveFileManager
-                savePhotosFloatingPanelViewController?.actionHandler = { [self] sender in
+                savePhotosFloatingPanelViewController?.actionHandler = { [self] _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     photoSyncSettingsVC.driveFileManager = currentDriveFileManager
                     let mainTabViewVC = self.window?.rootViewController as? UITabBarController
@@ -297,7 +296,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             }
         }
 
-        accountManager.updateUserForAccount(currentAccount) { [self] (account, switchedDrive, error) in
+        accountManager.updateUserForAccount(currentAccount) { [self] (_, switchedDrive, error) in
             if let error = error {
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")
@@ -334,7 +333,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 UploadQueue.instance.addToQueueFromRealm()
                 BackgroundUploadSessionManager.instance.reconnectBackgroundTasks()
                 DispatchQueue.global(qos: .utility).async {
-                    let _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
+                    _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
                 }
             }
         }
@@ -415,7 +414,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 driveFileManager.getFile(id: file.id, withExtras: true) { (newFile, _, error) in
                     if let error = error {
                         if let error = error as? DriveError, error == .objectNotFound {
-                            driveFileManager.setFileAvailableOffline(file: file, available: false) { (error) in }
+                            driveFileManager.setFileAvailableOffline(file: file, available: false) { (_) in }
                         } else {
                             SentrySDK.capture(error: error)
                         }
@@ -511,8 +510,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             default:
                 break
             }
-        }
-        else {
+        } else {
             // Handle other notification types...
         }
 

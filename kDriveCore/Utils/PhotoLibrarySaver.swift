@@ -54,7 +54,7 @@ public class PhotoLibrarySaver: NSObject {
                 authorized = status == .authorized
             }
             if authorized {
-                self.createAlbumIfNeeded { (success) in
+                self.createAlbumIfNeeded { (_) in
                     completion(true)
                 }
             } else {
@@ -70,7 +70,7 @@ public class PhotoLibrarySaver: NSObject {
         } else {
             PHPhotoLibrary.shared().performChanges { [self] in
                 PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
-            } completionHandler: { success, error in
+            } completionHandler: { success, _ in
                 if success {
                     self.assetCollection = self.fetchAssetCollectionForAlbum()
                     completion(true)
@@ -92,7 +92,7 @@ public class PhotoLibrarySaver: NSObject {
         return nil
     }
 
-    public func save(image: UIImage, completion: @escaping (Bool, Error?) -> (Void)) {
+    public func save(image: UIImage, completion: @escaping (Bool, Error?) -> Void) {
         self.requestAuthorizationAndCreateAlbum { (success) in
             guard success else { return }
             PHPhotoLibrary.shared().performChanges({
@@ -107,7 +107,7 @@ public class PhotoLibrarySaver: NSObject {
         }
     }
 
-    public func save(videoUrl: URL, completion: @escaping (Bool, Error?) -> (Void)) {
+    public func save(videoUrl: URL, completion: @escaping (Bool, Error?) -> Void) {
         self.requestAuthorizationAndCreateAlbum { (success) in
             guard success else { return }
             PHPhotoLibrary.shared().performChanges({

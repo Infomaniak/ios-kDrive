@@ -33,9 +33,9 @@ class SelectFolderViewController: FileListViewController {
     @IBOutlet weak var addFolderButton: UIBarButtonItem!
 
     var disabledDirectoriesSelection = [File]()
-    var fileToMove: Int? = nil
+    var fileToMove: Int?
     weak var delegate: SelectFolderDelegate?
-    var selectHandler: ((File) -> (Void))?
+    var selectHandler: ((File) -> Void)?
 
     var isModal: Bool {
         let presentingIsModal = presentingViewController != nil

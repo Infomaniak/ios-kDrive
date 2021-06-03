@@ -127,7 +127,7 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: InfoTableViewCell.self)
 
         tableView.separatorColor = .clear
-        
+
         if self.file.createdAtDate == nil {
             self.fileInformationRows.remove(at: 4)
         }
@@ -148,14 +148,14 @@ class FileDetailViewController: UIViewController {
         // Load file informations
         let group = DispatchGroup()
         group.enter()
-        driveFileManager.getFile(id: file.id, withExtras: true) { (file, _, error) in
+        driveFileManager.getFile(id: file.id, withExtras: true) { (file, _, _) in
             if let file = file {
                 self.file = file
             }
             group.leave()
         }
         group.enter()
-        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, _) in
             self.sharedFile = response?.data
             group.leave()
         }
@@ -187,7 +187,7 @@ class FileDetailViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if !initialLoading {
-            driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+            driveFileManager.apiFetcher.getShareListFor(file: file) { (response, _) in
                 if let data = response?.data {
                     self.sharedFile = data
                     if self.currentTab == .informations {
@@ -218,7 +218,7 @@ class FileDetailViewController: UIViewController {
 
     private func fetchNextActivities() {
         activitiesInfo.isLoading = true
-        driveFileManager.apiFetcher.getFileDetailActivity(file: file, page: activitiesInfo.page) { (response, error) in
+        driveFileManager.apiFetcher.getFileDetailActivity(file: file, page: activitiesInfo.page) { (response, _) in
             if let data = response?.data {
                 self.orderActivities(data: data)
                 self.activitiesInfo.page += 1
@@ -230,7 +230,7 @@ class FileDetailViewController: UIViewController {
 
     func fetchNextComments() {
         commentsInfo.isLoading = true
-        driveFileManager.apiFetcher.getFileDetailComment(file: file, page: commentsInfo.page) { (response, error) in
+        driveFileManager.apiFetcher.getFileDetailComment(file: file, page: commentsInfo.page) { (response, _) in
             if let data = response?.data {
                 for comment in data {
                     self.comments.append(comment)
@@ -296,7 +296,7 @@ class FileDetailViewController: UIViewController {
             let group = DispatchGroup()
             var newComment: Comment?
             group.enter()
-            self.driveFileManager.apiFetcher.addCommentTo(file: self.file, comment: comment) { (response, error) in
+            self.driveFileManager.apiFetcher.addCommentTo(file: self.file, comment: comment) { (response, _) in
                 if let data = response?.data {
                     newComment = data
                 }
@@ -376,7 +376,7 @@ class FileDetailViewController: UIViewController {
         }
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
-        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, error) in
+        driveFileManager.apiFetcher.getShareListFor(file: file) { (response, _) in
             self.sharedFile = response?.data
             self.fileInformationRows = FileInformationRow.allCases
             if self.file.createdAtDate == nil {
@@ -515,7 +515,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             case .comments:
                 if file.isOfficeFile {
                     let cell = tableView.dequeueReusableCell(type: InfoTableViewCell.self, for: indexPath)
-                    cell.actionHandler = { sender in
+                    cell.actionHandler = { _ in
                         let viewController = OnlyOfficeViewController.instantiate(file: self.file, previewParent: nil)
                         self.present(viewController, animated: true)
                     }
@@ -541,12 +541,12 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             return nil
         }
 
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { (action, sourceView, completionHandler) in
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { (action, _, completionHandler) in
             let deleteAlert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: KDriveStrings.Localizable.modalCommentDeleteDescription, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: true) {
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
-                self.driveFileManager.apiFetcher.deleteComment(file: self.file, comment: self.comments[indexPath.row]) { (response, error) in
+                self.driveFileManager.apiFetcher.deleteComment(file: self.file, comment: self.comments[indexPath.row]) { (response, _) in
                     if let data = response?.data {
                         success = data
                     }
@@ -561,8 +561,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                         } else {
                             self.tableView.reloadSections(IndexSet([1]), with: .automatic)
                         }
-                    }
-                    else {
+                    } else {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete, view: self.view)
                     }
                     completionHandler(success)
@@ -573,12 +572,12 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             self.present(deleteAlert, animated: true)
         }
 
-        let editAction = UIContextualAction(style: .normal, title: nil) { (action, sourceView, completionHandler) in
+        let editAction = UIContextualAction(style: .normal, title: nil) { (action, _, completionHandler) in
             let editAlert = AlertFieldViewController(title: KDriveStrings.Localizable.modalCommentAddTitle, placeholder: KDriveStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveStrings.Localizable.buttonSave, loading: true) { (comment) in
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
-                self.driveFileManager.apiFetcher.editComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { (response, error) in
+                self.driveFileManager.apiFetcher.editComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { (response, _) in
                     if let data = response?.data {
                         success = data
                     }
@@ -600,9 +599,9 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             self.present(editAlert, animated: true)
         }
 
-        let answerAction = UIContextualAction(style: .normal, title: nil) { (action, sourceView, completionHandler) in
+        let answerAction = UIContextualAction(style: .normal, title: nil) { (action, _, completionHandler) in
             let answerAlert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonAddComment, placeholder: KDriveStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveStrings.Localizable.buttonSend, loading: true) { (comment) in
-                self.driveFileManager.apiFetcher.answerComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { (response, error) in
+                self.driveFileManager.apiFetcher.answerComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { (response, _) in
                     if let data = response?.data {
                         data.isResponse = true
                         self.comments.insert(data, at: indexPath.row + 1)
@@ -756,7 +755,7 @@ extension FileDetailViewController: FileLocationDelegate {
 
 extension FileDetailViewController: FileCommentDelegate {
     func didLikeComment(comment: Comment, index: Int) {
-        driveFileManager.apiFetcher.likeComment(file: file, like: comment.liked, comment: comment) { (response, error) in
+        driveFileManager.apiFetcher.likeComment(file: file, like: comment.liked, comment: comment) { (_, _) in
             self.comments[index].likesCount = !self.comments[index].liked ? self.comments[index].likesCount + 1 : self.comments[index].likesCount - 1
             self.comments[index].liked = !self.comments[index].liked
             self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)
@@ -790,14 +789,14 @@ extension FileDetailViewController: FileCommentDelegate {
 extension FileDetailViewController: ShareLinkTableViewCellDelegate {
     func shareLinkSwitchToggled(isOn: Bool) {
         if isOn {
-            driveFileManager.activateShareLink(for: file) { (_, shareLink, error) in
+            driveFileManager.activateShareLink(for: file) { (_, shareLink, _) in
                 if let link = shareLink {
                     self.sharedFile?.link = link
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
                 }
             }
         } else {
-            driveFileManager.removeShareLink(for: file) { (file, error) in
+            driveFileManager.removeShareLink(for: file) { (file, _) in
                 if file != nil {
                     self.sharedFile?.link = nil
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)

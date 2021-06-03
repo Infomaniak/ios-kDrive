@@ -84,7 +84,7 @@ public class DownloadQueue {
         operationsInQueue[file.id] = operation
     }
 
-    public func temporaryDownload(file: File, completion: @escaping (DriveError?) -> ()) -> DownloadOperation? {
+    public func temporaryDownload(file: File, completion: @escaping (DriveError?) -> Void) -> DownloadOperation? {
         guard !file.isInvalidated && operationsInQueue[file.id] == nil,
             let driveFileManager = AccountManager.instance.currentDriveFileManager else {
             return nil

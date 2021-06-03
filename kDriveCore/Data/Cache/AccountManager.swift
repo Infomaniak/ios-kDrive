@@ -22,7 +22,7 @@ import InfomaniakCore
 import CocoaLumberjackSwift
 import Sentry
 
-public protocol SwitchAccountDelegate {
+public protocol SwitchAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)
     func didSwitchCurrentAccount(_ newAccount: Account)
 }
@@ -97,18 +97,16 @@ public class AccountManager: RefreshTokenDelegate {
         self.tokens = loadTokens()
         self.accounts = loadAccounts()
 
-        //remove accounts with no user
-        for account in accounts {
-            if account.user == nil {
-                removeAccount(toDeleteAccount: account)
-            }
+        // remove accounts with no user
+        for account in accounts where account.user == nil {
+            removeAccount(toDeleteAccount: account)
         }
 
         for token in tokens {
             if let account = self.accounts.first(where: { $0.userId == token.userId }) {
                 account.token = token
             } else {
-                //Remove token with no account
+                // Remove token with no account
                 removeTokenAndAccount(token: token)
             }
         }
@@ -158,7 +156,6 @@ public class AccountManager: RefreshTokenDelegate {
             }
         }
     }
-
 
     public func createAndSetCurrentAccount(code: String, codeVerifier: String, completion: @escaping (Account?, Error?) -> Void) {
         InfomaniakLogin.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { (apiToken, error) in
@@ -330,19 +327,15 @@ public class AccountManager: RefreshTokenDelegate {
     public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
         self.deleteToken(oldToken)
         self.storeToken(newToken)
-        for account in accounts {
-            if oldToken.userId == account.userId {
-                account.token = newToken
-            }
+        for account in accounts where oldToken.userId == account.userId {
+            account.token = newToken
         }
         tokens.removeAll { $0.userId == oldToken.userId }
         tokens.append(newToken)
 
-        //Update token for the other drive file manager
-        for driveFileManager in driveFileManagers.values where driveFileManager.drive != currentDriveFileManager?.drive {
-            if driveFileManager.apiFetcher.currentToken?.userId == newToken.userId {
-                driveFileManager.apiFetcher.currentToken = newToken
-            }
+        // Update token for the other drive file manager
+        for driveFileManager in driveFileManagers.values where driveFileManager.drive != currentDriveFileManager?.drive && driveFileManager.apiFetcher.currentToken?.userId == newToken.userId {
+            driveFileManager.apiFetcher.currentToken = newToken
         }
     }
 
@@ -367,6 +360,7 @@ public class AccountManager: RefreshTokenDelegate {
 
     func storeToken(_ token: ApiToken) {
         self.deleteToken(token)
+        // swiftlint:disable force_try
         let tokenData = try! JSONEncoder().encode(token)
         let queryAdd: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -400,7 +394,7 @@ public class AccountManager: RefreshTokenDelegate {
         var values = [ApiToken]()
         if resultCode == noErr {
             let jsonDecoder = JSONDecoder()
-            if let array = result as? Array<Dictionary<String, Any>> {
+            if let array = result as? [[String: Any]] {
                 for item in array {
                     if let value = item[kSecValueData as String] as? Data {
                         if let token = try? jsonDecoder.decode(ApiToken.self, from: value) {

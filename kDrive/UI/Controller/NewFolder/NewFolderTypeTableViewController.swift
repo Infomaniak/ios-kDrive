@@ -98,7 +98,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if content[indexPath.row] == .dropbox && (driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo) {
             let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
-            (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { sender in
+            (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { _ in
                 UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
             }
             self.present(floatingPanelViewController, animated: true)

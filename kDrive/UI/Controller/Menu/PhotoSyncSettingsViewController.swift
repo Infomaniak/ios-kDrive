@@ -79,7 +79,6 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
 
-
         photoSyncEnabled = PhotoLibraryUploader.instance.isSyncEnabled
         currentSyncSettings = PhotoLibraryUploader.instance.settings ?? PhotoSyncSettings()
 
@@ -96,7 +95,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         if currentSyncSettings.parentDirectoryId != -1,
             let drive = AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId),
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            //We should always have the folder in cache but just in case we don't...
+            // We should always have the folder in cache but just in case we don't...
             if let photoSyncDirectory = driveFileManager.getCachedFile(id: currentSyncSettings.parentDirectoryId) {
                 self.selectedDirectory = photoSyncDirectory
                 self.updateSaveButtonState()
@@ -159,7 +158,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         DispatchQueue.global(qos: .utility).async {
             let realm = DriveFileManager.constants.uploadsRealm
             self.saveSettings(using: realm)
-            let _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
         navigationController?.popViewController(animated: true)
     }
@@ -233,7 +232,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
         switch sections[section] {
         case .syncSwitch:
             let saveDetailsHeaderText = KDriveStrings.Localizable.syncSettingsDescription
-            //We recycle the header view, it's easier to add \n than setting dynamic constraints
+            // We recycle the header view, it's easier to add \n than setting dynamic constraints
             let headerView = HomeTitleView.instantiate(title: "\n" + saveDetailsHeaderText + "\n")
             headerView.titleLabel.font = .systemFont(ofSize: 14)
             headerView.titleLabel.numberOfLines = 0
@@ -404,7 +403,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
 
                     if self.syncMode == .all {
                         if #available(iOS 13.0, *) { } else {
-                            //DispatchQueue because we need to present this view after dismissing the previous one
+                            // DispatchQueue because we need to present this view after dismissing the previous one
                             DispatchQueue.main.async {
                                 let alertController = AlertTextViewController(title: KDriveStrings.Localizable.ios12LimitationPhotoSyncTitle, message: KDriveStrings.Localizable.ios12LimitationPhotoSyncDescription, action: KDriveStrings.Localizable.buttonClose, hasCancelButton: false, handler: nil)
                                 self.present(alertController, animated: true)

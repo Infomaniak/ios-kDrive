@@ -65,7 +65,7 @@ class tableAccount: Object {
     @objc dynamic var urlBase = ""
     @objc dynamic var user = ""
     @objc dynamic var userID = ""
-    @objc dynamic var userStatusClearAt: NSDate? = nil
+    @objc dynamic var userStatusClearAt: NSDate?
     @objc dynamic var userStatusIcon: String?
     @objc dynamic var userStatusMessage: String?
     @objc dynamic var userStatusMessageId: String?
@@ -78,13 +78,13 @@ class tableAccount: Object {
     @objc dynamic var hcIsTrial: Bool = false
     @objc dynamic var hcTrialExpired: Bool = false
     @objc dynamic var hcTrialRemainingSec: Double = 0
-    @objc dynamic var hcTrialEndTime: NSDate? = nil
+    @objc dynamic var hcTrialEndTime: NSDate?
     @objc dynamic var hcAccountRemoveExpired: Bool = false
     @objc dynamic var hcAccountRemoveRemainingSec: Double = 0
-    @objc dynamic var hcAccountRemoveTime: NSDate? = nil
+    @objc dynamic var hcAccountRemoveTime: NSDate?
     @objc dynamic var hcNextGroupExpirationGroup = ""
     @objc dynamic var hcNextGroupExpirationGroupExpired: Bool = false
-    @objc dynamic var hcNextGroupExpirationExpiresTime: NSDate? = nil
+    @objc dynamic var hcNextGroupExpirationExpiresTime: NSDate?
     @objc dynamic var hcNextGroupExpirationExpires = ""
 
     override static func primaryKey() -> String {

@@ -249,9 +249,9 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         let option = content[indexPath.row - 1]
         cell.configureWith(option: option, optionValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate)
         if !option.isEnabled(drive: driveFileManager.drive) {
-            cell.actionHandler = { [self] sender in
+            cell.actionHandler = { [self] _ in
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { sender in
+                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
                     UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)", from: self)
                 }
                 self.present(floatingPanelViewController, animated: true)
@@ -329,7 +329,7 @@ extension ShareLinkSettingsViewController: AccessRightPasswordDelegate {
 // MARK: - FooterButtonDelegate
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: shareFile.link!.canEdit, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getValue(for: .allowDownload), blockComments: getValue(for: .blockComments), blockInformation: getValue(for: .blockUsersConsult), isFree: driveFileManager.drive.pack == .free) { (response, error) in
+        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: shareFile.link!.canEdit, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getValue(for: .allowDownload), blockComments: getValue(for: .blockComments), blockInformation: getValue(for: .blockUsersConsult), isFree: driveFileManager.drive.pack == .free) { (response, _) in
             if response?.data == true {
                 self.navigationController?.popViewController(animated: true)
             }

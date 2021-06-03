@@ -177,7 +177,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { (context) in
+        coordinator.animate { (_) in
             self.collectionView?.collectionViewLayout.invalidateLayout()
         }
     }
@@ -205,7 +205,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func getNewChanges() {
-        driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] (results, _, error) in
+        driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] (results, _, _) in
             if results != nil {
                 self?.reloadData(withActivities: false)
             }
@@ -469,7 +469,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let lastFileId = sortedFiles.last?.id
         // Reload file list with DifferenceKit
         let changeSet = StagedChangeset(source: sortedFiles, target: files)
-        collectionView.reload(using: changeSet, interrupt: { $0.changeCount > self.maxDiffChanges }) { files in
+        collectionView.reload(using: changeSet) { $0.changeCount > self.maxDiffChanges } setData: { files in
             sortedFiles = files
             updateSelectedItems(newChildren: files)
         }
@@ -872,7 +872,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
                 var success = true
                 for file in self.selectedFiles {
                     group.enter()
-                    self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { (response, _, error) in
+                    self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { (_, _, error) in
                         if let error = error {
                             success = false
                             DDLogError("Error while moving file: \(error)")

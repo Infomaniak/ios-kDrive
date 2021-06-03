@@ -106,4 +106,3 @@ class NotificationsSettingsTableViewController: UITableViewController {
         }
     }
 }
-

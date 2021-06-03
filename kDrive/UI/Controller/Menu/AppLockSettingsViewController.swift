@@ -29,9 +29,7 @@ struct AppLockHelper {
     private init() { }
 
     var isAppLocked: Bool {
-        get {
-            return lastAppLock + appUnlockTime < Date().timeIntervalSince1970
-        }
+        return lastAppLock + appUnlockTime < Date().timeIntervalSince1970
     }
 
     mutating func setTime() {
@@ -70,7 +68,7 @@ class AppLockSettingsViewController: UIViewController {
         var error: NSError?
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, evaluateError in
+                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
                     DispatchQueue.main.async {
                         if success {
                             UserDefaults.shared.isAppLockEnabled = sender.isOn

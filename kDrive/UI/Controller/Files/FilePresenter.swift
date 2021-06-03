@@ -71,8 +71,8 @@ class FilePresenter {
                     floatingPanelViewController = AccessFileFloatingPanelViewController.instantiatePanel()
                     (floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.actionHandler = { _ in
                         (self.floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.rightButton.setLoading(true)
-                        driveFileManager.apiFetcher.requireFileAccess(file: file) { (response, error) in
-                            if (error != nil) {
+                        driveFileManager.apiFetcher.requireFileAccess(file: file) { (_, error) in
+                            if error != nil {
                                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRightModification)
                             } else {
                                 self.floatingPanelViewController?.dismiss(animated: true)

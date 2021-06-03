@@ -45,6 +45,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         contentInsetView.backgroundColor = .clear
     }
 
+    // swiftlint:disable cyclomatic_complexity
     func configureWith(activity: FileDetailActivity, file: File) {
         titleLabel.text = activity.user?.displayName ?? KDriveStrings.Localizable.allUserAnonymous
 

@@ -131,7 +131,7 @@ extension SwitchUserViewController: UITableViewDataSource {
 extension SwitchUserViewController: InfomaniakLoginDelegate {
 
     func didCompleteLoginWith(code: String, verifier: String) {
-        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { (account, error) in
+        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { (account, _) in
             if account != nil {
                 // Download root file
                 AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in

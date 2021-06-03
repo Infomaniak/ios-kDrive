@@ -140,7 +140,7 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         let constraints = [
             textField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             textField.topAnchor.constraint(equalTo: contentView.topAnchor),
-            textField.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            textField.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
     }

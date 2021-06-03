@@ -75,7 +75,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         dropDown.cellHeight = 65
         dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
 
-        dropDown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) -> Void in
+        dropDown.customCellConfiguration = { (index: Index, _: String, cell: DropDownCell) -> Void in
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
             if let mail = self.mail {
                 if index == 0 {
@@ -87,7 +87,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
                 cell.configureWith(user: self.results[index])
             }
         }
-        dropDown.selectionAction = { [unowned self] (index: Int, item: String) in
+        dropDown.selectionAction = { [unowned self] (index: Int, _: String) in
             if let mail = mail {
                 if index == 0 {
                     delegate?.didSelectMail(mail: mail)
@@ -148,4 +148,3 @@ extension InviteUserTableViewCell: UITextFieldDelegate {
         dropDown.show()
     }
 }
-

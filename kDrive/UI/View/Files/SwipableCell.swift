@@ -59,7 +59,7 @@ protocol SwipableCell: UICollectionViewCell {
     func showSwipeActions()
     func resetSwipeActions()
 }
-//MARK: SwipableCell default implementation
+// MARK: SwipableCell default implementation
 extension SwipableCell {
 
     private var closeThreshold: CGFloat {

@@ -98,7 +98,7 @@ class RecentActivityTableViewCell: InsetTableViewCell, UICollectionViewDelegate,
 
     func configureWith(recentActivity: FileActivity) {
         activity = recentActivity
-        //activity?.file = recentActivity.file?.freeze()
+        // activity?.file = recentActivity.file?.freeze()
         let count = activities.count
         let isDirectory = activity?.file?.isDirectory ?? false
         switch recentActivity.action {

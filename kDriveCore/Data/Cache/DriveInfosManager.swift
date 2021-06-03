@@ -34,8 +34,8 @@ public class DriveInfosManager {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
-            migrationBlock: { (migration, oldSchemaVersion) in
-                if (oldSchemaVersion < DriveInfosManager.currentDbVersion) {
+            migrationBlock: { (_, oldSchemaVersion) in
+                if oldSchemaVersion < DriveInfosManager.currentDbVersion {
                     // No migration needed from version 0 to version 1
                 }
             },
@@ -43,6 +43,7 @@ public class DriveInfosManager {
     }
 
     public func getRealm() -> Realm {
+        // swiftlint:disable force_try
         return try! Realm(configuration: realmConfiguration)
     }
 
@@ -183,7 +184,7 @@ public class DriveInfosManager {
         if let userId = userId {
             let filterPredicate: NSPredicate
             if let sharedWithMe = sharedWithMe {
-                filterPredicate = NSPredicate(format: "userId = %d AND sharedWithMe = %@", userId, NSNumber(booleanLiteral: sharedWithMe))
+                filterPredicate = NSPredicate(format: "userId = %d AND sharedWithMe = %@", userId, NSNumber(value: sharedWithMe))
             } else {
                 filterPredicate = NSPredicate(format: "userId = %d", userId)
             }

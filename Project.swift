@@ -95,7 +95,7 @@ let project = Project(name: "kDrive",
             infoPlist: "kDriveTests/Tests.plist",
             sources: "kDriveTests/**",
             dependencies: [
-                    .target(name: "kDrive"),
+                    .target(name: "kDrive")
             ],
             settings: Settings(base: ["CODE_SIGN_IDENTITY": "", "CODE_SIGNING_REQUIRED": "NO"])),
         Target(name: "kDriveUITests",
@@ -344,6 +344,6 @@ let project = Project(name: "kDrive",
                     .package(product: "Lottie"),
                     .package(product: "DropDown")
             ],
-            settings: Settings(base: actionExtensionSettings, debug: Configuration(settings: debugActionExtensionSettings))),
+            settings: Settings(base: actionExtensionSettings, debug: Configuration(settings: debugActionExtensionSettings)))
     ],
     fileHeaderTemplate: .file("file-header-template.txt"))

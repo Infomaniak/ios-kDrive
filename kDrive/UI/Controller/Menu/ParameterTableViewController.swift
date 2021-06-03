@@ -22,7 +22,7 @@ import kDriveCore
 class ParameterTableViewController: UITableViewController {
 
     var driveFileManager: DriveFileManager!
-    
+
     private enum parameterOption {
         case photos
         case theme
@@ -31,7 +31,7 @@ class ParameterTableViewController: UITableViewController {
         case wifi
         case about
     }
-    
+
     private var tableContent: [parameterOption] {
         if #available(iOS 13.0, *) {
             return [.photos, .theme, .notifications, .appLock, .wifi, .about]
@@ -39,7 +39,7 @@ class ParameterTableViewController: UITableViewController {
             return [.photos, .notifications, .appLock, .wifi, .about]
         }
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)

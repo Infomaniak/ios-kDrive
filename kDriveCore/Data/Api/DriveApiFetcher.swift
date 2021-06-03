@@ -130,8 +130,12 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func setupDropBox(directory: File, password: String?, validUntil: Date?, emailWhenFinished: Bool,
-        limitFileSize: Int?, completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
+    public func setupDropBox(directory: File,
+                             password: String?,
+                             validUntil: Date?,
+                             emailWhenFinished: Bool,
+                             limitFileSize: Int?,
+                             completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
@@ -160,8 +164,12 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func updateDropBox(directory: File, password: String?, validUntil: Date?, emailWhenFinished: Bool,
-        limitFileSize: Int?, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+    public func updateDropBox(directory: File,
+                              password: String?,
+                              validUntil: Date?,
+                              emailWhenFinished: Bool,
+                              limitFileSize: Int?,
+                              completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
@@ -258,6 +266,7 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
+    // swiftlint:disable function_parameter_count
     public func updateShareLinkWith(file: File, canEdit: Bool, permission: String, password: String? = "", date: TimeInterval?, blockDownloads: Bool, blockComments: Bool, blockInformation: Bool, isFree: Bool, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateShareLinkWith(file: file)
 
@@ -633,7 +642,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
         let lock = AccountManager.instance.refreshTokenLock
         lock.wait()
         lock.enter()
-        //Maybe someone else refreshed our token
+        // Maybe someone else refreshed our token
         AccountManager.instance.reloadTokensAndAccounts()
         if let token = AccountManager.instance.getTokenForUserId(credential.userId),
             token.expirationDate > credential.expirationDate {

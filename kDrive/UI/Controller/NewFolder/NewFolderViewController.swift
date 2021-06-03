@@ -91,7 +91,7 @@ class NewFolderViewController: UIViewController {
         tableView.separatorColor = .clear
         hideKeyboardWhenTappedAround()
 
-        driveFileManager.getFile(id: currentDirectory.id, withExtras: true) { (file, _, error) in
+        driveFileManager.getFile(id: currentDirectory.id, withExtras: true) { (file, _, _) in
             if let file = file {
                 self.currentDirectory = file
             }
@@ -225,7 +225,6 @@ class NewFolderViewController: UIViewController {
     }
 }
 
-
 // MARK: - TextField and Keyboard Methods
 extension NewFolderViewController: NewFolderTextFieldDelegate {
     func textFieldUpdated(content: String) {
@@ -233,7 +232,6 @@ extension NewFolderViewController: NewFolderTextFieldDelegate {
         updateButton()
     }
 }
-
 
 // MARK: - NewFolderSettingsDelegate
 extension NewFolderViewController: NewFolderSettingsDelegate {
@@ -254,7 +252,6 @@ extension NewFolderViewController: NewFolderSettingsDelegate {
         // Not needed
     }
 }
-
 
 // MARK: - TableView Methods
 extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
@@ -397,7 +394,6 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 }
-
 
 // MARK: - FooterButtonDelegate
 extension NewFolderViewController: FooterButtonDelegate {

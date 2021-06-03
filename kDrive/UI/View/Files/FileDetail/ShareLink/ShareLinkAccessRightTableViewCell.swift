@@ -33,7 +33,7 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
     @IBOutlet weak var buttonNewPassword: UIButton!
 
     var showPassword: Bool = false
-    var delegate: AccessRightPasswordDelegate?
+    weak var delegate: AccessRightPasswordDelegate?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -101,6 +101,5 @@ extension ShareLinkAccessRightTableViewCell: UITextFieldDelegate {
         textField.endEditing(true)
         return true
     }
-
 
 }

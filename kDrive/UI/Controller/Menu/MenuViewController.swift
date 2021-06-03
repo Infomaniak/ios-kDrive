@@ -209,7 +209,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    //MARK: Cell Button Action
+    // MARK: Cell Button Action
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
         performSegue(withIdentifier: "toSwitchDriveSegue", sender: nil)

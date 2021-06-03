@@ -80,7 +80,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             if #available(iOS 13, *) {
                 inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
             } else {
-                //Hack to properly center icons < iOS 13
+                // Hack to properly center icons < iOS 13
                 inset = UIEdgeInsets(top: 0, left: 0, bottom: -8, right: 0)
             }
         } else {
@@ -89,7 +89,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             if #available(iOS 13, *) {
                 inset = UIEdgeInsets(top: -2, left: -2, bottom: -2, right: -2)
             } else {
-                //Hack to properly center icons < iOS 13
+                // Hack to properly center icons < iOS 13
                 inset = UIEdgeInsets(top: -2, left: -2, bottom: -10, right: -2)
             }
         }
@@ -132,7 +132,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func plusButtonPressed() {
-        getCurrentDirectory() { file in
+        getCurrentDirectory { file in
             if let currentDirectory = file {
                 let floatingPanelViewController = DriveFloatingPanelController()
                 let fileInformationsViewController = PlusButtonFloatingPanelViewController()
@@ -154,7 +154,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             directory.id >= DriveFileManager.constants.rootID {
             completion(directory)
         } else {
-            driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, children, error) in
+            driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, _, _) in
                 completion(file)
             }
         }
@@ -207,19 +207,15 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
 
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         updateTabBarProfilePicture()
-        for viewController in viewControllers ?? [] {
-            if viewController.isViewLoaded {
-                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didUpdateCurrentAccountInformations(currentAccount)
-            }
+        for viewController in viewControllers ?? [] where viewController.isViewLoaded {
+            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didUpdateCurrentAccountInformations(currentAccount)
         }
     }
 
     func didSwitchCurrentAccount(_ newAccount: Account) {
         updateTabBarProfilePicture()
-        for viewController in viewControllers ?? [] {
-            if viewController.isViewLoaded {
-                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didSwitchCurrentAccount(newAccount)
-            }
+        for viewController in viewControllers ?? [] where viewController.isViewLoaded {
+            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchAccountDelegate)?.didSwitchCurrentAccount(newAccount)
         }
         setDriveFileManager(AccountManager.instance.currentDriveFileManager) { currentDriveFileManager in
             self.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
@@ -228,7 +224,7 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
 
     func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
         driveFileManager = newDriveFileManager
-        //Tell Files app that the drive changed
+        // Tell Files app that the drive changed
         DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
             manager.signalEnumerator(for: .workingSet) { (_) in }
             manager.signalEnumerator(for: .rootContainer) { (_) in }
@@ -259,4 +255,3 @@ extension MainTabViewController: UIDocumentPickerDelegate {
         }
     }
 }
-

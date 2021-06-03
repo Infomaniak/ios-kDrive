@@ -127,14 +127,14 @@ class SwipableCollectionView: UICollectionView {
 
     @objc private func didSelectAction(_ sender: UIButton) {
         if let actions = currentlySwipedCellActions,
-            let _ = currentlySwipedCell,
+            let swipedCell = currentlySwipedCell,
             let indexPath = currentlySwipedCellPath {
             if sender.tag < actions.count {
                 let action = actions[sender.tag]
                 swipeDelegate?.collectionView(self, didSelect: action, at: indexPath)
                 switch action.style {
                 case .normal:
-                    currentlySwipedCell?.hideSwipeActions()
+                    swipedCell.hideSwipeActions()
                     resetCurrentlySelectedCell()
                 case .destructive:
                     resetCurrentlySelectedCell()
@@ -145,7 +145,7 @@ class SwipableCollectionView: UICollectionView {
         }
     }
 }
-//MARK: - UIGestureRecognizerDelegate
+// MARK: - UIGestureRecognizerDelegate
 extension SwipableCollectionView: UIGestureRecognizerDelegate {
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer,
@@ -158,11 +158,7 @@ extension SwipableCollectionView: UIGestureRecognizerDelegate {
 
             let swipeLocation = gestureRecognizer.location(in: self)
 
-            if let _ = indexPathForItem(at: swipeLocation) {
-                return true
-            } else {
-                return false
-            }
+            return indexPathForItem(at: swipeLocation) != nil
         } else {
             return super.gestureRecognizerShouldBegin(gestureRecognizer)
         }

@@ -120,7 +120,7 @@ public class DownloadOperation: Operation {
                     var request = URLRequest(url: url)
                     request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
                     task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-                    progressObservation = task?.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = file.id] (progress, value) in
+                    progressObservation = task?.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = file.id] (_, value) in
                         guard let newValue = value.newValue else {
                             return
                         }

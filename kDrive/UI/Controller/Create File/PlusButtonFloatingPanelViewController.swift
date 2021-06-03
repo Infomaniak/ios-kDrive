@@ -54,10 +54,8 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     ]
 
     var contentHeight: CGFloat {
-        get {
-            return content.reduce(CGFloat(100)) { (last, section) in
-                return last + CGFloat(60 * section.count)
-            }
+        return content.reduce(CGFloat(100)) { (last, section) in
+            return last + CGFloat(60 * section.count)
         }
     }
 

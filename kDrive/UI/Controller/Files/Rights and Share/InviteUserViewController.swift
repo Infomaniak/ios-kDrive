@@ -110,7 +110,7 @@ class InviteUserViewController: UIViewController {
     func shareAndDismiss() {
         let usersIds = users.map(\.id)
         let tags = [Int]()
-        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { (response, error) in
+        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { (_, _) in
 
         }
         dismiss(animated: true)
@@ -265,7 +265,6 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-
 // MARK: - SearchUserDelegate
 extension InviteUserViewController: SearchUserDelegate {
     func didSelectUser(user: DriveUser) {
@@ -280,7 +279,6 @@ extension InviteUserViewController: SearchUserDelegate {
         reloadInvited()
     }
 }
-
 
 // MARK: - SelectedUsersDelegate
 extension InviteUserViewController: SelectedUsersDelegate {
@@ -302,7 +300,6 @@ extension InviteUserViewController: SelectedUsersDelegate {
     }
 }
 
-
 // MARK: - RightsSelectionDelegate
 extension InviteUserViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
@@ -315,7 +312,7 @@ extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let usersIds = users.map(\.id)
         let tags = [Int]()
-        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { (response, error) in
+        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { (response, _) in
             let conflictList = response?.data?.filter(\.isConflict) ?? []
             if conflictList.isEmpty {
                 self.shareAndDismiss()

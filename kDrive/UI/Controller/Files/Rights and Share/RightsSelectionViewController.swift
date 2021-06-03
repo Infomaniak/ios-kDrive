@@ -104,7 +104,7 @@ class RightsSelectionViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //Necessary for the large display to show up on initial view display, but why ?
+        // Necessary for the large display to show up on initial view display, but why ?
         navigationController?.navigationBar.sizeToFit()
     }
 
@@ -174,9 +174,9 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         var disable = false
         if right.key == "password" && driveFileManager.drive.pack == .free {
             disable = true
-            cell.actionHandler = { [self] sender in
+            cell.actionHandler = { [self] _ in
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { sender in
+                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
                     UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)", from: self)
                 }
                 self.present(floatingPanelViewController, animated: true)

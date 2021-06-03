@@ -70,5 +70,4 @@ extension FileInformationUsersTableViewCell: UICollectionViewDelegate, UICollect
         return CGSize(width: 35, height: 35)
     }
 
-
 }

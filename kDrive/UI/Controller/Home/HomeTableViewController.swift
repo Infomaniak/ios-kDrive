@@ -317,7 +317,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     func loadLastModifiedFiles() {
         lastUpdate = Date()
         lastModifyIsLoading = true
-        driveFileManager.getLastModifiedFiles { [self] (files, error) in
+        driveFileManager.getLastModifiedFiles { [self] (files, _) in
             if let files = files, files.map(\.id) != lastModifiedFiles.map(\.id) {
                 lastModifiedFiles = files
                 lastModifyIsLoading = false
@@ -331,18 +331,18 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         lastUpdate = Date()
         lastPicturesInfo.isLoading = true
         activityOrPicturesIsLoading = lastPicturesInfo.page == 1
-        driveFileManager.getLastPictures(page: lastPicturesInfo.page) { (files, error) in
+        driveFileManager.getLastPictures(page: lastPicturesInfo.page) { (files, _) in
             if let files = files {
                 self.lastPictures += files
 
-                //self.showFooter(false)
+                // self.showFooter(false)
                 self.activityOrPicturesIsLoading = false
                 self.reload(sections: [.activityOrPictures])
                 self.lastPicturesInfo.page += 1
                 self.lastPicturesInfo.hasNextPage = files.count == DriveApiFetcher.itemPerPage
                 self.lastPicturesInfo.isLoading = false
             } else {
-                //self.showFooter(false)
+                // self.showFooter(false)
                 self.activityOrPicturesIsLoading = false
                 self.lastPicturesInfo.isLoading = false
             }
@@ -478,12 +478,12 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.configureCell(with: driveFileManager.drive)
                 cell.selectionStyle = .none
-                cell.actionHandler = { [self] sender in
+                cell.actionHandler = { [self] _ in
                     if let url = URL(string: "\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)") {
                         UIApplication.shared.open(url)
                     }
                 }
-                cell.closeHandler = { [self] sender in
+                cell.closeHandler = { [self] _ in
                     topRows.remove(at: topRows.count - 1)
                     tableView.deleteRows(at: [indexPath], with: .automatic)
                     showInsufficientStorage = false

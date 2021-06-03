@@ -69,7 +69,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     public var backgroundCompletionHandler: (() -> Void)?
 
     static let maxBackgroundTasks = 10
-    
+
     var backgroundSession: URLSession!
     var tasksCompletionHandler: [Int: CompletionHandler] = [:]
     var tasksData: [Int: Data] = [:]
@@ -96,7 +96,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
                     let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                     .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = fileId] (progress, value) in
+                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = fileId] (_, value) in
                         guard let newValue = value.newValue else {
                             return
                         }

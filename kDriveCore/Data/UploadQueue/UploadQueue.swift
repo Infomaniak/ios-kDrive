@@ -82,7 +82,7 @@ public class UploadQueue {
         }
     }
 
-    public func waitForCompletion(_ completionHandler: @escaping () -> (Void)) {
+    public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         DispatchQueue.global(qos: .default).async {
             self.operationQueue.waitUntilAllOperationsAreFinished()
             completionHandler()
@@ -234,7 +234,7 @@ public class UploadQueue {
     }
 
     private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
-        fileUploadedCount = fileUploadedCount + (result.uploadFile.error == nil ? 1 : 0)
+        fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
         if let error = result.uploadFile.error,
             error != .networkError || error != .taskCancelled || error != .taskRescheduled {
             NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
@@ -299,7 +299,7 @@ public class UploadQueue {
             shouldCompactOnLaunch: compactingCondition,
             objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
         do {
-            let _ = try Realm(configuration: config)
+            _ = try Realm(configuration: config)
         } catch {
             DDLogError("Failed to compact uploads realm: \(error)")
         }

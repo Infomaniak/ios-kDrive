@@ -63,9 +63,9 @@ public class MigrationHelper {
             let group = DispatchGroup()
             for (account, password) in savedAccounts {
                 group.enter()
-                InfomaniakLogin.getApiToken(username: account, applicationPassword: password) { (token, error) in
+                InfomaniakLogin.getApiToken(username: account, applicationPassword: password) { (token, _) in
                     if let token = token {
-                        AccountManager.instance.createAndSetCurrentAccount(token: token) { (account, error) in
+                        AccountManager.instance.createAndSetCurrentAccount(token: token) { (account, _) in
                             if account == nil {
                                 successful = false
                             }
@@ -109,7 +109,7 @@ public class MigrationHelper {
 
         var values = [String: String]()
         if lastResultCode == noErr,
-            let array = result as? Array<Dictionary<String, Any>> {
+           let array = result as? [[String: Any]] {
 
             for item in array {
                 if let key = item[kSecAttrAccount as String] as? String,
@@ -121,7 +121,7 @@ public class MigrationHelper {
 
         var savedAccounts = [String: String]()
         for key in values.keys {
-            //Nextcloud accounts are saved in keychain using this format: password + usernameemail + " " + driveUrl
+            // Nextcloud accounts are saved in keychain using this format: password + usernameemail + " " + driveUrl
             let passwordMatch = "password"
             if key.starts(with: passwordMatch) {
                 var accountName = key
@@ -141,13 +141,7 @@ public class MigrationHelper {
             let realm = try Realm(configuration: config)
             let accounts = realm.objects(tableAccount.self)
 
-            for account in accounts {
-                if account.autoUpload {
-                    return true
-                }
-            }
-
-            return false
+            return accounts.contains(where: \.autoUpload)
         } catch {
             SentrySDK.capture(message: "[Migration] Cannot read database")
             return false
@@ -183,13 +177,13 @@ public class MigrationHelper {
 
             var queryDelete: [String: Any] = [
                 kSecClass as String: kSecClassGenericPassword,
-                kSecAttrAccessGroup as String: accessGroup,
+                kSecAttrAccessGroup as String: accessGroup
             ]
             _ = SecItemDelete(queryDelete as CFDictionary)
 
             queryDelete = [
                 kSecClass as String: kSecClassInternetPassword,
-                kSecAttrAccessGroup as String: accessGroup,
+                kSecAttrAccessGroup as String: accessGroup
             ]
             _ = SecItemDelete(queryDelete as CFDictionary)
 

@@ -263,8 +263,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func seek(to time: CMTime) {
-        player?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) {
-            isFinished in
+        player?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { isFinished in
             if isFinished {
                 self.setNowPlayingPlaybackInfo()
             }

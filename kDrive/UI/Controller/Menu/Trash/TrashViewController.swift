@@ -83,14 +83,14 @@ class TrashViewController: FileListViewController {
         emptyTrashBarButtonItem.isEnabled = !isListEmpty
     }
 
-    // MARK:- Actions
+    // MARK: - Actions
 
     @IBAction func emptyTrash(_ sender: UIBarButtonItem) {
         let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalEmptyTrashTitle, message: KDriveStrings.Localizable.modalEmptyTrashDescription, action: KDriveStrings.Localizable.buttonEmpty, destructive: true, loading: true) { [unowned self] in
             let group = DispatchGroup()
             var success = false
             group.enter()
-            driveFileManager.apiFetcher.deleteAllFilesDefinitely { (response, error) in
+            driveFileManager.apiFetcher.deleteAllFilesDefinitely { (_, error) in
                 if let error = error {
                     success = false
                     DDLogError("Error while emptying trash: \(error)")
@@ -135,7 +135,7 @@ class TrashViewController: FileListViewController {
             var success = true
             for file in files {
                 group.enter()
-                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { (response, error) in
+                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { (_, error) in
                     file.signalChanges(userId: self.driveFileManager.drive.userId)
                     if let error = error {
                         success = false
@@ -251,7 +251,7 @@ extension TrashViewController: TrashOptionsDelegate {
             let group = DispatchGroup()
             for file in files {
                 group.enter()
-                driveFileManager.apiFetcher.restoreTrashedFile(file: file) { [self] (response, error) in
+                driveFileManager.apiFetcher.restoreTrashedFile(file: file) { [self] (_, error) in
                     // TODO: Find parent to signal changes
                     file.signalChanges(userId: self.driveFileManager.drive.userId)
                     if error == nil {
@@ -283,7 +283,7 @@ extension TrashViewController: SelectFolderDelegate {
         let group = DispatchGroup()
         for file in filesToRestore {
             group.enter()
-            driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: folder.id) { [self] (response, error) in
+            driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: folder.id) { [self] (_, error) in
                 folder.signalChanges(userId: driveFileManager.drive.userId)
                 if error == nil {
                     removeFileFromList(id: file.id)

@@ -95,7 +95,7 @@ class PhotoListViewController: UIViewController {
         super.viewWillLayoutSubviews()
         collectionView.collectionViewLayout.invalidateLayout()
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.tintColor = nil
@@ -147,7 +147,7 @@ class PhotoListViewController: UIViewController {
 
     func fetchNextPage() {
         isLoading = true
-        driveFileManager?.getLastPictures(page: page) { (response, error) in
+        driveFileManager?.getLastPictures(page: page) { (response, _) in
             if let fetchedPictures = response {
 
                 self.collectionView.performBatchUpdates {
@@ -172,7 +172,7 @@ class PhotoListViewController: UIViewController {
                         currentYearMonth.pictures.append(picture)
                         self.collectionView.insertItems(at: [IndexPath(row: currentYearMonth.pictures.count - 1, section: currentSectionIndex + 1)])
                     }
-                } completion: { done in
+                } completion: { _ in
 
                 }
 

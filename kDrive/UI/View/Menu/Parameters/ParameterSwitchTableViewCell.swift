@@ -41,6 +41,4 @@ class ParameterSwitchTableViewCell: InsetTableViewCell {
         self.contentInsetView.backgroundColor = InfomaniakCoreAsset.backgroundCardView.color
     }
 
-
-
 }

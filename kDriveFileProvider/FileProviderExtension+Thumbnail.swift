@@ -35,21 +35,20 @@ extension FileProviderExtension {
                 // Download the thumbnail to disk
                 // For simplicity, this sample downloads each thumbnail separately;
                 // however, if possible, you should batch download all the thumbnails at once.
-                let downloadTask = urlSession.downloadTask(with: request, completionHandler: { (tempURL, response, error) in
+                let downloadTask = urlSession.downloadTask(with: request, completionHandler: { (tempURL, _, error) in
 
                     guard progress.isCancelled != true else {
                         return
                     }
 
                     var myErrorOrNil = error
-                    var mappedDataOrNil: Data? = nil
+                    var mappedDataOrNil: Data?
 
                     // If the download succeeds, map a data object to the file
                     if let fileURL = tempURL {
                         do {
                             mappedDataOrNil = try Data(contentsOf: fileURL, options: .alwaysMapped)
-                        }
-                        catch let mappingError {
+                        } catch let mappingError {
                             myErrorOrNil = mappingError
                         }
                     }

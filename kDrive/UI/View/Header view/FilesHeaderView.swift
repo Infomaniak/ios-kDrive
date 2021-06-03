@@ -50,7 +50,7 @@ class FilesHeaderView: UICollectionReusableView {
     @IBOutlet weak var activityLabel: UILabel!
     @IBOutlet weak var moveButton: UIButton!
     @IBOutlet weak var deleteButton: UIButton!
-    
+
     weak var delegate: FilesHeaderViewDelegate? {
         didSet {
             selectView.delegate = delegate

@@ -20,8 +20,8 @@ import Foundation
 import InfomaniakCore
 
 public class ErrorUserInfo: Codable {
-    var intValue: Int? = nil
-    var stringValue: String? = nil
+    var intValue: Int?
+    var stringValue: String?
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()

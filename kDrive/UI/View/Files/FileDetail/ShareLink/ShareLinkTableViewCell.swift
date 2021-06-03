@@ -118,4 +118,3 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         delegate?.shareLinkSettingsButtonPressed()
     }
 }
-

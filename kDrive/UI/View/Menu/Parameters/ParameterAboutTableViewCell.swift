@@ -26,5 +26,4 @@ class ParameterAboutTableViewCell: InsetTableViewCell {
         // Initialization code
     }
 
-
 }

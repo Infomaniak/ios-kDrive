@@ -59,7 +59,6 @@ class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelega
         return cell
     }
 
-
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let sizeLabel = UILabel()
         sizeLabel.font = sizeLabel.font.withSize(14)

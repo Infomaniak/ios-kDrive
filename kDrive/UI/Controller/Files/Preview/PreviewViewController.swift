@@ -202,7 +202,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: true)
-        //floatingPanelViewController.move(to: .hidden, animated: true)
+        // floatingPanelViewController.move(to: .hidden, animated: true)
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
@@ -222,9 +222,9 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         centerIndexPathBeforeRotate = currentIndex
-        coordinator.animate { (context) in
+        coordinator.animate { (_) in
             self.collectionView?.collectionViewLayout.invalidateLayout()
-        } completion: { (context) in
+        } completion: { (_) in
         }
     }
 
@@ -465,7 +465,7 @@ extension PreviewViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
-        //File is already downloaded and up to date OR we can remote play it (audio / video)
+        // File is already downloaded and up to date OR we can remote play it (audio / video)
         if !file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType) {
             let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
             switch file.convertedType {

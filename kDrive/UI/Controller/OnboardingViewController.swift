@@ -79,9 +79,9 @@ class OnboardingViewController: UIViewController {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { (context) in
+        coordinator.animate { (_) in
             self.collectionView?.collectionViewLayout.invalidateLayout()
-        } completion: { (context) in
+        } completion: { (_) in
             let indexPath = IndexPath(row: self.pageControl.currentPage, section: 0)
             self.collectionView.scrollToItem(at: indexPath, at: .left, animated: true)
         }

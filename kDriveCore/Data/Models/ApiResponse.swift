@@ -47,7 +47,6 @@ public class CancelableResponse: Codable {
     }
 }
 
-
 public class ApiResponse<ResponseContent: Codable>: Codable {
 
     public let result: ApiResult

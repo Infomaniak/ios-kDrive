@@ -27,7 +27,7 @@ class FooterButtonView: UITableViewHeaderFooterView {
 
     @IBOutlet weak var footerButton: IKLargeButton!
     @IBOutlet weak var background: UIView!
-    var delegate: FooterButtonDelegate?
+    weak var delegate: FooterButtonDelegate?
 
     override class func awakeFromNib() {
         super.awakeFromNib()

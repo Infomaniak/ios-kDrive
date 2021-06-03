@@ -24,7 +24,7 @@ import InfomaniakCore
 public class FloatingPanelAction: Equatable {
     let id: Int
     let name: String
-    var reverseName: String? = nil
+    var reverseName: String?
     let image: UIImage
     var tintColor: UIColor = KDriveAsset.iconColor.color
     var isLoading = false
@@ -119,7 +119,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         tableView.register(cellView: FloatingPanelTitleTableViewCell.self)
         tableView.register(cellView: FloatingPanelCollectionTableViewCell.self)
 
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
+        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (_) in
             guard file != nil else { return }
             self.setupContent()
             UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
@@ -130,7 +130,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { (context) in
+        coordinator.animate { (_) in
             // Reload collection view
             self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .fade)
         }
@@ -280,6 +280,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         tableView.reloadRows(at: rows, with: animated ? .fade : .none)
     }
 
+    // swiftlint:disable cyclomatic_complexity
     private func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         guard file.realm != nil else {
             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
@@ -290,7 +291,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         case .convertToDropbox:
             if driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo {
                 let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { sender in
+                (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { _ in
                     UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
                 }
                 present(floatingPanelViewController, animated: true)
@@ -319,7 +320,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, _) in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         do {
@@ -358,7 +359,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     let group = DispatchGroup()
                     var success = false
                     group.enter()
-                    self.driveFileManager.renameFile(file: file, newName: newName) { (file, error) in
+                    self.driveFileManager.renameFile(file: file, newName: newName) { (_, error) in
                         if error == nil {
                             success = true
                         }
@@ -469,7 +470,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     let group = DispatchGroup()
                     var success = false
                     group.enter()
-                    self.driveFileManager.duplicateFile(file: file, duplicateName: duplicateName) { (file, error) in
+                    self.driveFileManager.duplicateFile(file: file, duplicateName: duplicateName) { (_, error) in
                         if error == nil {
                             success = true
                         }
@@ -523,7 +524,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
-                self.driveFileManager.deleteFile(file: file) { response, error in
+                self.driveFileManager.deleteFile(file: file) { _, error in
                     success = error == nil
                     group.leave()
                 }
@@ -571,7 +572,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, _) in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         presentShareSheetForCurrentFile()
@@ -585,7 +586,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 // Copy drop box link
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                driveFileManager.apiFetcher.getDropBoxSettings(directory: file) { (response, error) in
+                driveFileManager.apiFetcher.getDropBoxSettings(directory: file) { (response, _) in
                     action.isLoading = false
                     self.tableView.reloadSections([1], with: .none)
                     if let dropBox = response?.data {
@@ -608,8 +609,8 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         self.tableView.reloadSections([1], with: .none)
                         self.copyShareLinkToPasteboard(link: link.url)
                     } else if let error = error as? DriveError, error == .shareLinkAlreadyExists {
-                        //This should never happen
-                        self.driveFileManager.apiFetcher.getShareListFor(file: self.file) { (response, error) in
+                        // This should never happen
+                        self.driveFileManager.apiFetcher.getShareListFor(file: self.file) { (response, _) in
                             if let data = response?.data, let link = data.link?.url {
                                 if let newFile = self.driveFileManager.setFileShareLink(file: self.file, shareLink: link)?.freeze() {
                                     self.file = newFile
@@ -642,7 +643,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         switch file.convertedType {
         case .image:
             if let image = UIImage(contentsOfFile: file.localUrl.path) {
-                PhotoLibrarySaver.instance.save(image: image) { (success, error) in
+                PhotoLibrarySaver.instance.save(image: image) { (success, _) in
                     DispatchQueue.main.async {
                         if success {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarImageSavedConfirmation, view: self.view)
@@ -653,7 +654,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             }
         case .video:
-            PhotoLibrarySaver.instance.save(videoUrl: file.localUrl) { (success, error) in
+            PhotoLibrarySaver.instance.save(videoUrl: file.localUrl) { (success, _) in
                 DispatchQueue.main.async {
                     if success {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarVideoSavedConfirmation, view: self.view)
@@ -667,7 +668,6 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             DispatchQueue.main.async { [weak self] in
                 self?.present(documentExportViewController, animated: true)
             }
-            break
         }
 
     }

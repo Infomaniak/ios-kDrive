@@ -38,6 +38,7 @@ public class BackgroundRealm {
             let queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)")
             var realm: Realm!
             queue.sync {
+                // swiftlint:disable force_try
                 realm = try! Realm(configuration: configuration, queue: queue)
             }
             let instance = BackgroundRealm(realm: realm, queue: queue)

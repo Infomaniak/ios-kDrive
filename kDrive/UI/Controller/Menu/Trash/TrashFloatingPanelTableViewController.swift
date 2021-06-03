@@ -20,7 +20,6 @@ import UIKit
 import FloatingPanel
 import kDriveCore
 
-
 protocol TrashOptionsDelegate: AnyObject {
     func didClickOnTrashOption(option: TrashOption, files: [File])
 }
@@ -92,4 +91,3 @@ class TrashFloatingPanelTableViewController: UITableViewController, FloatingPane
         delegate?.didClickOnTrashOption(option: tableContent[indexPath.row], files: trashedFiles)
     }
 }
-

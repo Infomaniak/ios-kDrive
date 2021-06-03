@@ -47,7 +47,7 @@ class ShareAndRightsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        //Documentation says it's better to put it in AppDelegate but why ?
+        // Documentation says it's better to put it in AppDelegate but why ?
         DropDown.startListeningToKeyboard()
 
         tableView.register(cellView: InviteUserTableViewCell.self)
@@ -74,12 +74,12 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     func updateShareList() {
-        driveFileManager?.apiFetcher.getShareListFor(file: file) { (response, error) in
+        driveFileManager?.apiFetcher.getShareListFor(file: file) { (response, _) in
             if let data = response?.data {
                 self.sharedFile = data
                 self.removeUsers = data.users.map(\.id) + data.invitations.compactMap { $0?.userId }
                 self.removeEmails = data.invitations.compactMap { (invitation) -> String? in
-                    if let _ = invitation?.userId {
+                    if invitation?.userId != nil {
                         return nil
                     }
                     return invitation?.email
@@ -200,8 +200,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
 
             if indexPath.row < sharedFile!.tags.count {
                 selectedTagIndex = indexPath.row
-            }
-            else if indexPath.row < (sharedFile!.tags.count) + (sharedFile!.users.count) {
+            } else if indexPath.row < (sharedFile!.tags.count) + (sharedFile!.users.count) {
                 let index = indexPath.row - (sharedFile!.tags.count)
                 if sharedFile!.users[index].id == AccountManager.instance.currentUserId {
                     break
@@ -253,15 +252,15 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
 
             }
         } else if let index = selectedUserIndex {
-            driveFileManager.apiFetcher.updateUserRights(file: file, user: sharedFile!.users[index], permission: value) { (response, error) in
-                if let _ = response?.data {
+            driveFileManager.apiFetcher.updateUserRights(file: file, user: sharedFile!.users[index], permission: value) { (response, _) in
+                if response?.data != nil {
                     self.sharedFile!.users[index].permission = UserPermission(rawValue: value)
                     self.tableView.reloadRows(at: [IndexPath(row: index + self.sharedFile!.tags.count, section: 2)], with: .automatic)
                 }
             }
         } else if let index = selectedInvitationIndex {
-            driveFileManager.apiFetcher.updateInvitationRights(invitation: sharedFile!.invitations[index]!, permission: value) { (response, error) in
-                if let _ = response?.data {
+            driveFileManager.apiFetcher.updateInvitationRights(invitation: sharedFile!.invitations[index]!, permission: value) { (response, _) in
+                if response?.data != nil {
                     self.sharedFile!.invitations[index]!.permission = UserPermission(rawValue: value)!
                     self.tableView.reloadRows(at: [IndexPath(row: index + self.sharedFile!.tags.count + self.sharedFile!.users.count, section: 2)], with: .automatic)
                 }
@@ -271,14 +270,14 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
 
     func didDeleteUserRight() {
         if let index = selectedUserIndex {
-            driveFileManager.apiFetcher.deleteUserRights(file: file, user: sharedFile!.users[index]) { (response, error) in
-                if let _ = response?.data {
+            driveFileManager.apiFetcher.deleteUserRights(file: file, user: sharedFile!.users[index]) { (response, _) in
+                if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }
             }
         } else if let index = selectedInvitationIndex {
-            driveFileManager.apiFetcher.deleteInvitationRights(invitation: sharedFile!.invitations[index]!) { (response, error) in
-                if let _ = response?.data {
+            driveFileManager.apiFetcher.deleteInvitationRights(invitation: sharedFile!.invitations[index]!) { (response, _) in
+                if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }
             }
@@ -314,14 +313,14 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
 
     func shareLinkSwitchToggled(isOn: Bool) {
         if isOn {
-            driveFileManager.activateShareLink(for: file) { (_, shareLink, error) in
+            driveFileManager.activateShareLink(for: file) { (_, shareLink, _) in
                 if let link = shareLink {
                     self.sharedFile?.link = link
                     self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .automatic)
                 }
             }
         } else {
-            driveFileManager.removeShareLink(for: file) { (file, error) in
+            driveFileManager.removeShareLink(for: file) { (file, _) in
                 if file != nil {
                     self.sharedFile?.link = nil
                     self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .automatic)
@@ -330,7 +329,6 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
         }
     }
 }
-
 
 // MARK: - SearchUserDelegate
 extension ShareAndRightsViewController: SearchUserDelegate {

@@ -36,7 +36,7 @@ class LockedAppViewController: UIViewController {
         var error: NSError?
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, evaluateError in
+                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
                     DispatchQueue.main.async {
                         if success {
                             self.dismiss(animated: true)
@@ -57,4 +57,3 @@ class LockedAppViewController: UIViewController {
         return instance
     }
 }
-

@@ -60,22 +60,21 @@ class AppUITest: XCTestCase {
     }
 
     func tearDownTest(directory: File) {
-        AppUITest.driveFileManager.deleteFile(file: directory) { (response, error) in
+        AppUITest.driveFileManager.deleteFile(file: directory) { (response, _) in
             XCTAssertNotNil(response, "Failed to delete directory")
         }
     }
 
-
     // MARK: - Helping methods
     func getRootDirectory(completion: @escaping (File) -> Void) {
-        AppUITest.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, fileList, error) in
+        AppUITest.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, _, _) in
             XCTAssertNotNil(file, "Failed to get root directory")
             completion(file!)
         }
     }
 
     func createTestDirectory(name: String, parentDirectory: File, completion: @escaping (File) -> Void) {
-        AppUITest.driveFileManager.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { (directory, error) in
+        AppUITest.driveFileManager.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { (directory, _) in
             XCTAssertNotNil(directory, "Failed to create test directory")
             completion(directory!)
         }
@@ -83,13 +82,12 @@ class AppUITest: XCTestCase {
 
     func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
         setUpTest(testName: testName) { (rootFile) in
-            AppUITest.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { (file, error) in
+            AppUITest.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { (file, _) in
                 XCTAssertNotNil(file, "Failed to create office file")
                 completion(rootFile, file!)
             }
         }
     }
-
 
     // MARK: - Tests methods
     func testShareFile() {

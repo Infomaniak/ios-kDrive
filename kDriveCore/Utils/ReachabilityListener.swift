@@ -62,7 +62,7 @@ public class ReachabilityListener {
     }
 }
 
-//MARK: - Observation
+// MARK: - Observation
 extension ReachabilityListener {
     @discardableResult
     public func observeNetworkChange<T: AnyObject>(_ observer: T, using closure: @escaping (NetworkStatus) -> Void)
@@ -71,7 +71,7 @@ extension ReachabilityListener {
         didChangeNetworkStatus[key] = { [weak self, weak observer] status in
             // If the observer has been deallocated, we can
             // automatically remove the observation closure.
-            guard let _ = observer else {
+            guard observer != nil else {
                 self?.didChangeNetworkStatus.removeValue(forKey: key)
                 return
             }

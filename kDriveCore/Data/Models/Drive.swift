@@ -130,7 +130,7 @@ public class Drive: Object, Codable {
     /*
      Drive data
      */
-    ///Account id of the drive CREATOR
+    /// Account id of the drive CREATOR
     @objc public dynamic var accountId: Int = -1
     @objc public dynamic var id: Int = -1
     @objc private dynamic var _pack: String = ""
@@ -216,4 +216,3 @@ public class Drive: Object, Codable {
         return lhs.objectId == rhs.objectId
     }
 }
-

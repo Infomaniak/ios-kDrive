@@ -37,14 +37,14 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             floatingPanelViewController.titleLabel.text = KDriveStrings.Localizable.notSupportedExtensionTitle(file.extension)
             floatingPanelViewController.descriptionLabel.attributedText = attrString
             floatingPanelViewController.rightButton.setTitle(KDriveStrings.Localizable.buttonCreateOnlyOfficeCopy(newExtension), for: .normal)
-            floatingPanelViewController.cancelHandler = { sender in
+            floatingPanelViewController.cancelHandler = { _ in
                 viewController.dismiss(animated: true)
                 let onlyOfficeViewController = OnlyOfficeViewController.instantiate(file: file, previewParent: viewController as? PreviewViewController)
                 viewController.present(onlyOfficeViewController, animated: true)
             }
             floatingPanelViewController.actionHandler = { sender in
                 sender.setLoading(true)
-                driveFileManager.apiFetcher.convertFile(file: file) { (response, error) in
+                driveFileManager.apiFetcher.convertFile(file: file) { (response, _) in
                     sender.setLoading(false)
                     if let newFile = response?.data {
                         if let parent = file.parent {

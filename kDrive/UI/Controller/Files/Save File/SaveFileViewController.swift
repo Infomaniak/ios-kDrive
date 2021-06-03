@@ -303,7 +303,7 @@ class SaveFileViewController: UIViewController {
     }
 
     private func updateButton() {
-        enableButton = selectedDirectory != nil && items.reduce(true) { $0 && !$1.name.isEmpty } && !importInProgress
+        enableButton = selectedDirectory != nil && items.allSatisfy { !$0.name.isEmpty } && !importInProgress
     }
 
     private func updateTableViewAfterImport() {

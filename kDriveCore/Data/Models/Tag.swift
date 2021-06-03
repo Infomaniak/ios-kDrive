@@ -26,10 +26,10 @@ public class Tag: Object, Codable {
     public var right: UserPermission?
 
     enum CodingKeys: String, CodingKey {
-        case id = "id"
-        case name = "name"
-        case color = "color"
-        case right = "right"
+        case id
+        case name
+        case color
+        case right
     }
 
     public func isAllDriveUsersTag() -> Bool {

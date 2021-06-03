@@ -22,7 +22,7 @@ import kDriveCore
 
 class UploadTableViewCell: InsetTableViewCell {
 
-    //This view is reused if FileListCollectionView header
+    // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String!
 

@@ -69,7 +69,7 @@ extension FileListOptions {
         didChangeListStyleObservers[key] = { [weak self, weak observer] style in
             // If the observer has been deallocated, we can
             // automatically remove the observation closure.
-            guard let _ = observer else {
+            guard observer != nil else {
                 self?.didChangeListStyleObservers.removeValue(forKey: key)
                 return
             }
@@ -88,7 +88,7 @@ extension FileListOptions {
         didChangeSortTypeObservers[key] = { [weak self, weak observer] sortType in
             // If the observer has been deallocated, we can
             // automatically remove the observation closure.
-            guard let _ = observer else {
+            guard observer != nil else {
                 self?.didChangeSortTypeObservers.removeValue(forKey: key)
                 return
             }

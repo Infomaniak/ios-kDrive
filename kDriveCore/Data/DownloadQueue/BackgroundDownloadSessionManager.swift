@@ -56,7 +56,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
                     let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "AND sessionUrl = %@", sessionUrl)).first?.fileId {
-                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = fileId] (progress, value) in
+                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = fileId] (_, value) in
                         guard let newValue = value.newValue else {
                             return
                         }

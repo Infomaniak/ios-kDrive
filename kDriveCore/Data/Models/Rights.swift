@@ -90,9 +90,7 @@ public class Rights: Object, Codable {
 extension Rights: Differentiable {
 
     public var differenceIdentifier: Int {
-        get {
-            return fileId
-        }
+        return fileId
     }
 
     public func isContentEqual(to source: Rights) -> Bool {
