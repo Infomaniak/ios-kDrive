@@ -290,7 +290,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     @objc func forceRefresh() {
-        reloadData(forceRefresh: true)
+        reloadData(forceRefresh: true, withActivities: false)
     }
 
     final func setUpObservers() {

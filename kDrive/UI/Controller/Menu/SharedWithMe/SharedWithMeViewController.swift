@@ -52,7 +52,9 @@ class SharedWithMeViewController: FileListViewController {
     }
 
     override func getNewChanges() {
-        if !currentDirectory.isRoot {
+        if currentDirectory.isRoot {
+            forceRefresh()
+        } else {
             super.getNewChanges()
         }
     }
