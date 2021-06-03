@@ -194,9 +194,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             return
         }
 
-        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
+        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] (file, children, error) in
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
-                currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
+                self?.currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
             } else {
                 completion(.failure(error ?? DriveError.localError), false, true)
@@ -205,9 +205,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func getNewChanges() {
-        driveFileManager?.getFolderActivities(file: currentDirectory) { [self] (results, _, error) in
+        driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] (results, _, error) in
             if results != nil {
-                reloadData()
+                self?.reloadData()
             }
         }
     }
