@@ -42,9 +42,9 @@ class FavoriteViewController: FileListViewController {
             return
         }
 
-        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh) { [self] (file, children, error) in
+        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] (file, children, error) in
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
-                currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
+                self?.currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
             } else {
                 completion(.failure(error ?? DriveError.localError), false, true)
