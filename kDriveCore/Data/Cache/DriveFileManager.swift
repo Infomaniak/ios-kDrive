@@ -825,6 +825,7 @@ public class DriveFileManager {
                     DispatchQueue.main.async {
                         completion(response?.data, error)
                     }
+                    self.notifyObserversWith(file: file)
                     deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)
                 }
             } else {

@@ -130,6 +130,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
         // Table view footer
         showFooter(!driveFileManager.drive.isProOrTeam)
+        
+        observeFileUpdated()
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
             self.reload(sections: [.top])
@@ -276,6 +278,14 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
         if view.window != nil {
             tableView.isScrollEnabled = !activityOrPicturesIsLoading
+        }
+    }
+
+    func observeFileUpdated() {
+        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+            if lastModifiedFiles.contains(where: { $0.id == file.id }) || lastPictures.contains(where: { $0.id == file.id }) {
+                needsContentUpdate = true
+            }
         }
     }
 
