@@ -42,11 +42,11 @@ class LastModificationsViewController: FileListViewController {
         }
 
         if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
-            driveFileManager.apiFetcher.getLastModifiedFiles(page: page) { (response, error) in
-                if let data = response?.data {
-                    completion(.success(data), data.count == DriveApiFetcher.itemPerPage, false)
+            driveFileManager.getLastModifiedFiles(page: page) { (response, error) in
+                if let files = response {
+                    completion(.success(files), files.count == DriveApiFetcher.itemPerPage, true)
                 } else {
-                    completion(.failure(error ?? DriveError.localError), false, false)
+                    completion(.failure(error ?? DriveError.localError), false, true)
                 }
             }
         } else {
