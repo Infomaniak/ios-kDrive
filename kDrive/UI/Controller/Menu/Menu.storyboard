@@ -192,9 +192,7 @@
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="i9M-AV-rfJ" firstAttribute="leading" secondItem="uZL-Ly-C2G" secondAttribute="leading" id="1tw-ga-JaN"/>
-                                    <constraint firstItem="SeG-hp-Rwt" firstAttribute="leading" secondItem="uZL-Ly-C2G" secondAttribute="leading" constant="16" id="QNj-GR-eSu"/>
                                     <constraint firstAttribute="bottom" secondItem="SeG-hp-Rwt" secondAttribute="bottom" constant="16" id="bjm-w1-pqH"/>
-                                    <constraint firstAttribute="trailing" secondItem="SeG-hp-Rwt" secondAttribute="trailing" constant="16" id="eOJ-BW-qbI"/>
                                     <constraint firstAttribute="trailing" secondItem="i9M-AV-rfJ" secondAttribute="trailing" id="jCg-Xb-lN6"/>
                                     <constraint firstItem="i9M-AV-rfJ" firstAttribute="top" secondItem="uZL-Ly-C2G" secondAttribute="top" id="r6t-qc-Huj"/>
                                     <constraint firstAttribute="bottom" secondItem="i9M-AV-rfJ" secondAttribute="bottom" id="ugg-cO-KYw"/>
@@ -204,14 +202,16 @@
                         <viewLayoutGuide key="safeArea" id="rdT-QV-MsF"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
+                            <constraint firstItem="rdT-QV-MsF" firstAttribute="trailing" secondItem="SeG-hp-Rwt" secondAttribute="trailing" constant="16" id="0ST-Qd-j9T"/>
                             <constraint firstAttribute="trailing" secondItem="uZL-Ly-C2G" secondAttribute="trailing" id="Ecn-5W-HaG"/>
-                            <constraint firstItem="1Of-3f-AT1" firstAttribute="leading" secondItem="HTJ-aD-7V4" secondAttribute="leading" id="EeU-ap-vKs"/>
+                            <constraint firstItem="1Of-3f-AT1" firstAttribute="leading" secondItem="rdT-QV-MsF" secondAttribute="leading" id="EeU-ap-vKs"/>
                             <constraint firstItem="uZL-Ly-C2G" firstAttribute="leading" secondItem="HTJ-aD-7V4" secondAttribute="leading" id="GLf-WI-uSL"/>
+                            <constraint firstItem="SeG-hp-Rwt" firstAttribute="leading" secondItem="rdT-QV-MsF" secondAttribute="leading" constant="16" id="GQj-PX-gre"/>
                             <constraint firstItem="uZL-Ly-C2G" firstAttribute="top" secondItem="HTJ-aD-7V4" secondAttribute="top" id="STJ-yf-WFI"/>
                             <constraint firstItem="1Of-3f-AT1" firstAttribute="top" secondItem="HTJ-aD-7V4" secondAttribute="top" id="fDy-4h-hom"/>
                             <constraint firstItem="uZL-Ly-C2G" firstAttribute="bottom" secondItem="rdT-QV-MsF" secondAttribute="top" constant="50" id="fJz-C5-9KL"/>
                             <constraint firstAttribute="bottom" secondItem="1Of-3f-AT1" secondAttribute="bottom" id="kNj-fb-ae5"/>
-                            <constraint firstAttribute="trailing" secondItem="1Of-3f-AT1" secondAttribute="trailing" id="ocA-Is-Fwg"/>
+                            <constraint firstItem="rdT-QV-MsF" firstAttribute="trailing" secondItem="1Of-3f-AT1" secondAttribute="trailing" id="ocA-Is-Fwg"/>
                         </constraints>
                     </view>
                     <toolbarItems/>
