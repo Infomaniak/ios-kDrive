@@ -97,7 +97,7 @@ class PhotoListViewController: UIViewController {
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager, fileType: .imagesRow), animated: true)
+        present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager, fileType: .imagesRow), animated: true)
     }
 
     func applyGradient(view: UIImageView) {

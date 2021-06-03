@@ -55,7 +55,7 @@ class InviteUserViewController: UIViewController {
         hideKeyboardWhenTappedAround()
         navigationController?.setInfomaniakAppearanceNavigationBar()
         setTitle()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeView))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -84,7 +84,7 @@ class InviteUserViewController: UIViewController {
         }
     }
 
-    @objc func closeView() {
+    @objc func closeButtonPressed() {
         self.dismiss(animated: true)
     }
 

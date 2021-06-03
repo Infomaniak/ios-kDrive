@@ -158,8 +158,8 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         let mainTabViewController = UIApplication.shared.keyWindow?.rootViewController as? UITabBarController
         let fileNavigationController = mainTabViewController?.selectedViewController as? UINavigationController
         if let viewControllers = fileNavigationController?.viewControllers, viewControllers.count > 1 {
-            let fileListViewController = viewControllers[viewControllers.count - 2] as? FileListCollectionViewController
-            // FIXME: We should call `refreshDataSource(withActivities: true)` but activities don't return changes in drop box :(
+            let fileListViewController = viewControllers[viewControllers.count - 2] as? FileListViewController
+            // FIXME: We should call `getNewChanges()` but activities don't return changes in drop box :(
             fileListViewController?.forceRefresh()
         }
         navigationController?.popViewController(animated: true)

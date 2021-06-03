@@ -88,6 +88,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        moreButton.accessibilityLabel = KDriveStrings.Localizable.buttonMenu
         downloadProgressView?.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
         downloadProgressView?.progressTintColor = KDriveAsset.infomaniakColor.color
         downloadProgressView?.thicknessRatio = 0.15
@@ -157,8 +158,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
     }
 
-    func configureWith(file: File) {
+    func configureWith(file: File, selectionMode: Bool = false) {
         self.file = file
+        self.selectionMode = selectionMode
+
         titleLabel.text = file.name
         favoriteImageView.isHidden = !file.isFavorite
         favoriteImageView.accessibilityLabel = KDriveStrings.Localizable.favoritesTitle
@@ -220,10 +223,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     private func configureForSelection() {
-        if selectionMode {
-            accessoryImage?.isHidden = true
-            checkmarkImage.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
-        }
+        guard selectionMode else { return }
+        accessoryImage?.isHidden = true
+        checkmarkImage.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
     }
 
     func configureWith(fileType: FileTypeRow) {

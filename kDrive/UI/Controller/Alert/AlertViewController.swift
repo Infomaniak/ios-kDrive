@@ -151,8 +151,8 @@ class AlertViewController: UIViewController {
     // MARK: - Actions
 
     @objc func cancel() {
-        cancelHandler?()
         dismiss(animated: true)
+        cancelHandler?()
     }
 
     @objc func action() {
@@ -166,8 +166,8 @@ class AlertViewController: UIViewController {
                 }
             }
         } else {
-            handler?()
             dismiss(animated: true)
+            handler?()
         }
     }
 

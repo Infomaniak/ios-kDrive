@@ -13,7 +13,7 @@
         <!--Westworld-->
         <scene sceneID="JJW-z8-kTh">
             <objects>
-                <collectionViewController storyboardIdentifier="FileListCollectionViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="afx-Ig-yDG" customClass="FileListCollectionViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="FileListViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="afx-Ig-yDG" customClass="FileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="yCM-Om-3CZ" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -33,7 +33,7 @@
                     <navigationItem key="navigationItem" title="Westworld" largeTitleDisplayMode="always" id="6nN-R6-lch">
                         <barButtonItem key="rightBarButtonItem" style="done" systemItem="search" id="OAV-22-wNN">
                             <connections>
-                                <action selector="searchButtonPressed:" destination="afx-Ig-yDG" id="ucx-g1-xVs"/>
+                                <action selector="searchButtonPressed:" destination="afx-Ig-yDG" id="UEV-hJ-7h0"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -511,14 +511,14 @@
         <!--Activités-->
         <scene sceneID="jQX-tY-pqn">
             <objects>
-                <viewController storyboardIdentifier="RecentActivityFileListViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="SXx-tI-VhM" customClass="RecentActivityFileListViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RecentActivityFilesViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="SXx-tI-VhM" customClass="RecentActivityFilesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="KJR-0t-Oxg">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="tCK-Zo-2xk" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="tCK-Zo-2xk" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="e99-uM-yBD">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -533,15 +533,15 @@
                             </collectionView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Pev-JJ-2tt"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
-                            <constraint firstItem="tCK-Zo-2xk" firstAttribute="leading" secondItem="KJR-0t-Oxg" secondAttribute="leading" id="Xe5-zS-ktr"/>
+                            <constraint firstItem="tCK-Zo-2xk" firstAttribute="leading" secondItem="Pev-JJ-2tt" secondAttribute="leading" id="Xe5-zS-ktr"/>
                             <constraint firstItem="tCK-Zo-2xk" firstAttribute="top" secondItem="KJR-0t-Oxg" secondAttribute="top" id="kPi-Vf-ZbQ"/>
-                            <constraint firstAttribute="trailing" secondItem="tCK-Zo-2xk" secondAttribute="trailing" id="sjk-A6-hQP"/>
+                            <constraint firstItem="Pev-JJ-2tt" firstAttribute="trailing" secondItem="tCK-Zo-2xk" secondAttribute="trailing" id="sjk-A6-hQP"/>
                             <constraint firstAttribute="bottom" secondItem="tCK-Zo-2xk" secondAttribute="bottom" id="zeT-mG-teZ"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Activités" id="dy4-zn-GY4">
+                    <navigationItem key="navigationItem" title="Activités" largeTitleDisplayMode="always" id="dy4-zn-GY4">
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileDetailsActivitiesTitle"/>
                         </userDefinedRuntimeAttributes>
@@ -557,13 +557,13 @@
     </scenes>
     <designables>
         <designable name="6yn-n6-xrf">
-            <size key="intrinsicContentSize" width="169" height="34"/>
+            <size key="intrinsicContentSize" width="152" height="32"/>
         </designable>
         <designable name="OiI-t5-4G2">
-            <size key="intrinsicContentSize" width="101" height="34"/>
+            <size key="intrinsicContentSize" width="92" height="32"/>
         </designable>
         <designable name="qGi-Yx-e8m">
-            <size key="intrinsicContentSize" width="101" height="34"/>
+            <size key="intrinsicContentSize" width="92" height="32"/>
         </designable>
     </designables>
     <resources>

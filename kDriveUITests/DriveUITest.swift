@@ -68,7 +68,7 @@ class AppUITest: XCTestCase {
 
     // MARK: - Helping methods
     func getRootDirectory(completion: @escaping (File) -> Void) {
-        AppUITest.driveFileManager.getFile(id: 1) { (file, fileList, error) in
+        AppUITest.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, fileList, error) in
             XCTAssertNotNil(file, "Failed to get root directory")
             completion(file!)
         }
@@ -111,11 +111,8 @@ class AppUITest: XCTestCase {
             tabBar.buttons["Fichiers"].tap()
 
             var element = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-            if !element.buttons["menu"].exists {
-                collectionViewsQuery.buttons["Passer en mode grille ou mode liste"].tap()
-            }
-            XCTAssertTrue(element.buttons["menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
-            element.buttons["menu"].tap()
+            XCTAssertTrue(element.buttons["Menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
+            element.buttons["Menu"].tap()
             tablesQuery.buttons["Partage et droits"].tap()
 
             XCTAssertTrue(self.app.navigationBars["Partage et droits du dossier \(testName)"].exists, "Should exist")
@@ -143,7 +140,7 @@ class AppUITest: XCTestCase {
             self.app.buttons["Fermer"].tap()
 
             element = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-            element.buttons["menu"].tap()
+            element.buttons["Menu"].tap()
             tablesQuery.buttons["Partage et droits"].tap()
 
             XCTAssertTrue(self.app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should exist")
@@ -189,12 +186,9 @@ class AppUITest: XCTestCase {
             XCTAssertTrue(imageCell.waitForExistence(timeout: 10), "Wait for image importation")
 
             // Go to comment
-            if !imageCell.buttons["menu"].exists {
-                collectionViewsQuery.buttons["Passer en mode grille ou mode liste"].tap()
-            }
-            XCTAssertTrue(imageCell.buttons["menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
+            XCTAssertTrue(imageCell.buttons["Menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
             expectations[0].expectation.fulfill()
-            imageCell.buttons["menu"].tap()
+            imageCell.buttons["Menu"].tap()
             tablesQuery.buttons["Informations"].tap()
             tablesQuery.buttons["Commentaires"].tap()
 
