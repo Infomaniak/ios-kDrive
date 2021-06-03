@@ -154,7 +154,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
 
         // First load
-        forceRefresh()
+        reloadData()
 
         // Set up observers
         setUpObservers()
@@ -207,7 +207,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func getNewChanges() {
         driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] (results, _, error) in
             if results != nil {
-                self?.reloadData()
+                self?.reloadData(withActivities: false)
             }
         }
     }
@@ -244,7 +244,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - Public methods
 
-    final func reloadData(page: Int = 1, forceRefresh: Bool = false) {
+    final func reloadData(page: Int = 1, forceRefresh: Bool = false, withActivities: Bool = true) {
         if page == 1 && configuration.isRefreshControlEnabled {
             // Show refresh control if loading is slow
             isLoading = true
@@ -279,6 +279,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     self.reloadData(page: page + 1, forceRefresh: forceRefresh)
                 } else {
                     self.isContentLoaded = true
+                    if withActivities {
+                        self.getNewChanges()
+                    }
                 }
             case .failure(let error):
                 UIConstants.showSnackBar(message: error.localizedDescription)
@@ -754,7 +757,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         setTitle()
         observeUploads()
         observeFiles()
-        forceRefresh()
+        reloadData()
     }
 
 }
@@ -921,9 +924,10 @@ extension FileListViewController: FilesHeaderViewDelegate {
             floatingPanelViewController.isRemovalInteractionEnabled = true
             selectViewController.files = Array(selectedFiles)
             floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
+            selectViewController.driveFileManager = driveFileManager
             selectViewController.reloadAction = {
                 self.selectionMode = false
-                self.forceRefresh()
+                self.getNewChanges()
             }
             floatingPanelViewController.set(contentViewController: selectViewController)
             floatingPanelViewController.track(scrollView: selectViewController.tableView)
@@ -968,7 +972,7 @@ extension FileListViewController: SortOptionsDelegate {
             }
             sortedFiles = []
             collectionView.reloadData()
-            forceRefresh()
+            reloadData()
             navigationController?.popToRootViewController(animated: false)
         }
 
