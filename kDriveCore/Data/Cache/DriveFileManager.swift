@@ -430,8 +430,9 @@ public class DriveFileManager {
 
                             setLocalFiles(files, root: searchRoot) {
                                 let safeRoot = ThreadSafeReference(to: searchRoot)
+                                let frozenFiles = files.map({ $0.freeze() })
                                 DispatchQueue.main.async {
-                                    completion(getRealm().resolve(safeRoot), files, nil)
+                                    completion(getRealm().resolve(safeRoot), frozenFiles, nil)
                                 }
                             }
                         }
@@ -582,11 +583,10 @@ public class DriveFileManager {
             autoreleasepool {
                 let realm = getRealm()
                 for file in files {
-                    let safeFile = File(value: file)
-                    keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
-                    root.children.append(safeFile)
+                    keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
+                    root.children.append(file)
                     if let rights = file.rights {
-                        safeFile.rights = Rights(value: rights)
+                        file.rights = Rights(value: rights)
                     }
                 }
 
@@ -611,9 +611,11 @@ public class DriveFileManager {
                             keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                         }
 
-                        setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile)
-                        DispatchQueue.main.async {
-                            completion(files, nil)
+                        setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile) {
+                            let frozenFiles = files.map({ $0.freeze() })
+                            DispatchQueue.main.async {
+                                completion(frozenFiles, nil)
+                            }
                         }
                     }
                 }
@@ -633,9 +635,11 @@ public class DriveFileManager {
                             keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                         }
 
-                        setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile)
-                        DispatchQueue.main.async {
-                            completion(files, nil)
+                        setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile) {
+                            let frozenFiles = files.map({ $0.freeze() })
+                            DispatchQueue.main.async {
+                                completion(frozenFiles, nil)
+                            }
                         }
                     }
                 }
@@ -825,6 +829,7 @@ public class DriveFileManager {
                     DispatchQueue.main.async {
                         completion(response?.data, error)
                     }
+                    self.notifyObserversWith(file: file)
                     deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)
                 }
             } else {

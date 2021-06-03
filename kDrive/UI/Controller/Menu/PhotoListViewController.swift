@@ -147,8 +147,8 @@ class PhotoListViewController: UIViewController {
 
     func fetchNextPage() {
         isLoading = true
-        driveFileManager?.apiFetcher.getLastPictures(page: page) { (response, error) in
-            if let fetchedPictures = response?.data {
+        driveFileManager?.getLastPictures(page: page) { (response, error) in
+            if let fetchedPictures = response {
 
                 self.collectionView.performBatchUpdates {
                     for picture in fetchedPictures {
@@ -180,7 +180,6 @@ class PhotoListViewController: UIViewController {
                 self.showEmptyView(.noImages)
                 self.page += 1
                 self.hasNextPage = fetchedPictures.count == DriveApiFetcher.itemPerPage
-                self.driveFileManager.setLocalFiles(self.pictures, root: DriveFileManager.lastPicturesRootFile)
             }
             self.isLoading = false
             if self.pictureForYearMonth.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
