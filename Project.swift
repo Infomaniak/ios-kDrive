@@ -73,6 +73,9 @@ let project = Project(name: "kDrive",
                 "kDrive/**/*.json"
             ],
             entitlements: "kDrive/Resources/kDrive.entitlements",
+            actions: [
+                    .post(tool: "./scripts/lint.sh", arguments: [""], name: "Swiftlint")
+            ],
             dependencies: [
                     .target(name: "kDriveFileProvider"),
                     .target(name: "kDriveCore"),
@@ -237,9 +240,8 @@ let project = Project(name: "kDrive",
             actions: [
                 /* This prevents Tuist from generating automatic resources definition for this extension
                   as disabling it seems only possible at a project level (.disableSynthesizedResourceAccessors */
-                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Bundle+kDriveShareExtension.swift"], name: "Fix Tuist"),
-                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Assets+KDriveShareExtension.swift"], name: "Fix Tuist"),
-                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Strings+KDriveShareExtension.swift"], name: "Fix Tuist")
+                    .pre(tool: "./scripts/fix-tuist.sh", arguments: [""], name: "Fix Tuist"),
+                    .post(tool: "./scripts/lint.sh", arguments: [""], name: "Swiftlint")
             ],
             dependencies: [
                     .target(name: "kDriveCore"),
@@ -332,9 +334,8 @@ let project = Project(name: "kDrive",
             actions: [
                 /* This prevents Tuist from generating automatic resources definition for this extension
                   as disabling it seems only possible at a project level (.disableSynthesizedResourceAccessors */
-                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Bundle+kDriveActionExtension.swift"], name: "Fix Tuist"),
-                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Assets+KDriveActionExtension.swift"], name: "Fix Tuist"),
-                    .pre(tool: "/bin/echo", arguments: ["-n \"\" > Derived/Sources/Strings+KDriveActionExtension.swift"], name: "Fix Tuist")
+                    .pre(tool: "./scripts/fix-tuist.sh", arguments: [""], name: "Fix Tuist"),
+                    .post(tool: "./scripts/lint.sh", arguments: [""], name: "Swiftlint")
             ],
             dependencies: [
                     .target(name: "kDriveCore"),
