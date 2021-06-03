@@ -472,7 +472,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        return true
+        return !(UserDefaults.isFirstLaunch() || accountManager.accounts.count == 0)
     }
 
     // MARK: - User notification center delegate
