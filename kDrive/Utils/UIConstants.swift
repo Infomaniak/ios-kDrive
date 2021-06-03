@@ -31,6 +31,7 @@ class UIConstants {
     static let homeListPaddingTop: CGFloat = 16
     static let floatingPanelHeaderHeight: CGFloat = 70
     static let largeTitleHeight: CGFloat = 96
+    static let safeAreaForLandscape: CGFloat = 47
     static let insufficientStorageMinimumPercentage: Double = 90.0
     static let swipeActionShareIdentifier = "share"
     static let swipeActionMoreIdentifier = "more"

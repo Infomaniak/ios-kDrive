@@ -222,7 +222,7 @@ class PhotoListViewController: UIViewController {
                 headerView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
             }
         }
-        if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerView.frame.minX, y: headerView.frame.maxY), from: headerView)) {
+        if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerView.frame.minX + UIConstants.safeAreaForLandscape, y: headerView.frame.maxY), from: headerView)) {
             headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[indexPath.section - 1].referenceDate)
         } else if pictureForYearMonth.count > 0 && headerTitleLabel.text == "" {
             headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[0].referenceDate)
