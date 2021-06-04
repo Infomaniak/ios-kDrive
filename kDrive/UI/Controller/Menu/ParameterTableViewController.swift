@@ -89,7 +89,7 @@ class ParameterTableViewController: UITableViewController {
         case .wifi:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.wifiSwitch.isOn = UserDefaults.shared.isWifiOnly
+            cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
             cell.switchHandler = { sender in
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
