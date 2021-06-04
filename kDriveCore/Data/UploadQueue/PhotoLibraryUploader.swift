@@ -190,6 +190,9 @@ public class PhotoLibraryUploader {
                     asset: asset,
                     creationDate: asset.creationDate,
                     priority: initial ? .low : .high)
+                if settings.createDatedSubFolders {
+                    uploadFile.setDatedRelativePath()
+                }
                 realm.add(uploadFile, update: .modified)
 
                 if idx < assets.count - 1 && idx % 99 == 0 {

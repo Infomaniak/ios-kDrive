@@ -190,6 +190,12 @@ public class UploadFile: Object {
         self.id = "\(Date().timeIntervalSinceNow)-\(name)"
     }
 
+    func setDatedRelativePath() {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy/MM/"
+        relativePath = dateFormatter.string(from: creationDate ?? Date())
+    }
+
 }
 
 extension UploadFile: Differentiable {
