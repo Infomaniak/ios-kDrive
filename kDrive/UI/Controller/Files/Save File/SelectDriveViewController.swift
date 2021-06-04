@@ -66,7 +66,7 @@ class SelectDriveViewController: UIViewController {
 
     private func initForCurrentAccount(_ account: Account) {
         currentAccount = account
-        accounts = AccountManager.instance.accounts.filter({ $0.userId != account.userId })
+        accounts = AccountManager.instance.accounts.filter { $0.userId != account.userId }
         driveList = DriveInfosManager.instance.getDrives(for: account.userId, sharedWithMe: false)
         dropDown.dataSource = accounts.map(\.user.displayName)
     }
@@ -122,7 +122,7 @@ extension SelectDriveViewController: UITableViewDataSource {
             cell.titleLabel.text = currentAccount.user.displayName
             cell.userEmailLabel.text = currentAccount.user.email
             if let user = currentAccount.user {
-                user.getAvatar { (image) in
+                user.getAvatar { image in
                     cell.logoImage.image = image
                 }
             }

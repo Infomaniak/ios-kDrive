@@ -42,7 +42,7 @@ class FilePresenter {
             }
             present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
         } else if file.parentId != 0 {
-            driveFileManager.getFile(id: file.parentId) { (parent, _, error) in
+            driveFileManager.getFile(id: file.parentId) { parent, _, error in
                 if let parent = parent {
                     self.present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
                 } else {
@@ -71,7 +71,7 @@ class FilePresenter {
                     floatingPanelViewController = AccessFileFloatingPanelViewController.instantiatePanel()
                     (floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.actionHandler = { _ in
                         (self.floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.rightButton.setLoading(true)
-                        driveFileManager.apiFetcher.requireFileAccess(file: file) { (_, error) in
+                        driveFileManager.apiFetcher.requireFileAccess(file: file) { _, error in
                             if error != nil {
                                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRightModification)
                             } else {

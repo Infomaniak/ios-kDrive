@@ -25,16 +25,16 @@ let baseSettings: [String: SettingValue] = [
     "MARKETING_VERSION": "4.0.3"
 ]
 
-let fileProviderSettings = baseSettings.merging(["SWIFT_OBJC_BRIDGING_HEADER": "kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h", "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION"]) { (first, _) in first }
-let debugFileProviderSettings = baseSettings.merging(["SWIFT_OBJC_BRIDGING_HEADER": "kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h", "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG"]) { (first, _) in first }
+let fileProviderSettings = baseSettings.merging(["SWIFT_OBJC_BRIDGING_HEADER": "kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h", "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION"]) { first, _ in first }
+let debugFileProviderSettings = baseSettings.merging(["SWIFT_OBJC_BRIDGING_HEADER": "kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h", "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG"]) { first, _ in first }
 
-let shareExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION"]) { (first, _) in first }
+let shareExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION"]) { first, _ in first }
 
-let debugShareExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG"]) { (first, _) in first }
+let debugShareExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG"]) { first, _ in first }
 
-let actionExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION", "ASSETCATALOG_COMPILER_APPICON_NAME": "ExtensionIcon"]) { (first, _) in first }
+let actionExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION", "ASSETCATALOG_COMPILER_APPICON_NAME": "ExtensionIcon"]) { first, _ in first }
 
-let debugActionExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG", "ASSETCATALOG_COMPILER_APPICON_NAME": "ExtensionIcon"]) { (first, _) in first }
+let debugActionExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION DEBUG", "ASSETCATALOG_COMPILER_APPICON_NAME": "ExtensionIcon"]) { first, _ in first }
 
 let project = Project(name: "kDrive",
     packages: [
@@ -180,7 +180,8 @@ let project = Project(name: "kDrive",
                     "NSExtensionAttributes": ["NSExtensionActivationRule": "SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, (ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.data\")).@count == $extensionItem.attachments.@count ).@count > 0"]
                 ]
                 ]),
-            sources: ["kDriveShareExtension/**",
+            sources: [
+                "kDriveShareExtension/**",
                 "kDrive/UI/Controller/Alert/AlertFieldViewController.swift",
                 "kDrive/UI/Controller/Alert/AlertTextViewController.swift",
                 "kDrive/UI/Controller/Alert/AlertViewController.swift",
@@ -212,7 +213,8 @@ let project = Project(name: "kDrive",
                 "kDrive/Utils/**",
                 "Derived/Sources/Assets+KDrive.swift",
                 "Derived/Sources/Bundle+kDrive.swift",
-                "Derived/Sources/Strings+kDrive.swift"],
+                "Derived/Sources/Strings+kDrive.swift"
+            ],
             resources: [
                 "kDriveShareExtension/**/*.storyboard",
                 "kDrive/UI/Controller/Files/**/*.storyboard",
@@ -264,15 +266,18 @@ let project = Project(name: "kDrive",
                 "NSExtension": [
                     "NSExtensionMainStoryboard": "MainInterface",
                     "NSExtensionPointIdentifier": "com.apple.ui-services",
-                    "NSExtensionAttributes": ["NSExtensionActivationRule": "SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, (ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.data\")).@count == $extensionItem.attachments.@count ).@count > 0",
+                    "NSExtensionAttributes": [
+                        "NSExtensionActivationRule": "SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, (ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.data\")).@count == $extensionItem.attachments.@count ).@count > 0",
                         "NSExtensionServiceAllowsFinderPreviewItem": true,
                         "NSExtensionServiceAllowsTouchBarItem": true,
                         "NSExtensionServiceFinderPreviewIconName": "NSActionTemplate",
                         "NSExtensionServiceTouchBarBezelColorName": "TouchBarBezel",
-                        "NSExtensionServiceTouchBarIconName": "NSActionTemplate"]
+                        "NSExtensionServiceTouchBarIconName": "NSActionTemplate"
+                    ]
                 ]
                 ]),
-            sources: ["kDriveActionExtension/**",
+            sources: [
+                "kDriveActionExtension/**",
                 "kDrive/UI/Controller/Alert/AlertFieldViewController.swift",
                 "kDrive/UI/Controller/Alert/AlertTextViewController.swift",
                 "kDrive/UI/Controller/Alert/AlertViewController.swift",
@@ -304,7 +309,8 @@ let project = Project(name: "kDrive",
                 "kDrive/Utils/**",
                 "Derived/Sources/Assets+KDrive.swift",
                 "Derived/Sources/Bundle+kDrive.swift",
-                "Derived/Sources/Strings+kDrive.swift"],
+                "Derived/Sources/Strings+kDrive.swift"
+            ],
             resources: [
                 "kDriveActionExtension/**/*.storyboard",
                 "kDrive/UI/Controller/Files/**/*.storyboard",

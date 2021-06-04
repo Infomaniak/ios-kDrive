@@ -38,7 +38,7 @@ class OnboardingViewController: UIViewController {
     @IBOutlet weak var nextButtonHeight: NSLayoutConstraint!
     @IBOutlet weak var registerButtonHeight: NSLayoutConstraint!
 
-    var addUser: Bool = false
+    var addUser = false
     var slides: [Slide] = []
 
     override func viewDidLoad() {
@@ -79,9 +79,9 @@ class OnboardingViewController: UIViewController {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { (_) in
+        coordinator.animate { _ in
             self.collectionView?.collectionViewLayout.invalidateLayout()
-        } completion: { (_) in
+        } completion: { _ in
             let indexPath = IndexPath(row: self.pageControl.currentPage, section: 0)
             self.collectionView.scrollToItem(at: indexPath, at: .left, animated: true)
         }
@@ -130,7 +130,7 @@ class OnboardingViewController: UIViewController {
                     self.buttonContentView.alpha = 1
                     self.buttonContentView.isHidden = false
                     self.nextButton.alpha = 0
-                } completion: { (_) in
+                } completion: { _ in
                     self.nextButton.alpha = 0
                     self.nextButton.isHidden = true
                 }
@@ -143,7 +143,7 @@ class OnboardingViewController: UIViewController {
                     self.nextButton.alpha = 1
                     self.nextButton.isHidden = false
                     self.buttonContentView.alpha = 0
-                } completion: { (_) in
+                } completion: { _ in
                     self.buttonContentView.alpha = 0
                     self.buttonContentView.isHidden = true
                 }
@@ -225,10 +225,10 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
         let previousAccount = AccountManager.instance.currentAccount
         signInButton.setLoading(true)
         registerButton.isEnabled = false
-        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { (account, error) in
+        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { account, error in
             if account != nil {
                 // Download root file
-                AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+                AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
                     self.goToMainScreen()

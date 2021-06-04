@@ -124,7 +124,7 @@ class SearchViewController: FileListViewController {
             return
         }
 
-        driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { (file, children, error) in
+        driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { file, children, error in
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, false)
             } else {
@@ -264,7 +264,7 @@ class SearchViewController: FileListViewController {
         if isDisplayingSearchResults {
             return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
         } else {
-            if section == 0 && recentSearches.count == 0 {
+            if section == 0 && recentSearches.isEmpty {
                 return .zero
             } else {
                 let view = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: IndexPath(row: 0, section: section))

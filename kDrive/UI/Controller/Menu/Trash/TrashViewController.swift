@@ -56,7 +56,7 @@ class TrashViewController: FileListViewController {
         }
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            driveFileManager.apiFetcher.getTrashedFiles(page: page, sortType: sortType) { (response, error) in
+            driveFileManager.apiFetcher.getTrashedFiles(page: page, sortType: sortType) { response, error in
                 if let trashedList = response?.data {
                     completion(.success(trashedList), trashedList.count == DriveApiFetcher.itemPerPage, false)
                 } else {
@@ -64,7 +64,7 @@ class TrashViewController: FileListViewController {
                 }
             }
         } else {
-            driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: page, sortType: sortType) { (response, error) in
+            driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: page, sortType: sortType) { response, error in
                 if let file = response?.data {
                     let children = file.children
                     completion(.success(Array(children)), children.count == DriveApiFetcher.itemPerPage, false)
@@ -90,7 +90,7 @@ class TrashViewController: FileListViewController {
             let group = DispatchGroup()
             var success = false
             group.enter()
-            driveFileManager.apiFetcher.deleteAllFilesDefinitely { (_, error) in
+            driveFileManager.apiFetcher.deleteAllFilesDefinitely { _, error in
                 if let error = error {
                     success = false
                     DDLogError("Error while emptying trash: \(error)")
@@ -135,7 +135,7 @@ class TrashViewController: FileListViewController {
             var success = true
             for file in files {
                 group.enter()
-                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { (_, error) in
+                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
                     file.signalChanges(userId: self.driveFileManager.drive.userId)
                     if let error = error {
                         success = false
@@ -251,7 +251,7 @@ extension TrashViewController: TrashOptionsDelegate {
             let group = DispatchGroup()
             for file in files {
                 group.enter()
-                driveFileManager.apiFetcher.restoreTrashedFile(file: file) { [self] (_, error) in
+                driveFileManager.apiFetcher.restoreTrashedFile(file: file) { [self] _, error in
                     // TODO: Find parent to signal changes
                     file.signalChanges(userId: self.driveFileManager.drive.userId)
                     if error == nil {
@@ -283,7 +283,7 @@ extension TrashViewController: SelectFolderDelegate {
         let group = DispatchGroup()
         for file in filesToRestore {
             group.enter()
-            driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: folder.id) { [self] (_, error) in
+            driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: folder.id) { [self] _, error in
                 folder.signalChanges(userId: driveFileManager.drive.userId)
                 if error == nil {
                     removeFileFromList(id: file.id)

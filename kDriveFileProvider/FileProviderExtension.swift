@@ -33,7 +33,7 @@ class FileProviderExtensionState {
 
     func unenumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
         let children = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier && !$0.alreadyEnumerated }
-        children.forEach({ $0.alreadyEnumerated = true })
+        children.forEach { $0.alreadyEnumerated = true }
         return children
     }
 
@@ -190,7 +190,7 @@ class FileProviderExtension: NSFileProviderExtension {
             }
 
             var observationToken: ObservationToken?
-            observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { (_, error) in
+            observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
                 observationToken?.cancel()
                 if error != nil {
                     self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
@@ -249,9 +249,9 @@ class FileProviderExtension: NSFileProviderExtension {
         }
 
         // write out a placeholder to facilitate future property lookups
-        self.providePlaceholder(at: url, completionHandler: { _ in
+        self.providePlaceholder(at: url) { _ in
             // TODO: handle any error, do any necessary cleanup
-        })
+        }
     }
 
     func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
@@ -264,7 +264,7 @@ class FileProviderExtension: NSFileProviderExtension {
             url: item.storageUrl,
             name: item.filename,
             shouldRemoveAfterUpload: false)
-        UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { (uploadedFile, _) in
+        UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
             }

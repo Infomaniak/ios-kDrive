@@ -42,6 +42,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     }
 
     override func prepareForReuse() {
+        super.prepareForReuse()
         avatarImage.image = KDriveAsset.placeholderAvatar.image
         avatarHeightConstraint.constant = 35
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
@@ -55,7 +56,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         detailLabel.text = user.email
         rightsLabel.text = user.permission?.title
         rightsLabel.textColor = blocked ? KDriveAsset.secondaryTextColor.color : KDriveAsset.titleColor.color
-        user.getAvatar { (image) in
+        user.getAvatar { image in
             self.avatarImage.image = image
                 .resizeImage(size: CGSize(width: 35, height: 35))
                 .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
@@ -71,7 +72,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         rightsLabel.text = invitation.permission.title
         avatarImage.image = KDriveAsset.circleSend.image
         if let avatar = invitation.avatar, let url = URL(string: avatar) {
-            KingfisherManager.shared.retrieveImage(with: url) { (result) in
+            KingfisherManager.shared.retrieveImage(with: url) { result in
                 if let image = try? result.get().image {
                     self.avatarImage.image = image
                         .resizeImage(size: CGSize(width: 35, height: 35))

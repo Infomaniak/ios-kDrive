@@ -86,9 +86,9 @@ public enum ConvertedType: String, CaseIterable {
 
     public static func fromUTI(_ uti: UTI) -> ConvertedType {
         var types = ConvertedType.allCases
-        types.removeAll(where: { $0 == .unknown })
+        types.removeAll { $0 == .unknown }
 
-        return types.first(where: { uti.conforms(to: $0.uti) }) ?? .unknown
+        return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
 
     public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .code, .pdf, .presentation, .spreadsheet, .text)
@@ -159,16 +159,16 @@ public class File: Object, Codable {
     @objc public dynamic var nameNaturalSorting: String = ""
     private let parentLink = LinkingObjects(fromType: File.self, property: "children")
     public var children = List<File>()
-    @objc public dynamic var canUseTag: Bool = false
+    @objc public dynamic var canUseTag = false
     @objc public dynamic var createdBy: Int = 0
     @objc private dynamic var createdAt: Int = 0
     @objc private dynamic var fileCreatedAt: Int = 0
     @objc public dynamic var deletedBy: Int = 0
     @objc private dynamic var deletedAt: Int = 0
     @objc public dynamic var driveId: Int = 0
-    @objc public dynamic var hasThumbnail: Bool = false
-    @objc public dynamic var hasVersion: Bool = false
-    @objc public dynamic var isFavorite: Bool = false
+    @objc public dynamic var hasThumbnail = false
+    @objc public dynamic var hasVersion = false
+    @objc public dynamic var isFavorite = false
     @objc public dynamic var lastModifiedAt: Int = 0
     @objc public dynamic var nbVersion: Int = 0
     @objc public dynamic var collaborativeFolder: String?
@@ -184,10 +184,10 @@ public class File: Object, Codable {
     public var users = List<Int>()
     @objc public dynamic var responseAt: Int = 0
     @objc private dynamic var rawVisibility: String = ""
-    @objc public dynamic var onlyOffice: Bool = false
+    @objc public dynamic var onlyOffice = false
     @objc public dynamic var onlyOfficeConvertExtension: String?
-    @objc public dynamic var fullyDownloaded: Bool = false
-    @objc public dynamic var isAvailableOffline: Bool = false
+    @objc public dynamic var fullyDownloaded = false
+    @objc public dynamic var isAvailableOffline = false
     public var isFirstInCollection = false
     public var isLastInCollection = false
 

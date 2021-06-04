@@ -33,7 +33,7 @@ public class CancelableResponse: Codable {
     public let id: String
     public let validUntil: Int
     public var offline: Bool {
-        return id == ""
+        return id.isEmpty
     }
 
     init() {

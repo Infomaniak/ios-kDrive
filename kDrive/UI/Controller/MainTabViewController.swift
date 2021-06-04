@@ -106,7 +106,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     func updateTabBarProfilePicture() {
         setProfilePicture(image: KDriveAsset.placeholderAvatar.image)
 
-        AccountManager.instance.currentAccount?.user?.getAvatar { (image) in
+        AccountManager.instance.currentAccount?.user?.getAvatar { image in
             self.setProfilePicture(image: image)
         }
 
@@ -154,7 +154,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             directory.id >= DriveFileManager.constants.rootID {
             completion(directory)
         } else {
-            driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, _, _) in
+            driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
                 completion(file)
             }
         }
@@ -226,8 +226,8 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
         driveFileManager = newDriveFileManager
         // Tell Files app that the drive changed
         DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
-            manager.signalEnumerator(for: .workingSet) { (_) in }
-            manager.signalEnumerator(for: .rootContainer) { (_) in }
+            manager.signalEnumerator(for: .workingSet) { _ in }
+            manager.signalEnumerator(for: .rootContainer) { _ in }
         }
         for viewController in viewControllers ?? [] {
             if viewController.isViewLoaded {

@@ -32,7 +32,7 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
     @IBOutlet weak var textField: MaterialOutlinedTextField!
     @IBOutlet weak var buttonNewPassword: UIButton!
 
-    var showPassword: Bool = false
+    var showPassword = false
     weak var delegate: AccessRightPasswordDelegate?
 
     override func awakeFromNib() {
@@ -71,6 +71,7 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
     }
 
     override func prepareForReuse() {
+        super.prepareForReuse()
         textField.isHidden = true
         buttonNewPassword.isHidden = true
     }
@@ -87,7 +88,7 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
     }
 
     @objc func displayPassword() {
-        showPassword = !showPassword
+        showPassword.toggle()
         textField.isSecureTextEntry = !showPassword
     }
 }

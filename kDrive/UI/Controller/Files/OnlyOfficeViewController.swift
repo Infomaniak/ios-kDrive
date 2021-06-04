@@ -27,6 +27,8 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
     var webView: WKWebView!
     let progressView = UIProgressView()
 
+    private var progressObserver: NSKeyValueObservation?
+
     class func open(driveFileManager: DriveFileManager, file: File, viewController: UIViewController) {
         guard file.isOfficeFile else { return }
 
@@ -44,7 +46,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             }
             floatingPanelViewController.actionHandler = { sender in
                 sender.setLoading(true)
-                driveFileManager.apiFetcher.convertFile(file: file) { (response, _) in
+                driveFileManager.apiFetcher.convertFile(file: file) { response, _ in
                     sender.setLoading(false)
                     if let newFile = response?.data {
                         if let parent = file.parent {
@@ -81,7 +83,13 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             // Force mobile mode for better usage on iPadOS
             webView.configuration.defaultWebpagePreferences.preferredContentMode = .mobile
         }
-        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
+        progressObserver = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, value in
+            guard let newValue = value.newValue else {
+                return
+            }
+            self?.progressView.isHidden = newValue == 1
+            self?.progressView.setProgress(Float(newValue), animated: true)
+        }
         view = webView
     }
 
@@ -106,6 +114,10 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         }
     }
 
+    deinit {
+        progressObserver?.invalidate()
+    }
+
     private func showErrorMessage() {
         dismiss(animated: true) {
             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorLoadingOfficeEditor)
@@ -114,13 +126,6 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
 
     private func dismiss() {
         dismiss(animated: true)
-    }
-
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == "estimatedProgress" {
-            progressView.isHidden = webView.estimatedProgress == 1
-            progressView.setProgress(Float(webView.estimatedProgress), animated: true)
-        }
     }
 
     // MARK: - Web view navigation delegate

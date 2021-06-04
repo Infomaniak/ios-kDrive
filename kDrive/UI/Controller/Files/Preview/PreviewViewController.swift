@@ -142,7 +142,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     @objc func tapPreview() {
-        fullScreenPreview = !fullScreenPreview
+        fullScreenPreview.toggle()
         setFullscreen(fullScreenPreview)
     }
 
@@ -222,9 +222,9 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         centerIndexPathBeforeRotate = currentIndex
-        coordinator.animate { (_) in
+        coordinator.animate { _ in
             self.collectionView?.collectionViewLayout.invalidateLayout()
-        } completion: { (_) in
+        } completion: { _ in
         }
     }
 
@@ -367,7 +367,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
         if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
-            currentDownloadOperation = DownloadQueue.instance.temporaryDownload(file: currentFile) { (error) in
+            currentDownloadOperation = DownloadQueue.instance.temporaryDownload(file: currentFile) { error in
                 DispatchQueue.main.async { [weak self] in
                     if self?.view.window != nil {
                         if let error = error {

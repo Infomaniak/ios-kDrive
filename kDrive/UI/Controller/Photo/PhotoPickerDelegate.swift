@@ -91,7 +91,7 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
 
-        if results.count > 0 {
+        if !results.isEmpty {
             let saveFileNavigationController = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
 
             guard let saveFileVC = saveFileNavigationController.viewControllers.first as? SaveFileViewController else {

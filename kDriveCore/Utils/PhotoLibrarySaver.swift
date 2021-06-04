@@ -35,18 +35,18 @@ public class PhotoLibrarySaver: NSObject {
 
     private func requestAuthorization(completion: @escaping (PHAuthorizationStatus) -> Void) {
         if #available(iOS 14, *) {
-            PHPhotoLibrary.requestAuthorization(for: .addOnly) { (status) in
+            PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
                 completion(status)
             }
         } else {
-            PHPhotoLibrary.requestAuthorization { (status) in
+            PHPhotoLibrary.requestAuthorization { status in
                 completion(status)
             }
         }
     }
 
     private func requestAuthorizationAndCreateAlbum(completion: @escaping ((_ success: Bool) -> Void)) {
-        requestAuthorization { (status) in
+        requestAuthorization { status in
             let authorized: Bool
             if #available(iOS 14, *) {
                 authorized = status == .authorized || status == .limited
@@ -54,7 +54,7 @@ public class PhotoLibrarySaver: NSObject {
                 authorized = status == .authorized
             }
             if authorized {
-                self.createAlbumIfNeeded { (_) in
+                self.createAlbumIfNeeded { _ in
                     completion(true)
                 }
             } else {
@@ -93,7 +93,7 @@ public class PhotoLibrarySaver: NSObject {
     }
 
     public func save(image: UIImage, completion: @escaping (Bool, Error?) -> Void) {
-        self.requestAuthorizationAndCreateAlbum { (success) in
+        self.requestAuthorizationAndCreateAlbum { success in
             guard success else { return }
             PHPhotoLibrary.shared().performChanges({
                 let assetChangeRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
@@ -108,7 +108,7 @@ public class PhotoLibrarySaver: NSObject {
     }
 
     public func save(videoUrl: URL, completion: @escaping (Bool, Error?) -> Void) {
-        self.requestAuthorizationAndCreateAlbum { (success) in
+        self.requestAuthorizationAndCreateAlbum { success in
             guard success else { return }
             PHPhotoLibrary.shared().performChanges({
                 if let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl) {

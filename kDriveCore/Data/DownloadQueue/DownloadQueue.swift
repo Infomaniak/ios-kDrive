@@ -113,7 +113,7 @@ public class DownloadQueue {
     }
 
     public func cancelRunningOperations() {
-        operationQueue.operations.filter(\.isExecuting).forEach({ $0.cancel() })
+        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
     // MARK: - Private methods

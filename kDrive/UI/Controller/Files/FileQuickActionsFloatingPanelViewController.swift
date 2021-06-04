@@ -119,7 +119,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         tableView.register(cellView: FloatingPanelTitleTableViewCell.self)
         tableView.register(cellView: FloatingPanelCollectionTableViewCell.self)
 
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (_) in
+        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
             guard file != nil else { return }
             self.setupContent()
             UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
@@ -130,7 +130,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { (_) in
+        coordinator.animate { _ in
             // Reload collection view
             self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .fade)
         }
@@ -153,14 +153,13 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             setupContent()
             UIView.transition(with: tableView,
                 duration: 0.35,
-                options: .transitionCrossDissolve,
-                animations: { self.tableView.reloadData() })
+                options: .transitionCrossDissolve) { self.tableView.reloadData() }
         }
     }
 
     func setupContent() {
         quickActions = file.isDirectory ? FloatingPanelAction.folderQuickActions : FloatingPanelAction.quickActions
-        quickActions.forEach { (action) in
+        quickActions.forEach { action in
             let offline = ReachabilityListener.instance.currentStatus == .offline
             switch action {
             case .shareAndRights:
@@ -180,7 +179,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
         }
 
-        listActions = (file.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions).filter { (action) -> Bool in
+        listActions = (file.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions).filter { action -> Bool in
             switch action {
             case .openWith:
                 return file.rights?.write.value ?? false
@@ -320,7 +319,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, _) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, _ in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         do {
@@ -336,7 +335,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         case .edit:
             OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
         case .favorite:
-            driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { (error) in
+            driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { error in
                 if error == nil {
                     if !self.file.isFavorite {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
@@ -354,12 +353,12 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         case .rename:
             let file = self.file.freeze()
             let placeholder = file.isDirectory ? KDriveStrings.Localizable.hintInputDirName : KDriveStrings.Localizable.hintInputFileName
-            let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonRename, placeholder: placeholder, text: file.name, action: KDriveStrings.Localizable.buttonSave, loading: true) { (newName) in
+            let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonRename, placeholder: placeholder, text: file.name, action: KDriveStrings.Localizable.buttonSave, loading: true) { newName in
                 if newName != file.name {
                     let group = DispatchGroup()
                     var success = false
                     group.enter()
-                    self.driveFileManager.renameFile(file: file, newName: newName) { (_, error) in
+                    self.driveFileManager.renameFile(file: file, newName: newName) { _, error in
                         if error == nil {
                             success = true
                         }
@@ -388,7 +387,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 var success = false
                 var cancelId: String?
                 group.enter()
-                self.driveFileManager.deleteFile(file: file) { (response, error) in
+                self.driveFileManager.deleteFile(file: file) { response, error in
                     success = error == nil
                     cancelId = response?.id
                     group.leave()
@@ -418,7 +417,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         group.notify(queue: .main) {
                             UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: KDriveStrings.Localizable.buttonCancel) {
                                 if let cancelId = cancelId {
-                                    self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { (error) in
+                                    self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
                                         if error == nil {
                                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
                                         }
@@ -439,7 +438,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadRows(at: [indexPath], with: .fade)
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         if error == nil {
@@ -454,7 +453,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
         case .offline:
             downloadProgress = -1
-            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { (error) in
+            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
                 if error != nil {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorCache)
                 }
@@ -465,12 +464,12 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             let file = self.file.freeze()
             let pathString = self.file.name as NSString
             let text = KDriveStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
-            let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonDuplicate, placeholder: KDriveStrings.Localizable.fileInfoInputDuplicateFile, text: text, action: KDriveStrings.Localizable.buttonCopy, loading: true) { (duplicateName) in
+            let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonDuplicate, placeholder: KDriveStrings.Localizable.fileInfoInputDuplicateFile, text: text, action: KDriveStrings.Localizable.buttonCopy, loading: true) { duplicateName in
                 if duplicateName != file.name {
                     let group = DispatchGroup()
                     var success = false
                     group.enter()
-                    self.driveFileManager.duplicateFile(file: file, duplicateName: duplicateName) { (_, error) in
+                    self.driveFileManager.duplicateFile(file: file, duplicateName: duplicateName) { _, error in
                         if error == nil {
                             success = true
                         }
@@ -498,13 +497,13 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             selectFolderViewController?.disabledDirectoriesSelection = [file.parent ?? driveFileManager.getRootFile()]
             selectFolderViewController?.fileToMove = file.id
             selectFolderViewController?.selectHandler = { selectedFolder in
-                self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { (response, _, error) in
+                self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { response, _, error in
                     if error != nil {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove, view: self.view)
                     } else {
                         UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), view: self.view, action: KDriveStrings.Localizable.buttonCancel) {
                             if let cancelId = response?.id {
-                                self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { (error) in
+                                self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
                                     if error == nil {
                                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileMoveCancelled, view: self.view)
                                     }
@@ -572,7 +571,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, _) in
+                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, _ in
                     action.isLoading = false
                     DispatchQueue.main.async {
                         presentShareSheetForCurrentFile()
@@ -586,7 +585,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 // Copy drop box link
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                driveFileManager.apiFetcher.getDropBoxSettings(directory: file) { (response, _) in
+                driveFileManager.apiFetcher.getDropBoxSettings(directory: file) { response, _ in
                     action.isLoading = false
                     self.tableView.reloadSections([1], with: .none)
                     if let dropBox = response?.data {
@@ -602,7 +601,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 // Create share link
                 action.isLoading = true
                 self.tableView.reloadSections([1], with: .none)
-                driveFileManager.activateShareLink(for: file) { (newFile, shareLink, error) in
+                driveFileManager.activateShareLink(for: file) { newFile, shareLink, error in
                     if let newFile = newFile, let link = shareLink {
                         self.file = newFile
                         action.isLoading = false
@@ -610,7 +609,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         self.copyShareLinkToPasteboard(link: link.url)
                     } else if let error = error as? DriveError, error == .shareLinkAlreadyExists {
                         // This should never happen
-                        self.driveFileManager.apiFetcher.getShareListFor(file: self.file) { (response, _) in
+                        self.driveFileManager.apiFetcher.getShareListFor(file: self.file) { response, _ in
                             if let data = response?.data, let link = data.link?.url {
                                 if let newFile = self.driveFileManager.setFileShareLink(file: self.file, shareLink: link)?.freeze() {
                                     self.file = newFile
@@ -643,7 +642,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         switch file.convertedType {
         case .image:
             if let image = UIImage(contentsOfFile: file.localUrl.path) {
-                PhotoLibrarySaver.instance.save(image: image) { (success, _) in
+                PhotoLibrarySaver.instance.save(image: image) { success, _ in
                     DispatchQueue.main.async {
                         if success {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarImageSavedConfirmation, view: self.view)
@@ -654,7 +653,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             }
         case .video:
-            PhotoLibrarySaver.instance.save(videoUrl: file.localUrl) { (success, _) in
+            PhotoLibrarySaver.instance.save(videoUrl: file.localUrl) { success, _ in
                 DispatchQueue.main.async {
                     if success {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarVideoSavedConfirmation, view: self.view)

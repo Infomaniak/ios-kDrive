@@ -91,17 +91,17 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func reconnectBackgroundTasks() {
-        backgroundSession.getTasksWithCompletionHandler { (_, uploadTasks, _) in
+        backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
                     let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                     .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = fileId] (_, value) in
+                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
                         }
                         UploadQueue.instance.publishProgress(newValue, for: fileId)
-                    })
+                    }
                 }
             }
         }

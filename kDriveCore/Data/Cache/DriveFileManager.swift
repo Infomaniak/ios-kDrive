@@ -39,7 +39,7 @@ public class DriveFileManager {
             if oldSchemaVersion < strongSelf.currentUploadDbVersion {
                 // Migration from version 2 to version 3
                 if oldSchemaVersion < 3 {
-                    migration.enumerateObjects(ofType: UploadFile.className()) { (_, newObject) in
+                    migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
                         newObject!["maxRetryCount"] = 3
                     }
                 }
@@ -223,7 +223,7 @@ public class DriveFileManager {
             }
         } else {
             if !withExtras {
-                apiFetcher.getFileListForDirectory(parentId: id, page: page, sortType: sortType) { [self] (response, error) in
+                apiFetcher.getFileListForDirectory(parentId: id, page: page, sortType: sortType) { [self] response, error in
                     if let file = response?.data {
                         backgroundQueue.async {
                             autoreleasepool {
@@ -272,7 +272,7 @@ public class DriveFileManager {
                     }
                 }
             } else {
-                apiFetcher.getFileDetail(fileId: id) { [self] (response, error) in
+                apiFetcher.getFileDetail(fileId: id) { [self] response, error in
                     if let file = response?.data {
                         keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: false, keepRights: false, using: realm)
 
@@ -295,7 +295,7 @@ public class DriveFileManager {
     }
 
     public func getFavorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        apiFetcher.getFavoriteFiles(page: page) { [self] (response, error) in
+        apiFetcher.getFavoriteFiles(page: page) { [self] response, error in
             if let favorites = response?.data {
                 backgroundQueue.async {
                     autoreleasepool {
@@ -334,7 +334,7 @@ public class DriveFileManager {
     }
 
     public func getMyShared(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        apiFetcher.getMyShared(page: page, sortType: sortType) { [self] (response, error) in
+        apiFetcher.getMyShared(page: page, sortType: sortType) { [self] response, error in
             let realm = getRealm()
             let mySharedRoot = DriveFileManager.mySharedRootFile
             if let sharedFiles = response?.data {
@@ -417,7 +417,7 @@ public class DriveFileManager {
         if ReachabilityListener.instance.currentStatus == .offline {
             searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
         } else {
-            apiFetcher.searchFiles(query: query, fileType: fileType, page: page, sortType: sortType) { [self] (response, _) in
+            apiFetcher.searchFiles(query: query, fileType: fileType, page: page, sortType: sortType) { [self] response, _ in
                 if let files = response?.data {
                     self.backgroundQueue.async { [self] in
                         autoreleasepool {
@@ -432,7 +432,7 @@ public class DriveFileManager {
 
                             setLocalFiles(files, root: searchRoot) {
                                 let safeRoot = ThreadSafeReference(to: searchRoot)
-                                let frozenFiles = files.map({ $0.freeze() })
+                                let frozenFiles = files.map { $0.freeze() }
                                 DispatchQueue.main.async {
                                     completion(getRealm().resolve(safeRoot), frozenFiles, nil)
                                 }
@@ -604,7 +604,7 @@ public class DriveFileManager {
     }
 
     public func getLastModifiedFiles(page: Int? = nil, completion: @escaping ([File]?, Error?) -> Void) {
-        apiFetcher.getLastModifiedFiles(page: page) { (response, error) in
+        apiFetcher.getLastModifiedFiles(page: page) { response, error in
             if let files = response?.data {
                 self.backgroundQueue.async { [self] in
                     autoreleasepool {
@@ -614,7 +614,7 @@ public class DriveFileManager {
                         }
 
                         setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile) {
-                            let frozenFiles = files.map({ $0.freeze() })
+                            let frozenFiles = files.map { $0.freeze() }
                             DispatchQueue.main.async {
                                 completion(frozenFiles, nil)
                             }
@@ -628,7 +628,7 @@ public class DriveFileManager {
     }
 
     public func getLastPictures(page: Int = 1, completion: @escaping ([File]?, Error?) -> Void) {
-        apiFetcher.getLastPictures(page: page) { (response, error) in
+        apiFetcher.getLastPictures(page: page) { response, error in
             if let files = response?.data {
                 self.backgroundQueue.async { [self] in
                     autoreleasepool {
@@ -638,7 +638,7 @@ public class DriveFileManager {
                         }
 
                         setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile) {
-                            let frozenFiles = files.map({ $0.freeze() })
+                            let frozenFiles = files.map { $0.freeze() }
                             DispatchQueue.main.async {
                                 completion(frozenFiles, nil)
                             }
@@ -672,7 +672,7 @@ public class DriveFileManager {
         var pagedActions = pagedActions ?? [Int: FileActivityType]()
         let fromDate = date ?? file.responseAt
         let safeFile = ThreadSafeReference(to: file)
-        apiFetcher.getFileActivitiesFromDate(file: file, date: fromDate, page: page) { (response, error) in
+        apiFetcher.getFileActivitiesFromDate(file: file, date: fromDate, page: page) { response, error in
             if let activities = response?.data,
                 let timestamp = response?.responseAt {
                 self.backgroundQueue.async { [self] in
@@ -797,7 +797,7 @@ public class DriveFileManager {
         }
         file.responseAt = timestamp
         try? realm.commitWrite()
-        return ActivitiesResult(inserted: insertedFiles.map { $0.freeze() }, updated: updatedFiles.map({ $0.freeze() }), deleted: deletedFiles)
+        return ActivitiesResult(inserted: insertedFiles.map { $0.freeze() }, updated: updatedFiles.map { $0.freeze() }, deleted: deletedFiles)
     }
 
     public func getWorkingSet() -> [File] {
@@ -813,7 +813,7 @@ public class DriveFileManager {
     public func setFavoriteFile(file: File, favorite: Bool, completion: @escaping (Error?) -> Void) {
         let fileId = file.id
         if favorite {
-            apiFetcher.postFavoriteFile(file: file) { (_, error) in
+            apiFetcher.postFavoriteFile(file: file) { _, error in
                 if error == nil {
                     self.updateFileProperty(fileId: fileId) { file in
                         file.isFavorite = true
@@ -822,7 +822,7 @@ public class DriveFileManager {
                 completion(error)
             }
         } else {
-            apiFetcher.deleteFavoriteFile(file: file) { (_, error) in
+            apiFetcher.deleteFavoriteFile(file: file) { _, error in
                 if error == nil {
                     self.updateFileProperty(fileId: fileId) { file in
                         file.isFavorite = false
@@ -835,7 +835,7 @@ public class DriveFileManager {
 
     public func deleteFile(file: File, completion: @escaping (CancelableResponse?, Error?) -> Void) {
         let fileId = file.id
-        apiFetcher.deleteFile(file: file) { (response, error) in
+        apiFetcher.deleteFile(file: file) { response, error in
             if error == nil {
                 file.signalChanges(userId: self.drive.userId)
                 self.backgroundQueue.async { [self] in
@@ -856,7 +856,7 @@ public class DriveFileManager {
     public func moveFile(file: File, newParent: File, completion: @escaping (CancelableResponse?, File?, Error?) -> Void) {
         let safeFile = ThreadSafeReference(to: file)
         let safeParent = ThreadSafeReference(to: newParent)
-        apiFetcher.moveFile(file: file, newParent: newParent) { (response, error) in
+        apiFetcher.moveFile(file: file, newParent: newParent) { response, error in
             if error == nil {
                 // Add the moved file to the realm db
                 let realm = self.getRealm()
@@ -888,7 +888,7 @@ public class DriveFileManager {
 
     public func renameFile(file: File, newName: String, completion: @escaping (File?, Error?) -> Void) {
         let safeFile = ThreadSafeReference(to: file)
-        apiFetcher.renameFile(file: file, newName: newName) { [self] (response, error) in
+        apiFetcher.renameFile(file: file, newName: newName) { [self] response, error in
             let realm = getRealm()
             if let updatedFile = response?.data,
                 let file = realm.resolve(safeFile) {
@@ -909,7 +909,7 @@ public class DriveFileManager {
 
     public func duplicateFile(file: File, duplicateName: String, completion: @escaping (File?, Error?) -> Void) {
         let parentId = file.parent?.id
-        apiFetcher.duplicateFile(file: file, duplicateName: duplicateName) { (response, error) in
+        apiFetcher.duplicateFile(file: file, duplicateName: duplicateName) { response, error in
             if let duplicateFile = response?.data {
                 do {
                     let duplicateFile = try self.updateFileInDatabase(updatedFile: duplicateFile)
@@ -936,7 +936,7 @@ public class DriveFileManager {
 
     public func createDirectory(parentDirectory: File, name: String, onlyForMe: Bool, completion: @escaping (File?, Error?) -> Void) {
         let parentId = parentDirectory.id
-        apiFetcher.createDirectory(parentDirectory: parentDirectory, name: name, onlyForMe: onlyForMe) { (response, error) in
+        apiFetcher.createDirectory(parentDirectory: parentDirectory, name: name, onlyForMe: onlyForMe) { response, error in
             if let createdDirectory = response?.data {
                 do {
                     let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
@@ -961,7 +961,7 @@ public class DriveFileManager {
     }
 
     public func createCommonDirectory(name: String, forAllUser: Bool, completion: @escaping (File?, Error?) -> Void) {
-        apiFetcher.createCommonDirectory(name: name, forAllUser: forAllUser) { (response, error) in
+        apiFetcher.createCommonDirectory(name: name, forAllUser: forAllUser) { response, error in
             if let createdDirectory = response?.data {
                 do {
                     let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
@@ -988,9 +988,9 @@ public class DriveFileManager {
                               limitFileSize: Int?,
                               completion: @escaping (File?, DropBox?, Error?) -> Void) {
         let parentId = parentDirectory.id
-        apiFetcher.createDirectory(parentDirectory: parentDirectory, name: name, onlyForMe: onlyForMe) { [self] (response, error) in
+        apiFetcher.createDirectory(parentDirectory: parentDirectory, name: name, onlyForMe: onlyForMe) { [self] response, error in
             if let createdDirectory = response?.data {
-                apiFetcher.setupDropBox(directory: createdDirectory, password: password, validUntil: validUntil, emailWhenFinished: emailWhenFinished, limitFileSize: limitFileSize) { (response, error) in
+                apiFetcher.setupDropBox(directory: createdDirectory, password: password, validUntil: validUntil, emailWhenFinished: emailWhenFinished, limitFileSize: limitFileSize) { response, error in
                     if let dropbox = response?.data {
                         do {
                             let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
@@ -1020,7 +1020,7 @@ public class DriveFileManager {
 
     public func createOfficeFile(parentDirectory: File, name: String, type: String, completion: @escaping (File?, Error?) -> Void) {
         let parentId = parentDirectory.id
-        apiFetcher.createOfficeFile(parentDirectory: parentDirectory, name: name, type: type) { (response, error) in
+        apiFetcher.createOfficeFile(parentDirectory: parentDirectory, name: name, type: type) { response, error in
             let realm = self.getRealm()
             if let file = response?.data,
                 let createdFile = try? self.updateFileInDatabase(updatedFile: file, using: realm) {
@@ -1044,7 +1044,7 @@ public class DriveFileManager {
     }
 
     public func activateShareLink(for file: File, completion: @escaping (File?, ShareLink?, Error?) -> Void) {
-        apiFetcher.activateShareLinkFor(file: file) { (response, error) in
+        apiFetcher.activateShareLinkFor(file: file) { response, error in
             if let link = response?.data {
                 // Fix for API not returning share link activities
                 let newFile = self.setFileShareLink(file: file, shareLink: link.url)?.freeze()
@@ -1056,7 +1056,7 @@ public class DriveFileManager {
     }
 
     public func removeShareLink(for file: File, completion: @escaping (File?, Error?) -> Void) {
-        apiFetcher.removeShareLinkFor(file: file) { (response, error) in
+        apiFetcher.removeShareLinkFor(file: file) { response, error in
             if let data = response?.data {
                 if data {
                     // Fix for API not returning share link activities
@@ -1175,7 +1175,7 @@ public class DriveFileManager {
     }
 
     public func cancelAction(file: File, cancelId: String, completion: @escaping (Error?) -> Void) {
-        apiFetcher.cancelAction(cancelId: cancelId) { (_, error) in
+        apiFetcher.cancelAction(cancelId: cancelId) { _, error in
             if error == nil {
                 completion(error)
             } else {

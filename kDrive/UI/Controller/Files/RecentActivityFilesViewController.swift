@@ -71,7 +71,7 @@ class RecentActivityFilesViewController: FileListViewController {
 
             headerView.activityLabel.text = text
 
-            user.getAvatar { (image) in
+            user.getAvatar { image in
                 headerView.activityAvatar.image = image.withRenderingMode(.alwaysOriginal)
             }
         }
@@ -87,7 +87,7 @@ class RecentActivityFilesViewController: FileListViewController {
     // MARK: - Private methods
 
     private func sortFiles(_ files: [File]) -> [File] {
-        return files.sorted { (firstFile, secondFile) -> Bool in
+        return files.sorted { firstFile, secondFile -> Bool in
             switch sortType {
             case .nameAZ:
                 return firstFile.name.lowercased() < secondFile.name.lowercased()

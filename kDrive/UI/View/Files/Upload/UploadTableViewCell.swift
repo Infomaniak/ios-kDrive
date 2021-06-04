@@ -74,10 +74,10 @@ class UploadTableViewCell: InsetTableViewCell {
             updateProgress(fileId: currentFileId, progress: progress, animated: false)
         }
 
-        uploadFile.getIconForUploadFile { (placeholder) in
+        uploadFile.getIconForUploadFile { placeholder in
             cardContentView.iconView.layer.cornerRadius = 0
             cardContentView.iconView.image = placeholder
-        } completion: { (icon) in
+        } completion: { icon in
             self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
             self.cardContentView.iconView.image = icon
         }

@@ -36,7 +36,7 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.createDirectory(parentDirectory: file, name: directoryName, onlyForMe: false) { (file, error) in
+        driveFileManager.createDirectory(parentDirectory: file, name: directoryName, onlyForMe: false) { file, error in
             if let file = file {
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
             } else {
@@ -52,9 +52,9 @@ extension FileProviderExtension {
         }
 
         // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId) { (response, error) in
+        driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId) { response, error in
             if let file = response?.data {
-                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { (_, error) in
+                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
                     FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
                     self.manager.signalEnumerator(for: .workingSet) { _ in }
                     self.manager.signalEnumerator(for: itemIdentifier) { _ in }
@@ -87,7 +87,7 @@ extension FileProviderExtension {
         let importedDocumentIdentifier = NSFileProviderItemIdentifier(id)
         let storageUrl = FileProviderItem.createStorageUrl(identifier: importedDocumentIdentifier, filename: fileURL.lastPathComponent, domain: domain)
 
-        fileCoordinator.coordinate(readingItemAt: fileURL, options: .withoutChanges, writingItemAt: storageUrl, options: .forReplacing, error: nil) { (readURL, writeURL) in
+        fileCoordinator.coordinate(readingItemAt: fileURL, options: .withoutChanges, writingItemAt: storageUrl, options: .forReplacing, error: nil) { readURL, writeURL in
             do {
                 try FileManager.default.copyItem(at: readURL, to: writeURL)
             } catch let error as NSError {
@@ -131,7 +131,7 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.renameFile(file: file, newName: itemName) { (file, error) in
+        driveFileManager.renameFile(file: file, newName: itemName) { file, error in
             if let file = file {
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
             } else {
@@ -156,7 +156,7 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.moveFile(file: file, newParent: parent) { (_, file, error) in
+        driveFileManager.moveFile(file: file, newParent: parent) { _, file, error in
             if let file = file {
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
             } else {
@@ -219,12 +219,12 @@ extension FileProviderExtension {
         }
 
         // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId) { (response, error) in
+        driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId) { response, error in
             if let file = response?.data {
                 if let parentItemIdentifier = parentItemIdentifier,
                     let parentId = parentItemIdentifier.toFileId() {
                     // Restore in given parent
-                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: parentId) { (_, error) in
+                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: parentId) { _, error in
                         let item = FileProviderItem(file: file, domain: self.domain)
                         item.parentItemIdentifier = parentItemIdentifier
                         item.isTrashed = false
@@ -239,7 +239,7 @@ extension FileProviderExtension {
                     }
                 } else {
                     // Restore in original parent
-                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file) { (_, error) in
+                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file) { _, error in
                         let item = FileProviderItem(file: file, domain: self.domain)
                         item.isTrashed = false
                         FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)

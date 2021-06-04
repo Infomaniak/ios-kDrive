@@ -38,7 +38,7 @@ class FloatingPanelSortOptionTableViewController: UITableViewController, Floatin
         tableView.register(cellView: FloatingPanelSortOptionTableViewCell.self)
         tableView.separatorColor = .clear
         tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-        let selectedIndex = (tableContent.firstIndex(where: { $0 == sortType }) ?? 0) + 1
+        let selectedIndex = (tableContent.firstIndex { $0 == sortType } ?? 0) + 1
         tableView.selectRow(at: IndexPath(row: selectedIndex, section: 0), animated: false, scrollPosition: .none)
     }
 

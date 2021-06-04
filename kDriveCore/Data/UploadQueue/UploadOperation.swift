@@ -37,7 +37,7 @@ public class UploadTokenManager {
         } else if let userToken = AccountManager.instance.getTokenForUserId(userId),
             let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            driveFileManager.apiFetcher.getPublicUploadTokenWithToken(userToken) { (response, _) in
+            driveFileManager.apiFetcher.getPublicUploadTokenWithToken(userToken) { response, _ in
                 let token = response?.data
                 self.tokens[userId] = token
                 completionHandler(token)
@@ -172,12 +172,12 @@ public class UploadOperation: Operation {
             task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
             task?.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
             task?.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
-            progressObservation = task?.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = file.id] (_, value) in
+            progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
                 guard let newValue = value.newValue else {
                     return
                 }
                 UploadQueue.instance.publishProgress(newValue, for: fileId)
-            })
+            }
             task?.resume()
         } else {
             DDLogInfo("[UploadOperation] No file path found for job \(file.id)")
@@ -196,7 +196,7 @@ public class UploadOperation: Operation {
     private func getUploadTokenSync() {
         let syncToken = DispatchGroup()
         syncToken.enter()
-        UploadTokenManager.instance.getToken(userId: file.userId, driveId: file.driveId) { (token) in
+        UploadTokenManager.instance.getToken(userId: file.userId, driveId: file.driveId) { token in
             self.uploadToken = token
             syncToken.leave()
         }
@@ -248,11 +248,11 @@ public class UploadOperation: Operation {
 
                 // File is already or has parent in DB let's update it
                 BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
-                    if driveFileManager.getCachedFile(id: driveFile.id, using: realm) != nil || file.relativePath == "" {
+                    if driveFileManager.getCachedFile(id: driveFile.id, using: realm) != nil || file.relativePath.isEmpty {
                         let parent = driveFileManager.getCachedFile(id: file.parentDirectoryId, freeze: false, using: realm)
                         try? realm.safeWrite {
                             realm.add(driveFile, update: .all)
-                            if file.relativePath == "" && parent != nil && !parent!.children.contains(driveFile) {
+                            if file.relativePath.isEmpty && parent != nil && !parent!.children.contains(driveFile) {
                                 parent?.children.append(driveFile)
                             }
                         }

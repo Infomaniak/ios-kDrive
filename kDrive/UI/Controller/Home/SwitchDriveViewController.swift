@@ -93,7 +93,7 @@ extension SwitchDriveViewController: UITableViewDelegate {
                 return
             }
 
-            currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+            currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                 self.delegate?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
                 self.dismiss(animated: true)
             }
@@ -134,10 +134,8 @@ extension SwitchDriveViewController: UISearchResultsUpdating {
     }
 
     func filterOrganisationsWithText(_ text: String) {
-        if text.count > 0 {
-            filteredDrives = drives.filter({ (drive) -> Bool in
-                return drive.name.lowercased().contains(text.lowercased())
-            })
+        if !text.isEmpty {
+            filteredDrives = drives.filter { $0.name.lowercased().contains(text.lowercased()) }
         } else {
             filteredDrives = drives
         }

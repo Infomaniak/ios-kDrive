@@ -35,6 +35,7 @@ class InvitedUserCollectionViewCell: UICollectionViewCell {
     }
 
     override func prepareForReuse() {
+        super.prepareForReuse()
         avatarImage.image = KDriveAsset.placeholderAvatar.image
     }
 

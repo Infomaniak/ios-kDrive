@@ -41,7 +41,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var trailingInnerConstraint: NSLayoutConstraint!
     @IBOutlet weak var bottomInnerConstraint: NSLayoutConstraint!
 
-    var insets: Bool = true
+    var insets = true
     weak var delegate: ShareLinkTableViewCellDelegate?
 
     override func awakeFromNib() {

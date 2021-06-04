@@ -74,7 +74,7 @@ public class PhotoLibraryUploader {
     func getUrlForPHAsset(_ asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
         autoreleasepool {
             if asset.mediaType == .video {
-                let request = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { (asset, _, _) in
+                let request = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { asset, _, _ in
                     if let assetUrl = (asset as? AVURLAsset)?.url {
                         let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(assetUrl.lastPathComponent)
                         do {
@@ -89,7 +89,7 @@ public class PhotoLibraryUploader {
                 }
                 phRequests.insert(request)
             } else if asset.mediaType == .image {
-                let request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { (data, _, _, _) in
+                let request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
                     let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
                     do {
                         try data?.write(to: filePath)
@@ -109,7 +109,7 @@ public class PhotoLibraryUploader {
         var url: URL?
         let getUrlLock = DispatchGroup()
         getUrlLock.enter()
-        getUrlForPHAsset(asset) { (fetchedUrl) in
+        getUrlForPHAsset(asset) { fetchedUrl in
             url = fetchedUrl
             getUrlLock.leave()
         }
@@ -162,7 +162,7 @@ public class PhotoLibraryUploader {
     private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>, initial: Bool, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         autoreleasepool {
             realm.beginWrite()
-            assets.enumerateObjects { [self] (asset, idx, stop) in
+            assets.enumerateObjects { [self] asset, idx, stop in
                 guard settings != nil else {
                     realm.cancelWrite()
                     stop.pointee = true
@@ -215,7 +215,7 @@ public class PhotoLibraryUploader {
         }
         PHPhotoLibrary.shared().performChanges {
             PHAssetChangeRequest.deleteAssets(toRemoveAssets as NSFastEnumeration)
-        } completionHandler: { (_, _) in
+        } completionHandler: { _, _ in
 
         }
     }

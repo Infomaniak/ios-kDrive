@@ -130,10 +130,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
         // Table view footer
         showFooter(!driveFileManager.drive.isProOrTeam)
-        
+
         observeFileUpdated()
 
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
+        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
             self.reload(sections: [.top])
             if status != .offline {
                 self.reloadData()
@@ -317,7 +317,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     func loadLastModifiedFiles() {
         lastUpdate = Date()
         lastModifyIsLoading = true
-        driveFileManager.getLastModifiedFiles { [self] (files, _) in
+        driveFileManager.getLastModifiedFiles { [self] files, _ in
             if let files = files, files.map(\.id) != lastModifiedFiles.map(\.id) {
                 lastModifiedFiles = files
                 lastModifyIsLoading = false
@@ -331,7 +331,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         lastUpdate = Date()
         lastPicturesInfo.isLoading = true
         activityOrPicturesIsLoading = lastPicturesInfo.page == 1
-        driveFileManager.getLastPictures(page: lastPicturesInfo.page) { (files, _) in
+        driveFileManager.getLastPictures(page: lastPicturesInfo.page) { files, _ in
             if let files = files {
                 self.lastPictures += files
 
@@ -357,7 +357,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         showFooter(true)
         lastUpdate = Date()
         activityOrPicturesIsLoading = recentActivityController.nextPage == 1
-        recentActivityController.loadNextRecentActivities { (error) in
+        recentActivityController.loadNextRecentActivities { error in
             self.showFooter(false)
             self.activityOrPicturesIsLoading = false
             if let error = error {

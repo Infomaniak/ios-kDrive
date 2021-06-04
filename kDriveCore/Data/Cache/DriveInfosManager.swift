@@ -34,7 +34,7 @@ public class DriveInfosManager {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
-            migrationBlock: { (_, oldSchemaVersion) in
+            migrationBlock: { _, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {
                     // No migration needed from version 0 to version 1
                 }
@@ -54,7 +54,7 @@ public class DriveInfosManager {
 
     private func initFileProviderDomains(drives: [Drive], user: UserProfile) {
         let updatedDomains = drives.map { NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier($0.objectId), displayName: "\($0.name) (\(user.email))", pathRelativeToDocumentStorage: "\($0.id)") }
-        NSFileProviderManager.getDomainsWithCompletionHandler { (allDomains, error) in
+        NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
             if let error = error {
                 DDLogError("Error while getting domains: \(error)")
             }
@@ -66,11 +66,11 @@ public class DriveInfosManager {
                     let existingDomain = domainsForCurrentUser.remove(at: existingDomainIndex)
                     // Domain exists but its name could have changed
                     if existingDomain.displayName != newDomain.displayName {
-                        NSFileProviderManager.remove(existingDomain) { (error) in
+                        NSFileProviderManager.remove(existingDomain) { error in
                             if let error = error {
                                 DDLogError("Error while removing domain \(existingDomain.displayName): \(error)")
                             } else {
-                                NSFileProviderManager.add(newDomain) { (error) in
+                                NSFileProviderManager.add(newDomain) { error in
                                     if let error = error {
                                         DDLogError("Error while adding domain \(newDomain.displayName): \(error)")
                                     }
@@ -80,7 +80,7 @@ public class DriveInfosManager {
                     }
                 } else {
                     // Domain didn't exist we have to add it
-                    NSFileProviderManager.add(newDomain) { (error) in
+                    NSFileProviderManager.add(newDomain) { error in
                         if let error = error {
                             DDLogError("Error while adding domain \(newDomain.displayName): \(error)")
                         }
@@ -90,7 +90,7 @@ public class DriveInfosManager {
 
             // Remove left domains
             for domain in domainsForCurrentUser {
-                NSFileProviderManager.remove(domain) { (error) in
+                NSFileProviderManager.remove(domain) { error in
                     if let error = error {
                         DDLogError("Error while removing domain \(domain.displayName): \(error)")
                     }
@@ -100,14 +100,14 @@ public class DriveInfosManager {
     }
 
     func deleteFileProviderDomains(for userId: Int) {
-        NSFileProviderManager.getDomainsWithCompletionHandler { (allDomains, error) in
+        NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
             if let error = error {
                 DDLogError("Error while getting domains: \(error)")
             }
 
             let domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(userId)") }
             for domain in domainsForCurrentUser {
-                NSFileProviderManager.remove(domain) { (error) in
+                NSFileProviderManager.remove(domain) { error in
                     if let error = error {
                         DDLogError("Error while removing domain \(domain.displayName): \(error)")
                     }
@@ -122,7 +122,7 @@ public class DriveInfosManager {
                 DDLogError("Error while getting domains: \(error)")
                 completion(nil)
             } else {
-                completion(domains.first(where: { $0.identifier.rawValue == driveId }))
+                completion(domains.first { $0.identifier.rawValue == driveId })
             }
         }
     }
@@ -162,7 +162,7 @@ public class DriveInfosManager {
         initFileProviderDomains(drives: driveResponse.drives.main, user: user)
 
         let realm = getRealm()
-        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm).filter { currentDrive in !driveList.contains(where: { newDrive in newDrive.objectId == currentDrive.objectId }) }
+        let driveRemoved = getDrives(for: user.id, sharedWithMe: nil, using: realm).filter { currentDrive in !driveList.contains { newDrive in newDrive.objectId == currentDrive.objectId } }
         let driveRemovedIds = driveRemoved.map(\.objectId)
         try? realm.write {
             realm.delete(realm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds))
@@ -190,7 +190,7 @@ public class DriveInfosManager {
             }
             realmDriveList = realmDriveList.filter(filterPredicate)
         }
-        return Array(realmDriveList.map({ $0.freeze() }))
+        return Array(realmDriveList.map { $0.freeze() })
     }
 
     public func getDrive(id: Int, userId: Int, using realm: Realm? = nil) -> Drive? {
@@ -225,7 +225,7 @@ public class DriveInfosManager {
 
     public func getTags(using realm: Realm? = nil) -> [Tag] {
         let realm = realm ?? getRealm()
-        return realm.objects(Tag.self).sorted(byKeyPath: "id", ascending: true).map({ $0 })
+        return realm.objects(Tag.self).sorted(byKeyPath: "id", ascending: true).map { $0 }
     }
 
     public func getTag(id: Int, using realm: Realm? = nil) -> Tag? {

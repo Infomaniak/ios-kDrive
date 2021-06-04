@@ -99,7 +99,7 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
         if indexPath.row < users.count {
             let user = users[indexPath.row]
             cell.usernameLabel.text = user.displayName
-            user.getAvatar { (image) in
+            user.getAvatar { image in
                 cell.avatarImage.image = image
                     .resizeImage(size: CGSize(width: 35, height: 35))
                     .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)

@@ -124,7 +124,7 @@ class RecentActivityTableViewCell: InsetTableViewCell, UICollectionViewDelegate,
             titleLabel.text = user.displayName
             timeLabel.text = Constants.formatTimestamp(TimeInterval(activity?.createdAt ?? 0), relative: true)
 
-            user.getAvatar { (image) in
+            user.getAvatar { image in
                 self.avatarImage.image = image.withRenderingMode(.alwaysOriginal)
             }
         }

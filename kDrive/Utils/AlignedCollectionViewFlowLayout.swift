@@ -206,9 +206,9 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     override open func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         // We may not change the original layout attributes or UICollectionViewFlowLayout might complain.
         let layoutAttributesObjects = copy(super.layoutAttributesForElements(in: rect))
-        layoutAttributesObjects?.forEach({ (layoutAttributes) in
+        layoutAttributesObjects?.forEach { layoutAttributes in
             setFrame(forLayoutAttributes: layoutAttributes)
-        })
+        }
         return layoutAttributesObjects
     }
 

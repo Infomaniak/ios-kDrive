@@ -35,7 +35,7 @@ extension FileProviderExtension {
                 // Download the thumbnail to disk
                 // For simplicity, this sample downloads each thumbnail separately;
                 // however, if possible, you should batch download all the thumbnails at once.
-                let downloadTask = urlSession.downloadTask(with: request, completionHandler: { (tempURL, _, error) in
+                let downloadTask = urlSession.downloadTask(with: request) { tempURL, _, error in
 
                     guard progress.isCancelled != true else {
                         return
@@ -62,7 +62,7 @@ extension FileProviderExtension {
                             completionHandler(nil)
                         }
                     }
-                })
+                }
 
                 // Add the download task's progress as a child to the overall progress.
                 progress.addChild(downloadTask.progress, withPendingUnitCount: 1)

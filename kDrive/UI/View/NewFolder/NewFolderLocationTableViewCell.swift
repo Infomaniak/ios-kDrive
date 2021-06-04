@@ -37,6 +37,7 @@ class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelega
     }
 
     override func prepareForReuse() {
+        super.prepareForReuse()
         collectionView.reloadData()
     }
 

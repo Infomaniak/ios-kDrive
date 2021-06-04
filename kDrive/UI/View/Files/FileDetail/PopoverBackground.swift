@@ -107,7 +107,7 @@ private struct Arrow {
 class PopoverBackground: UIPopoverBackgroundView {
 
     var backgroundView = UIImageView()
-    private var arrow: Arrow = Arrow()
+    private var arrow = Arrow()
     private static let PROTO_ARROW = Arrow()
 
     override var arrowDirection: UIPopoverArrowDirection {

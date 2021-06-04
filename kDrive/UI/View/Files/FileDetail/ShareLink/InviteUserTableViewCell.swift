@@ -55,7 +55,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         didSet {
             guard drive != nil else { return }
             users = DriveInfosManager.instance.getUsers(for: drive.id)
-            users.sort { (user1, user2) -> Bool in
+            users.sort { user1, user2 -> Bool in
                 return user1.displayName < user2.displayName
             }
             results = users
@@ -111,8 +111,8 @@ class InviteUserTableViewCell: InsetTableViewCell {
     }
 
     private func filterContent(for text: String) {
-        var emailExist: Bool = false
-        if text.count > 0 {
+        var emailExist = false
+        if !text.isEmpty {
             results.removeAll()
             for user in users {
                 if user.displayName.contains(text) || user.email.contains(text) {

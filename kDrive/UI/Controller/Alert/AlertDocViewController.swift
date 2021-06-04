@@ -88,7 +88,7 @@ class AlertDocViewController: AlertFieldViewController {
 
         name = name.hasSuffix(".\(fileType)") ? name : "\(name).\(fileType)"
         setLoading(true)
-        driveFileManager.createOfficeFile(parentDirectory: directory, name: name, type: fileType) { (file, error) in
+        driveFileManager.createOfficeFile(parentDirectory: directory, name: name, type: fileType) { file, error in
             self.setLoading(false)
 
             self.dismiss(animated: true) {

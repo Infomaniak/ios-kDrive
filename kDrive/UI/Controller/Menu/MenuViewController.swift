@@ -95,7 +95,7 @@ class MenuViewController: UIViewController {
         }
 
         // Hide shared with me action if no shared with me drive
-        let sharedWithMeInList = tableContent[1].contains(where: { $0 == .sharedWithMeAction })
+        let sharedWithMeInList = tableContent[1].contains { $0 == .sharedWithMeAction }
         let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentAccount.userId, sharedWithMe: true).isEmpty
         if sharedWithMeInList && !hasSharedWithMe {
             tableContent[1].removeFirst()
@@ -186,7 +186,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.section > 0 {
             let segue = tableContent[indexPath.section][indexPath.row].segue
-            if segue != "" {
+            if !segue.isEmpty {
                 if segue == "disconnect" {
                     let alert = AlertTextViewController(title: KDriveStrings.Localizable.alertRemoveUserTitle, message: KDriveStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveStrings.Localizable.buttonConfirm, destructive: true) {
                         AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)

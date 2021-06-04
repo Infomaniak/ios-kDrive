@@ -31,7 +31,7 @@ class InviteUserViewController: UIViewController {
     var message = String()
     var file: File!
 
-    var emptyInvitation: Bool = false
+    var emptyInvitation = false
 
     private enum InviteUserRows: CaseIterable {
         case invited
@@ -110,14 +110,14 @@ class InviteUserViewController: UIViewController {
     func shareAndDismiss() {
         let usersIds = users.map(\.id)
         let tags = [Int]()
-        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { (_, _) in
+        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in
 
         }
         dismiss(animated: true)
     }
 
     func reloadInvited() {
-        emptyInvitation = users.count == 0 && emails.count == 0
+        emptyInvitation = users.isEmpty && emails.isEmpty
         if emptyInvitation {
             rows = [.addUser, .rights, .message]
         } else {
@@ -312,7 +312,7 @@ extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let usersIds = users.map(\.id)
         let tags = [Int]()
-        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { (response, _) in
+        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { response, _ in
             let conflictList = response?.data?.filter(\.isConflict) ?? []
             if conflictList.isEmpty {
                 self.shareAndDismiss()

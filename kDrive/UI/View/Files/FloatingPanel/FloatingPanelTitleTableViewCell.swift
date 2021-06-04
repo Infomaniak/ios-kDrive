@@ -42,7 +42,7 @@ class FloatingPanelTitleTableViewCell: InsetTableViewCell {
             iconImageView.layer.cornerRadius = UIConstants.imageCornerRadius
             iconImageView.layer.masksToBounds = true
             iconImageView.backgroundColor = KDriveAsset.loaderDefaultColor.color
-            file.getThumbnail { (image, _) in
+            file.getThumbnail { image, _ in
                 self.iconImageView.image = image
                 self.iconImageView.backgroundColor = nil
             }

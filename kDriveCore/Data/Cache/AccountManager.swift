@@ -158,7 +158,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func createAndSetCurrentAccount(code: String, codeVerifier: String, completion: @escaping (Account?, Error?) -> Void) {
-        InfomaniakLogin.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { (apiToken, error) in
+        InfomaniakLogin.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { apiToken, error in
             if let token = apiToken {
                 self.createAndSetCurrentAccount(token: token, completion: completion)
             } else {
@@ -172,13 +172,13 @@ public class AccountManager: RefreshTokenDelegate {
         self.addAccount(account: newAccount)
         self.setCurrentAccount(account: newAccount)
         let apiFetcher = ApiFetcher(token: token, delegate: self)
-        apiFetcher.getUserForAccount { (response, error) in
+        apiFetcher.getUserForAccount { response, error in
             if let user = response?.data {
                 newAccount.user = user
 
-                apiFetcher.getUserDrives { (response, error) in
+                apiFetcher.getUserDrives { response, error in
                     if let driveResponse = response?.data,
-                        driveResponse.drives.main.count > 0 {
+                        !driveResponse.drives.main.isEmpty {
                         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
 
                         guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
@@ -203,12 +203,12 @@ public class AccountManager: RefreshTokenDelegate {
     public func updateUserForAccount(_ account: Account, completion: @escaping (Account?, Drive?, Error?) -> Void) {
         guard account.isConnected else { return }
         let apiFetcher = ApiFetcher(token: account.token, delegate: self)
-        apiFetcher.getUserForAccount { (response, error) in
+        apiFetcher.getUserForAccount { response, error in
             if let user = response?.data {
                 account.user = user
-                apiFetcher.getUserDrives { (response, error) in
+                apiFetcher.getUserDrives { response, error in
                     if let driveResponse = response?.data,
-                        driveResponse.drives.main.count > 0 {
+                        !driveResponse.drives.main.isEmpty {
                         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
                         var switchedDrive: Drive?
                         for driveRemoved in driveRemovedList {
@@ -305,7 +305,7 @@ public class AccountManager: RefreshTokenDelegate {
         }
         DriveInfosManager.instance.deleteFileProviderDomains(for: toDeleteAccount.userId)
         DriveFileManager.deleteUserDriveFiles(userId: toDeleteAccount.userId)
-        accounts.removeAll { (account) -> Bool in
+        accounts.removeAll { account -> Bool in
             account == toDeleteAccount
         }
     }
@@ -319,7 +319,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func getAccountForToken(token: ApiToken) -> Account? {
-        return accounts.first { (account) -> Bool in
+        return accounts.first { account -> Bool in
             account.token?.userId == token.userId
         }
     }

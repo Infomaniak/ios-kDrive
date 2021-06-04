@@ -150,7 +150,7 @@ extension SwipableCell {
     func hideSwipeActions() {
         innerViewTrailingConstraint.constant = 0
         innerViewLeadingConstraint.constant = 0
-        updateConstraintsWithAnimationIfNeeded(animated: true) { (_) in
+        updateConstraintsWithAnimationIfNeeded(animated: true) { _ in
             self.innerViewTrailingConstraint.constant = 0
             self.innerViewLeadingConstraint.constant = 0
             self.resetSwipeActions()
@@ -164,7 +164,7 @@ extension SwipableCell {
 
         innerViewTrailingConstraint.constant = swipeActionsSize
         innerViewLeadingConstraint.constant = -innerViewTrailingConstraint.constant
-        updateConstraintsWithAnimationIfNeeded(animated: true) { (_) in
+        updateConstraintsWithAnimationIfNeeded(animated: true) { _ in
             self.innerViewTrailingConstraint.constant = self.swipeActionsSize
             self.innerViewLeadingConstraint.constant = -self.innerViewTrailingConstraint.constant
         }

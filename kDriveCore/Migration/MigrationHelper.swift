@@ -63,9 +63,9 @@ public class MigrationHelper {
             let group = DispatchGroup()
             for (account, password) in savedAccounts {
                 group.enter()
-                InfomaniakLogin.getApiToken(username: account, applicationPassword: password) { (token, _) in
+                InfomaniakLogin.getApiToken(username: account, applicationPassword: password) { token, _ in
                     if let token = token {
-                        AccountManager.instance.createAndSetCurrentAccount(token: token) { (account, _) in
+                        AccountManager.instance.createAndSetCurrentAccount(token: token) { account, _ in
                             if account == nil {
                                 successful = false
                             }

@@ -52,7 +52,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     func configureWith(file: File, roundedCorners: Bool = true) {
         darkLayer.isHidden = false
-        file.getThumbnail { (image, _) in
+        file.getThumbnail { image, _ in
             self.darkLayer.isHidden = true
             self.fileImage.image = image
         }

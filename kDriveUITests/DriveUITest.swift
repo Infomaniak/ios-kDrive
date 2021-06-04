@@ -51,8 +51,8 @@ class AppUITest: XCTestCase {
 
     // MARK: - Tests setup
     func setUpTest(testName: String, completion: @escaping (File) -> Void) {
-        getRootDirectory { (rootFile) in
-            self.createTestDirectory(name: "UITest - \(testName)", parentDirectory: rootFile) { (file) in
+        getRootDirectory { rootFile in
+            self.createTestDirectory(name: "UITest - \(testName)", parentDirectory: rootFile) { file in
                 XCTAssertNotNil(file, "Failed to create UnitTest directory")
                 completion(file)
             }
@@ -60,29 +60,29 @@ class AppUITest: XCTestCase {
     }
 
     func tearDownTest(directory: File) {
-        AppUITest.driveFileManager.deleteFile(file: directory) { (response, _) in
+        AppUITest.driveFileManager.deleteFile(file: directory) { response, _ in
             XCTAssertNotNil(response, "Failed to delete directory")
         }
     }
 
     // MARK: - Helping methods
     func getRootDirectory(completion: @escaping (File) -> Void) {
-        AppUITest.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { (file, _, _) in
+        AppUITest.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
             XCTAssertNotNil(file, "Failed to get root directory")
             completion(file!)
         }
     }
 
     func createTestDirectory(name: String, parentDirectory: File, completion: @escaping (File) -> Void) {
-        AppUITest.driveFileManager.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { (directory, _) in
+        AppUITest.driveFileManager.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { directory, _ in
             XCTAssertNotNil(directory, "Failed to create test directory")
             completion(directory!)
         }
     }
 
     func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
-        setUpTest(testName: testName) { (rootFile) in
-            AppUITest.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { (file, _) in
+        setUpTest(testName: testName) { rootFile in
+            AppUITest.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { file, _ in
                 XCTAssertNotNil(file, "Failed to create office file")
                 completion(rootFile, file!)
             }
@@ -97,12 +97,12 @@ class AppUITest: XCTestCase {
             (name: "User added", expectation: expectation(description: "User added")),
             (name: "User deleted", expectation: expectation(description: "User deleted"))
         ]
-        var rootFile: File = File()
+        var rootFile = File()
         let tabBar = app.tabBars
         let tablesQuery = app.tables
         let collectionViewsQuery = app.collectionViews
 
-        setUpTest(testName: testName) { (root) in
+        setUpTest(testName: testName) { root in
             rootFile = root
 
             // Go to ShareAndRights
@@ -161,12 +161,12 @@ class AppUITest: XCTestCase {
             (name: "No comment", expectation: expectation(description: "No comment")),
             (name: "Comment added", expectation: expectation(description: "Comment added"))
         ]
-        var rootFile: File = File()
+        var rootFile = File()
         let tablesQuery = app.tables
         let collectionViewsQuery = app.collectionViews
         let tabBar = app.tabBars
 
-        setUpTest(testName: testName) { (root) in
+        setUpTest(testName: testName) { root in
             rootFile = root
 
             // Find created file

@@ -51,17 +51,17 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     }
 
     public func reconnectBackgroundTasks() {
-        backgroundSession.getTasksWithCompletionHandler { (_, uploadTasks, _) in
+        backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             let realm = DriveFileManager.constants.uploadsRealm
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
                     let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "AND sessionUrl = %@", sessionUrl)).first?.fileId {
-                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = fileId] (_, value) in
+                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
                         }
                         DownloadQueue.instance.publishProgress(newValue, for: fileId)
-                    })
+                    }
                 }
             }
         }

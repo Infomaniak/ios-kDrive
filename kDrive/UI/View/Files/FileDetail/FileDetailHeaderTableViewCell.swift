@@ -71,7 +71,7 @@ class FileDetailHeaderTableViewCell: UITableViewCell {
         fileDetailLabel.textColor = .white
         fileImage.image = nil
         fileImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
-        file.getThumbnail { (image, _) in
+        file.getThumbnail { image, _ in
             self.fileImage.image = image
             self.fileImage.backgroundColor = nil
             self.darkLayer.isHidden = false

@@ -31,7 +31,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             getSettings()
         }
     }
-    var convertingFolder: Bool = false {
+    var convertingFolder = false {
         didSet { setTitle() }
     }
 
@@ -123,7 +123,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             ]
             self.newPassword = false
         } else {
-            driveFileManager.apiFetcher.getDropBoxSettings(directory: folder) { (response, _) in
+            driveFileManager.apiFetcher.getDropBoxSettings(directory: folder) { response, _ in
                 self.dropBox = response?.data
                 if let dropBox = response?.data {
                     self.settings = [
@@ -235,7 +235,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.section == 2 {
-            driveFileManager.apiFetcher.disableDropBox(directory: folder) { (_, error) in
+            driveFileManager.apiFetcher.disableDropBox(directory: folder) { _, error in
                 if error == nil {
                     self.dismissAndRefreshDataSource()
                 } else {
@@ -300,7 +300,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
         let limitFileSize = getSetting(for: .optionSize) ? (getValue(for: .optionSize) as? Int) : nil
 
         if convertingFolder {
-            driveFileManager.apiFetcher.setupDropBox(directory: folder, password: (password?.isEmpty ?? false) ? nil : password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { (response, _) in
+            driveFileManager.apiFetcher.setupDropBox(directory: folder, password: (password?.isEmpty ?? false) ? nil : password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { response, _ in
                 if let dropBox = response?.data {
                     let floatingPanelViewController = ShareFloatingPanelViewController.instantiatePanel()
                     (floatingPanelViewController.contentViewController as? ShareFloatingPanelViewController)?.copyTextField.text = dropBox.url
@@ -311,7 +311,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                 }
             }
         } else {
-            driveFileManager.apiFetcher.updateDropBox(directory: folder, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { (_, error) in
+            driveFileManager.apiFetcher.updateDropBox(directory: folder, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { _, error in
                 if error == nil {
                     self.navigationController?.popViewController(animated: true)
                 } else {

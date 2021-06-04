@@ -165,7 +165,7 @@ public class UploadQueue {
     }
 
     public func cancelRunningOperations() {
-        operationQueue.operations.filter(\.isExecuting).forEach({ $0.cancel() })
+        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
     public func cancel(_ file: UploadFile, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
@@ -278,7 +278,7 @@ public class UploadQueue {
         let realm = DriveFileManager.constants.uploadsRealm
         for file in importedFiles {
             let filePath = importDirectory.appendingPathComponent(file, isDirectory: false).path
-            if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).count == 0 {
+            if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).isEmpty {
                 try? FileManager.default.removeItem(atPath: filePath)
             }
         }

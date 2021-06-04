@@ -70,7 +70,7 @@ class ShareLinkSettingsViewController: UIViewController {
     var expirationDate: TimeInterval?
     var content: [Option] = [.expirationDate, .allowDownload]
     var password: String?
-    var enableButton: Bool = true {
+    var enableButton = true {
         didSet {
             guard let footer = tableview.footerView(forSection: tableview.numberOfSections - 1) as? FooterButtonView else {
                 return
@@ -156,6 +156,7 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         tableview.reloadData()
     }
 
@@ -329,7 +330,7 @@ extension ShareLinkSettingsViewController: AccessRightPasswordDelegate {
 // MARK: - FooterButtonDelegate
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: shareFile.link!.canEdit, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getValue(for: .allowDownload), blockComments: getValue(for: .blockComments), blockInformation: getValue(for: .blockUsersConsult), isFree: driveFileManager.drive.pack == .free) { (response, _) in
+        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: shareFile.link!.canEdit, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getValue(for: .allowDownload), blockComments: getValue(for: .blockComments), blockInformation: getValue(for: .blockUsersConsult), isFree: driveFileManager.drive.pack == .free) { response, _ in
             if response?.data == true {
                 self.navigationController?.popViewController(animated: true)
             }

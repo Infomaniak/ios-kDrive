@@ -30,6 +30,7 @@ class FloatingPanelSortOptionTableViewCell: InsetTableViewCell {
     }
 
     override func prepareForReuse() {
+        super.prepareForReuse()
         accessoryImageView.isHidden = true
     }
 

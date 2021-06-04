@@ -63,7 +63,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 return
             }
             let pageIndex = page.isInitialPage ? 1 : page.toInt
-            driveFileManager.getFile(id: fileId, withExtras: !isDirectory, page: pageIndex) { (containerFile, childrenFiles, error) in
+            driveFileManager.getFile(id: fileId, withExtras: !isDirectory, page: pageIndex) { containerFile, childrenFiles, error in
                 if let folder = containerFile, let children = childrenFiles {
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
@@ -83,7 +83,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 } else {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId, page: pageIndex) { (response, error) in
+                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId, page: pageIndex) { response, error in
                         if let file = response?.data {
                             var containerItems = [FileProviderItem]()
                             for child in file.children {
@@ -121,9 +121,9 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 return
             }
 
-            driveFileManager.getFile(id: directoryIdentifier) { (file, _, _) in
+            driveFileManager.getFile(id: directoryIdentifier) { file, _, _ in
                 if let file = file {
-                    self.driveFileManager.getFolderActivities(file: file, date: lastTimestamp) { (results, timestamp, error) in
+                    self.driveFileManager.getFolderActivities(file: file, date: lastTimestamp) { results, timestamp, error in
                         if let results = results, let timestamp = timestamp {
                             let updated = results.inserted + results.updated
                             var updatedItems = [NSFileProviderItem]()
@@ -148,7 +148,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 } else {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: directoryIdentifier) { (response, error) in
+                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: directoryIdentifier) { response, error in
                         if let file = response?.data {
                             observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
                             observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)

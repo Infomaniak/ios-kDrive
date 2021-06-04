@@ -42,7 +42,7 @@ public class UploadFile: Object {
     @objc public dynamic var uploadDate: Date?
     @objc public dynamic var creationDate: Date?
     @objc public dynamic var taskCreationDate: Date?
-    @objc dynamic var shouldRemoveAfterUpload: Bool = true
+    @objc dynamic var shouldRemoveAfterUpload = true
     @objc public dynamic var maxRetryCount: Int = defaultMaxRetryCount
     @objc private dynamic var rawPriority: Int = 0
     @objc private dynamic var _error: Data?
@@ -154,7 +154,7 @@ public class UploadFile: Object {
                 option.deliveryMode = .fastFormat
                 option.isNetworkAccessAllowed = true
                 option.resizeMode = .fast
-                PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 128, height: 128), contentMode: .aspectFill, options: option) { (image, _) in
+                PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 128, height: 128), contentMode: .aspectFill, options: option) { image, _ in
                     if let image = image {
                         completion(image)
                     }
@@ -171,6 +171,7 @@ public class UploadFile: Object {
             return localAsset
         }
         let assets = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil)
+        // swiftlint:disable empty_count
         if assets.count > 0 {
             return assets[0]
         }

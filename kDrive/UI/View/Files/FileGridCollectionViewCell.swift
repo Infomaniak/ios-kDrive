@@ -75,7 +75,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         iconImageView.image = file.icon
         largeIconImageView.image = file.icon
         if file.isDirectory {
-            file.getThumbnail { (image, _) in
+            file.getThumbnail { image, _ in
                 self.largeIconImageView.image = image
             }
         }

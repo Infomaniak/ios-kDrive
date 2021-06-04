@@ -43,7 +43,7 @@ class LocationTableViewCell: InsetTableViewCell {
                 titleLabel.text = KDriveStrings.Localizable.allRootName(drive.name)
             } else {
                 titleLabel.text = folder.name
-                folder.getThumbnail { (image, _) in
+                folder.getThumbnail { image, _ in
                     self.logoImage.image = image
                 }
                 logoImage.tintColor = nil
