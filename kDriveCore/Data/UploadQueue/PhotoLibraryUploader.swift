@@ -189,6 +189,7 @@ public class PhotoLibraryUploader {
                     name: correctName,
                     asset: asset,
                     creationDate: asset.creationDate,
+                    modificationDate: asset.modificationDate,
                     priority: initial ? .low : .high)
                 if settings.createDatedSubFolders {
                     uploadFile.setDatedRelativePath()

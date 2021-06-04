@@ -152,6 +152,9 @@ public class ApiRoutes {
         if let creationDate = file.creationDate {
             url += "&file_created_at=\(Int(creationDate.timeIntervalSince1970))"
         }
+        if let modificationDate = file.modificationDate {
+            url += "&last_modified_at=\(Int(modificationDate.timeIntervalSince1970))"
+        }
         return url
     }
 

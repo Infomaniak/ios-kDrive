@@ -41,6 +41,7 @@ public class UploadFile: Object {
     @objc dynamic var driveId: Int = 0
     @objc public dynamic var uploadDate: Date? = nil
     @objc public dynamic var creationDate: Date? = nil
+    @objc public dynamic var modificationDate: Date? = nil
     @objc public dynamic var taskCreationDate: Date? = nil
     @objc dynamic var shouldRemoveAfterUpload: Bool = true
     @objc public dynamic var maxRetryCount: Int = defaultMaxRetryCount
@@ -117,11 +118,12 @@ public class UploadFile: Object {
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.rawType = UploadFileType.file.rawValue
         self.creationDate = url.creationDate
+        self.modificationDate = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
         self.taskCreationDate = Date()
         self.rawPriority = priority.rawValue
     }
 
-    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, modificationDate: Date?, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -131,6 +133,7 @@ public class UploadFile: Object {
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.rawType = UploadFileType.phAsset.rawValue
         self.creationDate = creationDate
+        self.modificationDate = modificationDate
         self.taskCreationDate = Date()
         self.rawPriority = priority.rawValue
     }
