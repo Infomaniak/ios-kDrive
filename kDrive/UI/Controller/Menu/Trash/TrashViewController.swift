@@ -75,6 +75,10 @@ class TrashViewController: FileListViewController {
         }
     }
 
+    override func getNewChanges() {
+        // We don't have incremental changes for trash
+    }
+
     override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
         super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
         // Hide move button in multiple selection
