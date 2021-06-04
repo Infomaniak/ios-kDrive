@@ -18,6 +18,10 @@
                 <rect key="frame" x="0.0" y="0.0" width="322" height="60"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
+                    <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="N6V-J5-jZd">
+                        <rect key="frame" x="0.0" y="0.0" width="322" height="60"/>
+                        <color key="backgroundColor" name="backgroundCardView"/>
+                    </view>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aqX-hy-10J">
                         <rect key="frame" x="0.0" y="0.0" width="322" height="60"/>
                         <subviews>
@@ -41,7 +45,7 @@
                                         </constraints>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="82" y="21.5" width="125" height="17"/>
+                                        <rect key="frame" x="82" y="21" width="125" height="18"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -83,9 +87,13 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
+                    <constraint firstItem="N6V-J5-jZd" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="58E-1M-JlW"/>
+                    <constraint firstAttribute="bottom" secondItem="N6V-J5-jZd" secondAttribute="bottom" id="7gZ-o7-f8Q"/>
                     <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="KQ3-U3-HEG"/>
                     <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" id="b3L-GJ-LSF"/>
                     <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="eo3-Nh-xzM"/>
+                    <constraint firstAttribute="trailing" secondItem="N6V-J5-jZd" secondAttribute="trailing" id="lMo-3P-b7s"/>
+                    <constraint firstItem="N6V-J5-jZd" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="lex-yc-Brf"/>
                     <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" id="vUN-8O-pqH"/>
                 </constraints>
             </tableViewCellContentView>
@@ -95,6 +103,7 @@
                 <outlet property="accessoryImageView" destination="kZU-CD-ye1" id="V4o-qX-R0L"/>
                 <outlet property="bottomConstraint" destination="b3L-GJ-LSF" id="Y7h-fG-fCo"/>
                 <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
+                <outlet property="disabledView" destination="N6V-J5-jZd" id="aVU-zN-c7i"/>
                 <outlet property="offlineSwitch" destination="fOw-40-nFC" id="3r2-uL-3I2"/>
                 <outlet property="progressView" destination="F0L-1s-lFt" id="LGL-5b-Mdl"/>
                 <outlet property="separator" destination="BSA-Kc-s9g" id="Aqp-OR-DH2"/>
@@ -106,10 +115,13 @@
     </objects>
     <designables>
         <designable name="rtI-Wc-46s">
-            <size key="intrinsicContentSize" width="36" height="17"/>
+            <size key="intrinsicContentSize" width="38.5" height="18"/>
         </designable>
     </designables>
     <resources>
+        <namedColor name="backgroundCardView">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="infomaniakColor">
             <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
