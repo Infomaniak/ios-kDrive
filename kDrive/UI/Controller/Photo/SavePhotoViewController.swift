@@ -80,8 +80,10 @@ class SavePhotoViewController: SaveFileViewController {
         let name: String
         if uti == .image {
             switch format {
+            case .heic:
+                data = photo.heicData(compressionQuality: imageCompression)
             case .jpg:
-                data = photo.jpegData(compressionQuality: JPEG_QUALITY)
+                data = photo.jpegData(compressionQuality: imageCompression)
             case .png:
                 if photo.imageOrientation != .up {
                     let format = photo.imageRendererFormat

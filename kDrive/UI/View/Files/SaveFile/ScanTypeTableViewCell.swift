@@ -47,10 +47,12 @@ enum ScanFileFormat: Int, CaseIterable {
 }
 
 enum PhotoFileFormat: Int, CaseIterable {
-    case jpg, png
+    case heic, jpg, png
 
     var title: String {
         switch self {
+        case .heic:
+            return "HEIF"
         case .jpg:
             return "JPG"
         case .png:
@@ -60,6 +62,8 @@ enum PhotoFileFormat: Int, CaseIterable {
 
     var uti: UTI {
         switch self {
+        case .heic:
+            return .heic
         case .jpg:
             return .jpeg
         case .png:

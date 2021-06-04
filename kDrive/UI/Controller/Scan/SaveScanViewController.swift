@@ -89,7 +89,7 @@ class SaveScanViewController: SaveFileViewController {
                 data = pdfDocument.dataRepresentation()
             case .image:
                 let image = scan.imageOfPage(at: 0)
-                data = image.jpegData(compressionQuality: JPEG_QUALITY)
+                data = image.jpegData(compressionQuality: imageCompression)
             }
             let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
             do {
