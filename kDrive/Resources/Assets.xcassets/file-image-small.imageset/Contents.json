@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "350 - circle.svg",
+      "filename" : "true 350 - circle.svg",
       "idiom" : "universal"
     },
     {
@@ -11,7 +11,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "350 – dark - circle.svg",
+      "filename" : "true 350 – dark - circle.svg",
       "idiom" : "universal"
     }
   ],
