@@ -205,6 +205,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func getNewChanges() {
+        guard currentDirectory != nil else { return }
         driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] (results, _, error) in
             if results != nil {
                 self?.reloadData(withActivities: false)
