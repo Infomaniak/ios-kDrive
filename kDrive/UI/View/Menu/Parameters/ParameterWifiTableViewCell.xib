@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -29,7 +29,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Transfert uniquement en Wi-Fi" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="20" y="27" width="202" height="17"/>
+                                <rect key="frame" x="20" y="27" width="170.5" height="17"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -42,7 +42,7 @@
                                 <rect key="frame" x="308" y="20" width="51" height="31"/>
                                 <color key="onTintColor" name="infomaniakColor"/>
                                 <connections>
-                                    <action selector="wifiOnlySwitchChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="dqA-Pg-DMl"/>
+                                    <action selector="switchValueChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="YYx-7L-xfy"/>
                                 </connections>
                             </switch>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Les fichiers seront envoyés et téléchargés que lorsque vous êtes connecté(e) à un réseau Wi-Fi." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FCj-Ol-yTI" customClass="IKLabel" customModule="kDriveCore">
@@ -90,11 +90,19 @@
                 <outlet property="separator" destination="BSA-Kc-s9g" id="Aqp-OR-DH2"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
                 <outlet property="topConstraint" destination="eo3-Nh-xzM" id="zKn-C5-K50"/>
-                <outlet property="wifiSwitch" destination="IQt-Nn-tqw" id="aHk-RB-wH0"/>
+                <outlet property="valueSwitch" destination="IQt-Nn-tqw" id="Xd9-bA-4tO"/>
             </connections>
             <point key="canvasLocation" x="213.768115942029" y="203.57142857142856"/>
         </tableViewCell>
     </objects>
+    <designables>
+        <designable name="FCj-Ol-yTI">
+            <size key="intrinsicContentSize" width="212" height="17"/>
+        </designable>
+        <designable name="rtI-Wc-46s">
+            <size key="intrinsicContentSize" width="170.5" height="17"/>
+        </designable>
+    </designables>
     <resources>
         <namedColor name="infomaniakColor">
             <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

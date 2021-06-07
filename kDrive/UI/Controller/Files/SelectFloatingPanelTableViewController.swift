@@ -26,11 +26,11 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
     var downloadInProgress = false
 
     var filesAvailableOffline: Bool {
-        return files.filter(\.isAvailableOffline).count == files.count
+        return files.allSatisfy(\.isAvailableOffline)
     }
 
     var filesAreFavorite: Bool {
-        return files.filter(\.isFavorite).count == files.count
+        return files.allSatisfy(\.isFavorite)
     }
 
     lazy var actions: [FloatingPanelAction] = {
@@ -77,6 +77,8 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             cell.accessoryImageView.tintColor = filesAvailableOffline ? KDriveAsset.greenColor.color : action.tintColor
             cell.offlineSwitch.isOn = filesAvailableOffline
             cell.setProgress(downloadInProgress ? -1 : nil)
+            // Disable cell if all selected items are folders
+            cell.setEnabled(!files.allSatisfy(\.isDirectory))
         } else if action == .download {
             cell.setProgress(downloadInProgress ? -1 : nil)
         }

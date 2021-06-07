@@ -34,8 +34,9 @@ public class PhotoSyncSettings: Object {
     @objc public dynamic var syncPicturesEnabled = true
     @objc public dynamic var syncVideosEnabled = true
     @objc public dynamic var syncScreenshotsEnabled = true
+    @objc public dynamic var createDatedSubFolders = false
 
-    public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool) {
+    public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool, createDatedSubFolders: Bool) {
         self.userId = userId
         self.driveId = driveId
         self.parentDirectoryId = parentDirectoryId
@@ -44,6 +45,7 @@ public class PhotoSyncSettings: Object {
         self.syncPicturesEnabled = syncPictures
         self.syncVideosEnabled = syncVideos
         self.syncScreenshotsEnabled = syncScreenshots
+        self.createDatedSubFolders = createDatedSubFolders
     }
 
     public override init() {

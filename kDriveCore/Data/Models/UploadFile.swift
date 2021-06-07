@@ -41,6 +41,7 @@ public class UploadFile: Object {
     @objc dynamic var driveId: Int = 0
     @objc public dynamic var uploadDate: Date?
     @objc public dynamic var creationDate: Date?
+    @objc public dynamic var modificationDate: Date?
     @objc public dynamic var taskCreationDate: Date?
     @objc dynamic var shouldRemoveAfterUpload = true
     @objc public dynamic var maxRetryCount: Int = defaultMaxRetryCount
@@ -117,11 +118,12 @@ public class UploadFile: Object {
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.rawType = UploadFileType.file.rawValue
         self.creationDate = url.creationDate
+        self.modificationDate = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
         self.taskCreationDate = Date()
         self.rawPriority = priority.rawValue
     }
 
-    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, modificationDate: Date?, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -131,6 +133,7 @@ public class UploadFile: Object {
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.rawType = UploadFileType.phAsset.rawValue
         self.creationDate = creationDate
+        self.modificationDate = modificationDate
         self.taskCreationDate = Date()
         self.rawPriority = priority.rawValue
     }
@@ -188,6 +191,12 @@ public class UploadFile: Object {
         self.name = url.lastPathComponent
 
         self.id = "\(Date().timeIntervalSinceNow)-\(name)"
+    }
+
+    func setDatedRelativePath() {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy/MM/"
+        relativePath = dateFormatter.string(from: creationDate ?? Date())
     }
 
 }

@@ -33,33 +33,35 @@ class PhotoSyncSettingsViewController: UIViewController {
         case syncSettings
         case syncDenied
     }
-    private enum PhotoSyncSwitchRows {
+    private enum PhotoSyncSwitchRows: CaseIterable {
         case syncSwitch
     }
-    private enum PhotoSyncLocationRows {
+    private enum PhotoSyncLocationRows: CaseIterable {
         case driveSelection
         case folderSelection
     }
-    private enum PhotoSyncSettingsRows {
+    private enum PhotoSyncSettingsRows: CaseIterable {
         case importPicturesSwitch
         case importVideosSwitch
         case importScreenshotsSwitch
+        case createDatedSubFolders
         case syncMode
     }
-    private enum PhotoSyncDeniedRows {
+    private enum PhotoSyncDeniedRows: CaseIterable {
         case deniedExplanation
     }
     private var sections: [PhotoSyncSection] = [.syncSwitch]
-    private let switchSyncRows: [PhotoSyncSwitchRows] = [.syncSwitch]
-    private let locationRows: [PhotoSyncLocationRows] = [.driveSelection, .folderSelection]
-    private let settingsRows: [PhotoSyncSettingsRows] = [.importPicturesSwitch, .importVideosSwitch, .importScreenshotsSwitch, .syncMode]
-    private let deniedRows: [PhotoSyncDeniedRows] = [.deniedExplanation]
+    private let switchSyncRows: [PhotoSyncSwitchRows] = PhotoSyncSwitchRows.allCases
+    private let locationRows: [PhotoSyncLocationRows] = PhotoSyncLocationRows.allCases
+    private let settingsRows: [PhotoSyncSettingsRows] = PhotoSyncSettingsRows.allCases
+    private let deniedRows: [PhotoSyncDeniedRows] = PhotoSyncDeniedRows.allCases
 
     private var currentSyncSettings: PhotoSyncSettings!
     private var photoSyncEnabled: Bool!
     private var syncVideosEnabled: Bool!
     private var syncPicturesEnabled: Bool!
     private var syncScreenshotsEnabled: Bool!
+    private var createDatedSubFolders: Bool!
     private var currentUserId: Int!
     private var currentDriveId: Int!
     private var syncMode: PhotoSyncMode = .new
@@ -71,6 +73,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
+        tableView.register(cellView: ParameterWifiTableViewCell.self)
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
@@ -85,6 +88,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         syncVideosEnabled = currentSyncSettings.syncVideosEnabled
         syncPicturesEnabled = currentSyncSettings.syncPicturesEnabled
         syncScreenshotsEnabled = currentSyncSettings.syncScreenshotsEnabled
+        createDatedSubFolders = currentSyncSettings.createDatedSubFolders
         let savedCurrentId = currentSyncSettings.userId
         currentUserId = savedCurrentId == -1 ? AccountManager.instance.currentAccount.userId : savedCurrentId
         let savedCurrentDrive = currentSyncSettings.driveId
@@ -143,6 +147,7 @@ class PhotoSyncSettingsViewController: UIViewController {
                 currentSyncSettings.syncPicturesEnabled != syncPicturesEnabled ||
                 currentSyncSettings.syncVideosEnabled != syncVideosEnabled ||
                 currentSyncSettings.syncScreenshotsEnabled != syncScreenshotsEnabled ||
+                currentSyncSettings.createDatedSubFolders != createDatedSubFolders ||
                 currentSyncSettings.syncMode != syncMode
         }
         saveButton.isHidden = !isEdited
@@ -179,7 +184,8 @@ class PhotoSyncSettingsViewController: UIViewController {
                 syncMode: syncMode,
                 syncPictures: syncPicturesEnabled,
                 syncVideos: syncVideosEnabled,
-                syncScreenshots: syncScreenshotsEnabled)
+                syncScreenshots: syncScreenshotsEnabled,
+                createDatedSubFolders: createDatedSubFolders)
             PhotoLibraryUploader.instance.enableSyncWithSettings(newSettings)
         } else {
             PhotoLibraryUploader.instance.disableSync()
@@ -349,6 +355,17 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.valueSwitch.setOn(syncScreenshotsEnabled, animated: true)
                 cell.switchHandler = { sender in
                     self.syncScreenshotsEnabled = sender.isOn
+                    self.updateSaveButtonState()
+                }
+                return cell
+            case .createDatedSubFolders:
+                let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow()
+                cell.titleLabel.text = KDriveStrings.Localizable.createDatedSubFoldersTitle
+                cell.detailsLabel.text = KDriveStrings.Localizable.createDatedSubFoldersDescription
+                cell.valueSwitch.setOn(createDatedSubFolders, animated: true)
+                cell.switchHandler = { sender in
+                    self.createDatedSubFolders = sender.isOn
                     self.updateSaveButtonState()
                 }
                 return cell

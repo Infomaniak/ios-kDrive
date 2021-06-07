@@ -279,7 +279,7 @@ public class UploadOperation: Operation {
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
                 UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId)
-                if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings.parentDirectoryId == file.parentDirectoryId {
+                if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.parentDirectoryId == file.parentDirectoryId {
                     PhotoLibraryUploader.instance.disableSync()
                 }
             }

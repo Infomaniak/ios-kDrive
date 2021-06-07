@@ -24,6 +24,7 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
 
     @IBOutlet weak var offlineSwitch: UISwitch!
     @IBOutlet weak var progressView: RPCircularProgress!
+    @IBOutlet weak var disabledView: UIView!
     private var observationToken: ObservationToken?
 
     override func awakeFromNib() {
@@ -45,6 +46,19 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
         progressView.isHidden = true
         progressView.updateProgress(0, animated: false)
         observationToken?.cancel()
+    }
+
+    func setEnabled(_ enabled: Bool) {
+        if enabled {
+            disabledView.isHidden = true
+            disabledView.superview?.sendSubviewToBack(disabledView)
+            isUserInteractionEnabled = true
+        } else {
+            disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+            disabledView.isHidden = false
+            disabledView.superview?.bringSubviewToFront(disabledView)
+            isUserInteractionEnabled = false
+        }
     }
 
     func setProgress(_ progress: CGFloat? = -1) {
