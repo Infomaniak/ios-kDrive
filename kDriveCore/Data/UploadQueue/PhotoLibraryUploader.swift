@@ -24,7 +24,7 @@ import RealmSwift
 public class PhotoLibraryUploader {
 
     public static let instance = PhotoLibraryUploader()
-    public var settings: PhotoSyncSettings!
+    public var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
     }
@@ -130,7 +130,7 @@ public class PhotoLibraryUploader {
 
     public func addNewPicturesToUploadQueue(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
         var assets = PHFetchResult<PHAsset>()
-        if isSyncEnabled && (PHPhotoLibrary.authorizationStatus() == .authorized || PHPhotoLibrary.authorizationStatus() == .restricted) {
+        if let settings = settings, (PHPhotoLibrary.authorizationStatus() == .authorized || PHPhotoLibrary.authorizationStatus() == .restricted) {
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
             // Create predicate from settings
@@ -163,7 +163,7 @@ public class PhotoLibraryUploader {
         autoreleasepool {
             realm.beginWrite()
             assets.enumerateObjects { [self] (asset, idx, stop) in
-                guard settings != nil else {
+                guard let settings = settings else {
                     realm.cancelWrite()
                     stop.pointee = true
                     return
