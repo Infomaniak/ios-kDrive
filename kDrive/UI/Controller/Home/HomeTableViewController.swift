@@ -130,7 +130,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
         // Table view footer
         showFooter(!driveFileManager.drive.isProOrTeam)
-        
+
         observeFileUpdated()
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
@@ -214,6 +214,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func initViewWithCurrentDrive() {
+        guard driveFileManager != nil else {
+            return
+        }
+
         // Load last modified files
         lastModifiedFiles.removeAll()
         loadLastModifiedFiles()
@@ -369,7 +373,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadData() {
-        guard !activityOrPicturesIsLoading else {
+        guard !activityOrPicturesIsLoading, driveFileManager != nil else {
             return
         }
 
