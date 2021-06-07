@@ -21,11 +21,11 @@ import InfomaniakCore
 
 class ParameterWifiTableViewCell: InsetTableViewCell {
 
-    @IBOutlet weak var wifiSwitch: UISwitch!
+    @IBOutlet weak var valueSwitch: UISwitch!
     @IBOutlet weak var detailsLabel: UILabel!
     var switchHandler: ((UISwitch) -> Void)?
 
-    @IBAction func wifiOnlySwitchChanged(_ sender: UISwitch) {
+    @IBAction func switchValueChanged(_ sender: UISwitch) {
         switchHandler?(sender)
     }
 
