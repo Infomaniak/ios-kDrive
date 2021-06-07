@@ -6,12 +6,12 @@ disabled_rules:
  - file_length
  - type_name
  - force_cast
+ - cyclomatic_complexity
 opt_in_rules:
  - closure_end_indentation
  - closure_spacing
  - collection_alignment
  - contains_over_filter_count
- - contains_over_filter_is_empty
  - contains_over_first_not_nil
  - contains_over_range_nil_comparison
  - empty_collection_literal
@@ -29,4 +29,5 @@ opt_in_rules:
  - trailing_closure
  - unneeded_parentheses_in_closure_argument
  - unused_import
-
+excluded:
+ - Derived/Sources/*

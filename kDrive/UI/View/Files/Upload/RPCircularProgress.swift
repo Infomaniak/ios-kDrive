@@ -104,7 +104,7 @@ open class RPCircularProgress: UIView {
     /**
       Getter for the current progress (not observed from any active animations)
      */
-    @IBInspectable open var progress: CGFloat {
+    open var progress: CGFloat {
         return progressLayer.progress
     }
 
@@ -125,7 +125,7 @@ open class RPCircularProgress: UIView {
     /**
       Controls the speed at which the indeterminate progress bar animates
      */
-    @IBInspectable open var indeterminateDuration: CFTimeInterval = Defaults.indeterminateDuration
+    open var indeterminateDuration: CFTimeInterval = Defaults.indeterminateDuration
 
     // MARK: - Custom Base Layer
 

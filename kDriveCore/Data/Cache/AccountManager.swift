@@ -135,7 +135,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
-        return accounts.first(where: { $0.userId == id })?.token
+        return accounts.first { $0.userId == id }?.token
     }
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {

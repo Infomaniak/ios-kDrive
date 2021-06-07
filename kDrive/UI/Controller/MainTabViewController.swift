@@ -24,7 +24,7 @@ import kDriveCore
 class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     var floatingPanelViewController: DriveFloatingPanelController?
-
+    // swiftlint:disable weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
     override var tabBar: MainTabBar {
