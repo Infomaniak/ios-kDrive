@@ -158,6 +158,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         // Set up observers
         setUpObservers()
+
+        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc func appWillEnterForeground() {
+        viewWillAppear(true)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -209,6 +219,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] (results, _, error) in
             if results != nil {
                 self?.reloadData(withActivities: false)
+            } else if let error = error as? DriveError, error == DriveError.objectNotFound {
+                // Pop view controller
+                self?.navigationController?.popViewController(animated: true)
             }
         }
     }
@@ -285,6 +298,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     }
                 }
             case .failure(let error):
+                if let error = error as? DriveError, error == DriveError.objectNotFound {
+                    // Pop view controller
+                    self.navigationController?.popViewController(animated: true)
+                }
                 UIConstants.showSnackBar(message: error.localizedDescription)
             }
         }
@@ -406,15 +423,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Private methods
 
     private func setTitle() {
-        guard currentDirectory != nil else { return }
-        if currentDirectory.isRoot {
+        if (currentDirectory?.isRoot ?? false) {
             if let rootTitle = configuration.rootTitle {
                 navigationItem.title = rootTitle
             } else {
                 navigationItem.title = driveFileManager?.drive.name ?? ""
             }
         } else {
-            navigationItem.title = currentDirectory.name
+            navigationItem.title = currentDirectory?.name ?? ""
         }
     }
 
@@ -755,6 +771,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
         self.driveFileManager = driveFileManager
         currentDirectory = driveFileManager.getCachedFile(id: directoryId)
+        if currentDirectory == nil && directoryId > DriveFileManager.constants.rootID {
+            navigationController?.popViewController(animated: true)
+        }
         setTitle()
         observeUploads()
         observeFiles()
