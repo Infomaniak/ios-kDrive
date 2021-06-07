@@ -36,7 +36,9 @@ class SharedWithMeViewController: FileListViewController {
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
         guard driveFileManager != nil && currentDirectory != nil else {
-            completion(.success([]), false, true)
+            DispatchQueue.main.async {
+                completion(.success([]), false, true)
+            }
             return
         }
 

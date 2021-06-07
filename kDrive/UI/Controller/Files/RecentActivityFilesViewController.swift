@@ -35,7 +35,9 @@ class RecentActivityFilesViewController: FileListViewController {
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        completion(.success(sortFiles(activityFiles)), false, true)
+        DispatchQueue.main.async {
+            completion(.success(sortFiles(activityFiles)), false, true)
+        }
     }
 
     override func getNewChanges() {

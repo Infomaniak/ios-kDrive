@@ -33,7 +33,9 @@ class OfflineViewController: FileListViewController {
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
         let files = driveFileManager?.getAvailableOfflineFiles(sortType: sortType)
-        completion(.success(files ?? []), false, true)
+        DispatchQueue.main.async {
+            completion(.success(files ?? []), false, true)
+        }
     }
 
     override func getNewChanges() {
