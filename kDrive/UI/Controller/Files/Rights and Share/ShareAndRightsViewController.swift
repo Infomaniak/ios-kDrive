@@ -94,7 +94,7 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     class func instantiate() -> ShareAndRightsViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
+        return Storyboard.files.instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
     }
 
     // MARK: - State restoration

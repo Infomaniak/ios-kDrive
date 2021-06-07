@@ -71,7 +71,7 @@ class SwitchDriveViewController: UIViewController {
     }
 
     class func instantiate() -> SwitchDriveViewController {
-        return UIStoryboard(name: "Home", bundle: nil).instantiateViewController(withIdentifier: "SwitchDriveViewController") as! SwitchDriveViewController
+        return Storyboard.home.instantiateViewController(withIdentifier: "SwitchDriveViewController") as! SwitchDriveViewController
     }
 
 }

@@ -393,7 +393,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     class func instantiate(files: [File], index: Int, driveFileManager: DriveFileManager, normalFolderHierarchy: Bool, fromActivities: Bool) -> PreviewViewController {
-        let previewPageViewController = UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "PreviewViewController") as! PreviewViewController
+        let previewPageViewController = Storyboard.files.instantiateViewController(withIdentifier: "PreviewViewController") as! PreviewViewController
         previewPageViewController.previewFiles = files
         previewPageViewController.driveFileManager = driveFileManager
         previewPageViewController.currentIndex = IndexPath(row: index, section: 0)

@@ -202,7 +202,7 @@ class PhotoListViewController: UIViewController {
     }
 
     class func instantiate() -> PhotoListViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
+        return Storyboard.menu.instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
     }
 
     // MARK: - Scroll view delegate

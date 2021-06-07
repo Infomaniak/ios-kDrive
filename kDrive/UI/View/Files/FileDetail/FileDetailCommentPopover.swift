@@ -37,7 +37,7 @@ class FileDetailCommentPopover: UIViewController {
     }
 
     class func instantiate() -> FileDetailCommentPopover {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileDetailCommentPopover") as! FileDetailCommentPopover
+        return Storyboard.files.instantiateViewController(withIdentifier: "FileDetailCommentPopover") as! FileDetailCommentPopover
     }
 }
 

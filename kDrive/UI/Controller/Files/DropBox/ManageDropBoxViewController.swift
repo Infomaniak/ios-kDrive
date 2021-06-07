@@ -77,7 +77,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     class func instantiate() -> ManageDropBoxViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
+        return Storyboard.files.instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {

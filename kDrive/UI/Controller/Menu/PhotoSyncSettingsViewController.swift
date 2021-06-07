@@ -206,7 +206,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     class func instantiate() -> PhotoSyncSettingsViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
+        return Storyboard.menu.instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
     }
 
     // MARK: - State restoration
