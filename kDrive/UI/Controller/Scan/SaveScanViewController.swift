@@ -78,7 +78,7 @@ class SaveScanViewController: SaveFileViewController {
         }
         DispatchQueue.global(qos: .userInteractive).async { [self] in
             let data: Data?
-            let name = filename.hasSuffix(".\(scanType.extension)") ? filename : "\(filename).\(scanType.extension)"
+            let name = filename.addingExtension(scanType.extension)
             switch scanType {
             case .pdf:
                 let pdfDocument = PDFDocument()

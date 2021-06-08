@@ -149,7 +149,7 @@ class SaveFileViewController: UIViewController {
         let url = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
         do {
             try data.write(to: url)
-            items.append(ImportedFile(name: name, path: url, uti: uti))
+            items.append(ImportedFile(name: name.addingExtension(uti.preferredFilenameExtension ?? ""), path: url, uti: uti))
         } catch {
             DDLogError("Error while saving image to disk: \(error)")
         }
@@ -171,22 +171,20 @@ class SaveFileViewController: UIViewController {
                 importProgress?.completedUnitCount += perItemUnitCount
             } else if itemProvider.canLoadObject(ofClass: UIImage.self) {
                 let childProgress = getPhoto(from: itemProvider) { (image) in
-                    if let data = image?.heicData(compressionQuality: self.imageCompression) {
-                        var name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
-                        name = name.hasSuffix(".heic") ? name : "\(name).heic"
+                    let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
+                    if itemProvider.registeredTypeIdentifiers.contains(UTI.heic.identifier), let data = image?.heicData(compressionQuality: self.imageCompression) {
                         self.save(data: data, name: name, uti: .heic)
-                    } else if let data = image?.jpegData(compressionQuality: self.imageCompression) {
-                        var name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
-                        name = name.hasSuffix(".jpeg") ? name : "\(name).jpeg"
+                    } else if itemProvider.registeredTypeIdentifiers.contains(UTI.jpeg.identifier), let data = image?.jpegData(compressionQuality: self.imageCompression) {
                         self.save(data: data, name: name, uti: .jpeg)
+                    } else if itemProvider.registeredTypeIdentifiers.contains(UTI.png.identifier), let data = image?.pngData() {
+                        self.save(data: data, name: name, uti: .png)
                     }
                 }
                 importProgress?.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             } else if itemProvider.canLoadObject(ofClass: PHLivePhoto.self) {
                 let childProgress = getLivePhoto(from: itemProvider) { (data) in
                     if let data = data {
-                        var name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
-                        name = name.hasSuffix(".jpeg") ? name : "\(name).jpeg"
+                        let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
                         self.save(data: data, name: name, uti: .jpeg)
                     }
                 }
@@ -194,10 +192,7 @@ class SaveFileViewController: UIViewController {
             } else if let typeIdentifier = itemProvider.registeredTypeIdentifiers.first {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { (filename, url) in
                     if let url = url {
-                        var name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
-                        if let ext = UTI(typeIdentifier)?.preferredFilenameExtension {
-                            name = name.hasSuffix(".\(ext)") ? name : "\(name).\(ext)"
-                        }
+                        let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
                         self.items.append(ImportedFile(name: filename ?? name, path: url, uti: UTI(typeIdentifier) ?? .data))
                     }
                 }

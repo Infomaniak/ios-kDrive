@@ -64,7 +64,7 @@ public class DriveUser: Object, Codable, InfomaniakUser {
     @objc private dynamic var _permission: String? = nil
 
     public var avatar: String {
-        get { return !_avatar.isBlank() ? _avatar: (_avatarUrl ?? "") }
+        get { return !_avatar.isBlank ? _avatar: (_avatarUrl ?? "") }
         set { }
     }
 

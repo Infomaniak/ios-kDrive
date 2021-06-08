@@ -447,7 +447,7 @@ public class DriveFileManager {
     private func searchOffline(query: String? = nil, fileType: String? = nil, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
         let realm = getRealm()
         var searchResults = realm.objects(File.self)
-        if let query = query, !query.isBlank() {
+        if let query = query, !query.isBlank {
             searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS %@", query))
         }
         if let fileType = fileType {
