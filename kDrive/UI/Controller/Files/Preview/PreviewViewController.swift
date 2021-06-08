@@ -379,6 +379,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                             }
                         } else {
                             (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
+                            self?.collectionView.endEditing(true)
                             self?.collectionView.reloadItems(at: [indexPath])
                             self?.updateNavigationBar()
                         }
