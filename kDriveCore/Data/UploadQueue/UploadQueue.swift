@@ -103,7 +103,7 @@ public class UploadQueue {
             }
         }
     }
-    
+
     public func addToQueue(file: UploadFile) {
         BackgroundRealm.uploads.execute { uploadsRealm in
             addToQueue(file: file, using: uploadsRealm)
@@ -281,11 +281,13 @@ public class UploadQueue {
         let importDirectory = DriveFileManager.constants.importDirectoryURL
         let importedFiles = (try? FileManager.default.contentsOfDirectory(atPath: importDirectory.path)) ?? []
 
-        let realm = DriveFileManager.constants.uploadsRealm
-        for file in importedFiles {
-            let filePath = importDirectory.appendingPathComponent(file, isDirectory: false).path
-            if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).count == 0 {
-                try? FileManager.default.removeItem(atPath: filePath)
+        autoreleasepool {
+            let realm = DriveFileManager.constants.uploadsRealm
+            for file in importedFiles {
+                let filePath = importDirectory.appendingPathComponent(file, isDirectory: false).path
+                if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).count == 0 {
+                    try? FileManager.default.removeItem(atPath: filePath)
+                }
             }
         }
     }
