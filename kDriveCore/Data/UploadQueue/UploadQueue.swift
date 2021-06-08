@@ -103,8 +103,14 @@ public class UploadQueue {
             }
         }
     }
+    
+    public func addToQueue(file: UploadFile) {
+        BackgroundRealm.uploads.execute { uploadsRealm in
+            addToQueue(file: file, using: uploadsRealm)
+        }
+    }
 
-    public func addToQueue(file: UploadFile, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+    public func addToQueue(file: UploadFile, using realm: Realm) {
         locks.addToQueue.performLocked {
             guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
                 return
