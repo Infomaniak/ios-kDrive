@@ -44,7 +44,9 @@ public class PhotoLibraryUploader {
         requestVideoOption.version = .current
 
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
-        settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first?.freeze()
+        if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
+            self.settings = PhotoSyncSettings(value: settings)
+        }
     }
 
     public func enableSyncWithSettings(_ newSettings: PhotoSyncSettings, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
@@ -52,7 +54,7 @@ public class PhotoLibraryUploader {
             realm.delete(realm.objects(PhotoSyncSettings.self))
             realm.add(newSettings)
         }
-        settings = newSettings.freeze()
+        settings = PhotoSyncSettings(value: newSettings)
     }
 
     public func disableSync(using realm: Realm = DriveFileManager.constants.uploadsRealm) {
@@ -67,7 +69,7 @@ public class PhotoLibraryUploader {
             try? realm.safeWrite {
                 settings.lastSync = date
             }
-            self.settings = settings.freeze()
+            self.settings = PhotoSyncSettings(value: settings)
         }
     }
 
