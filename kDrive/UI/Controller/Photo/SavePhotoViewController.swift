@@ -81,7 +81,9 @@ class SavePhotoViewController: SaveFileViewController {
         if uti == .image {
             switch format {
             case .jpg:
-                data = photo.jpegData(compressionQuality: JPEG_QUALITY)
+                data = photo.jpegData(compressionQuality: imageCompression)
+            case .heic:
+                data = photo.heicData(compressionQuality: imageCompression)
             case .png:
                 if photo.imageOrientation != .up {
                     let format = photo.imageRendererFormat
@@ -91,10 +93,10 @@ class SavePhotoViewController: SaveFileViewController {
                 }
                 data = photo.pngData()
             }
-            name = filename.hasSuffix(".\(format.extension)") ? filename : "\(filename).\(format.extension)"
+            name = filename.addingExtension(format.extension)
         } else {
             data = try? Data(contentsOf: videoUrl)
-            name = filename.hasSuffix(".mov") ? filename : "\(filename).mov"
+            name = filename.addingExtension("mov")
         }
         let filepath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
         do {

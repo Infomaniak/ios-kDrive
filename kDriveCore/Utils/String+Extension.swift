@@ -19,7 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 
 extension String {
-    func isBlank() -> Bool {
+
+    var isBlank: Bool {
         return self.trimmingCharacters(in: .whitespaces).isEmpty
     }
+
+    public func addingExtension(_ ext: String) -> String {
+        return self.hasSuffix(".\(ext)") ? self : "\(self).\(ext)"
+    }
+
 }

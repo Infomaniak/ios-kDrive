@@ -327,7 +327,7 @@ public class File: Object, Codable {
             if let type = VisibilityType(rawValue: rawVisibility),
                 type == .root || type == .isTeamSpace || type == .isTeamSpaceFolder || type == .isInTeamSpaceFolder || type == .isSharedSpace {
                 return type
-            } else if let collaborativeFolder = collaborativeFolder, !collaborativeFolder.isBlank() {
+            } else if let collaborativeFolder = collaborativeFolder, !collaborativeFolder.isBlank {
                 return VisibilityType.isCollaborativeFolder
             } else if users.count > 1 {
                 return VisibilityType.isShared

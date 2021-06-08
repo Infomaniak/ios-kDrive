@@ -82,13 +82,12 @@ class AlertDocViewController: AlertFieldViewController {
     // MARK: - Actions
 
     @objc override func action() {
-        guard var name = textField.text else {
+        guard let name = textField.text else {
             return
         }
 
-        name = name.hasSuffix(".\(fileType)") ? name : "\(name).\(fileType)"
         setLoading(true)
-        driveFileManager.createOfficeFile(parentDirectory: directory, name: name, type: fileType) { (file, error) in
+        driveFileManager.createOfficeFile(parentDirectory: directory, name: name.addingExtension(fileType), type: fileType) { (file, error) in
             self.setLoading(false)
 
             self.dismiss(animated: true) {
