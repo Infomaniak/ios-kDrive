@@ -98,7 +98,7 @@ class DriveErrorViewController: UIViewController {
     }
 
     class func instantiate() -> DriveErrorViewController {
-        return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DriveErrorViewController") as! DriveErrorViewController
+        return Storyboard.main.instantiateViewController(withIdentifier: "DriveErrorViewController") as! DriveErrorViewController
     }
 
     class func instantiateInNavigationController() -> UINavigationController {

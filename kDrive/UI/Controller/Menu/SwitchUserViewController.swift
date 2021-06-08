@@ -60,7 +60,7 @@ class SwitchUserViewController: UIViewController {
     }
 
     class func instantiate() -> SwitchUserViewController {
-        return UIStoryboard(name: "Menu", bundle: nil).instantiateViewController(withIdentifier: "SwitchUserViewController") as! SwitchUserViewController
+        return Storyboard.menu.instantiateViewController(withIdentifier: "SwitchUserViewController") as! SwitchUserViewController
     }
 
     class func instantiateInNavigationController() -> UINavigationController {

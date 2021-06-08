@@ -333,7 +333,7 @@ class SaveFileViewController: UIViewController {
     }
 
     class func instantiate(driveFileManager: DriveFileManager?) -> SaveFileViewController {
-        let viewController = UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
+        let viewController = Storyboard.saveFile.instantiateViewController(withIdentifier: "SaveFileViewController") as! SaveFileViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
     }

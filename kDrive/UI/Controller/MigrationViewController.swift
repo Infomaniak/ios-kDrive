@@ -114,7 +114,7 @@ class MigrationViewController: UIViewController {
     }
 
     class func instantiate() -> MigrationViewController {
-        return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MigrationViewController") as! MigrationViewController
+        return Storyboard.main.instantiateViewController(withIdentifier: "MigrationViewController") as! MigrationViewController
     }
 
 }

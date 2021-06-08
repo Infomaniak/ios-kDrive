@@ -121,7 +121,7 @@ class SaveScanViewController: SaveFileViewController {
     }
 
     override class func instantiate(driveFileManager: DriveFileManager?) -> SaveScanViewController {
-        let viewController = UIStoryboard(name: "Scan", bundle: nil).instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
+        let viewController = Storyboard.scan.instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
     }

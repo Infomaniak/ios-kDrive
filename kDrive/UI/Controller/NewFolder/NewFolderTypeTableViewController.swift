@@ -126,7 +126,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     }
 
     private class func instantiate() -> NewFolderTypeTableViewController {
-        return UIStoryboard(name: "NewFolder", bundle: nil).instantiateViewController(withIdentifier: "NewFolderTypeTableViewController") as! NewFolderTypeTableViewController
+        return Storyboard.newFolder.instantiateViewController(withIdentifier: "NewFolderTypeTableViewController") as! NewFolderTypeTableViewController
     }
 
 }

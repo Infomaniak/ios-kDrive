@@ -173,7 +173,7 @@ class OnboardingViewController: UIViewController {
     }
 
     class func instantiate() -> OnboardingViewController {
-        return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "OnboardingViewController") as! OnboardingViewController
+        return Storyboard.main.instantiateViewController(withIdentifier: "OnboardingViewController") as! OnboardingViewController
     }
 }
 

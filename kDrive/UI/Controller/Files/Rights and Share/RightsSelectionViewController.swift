@@ -157,7 +157,7 @@ class RightsSelectionViewController: UIViewController {
     }
 
     class func instantiate() -> RightsSelectionViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
+        return Storyboard.files.instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
     }
 }
 

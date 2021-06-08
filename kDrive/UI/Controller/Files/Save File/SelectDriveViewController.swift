@@ -90,7 +90,7 @@ class SelectDriveViewController: UIViewController {
     }
 
     class func instantiate() -> SelectDriveViewController {
-        return UIStoryboard(name: "SaveFile", bundle: nil).instantiateViewController(withIdentifier: "SelectDriveViewController") as! SelectDriveViewController
+        return Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectDriveViewController") as! SelectDriveViewController
     }
 
 }

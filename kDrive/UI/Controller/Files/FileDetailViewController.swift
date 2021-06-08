@@ -352,7 +352,7 @@ class FileDetailViewController: UIViewController {
     }
 
     class func instantiate() -> FileDetailViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "FileDetailViewController") as! FileDetailViewController
+        return Storyboard.files.instantiateViewController(withIdentifier: "FileDetailViewController") as! FileDetailViewController
     }
 
     // MARK: - State restoration

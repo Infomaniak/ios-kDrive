@@ -67,7 +67,7 @@ class InformationFloatingPanelViewController: UIViewController {
     }
 
     class func instantiate() -> InformationFloatingPanelViewController {
-        return UIStoryboard(name: "InformationFloatingPanel", bundle: nil).instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        return Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
     }
 
     class func instantiatePanel() -> DriveFloatingPanelController {

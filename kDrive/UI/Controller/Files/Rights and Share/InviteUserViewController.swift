@@ -134,7 +134,7 @@ class InviteUserViewController: UIViewController {
     }
 
     class func instantiate() -> InviteUserViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "InviteUserViewController") as! InviteUserViewController
+        return Storyboard.files.instantiateViewController(withIdentifier: "InviteUserViewController") as! InviteUserViewController
     }
 
     // MARK: - State restoration

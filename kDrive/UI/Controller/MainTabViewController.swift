@@ -177,7 +177,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     class func instantiate() -> MainTabViewController {
-        return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MainTabViewController") as! MainTabViewController
+        return Storyboard.main.instantiateViewController(withIdentifier: "MainTabViewController") as! MainTabViewController
     }
 }
 

@@ -53,8 +53,7 @@ class LockedAppViewController: UIViewController {
     }
 
     class func instantiate() -> LockedAppViewController {
-        let instance = (UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "LockedAppViewController") as? LockedAppViewController)!
-        return instance
+        return Storyboard.main.instantiateViewController(withIdentifier: "LockedAppViewController") as! LockedAppViewController
     }
 }
 

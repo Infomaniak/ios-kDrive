@@ -183,7 +183,7 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     class func instantiate() -> ShareLinkSettingsViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "ShareLinkSettingsViewController") as! ShareLinkSettingsViewController
+        return Storyboard.files.instantiateViewController(withIdentifier: "ShareLinkSettingsViewController") as! ShareLinkSettingsViewController
     }
 
     // MARK: - State restoration

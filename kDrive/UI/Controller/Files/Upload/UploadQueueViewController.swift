@@ -94,7 +94,7 @@ class UploadQueueViewController: UIViewController {
     }
 
     class func instantiate() -> UploadQueueViewController {
-        return UIStoryboard(name: "Files", bundle: nil).instantiateViewController(withIdentifier: "UploadQueueViewController") as! UploadQueueViewController
+        return Storyboard.files.instantiateViewController(withIdentifier: "UploadQueueViewController") as! UploadQueueViewController
     }
 
     // MARK: - State restoration

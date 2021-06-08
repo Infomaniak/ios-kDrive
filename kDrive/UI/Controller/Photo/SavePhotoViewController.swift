@@ -124,7 +124,7 @@ class SavePhotoViewController: SaveFileViewController {
     }
 
     override class func instantiate(driveFileManager: DriveFileManager?) -> SavePhotoViewController {
-        let viewController = UIStoryboard(name: "Photo", bundle: nil).instantiateViewController(withIdentifier: "SavePhotoViewController") as! SavePhotoViewController
+        let viewController = Storyboard.photo.instantiateViewController(withIdentifier: "SavePhotoViewController") as! SavePhotoViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
     }

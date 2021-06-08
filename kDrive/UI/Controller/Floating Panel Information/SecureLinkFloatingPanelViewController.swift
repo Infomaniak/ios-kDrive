@@ -38,7 +38,7 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
-        let contentViewController = UIStoryboard(name: "InformationFloatingPanel", bundle: nil).instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
+        let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
         object_setClass(contentViewController, SecureLinkFloatingPanelViewController.self)
         return contentViewController
     }
