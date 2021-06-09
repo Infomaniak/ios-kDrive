@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/ProxymanApp/atlantis",
         "state": {
           "branch": null,
-          "revision": "4fadd54eca7a0fb9eab8c9ec5ccce646fe116cdc",
-          "version": "1.9.0"
+          "revision": "9d125e08268437e4231bcbae99cccb337d5ee5df",
+          "version": "1.10.0"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/SCENEE/FloatingPanel",
         "state": {
           "branch": null,
-          "revision": "da4668aa2b8277dd8ce2741ac5c39394431400fc",
-          "version": "2.3.1"
+          "revision": "b8fcb50874f50bb511173700f87b09344c568c6a",
+          "version": "2.4.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
-          "revision": "11b2e25b08cb00bd13ba0702373a522b62db943f",
-          "version": "1.0.12"
+          "revision": "d39b72d0c0d8bbd623d3f6ee692dd6eb697c3b80",
+          "version": "1.0.13"
         }
       },
       {
