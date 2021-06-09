@@ -42,6 +42,7 @@ extension UserDefaults {
         case lastSelectedDrive
         case lastSelectedDirectory
         case theme
+        case photoSortMode
     }
 
     private func key(_ key: Keys) -> String {
@@ -232,6 +233,15 @@ extension UserDefaults {
         }
         set {
             setValue(newValue.rawValue, forKey: key(.theme))
+        }
+    }
+
+    public var photoSortMode: PhotoSortMode {
+        get {
+            return PhotoSortMode(rawValue: string(forKey: key(.photoSortMode)) ?? "") ?? .month
+        }
+        set {
+            return set(newValue.rawValue, forKey: key(.photoSortMode))
         }
     }
 }
