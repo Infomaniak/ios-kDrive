@@ -243,9 +243,13 @@ public class UploadOperation: Operation {
             // Success
             DDLogError("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
-            if let drive = AccountManager.instance.getDrive(for: file.userId, driveId: file.driveId),
-                let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-
+            var driveFileManager: DriveFileManager?
+            BackgroundRealm.getQueue(for: DriveInfosManager.instance.realmConfiguration).execute { realm in
+                if let drive = AccountManager.instance.getDrive(for: file.userId, driveId: file.driveId, using: realm) {
+                    driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
+                }
+            }
+            if let driveFileManager = driveFileManager {
                 // File is already or has parent in DB let's update it
                 BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, using: realm) != nil || file.relativePath.isEmpty {
@@ -259,7 +263,7 @@ public class UploadOperation: Operation {
                         if let parent = parent {
                             driveFileManager.notifyObserversWith(file: parent)
                         }
-                        result.driveFile = driveFile.freeze()
+                        result.driveFile = File(value: driveFile)
                     }
                 }
             }

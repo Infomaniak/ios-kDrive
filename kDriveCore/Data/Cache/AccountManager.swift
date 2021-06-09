@@ -21,6 +21,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakLogin
 import Sentry
+import RealmSwift
 
 public protocol SwitchAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)
@@ -150,8 +151,8 @@ public class AccountManager: RefreshTokenDelegate {
         }
     }
 
-    public func getDrive(for accountId: Int, driveId: Int) -> Drive? {
-        return DriveInfosManager.instance.getDrive(id: driveId, userId: accountId)
+    public func getDrive(for accountId: Int, driveId: Int, using realm: Realm? = nil) -> Drive? {
+        return DriveInfosManager.instance.getDrive(id: driveId, userId: accountId, using: realm)
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
