@@ -22,6 +22,7 @@ import Alamofire
 import InfomaniakLogin
 import InfomaniakCore
 import Kingfisher
+import Sentry
 
 extension ApiFetcher {
 
@@ -633,16 +634,34 @@ class SyncedAuthenticator: OAuthAuthenticator {
         let lock = AccountManager.instance.refreshTokenLock
         lock.wait()
         lock.enter()
+        let tokenBreadcrumb = Breadcrumb()
+        tokenBreadcrumb.category = "Token"
         //Maybe someone else refreshed our token
         AccountManager.instance.reloadTokensAndAccounts()
         if let token = AccountManager.instance.getTokenForUserId(credential.userId),
             token.expirationDate > credential.expirationDate {
+            tokenBreadcrumb.level = .info
+            tokenBreadcrumb.type = "transaction"
+            tokenBreadcrumb.message = "Token refreshed by someone else"
+            SentrySDK.addBreadcrumb(crumb: tokenBreadcrumb)
             lock.leave()
             completion(.success(token))
             return
         }
 
         super.refresh(credential, for: session) { result in
+            switch result {
+            case .failure(let error):
+                tokenBreadcrumb.level = .error
+                tokenBreadcrumb.type = "error"
+                tokenBreadcrumb.message = "Error while refreshing token"
+                tokenBreadcrumb.data = ["Error": error.localizedDescription]
+            case .success(_):
+                tokenBreadcrumb.level = .info
+                tokenBreadcrumb.type = "http"
+                tokenBreadcrumb.message = "Token refreshed"
+            }
+            SentrySDK.addBreadcrumb(crumb: tokenBreadcrumb)
             lock.leave()
             completion(result)
         }
