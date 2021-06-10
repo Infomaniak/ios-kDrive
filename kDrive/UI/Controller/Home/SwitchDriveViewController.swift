@@ -57,7 +57,7 @@ class SwitchDriveViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTapToDismiss(_:)))
         tap.cancelsTouchesInView = false
         tableView.addGestureRecognizer(tap)
-        
+
         let backgroundBlureView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         backgroundBlureView.alpha = 0.8
         tableView.backgroundView = backgroundBlureView
@@ -92,8 +92,8 @@ extension SwitchDriveViewController: UITableViewDelegate {
             guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
                 return
             }
-            
-            currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+
+            currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                 self.delegate?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
                 self.dismiss(animated: true)
             }
@@ -134,10 +134,8 @@ extension SwitchDriveViewController: UISearchResultsUpdating {
     }
 
     func filterOrganisationsWithText(_ text: String) {
-        if text.count > 0 {
-            filteredDrives = drives.filter({ (drive) -> Bool in
-                return drive.name.lowercased().contains(text.lowercased())
-            })
+        if !text.isEmpty {
+            filteredDrives = drives.filter { $0.name.lowercased().contains(text.lowercased()) }
         } else {
             filteredDrives = drives
         }

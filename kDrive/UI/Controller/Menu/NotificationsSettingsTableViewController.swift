@@ -55,7 +55,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationReceiveNotifications
             cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
-            cell.switchDelegate = { sender in
+            cell.switchHandler = { sender in
                 UserDefaults.shared.isNotificationEnabled = sender.isOn
                 if UserDefaults.shared.isNotificationEnabled {
                     tableView.reloadRows(at: [IndexPath(row: 1, section: 0), IndexPath(row: 2, section: 0), IndexPath(row: 3, section: 0)], with: .none)
@@ -68,7 +68,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveStrings.Localizable.notificationFileUpload
             cell.separator?.isHidden = true
             cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
-            cell.switchDelegate = { [self] sender in
+            cell.switchHandler = { [self] sender in
                 UserDefaults.shared.importNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
@@ -77,7 +77,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveStrings.Localizable.notificationSharedWithMeChannelName
             cell.separator?.isHidden = true
             cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
-            cell.switchDelegate = { [self] sender in
+            cell.switchHandler = { [self] sender in
                 UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
@@ -85,7 +85,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.initWithPositionAndShadow(isLast: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationCommentChannelName
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
-            cell.switchDelegate = { [self] sender in
+            cell.switchHandler = { [self] sender in
                 UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
@@ -106,4 +106,3 @@ class NotificationsSettingsTableViewController: UITableViewController {
         }
     }
 }
-

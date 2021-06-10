@@ -40,7 +40,7 @@ class FileInformationOwnerTableViewCell: UITableViewCell {
         ownerLabel.text = ""
         if let user = DriveInfosManager.instance.getUser(id: file.createdBy) {
             ownerLabel.text = user.displayName
-            user.getAvatar { (image) in
+            user.getAvatar { image in
                 self.ownerImage.image = image
             }
         }

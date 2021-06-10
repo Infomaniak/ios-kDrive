@@ -59,21 +59,20 @@ public class DriveUser: Object, Codable, InfomaniakUser {
     @objc public dynamic var id: Int = -1
     @objc public dynamic var email: String = ""
     @objc private dynamic var _avatar: String = ""
-    @objc private dynamic var _avatarUrl: String? = nil
+    @objc private dynamic var _avatarUrl: String?
     @objc public dynamic var displayName: String = ""
-    @objc private dynamic var _permission: String? = nil
+    @objc private dynamic var _permission: String?
 
     public var avatar: String {
-        get { return !_avatar.isBlank ? _avatar: (_avatarUrl ?? "") }
-        set { }
+        return !_avatar.isBlank ? _avatar: (_avatarUrl ?? "")
     }
 
     public var permission: UserPermission? {
-        set {
-            _permission = newValue?.rawValue
-        }
         get {
             return UserPermission(rawValue: _permission ?? "")
+        }
+        set {
+            _permission = newValue?.rawValue
         }
     }
 

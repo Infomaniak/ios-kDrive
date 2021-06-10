@@ -46,7 +46,7 @@ class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
         }
         isAccessibilityElement = true
 
-        driveUser.getAvatar { (image) in
+        driveUser.getAvatar { image in
             self.avatarImage.image = image
         }
     }

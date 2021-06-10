@@ -45,11 +45,12 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         contentInsetView.backgroundColor = .clear
     }
 
+    // swiftlint:disable cyclomatic_complexity
     func configureWith(activity: FileDetailActivity, file: File) {
         titleLabel.text = activity.user?.displayName ?? KDriveStrings.Localizable.allUserAnonymous
 
         if let user = activity.user {
-            user.getAvatar { (image) in
+            user.getAvatar { image in
                 self.accessoryImageView.image = image
                     .resizeImage(size: CGSize(width: 35, height: 35))
                     .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)

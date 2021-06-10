@@ -34,19 +34,19 @@ public class UploadFile: Object {
     @objc public dynamic var name: String = ""
     @objc dynamic var relativePath: String = ""
     @objc dynamic var sessionUrl: String = ""
-    @objc private dynamic var url: String? = nil
+    @objc private dynamic var url: String?
     @objc private dynamic var rawType: String = "file"
     @objc public dynamic var parentDirectoryId: Int = 1
     @objc dynamic var userId: Int = 0
     @objc dynamic var driveId: Int = 0
-    @objc public dynamic var uploadDate: Date? = nil
-    @objc public dynamic var creationDate: Date? = nil
-    @objc public dynamic var modificationDate: Date? = nil
-    @objc public dynamic var taskCreationDate: Date? = nil
-    @objc dynamic var shouldRemoveAfterUpload: Bool = true
+    @objc public dynamic var uploadDate: Date?
+    @objc public dynamic var creationDate: Date?
+    @objc public dynamic var modificationDate: Date?
+    @objc public dynamic var taskCreationDate: Date?
+    @objc dynamic var shouldRemoveAfterUpload = true
     @objc public dynamic var maxRetryCount: Int = defaultMaxRetryCount
     @objc private dynamic var rawPriority: Int = 0
-    @objc private dynamic var _error: Data? = nil
+    @objc private dynamic var _error: Data?
 
     private var localAsset: PHAsset?
 
@@ -71,15 +71,15 @@ public class UploadFile: Object {
     }
 
     public var error: DriveError? {
-        set {
-            _error = newValue?.toRealm()
-        }
         get {
             if let error = _error {
                 return DriveError.from(realmData: error)
             } else {
                 return nil
             }
+        }
+        set {
+            _error = newValue?.toRealm()
         }
     }
 
@@ -142,7 +142,7 @@ public class UploadFile: Object {
 
     }
 
-    public func getIconForUploadFile(placeholder: (UIImage) -> (), completion: @escaping (UIImage) -> ()) {
+    public func getIconForUploadFile(placeholder: (UIImage) -> Void, completion: @escaping (UIImage) -> Void) {
         if type == .phAsset {
             let asset = getPHAsset()
             if asset?.mediaType == .video {
@@ -157,7 +157,7 @@ public class UploadFile: Object {
                 option.deliveryMode = .fastFormat
                 option.isNetworkAccessAllowed = true
                 option.resizeMode = .fast
-                PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 128, height: 128), contentMode: .aspectFill, options: option) { (image, infos) in
+                PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 128, height: 128), contentMode: .aspectFill, options: option) { image, _ in
                     if let image = image {
                         completion(image)
                     }
@@ -169,12 +169,12 @@ public class UploadFile: Object {
         }
     }
 
-
     func getPHAsset() -> PHAsset? {
         if localAsset != nil {
             return localAsset
         }
         let assets = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil)
+        // swiftlint:disable empty_count
         if assets.count > 0 {
             return assets[0]
         }

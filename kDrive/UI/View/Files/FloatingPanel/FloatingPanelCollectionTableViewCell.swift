@@ -81,5 +81,4 @@ class FloatingPanelCollectionTableViewCell: UITableViewCell, UICollectionViewDel
         delegate?.didSelectAction(action)
     }
 
-
 }

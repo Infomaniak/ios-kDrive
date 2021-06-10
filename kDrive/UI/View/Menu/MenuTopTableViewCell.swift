@@ -51,7 +51,7 @@ class MenuTopTableViewCell: UITableViewCell {
         userDisplayNameLabel.text = account.user.displayName
         userEmailLabel.text = account.user.email
         userAvatarImageView.image = KDriveAsset.placeholderAvatar.image
-        account.user.getAvatar(size: CGSize(width: 512, height: 512)) { (image) in
+        account.user.getAvatar(size: CGSize(width: 512, height: 512)) { image in
             self.userAvatarImageView.image = image
         }
 

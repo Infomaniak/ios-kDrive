@@ -42,15 +42,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     struct Configuration {
         /// Is normal folder hierarchy
-        var normalFolderHierarchy: Bool = true
+        var normalFolderHierarchy = true
         /// Enable or disable upload status displayed in the header (enabled by default)
-        var showUploadingFiles: Bool = true
+        var showUploadingFiles = true
         /// Enable or disable multiple selection (enabled by default)
-        var isMultipleSelectionEnabled: Bool = true
+        var isMultipleSelectionEnabled = true
         /// Enable or disable refresh control (enabled by default)
-        var isRefreshControlEnabled: Bool = true
+        var isRefreshControlEnabled = true
         /// Is displayed from activities
-        var fromActivities: Bool = false
+        var fromActivities = false
         /// Root folder title
         var rootTitle: String?
         /// Type of empty view to display
@@ -187,7 +187,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { (context) in
+        coordinator.animate { _ in
             self.collectionView?.collectionViewLayout.invalidateLayout()
         }
     }
@@ -206,7 +206,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             return
         }
 
-        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] (file, children, error) in
+        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, children, error in
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 self?.currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
@@ -218,7 +218,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func getNewChanges() {
         guard currentDirectory != nil else { return }
-        driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] (results, _, error) in
+        driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] results, _, error in
             if results != nil {
                 self?.reloadData(withActivities: false)
             } else if let error = error as? DriveError, error == DriveError.objectNotFound {
@@ -273,7 +273,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             }
         }
 
-        getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] (result, moreComing, replaceFiles) in
+        getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] result, moreComing, replaceFiles in
             guard let self = self else { return }
             self.isLoading = false
             if self.configuration.isRefreshControlEnabled {
@@ -327,14 +327,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     final func observeUploads() {
         guard configuration.showUploadingFiles && currentDirectory != nil && uploadsObserver == nil else { return }
 
-        uploadsObserver = UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] (_, count) in
-            self.uploadingFilesCount = count
+        uploadsObserver = UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] _, uploadCount in
+            self.uploadingFilesCount = uploadCount
             DispatchQueue.main.async { [weak self] in
                 guard let self = self, self.isViewLoaded else { return }
 
                 let shouldHideUploadCard: Bool
-                if count > 0 {
-                    self.headerView?.uploadCardView.setUploadCount(count)
+                if uploadCount > 0 {
+                    self.headerView?.uploadCardView.setUploadCount(uploadCount)
                     shouldHideUploadCard = false
                 } else {
                     shouldHideUploadCard = true
@@ -350,7 +350,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     final func observeFiles() {
         guard filesObserver == nil else { return }
-        filesObserver = driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] (file) in
+        filesObserver = driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if file.id == self.currentDirectory?.id {
                 reloadData()
             } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
@@ -361,7 +361,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     final func observeNetwork() {
         guard networkObserver == nil else { return }
-        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
+        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
             // Observer is called on main queue
             headerView?.offlineView.isHidden = status != .offline
             collectionView.collectionViewLayout.invalidateLayout()
@@ -372,7 +372,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     final func observeListOptions() {
         guard listStyleObserver == nil && sortTypeObserver == nil else { return }
         // List style observer
-        listStyleObserver = FileListOptions.instance.observeListStyleChange(self) { [unowned self] (newStyle) in
+        listStyleObserver = FileListOptions.instance.observeListStyleChange(self) { [unowned self] newStyle in
             self.listStyle = newStyle
             DispatchQueue.main.async { [weak self] in
                 UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
@@ -383,7 +383,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             }
         }
         // Sort type observer
-        sortTypeObserver = FileListOptions.instance.observeSortTypeChange(self) { [unowned self] (newSortType) in
+        sortTypeObserver = FileListOptions.instance.observeSortTypeChange(self) { [unowned self] newSortType in
             self.sortType = newSortType
             reloadData()
         }
@@ -425,7 +425,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Private methods
 
     private func setTitle() {
-        if (currentDirectory?.isRoot ?? false) {
+        if currentDirectory?.isRoot ?? false {
             if let rootTitle = configuration.rootTitle {
                 navigationItem.title = rootTitle
             } else {
@@ -458,7 +458,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     if files.count == 1 {
                         UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: KDriveStrings.Localizable.buttonCancel) {
                             guard let cancelId = cancelId else { return }
-                            self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { (error) in
+                            self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { error in
                                 self.getNewChanges()
                                 if error == nil {
                                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
@@ -488,7 +488,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let lastFileId = sortedFiles.last?.id
         // Reload file list with DifferenceKit
         let changeSet = StagedChangeset(source: sortedFiles, target: files)
-        collectionView.reload(using: changeSet, interrupt: { $0.changeCount > self.maxDiffChanges }) { files in
+        collectionView.reload(using: changeSet) { $0.changeCount > self.maxDiffChanges } setData: { files in
             sortedFiles = files
             updateSelectedItems(newChildren: files)
         }
@@ -511,7 +511,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     indexPaths.append(IndexPath(item: index, section: 0))
                 }
             }
-            if indexPaths.count > 0 {
+            if !indexPaths.isEmpty {
                 collectionView.reloadItems(at: indexPaths)
             }
         }
@@ -576,7 +576,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     @objc final func selectAllChildren() {
-        let wasDisabled = selectedFiles.count == 0
+        let wasDisabled = selectedFiles.isEmpty
         selectedFiles = Set(sortedFiles)
         for index in 0..<selectedFiles.count {
             let indexPath = IndexPath(row: index, section: 0)
@@ -589,7 +589,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     final func selectChild(at indexPath: IndexPath) {
-        let wasDisabled = selectedFiles.count == 0
+        let wasDisabled = selectedFiles.isEmpty
         selectedFiles.insert(sortedFiles[indexPath.row])
         if wasDisabled {
             setSelectionButtonsEnabled(true)
@@ -612,7 +612,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if let index = selectedFiles.firstIndex(of: selectedFile) {
             selectedFiles.remove(at: index)
         }
-        if selectedFiles.count == 0 {
+        if selectedFiles.isEmpty {
             setSelectionButtonsEnabled(false)
         }
         updateSelectedCount()
@@ -626,7 +626,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     /// Select collection view cells based on `selectedItems`
     final func setSelectedCells() {
-        if selectionMode && selectedFiles.count > 0 {
+        if selectionMode && !selectedFiles.isEmpty {
             for i in 0..<sortedFiles.count where selectedFiles.contains(sortedFiles[i]) {
                 collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: .centeredVertically)
             }
@@ -894,7 +894,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
                 var success = true
                 for file in self.selectedFiles {
                     group.enter()
-                    self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { (response, _, error) in
+                    self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { _, _, error in
                         if let error = error {
                             success = false
                             DDLogError("Error while moving file: \(error)")

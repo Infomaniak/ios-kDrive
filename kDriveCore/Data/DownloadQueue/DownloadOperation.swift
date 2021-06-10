@@ -115,17 +115,17 @@ public class DownloadOperation: Operation {
         }
 
         if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] (token, error) in
+            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, error in
                 if let token = token {
                     var request = URLRequest(url: url)
                     request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
                     task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-                    progressObservation = task?.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [fileId = file.id] (progress, value) in
+                    progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
                         guard let newValue = value.newValue else {
                             return
                         }
                         DownloadQueue.instance.publishProgress(newValue, for: fileId)
-                    })
+                    }
                     if let itemIdentifier = itemIdentifier {
                         DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
                             manager.register(task!, forItemWithIdentifier: itemIdentifier) { _ in }

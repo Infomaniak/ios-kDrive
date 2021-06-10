@@ -64,7 +64,6 @@ private struct Arrow {
     var direction: Direction = .UP
     var offset: CGFloat = 0.0
 
-
     func frame(container: CGRect) -> CGRect {
         let containerMidX = container.midX
         let containerMidY = container.midY
@@ -104,12 +103,11 @@ private struct Arrow {
     }
 }
 
-
 // MARK: - PopoverBackground
 class PopoverBackground: UIPopoverBackgroundView {
 
     var backgroundView = UIImageView()
-    private var arrow: Arrow = Arrow()
+    private var arrow = Arrow()
     private static let PROTO_ARROW = Arrow()
 
     override var arrowDirection: UIPopoverArrowDirection {
@@ -170,6 +168,3 @@ class PopoverBackground: UIPopoverBackgroundView {
     }
 
 }
-
-
-

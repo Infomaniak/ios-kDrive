@@ -52,7 +52,7 @@ class MigrationViewController: UIViewController {
             description: KDriveStrings.Localizable.migrationDescription)
 
         slides = [migrationSlide]
-        MigrationHelper.migrate { (result) in
+        MigrationHelper.migrate { result in
             DispatchQueue.main.async { [self] in
                 migrationResult = result
                 buttonView.alpha = 0
@@ -64,7 +64,7 @@ class MigrationViewController: UIViewController {
                 UIView.animate(withDuration: 0.5) {
                     self.buttonView.alpha = 1
                     self.migrationProgressView.alpha = 0
-                } completion: { (done) in
+                } completion: { _ in
                     self.migrationProgressView.isHidden = true
                     self.buttonView.isHidden = false
                 }
@@ -74,9 +74,9 @@ class MigrationViewController: UIViewController {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { (context) in
+        coordinator.animate { _ in
             self.collectionView?.collectionViewLayout.invalidateLayout()
-        } completion: { (context) in
+        } completion: { _ in
             let indexPath = IndexPath(row: 0, section: 0)
             self.collectionView.scrollToItem(at: indexPath, at: .left, animated: true)
         }
@@ -91,7 +91,7 @@ class MigrationViewController: UIViewController {
             if migrationResult?.photoSyncEnabled == true,
                 let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
                 let floatingPanelViewController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController)?.actionHandler = { sender in
+                (floatingPanelViewController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController)?.actionHandler = { _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     photoSyncSettingsVC.driveFileManager = currentDriveFileManager
                     guard let currentVC = mainTabBarViewController.selectedViewController as? UINavigationController else {

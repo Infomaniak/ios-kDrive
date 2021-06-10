@@ -92,7 +92,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             queue: .main) { [weak self] notification in
             self?.handleAudioSessionInterruption(notification: notification)
         }
-        timeObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 10), queue: DispatchQueue.main) { [weak self] (time) in
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 10), queue: DispatchQueue.main) { [weak self] time in
             guard let strongSelf = self else { return }
             strongSelf.elapsedTimeLabel.text = time.formattedText
             if let duration = strongSelf.player?.currentItem?.duration {
@@ -127,7 +127,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         for command in registeredCommands {
             command.removeHandler()
 
-            command.addHandler { [unowned self] (command, event) in
+            command.addHandler { [unowned self] command, event in
                 switch command {
                 case .togglePausePlay:
                     togglePlayPause()
@@ -263,8 +263,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func seek(to time: CMTime) {
-        player?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) {
-            isFinished in
+        player?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { isFinished in
             if isFinished {
                 self.setNowPlayingPlaybackInfo()
             }

@@ -82,7 +82,6 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
 
-
         photoSyncEnabled = PhotoLibraryUploader.instance.isSyncEnabled
         currentSyncSettings = PhotoLibraryUploader.instance.settings ?? PhotoSyncSettings()
 
@@ -100,12 +99,12 @@ class PhotoSyncSettingsViewController: UIViewController {
         if currentSyncSettings.parentDirectoryId != -1,
             let drive = AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId),
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            //We should always have the folder in cache but just in case we don't...
+            // We should always have the folder in cache but just in case we don't...
             if let photoSyncDirectory = driveFileManager.getCachedFile(id: currentSyncSettings.parentDirectoryId) {
                 self.selectedDirectory = photoSyncDirectory
                 self.updateSaveButtonState()
             } else {
-                driveFileManager.getFile(id: currentSyncSettings.parentDirectoryId) { (file, _, _) in
+                driveFileManager.getFile(id: currentSyncSettings.parentDirectoryId) { file, _, _ in
                     self.selectedDirectory = file?.freeze()
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .none)
                 }
@@ -164,7 +163,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         DispatchQueue.global(qos: .utility).async {
             let realm = DriveFileManager.constants.uploadsRealm
             self.saveSettings(using: realm)
-            let _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
         navigationController?.popViewController(animated: true)
     }
@@ -195,11 +194,11 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     private func requestAuthorization(completion: @escaping (PHAuthorizationStatus) -> Void) {
         if #available(iOS 14, *) {
-            PHPhotoLibrary.requestAuthorization(for: .readWrite) { (status) in
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
                 completion(status)
             }
         } else {
-            PHPhotoLibrary.requestAuthorization { (status) in
+            PHPhotoLibrary.requestAuthorization { status in
                 completion(status)
             }
         }
@@ -239,7 +238,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
         switch sections[section] {
         case .syncSwitch:
             let saveDetailsHeaderText = KDriveStrings.Localizable.syncSettingsDescription
-            //We recycle the header view, it's easier to add \n than setting dynamic constraints
+            // We recycle the header view, it's easier to add \n than setting dynamic constraints
             let headerView = HomeTitleView.instantiate(title: "\n" + saveDetailsHeaderText + "\n")
             headerView.titleLabel.font = .systemFont(ofSize: 14)
             headerView.titleLabel.numberOfLines = 0
@@ -279,9 +278,9 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == (self.tableView(tableView, numberOfRowsInSection: indexPath.section)) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonActiveSync
                 cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
-                cell.switchDelegate = { sender in
+                cell.switchHandler = { sender in
                     if sender.isOn {
-                        self.requestAuthorization { (status) in
+                        self.requestAuthorization { status in
                             DispatchQueue.main.async {
                                 self.currentUserId = AccountManager.instance.currentAccount.userId
                                 self.currentDriveId = self.driveFileManager.drive.id
@@ -334,7 +333,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == (self.tableView(tableView, numberOfRowsInSection: indexPath.section)) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncPicture
                 cell.valueSwitch.setOn(syncPicturesEnabled, animated: true)
-                cell.switchDelegate = { sender in
+                cell.switchHandler = { sender in
                     self.syncPicturesEnabled = sender.isOn
                     self.updateSaveButtonState()
                 }
@@ -344,7 +343,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == (self.tableView(tableView, numberOfRowsInSection: indexPath.section)) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncVideo
                 cell.valueSwitch.setOn(syncVideosEnabled, animated: true)
-                cell.switchDelegate = { sender in
+                cell.switchHandler = { sender in
                     self.syncVideosEnabled = sender.isOn
                     self.updateSaveButtonState()
                 }
@@ -354,7 +353,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == (self.tableView(tableView, numberOfRowsInSection: indexPath.section)) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncScreenshot
                 cell.valueSwitch.setOn(syncScreenshotsEnabled, animated: true)
-                cell.switchDelegate = { sender in
+                cell.switchHandler = { sender in
                     self.syncScreenshotsEnabled = sender.isOn
                     self.updateSaveButtonState()
                 }
@@ -414,14 +413,14 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
         } else if section == .syncSettings {
             let row = settingsRows[indexPath.row]
             if row == .syncMode {
-                let alert = AlertChoiceViewController(title: KDriveStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveStrings.Localizable.syncSettingsSaveDateAllPictureValue], selected: syncMode == .new ? 0 : 1, action: KDriveStrings.Localizable.buttonValid) { (selectedIndex) in
+                let alert = AlertChoiceViewController(title: KDriveStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveStrings.Localizable.syncSettingsSaveDateAllPictureValue], selected: syncMode == .new ? 0 : 1, action: KDriveStrings.Localizable.buttonValid) { selectedIndex in
                     self.syncMode = selectedIndex == 0 ? .new : .all
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
 
                     if self.syncMode == .all {
                         if #available(iOS 13.0, *) { } else {
-                            //DispatchQueue because we need to present this view after dismissing the previous one
+                            // DispatchQueue because we need to present this view after dismissing the previous one
                             DispatchQueue.main.async {
                                 let alertController = AlertTextViewController(title: KDriveStrings.Localizable.ios12LimitationPhotoSyncTitle, message: KDriveStrings.Localizable.ios12LimitationPhotoSyncDescription, action: KDriveStrings.Localizable.buttonClose, hasCancelButton: false, handler: nil)
                                 self.present(alertController, animated: true)

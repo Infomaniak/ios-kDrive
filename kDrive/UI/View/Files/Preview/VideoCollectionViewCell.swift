@@ -55,7 +55,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     override func configureWith(file: File) {
         self.file = file
-        file.getThumbnail { (preview, hasThumbnail) in
+        file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
         let url: AVURLAsset

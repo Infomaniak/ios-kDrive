@@ -55,7 +55,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         didSet {
             guard drive != nil else { return }
             users = DriveInfosManager.instance.getUsers(for: drive.id)
-            users.sort { (user1, user2) -> Bool in
+            users.sort { user1, user2 -> Bool in
                 return user1.displayName < user2.displayName
             }
             results = users
@@ -75,7 +75,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         dropDown.cellHeight = 65
         dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
 
-        dropDown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) -> Void in
+        dropDown.customCellConfiguration = { (index: Index, _: String, cell: DropDownCell) -> Void in
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
             if let mail = self.mail {
                 if index == 0 {
@@ -87,7 +87,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
                 cell.configureWith(user: self.results[index])
             }
         }
-        dropDown.selectionAction = { [unowned self] (index: Int, item: String) in
+        dropDown.selectionAction = { [unowned self] (index: Int, _: String) in
             if let mail = mail {
                 if index == 0 {
                     delegate?.didSelectMail(mail: mail)
@@ -111,8 +111,8 @@ class InviteUserTableViewCell: InsetTableViewCell {
     }
 
     private func filterContent(for text: String) {
-        var emailExist: Bool = false
-        if text.count > 0 {
+        var emailExist = false
+        if !text.isEmpty {
             results.removeAll()
             for user in users {
                 if user.displayName.contains(text) || user.email.contains(text) {
@@ -148,4 +148,3 @@ extension InviteUserTableViewCell: UITextFieldDelegate {
         dropDown.show()
     }
 }
-

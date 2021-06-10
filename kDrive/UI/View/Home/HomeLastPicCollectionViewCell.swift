@@ -52,7 +52,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     func configureWith(file: File, roundedCorners: Bool = true) {
         darkLayer.isHidden = false
-        file.getThumbnail { (image, isThumbnail) in
+        file.getThumbnail { image, isThumbnail in
             self.darkLayer.isHidden = true
             self.fileImage.image = isThumbnail ? image : KDriveAsset.fileImageSmall.image
         }

@@ -33,7 +33,7 @@ public class CancelableResponse: Codable {
     public let id: String
     public let validUntil: Int
     public var offline: Bool {
-        return id == ""
+        return id.isEmpty
     }
 
     init() {
@@ -46,7 +46,6 @@ public class CancelableResponse: Codable {
         case validUntil = "cancel_valid_until"
     }
 }
-
 
 public class ApiResponse<ResponseContent: Codable>: Codable {
 

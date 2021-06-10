@@ -98,7 +98,7 @@ class RecentActivityTableViewCell: InsetTableViewCell, UICollectionViewDelegate,
 
     func configureWith(recentActivity: FileActivity) {
         activity = recentActivity
-        //activity?.file = recentActivity.file?.freeze()
+        // activity?.file = recentActivity.file?.freeze()
         let count = activities.count
         let isDirectory = activity?.file?.isDirectory ?? false
         switch recentActivity.action {
@@ -124,7 +124,7 @@ class RecentActivityTableViewCell: InsetTableViewCell, UICollectionViewDelegate,
             titleLabel.text = user.displayName
             timeLabel.text = Constants.formatTimestamp(TimeInterval(activity?.createdAt ?? 0), relative: true)
 
-            user.getAvatar { (image) in
+            user.getAvatar { image in
                 self.avatarImage.image = image.withRenderingMode(.alwaysOriginal)
             }
         }

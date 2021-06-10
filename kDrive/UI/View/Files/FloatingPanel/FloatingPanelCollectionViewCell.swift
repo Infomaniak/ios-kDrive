@@ -34,6 +34,7 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
         }
     }
     override func awakeFromNib() {
+        super.awakeFromNib()
         self.contentView.bringSubviewToFront(darkLayer)
     }
 

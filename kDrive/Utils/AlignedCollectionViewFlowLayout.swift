@@ -27,7 +27,6 @@
 
 import UIKit
 
-
 // MARK: - 🦆 Type definitions
 
 /// An abstract protocol that defines an alignment.
@@ -69,7 +68,6 @@ private struct AlignmentAxis<A: Alignment> {
     /// * If the `Alignment` is vertical, the alignment axis is horizontal and this is the position on the `y` axis.
     let position: CGFloat
 }
-
 
 // MARK: - Flow Layout
 
@@ -140,7 +138,6 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
         return collectionViewWidth - sectionInset.left - sectionInset.right
     }
 
-
     // MARK: - 👶 Initialization
 
     /// The designated initializer.
@@ -159,7 +156,6 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-
 
     // MARK: - 🅾️ Overrides
 
@@ -210,12 +206,11 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     override open func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         // We may not change the original layout attributes or UICollectionViewFlowLayout might complain.
         let layoutAttributesObjects = copy(super.layoutAttributesForElements(in: rect))
-        layoutAttributesObjects?.forEach({ (layoutAttributes) in
+        layoutAttributesObjects?.forEach { layoutAttributes in
             setFrame(forLayoutAttributes: layoutAttributes)
-        })
+        }
         return layoutAttributesObjects
     }
-
 
     // MARK: - 👷 Private layout helpers
 
@@ -325,7 +320,6 @@ open class AlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
     }
 
 }
-
 
 // MARK: - 👷 Layout attributes helpers
 

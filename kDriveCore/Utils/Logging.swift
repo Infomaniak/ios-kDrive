@@ -31,7 +31,7 @@ public class Logging {
 
     private static func initLogger() {
         DDLog.add(DDOSLogger.sharedInstance)
-        let fileLogger: DDFileLogger = DDFileLogger()
+        let fileLogger = DDFileLogger()
         fileLogger.rollingFrequency = 60 * 60 * 24 // 24 hours
         fileLogger.logFileManager.maximumNumberOfLogFiles = 7
         DDLog.add(fileLogger)

@@ -64,7 +64,7 @@ class RecentActivitySharedController: RecentActivityDelegate {
     func loadNextRecentActivities(completion: @escaping (Error?) -> Void) {
         isLoading = true
         let replace = nextPage == 1
-        driveFileManager.apiFetcher.getRecentActivity(page: nextPage) { (response, error) in
+        driveFileManager.apiFetcher.getRecentActivity(page: nextPage) { response, _ in
             guard !self.isInvalidated else {
                 return
             }
@@ -104,7 +104,7 @@ class RecentActivitySharedController: RecentActivityDelegate {
         var ignoredActivityIds = [Int]()
 
         for (index, activity) in activities.enumerated() {
-            let ignoreActivity = resultActivities.count > 0 && resultActivities.last?.user?.id == activity.user?.id && resultActivities.last?.action == activity.action && resultActivities.last?.file?.id == activity.file?.id
+            let ignoreActivity = !resultActivities.isEmpty && resultActivities.last?.user?.id == activity.user?.id && resultActivities.last?.action == activity.action && resultActivities.last?.file?.id == activity.file?.id
             if !ignoredActivityIds.contains(activity.id) && !ignoreActivity {
                 var i = index + 1
                 var mergedFilesTemp = [activity.fileId: activity.file]

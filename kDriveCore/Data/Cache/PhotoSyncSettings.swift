@@ -29,12 +29,12 @@ public class PhotoSyncSettings: Object {
     @objc public dynamic var userId: Int = -1
     @objc public dynamic var driveId: Int = -1
     @objc public dynamic var parentDirectoryId: Int = -1
-    @objc public dynamic var lastSync: Date = Date(timeIntervalSince1970: 0)
+    @objc public dynamic var lastSync = Date(timeIntervalSince1970: 0)
     @objc public dynamic var syncMode: PhotoSyncMode = .new
-    @objc public dynamic var syncPicturesEnabled: Bool = true
-    @objc public dynamic var syncVideosEnabled: Bool = true
-    @objc public dynamic var syncScreenshotsEnabled: Bool = true
-    @objc public dynamic var createDatedSubFolders: Bool = false
+    @objc public dynamic var syncPicturesEnabled = true
+    @objc public dynamic var syncVideosEnabled = true
+    @objc public dynamic var syncScreenshotsEnabled = true
+    @objc public dynamic var createDatedSubFolders = false
 
     public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool, createDatedSubFolders: Bool) {
         self.userId = userId

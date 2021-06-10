@@ -34,17 +34,17 @@ extension ApiFetcher {
     public func getUserDrives(completion: @escaping (ApiResponse<DriveResponse>?, Error?) -> Void) {
         authenticatedSession.request(ApiRoutes.getAllDrivesData(), method: .get)
             .validate()
-            .responseDecodable(of: ApiResponse<DriveResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<DriveResponse>.self, decoder: ApiFetcher.decoder) { response in
 
-            self.handleResponse(response: response) { (response, error) in
+            self.handleResponse(response: response) { response, error in
                 if let driveResponse = response?.data,
-                    driveResponse.drives.main.count == 0 {
+                    driveResponse.drives.main.isEmpty {
                     completion(nil, DriveError.noDrive)
                 } else {
                     completion(response, error)
                 }
             }
-        }
+            }
     }
 }
 
@@ -81,7 +81,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public override func handleResponse<Type>(response: DataResponse<Type, AFError>, completion: @escaping (Type?, Error?) -> Void) {
-        super.handleResponse(response: response) { (res, error) in
+        super.handleResponse(response: response) { res, error in
             if let error = error as? InfomaniakCore.ApiError {
                 completion(res, DriveError(apiError: error))
             } else {
@@ -96,52 +96,64 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func createDirectory(parentDirectory: File, name: String, onlyForMe: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.createDirectory(driveId: parentDirectory.driveId, parentId: parentDirectory.id)
-        let body: [String: Any] = ["name": name,
+        let body: [String: Any] = [
+            "name": name,
             "only_for_me": onlyForMe,
-            "share": false]
+            "share": false
+        ]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func createCommonDirectory(name: String, forAllUser: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.createCommonDirectory(driveId: drive.id)
-        let body: [String: Any] = ["name": name,
-            "for_all_user": forAllUser]
+        let body: [String: Any] = [
+            "name": name,
+            "for_all_user": forAllUser
+        ]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func createOfficeFile(parentDirectory: File, name: String, type: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.createOfficeFile(driveId: drive.id, parentId: parentDirectory.id)
-        let body: [String: Any] = ["name": name,
-            "type": type]
+        let body: [String: Any] = [
+            "name": name,
+            "type": type
+        ]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
-    public func setupDropBox(directory: File, password: String?, validUntil: Date?, emailWhenFinished: Bool,
-        limitFileSize: Int?, completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
+    public func setupDropBox(directory: File,
+                             password: String?,
+                             validUntil: Date?,
+                             emailWhenFinished: Bool,
+                             limitFileSize: Int?,
+                             completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
             let size = Double(limitFileSize) * pow(Double(1024), Double(3))
             sizeLimit = Int(size)
         }
-        var body: [String: Any] = ["password": password ?? "",
+        var body: [String: Any] = [
+            "password": password ?? "",
             "email_when_finished": emailWhenFinished,
-            "limit_file_size": sizeLimit ?? ""]
+            "limit_file_size": sizeLimit ?? ""
+        ]
         if let validUntil = validUntil?.timeIntervalSince1970 {
             body.updateValue(Int(validUntil), forKey: "valid_until")
         }
@@ -149,7 +161,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<DropBox>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getDropBoxSettings(directory: File, completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
@@ -158,11 +170,15 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<DropBox>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
-    public func updateDropBox(directory: File, password: String?, validUntil: Date?, emailWhenFinished: Bool,
-        limitFileSize: Int?, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+    public func updateDropBox(directory: File,
+                              password: String?,
+                              validUntil: Date?,
+                              emailWhenFinished: Bool,
+                              limitFileSize: Int?,
+                              completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
@@ -181,7 +197,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .put, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func disableDropBox(directory: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
@@ -190,7 +206,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .delete)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getFileListForDirectory(parentId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -198,24 +214,24 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getFavoriteFiles(page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFavoriteFiles(driveId: drive.id, sortType: sortType))\(pagination(page: page))"
 
         authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getMyShared(page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getMyShared(driveId: drive.id, sortType: sortType))\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -229,7 +245,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getLastPictures(page: Int = 1, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
@@ -238,13 +254,13 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getShareListFor(file: File, completion: @escaping (ApiResponse<SharedFile>?, Error?) -> Void) {
         let url = ApiRoutes.getShareListFor(file: file)
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<SharedFile>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<SharedFile>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -254,11 +270,12 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post)
             .validate()
-            .responseDecodable(of: ApiResponse<ShareLink>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<ShareLink>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
+    // swiftlint:disable function_parameter_count
     public func updateShareLinkWith(file: File, canEdit: Bool, permission: String, password: String? = "", date: TimeInterval?, blockDownloads: Bool, blockComments: Bool, blockInformation: Bool, isFree: Bool, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateShareLinkWith(file: file)
 
@@ -272,7 +289,7 @@ public class DriveApiFetcher: ApiFetcher {
             body.updateValue(password!, forKey: "password")
         }
 
-        authenticatedSession.request(url, method: .put, parameters: body, encoding: JSONEncoding.default).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .put, parameters: body, encoding: JSONEncoding.default).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -281,7 +298,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.addUserRights(file: file)
         let body: [String: Any] = ["user_ids": users, "tag_ids": tags, "emails": emails, "permission": permission, "lang": "fr", "message": message]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<SharedUsers>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<SharedUsers>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -290,7 +307,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.checkUserRights(file: file)
         let body: [String: Any] = ["user_ids": users, "tag_ids": tags, "emails": emails, "permission": permission]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<[FileCheckResult]>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<[FileCheckResult]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -299,7 +316,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.updateUserRights(file: file, user: user)
         let body: [String: Any] = ["permission": permission]
 
-        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -307,7 +324,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func deleteUserRights(file: File, user: DriveUser, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateUserRights(file: file, user: user)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -316,7 +333,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.updateInvitationRights(driveId: drive.id, invitation: invitation)
         let body: [String: Any] = ["permission": permission]
 
-        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -324,7 +341,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func deleteInvitationRights(invitation: Invitation, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.deleteInvitationRights(driveId: drive.id, invitation: invitation)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -332,7 +349,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func removeShareLinkFor(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.removeShareLinkFor(file: file)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -342,15 +359,15 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getFileDetailActivity(file: File, page: Int, completion: @escaping (ApiResponse<[FileDetailActivity]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=*\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[FileDetailActivity]>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[FileDetailActivity]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -358,7 +375,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func getFileDetailComment(file: File, page: Int, completion: @escaping (ApiResponse<[Comment]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFileDetailComment(file: file))?with=*\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[Comment]>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[Comment]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -367,7 +384,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.getFileDetailComment(file: file)
         let body: [String: Any] = ["body": comment]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<Comment>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<Comment>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -375,7 +392,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func likeComment(file: File, like: Bool, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = like ? ApiRoutes.unlikeComment(file: file, comment: comment) : ApiRoutes.likeComment(file: file, comment: comment)
 
-        authenticatedSession.request(url, method: .post).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .post).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -383,7 +400,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func deleteComment(file: File, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.getComment(file: file, comment: comment)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -392,7 +409,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.getComment(file: file, comment: comment)
         let body: [String: Any] = ["body": text]
 
-        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -401,7 +418,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.getComment(file: file, comment: comment)
         let body: [String: Any] = ["body": text]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<Comment>.self, decoder: ApiFetcher.decoder) { (response) in
+        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<Comment>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
@@ -410,27 +427,27 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.deleteFile(file: file)
 
         authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func deleteAllFilesDefinitely(completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.deleteAllFilesDefinitely(driveId: drive.id)
 
         authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func deleteFileDefinitely(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.deleteFileDefinitely(file: file)
 
         authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func renameFile(file: File, newName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -438,9 +455,9 @@ public class DriveApiFetcher: ApiFetcher {
         let body: [String: Any] = ["name": newName]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func duplicateFile(file: File, duplicateName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -448,18 +465,18 @@ public class DriveApiFetcher: ApiFetcher {
         let body: [String: Any] = ["name": duplicateName]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func moveFile(file: File, newParent: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
         let url = ApiRoutes.moveFile(file: file, newParentId: newParent.id)
 
         authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getRecentActivity(page: Int = 1, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
@@ -468,7 +485,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[FileActivity]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getFileActivitiesFromDate(file: File, date: Int, page: Int, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
@@ -478,7 +495,7 @@ public class DriveApiFetcher: ApiFetcher {
             .validate()
             .responseDecodable(of: ApiResponse<[FileActivity]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func postFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
@@ -487,7 +504,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post)
             .responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func deleteFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
@@ -496,7 +513,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .delete)
             .responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
@@ -507,7 +524,7 @@ public class DriveApiFetcher: ApiFetcher {
             AccountManager.instance.reloadTokensAndAccounts()
             if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
                 if reloadedToken.requiresRefresh {
-                    InfomaniakLogin.refreshToken(token: reloadedToken) { (newToken, error) in
+                    InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
                         if let newToken = newToken {
                             AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
                             lock.leave()
@@ -532,12 +549,12 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func getPublicUploadTokenWithToken(_ token: ApiToken, completion: @escaping (ApiResponse<UploadToken>?, Error?) -> Void) {
         let url = ApiRoutes.getUploadToken(driveId: drive.id)
-        performAuthenticatedRequest(token: token) { (token, error) in
+        performAuthenticatedRequest(token: token) { token, error in
             if let token = token {
                 AF.request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])
-                    .responseDecodable(of: ApiResponse<UploadToken>.self, decoder: ApiFetcher.decoder) { (response) in
+                    .responseDecodable(of: ApiResponse<UploadToken>.self, decoder: ApiFetcher.decoder) { response in
                     self.handleResponse(response: response, completion: completion)
-                }
+                    }
             } else {
                 completion(nil, error)
             }
@@ -548,9 +565,9 @@ public class DriveApiFetcher: ApiFetcher {
         let url = "\(ApiRoutes.getTrashFiles(driveId: drive.id, sortType: sortType))\(pagination(page: page))"
 
         authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func getChildrenTrashedFiles(fileId: Int?, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -558,9 +575,9 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func restoreTrashedFile(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
@@ -568,9 +585,9 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post)
             .validate()
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func restoreTrashedFile(file: File, in folderId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
@@ -579,9 +596,9 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post, parameters: body)
             .validate()
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func searchFiles(query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
@@ -594,18 +611,18 @@ public class DriveApiFetcher: ApiFetcher {
         }
 
         authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func requireFileAccess(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.requireFileAccess(file: file)
 
         authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func cancelAction(cancelId: String, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
@@ -613,18 +630,18 @@ public class DriveApiFetcher: ApiFetcher {
         let body: [String: Any] = ["cancel_id": cancelId]
 
         authenticatedSession.request(url, method: .post, parameters: body)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 
     public func convertFile(file: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.convertFile(file: file)
 
         authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { (response) in
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
-        }
+            }
     }
 }
 
@@ -636,7 +653,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
         lock.enter()
         let tokenBreadcrumb = Breadcrumb()
         tokenBreadcrumb.category = "Token"
-        //Maybe someone else refreshed our token
+        // Maybe someone else refreshed our token
         AccountManager.instance.reloadTokensAndAccounts()
         if let token = AccountManager.instance.getTokenForUserId(credential.userId),
             token.expirationDate > credential.expirationDate {

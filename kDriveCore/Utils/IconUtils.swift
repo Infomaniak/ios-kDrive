@@ -38,7 +38,7 @@ public class IconUtils {
         }
     }
 
-    public static func getThumbnail(for file: File, completion: @escaping ((UIImage, Bool) -> (Void))) {
+    public static func getThumbnail(for file: File, completion: @escaping ((UIImage, Bool) -> Void)) {
         if file.isDirectory {
             switch file.visibility {
             case .isTeamSpace:

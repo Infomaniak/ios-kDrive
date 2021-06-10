@@ -44,7 +44,7 @@ class FavoriteViewController: FileListViewController {
             return
         }
 
-        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] (file, children, error) in
+        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, children, error in
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 self?.currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
@@ -86,10 +86,12 @@ class FavoriteViewController: FileListViewController {
 
     // MARK: - State restoration
 
+    // swiftlint:disable overridden_super_call
     override func encodeRestorableState(with coder: NSCoder) {
         // We don't need to encode anything for Favorites
     }
 
+    // swiftlint:disable overridden_super_call
     override func decodeRestorableState(with coder: NSCoder) {
         // We don't need to decode anything for Favorites
         // DriveFileManager will be recovered from tab bar controller

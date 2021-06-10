@@ -24,7 +24,7 @@ class ParameterSwitchTableViewCell: InsetTableViewCell {
     @IBOutlet weak var valueLabel: UILabel!
     @IBOutlet weak var valueSwitch: UISwitch!
 
-    var switchDelegate: ((UISwitch) -> Void)?
+    var switchHandler: ((UISwitch) -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -32,7 +32,7 @@ class ParameterSwitchTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func didSwitch(_ sender: UISwitch) {
-        switchDelegate?(sender)
+        switchHandler?(sender)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -40,7 +40,5 @@ class ParameterSwitchTableViewCell: InsetTableViewCell {
 
         self.contentInsetView.backgroundColor = InfomaniakCoreAsset.backgroundCardView.color
     }
-
-
 
 }

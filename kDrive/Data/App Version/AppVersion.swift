@@ -27,12 +27,10 @@ struct AppVersion: Codable {
     var version: String?
     var currentVersionReleaseDate: String?
 
-
     private enum CodingKeys: String, CodingKey {
-        case version = "version"
-        case currentVersionReleaseDate = "currentVersionReleaseDate"
+        case version
+        case currentVersionReleaseDate
     }
-
 
     func loadVersionData(handler: @escaping (_ resultList: AppVersion) -> Void) {
 
@@ -42,7 +40,7 @@ struct AppVersion: Codable {
 
         let request = URLRequest(url: url)
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { data, _, error in
 
             if let data = data {
                 if let decodedResponse = try? JSONDecoder().decode(Response.self, from: data) {
@@ -86,7 +84,3 @@ struct AppVersion: Codable {
     }
 
 }
-
-
-
-

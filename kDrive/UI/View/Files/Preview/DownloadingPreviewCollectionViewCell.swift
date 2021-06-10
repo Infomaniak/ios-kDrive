@@ -94,11 +94,11 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 
     func progressiveLoadingForFile(_ file: File) {
         self.file = file
-        file.getThumbnail { (thumbnail, _) in
+        file.getThumbnail { thumbnail, _ in
             self.previewImageView.image = thumbnail
         }
 
-        previewDownloadTask = file.getPreview { [weak previewImageView] (preview) in
+        previewDownloadTask = file.getPreview { [weak previewImageView] preview in
             guard let previewImageView = previewImageView else {
                 return
             }

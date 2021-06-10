@@ -35,7 +35,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     var option: ShareLinkSettingsViewController.Option?
     weak var delegate: ShareLinkSettingsDelegate?
-    var datePickerView: UIDatePicker = UIDatePicker()
+    var datePickerView = UIDatePicker()
     var expirationDate: Date?
 
     var actionHandler: ((UIButton) -> Void)?

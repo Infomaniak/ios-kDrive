@@ -37,7 +37,7 @@ class InformationFloatingPanelViewController: UIViewController {
 
     var cancelHandler: ((UIButton) -> Void)?
     var actionHandler: ((UIButton) -> Void)?
-    
+
     var driveFileManager: DriveFileManager!
 
     override func viewDidLoad() {

@@ -31,7 +31,7 @@ public class Comment: Codable {
     public var user: DriveUser
     public var responses: [Comment]?
     public var likes: [DriveUser]?
-    public var isResponse: Bool = false
+    public var isResponse = false
 
     enum CodingKeys: String, CodingKey {
         case id = "id"

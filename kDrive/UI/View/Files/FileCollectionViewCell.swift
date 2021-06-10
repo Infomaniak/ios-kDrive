@@ -149,7 +149,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
             logoImage.layer.cornerRadius = UIConstants.imageCornerRadius
             logoImage.layer.masksToBounds = true
             logoImage.backgroundColor = KDriveAsset.loaderDefaultColor.color
-            file.getThumbnail { (image, _) in
+            file.getThumbnail { image, _ in
                 if fileId == self.file.id {
                     self.logoImage.image = image
                     self.logoImage.backgroundColor = nil

@@ -84,7 +84,7 @@ public class DownloadQueue {
         operationsInQueue[file.id] = operation
     }
 
-    public func temporaryDownload(file: File, completion: @escaping (DriveError?) -> ()) -> DownloadOperation? {
+    public func temporaryDownload(file: File, completion: @escaping (DriveError?) -> Void) -> DownloadOperation? {
         guard !file.isInvalidated && operationsInQueue[file.id] == nil,
             let driveFileManager = AccountManager.instance.currentDriveFileManager else {
             return nil
@@ -113,7 +113,7 @@ public class DownloadQueue {
     }
 
     public func cancelRunningOperations() {
-        operationQueue.operations.filter(\.isExecuting).forEach({ $0.cancel() })
+        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
     // MARK: - Private methods

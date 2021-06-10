@@ -22,7 +22,7 @@ import InfomaniakCore
 class ThemeSelectionTableViewCell: InsetTableViewCell {
 
     @IBOutlet weak var themeLabel: UILabel!
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
     }

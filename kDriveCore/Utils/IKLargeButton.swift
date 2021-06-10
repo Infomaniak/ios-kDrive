@@ -56,7 +56,6 @@ import UIKit
 
         static let allValues = [primaryButton, secondaryButton]
 
-        public typealias RawValue = String
         public var rawValue: String
 
         internal init(titleFont: UIFont, titleColor: UIColor, backgroundColor: UIColor, rawValue: RawValue) {

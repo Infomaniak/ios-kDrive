@@ -33,7 +33,7 @@ class FileProviderExtensionState {
 
     func unenumeratedImportedDocuments(forParent parentItemIdentifier: NSFileProviderItemIdentifier) -> [FileProviderItem] {
         let children = importedDocuments.values.filter { $0.parentItemIdentifier == parentItemIdentifier && !$0.alreadyEnumerated }
-        children.forEach({ $0.alreadyEnumerated = true })
+        children.forEach { $0.alreadyEnumerated = true }
         return children
     }
 
@@ -125,8 +125,7 @@ class FileProviderExtension: NSFileProviderExtension {
             try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
             let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
             try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: FileProviderItem(file: file, domain: domain))
-        }
-        catch let error {
+        } catch let error {
             print("\(error)")
         }
         completionHandler(nil)
@@ -182,7 +181,7 @@ class FileProviderExtension: NSFileProviderExtension {
         }
     }
 
-    private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> ()) {
+    private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
         if file.isLocalVersionOlderThanRemote() {
             // Prevent observing file multiple times
             guard DownloadQueue.instance.operationsInQueue[file.id] == nil else {
@@ -191,7 +190,7 @@ class FileProviderExtension: NSFileProviderExtension {
             }
 
             var observationToken: ObservationToken?
-            observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { (fileId, error) in
+            observationToken = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
                 observationToken?.cancel()
                 if error != nil {
                     self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
@@ -250,12 +249,12 @@ class FileProviderExtension: NSFileProviderExtension {
         }
 
         // write out a placeholder to facilitate future property lookups
-        self.providePlaceholder(at: url, completionHandler: { error in
+        self.providePlaceholder(at: url) { _ in
             // TODO: handle any error, do any necessary cleanup
-        })
+        }
     }
 
-    func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> ())? = nil) {
+    func backgroundUploadItem(_ item: FileProviderItem, completion: (() -> Void)? = nil) {
         let fileId = item.itemIdentifier.rawValue
         let uploadFile = UploadFile(
             id: fileId,
@@ -265,7 +264,7 @@ class FileProviderExtension: NSFileProviderExtension {
             url: item.storageUrl,
             name: item.filename,
             shouldRemoveAfterUpload: false)
-        UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { (uploadedFile, driveFile) in
+        UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
             }
@@ -305,8 +304,9 @@ class FileProviderExtension: NSFileProviderExtension {
 
 extension FileProviderExtension {
     // Create an NSError based on the file provider error code
-    func nsError(domain: String = NSFileProviderErrorDomain, code: NSFileProviderError.Code,
-        userInfo dict: [String: Any]? = nil) -> NSError {
+    func nsError(domain: String = NSFileProviderErrorDomain,
+                 code: NSFileProviderError.Code,
+                 userInfo dict: [String: Any]? = nil) -> NSError {
         return NSError(domain: NSFileProviderErrorDomain, code: code.rawValue, userInfo: dict)
     }
 }

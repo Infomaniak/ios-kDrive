@@ -37,6 +37,7 @@ class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelega
     }
 
     override func prepareForReuse() {
+        super.prepareForReuse()
         collectionView.reloadData()
     }
 
@@ -58,7 +59,6 @@ class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelega
         }
         return cell
     }
-
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let sizeLabel = UILabel()

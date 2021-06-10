@@ -38,8 +38,8 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
     @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var dateTextField: MaterialOutlinedTextField!
 
-    var showPassword: Bool = false
-    var datePickerView: UIDatePicker = UIDatePicker()
+    var showPassword = false
+    var datePickerView = UIDatePicker()
 
     weak var delegate: NewFolderSettingsDelegate?
     var index: Int!
@@ -165,7 +165,7 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
     }
 
     @objc func displayPassword() {
-        showPassword = !showPassword
+        showPassword.toggle()
         textField.isSecureTextEntry = !showPassword
     }
 

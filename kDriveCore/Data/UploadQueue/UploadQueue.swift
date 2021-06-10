@@ -82,7 +82,7 @@ public class UploadQueue {
         }
     }
 
-    public func waitForCompletion(_ completionHandler: @escaping () -> (Void)) {
+    public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         DispatchQueue.global(qos: .default).async {
             self.operationQueue.waitUntilAllOperationsAreFinished()
             completionHandler()
@@ -171,7 +171,7 @@ public class UploadQueue {
     }
 
     public func cancelRunningOperations() {
-        operationQueue.operations.filter(\.isExecuting).forEach({ $0.cancel() })
+        operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
     public func cancel(_ file: UploadFile, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
@@ -240,7 +240,7 @@ public class UploadQueue {
     }
 
     private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
-        fileUploadedCount = fileUploadedCount + (result.uploadFile.error == nil ? 1 : 0)
+        fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
         if let error = result.uploadFile.error,
             error != .networkError || error != .taskCancelled || error != .taskRescheduled {
             NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
@@ -285,7 +285,7 @@ public class UploadQueue {
             let realm = DriveFileManager.constants.uploadsRealm
             for file in importedFiles {
                 let filePath = importDirectory.appendingPathComponent(file, isDirectory: false).path
-                if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).count == 0 {
+                if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).isEmpty {
                     try? FileManager.default.removeItem(atPath: filePath)
                 }
             }
@@ -307,7 +307,7 @@ public class UploadQueue {
             shouldCompactOnLaunch: compactingCondition,
             objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
         do {
-            let _ = try Realm(configuration: config)
+            _ = try Realm(configuration: config)
         } catch {
             DDLogError("Failed to compact uploads realm: \(error)")
         }

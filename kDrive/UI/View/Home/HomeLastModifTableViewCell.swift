@@ -84,4 +84,3 @@ class HomeLastModifTableViewCell: UITableViewCell, UICollectionViewDelegate, UIC
     }
 
 }
-

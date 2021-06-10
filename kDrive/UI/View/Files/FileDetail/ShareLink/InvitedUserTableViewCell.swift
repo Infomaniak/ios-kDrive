@@ -85,9 +85,8 @@ class InvitedUserTableViewCell: InsetTableViewCell {
         return height
     }
 
-
 }
-//MARK: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
+// MARK: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -100,19 +99,19 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
         if indexPath.row < users.count {
             let user = users[indexPath.row]
             cell.usernameLabel.text = user.displayName
-            user.getAvatar { (image) in
+            user.getAvatar { image in
                 cell.avatarImage.image = image
                     .resizeImage(size: CGSize(width: 35, height: 35))
                     .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
                     .withRenderingMode(.alwaysOriginal)
             }
-            cell.removeButtonHandler = { sender in
+            cell.removeButtonHandler = { _ in
                 self.delegate?.didDeleteUser(user: user)
             }
         } else {
             cell.usernameLabel.text = mails[indexPath.row - users.count]
             cell.avatarImage.image = KDriveAsset.circleSend.image
-            cell.removeButtonHandler = { sender in
+            cell.removeButtonHandler = { _ in
                 self.delegate?.didDeleteMail(mail: self.mails[indexPath.row - self.users.count])
             }
         }
@@ -124,4 +123,3 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
     }
 
 }
-

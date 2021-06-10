@@ -22,22 +22,22 @@ import RealmSwift
 class tableAccount: Object {
 
     @objc dynamic var account = ""
-    @objc dynamic var active: Bool = false
+    @objc dynamic var active = false
     @objc dynamic var address = ""
-    @objc dynamic var autoUpload: Bool = false
-    @objc dynamic var autoUploadBackground: Bool = false
-    @objc dynamic var autoUploadCreateSubfolder: Bool = false
-    @objc dynamic var autoUploadDeleteAssetLocalIdentifier: Bool = true
+    @objc dynamic var autoUpload = false
+    @objc dynamic var autoUploadBackground = false
+    @objc dynamic var autoUploadCreateSubfolder = false
+    @objc dynamic var autoUploadDeleteAssetLocalIdentifier = true
     @objc dynamic var autoUploadDirectory = ""
     @objc dynamic var autoUploadFileName = ""
-    @objc dynamic var autoUploadFull: Bool = false
-    @objc dynamic var autoUploadImage: Bool = false
-    @objc dynamic var autoUploadVideo: Bool = false
-    @objc dynamic var autoUploadWWAnPhoto: Bool = false
-    @objc dynamic var autoUploadWWAnVideo: Bool = false
+    @objc dynamic var autoUploadFull = false
+    @objc dynamic var autoUploadImage = false
+    @objc dynamic var autoUploadVideo = false
+    @objc dynamic var autoUploadWWAnPhoto = false
+    @objc dynamic var autoUploadWWAnVideo = false
     @objc dynamic var backend = ""
-    @objc dynamic var backendCapabilitiesSetDisplayName: Bool = false
-    @objc dynamic var backendCapabilitiesSetPassword: Bool = false
+    @objc dynamic var backendCapabilitiesSetDisplayName = false
+    @objc dynamic var backendCapabilitiesSetPassword = false
     @objc dynamic var businessSize: String = ""
     @objc dynamic var businessType = ""
     @objc dynamic var city = ""
@@ -45,7 +45,7 @@ class tableAccount: Object {
     @objc dynamic var country = ""
     @objc dynamic var displayName = ""
     @objc dynamic var email = ""
-    @objc dynamic var enabled: Bool = false
+    @objc dynamic var enabled = false
     @objc dynamic var groups = ""
     @objc dynamic var language = ""
     @objc dynamic var lastLogin: Double = 0
@@ -65,26 +65,26 @@ class tableAccount: Object {
     @objc dynamic var urlBase = ""
     @objc dynamic var user = ""
     @objc dynamic var userID = ""
-    @objc dynamic var userStatusClearAt: NSDate? = nil
+    @objc dynamic var userStatusClearAt: NSDate?
     @objc dynamic var userStatusIcon: String?
     @objc dynamic var userStatusMessage: String?
     @objc dynamic var userStatusMessageId: String?
-    @objc dynamic var userStatusMessageIsPredefined: Bool = false
+    @objc dynamic var userStatusMessageIsPredefined = false
     @objc dynamic var userStatusStatus: String?
-    @objc dynamic var userStatusStatusIsUserDefined: Bool = false
+    @objc dynamic var userStatusStatusIsUserDefined = false
     @objc dynamic var webpage = ""
     @objc dynamic var zip = ""
     // HC
-    @objc dynamic var hcIsTrial: Bool = false
-    @objc dynamic var hcTrialExpired: Bool = false
+    @objc dynamic var hcIsTrial = false
+    @objc dynamic var hcTrialExpired = false
     @objc dynamic var hcTrialRemainingSec: Double = 0
-    @objc dynamic var hcTrialEndTime: NSDate? = nil
-    @objc dynamic var hcAccountRemoveExpired: Bool = false
+    @objc dynamic var hcTrialEndTime: NSDate?
+    @objc dynamic var hcAccountRemoveExpired = false
     @objc dynamic var hcAccountRemoveRemainingSec: Double = 0
-    @objc dynamic var hcAccountRemoveTime: NSDate? = nil
+    @objc dynamic var hcAccountRemoveTime: NSDate?
     @objc dynamic var hcNextGroupExpirationGroup = ""
-    @objc dynamic var hcNextGroupExpirationGroupExpired: Bool = false
-    @objc dynamic var hcNextGroupExpirationExpiresTime: NSDate? = nil
+    @objc dynamic var hcNextGroupExpirationGroupExpired = false
+    @objc dynamic var hcNextGroupExpirationExpiresTime: NSDate?
     @objc dynamic var hcNextGroupExpirationExpires = ""
 
     override static func primaryKey() -> String {

@@ -54,10 +54,8 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     ]
 
     var contentHeight: CGFloat {
-        get {
-            return content.reduce(CGFloat(100)) { (last, section) in
-                return last + CGFloat(60 * section.count)
-            }
+        return content.reduce(CGFloat(100)) { last, section in
+            return last + CGFloat(60 * section.count)
         }
     }
 
@@ -74,13 +72,13 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
             if #available(iOS 13.0, *), VNDocumentCameraViewController.isSupported {
                 // Action is available: do nothing
             } else {
-                content[1].removeAll(where: { $0 == .scanAction })
+                content[1].removeAll { $0 == .scanAction }
             }
             if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-                content[1].removeAll(where: { $0 == .takePictureAction })
+                content[1].removeAll { $0 == .takePictureAction }
             }
             if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-                content[1].removeAll(where: { $0 == .importMediaAction })
+                content[1].removeAll { $0 == .importMediaAction }
             }
         #endif
     }

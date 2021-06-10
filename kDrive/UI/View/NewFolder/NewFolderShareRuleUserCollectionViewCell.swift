@@ -33,7 +33,7 @@ class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
 
     func configureWith(user: DriveUser) {
         userImage.image = KDriveAsset.placeholderAvatar.image
-        user.getAvatar { (image) in
+        user.getAvatar { image in
             self.userImage.image = image
         }
     }

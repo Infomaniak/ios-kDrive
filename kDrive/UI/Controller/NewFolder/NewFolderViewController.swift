@@ -37,7 +37,7 @@ class NewFolderViewController: UIViewController {
     var dropBoxUrl: String?
     var folderName: String?
 
-    private var showSettings: Bool = false
+    private var showSettings = false
     private var settings: [OptionsRow: Bool] = [
             .optionMail: true,
             .optionPassword: false,
@@ -91,7 +91,7 @@ class NewFolderViewController: UIViewController {
         tableView.separatorColor = .clear
         hideKeyboardWhenTappedAround()
 
-        driveFileManager.getFile(id: currentDirectory.id, withExtras: true) { (file, _, error) in
+        driveFileManager.getFile(id: currentDirectory.id, withExtras: true) { file, _, _ in
             if let file = file {
                 self.currentDirectory = file
             }
@@ -121,14 +121,14 @@ class NewFolderViewController: UIViewController {
         switch folderType {
         case .folder:
             sections = [.header, .permissions]
-            permissionsRows = [.meOnly, currentDirectory.users.count > 1 || currentDirectory.tags.count > 0 ? .parentsRights : .someUser]
+            permissionsRows = [.meOnly, currentDirectory.users.count > 1 || !currentDirectory.tags.isEmpty ? .parentsRights : .someUser]
         case .commonFolder:
             sections = [.header, .permissions, .location]
             permissionsRows = [.allUsers, .someUser]
             setupFolderPath()
         case .dropbox:
             sections = [.header, .permissions, .options]
-            permissionsRows = [.meOnly, currentDirectory.users.count > 1 || currentDirectory.tags.count > 0 ? .parentsRights : .someUser]
+            permissionsRows = [.meOnly, currentDirectory.users.count > 1 || !currentDirectory.tags.isEmpty ? .parentsRights : .someUser]
         case .none:
             break
         }
@@ -158,7 +158,7 @@ class NewFolderViewController: UIViewController {
 
     func setupFolderPath() {
         commonFolderPath.append(driveFileManager.drive.name)
-        commonFolderPath.append(contentsOf: currentDirectory.path.split(separator: "/").map({ String.init($0) }))
+        commonFolderPath.append(contentsOf: currentDirectory.path.split(separator: "/").map { String.init($0) })
     }
 
     func computeHeightForImpactedCell(labels: [String]) -> CGFloat {
@@ -213,7 +213,7 @@ class NewFolderViewController: UIViewController {
 
     func updateButton() {
         var activateButton = true
-        activateButton = newFolderName.count > 0
+        activateButton = !newFolderName.isEmpty
         if folderType == .dropbox {
             for (option, enabled) in settings {
                 if option != .optionMail && enabled && getValue(for: option) == nil {
@@ -225,7 +225,6 @@ class NewFolderViewController: UIViewController {
     }
 }
 
-
 // MARK: - TextField and Keyboard Methods
 extension NewFolderViewController: NewFolderTextFieldDelegate {
     func textFieldUpdated(content: String) {
@@ -233,7 +232,6 @@ extension NewFolderViewController: NewFolderTextFieldDelegate {
         updateButton()
     }
 }
-
 
 // MARK: - NewFolderSettingsDelegate
 extension NewFolderViewController: NewFolderSettingsDelegate {
@@ -254,7 +252,6 @@ extension NewFolderViewController: NewFolderSettingsDelegate {
         // Not needed
     }
 }
-
 
 // MARK: - TableView Methods
 extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
@@ -380,7 +377,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             return indexPath
         case .options:
             if optionsRows[indexPath.row] == .header {
-                showSettings = !showSettings
+                showSettings.toggle()
                 optionsRows = showSettings ? OptionsRow.allCases : [.header]
                 UIView.animate(withDuration: 0.2) {
                     let cell = tableView.cellForRow(at: indexPath) as! NewFolderSettingsTitleTableViewCell
@@ -398,7 +395,6 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-
 // MARK: - FooterButtonDelegate
 extension NewFolderViewController: FooterButtonDelegate {
     func didClickOnButton() {
@@ -412,7 +408,7 @@ extension NewFolderViewController: FooterButtonDelegate {
             }
             let onlyForMe = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .meOnly
             let toShare = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .someUser
-            driveFileManager.createDirectory(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe) { (file, error) in
+            driveFileManager.createDirectory(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe) { file, error in
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
                     if toShare {
@@ -430,7 +426,7 @@ extension NewFolderViewController: FooterButtonDelegate {
             }
         case .commonFolder:
             let forAllUser = tableView.indexPathForSelectedRow?.row == 0
-            driveFileManager.createCommonDirectory(name: newFolderName, forAllUser: forAllUser) { (file, error) in
+            driveFileManager.createCommonDirectory(name: newFolderName, forAllUser: forAllUser) { file, error in
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
                     if !forAllUser {
@@ -451,7 +447,7 @@ extension NewFolderViewController: FooterButtonDelegate {
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
             let limitFileSize: Int? = getSetting(for: .optionSize) ? (getValue(for: .optionSize) as? Int) : nil
-            driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { (file, dropBox, error) in
+            driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { file, dropBox, error in
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
                     if !onlyForMe {

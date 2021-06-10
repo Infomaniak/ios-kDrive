@@ -74,7 +74,7 @@ class AlertDocViewController: AlertFieldViewController {
             typeImage.heightAnchor.constraint(equalToConstant: 25),
             typeImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             textField.leadingAnchor.constraint(equalTo: typeImage.trailingAnchor, constant: 8),
-            textField.centerYAnchor.constraint(equalTo: typeImage.centerYAnchor),
+            textField.centerYAnchor.constraint(equalTo: typeImage.centerYAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
     }
@@ -87,7 +87,7 @@ class AlertDocViewController: AlertFieldViewController {
         }
 
         setLoading(true)
-        driveFileManager.createOfficeFile(parentDirectory: directory, name: name.addingExtension(fileType), type: fileType) { (file, error) in
+        driveFileManager.createOfficeFile(parentDirectory: directory, name: name.addingExtension(fileType), type: fileType) { file, error in
             self.setLoading(false)
 
             self.dismiss(animated: true) {

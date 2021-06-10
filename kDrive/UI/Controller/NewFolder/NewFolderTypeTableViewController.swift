@@ -45,20 +45,13 @@ class NewFolderTypeTableViewController: UITableViewController {
 
     func setupFolderType() {
         if driveFileManager.drive.pack == .solo || driveFileManager.drive.pack == .free {
-            content.removeAll(where: {
-                $0 == .commonFolder
-            })
+            content.removeAll { $0 == .commonFolder }
         }
         if currentDirectory.visibility == .isTeamSpace {
-            content.removeAll(where: {
-                $0 == .dropbox ||
-                    $0 == .folder
-            })
+            content.removeAll { $0 == .dropbox || $0 == .folder }
         }
         if currentDirectory.visibility == .isTeamSpaceFolder || currentDirectory.visibility == .isInTeamSpaceFolder {
-            content.removeAll(where: {
-                $0 == .commonFolder
-            })
+            content.removeAll { $0 == .commonFolder }
         }
         tableView.reloadData()
     }
@@ -98,7 +91,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if content[indexPath.row] == .dropbox && (driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo) {
             let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
-            (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { sender in
+            (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { _ in
                 UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
             }
             self.present(floatingPanelViewController, animated: true)

@@ -39,7 +39,7 @@ class SwitchUserViewController: UIViewController {
         tableView.register(cellView: UserAccountTableViewCell.self)
         // Try to update other accounts infos
         for account in accountManager.accounts where account != accountManager.currentAccount {
-            accountManager.updateUserForAccount(account, completion: { _, _, _ in })
+            accountManager.updateUserForAccount(account) { _, _, _ in }
         }
     }
 
@@ -117,9 +117,9 @@ extension SwitchUserViewController: UITableViewDataSource {
         cell.titleLabel.text = account.user.displayName
         cell.userEmailLabel.text = account.user.email
         cell.logoImage.image = KDriveAsset.placeholderAvatar.image
-        cell.isUserInteractionEnabled = DriveInfosManager.instance.getDrives(for: account.userId).count > 0
+        cell.isUserInteractionEnabled = !DriveInfosManager.instance.getDrives(for: account.userId).isEmpty
 
-        account.user.getAvatar { (image) in
+        account.user.getAvatar { image in
             cell.logoImage.image = image
         }
         return cell
@@ -131,10 +131,10 @@ extension SwitchUserViewController: UITableViewDataSource {
 extension SwitchUserViewController: InfomaniakLoginDelegate {
 
     func didCompleteLoginWith(code: String, verifier: String) {
-        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { (account, error) in
+        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { account, _ in
             if account != nil {
                 // Download root file
-                AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { (_, _, _) in
+                AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                     (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate())
                 }
             } else {

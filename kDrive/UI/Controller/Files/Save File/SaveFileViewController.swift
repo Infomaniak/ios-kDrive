@@ -54,7 +54,7 @@ class SaveFileViewController: UIViewController {
     var skipOptionsSelection = false
     private var importProgress: Progress?
     private var progressObserver: NSKeyValueObservation?
-    private var enableButton: Bool = false {
+    private var enableButton = false {
         didSet {
             guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
                 return
@@ -159,7 +159,7 @@ class SaveFileViewController: UIViewController {
         sections = [.importing]
         let perItemUnitCount: Int64 = 10
         importProgress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
-        progressObserver = importProgress?.observe(\.fractionCompleted) { (_, _) in
+        progressObserver = importProgress?.observe(\.fractionCompleted) { _, _ in
             // Observe progress to update table view when import is finished
             DispatchQueue.main.async { [weak self] in
                 self?.updateTableViewAfterImport()
@@ -170,7 +170,7 @@ class SaveFileViewController: UIViewController {
                 // We don't handle saving web url, only file url
                 importProgress?.completedUnitCount += perItemUnitCount
             } else if itemProvider.canLoadObject(ofClass: UIImage.self) {
-                let childProgress = getPhoto(from: itemProvider) { (image) in
+                let childProgress = getPhoto(from: itemProvider) { image in
                     let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
                     if itemProvider.registeredTypeIdentifiers.contains(UTI.heic.identifier), let data = image?.heicData(compressionQuality: self.imageCompression) {
                         self.save(data: data, name: name, uti: .heic)
@@ -182,7 +182,7 @@ class SaveFileViewController: UIViewController {
                 }
                 importProgress?.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             } else if itemProvider.canLoadObject(ofClass: PHLivePhoto.self) {
-                let childProgress = getLivePhoto(from: itemProvider) { (data) in
+                let childProgress = getLivePhoto(from: itemProvider) { data in
                     if let data = data {
                         let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
                         self.save(data: data, name: name, uti: .jpeg)
@@ -190,7 +190,7 @@ class SaveFileViewController: UIViewController {
                 }
                 importProgress?.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             } else if let typeIdentifier = itemProvider.registeredTypeIdentifiers.first {
-                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { (filename, url) in
+                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { filename, url in
                     if let url = url {
                         let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
                         self.items.append(ImportedFile(name: filename ?? name, path: url, uti: UTI(typeIdentifier) ?? .data))
@@ -247,9 +247,9 @@ class SaveFileViewController: UIViewController {
                 let livePhotoResources = PHAssetResource.assetResources(for: livePhoto)
                 if let resource = livePhotoResources.first(where: { $0.type == .photo }) {
                     var data = Data()
-                    PHAssetResourceManager.default().requestData(for: resource, options: nil) { (chunk) in
+                    PHAssetResourceManager.default().requestData(for: resource, options: nil) { chunk in
                         data.append(chunk)
-                    } completionHandler: { (error) in
+                    } completionHandler: { error in
                         if let error = error {
                             DDLogError("Error while requesting live photo data: \(error)")
                             completion(nil)
@@ -302,7 +302,7 @@ class SaveFileViewController: UIViewController {
     }
 
     private func updateButton() {
-        enableButton = selectedDirectory != nil && items.reduce(true) { $0 && !$1.name.isEmpty } && !importInProgress
+        enableButton = selectedDirectory != nil && items.allSatisfy { !$0.name.isEmpty } && !importInProgress
     }
 
     private func updateTableViewAfterImport() {
@@ -453,7 +453,7 @@ extension SaveFileViewController: UITableViewDelegate {
         case .fileName:
             let item = items[indexPath.row]
             if items.count > 1 {
-                let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonRename, placeholder: KDriveStrings.Localizable.hintInputFileName, text: item.name, action: KDriveStrings.Localizable.buttonSave, loading: false) { (newName) in
+                let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonRename, placeholder: KDriveStrings.Localizable.hintInputFileName, text: item.name, action: KDriveStrings.Localizable.buttonSave, loading: false) { newName in
                     item.name = newName
                     tableView.reloadRows(at: [indexPath], with: .automatic)
                 }

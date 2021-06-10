@@ -107,7 +107,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             }
             for file in files where !file.isDirectory {
                 group.enter()
-                driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { (error) in
+                driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
                     if error != nil {
                         success = false
                     }
@@ -122,7 +122,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             addAction = !isFavorite
             for file in files where (file.rights?.canFavorite.value ?? false) {
                 group.enter()
-                driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { (error) in
+                driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { error in
                     if error != nil {
                         success = false
                     }
@@ -140,7 +140,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     downloadInProgress = true
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                     group.enter()
-                    DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] (_, error) in
+                    DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                         if error != nil {
                             success = false
                         }

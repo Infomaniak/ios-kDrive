@@ -23,7 +23,6 @@ import kDriveCore
 class SelectThemeTableViewController: UITableViewController {
 
     private var tableContent: [Theme] = Theme.allCases
-    private let appDelegate = UIApplication.shared.delegate as! AppDelegate
     private var selectedTheme: Theme!
 
     override func viewDidLoad() {
@@ -58,7 +57,7 @@ class SelectThemeTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         UserDefaults.shared.theme = tableContent[indexPath.row]
-        appDelegate.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
+        (UIApplication.shared.delegate as? AppDelegate)?.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         navigationController?.popViewController(animated: true)
     }
 

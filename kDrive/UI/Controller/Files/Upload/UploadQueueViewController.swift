@@ -41,7 +41,7 @@ class UploadQueueViewController: UIViewController {
         cancelButton.accessibilityLabel = KDriveStrings.Localizable.buttonCancel
 
         reloadData(reloadTableView: false)
-        UploadQueue.instance.observeFileUploaded(self) { uploadFile, file in
+        UploadQueue.instance.observeFileUploaded(self) { _, _ in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 if self.isViewLoaded {
@@ -49,7 +49,7 @@ class UploadQueueViewController: UIViewController {
                 }
             }
         }
-        UploadQueue.instance.observeFileUploadProgress(self) { (fileId, progress) in
+        UploadQueue.instance.observeFileUploadProgress(self) { fileId, progress in
             DispatchQueue.main.async { [weak self] in
                 guard let strongSelf = self else { return }
                 strongSelf.progressForFileId[fileId] = CGFloat(progress)
@@ -59,7 +59,7 @@ class UploadQueueViewController: UIViewController {
             }
         }
 
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] (status) in
+        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
             self.tableView.reloadData()
         }
     }
@@ -71,14 +71,14 @@ class UploadQueueViewController: UIViewController {
 
         if reloadTableView {
             let changeSet = StagedChangeset(source: uploadingFiles, target: newUploadingFiles)
-            tableView.reload(using: changeSet, with: .automatic) { (newUploadingFiles) in
+            tableView.reload(using: changeSet, with: .automatic) { newUploadingFiles in
                 uploadingFiles = newUploadingFiles
             }
         } else {
             uploadingFiles = newUploadingFiles
         }
 
-        if newUploadingFiles.count == 0 {
+        if newUploadingFiles.isEmpty {
             navigationController?.popViewController(animated: true)
         }
     }

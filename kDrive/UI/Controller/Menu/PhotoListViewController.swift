@@ -152,7 +152,7 @@ class PhotoListViewController: UIViewController {
 
     func fetchNextPage() {
         isLoading = true
-        driveFileManager?.getLastPictures(page: page) { (response, error) in
+        driveFileManager?.getLastPictures(page: page) { response, _ in
             if let fetchedPictures = response {
 
                 self.collectionView.performBatchUpdates {
@@ -177,7 +177,7 @@ class PhotoListViewController: UIViewController {
                         currentYearMonth.pictures.append(picture)
                         self.collectionView.insertItems(at: [IndexPath(row: currentYearMonth.pictures.count - 1, section: currentSectionIndex + 1)])
                     }
-                } completion: { done in
+                } completion: { _ in
 
                 }
 
@@ -226,7 +226,7 @@ class PhotoListViewController: UIViewController {
         }
         if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY), from: headerTitleLabel)) {
             headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[indexPath.section - 1].referenceDate)
-        } else if pictureForYearMonth.count > 0 && headerTitleLabel.text == "" {
+        } else if !pictureForYearMonth.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
             headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[0].referenceDate)
         }
 

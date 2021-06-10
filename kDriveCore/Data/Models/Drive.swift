@@ -70,10 +70,10 @@ public enum DrivePack: String, Codable {
 public class DrivePackFunctionality: Object, Codable {
     @objc public dynamic var objectId: String = ""
     @objc public dynamic var versionsNumber: Int = 0
-    @objc public dynamic var dropbox: Bool = false
-    @objc public dynamic var versioning: Bool = false
-    @objc public dynamic var manageRight: Bool = false
-    @objc public dynamic var hasTeamSpace: Bool = false
+    @objc public dynamic var dropbox = false
+    @objc public dynamic var versioning = false
+    @objc public dynamic var manageRight = false
+    @objc public dynamic var hasTeamSpace = false
     @objc public dynamic var versionsKeptForDays: Int = 0
 
     public override init() {
@@ -120,9 +120,9 @@ public class Drive: Object, Codable {
     /*
      User data
      */
-    @objc public dynamic var canAddUser: Bool = false
-    @objc public dynamic var canCreateTeamFolder: Bool = false
-    @objc public dynamic var hasTechnicalRight: Bool = false
+    @objc public dynamic var canAddUser = false
+    @objc public dynamic var canCreateTeamFolder = false
+    @objc public dynamic var hasTechnicalRight = false
     @objc public dynamic var name: String = ""
     @objc private dynamic var _preferences: DrivePreferences?
     @objc public dynamic var role: String = ""
@@ -130,16 +130,16 @@ public class Drive: Object, Codable {
     /*
      Drive data
      */
-    ///Account id of the drive CREATOR
+    /// Account id of the drive CREATOR
     @objc public dynamic var accountId: Int = -1
     @objc public dynamic var id: Int = -1
     @objc private dynamic var _pack: String = ""
     @objc public dynamic var packFunctionality: DrivePackFunctionality?
-    @objc public dynamic var sharedWithMe: Bool = false
+    @objc public dynamic var sharedWithMe = false
     @objc public dynamic var size: Int64 = 0
     @objc public dynamic var usedSize: Int64 = 0
     @objc private dynamic var _users: DriveUsersCategories? = DriveUsersCategories()
-    @objc public dynamic var maintenance: Bool = false
+    @objc public dynamic var maintenance = false
     @objc public dynamic var userId: Int = 0 {
         didSet {
             let objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
@@ -216,4 +216,3 @@ public class Drive: Object, Codable {
         return lhs.objectId == rhs.objectId
     }
 }
-

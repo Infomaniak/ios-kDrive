@@ -43,8 +43,8 @@ public class SharedFile: NSObject, NSCoding, Codable {
         coder.encode(canUseTag, forKey: "CanUseTag")
         coder.encode(users.map(\.id), forKey: "Users")
         coder.encode(link, forKey: "Link")
-        //coder.encode(invitations, forKey: "Invitations")
-        //coder.encode(tags, forKey: "Tags")
+        // coder.encode(invitations, forKey: "Invitations")
+        // coder.encode(tags, forKey: "Tags")
     }
 
     public required init?(coder: NSCoder) {
@@ -60,8 +60,8 @@ public class SharedFile: NSObject, NSCoding, Codable {
         let realm = DriveInfosManager.instance.getRealm()
         self.users = users.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
         self.link = coder.decodeObject(forKey: "Link") as? ShareLink
-        self.invitations = []//invitations
-        self.tags = []//tags
+        self.invitations = []// invitations
+        self.tags = []// tags
     }
 }
 
@@ -133,15 +133,14 @@ public class Invitation: Codable {
     }
 }
 
-
 // MARK: - Share with users
 public class SharedUsers: Codable {
     public var errors: [String]
     public var valid: SharedUsersValid
 
     enum CodingKeys: String, CodingKey {
-        case errors = "errors"
-        case valid = "valid"
+        case errors
+        case valid
     }
 }
 
@@ -151,9 +150,9 @@ public class SharedUsersValid: Codable {
     public var tags: [Tag]?
 
     enum CodingKeys: String, CodingKey {
-        case invitations = "invitations"
-        case users = "users"
-        case tags = "tags"
+        case invitations
+        case users
+        case tags
     }
 }
 

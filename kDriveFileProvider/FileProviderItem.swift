@@ -38,7 +38,6 @@ extension NSFileProviderItemIdentifier {
     }
 }
 
-
 class FileProviderItem: NSObject, NSFileProviderItem {
 
     // Required properties
@@ -84,7 +83,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         } else {
             self.capabilities = [.allowsContentEnumerating, .allowsReading]
         }
-        //Every file should have a parent, root file parent should not be called
+        // Every file should have a parent, root file parent should not be called
         self.parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
         let tmpChildren = FileProviderExtensionState.shared.importedDocuments(forParent: itemIdentifier)
         self.childItemCount = file.isDirectory ? NSNumber(value: file.children.count + tmpChildren.count) : nil
@@ -216,8 +215,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         if !FileManager.default.fileExists(atPath: itemFolderURL.path) {
             do {
                 try FileManager.default.createDirectory(at: itemFolderURL, withIntermediateDirectories: true, attributes: nil)
-            }
-            catch let error {
+            } catch let error {
                 print(error)
             }
         }

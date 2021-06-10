@@ -43,7 +43,7 @@ extension MessageTableViewCell: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         textDidChange?(textView.text)
     }
-    
+
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.isEmpty {
             textView.text = KDriveStrings.Localizable.fileShareAddMessage

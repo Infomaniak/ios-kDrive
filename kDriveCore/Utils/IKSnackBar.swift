@@ -46,7 +46,7 @@ public class IKSnackBar: SnackBar {
 
     private static func getTopViewController() -> UIViewController? {
         let windows = UIApplication.shared.windows
-        let keyWindow = windows.count == 1 ? windows.first : windows.filter(\.isKeyWindow).first
+        let keyWindow = windows.count == 1 ? windows.first : windows.first(where: \.isKeyWindow)
         if let topController = keyWindow?.rootViewController {
             return getVisibleViewController(from: topController)
         } else {

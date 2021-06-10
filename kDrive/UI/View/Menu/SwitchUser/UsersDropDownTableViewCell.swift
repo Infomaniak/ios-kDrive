@@ -49,7 +49,7 @@ class UsersDropDownTableViewCell: DropDownCell {
         usernameLabel.text = user.displayName
         detailLabel.text = user.email
 
-        user.getAvatar { (image) in
+        user.getAvatar { image in
             self.avatarImage.image = image
                 .resizeImage(size: CGSize(width: 35, height: 35))
                 .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
@@ -60,7 +60,7 @@ class UsersDropDownTableViewCell: DropDownCell {
     func configureWith(account: Account) {
         usernameLabel.text = account.user.displayName
         detailLabel.text = account.user.email
-        account.user.getAvatar { (image) in
+        account.user.getAvatar { image in
             self.avatarImage.image = image
         }
     }

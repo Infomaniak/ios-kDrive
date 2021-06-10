@@ -50,7 +50,7 @@ public class NotificationsHelper {
 
     public static func askForPermissions() {
         let options: UNAuthorizationOptions = [.alert, .sound, .badge, .provisional, .providesAppNotificationSettings]
-        UNUserNotificationCenter.current().requestAuthorization(options: options) { (granted, error) in
+        UNUserNotificationCenter.current().requestAuthorization(options: options) { granted, _ in
             if !granted {
                 DDLogInfo("User has declined notifications")
             }
@@ -80,7 +80,7 @@ public class NotificationsHelper {
         content.categoryIdentifier = uploadCategoryId
         content.sound = .default
 
-        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
+        UNUserNotificationCenter.current().getDeliveredNotifications { _ in
             content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
             content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
             content.userInfo[parentIdKey] = parentId
@@ -108,7 +108,7 @@ public class NotificationsHelper {
         content.sound = .default
         sendImmediately(notification: content, id: uploadPausedNotificationId)
     }
-    
+
     public static func sendDisconnectedNotification() {
         let content = UNMutableNotificationContent()
         content.title = KDriveCoreStrings.Localizable.errorGeneric

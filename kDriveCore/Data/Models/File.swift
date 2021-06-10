@@ -86,14 +86,14 @@ public enum ConvertedType: String, CaseIterable {
 
     public static func fromUTI(_ uti: UTI) -> ConvertedType {
         var types = ConvertedType.allCases
-        types.removeAll(where: { $0 == .unknown })
+        types.removeAll { $0 == .unknown }
 
-        return types.first(where: { uti.conforms(to: $0.uti) }) ?? .unknown
+        return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
 
     public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .code, .pdf, .presentation, .spreadsheet, .text)
     public static let remotePlayableTypes = Set<ConvertedType>(arrayLiteral: .audio, .video)
-    //Currently it's the same as the downloadableTypes but later this could change
+    // Currently it's the same as the downloadableTypes but later this could change
     public static let ignoreThumbnailTypes = downloadableTypes
 
 }
@@ -159,16 +159,16 @@ public class File: Object, Codable {
     @objc public dynamic var nameNaturalSorting: String = ""
     private let parentLink = LinkingObjects(fromType: File.self, property: "children")
     public var children = List<File>()
-    @objc public dynamic var canUseTag: Bool = false
+    @objc public dynamic var canUseTag = false
     @objc public dynamic var createdBy: Int = 0
     @objc private dynamic var createdAt: Int = 0
     @objc private dynamic var fileCreatedAt: Int = 0
     @objc public dynamic var deletedBy: Int = 0
     @objc private dynamic var deletedAt: Int = 0
     @objc public dynamic var driveId: Int = 0
-    @objc public dynamic var hasThumbnail: Bool = false
-    @objc public dynamic var hasVersion: Bool = false
-    @objc public dynamic var isFavorite: Bool = false
+    @objc public dynamic var hasThumbnail = false
+    @objc public dynamic var hasVersion = false
+    @objc public dynamic var isFavorite = false
     @objc public dynamic var lastModifiedAt: Int = 0
     @objc public dynamic var nbVersion: Int = 0
     @objc public dynamic var collaborativeFolder: String?
@@ -184,15 +184,15 @@ public class File: Object, Codable {
     public var users = List<Int>()
     @objc public dynamic var responseAt: Int = 0
     @objc private dynamic var rawVisibility: String = ""
-    @objc public dynamic var onlyOffice: Bool = false
+    @objc public dynamic var onlyOffice = false
     @objc public dynamic var onlyOfficeConvertExtension: String?
-    @objc public dynamic var fullyDownloaded: Bool = false
-    @objc public dynamic var isAvailableOffline: Bool = false
+    @objc public dynamic var fullyDownloaded = false
+    @objc public dynamic var isAvailableOffline = false
     public var isFirstInCollection = false
     public var isLastInCollection = false
 
     public var parent: File? {
-        //We want to get the real parent not one of the fake roots
+        // We want to get the real parent not one of the fake roots
         return parentLink.filter(NSPredicate(format: "id > 0")).first
     }
 
@@ -232,40 +232,28 @@ public class File: Object, Codable {
     }
 
     public var isDirectory: Bool {
-        get {
-            return type == "dir"
-        }
+        return type == "dir"
     }
 
     public var isTrashed: Bool {
-        get {
-            return status == "trashed" || status == "trash_inherited"
-        }
+        return status == "trashed" || status == "trash_inherited"
     }
 
     public var isDisabled: Bool {
-        get {
-            return rights?.read.value == false && rights?.show.value == false
-        }
+        return rights?.read.value == false && rights?.show.value == false
     }
 
     public var localUrl: URL {
-        get {
-            return localContainerUrl.appendingPathComponent("\(name)", isDirectory: isDirectory)
-        }
+        return localContainerUrl.appendingPathComponent("\(name)", isDirectory: isDirectory)
     }
 
     public var localContainerUrl: URL {
-        get {
-            let directory = isAvailableOffline ? DriveFileManager.constants.rootDocumentsURL : DriveFileManager.constants.cacheDirectoryURL
-            return directory.appendingPathComponent("\(driveId)", isDirectory: true).appendingPathComponent("\(id)", isDirectory: true)
-        }
+        let directory = isAvailableOffline ? DriveFileManager.constants.rootDocumentsURL : DriveFileManager.constants.cacheDirectoryURL
+        return directory.appendingPathComponent("\(driveId)", isDirectory: true).appendingPathComponent("\(id)", isDirectory: true)
     }
 
     public var imagePreviewUrl: URL {
-        get {
-            return URL(string: "\(ApiRoutes.driveApiUrl)\(driveId)/file/\(id)/preview?width=2500&height=1500&quality=80&t=\(lastModifiedAt)")!
-        }
+        return URL(string: "\(ApiRoutes.driveApiUrl)\(driveId)/file/\(id)/preview?width=2500&height=1500&quality=80&t=\(lastModifiedAt)")!
     }
 
     public var thumbnailURL: URL {
@@ -410,7 +398,7 @@ public class File: Object, Codable {
         onlyOfficeConvertExtension = try values.decodeIfPresent(String.self, forKey: .onlyOfficeConvertExtension)
         children = try values.decodeIfPresent(List<File>.self, forKey: .children) ?? List<File>()
 
-        //extras
+        // extras
         canUseTag = (try? values.decode(Bool.self, forKey: .canUseTag)) ?? false
         hasVersion = (try? values.decode(Bool.self, forKey: .hasVersion)) ?? false
         nbVersion = (try? values.decode(Int.self, forKey: .nbVersion)) ?? 0
@@ -421,7 +409,7 @@ public class File: Object, Codable {
         users = try values.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
     }
 
-    //We have to keep it for Realm
+    // We have to keep it for Realm
     override public init() { }
 
     init(id: Int, name: String) {
@@ -476,9 +464,7 @@ public class File: Object, Codable {
 extension File: Differentiable {
 
     public var differenceIdentifier: Int {
-        get {
-            return id
-        }
+        return id
     }
 
     public func isContentEqual(to source: File) -> Bool {
