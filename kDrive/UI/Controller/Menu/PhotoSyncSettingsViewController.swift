@@ -118,6 +118,12 @@ class PhotoSyncSettingsViewController: UIViewController {
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationController?.navigationBar.isTranslucent = false
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        navigationController?.navigationBar.isTranslucent = true
+    }
 
     func updateSectionList() {
         if photoSyncEnabled {
