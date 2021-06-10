@@ -651,36 +651,40 @@ class SyncedAuthenticator: OAuthAuthenticator {
         let lock = AccountManager.instance.refreshTokenLock
         lock.wait()
         lock.enter()
-        let tokenBreadcrumb = Breadcrumb()
-        tokenBreadcrumb.category = "Token"
         // Maybe someone else refreshed our token
         AccountManager.instance.reloadTokensAndAccounts()
         if let token = AccountManager.instance.getTokenForUserId(credential.userId),
             token.expirationDate > credential.expirationDate {
-            tokenBreadcrumb.level = .info
-            tokenBreadcrumb.type = "transaction"
-            tokenBreadcrumb.message = "Token refreshed by someone else"
-            SentrySDK.addBreadcrumb(crumb: tokenBreadcrumb)
             lock.leave()
             completion(.success(token))
             return
         }
 
-        super.refresh(credential, for: session) { result in
-            switch result {
-            case .failure(let error):
-                tokenBreadcrumb.level = .error
-                tokenBreadcrumb.type = "error"
-                tokenBreadcrumb.message = "Error while refreshing token"
-                tokenBreadcrumb.data = ["Error": error.localizedDescription]
-            case .success(_):
-                tokenBreadcrumb.level = .info
-                tokenBreadcrumb.type = "http"
-                tokenBreadcrumb.message = "Token refreshed"
+        InfomaniakLogin.refreshToken(token: credential) { token, error in
+            // New token has been fetched correctly
+            if let token = token {
+                self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
+                lock.leave()
+                completion(.success(token))
+            } else {
+                // Couldn't refresh the token, API says it's invalid
+                if let error = error as NSError?, error.domain == "invalid_grant" {
+                    AccountManager.instance.reloadTokensAndAccounts()
+                    if let token = AccountManager.instance.getTokenForUserId(credential.userId),
+                        token.expirationDate > credential.expirationDate {
+                        lock.leave()
+                        completion(.success(token))
+                    } else {
+                        self.refreshTokenDelegate?.didFailRefreshToken(credential)
+                        lock.leave()
+                        completion(.failure(error))
+                    }
+                } else {
+                    // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
+                    lock.leave()
+                    completion(.success(credential))
+                }
             }
-            SentrySDK.addBreadcrumb(crumb: tokenBreadcrumb)
-            lock.leave()
-            completion(result)
         }
     }
 }
