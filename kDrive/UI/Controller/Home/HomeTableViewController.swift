@@ -628,6 +628,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         lastPictures.removeAll()
         recentActivityController?.invalidate()
         recentActivityController = nil
+        tableView.reloadData()
         needsContentUpdate = true
         updateContentIfNeeded()
     }
@@ -647,7 +648,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     // MARK: - Home file delegate
 
     func didSelect(index: Int, files: [File]) {
-        filePresenter.present(driveFileManager: AccountManager.instance.getDriveFileManager(for: driveFileManager.drive)!, file: files[index], files: files, normalFolderHierarchy: false)
+        filePresenter.present(driveFileManager: driveFileManager, file: files[index], files: files, normalFolderHierarchy: false)
     }
 
     // MARK: - Top scrollable
