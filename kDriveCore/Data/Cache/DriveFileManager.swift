@@ -671,13 +671,14 @@ public class DriveFileManager {
                                     completion: @escaping (ActivitiesResult?, Int?, Error?) -> Void) {
         var pagedActions = pagedActions ?? [Int: FileActivityType]()
         let fromDate = date ?? file.responseAt
-        let safeFile = ThreadSafeReference(to: file)
+        // Using a ThreadSafeReference produced crash
+        let fileId = file.id
         apiFetcher.getFileActivitiesFromDate(file: file, date: fromDate, page: page) { response, error in
             if let activities = response?.data,
                 let timestamp = response?.responseAt {
                 self.backgroundQueue.async { [self] in
                     let realm = getRealm()
-                    guard let file = realm.resolve(safeFile) else {
+                    guard let file = realm.object(ofType: File.self, forPrimaryKey: fileId) else {
                         DispatchQueue.main.async {
                             completion(nil, nil, nil)
                         }
