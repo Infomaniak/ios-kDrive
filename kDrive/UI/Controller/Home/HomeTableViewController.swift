@@ -129,7 +129,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         initViewWithCurrentDrive()
 
         // Table view footer
-        showFooter(!driveFileManager.drive.isProOrTeam)
+        showFooter(!(driveFileManager?.drive.isProOrTeam ?? true))
 
         observeFileUpdated()
 
