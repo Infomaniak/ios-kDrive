@@ -30,8 +30,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var landscapePlayButton: UIButton!
     @IBOutlet weak var iconHeightConstraint: NSLayoutConstraint!
-    
-    private var isPortrait = true
+
     private var file: File!
     private var player: AVPlayer?
     private var playerState: PlayerState = .stopped {
@@ -93,14 +92,9 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func setUpPlayButtons() {
-        if UIDevice.current.orientation.isPortrait {
-            isPortrait = true
-        } else if UIDevice.current.orientation.isLandscape {
-            isPortrait = false
-        }
-        playButton.isHidden = !isPortrait
-        landscapePlayButton.isHidden = isPortrait
-        iconHeightConstraint.constant = isPortrait ? 254 : 120
+        playButton.isHidden = UIApplication.shared.statusBarOrientation.isLandscape
+        landscapePlayButton.isHidden = UIApplication.shared.statusBarOrientation.isPortrait
+        iconHeightConstraint.constant = UIApplication.shared.statusBarOrientation.isPortrait ? 254 : 120
     }
 
     func setUpObservers() {
