@@ -206,6 +206,7 @@ extension RecentActivityTableViewCell: UITableViewDelegate, UITableViewDataSourc
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !isLoading else { return }
         delegate?.didSelectActivity(index: indexPath.row, activities: activities)
     }
 }
