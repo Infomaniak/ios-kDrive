@@ -176,7 +176,7 @@
                                         <color key="textColor" name="primaryTextColor"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="goToInfomaniakWebsite"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
