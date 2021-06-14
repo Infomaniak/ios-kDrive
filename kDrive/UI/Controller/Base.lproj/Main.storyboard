@@ -107,7 +107,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Rkb-an-uwN">
-                                <rect key="frame" x="0.0" y="0.0" width="390" height="631.66666666666663"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="650"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="9ub-9i-xp5">
                                     <size key="itemSize" width="128" height="128"/>
@@ -138,7 +138,7 @@
                                 </items>
                             </navigationBar>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v0X-JU-4vd">
-                                <rect key="frame" x="24" y="674" width="342" height="136"/>
+                                <rect key="frame" x="24" y="692.33333333333337" width="342" height="117.66666666666663"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iEM-pL-yBh" customClass="IKLargeButton" customModule="kDriveCore">
                                         <rect key="frame" x="0.0" y="0.0" width="342" height="60"/>
@@ -170,6 +170,12 @@
                                             <action selector="signInButtonPressed:" destination="wQU-0Z-Dua" eventType="touchUpInside" id="9ED-hk-qgY"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pour créer un compte, rendez-vous sur le site officiel de Infomaniak" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3kC-eU-rf6">
+                                        <rect key="frame" x="0.0" y="76" width="342" height="33.666666666666657"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <color key="textColor" name="primaryTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1Ws-Ei-OPK" customClass="IKButton" customModule="kDriveCore">
                                         <rect key="frame" x="0.0" y="76" width="342" height="60"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -214,12 +220,19 @@
                                     <constraint firstAttribute="trailing" secondItem="1Ws-Ei-OPK" secondAttribute="trailing" id="Hiq-Ue-Fby"/>
                                     <constraint firstItem="iEM-pL-yBh" firstAttribute="top" secondItem="v0X-JU-4vd" secondAttribute="top" id="Hz9-aq-T5u"/>
                                     <constraint firstItem="1Ws-Ei-OPK" firstAttribute="top" secondItem="iEM-pL-yBh" secondAttribute="bottom" id="LMZ-Sf-Hn7"/>
+                                    <constraint firstItem="3kC-eU-rf6" firstAttribute="leading" secondItem="v0X-JU-4vd" secondAttribute="leading" id="M88-8p-5C0"/>
                                     <constraint firstAttribute="trailing" secondItem="iEM-pL-yBh" secondAttribute="trailing" id="O2K-qw-Zty"/>
+                                    <constraint firstAttribute="trailing" secondItem="3kC-eU-rf6" secondAttribute="trailing" id="QxS-FI-QHo"/>
                                     <constraint firstAttribute="bottom" secondItem="1Ws-Ei-OPK" secondAttribute="bottom" id="VYn-Ic-Fzw"/>
+                                    <constraint firstAttribute="bottom" secondItem="3kC-eU-rf6" secondAttribute="bottom" constant="8" id="eXk-We-8jK"/>
                                     <constraint firstItem="iEM-pL-yBh" firstAttribute="leading" secondItem="v0X-JU-4vd" secondAttribute="leading" id="gIO-06-pI6"/>
                                     <constraint firstItem="1Ws-Ei-OPK" firstAttribute="centerX" secondItem="v0X-JU-4vd" secondAttribute="centerX" id="qDh-x4-0YV"/>
+                                    <constraint firstItem="3kC-eU-rf6" firstAttribute="top" secondItem="iEM-pL-yBh" secondAttribute="bottom" constant="16" id="yBZ-cQ-RZi"/>
                                 </constraints>
                                 <variation key="default">
+                                    <mask key="subviews">
+                                        <exclude reference="1Ws-Ei-OPK"/>
+                                    </mask>
                                     <mask key="constraints">
                                         <exclude reference="LMZ-Sf-Hn7"/>
                                     </mask>
@@ -248,7 +261,7 @@
                                 </variation>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="53t-Hq-IZI" customClass="IKRoundButton" customModule="kDriveCore">
-                                <rect key="frame" x="155" y="702" width="80" height="80"/>
+                                <rect key="frame" x="155" y="711.33333333333337" width="80" height="80"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="80" id="9nz-Tp-P0E"/>
@@ -284,7 +297,7 @@
                                 </connections>
                             </button>
                             <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="3" translatesAutoresizingMaskIntoConstraints="NO" id="Ygk-pb-gfq">
-                                <rect key="frame" x="24" y="631.66666666666663" width="342" height="26.333333333333371"/>
+                                <rect key="frame" x="24" y="650" width="342" height="26.333333333333371"/>
                                 <color key="pageIndicatorTintColor" systemColor="systemGray4Color"/>
                                 <color key="currentPageIndicatorTintColor" name="infomaniakColor"/>
                             </pageControl>
@@ -579,7 +592,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Zkn-3x-vMJ">
-                                <rect key="frame" x="0.0" y="0.0" width="390" height="658.66666666666663"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="661.66666666666663"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="9Im-hm-zse">
                                     <size key="itemSize" width="128" height="128"/>
@@ -594,10 +607,10 @@
                                 </connections>
                             </collectionView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="y3W-9c-Z7I">
-                                <rect key="frame" x="24" y="746.66666666666663" width="342" height="47.333333333333371"/>
+                                <rect key="frame" x="24" y="749.66666666666663" width="342" height="44.333333333333371"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Migration en cours, veuillez patienter..." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d35-jP-p8E" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="0.0" width="342" height="19.333333333333332"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="342" height="16.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="secondaryTextColor"/>
                                         <nil key="highlightedColor"/>
@@ -607,7 +620,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="NFo-sA-fCC">
-                                        <rect key="frame" x="161" y="27.333333333333371" width="20" height="20"/>
+                                        <rect key="frame" x="161" y="24.333333333333371" width="20" height="20"/>
                                     </activityIndicatorView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -627,10 +640,10 @@
                                 </constraints>
                             </imageView>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bca-Af-84s">
-                                <rect key="frame" x="24" y="638.66666666666663" width="342" height="171.33333333333337"/>
+                                <rect key="frame" x="24" y="641.66666666666663" width="342" height="168.33333333333337"/>
                                 <subviews>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tdc-Rl-QKP" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="111.33333333333337" width="342" height="60"/>
+                                        <rect key="frame" x="0.0" y="108.33333333333337" width="342" height="60"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="60" id="1Ff-bX-m3E"/>
@@ -654,7 +667,7 @@
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="La migration a échoué." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0jU-Cm-uht" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="0.0" width="342" height="19.333333333333332"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="342" height="16.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -664,7 +677,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t82-BD-FpT" customClass="IKLargeButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="35.333333333333371" width="342" height="60"/>
+                                        <rect key="frame" x="0.0" y="32.333333333333371" width="342" height="60"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="60" id="4jS-Fu-yaJ"/>
                                         </constraints>
@@ -736,10 +749,10 @@
     </scenes>
     <designables>
         <designable name="0jU-Cm-uht">
-            <size key="intrinsicContentSize" width="111" height="19.333333333333332"/>
+            <size key="intrinsicContentSize" width="97" height="16.333333333333332"/>
         </designable>
         <designable name="1Ws-Ei-OPK">
-            <size key="intrinsicContentSize" width="83" height="29"/>
+            <size key="intrinsicContentSize" width="138" height="34"/>
         </designable>
         <designable name="1ka-pK-vme">
             <size key="intrinsicContentSize" width="172" height="32"/>
@@ -754,13 +767,13 @@
             <size key="intrinsicContentSize" width="101" height="32"/>
         </designable>
         <designable name="Tdc-Rl-QKP">
-            <size key="intrinsicContentSize" width="77" height="29"/>
+            <size key="intrinsicContentSize" width="68" height="27"/>
         </designable>
         <designable name="aqN-bN-aqi">
             <size key="intrinsicContentSize" width="123.66666666666667" height="17"/>
         </designable>
         <designable name="d35-jP-p8E">
-            <size key="intrinsicContentSize" width="145.66666666666666" height="19.333333333333332"/>
+            <size key="intrinsicContentSize" width="127.33333333333333" height="16.333333333333332"/>
         </designable>
         <designable name="eyg-Oq-wrC">
             <size key="intrinsicContentSize" width="79.666666666666671" height="17"/>
