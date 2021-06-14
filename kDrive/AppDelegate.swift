@@ -375,7 +375,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                             url: fileURL,
                             name: file.name,
                             shouldRemoveAfterUpload: false)
-                        uploadQueue.addToQueue(file: uploadFile)
                         group.enter()
                         shouldCleanFolder = true
                         uploadQueue.observeFileUploaded(self, fileId: uploadFile.id) { uploadFile, _ in
@@ -385,6 +384,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                             }
                             group.leave()
                         }
+                        uploadQueue.addToQueue(file: uploadFile)
                     }
                 }
             }
