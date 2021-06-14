@@ -28,7 +28,10 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet weak var remainingTimeLabel: UILabel!
     @IBOutlet weak var positionSlider: UISlider!
     @IBOutlet weak var playButton: UIButton!
-
+    @IBOutlet weak var landscapePlayButton: UIButton!
+    @IBOutlet weak var iconHeightConstraint: NSLayoutConstraint!
+    
+    private var isPortrait = true
     private var file: File!
     private var player: AVPlayer?
     private var playerState: PlayerState = .stopped {
@@ -65,6 +68,8 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         elapsedTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         remainingTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         positionSlider.setThumbImage(circleImage, for: .normal)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
     }
 
     override func prepareForReuse() {
@@ -73,6 +78,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     override func configureWith(file: File) {
+        setUpPlayButtons()
         self.file = file
         let url: AVURLAsset
         if !file.isLocalVersionOlderThanRemote() {
@@ -84,6 +90,17 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         // Set up player
         player = AVPlayer(playerItem: AVPlayerItem(asset: url))
         setUpObservers()
+    }
+
+    func setUpPlayButtons() {
+        if UIDevice.current.orientation.isPortrait {
+            isPortrait = true
+        } else if UIDevice.current.orientation.isLandscape {
+            isPortrait = false
+        }
+        playButton.isHidden = !isPortrait
+        landscapePlayButton.isHidden = isPortrait
+        iconHeightConstraint.constant = isPortrait ? 254 : 120
     }
 
     func setUpObservers() {
@@ -109,6 +126,10 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             self?.setNowPlayingPlaybackInfo()
         }
         setUpRemoteControlEvents()
+    }
+
+    @objc func rotated() {
+        setUpPlayButtons()
     }
 
     @IBAction func playButtonPressed(_ sender: UIButton) {
@@ -217,8 +238,10 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     private func updateUI() {
         if playerState == .playing && !isInterrupted {
             playButton?.setImage(KDriveAsset.pause.image, for: .normal)
+            landscapePlayButton?.setImage(KDriveAsset.pause.image, for: .normal)
         } else {
             playButton?.setImage(KDriveAsset.play.image, for: .normal)
+            landscapePlayButton?.setImage(KDriveAsset.play.image, for: .normal)
         }
     }
 
