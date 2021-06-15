@@ -45,12 +45,13 @@ public class PhotoLibraryUploader {
         requestVideoOption.version = .current
 
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
             self.settings = PhotoSyncSettings(value: settings)
         }
     }
 
-    public func enableSyncWithSettings(_ newSettings: PhotoSyncSettings, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+    public func enableSync(with newSettings: PhotoSyncSettings, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         try? realm.write {
             realm.delete(realm.objects(PhotoSyncSettings.self))
             realm.add(newSettings)

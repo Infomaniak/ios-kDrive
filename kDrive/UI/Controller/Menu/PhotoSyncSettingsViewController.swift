@@ -169,9 +169,11 @@ class PhotoSyncSettingsViewController: UIViewController {
         DispatchQueue.global(qos: .utility).async {
             let realm = DriveFileManager.constants.uploadsRealm
             self.saveSettings(using: realm)
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
             _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
-        navigationController?.popViewController(animated: true)
     }
 
     func saveSettings(using realm: Realm) {
@@ -192,7 +194,7 @@ class PhotoSyncSettingsViewController: UIViewController {
                 syncVideos: syncVideosEnabled,
                 syncScreenshots: syncScreenshotsEnabled,
                 createDatedSubFolders: createDatedSubFolders)
-            PhotoLibraryUploader.instance.enableSyncWithSettings(newSettings)
+            PhotoLibraryUploader.instance.enableSync(with: newSettings)
         } else {
             PhotoLibraryUploader.instance.disableSync()
         }
