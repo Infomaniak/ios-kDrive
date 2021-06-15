@@ -41,7 +41,7 @@ public class AccountManager: RefreshTokenDelegate {
     public var currentAccount: Account!
     public var accounts = [Account]()
     public var tokens = [ApiToken]()
-    public var refreshTokenLock = DispatchGroup()
+    public var refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     public weak var delegate: AccountManagerDelegate?
     public var currentUserId: Int {
         didSet {

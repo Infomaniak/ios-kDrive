@@ -648,43 +648,35 @@ public class DriveApiFetcher: ApiFetcher {
 class SyncedAuthenticator: OAuthAuthenticator {
 
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
-        let lock = AccountManager.instance.refreshTokenLock
-        lock.wait()
-        lock.enter()
-        // Maybe someone else refreshed our token
-        AccountManager.instance.reloadTokensAndAccounts()
-        if let token = AccountManager.instance.getTokenForUserId(credential.userId),
-            token.expirationDate > credential.expirationDate {
-            lock.leave()
-            completion(.success(token))
-            return
-        }
-
-        InfomaniakLogin.refreshToken(token: credential) { token, error in
-            // New token has been fetched correctly
-            if let token = token {
-                self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
-                lock.leave()
+        AccountManager.instance.refreshTokenLockedQueue.async {
+            // Maybe someone else refreshed our token
+            AccountManager.instance.reloadTokensAndAccounts()
+            if let token = AccountManager.instance.getTokenForUserId(credential.userId),
+                token.expirationDate > credential.expirationDate {
                 completion(.success(token))
-            } else {
-                // Couldn't refresh the token, API says it's invalid
-                if let error = error as NSError?, error.domain == "invalid_grant" {
-                    AccountManager.instance.reloadTokensAndAccounts()
-                    if let token = AccountManager.instance.getTokenForUserId(credential.userId),
-                        token.expirationDate > credential.expirationDate {
-                        lock.leave()
-                        completion(.success(token))
-                    } else {
-                        self.refreshTokenDelegate?.didFailRefreshToken(credential)
-                        lock.leave()
-                        completion(.failure(error))
-                    }
-                } else {
-                    // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
-                    lock.leave()
-                    completion(.success(credential))
-                }
+                return
             }
+
+            let group = DispatchGroup()
+            group.enter()
+            InfomaniakLogin.refreshToken(token: credential) { token, error in
+                // New token has been fetched correctly
+                if let token = token {
+                    self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
+                    completion(.success(token))
+                } else {
+                    // Couldn't refresh the token, API says it's invalid
+                    if let error = error as NSError?, error.domain == "invalid_grant" {
+                        self.refreshTokenDelegate?.didFailRefreshToken(credential)
+                        completion(.failure(error))
+                    } else {
+                        // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
+                        completion(.success(credential))
+                    }
+                }
+                group.leave()
+            }
+            group.wait()
         }
     }
 }
