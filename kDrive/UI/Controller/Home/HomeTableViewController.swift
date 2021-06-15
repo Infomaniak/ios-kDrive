@@ -97,7 +97,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     private var navbarHeight: CGFloat {
         return navigationController?.navigationBar.frame.height ?? 0
     }
-    private var isPortait = true
 
     var driveFileManager: DriveFileManager!
 
@@ -181,12 +180,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     @objc func rotated() {
-        if UIDevice.current.orientation.isPortrait {
-            isPortait = true
-        } else if UIDevice.current.orientation.isLandscape {
-            isPortait = false
-        }
-        if isPortait {
+        if UIApplication.shared.statusBarOrientation.isPortrait {
             let insetTop = navigationController?.tabBarController?.view.safeAreaInsets.bottom == 0 ? -UIConstants.homeListPaddingTop : UIConstants.homeListPaddingTop
             if tableView.contentOffset.y == 0 {
                 tableView.contentOffset.y = -insetTop
@@ -603,12 +597,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         guard let navigationBar = navigationController?.navigationBar else {
             return
         }
-        if UIDevice.current.orientation.isPortrait {
-            isPortait = true
-        } else if UIDevice.current.orientation.isLandscape {
-            isPortait = false
-        }
-        if isPortait {
+        if UIApplication.shared.statusBarOrientation.isPortrait {
             navigationItem.title = (driveFileManager.drive.name)
             navigationBar.alpha = min(1, max(0, (scrollOffset + tableView.contentInset.top) / navbarHeight))
             navigationBar.isUserInteractionEnabled = navigationBar.alpha > 0.5
