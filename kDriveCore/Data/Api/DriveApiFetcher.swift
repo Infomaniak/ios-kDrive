@@ -517,33 +517,32 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
-        if token.requiresRefresh {
-            let lock = AccountManager.instance.refreshTokenLock
-            lock.wait()
-            lock.enter()
-            AccountManager.instance.reloadTokensAndAccounts()
-            if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
-                if reloadedToken.requiresRefresh {
-                    InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
-                        if let newToken = newToken {
-                            AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
-                            lock.leave()
-                            request(newToken, nil)
-                        } else {
-                            lock.leave()
-                            request(nil, error)
+        AccountManager.instance.refreshTokenLockedQueue.async {
+            if token.requiresRefresh {
+                AccountManager.instance.reloadTokensAndAccounts()
+                if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
+                    if reloadedToken.requiresRefresh {
+                        let group = DispatchGroup()
+                        group.enter()
+                        InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
+                            if let newToken = newToken {
+                                AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
+                                request(newToken, nil)
+                            } else {
+                                request(nil, error)
+                            }
+                            group.leave()
                         }
+                        group.wait()
+                    } else {
+                        request(reloadedToken, nil)
                     }
                 } else {
-                    lock.leave()
-                    request(reloadedToken, nil)
+                    request(nil, DriveError.unknownToken)
                 }
             } else {
-                lock.leave()
-                request(nil, DriveError.unknownToken)
+                request(token, nil)
             }
-        } else {
-            request(token, nil)
         }
     }
 
