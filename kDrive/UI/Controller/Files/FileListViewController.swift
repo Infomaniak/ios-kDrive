@@ -767,7 +767,18 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let driveId = coder.decodeInteger(forKey: "DriveID")
         let directoryId = coder.decodeInteger(forKey: "DirectoryID")
 
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+        // Drive File Manager should be consistent
+        let maybeDriveFileManager: DriveFileManager?
+        #if ISEXTENSION
+        maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
+        #else
+        if !(self is SharedWithMeViewController) {
+            maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
+        } else {
+            maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
+        }
+        #endif
+        guard let driveFileManager = maybeDriveFileManager else {
             // Handle error?
             return
         }
