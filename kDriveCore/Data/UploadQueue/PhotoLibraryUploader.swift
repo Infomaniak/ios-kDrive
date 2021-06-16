@@ -25,7 +25,7 @@ import Sentry
 public class PhotoLibraryUploader {
 
     public static let instance = PhotoLibraryUploader()
-    public var settings: PhotoSyncSettings?
+    public private(set) var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
     }

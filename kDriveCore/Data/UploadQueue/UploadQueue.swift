@@ -92,7 +92,7 @@ public class UploadQueue {
     public func addToQueueFromRealm() {
         DispatchQueue.global(qos: .default).async {
             self.locks.addToQueueFromRealm.performLocked {
-                self.compactRealmIfNeeded()
+                // self.compactRealmIfNeeded()
                 BackgroundRealm.uploads.execute { uploadsRealm in
                     let uploadingFiles = uploadsRealm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
                     uploadingFiles.forEach { self.addToQueue(file: $0, using: uploadsRealm) }
