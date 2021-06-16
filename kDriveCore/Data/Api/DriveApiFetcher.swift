@@ -492,6 +492,14 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
+    public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (ApiResponse<FileActivities>?, Error?) -> Void) {
+        let url = ApiRoutes.getFilesActivities(driveId: driveId, files: files, from: date)
+
+        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<FileActivities>.self, decoder: ApiFetcher.decoder) { response in
+            self.handleResponse(response: response, completion: completion)
+        }
+    }
+
     public func postFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.favorite(file: file)
 

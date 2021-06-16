@@ -128,3 +128,37 @@ public class FileDetailActivity: Codable {
         case oldPath = "old_path"
     }
 }
+
+public class FileActivities: Codable {
+    public var activities: [Int: [FileActivity]]
+
+    struct DynamicCodingKeys: CodingKey {
+        var stringValue: String
+
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+
+        var intValue: Int?
+
+        init?(intValue: Int) {
+            return nil
+        }
+    }
+
+    enum ResultCodingKeys: String, CodingKey {
+        case status, activities
+    }
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+
+        var activities = [Int: [FileActivity]]()
+        for key in container.allKeys {
+            guard let id = Int(key.stringValue) else { continue }
+            let activitiesContainer = try container.nestedContainer(keyedBy: ResultCodingKeys.self, forKey: key)
+            activities[id] = try activitiesContainer.decodeIfPresent([FileActivity].self, forKey: .activities)
+        }
+        self.activities = activities
+    }
+}
