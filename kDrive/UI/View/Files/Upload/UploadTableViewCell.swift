@@ -85,14 +85,14 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.cancelButtonPressedHandler = {
             let realm = DriveFileManager.constants.uploadsRealm
             if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
-                UploadQueue.instance.cancel(file, using: realm)
+                UploadQueue.instance.cancel(file)
             }
         }
         cardContentView.retryButtonPressedHandler = {
             self.cardContentView.retryButton?.isHidden = true
             let realm = DriveFileManager.constants.uploadsRealm
             if let file = realm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id) {
-                UploadQueue.instance.retry(file, using: realm)
+                UploadQueue.instance.retry(file)
             }
         }
     }
