@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import WebKit
 import kDriveCore
+import Sentry
 
 class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
     var file: File!
@@ -110,7 +111,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             request.setValue("Bearer \(AccountManager.instance.currentAccount.token.accessToken)", forHTTPHeaderField: "Authorization")
             webView.load(request)
         } else {
-            showErrorMessage()
+            showErrorMessage(context: ["URL": "nil"])
         }
     }
 
@@ -118,7 +119,10 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         progressObserver?.invalidate()
     }
 
-    private func showErrorMessage() {
+    private func showErrorMessage(context: [String: Any] = [:]) {
+        SentrySDK.capture(message: "Failed to load office editor") { scope in
+            scope.setContext(value: context, key: "office")
+        }
         dismiss(animated: true) {
             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorLoadingOfficeEditor)
         }
@@ -151,11 +155,11 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             decisionHandler(.allow)
         } else {
             decisionHandler(.cancel)
-            showErrorMessage()
+            showErrorMessage(context: ["URL": navigationResponse.response.url?.absoluteString ?? "", "Status code": statusCode])
         }
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        showErrorMessage()
+        showErrorMessage(context: ["Error": error])
     }
 }
