@@ -173,7 +173,7 @@ public class ApiRoutes {
 
     static func getFilesActivities(driveId: Int, files: [File], from date: Int) -> String {
         let fileIds = files.map { String($0.id) }
-        return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?from_date=\(date)"
+        return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link&from_date=\(date)"
     }
 
     static func favorite(file: File) -> String {

@@ -43,6 +43,7 @@ extension UserDefaults {
         case lastSelectedDirectory
         case theme
         case photoSortMode
+        case lastSyncDateOfflineFiles
     }
 
     private func key(_ key: Keys) -> String {
@@ -242,6 +243,15 @@ extension UserDefaults {
         }
         set {
             return set(newValue.rawValue, forKey: key(.photoSortMode))
+        }
+    }
+
+    public var lastSyncDateOfflineFiles: Int {
+        get {
+            return integer(forKey: key(.lastSyncDateOfflineFiles))
+        }
+        set {
+            setValue(newValue, forKey: key(.lastSyncDateOfflineFiles))
         }
     }
 }
