@@ -252,10 +252,10 @@ public class UploadQueue {
         let operation = UploadOperation(file: file, urlSession: bestSession)
         operation.queuePriority = file.priority
         operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id] in
-            self.operationsInQueue.removeValue(forKey: fileId)
-            self.publishFileUploaded(result: operation.result)
-            BackgroundRealm.uploads.execute { realm in
-                self.publishUploadCount(withParent: parentId, using: realm)
+            self.dispatchQueue.async {
+                self.operationsInQueue.removeValue(forKey: fileId)
+                self.publishFileUploaded(result: operation.result)
+                self.publishUploadCount(withParent: parentId, using: self.realm)
             }
         }
         operationQueue.addOperation(operation)
