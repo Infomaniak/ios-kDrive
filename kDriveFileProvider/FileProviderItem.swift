@@ -99,7 +99,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
             self.isDownloaded = false
         } else {
             self.isDownloading = false
-            self.isDownloaded = FileManager.default.fileExists(atPath: storageUrl.path)
+            self.isDownloaded = file.isDownloaded
         }
         if file.visibility == .isShared {
             self.isShared = true
