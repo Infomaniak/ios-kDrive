@@ -260,7 +260,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
                 }
             }
-             if UserDefaults.shared.numberOfConnections == 10 {
+            if UserDefaults.shared.numberOfConnections == 10 {
                 if #available(iOS 14.0, *) {
                     if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
                         SKStoreReviewController.requestReview(in: scene)
@@ -358,7 +358,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 // Read file folder
                 let fileFolderURL = driveFolderURL.appendingPathComponent(fileFolder)
                 guard let fileId = Int(fileFolder),
-                    let file = accountManager.getDriveFileManager(for: drive)?.getCachedFile(id: fileId) else {
+                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
+                    let file = driveFileManager.getCachedFile(id: fileId) else {
                     DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
@@ -377,10 +378,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                             shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true
-                        uploadQueue.observeFileUploaded(self, fileId: uploadFile.id) { uploadFile, _ in
+                        uploadQueue.observeFileUploaded(self, fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
                             if let error = uploadFile.error {
                                 shouldCleanFolder = false
                                 DDLogError("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)")
+                            } else {
+                                // Update file to get the new modification date
+                                driveFileManager.getFile(id: fileId, forceRefresh: true) { file, _, _ in
+                                    if let file = file {
+                                        driveFileManager.notifyObserversWith(file: file)
+                                    }
+                                }
                             }
                             group.leave()
                         }
@@ -500,8 +508,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     navController.popToRootViewController(animated: false)
                     // Present folder (if it's not root)
                     if let parentId = parentId, parentId > DriveFileManager.constants.rootID,
-                       let driveFileManager = accountManager.currentDriveFileManager,
-                       let directory = driveFileManager.getCachedFile(id: parentId) {
+                        let driveFileManager = accountManager.currentDriveFileManager,
+                        let directory = driveFileManager.getCachedFile(id: parentId) {
                         let filesList = FileListViewController.instantiate(driveFileManager: driveFileManager)
                         filesList.currentDirectory = directory
                         navController.pushViewController(filesList, animated: false)
