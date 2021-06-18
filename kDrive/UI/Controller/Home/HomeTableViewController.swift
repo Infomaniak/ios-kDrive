@@ -130,8 +130,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         // Table view footer
         showFooter(!(driveFileManager?.drive.isProOrTeam ?? true))
 
-        observeFileUpdated()
-
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
             self.reload(sections: [.top])
             if status != .offline {
@@ -231,6 +229,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         updateSectionList()
         updateTopRows()
         updateActivityOrPicturesRowType()
+        observeFileUpdated()
         tableView.reloadData()
     }
 
