@@ -76,7 +76,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     init(file: File, domain: NSFileProviderDomain?) {
         self.itemIdentifier = NSFileProviderItemIdentifier(file.id)
         self.filename = file.name
-        self.typeIdentifier = file.typeIdentifier.identifier
+        self.typeIdentifier = file.typeIdentifier
         if let rights = file.rights {
             let rights = rights.realm == nil ? rights : rights.freeze()
             self.capabilities = FileProviderItem.rightsToCapabilities(rights)
@@ -120,7 +120,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         let resourceValues = try? importedFileUrl.resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey, .totalFileSizeKey])
         self.itemIdentifier = identifier
         self.filename = importedFileUrl.lastPathComponent
-        self.typeIdentifier = (importedFileUrl.typeIdentifier ?? .item).identifier
+        self.typeIdentifier = importedFileUrl.typeIdentifier ?? UTI.item.identifier
         self.capabilities = .allowsAll
         self.parentItemIdentifier = parentIdentifier
         if let totalSize = resourceValues?.totalFileSize {

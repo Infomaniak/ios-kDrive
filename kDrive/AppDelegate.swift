@@ -187,7 +187,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     try FileManager.default.removeItem(atPath: importPath.path)
                 }
                 try FileManager.default.moveItem(at: url, to: importPath)
-                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager, file: .init(name: filename, path: importPath, uti: importPath.typeIdentifier ?? .data))
+                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager, file: .init(name: filename, path: importPath, uti: importPath.uti ?? .data))
                 window?.rootViewController?.present(saveNavigationViewController, animated: true)
                 return true
             } catch {
@@ -260,7 +260,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
                 }
             }
-             if UserDefaults.shared.numberOfConnections == 10 {
+            if UserDefaults.shared.numberOfConnections == 10 {
                 if #available(iOS 14.0, *) {
                     if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
                         SKStoreReviewController.requestReview(in: scene)
@@ -500,8 +500,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     navController.popToRootViewController(animated: false)
                     // Present folder (if it's not root)
                     if let parentId = parentId, parentId > DriveFileManager.constants.rootID,
-                       let driveFileManager = accountManager.currentDriveFileManager,
-                       let directory = driveFileManager.getCachedFile(id: parentId) {
+                        let driveFileManager = accountManager.currentDriveFileManager,
+                        let directory = driveFileManager.getCachedFile(id: parentId) {
                         let filesList = FileListViewController.instantiate(driveFileManager: driveFileManager)
                         filesList.currentDirectory = directory
                         navController.pushViewController(filesList, animated: false)

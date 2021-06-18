@@ -277,8 +277,12 @@ public class File: Object, Codable {
         return URL(string: ApiRoutes.showOffice(file: self))
     }
 
-    public var typeIdentifier: UTI {
-        localUrl.typeIdentifier ?? convertedType.uti
+    public var typeIdentifier: String {
+        localUrl.typeIdentifier ?? convertedType.uti.identifier
+    }
+
+    public var uti: UTI {
+        localUrl.uti ?? convertedType.uti
     }
 
     public func applyLastModifiedDateToLocalFile() {
