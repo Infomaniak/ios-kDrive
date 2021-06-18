@@ -73,6 +73,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
     }
 
+    private var filesObserver: ObservationToken?
     private var needsContentUpdate = false
     private var showInsufficientStorage = true
     private var lastUpdate = Date()
@@ -129,8 +130,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
         // Table view footer
         showFooter(!(driveFileManager?.drive.isProOrTeam ?? true))
-
-        observeFileUpdated()
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
             self.reload(sections: [.top])
@@ -231,6 +230,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         updateSectionList()
         updateTopRows()
         updateActivityOrPicturesRowType()
+        observeFileUpdated()
         tableView.reloadData()
     }
 
@@ -280,7 +280,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func observeFileUpdated() {
-        driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+        filesObserver?.cancel()
+        filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             if lastModifiedFiles.contains(where: { $0.id == file.id }) || lastPictures.contains(where: { $0.id == file.id }) {
                 needsContentUpdate = true
             }
