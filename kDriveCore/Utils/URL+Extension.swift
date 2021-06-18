@@ -23,7 +23,12 @@ extension URL {
         if hasDirectoryPath {
             return UTI.folder.identifier
         }
-        return try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier
+        if FileManager.default.fileExists(atPath: path) {
+            return try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier
+        } else {
+            // If the file is not downloaded, we get the type identifier using its extension
+            return UTI(filenameExtension: pathExtension, conformingTo: .item)?.identifier
+        }
     }
 
     public var uti: UTI? {
