@@ -50,6 +50,8 @@ class ShareAndRightsViewController: UIViewController {
         // Documentation says it's better to put it in AppDelegate but why ?
         DropDown.startListeningToKeyboard()
 
+        navigationController?.navigationBar.isTranslucent = true
+
         tableView.register(cellView: InviteUserTableViewCell.self)
         tableView.register(cellView: UsersAccessTableViewCell.self)
         tableView.register(cellView: ShareLinkTableViewCell.self)
