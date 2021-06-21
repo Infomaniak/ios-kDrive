@@ -26,14 +26,47 @@ class RegisterViewController: UIViewController {
     @IBOutlet weak var webView: WKWebView!
     weak var delegate: InfomaniakLoginDelegate?
 
+    private let progressView = UIProgressView(progressViewStyle: .default)
+    private var estimatedProgressObserver: NSKeyValueObservation?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = KDriveStrings.Localizable.buttonSignIn
+        setupProgressView()
+        setupEstimatedProgressObserver()
         webView.load(URLRequest(url: URL(string: ApiRoutes.registerIkDriveUser())!))
         webView.navigationDelegate = self
     }
 
+    private func setupProgressView() {
+        guard let navigationBar = navigationController?.navigationBar else { return }
+
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        navigationBar.addSubview(progressView)
+
+        progressView.isHidden = true
+
+        NSLayoutConstraint.activate([
+            progressView.leadingAnchor.constraint(equalTo: navigationBar.leadingAnchor),
+            progressView.trailingAnchor.constraint(equalTo: navigationBar.trailingAnchor),
+
+            progressView.bottomAnchor.constraint(equalTo: navigationBar.bottomAnchor),
+            progressView.heightAnchor.constraint(equalToConstant: 2.0)
+            ])
+    }
+
+    private func setupEstimatedProgressObserver() {
+        estimatedProgressObserver = webView.observe(\.estimatedProgress, options: [.new]) { [weak self] webView, _ in
+            self?.progressView.progress = Float(webView.estimatedProgress)
+        }
+    }
+
     @IBAction func dismissButtonPressed(_ sender: Any) {
+        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+            for record in records {
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record]) { }
+            }
+        }
         dismiss(animated: true)
     }
 
@@ -51,6 +84,25 @@ class RegisterViewController: UIViewController {
 
 // MARK: - WKNavigationDelegate
 extension RegisterViewController: WKNavigationDelegate {
+
+    func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
+        if progressView.isHidden {
+            progressView.isHidden = false
+        }
+        UIView.animate(withDuration: 0.33) {
+            self.progressView.alpha = 1.0
+        }
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        UIView.animate(withDuration: 0.33,
+            animations: {
+                self.progressView.alpha = 0.0
+            },
+            completion: { isFinished in
+                self.progressView.isHidden = isFinished
+            })
+    }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let host = navigationAction.request.url?.host {
