@@ -21,7 +21,7 @@ import ProjectDescription
 let baseSettings: [String: SettingValue] = [
     "CODE_SIGN_STYLE": "Automatic",
     "DEVELOPMENT_TEAM": "864VDCS2QY",
-    "CURRENT_PROJECT_VERSION": "7",
+    "CURRENT_PROJECT_VERSION": "9",
     "MARKETING_VERSION": "4.0.5"
 ]
 
@@ -41,7 +41,7 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.2.2")),
             .package(url: "https://github.com/Infomaniak/ios-core.git", .upToNextMajor(from: "1.0.1")),
             .package(url: "https://github.com/Infomaniak/ios-login.git", .upToNextMajor(from: "1.4.0")),
-        .package(url: "https://github.com/realm/realm-cocoa", .exact("10.7.6")),
+            .package(url: "https://github.com/realm/realm-cocoa", .exact("10.7.6")),
             .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
             .package(url: "https://github.com/onevcat/Kingfisher", .upToNextMajor(from: "5.15.6")),
             .package(url: "https://github.com/flowbe/MaterialOutlinedTextField", .upToNextMajor(from: "0.1.0")),
