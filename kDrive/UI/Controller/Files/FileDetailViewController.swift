@@ -39,7 +39,7 @@ class FileDetailViewController: UIViewController {
         case comments
     }
 
-    private enum FileInformationRow: CaseIterable {
+    private enum FileInformationRow {
         case users
         case share
         case owner
@@ -48,11 +48,43 @@ class FileDetailViewController: UIViewController {
         case location
         case size
         case sizeAll
+
+        /// Build an array of row based on given file available information.
+        /// - Parameters:
+        ///   - file: File for which to build the array
+        ///   - sharedFile: Shared file related to `file`
+        /// - Returns: Array of row
+        static func getRows(for file: File, sharedFile: SharedFile?) -> [FileInformationRow] {
+            var rows = [FileInformationRow]()
+            if sharedFile != nil || !file.users.isEmpty {
+                rows.append(.users)
+            }
+            if file.rights?.share.value ?? false {
+                rows.append(.share)
+            }
+            rows.append(.owner)
+            if file.fileCreatedAtDate != nil {
+                rows.append(.creation)
+            }
+            if file.createdAtDate != nil {
+                rows.append(.added)
+            }
+            if sharedFile != nil || !file.path.isEmpty {
+                rows.append(.location)
+            }
+            if file.size != 0 {
+                rows.append(.size)
+            }
+            if file.sizeWithVersion != 0 {
+                rows.append(.sizeAll)
+            }
+            return rows
+        }
     }
 
     private var initialLoading = true
     private var currentTab = Tabs.informations
-    private var fileInformationRows: [FileInformationRow] = [.users, .share, .owner, .creation, .added, .size]
+    private var fileInformationRows: [FileInformationRow] = []
     private var oldSections = 2
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -128,20 +160,10 @@ class FileDetailViewController: UIViewController {
 
         tableView.separatorColor = .clear
 
-        if self.file.createdAtDate == nil {
-            self.fileInformationRows.remove(at: 4)
-        }
-        if self.file.fileCreatedAtDate == nil {
-            self.fileInformationRows.remove(at: 3)
-        }
-        if !(self.file.rights?.share.value ?? false) {
-            self.fileInformationRows.remove(at: 1)
-        }
-        if self.file.isDirectory {
-            self.fileInformationRows.removeLast()
-        }
-
         guard file != nil else { return }
+
+        // Set initial rows
+        fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile)
 
         driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: AccountManager.instance.currentUserId)
 
@@ -160,19 +182,7 @@ class FileDetailViewController: UIViewController {
             group.leave()
         }
         group.notify(queue: .main) {
-            self.fileInformationRows = FileInformationRow.allCases
-            if self.file.createdAtDate == nil {
-                self.fileInformationRows.remove(at: 4)
-            }
-            if self.file.fileCreatedAtDate == nil {
-                self.fileInformationRows.remove(at: 3)
-            }
-            if !(self.file.rights?.share.value ?? false) {
-                self.fileInformationRows.remove(at: 1)
-            }
-            if self.file.isDirectory {
-                self.fileInformationRows.removeLast(2)
-            }
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
             if self.currentTab == .informations {
                 self.reloadTableView()
             }
@@ -378,19 +388,7 @@ class FileDetailViewController: UIViewController {
         file = driveFileManager.getCachedFile(id: fileId)
         driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
             self.sharedFile = response?.data
-            self.fileInformationRows = FileInformationRow.allCases
-            if self.file.createdAtDate == nil {
-                self.fileInformationRows.remove(at: 4)
-            }
-            if self.file.fileCreatedAtDate == nil {
-                self.fileInformationRows.remove(at: 3)
-            }
-            if !(self.file.rights?.share.value ?? false) {
-                self.fileInformationRows.remove(at: 1)
-            }
-            if self.file.isDirectory {
-                self.fileInformationRows.removeLast(2)
-            }
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
