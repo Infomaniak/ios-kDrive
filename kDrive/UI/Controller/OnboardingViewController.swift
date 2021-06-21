@@ -106,9 +106,7 @@ class OnboardingViewController: UIViewController {
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
-        if let url = URL(string: ApiRoutes.orderDrive()) {
-            UIApplication.shared.open(url)
-        }
+        present(RegisterViewController.instantiateInNavigationController(delegate: self), animated: true)
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {

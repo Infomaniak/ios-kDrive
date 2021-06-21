@@ -223,4 +223,9 @@ public class ApiRoutes {
     public static func convertFile(file: File) -> String {
         return "\(fileURL(file: file))convert"
     }
+
+    public static func registerIkDriveUser() -> String {
+        return "https://welcome.infomaniak.com/signup/ikdrive/steps"
+    }
+
 }
