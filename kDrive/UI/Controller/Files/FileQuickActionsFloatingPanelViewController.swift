@@ -109,6 +109,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
     private var listActions = FloatingPanelAction.listActions
     private var quickActions = FloatingPanelAction.quickActions
     private var downloadProgress: CGFloat?
+    private var fileObserver: ObservationToken?
     private var interactionController: UIDocumentInteractionController!
 
     override func viewDidLoad() {
@@ -140,7 +141,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         self.driveFileManager = driveFileManager
 
         var newFile = newFile
-        if newFile.realm == nil {
+        if newFile.realm == nil || newFile.isFrozen {
             if let file = driveFileManager.getCachedFile(id: newFile.id, freeze: false) {
                 newFile = file
             } else {
@@ -149,6 +150,12 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         }
         if file == nil || file != newFile {
             file = newFile
+            fileObserver?.cancel()
+            fileObserver = driveFileManager.observeFileUpdated(self, fileId: file.id) { [weak self] _ in
+                DispatchQueue.main.async { [weak self] in
+                    self?.tableView.reloadData()
+                }
+            }
             downloadProgress = nil
             setupContent()
             UIView.transition(with: tableView,
@@ -310,7 +317,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
         case .openWith:
-            if file.isDownloaded {
+            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
                 do {
                     try presentInteractionControllerForCurrentFile(indexPath)
                 } catch {
@@ -432,7 +439,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
             present(alert, animated: true)
         case .download:
-            if file.isDownloaded {
+            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
                 saveLocalFile(file: file)
                 self.tableView.reloadRows(at: [indexPath], with: .fade)
             } else {
@@ -566,7 +573,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             #endif
         case .sendCopy:
-            if file.isDownloaded {
+            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
                 presentShareSheetForCurrentFile()
             } else {
                 action.isLoading = true
@@ -750,5 +757,10 @@ extension FileQuickActionsFloatingPanelViewController: FileActionDelegate {
 // MARK: Document interaction controller delegate
 
 extension FileQuickActionsFloatingPanelViewController: UIDocumentInteractionControllerDelegate {
+
+    func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
+        // Dismiss interaction controller when the user taps an app
+        controller.dismissMenu(animated: true)
+    }
 
 }
