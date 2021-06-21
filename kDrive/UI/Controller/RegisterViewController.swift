@@ -29,6 +29,10 @@ class RegisterViewController: UIViewController {
     private let progressView = UIProgressView(progressViewStyle: .default)
     private var estimatedProgressObserver: NSKeyValueObservation?
 
+    deinit {
+        estimatedProgressObserver?.invalidate()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = KDriveStrings.Localizable.buttonSignIn
