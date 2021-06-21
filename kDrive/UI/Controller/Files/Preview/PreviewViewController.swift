@@ -490,11 +490,13 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: VideoCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.parentViewController = floatingPanelViewController
+                cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
                 return cell
             case .audio:
                 let cell = collectionView.dequeueReusableCell(type: AudioCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
+                cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
                 return cell
             case .spreadsheet, .presentation, .text:

@@ -31,8 +31,15 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet weak var landscapePlayButton: UIButton!
     @IBOutlet weak var iconHeightConstraint: NSLayoutConstraint!
 
+    var driveFileManager: DriveFileManager!
+
     private var file: File!
-    private var player: AVPlayer?
+    private var player: AVPlayer? {
+        didSet {
+            playButton.isEnabled = player != nil
+            landscapePlayButton.isEnabled = player != nil
+        }
+    }
     private var playerState: PlayerState = .stopped {
         didSet { updateUI() }
     }
@@ -79,16 +86,28 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     override func configureWith(file: File) {
         setUpPlayButtons()
         self.file = file
-        let url: AVURLAsset
         if !file.isLocalVersionOlderThanRemote() {
-            url = AVURLAsset(url: file.localUrl)
+            player = AVPlayer(url: file.localUrl)
+            setUpObservers()
+        } else if let token = driveFileManager.apiFetcher.currentToken {
+            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
+                if let token = token {
+                    let url = URL(string: ApiRoutes.downloadFile(file: file))!
+                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
+                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+                    DispatchQueue.main.async {
+                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
+                        self.setUpObservers()
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
+                    }
+                }
+            }
         } else {
-            let headers = ["Authorization": "Bearer \(AccountManager.instance.currentAccount.token.accessToken)"]
-            url = AVURLAsset(url: URL(string: ApiRoutes.downloadFile(file: file))!, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+            UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
         }
-        // Set up player
-        player = AVPlayer(playerItem: AVPlayerItem(asset: url))
-        setUpObservers()
     }
 
     func setUpPlayButtons() {
