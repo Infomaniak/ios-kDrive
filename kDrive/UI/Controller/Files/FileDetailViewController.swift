@@ -182,6 +182,7 @@ class FileDetailViewController: UIViewController {
             group.leave()
         }
         group.notify(queue: .main) {
+            guard self.file != nil else { return }
             self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
             if self.currentTab == .informations {
                 self.reloadTableView()
@@ -386,6 +387,11 @@ class FileDetailViewController: UIViewController {
         }
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
+        guard file != nil else {
+            // If file doesn't exist anymore, pop view controller
+            navigationController?.popViewController(animated: true)
+            return
+        }
         driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
             self.sharedFile = response?.data
             self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
