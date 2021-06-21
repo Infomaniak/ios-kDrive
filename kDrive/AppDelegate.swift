@@ -187,7 +187,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     try FileManager.default.removeItem(atPath: importPath.path)
                 }
                 try FileManager.default.moveItem(at: url, to: importPath)
-                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager, file: .init(name: filename, path: importPath, uti: importPath.typeIdentifier ?? .data))
+                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager, file: .init(name: filename, path: importPath, uti: importPath.uti ?? .data))
                 window?.rootViewController?.present(saveNavigationViewController, animated: true)
                 return true
             } catch {

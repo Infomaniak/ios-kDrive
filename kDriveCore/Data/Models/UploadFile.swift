@@ -164,7 +164,7 @@ public class UploadFile: Object {
                 }
             }
         } else {
-            let uti = pathURL?.typeIdentifier ?? .data
+            let uti = pathURL?.uti ?? .data
             placeholder(ConvertedType.fromUTI(uti).icon)
         }
     }

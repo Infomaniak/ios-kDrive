@@ -19,19 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import Foundation
 
 extension URL {
-    public var typeIdentifier: UTI? {
+    public var typeIdentifier: String? {
         if hasDirectoryPath {
-            return .folder
+            return UTI.folder.identifier
         }
-        if let uti = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier {
-            return UTI(uti)
+        if FileManager.default.fileExists(atPath: path) {
+            return try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier
+        } else {
+            // If the file is not downloaded, we get the type identifier using its extension
+            return UTI(filenameExtension: pathExtension, conformingTo: .item)?.identifier
         }
-        /*if #available(iOS 14.0, *) {
-            let identifier = UTType(filenameExtension: pathExtension, conformingTo: .item)?.identifier
-            return identifier
-        } else {*/
-        return UTI(filenameExtension: pathExtension, conformingTo: .item)
-        // }
+    }
+
+    public var uti: UTI? {
+        if let typeIdentifier = typeIdentifier {
+            return UTI(typeIdentifier)
+        }
+        return nil
     }
 
     public var creationDate: Date? {
