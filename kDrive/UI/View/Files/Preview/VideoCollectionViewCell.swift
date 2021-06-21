@@ -24,7 +24,6 @@ import Kingfisher
 class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     private class VideoPlayerNavigationController: UINavigationController {
-
         var disappearCallback: (() -> Void)?
 
         override func viewWillDisappear(_ animated: Bool) {
@@ -35,10 +34,17 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     @IBOutlet weak var previewFrameImageView: UIImageView!
     @IBOutlet weak var playButton: UIButton!
+
+    var driveFileManager: DriveFileManager!
+    var parentViewController: UIViewController?
+
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
-    private var player: AVPlayer!
-    var parentViewController: UIViewController?
+    private var player: AVPlayer? {
+        didSet {
+            playButton.isEnabled = player != nil
+        }
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -47,7 +53,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        player.pause()
+        player?.pause()
         player = nil
         previewFrameImageView.image = nil
         previewDownloadTask?.cancel()
@@ -58,23 +64,35 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
-        let url: AVURLAsset
         if !file.isLocalVersionOlderThanRemote() {
-            url = AVURLAsset(url: file.localUrl)
+            player = AVPlayer(url: file.localUrl)
+        } else if let token = driveFileManager.apiFetcher.currentToken {
+            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
+                if let token = token {
+                    let url = URL(string: ApiRoutes.downloadFile(file: file))!
+                    let headers = ["Authorization": "Bearer \(token.accessToken)"]
+                    let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+                    DispatchQueue.main.async {
+                        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
+                    }
+                }
+            }
         } else {
-            let headers = ["Authorization": "Bearer \(AccountManager.instance.currentAccount.token.accessToken)"]
-            url = AVURLAsset(url: URL(string: ApiRoutes.downloadFile(file: file))!, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+            UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
         }
-        player = AVPlayer(playerItem: AVPlayerItem(asset: url))
-
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
+        guard let player = player else { return }
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = {
-            self.player.pause()
+            self.player?.pause()
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
