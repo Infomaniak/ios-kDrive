@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import Foundation
 import RealmSwift
+import Sentry
 
 public class BackgroundRealm {
 
@@ -38,8 +39,17 @@ public class BackgroundRealm {
             let queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)")
             var realm: Realm!
             queue.sync {
-                // swiftlint:disable force_try
-                realm = try! Realm(configuration: configuration, queue: queue)
+                do {
+                    realm = try Realm(configuration: configuration, queue: queue)
+                } catch {
+                    // We want to capture the error for further investigation ...
+                    SentrySDK.capture(error: error) { scope in
+                        scope.setContext(value: [
+                            "File URL": configuration.fileURL?.absoluteString ?? ""
+                            ], key: "Realm")
+                    }
+                    fatalError("Failed creating background realm")
+                }
             }
             let instance = BackgroundRealm(realm: realm, queue: queue)
             instances[fileURL.absoluteString] = instance
