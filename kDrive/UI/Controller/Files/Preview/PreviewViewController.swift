@@ -492,12 +492,14 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.parentViewController = floatingPanelViewController
                 cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
+                cell.previewFrameImageView.addGestureRecognizer(tap)
                 return cell
             case .audio:
                 let cell = collectionView.dequeueReusableCell(type: AudioCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
+                cell.addGestureRecognizer(tap)
                 return cell
             case .spreadsheet, .presentation, .text:
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
