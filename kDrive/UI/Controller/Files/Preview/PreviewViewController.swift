@@ -505,6 +505,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
+                tap.delegate = self
                 cell.addGestureRecognizer(tap)
                 return cell
             default:
@@ -578,5 +579,11 @@ extension PreviewViewController: FloatingPanelControllerDelegate {
 
     func floatingPanelShouldBeginDragging(_ vc: FloatingPanelController) -> Bool {
         return !fromActivities
+    }
+}
+
+extension PreviewViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
     }
 }
