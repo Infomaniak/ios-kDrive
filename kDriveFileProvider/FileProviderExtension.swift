@@ -264,7 +264,9 @@ class FileProviderExtension: NSFileProviderExtension {
             url: item.storageUrl,
             name: item.filename,
             shouldRemoveAfterUpload: false)
-        UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
+        var observationToken: ObservationToken?
+        observationToken = UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
+            observationToken?.cancel()
             if let error = uploadedFile.error {
                 item.setUploadingError(error)
             }
