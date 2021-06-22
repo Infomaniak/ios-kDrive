@@ -387,10 +387,11 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     func showFooter(_ show: Bool) {
-        tableView.tableFooterView = driveFileManager.drive.isProOrTeam ? footerLoader : footerAllImages
+        let isProOrTeam = driveFileManager?.drive.isProOrTeam ?? true
+        tableView.tableFooterView = isProOrTeam ? footerLoader : footerAllImages
         tableView.tableFooterView?.isHidden = !show
         tableView.tableFooterView?.frame.size.height = show ? 44 : 0
-        let inset: CGFloat = driveFileManager.drive.isProOrTeam ? 76 : 68
+        let inset: CGFloat = isProOrTeam ? 76 : 68
         tableView.contentInset.bottom = show ? UIConstants.listPaddingBottom + inset : UIConstants.listPaddingBottom
     }
 
