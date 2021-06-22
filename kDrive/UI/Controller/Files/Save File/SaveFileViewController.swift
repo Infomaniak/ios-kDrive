@@ -169,27 +169,7 @@ class SaveFileViewController: UIViewController {
             if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier) {
                 // We don't handle saving web url, only file url
                 importProgress?.completedUnitCount += perItemUnitCount
-            } else if itemProvider.canLoadObject(ofClass: UIImage.self) {
-                let childProgress = getPhoto(from: itemProvider) { image in
-                    let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
-                    if itemProvider.registeredTypeIdentifiers.contains(UTI.heic.identifier), let data = image?.heicData(compressionQuality: self.imageCompression) {
-                        self.save(data: data, name: name, uti: .heic)
-                    } else if itemProvider.registeredTypeIdentifiers.contains(UTI.jpeg.identifier), let data = image?.jpegData(compressionQuality: self.imageCompression) {
-                        self.save(data: data, name: name, uti: .jpeg)
-                    } else if itemProvider.registeredTypeIdentifiers.contains(UTI.png.identifier), let data = image?.pngData() {
-                        self.save(data: data, name: name, uti: .png)
-                    }
-                }
-                importProgress?.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if itemProvider.canLoadObject(ofClass: PHLivePhoto.self) {
-                let childProgress = getLivePhoto(from: itemProvider) { data in
-                    if let data = data {
-                        let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
-                        self.save(data: data, name: name, uti: .jpeg)
-                    }
-                }
-                importProgress?.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if let typeIdentifier = itemProvider.registeredTypeIdentifiers.first {
+            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { filename, url in
                     if let url = url {
                         let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
@@ -201,6 +181,16 @@ class SaveFileViewController: UIViewController {
                 // For some reason registeredTypeIdentifiers is empty (shouldn't occur)
                 importProgress?.completedUnitCount += perItemUnitCount
             }
+        }
+    }
+
+    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider) -> String? {
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) {
+            return UTI.heic.identifier
+        } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
+            return UTI.jpeg.identifier
+        } else {
+            return itemProvider.registeredTypeIdentifiers.first
         }
     }
 
