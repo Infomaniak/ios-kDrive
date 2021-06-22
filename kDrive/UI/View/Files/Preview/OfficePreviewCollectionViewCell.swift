@@ -40,3 +40,9 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
     }
 
 }
+
+extension OfficePreviewCollectionViewCell: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+}
