@@ -44,9 +44,8 @@ class MySharesViewController: FileListViewController {
         }
 
         if currentDirectory.id == DriveFileManager.mySharedRootFile.id {
-            driveFileManager.getMyShared(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, children, error in
+            driveFileManager.getMyShared(page: page, sortType: sortType, forceRefresh: forceRefresh) { file, children, error in
                 if let fetchedCurrentDirectory = file, let fetchedChildren = children {
-                    self?.currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
                     completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
                 } else {
                     completion(.failure(error ?? DriveError.localError), false, true)
