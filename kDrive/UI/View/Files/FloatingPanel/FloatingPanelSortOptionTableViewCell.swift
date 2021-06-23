@@ -21,33 +21,38 @@ import InfomaniakCore
 
 class FloatingPanelSortOptionTableViewCell: InsetTableViewCell {
 
-    var isHeader = false
+    var isHeader = false {
+        didSet { setUpView() }
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        accessoryImageView.isHidden = true
+        setUpView()
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        accessoryImageView.isHidden = true
+
+        setUpView()
     }
 
-    override var isSelected: Bool {
-        didSet {
-            accessoryImageView.isHidden = !isSelected
-            setAccessibility()
-        }
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+        accessoryImageView.isHidden = !selected
     }
 
-    func setAccessibility() {
-        if isSelected {
-            accessibilityTraits = .selected
-        } else if isHeader {
-            accessibilityTraits = .header
+    private func setUpView() {
+        accessoryImageView.isHidden = !isSelected
+        separator?.isHidden = !isHeader
+        setAccessibility()
+    }
+
+    private func setAccessibility() {
+        if isHeader {
+            accessibilityTraits = isSelected ? [.selected, .header] : .header
         } else {
-            accessibilityTraits = .staticText
+            accessibilityTraits = isSelected ? [.selected, .staticText] : .staticText
         }
     }
 }
