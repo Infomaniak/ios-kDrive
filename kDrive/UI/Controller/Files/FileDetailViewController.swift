@@ -520,7 +520,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 if file.isOfficeFile {
                     let cell = tableView.dequeueReusableCell(type: InfoTableViewCell.self, for: indexPath)
                     cell.actionHandler = { _ in
-                        let viewController = OnlyOfficeViewController.instantiate(file: self.file, previewParent: nil)
+                        let viewController = OnlyOfficeViewController.instantiate(driveFileManager: self.driveFileManager, file: self.file, previewParent: nil)
                         self.present(viewController, animated: true)
                     }
                     return cell
