@@ -116,14 +116,13 @@ public class DriveFileManager {
     let backgroundQueue = DispatchQueue(label: "background-db")
     public var realmConfiguration: Realm.Configuration
     public var drive: Drive
-    public var apiFetcher: DriveApiFetcher
+    public private(set) var apiFetcher: DriveApiFetcher
 
     private var didUpdateFileObservers = [UUID: (File) -> Void]()
 
-    init(drive: Drive, apiToken: ApiToken, refreshTokenDelegate: RefreshTokenDelegate) {
+    init(drive: Drive, apiFetcher: DriveApiFetcher) {
         self.drive = drive
-        apiFetcher = DriveApiFetcher(drive: drive)
-        apiFetcher.setToken(apiToken, authenticator: SyncedAuthenticator(refreshTokenDelegate: refreshTokenDelegate))
+        self.apiFetcher = apiFetcher
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
@@ -223,7 +222,7 @@ public class DriveFileManager {
             }
         } else {
             if !withExtras {
-                apiFetcher.getFileListForDirectory(parentId: id, page: page, sortType: sortType) { [self] response, error in
+                apiFetcher.getFileListForDirectory(driveId: drive.id, parentId: id, page: page, sortType: sortType) { [self] response, error in
                     if let file = response?.data {
                         backgroundQueue.async {
                             autoreleasepool {
@@ -272,7 +271,7 @@ public class DriveFileManager {
                     }
                 }
             } else {
-                apiFetcher.getFileDetail(fileId: id) { [self] response, error in
+                apiFetcher.getFileDetail(driveId: drive.id, fileId: id) { [self] response, error in
                     if let file = response?.data {
                         keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: false, keepRights: false, using: realm)
 
@@ -295,7 +294,7 @@ public class DriveFileManager {
     }
 
     public func getFavorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        apiFetcher.getFavoriteFiles(page: page) { [self] response, error in
+        apiFetcher.getFavoriteFiles(driveId: drive.id, page: page) { [self] response, error in
             if let favorites = response?.data {
                 backgroundQueue.async {
                     autoreleasepool {
@@ -334,7 +333,7 @@ public class DriveFileManager {
     }
 
     public func getMyShared(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        apiFetcher.getMyShared(page: page, sortType: sortType) { [self] response, error in
+        apiFetcher.getMyShared(driveId: drive.id, page: page, sortType: sortType) { [self] response, error in
             let realm = getRealm()
             let mySharedRoot = DriveFileManager.mySharedRootFile
             if let sharedFiles = response?.data {
@@ -417,7 +416,7 @@ public class DriveFileManager {
         if ReachabilityListener.instance.currentStatus == .offline {
             searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
         } else {
-            apiFetcher.searchFiles(query: query, fileType: fileType, page: page, sortType: sortType) { [self] response, _ in
+            apiFetcher.searchFiles(driveId: drive.id, query: query, fileType: fileType, page: page, sortType: sortType) { [self] response, _ in
                 if let files = response?.data {
                     self.backgroundQueue.async { [self] in
                         autoreleasepool {
@@ -604,7 +603,7 @@ public class DriveFileManager {
     }
 
     public func getLastModifiedFiles(page: Int? = nil, completion: @escaping ([File]?, Error?) -> Void) {
-        apiFetcher.getLastModifiedFiles(page: page) { response, error in
+        apiFetcher.getLastModifiedFiles(driveId: drive.id, page: page) { response, error in
             if let files = response?.data {
                 self.backgroundQueue.async { [self] in
                     autoreleasepool {
@@ -628,7 +627,7 @@ public class DriveFileManager {
     }
 
     public func getLastPictures(page: Int = 1, completion: @escaping ([File]?, Error?) -> Void) {
-        apiFetcher.getLastPictures(page: page) { response, error in
+        apiFetcher.getLastPictures(driveId: drive.id, page: page) { response, error in
             if let files = response?.data {
                 self.backgroundQueue.async { [self] in
                     autoreleasepool {
@@ -962,7 +961,7 @@ public class DriveFileManager {
     }
 
     public func createCommonDirectory(name: String, forAllUser: Bool, completion: @escaping (File?, Error?) -> Void) {
-        apiFetcher.createCommonDirectory(name: name, forAllUser: forAllUser) { response, error in
+        apiFetcher.createCommonDirectory(driveId: drive.id, name: name, forAllUser: forAllUser) { response, error in
             if let createdDirectory = response?.data {
                 do {
                     let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
@@ -1021,7 +1020,7 @@ public class DriveFileManager {
 
     public func createOfficeFile(parentDirectory: File, name: String, type: String, completion: @escaping (File?, Error?) -> Void) {
         let parentId = parentDirectory.id
-        apiFetcher.createOfficeFile(parentDirectory: parentDirectory, name: name, type: type) { response, error in
+        apiFetcher.createOfficeFile(driveId: drive.id, parentDirectory: parentDirectory, name: name, type: type) { response, error in
             let realm = self.getRealm()
             if let file = response?.data,
                 let createdFile = try? self.updateFileInDatabase(updatedFile: file, using: realm) {
@@ -1176,7 +1175,7 @@ public class DriveFileManager {
     }
 
     public func cancelAction(file: File, cancelId: String, completion: @escaping (Error?) -> Void) {
-        apiFetcher.cancelAction(cancelId: cancelId) { _, error in
+        apiFetcher.cancelAction(driveId: drive.id, cancelId: cancelId) { _, error in
             if error == nil {
                 completion(error)
             } else {

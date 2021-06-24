@@ -64,7 +64,7 @@ class RecentActivitySharedController: RecentActivityDelegate {
     func loadNextRecentActivities(completion: @escaping (Error?) -> Void) {
         isLoading = true
         let replace = nextPage == 1
-        driveFileManager.apiFetcher.getRecentActivity(page: nextPage) { response, _ in
+        driveFileManager.apiFetcher.getRecentActivity(driveId: driveFileManager.drive.id, page: nextPage) { response, _ in
             guard !self.isInvalidated else {
                 return
             }

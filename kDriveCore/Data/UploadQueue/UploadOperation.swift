@@ -37,7 +37,7 @@ public class UploadTokenManager {
         } else if let userToken = AccountManager.instance.getTokenForUserId(userId),
             let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
             let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            driveFileManager.apiFetcher.getPublicUploadTokenWithToken(userToken) { response, _ in
+            driveFileManager.apiFetcher.getPublicUploadTokenWithToken(userToken, driveId: drive.id) { response, _ in
                 let token = response?.data
                 self.tokens[userId] = token
                 completionHandler(token)

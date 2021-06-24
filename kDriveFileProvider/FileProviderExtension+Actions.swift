@@ -52,7 +52,7 @@ extension FileProviderExtension {
         }
 
         // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId) { response, error in
+        driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
             if let file = response?.data {
                 self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
                     FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
@@ -219,7 +219,7 @@ extension FileProviderExtension {
         }
 
         // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId) { response, error in
+        driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
             if let file = response?.data {
                 if let parentItemIdentifier = parentItemIdentifier,
                     let parentId = parentItemIdentifier.toFileId() {
