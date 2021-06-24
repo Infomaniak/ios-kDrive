@@ -67,6 +67,7 @@ public class AccountManager: RefreshTokenDelegate {
         }
     }
     private var driveFileManagers = [String: DriveFileManager]()
+    private var apiFetchers = [Int: DriveApiFetcher]()
 
     private init() {
         let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
@@ -123,10 +124,21 @@ public class AccountManager: RefreshTokenDelegate {
             return driveFileManager
         } else if let token = getTokenForUserId(userId),
             let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
-            driveFileManagers[objectId] = DriveFileManager(drive: drive, apiToken: token, refreshTokenDelegate: self)
+            let apiFetcher = getApiFetcher(for: userId, token: token)
+            driveFileManagers[objectId] = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
             return driveFileManagers[objectId]
         } else {
             return nil
+        }
+    }
+
+    public func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher {
+        if let apiFetcher = apiFetchers[userId] {
+            return apiFetcher
+        } else {
+            let apiFetcher = DriveApiFetcher(token: token, delegate: self)
+            apiFetchers[userId] = apiFetcher
+            return apiFetcher
         }
     }
 
@@ -202,7 +214,8 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func updateUserForAccount(_ account: Account, completion: @escaping (Account?, Drive?, Error?) -> Void) {
         guard account.isConnected else { return }
-        let apiFetcher = ApiFetcher(token: account.token, delegate: self)
+
+        let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
         apiFetcher.getUserForAccount { response, error in
             if let user = response?.data {
                 account.user = user

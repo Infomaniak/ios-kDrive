@@ -261,7 +261,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                 }
             }
         } else if let index = selectedInvitationIndex {
-            driveFileManager.apiFetcher.updateInvitationRights(invitation: sharedFile!.invitations[index]!, permission: value) { response, _ in
+            driveFileManager.apiFetcher.updateInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile!.invitations[index]!, permission: value) { response, _ in
                 if response?.data != nil {
                     self.sharedFile!.invitations[index]!.permission = UserPermission(rawValue: value)!
                     self.tableView.reloadRows(at: [IndexPath(row: index + self.sharedFile!.tags.count + self.sharedFile!.users.count, section: 2)], with: .automatic)
@@ -278,7 +278,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                 }
             }
         } else if let index = selectedInvitationIndex {
-            driveFileManager.apiFetcher.deleteInvitationRights(invitation: sharedFile!.invitations[index]!) { response, _ in
+            driveFileManager.apiFetcher.deleteInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile!.invitations[index]!) { response, _ in
                 if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }

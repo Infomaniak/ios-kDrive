@@ -54,7 +54,7 @@ class TrashViewController: FileListViewController {
         }
 
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            driveFileManager.apiFetcher.getTrashedFiles(page: page, sortType: sortType) { response, error in
+            driveFileManager.apiFetcher.getTrashedFiles(driveId: driveFileManager.drive.id, page: page, sortType: sortType) { response, error in
                 if let trashedList = response?.data {
                     completion(.success(trashedList), trashedList.count == DriveApiFetcher.itemPerPage, false)
                 } else {
@@ -62,7 +62,7 @@ class TrashViewController: FileListViewController {
                 }
             }
         } else {
-            driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: currentDirectory?.id, page: page, sortType: sortType) { response, error in
+            driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: currentDirectory?.id, page: page, sortType: sortType) { response, error in
                 if let file = response?.data {
                     let children = file.children
                     completion(.success(Array(children)), children.count == DriveApiFetcher.itemPerPage, false)
@@ -92,7 +92,7 @@ class TrashViewController: FileListViewController {
             let group = DispatchGroup()
             var success = false
             group.enter()
-            driveFileManager.apiFetcher.deleteAllFilesDefinitely { _, error in
+            driveFileManager.apiFetcher.deleteAllFilesDefinitely(driveId: driveFileManager.drive.id) { _, error in
                 if let error = error {
                     success = false
                     DDLogError("Error while emptying trash: \(error)")

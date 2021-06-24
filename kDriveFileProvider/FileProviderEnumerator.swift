@@ -83,7 +83,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 } else {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: fileId, page: pageIndex) { response, error in
+                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: fileId, page: pageIndex) { response, error in
                         if let file = response?.data {
                             var containerItems = [FileProviderItem]()
                             for child in file.children {
@@ -148,7 +148,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 } else {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(fileId: directoryIdentifier) { response, error in
+                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: directoryIdentifier) { response, error in
                         if let file = response?.data {
                             observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
                             observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
