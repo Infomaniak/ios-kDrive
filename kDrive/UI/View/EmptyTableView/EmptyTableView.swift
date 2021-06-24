@@ -45,6 +45,7 @@ class EmptyTableView: UIView {
     @IBOutlet weak var emptyDetailsLabel: UILabel!
     @IBOutlet weak var emptyImageView: UIImageView!
     @IBOutlet weak var reloadButton: UIButton!
+    @IBOutlet weak var emptyImageFrameViewHeightConstant: NSLayoutConstraint!
     var actionHandler: ((UIButton) -> Void)?
 
     private func setCenteringEnabled(_ enabled: Bool) {
@@ -59,6 +60,7 @@ class EmptyTableView: UIView {
         view.emptyMessageLabel.text = message
         view.emptyDetailsLabel.text = details
         view.emptyImageFrameView.backgroundColor = backgroundColor
+        view.emptyImageFrameView.cornerRadius = view.emptyImageFrameView.frame.height / 2
 
         view.bottomToButtonConstraint.isActive = button
         view.bottomConstraint.isActive = !button
