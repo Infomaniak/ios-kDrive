@@ -22,17 +22,15 @@
                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="tKU-Yd-MGq">
                             <rect key="frame" x="70" y="70" width="60" height="60"/>
                             <color key="tintColor" name="iconColor"/>
-                            <constraints>
-                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="60" id="oq8-OV-VuR"/>
-                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="60" id="tB9-OZ-xpr"/>
-                            </constraints>
                         </imageView>
                     </subviews>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
+                        <constraint firstItem="tKU-Yd-MGq" firstAttribute="height" secondItem="w27-f8-1Qx" secondAttribute="height" multiplier="0.3" id="FPK-sR-aWM"/>
                         <constraint firstItem="tKU-Yd-MGq" firstAttribute="centerX" secondItem="w27-f8-1Qx" secondAttribute="centerX" id="WGc-dw-aw9"/>
                         <constraint firstItem="tKU-Yd-MGq" firstAttribute="centerY" secondItem="w27-f8-1Qx" secondAttribute="centerY" id="edC-P4-48B"/>
                         <constraint firstAttribute="width" secondItem="w27-f8-1Qx" secondAttribute="height" multiplier="1:1" id="kw7-bd-BQZ"/>
+                        <constraint firstItem="tKU-Yd-MGq" firstAttribute="width" secondItem="w27-f8-1Qx" secondAttribute="width" multiplier="0.3" id="rxx-3v-rWG"/>
                         <constraint firstAttribute="height" constant="200" id="uhM-CR-9rl"/>
                     </constraints>
                 </view>
@@ -115,13 +113,13 @@
     </objects>
     <designables>
         <designable name="0Jv-j5-tP1">
-            <size key="intrinsicContentSize" width="83" height="34"/>
+            <size key="intrinsicContentSize" width="107" height="32"/>
         </designable>
         <designable name="I0w-c4-6se">
             <size key="intrinsicContentSize" width="44.5" height="17"/>
         </designable>
         <designable name="zQB-Y1-YO0">
-            <size key="intrinsicContentSize" width="74.5" height="21.5"/>
+            <size key="intrinsicContentSize" width="75.5" height="21.5"/>
         </designable>
     </designables>
     <resources>
