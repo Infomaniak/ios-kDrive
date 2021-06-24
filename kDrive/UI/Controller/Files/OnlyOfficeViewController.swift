@@ -22,6 +22,8 @@ import kDriveCore
 import Sentry
 
 class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
+
+    var driveFileManager: DriveFileManager!
     var file: File!
     weak var previewParent: PreviewViewController?
 
@@ -42,7 +44,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             floatingPanelViewController.rightButton.setTitle(KDriveStrings.Localizable.buttonCreateOnlyOfficeCopy(newExtension), for: .normal)
             floatingPanelViewController.cancelHandler = { _ in
                 viewController.dismiss(animated: true)
-                let onlyOfficeViewController = OnlyOfficeViewController.instantiate(file: file, previewParent: viewController as? PreviewViewController)
+                let onlyOfficeViewController = OnlyOfficeViewController.instantiate(driveFileManager: driveFileManager, file: file, previewParent: viewController as? PreviewViewController)
                 viewController.present(onlyOfficeViewController, animated: true)
             }
             floatingPanelViewController.actionHandler = { sender in
@@ -62,13 +64,14 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             }
             viewController.present(driveFloatingPanelController, animated: true)
         } else {
-            let onlyOfficeViewController = OnlyOfficeViewController.instantiate(file: file, previewParent: viewController as? PreviewViewController)
+            let onlyOfficeViewController = OnlyOfficeViewController.instantiate(driveFileManager: driveFileManager, file: file, previewParent: viewController as? PreviewViewController)
             viewController.present(onlyOfficeViewController, animated: true)
         }
     }
 
-    class func instantiate(file: File, previewParent: PreviewViewController?) -> OnlyOfficeViewController {
+    class func instantiate(driveFileManager: DriveFileManager, file: File, previewParent: PreviewViewController?) -> OnlyOfficeViewController {
         let onlyOfficeViewController = OnlyOfficeViewController()
+        onlyOfficeViewController.driveFileManager = driveFileManager
         onlyOfficeViewController.file = file
         onlyOfficeViewController.previewParent = previewParent
         onlyOfficeViewController.modalPresentationStyle = .fullScreen
@@ -107,9 +110,23 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
 
         // Load request
         if let url = URL(string: ApiRoutes.mobileLogin(url: ApiRoutes.showOffice(file: file))) {
-            var request = URLRequest(url: url)
-            request.setValue("Bearer \(AccountManager.instance.currentAccount.token.accessToken)", forHTTPHeaderField: "Authorization")
-            webView.load(request)
+            if let token = driveFileManager.apiFetcher.currentToken {
+                driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
+                    if let token = token {
+                        var request = URLRequest(url: url)
+                        request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
+                        DispatchQueue.main.async {
+                            self.webView.load(request)
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            self.showErrorMessage()
+                        }
+                    }
+                }
+            } else {
+                showErrorMessage()
+            }
         } else {
             showErrorMessage(context: ["URL": "nil"])
         }
