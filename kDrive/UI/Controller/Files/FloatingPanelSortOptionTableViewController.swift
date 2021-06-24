@@ -38,6 +38,10 @@ class FloatingPanelSortOptionTableViewController: UITableViewController, Floatin
         tableView.register(cellView: FloatingPanelSortOptionTableViewCell.self)
         tableView.separatorColor = .clear
         tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         let selectedIndex = (tableContent.firstIndex { $0 == sortType } ?? 0) + 1
         tableView.selectRow(at: IndexPath(row: selectedIndex, section: 0), animated: false, scrollPosition: .none)
     }
@@ -57,18 +61,21 @@ class FloatingPanelSortOptionTableViewController: UITableViewController, Floatin
             cell.isHeader = true
         } else {
             cell.titleLabel.text = tableContent[indexPath.row - 1].value.translation
-            cell.separator?.isHidden = true
             cell.isHeader = false
         }
-        cell.setAccessibility()
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row != 0 {
-            delegate?.didClickOnSortingOption(type: tableContent[indexPath.row - 1])
-            dismiss(animated: true)
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if indexPath.row == 0 {
+            return nil
         }
+        return indexPath
+    }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        delegate?.didClickOnSortingOption(type: tableContent[indexPath.row - 1])
+        dismiss(animated: true)
     }
 
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
