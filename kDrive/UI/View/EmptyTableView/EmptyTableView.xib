@@ -30,18 +30,13 @@
                     </subviews>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="200" id="Fjd-7P-sCk"/>
                         <constraint firstItem="tKU-Yd-MGq" firstAttribute="centerX" secondItem="w27-f8-1Qx" secondAttribute="centerX" id="WGc-dw-aw9"/>
                         <constraint firstItem="tKU-Yd-MGq" firstAttribute="centerY" secondItem="w27-f8-1Qx" secondAttribute="centerY" id="edC-P4-48B"/>
+                        <constraint firstAttribute="width" secondItem="w27-f8-1Qx" secondAttribute="height" multiplier="1:1" id="kw7-bd-BQZ"/>
                         <constraint firstAttribute="height" constant="200" id="uhM-CR-9rl"/>
                     </constraints>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
-                            <real key="value" value="100"/>
-                        </userDefinedRuntimeAttribute>
-                    </userDefinedRuntimeAttributes>
                 </view>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zQB-Y1-YO0" customClass="IKLabel" customModule="kDriveCore">
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="752" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zQB-Y1-YO0" customClass="IKLabel" customModule="kDriveCore">
                     <rect key="frame" x="24" y="335" width="366" height="21.5"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                     <color key="textColor" name="titleColor"/>
@@ -108,6 +103,7 @@
                 <outlet property="centerConstraint" destination="uWY-P0-D3H" id="fls-9z-bH2"/>
                 <outlet property="emptyDetailsLabel" destination="I0w-c4-6se" id="gWz-Xw-Qua"/>
                 <outlet property="emptyImageFrameView" destination="w27-f8-1Qx" id="xwt-CL-0k5"/>
+                <outlet property="emptyImageFrameViewHeightConstant" destination="uhM-CR-9rl" id="WBz-uZ-IdM"/>
                 <outlet property="emptyImageView" destination="tKU-Yd-MGq" id="LOe-c5-50L"/>
                 <outlet property="emptyMessageLabel" destination="zQB-Y1-YO0" id="yty-4Q-cKr"/>
                 <outlet property="mandatoryTopConstraint" destination="ufk-fh-ERD" id="oCD-qZ-rjn"/>
@@ -119,13 +115,13 @@
     </objects>
     <designables>
         <designable name="0Jv-j5-tP1">
-            <size key="intrinsicContentSize" width="95" height="29"/>
+            <size key="intrinsicContentSize" width="83" height="34"/>
         </designable>
         <designable name="I0w-c4-6se">
             <size key="intrinsicContentSize" width="44.5" height="17"/>
         </designable>
         <designable name="zQB-Y1-YO0">
-            <size key="intrinsicContentSize" width="75.5" height="21.5"/>
+            <size key="intrinsicContentSize" width="74.5" height="21.5"/>
         </designable>
     </designables>
     <resources>

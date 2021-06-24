@@ -107,6 +107,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private var listStyleObserver: ObservationToken?
     private var sortTypeObserver: ObservationToken?
 
+    private var background: EmptyTableView?
+
     var trashSort: Bool {
         #if ISEXTENSION
             return false
@@ -187,6 +189,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
+        if sortedFiles.isEmpty {
+            updateEmptyView()
+        }
         coordinator.animate { _ in
             self.collectionView?.collectionViewLayout.invalidateLayout()
         }
@@ -397,8 +402,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     final func showEmptyViewIfNeeded(type: EmptyTableView.EmptyTableViewType? = nil, files: [File]) {
         let type = type ?? configuration.emptyViewType
         if files.isEmpty {
-            let background = EmptyTableView.instantiate(type: type, button: false)
-            background.actionHandler = { _ in
+            background = EmptyTableView.instantiate(type: type, button: false)
+            updateEmptyView()
+            background?.actionHandler = { _ in
                 self.forceRefresh()
             }
             collectionView.backgroundView = background
@@ -433,6 +439,18 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             }
         } else {
             navigationItem.title = currentDirectory?.name ?? ""
+        }
+    }
+
+    private func updateEmptyView() {
+        if let emptyBackground = background {
+            if UIDevice.current.orientation.isPortrait {
+                emptyBackground.emptyImageFrameViewHeightConstant.constant = 200
+            }
+            if UIDevice.current.orientation.isLandscape {
+                emptyBackground.emptyImageFrameViewHeightConstant.constant = 120
+            }
+            emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
         }
     }
 
