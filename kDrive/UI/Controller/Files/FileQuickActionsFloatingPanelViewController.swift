@@ -152,13 +152,12 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             file = newFile
             fileObserver?.cancel()
             fileObserver = driveFileManager.observeFileUpdated(self, fileId: file.id) { [weak self] _ in
-                if self?.file.isInvalidated ?? false {
-                    // File has been removed
-                    DispatchQueue.main.async { [weak self] in
+                DispatchQueue.main.async { [weak self] in
+                    self?.file.realm?.refresh()
+                    if self?.file.isInvalidated ?? false {
+                        // File has been removed
                         self?.dismiss(animated: true)
-                    }
-                } else {
-                    DispatchQueue.main.async { [weak self] in
+                    } else {
                         self?.tableView.reloadData()
                     }
                 }
