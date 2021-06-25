@@ -537,6 +537,9 @@ extension PreviewViewController: UICollectionViewDataSource {
                 downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
+            cell.previewDelegate = self
+            tap.delegate = cell
+            cell.tapToFullScreen = tap
             cell.addGestureRecognizer(tap)
             return cell
         } else if ReachabilityListener.instance.currentStatus == .offline {

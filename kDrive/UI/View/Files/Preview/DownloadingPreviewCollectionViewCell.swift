@@ -38,8 +38,10 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
     @IBOutlet weak var previewImageView: UIImageView!
     @IBOutlet weak var progressView: UIProgressView!
 
+    weak var previewDelegate: PreviewContentCellDelegate?
     private var file: File!
     private var tapToZoomRecognizer: UITapGestureRecognizer!
+    var tapToFullScreen: UITapGestureRecognizer!
     var previewDownloadTask: Kingfisher.DownloadTask?
     weak var parentViewController: UIViewController?
 
@@ -62,19 +64,17 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
     }
 
     @objc private func didDoubleTap(_ sender: UITapGestureRecognizer) {
-        let scale = min(previewZoomView.zoomScale * 2, previewZoomView.maximumZoomScale)
-
-        if scale != previewZoomView.zoomScale { // zoom in
+        if previewZoomView.zoomScale == previewZoomView.minimumZoomScale { // zoom in
             let point = sender.location(in: previewImageView)
 
             let scrollSize = previewZoomView.frame.size
-            let size = CGSize(width: scrollSize.width / previewZoomView.maximumZoomScale,
-                height: scrollSize.height / previewZoomView.maximumZoomScale)
+            let size = CGSize(width: scrollSize.width / 3,
+                height: scrollSize.height / 3)
             let origin = CGPoint(x: point.x - size.width / 2,
                 y: point.y - size.height / 2)
             previewZoomView.zoom(to: CGRect(origin: origin, size: size), animated: true)
         } else {
-            previewZoomView.zoom(to: zoomRectForScale(scale: previewZoomView.maximumZoomScale, center: sender.location(in: previewImageView)), animated: true)
+            previewZoomView.zoom(to: previewImageView.frame, animated: true)
         }
     }
 
@@ -108,4 +108,17 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
         }
     }
 
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        previewDelegate?.setFullscreen(true)
+    }
+}
+
+extension DownloadingPreviewCollectionViewCell: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // Don't recognize a single tap until a double-tap fails.
+        if gestureRecognizer == tapToFullScreen && otherGestureRecognizer == tapToZoomRecognizer {
+            return true
+        }
+        return false
+    }
 }
