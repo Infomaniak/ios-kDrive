@@ -646,6 +646,11 @@ class SyncedAuthenticator: OAuthAuthenticator {
 
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
         AccountManager.instance.refreshTokenLockedQueue.async {
+            if !KeychainHelper.isKeychainAccessible {
+                completion(.failure(DriveError.refreshToken))
+                return
+            }
+
             // Maybe someone else refreshed our token
             AccountManager.instance.reloadTokensAndAccounts()
             if let token = AccountManager.instance.getTokenForUserId(credential.userId),
