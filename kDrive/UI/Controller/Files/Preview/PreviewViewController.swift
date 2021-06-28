@@ -25,7 +25,7 @@ import Sentry
 
 protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
-    func setFullscreen(_ fullscreen: Bool)
+    func setFullscreen(_ fullscreen: Bool?)
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
@@ -47,6 +47,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var popRecognizer: InteractivePopRecognizer?
     @IBOutlet weak var statusBarView: UIView!
     private var fullScreenPreview = false
+    private var heightToHide = CGFloat(0)
 
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
@@ -142,8 +143,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     @objc func tapPreview() {
-        fullScreenPreview.toggle()
-        setFullscreen(fullScreenPreview)
+        setFullscreen()
     }
 
     func observeFileUpdated() {
@@ -197,6 +197,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         initialLoading = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
+
+        heightToHide = backButton.frame.minY
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -326,19 +328,24 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         navigationController?.popViewController(animated: true)
     }
 
-    func setFullscreen(_ fullscreen: Bool) {
+    func setFullscreen(_ fullscreen: Bool? = nil) {
+        if let value = fullscreen {
+            fullScreenPreview = value
+        } else {
+            fullScreenPreview.toggle()
+        }
         UIView.animate(withDuration: 0.2) {
             self.setNeedsStatusBarAppearanceUpdate()
-            let hideStatusBar = CGAffineTransform(translationX: 0, y: fullscreen ? -(self.statusBarView.frame.height) : 0)
+            let hideStatusBar = CGAffineTransform(translationX: 0, y: self.fullScreenPreview ? -(self.statusBarView.frame.height) : 0)
             self.statusBarView.transform = hideStatusBar
         }
         UIView.animate(withDuration: 0.4) {
-            let hideButton = CGAffineTransform(translationX: 0, y: fullscreen ? -(self.backButton.frame.height + self.backButton.frame.minY) : 0)
+            let hideButton = CGAffineTransform(translationX: 0, y: self.fullScreenPreview ? -(self.backButton.frame.height + self.heightToHide) : 0)
             self.backButton.transform = hideButton
             self.pdfPageLabel.transform = hideButton
             self.editButton.transform = hideButton
         }
-        floatingPanelViewController.move(to: fullscreen ? .hidden : .tip, animated: true)
+        floatingPanelViewController.move(to: fullScreenPreview ? .hidden : .tip, animated: true)
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -475,7 +482,9 @@ extension PreviewViewController: UICollectionViewDataSource {
                     let cell = collectionView.dequeueReusableCell(type: ImagePreviewCollectionViewCell.self, for: indexPath)
                     cell.previewDelegate = self
                     cell.imagePreview.image = image
+                    tap.delegate = cell
                     cell.addGestureRecognizer(tap)
+                    cell.tapToFullScreen = tap
                     return cell
                 } else {
                     return getNoLocalPreviewCellFor(file: file, indexPath: indexPath)
@@ -528,6 +537,9 @@ extension PreviewViewController: UICollectionViewDataSource {
                 downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
+            cell.previewDelegate = self
+            tap.delegate = cell
+            cell.tapToFullScreen = tap
             cell.addGestureRecognizer(tap)
             return cell
         } else if ReachabilityListener.instance.currentStatus == .offline {

@@ -26,6 +26,7 @@ class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDel
     @IBOutlet weak var zoomScrollView: UIScrollView!
     @IBOutlet weak var imagePreview: UIImageView!
     private var tapToZoomRecognizer: UITapGestureRecognizer!
+    var tapToFullScreen: UITapGestureRecognizer!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -36,30 +37,18 @@ class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDel
     }
 
     @objc private func didDoubleTap(_ sender: UITapGestureRecognizer) {
-        let scale = min(zoomScrollView.zoomScale * 2, zoomScrollView.maximumZoomScale)
-
-        if scale != zoomScrollView.zoomScale { // zoom in
+        if zoomScrollView.zoomScale == zoomScrollView.minimumZoomScale { // zoom in
             let point = sender.location(in: imagePreview)
 
             let scrollSize = imagePreview.frame.size
-            let size = CGSize(width: scrollSize.width / zoomScrollView.maximumZoomScale,
-                height: scrollSize.height / zoomScrollView.maximumZoomScale)
+            let size = CGSize(width: scrollSize.width / 3,
+                height: scrollSize.height / 3)
             let origin = CGPoint(x: point.x - size.width / 2,
                 y: point.y - size.height / 2)
             zoomScrollView.zoom(to: CGRect(origin: origin, size: size), animated: true)
         } else {
-            zoomScrollView.zoom(to: zoomRectForScale(scale: zoomScrollView.maximumZoomScale, center: sender.location(in: imagePreview)), animated: true)
+            zoomScrollView.zoom(to: imagePreview.frame, animated: true)
         }
-    }
-
-    func zoomRectForScale(scale: CGFloat, center: CGPoint) -> CGRect {
-        var zoomRect = CGRect.zero
-        zoomRect.size.height = imagePreview.frame.size.height / scale
-        zoomRect.size.width = imagePreview.frame.size.width / scale
-        let newCenter = zoomScrollView.convert(center, from: imagePreview)
-        zoomRect.origin.x = newCenter.x - (zoomRect.size.width / 2.0)
-        zoomRect.origin.y = newCenter.y - (zoomRect.size.height / 2.0)
-        return zoomRect
     }
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
@@ -67,7 +56,17 @@ class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDel
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        previewDelegate?.setFullscreen(scrollView.zoomScale != 1.0)
+        previewDelegate?.setFullscreen(true)
     }
 
+}
+
+extension ImagePreviewCollectionViewCell: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // Don't recognize a single tap until a double-tap fails.
+        if gestureRecognizer == tapToFullScreen && otherGestureRecognizer == tapToZoomRecognizer {
+            return true
+        }
+        return false
+    }
 }
