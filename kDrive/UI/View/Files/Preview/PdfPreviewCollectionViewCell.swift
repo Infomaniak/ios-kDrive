@@ -28,6 +28,7 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     override func awakeFromNib() {
         super.awakeFromNib()
         pdfPreview.autoScales = true
+        pdfPreview.enableDataDetectors = true
         pdfPreview.backgroundColor = KDriveAsset.previewBackgroundColor.color
     }
 
@@ -47,4 +48,10 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
         pdfPreview.document = nil
     }
 
+}
+
+extension PdfPreviewCollectionViewCell: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
 }
