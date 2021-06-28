@@ -249,7 +249,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             topRows = [.drive, .search]
         }
 
-        guard driveFileManager.drive.size > 0 else {
+        guard driveFileManager != nil && driveFileManager.drive.size > 0 else {
             return
         }
         let storagePercentage = Double(driveFileManager.drive.usedSize) / Double(driveFileManager.drive.size) * 100
