@@ -72,6 +72,8 @@ public class AccountManager: RefreshTokenDelegate {
     private init() {
         let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
         accessGroup = appIdentifierPrefix + AccountManager.group
+        KeychainHelper.initKeychainAccessiblity(accessGroup: accessGroup)
+        DDLogInfo("[Keychain] Accessible ? \(KeychainHelper.isKeychainAccessible)")
 
         self.currentDriveId = UserDefaults.shared.currentDriveId
         self.currentUserId = UserDefaults.shared.currentDriveUserId
