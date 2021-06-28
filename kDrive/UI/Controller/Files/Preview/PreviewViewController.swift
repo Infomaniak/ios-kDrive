@@ -31,7 +31,7 @@ protocol PreviewContentCellDelegate: AnyObject {
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     @IBOutlet weak var collectionView: UICollectionView!
-    private var previewFiles: [File]!
+    private var previewFiles: [File] = []
     private var driveFileManager: DriveFileManager!
     private var normalFolderHierarchy = true
     private var initialLoading = true
@@ -435,6 +435,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
         }
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            navigationController?.popViewController(animated: true)
             return
         }
         self.driveFileManager = driveFileManager
