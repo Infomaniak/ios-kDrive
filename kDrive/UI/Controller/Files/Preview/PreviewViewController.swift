@@ -493,6 +493,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: PdfPreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
+                tap.delegate = cell
                 cell.pdfPreview.addGestureRecognizer(tap)
                 return cell
             case .video:
