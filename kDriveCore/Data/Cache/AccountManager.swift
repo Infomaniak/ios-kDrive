@@ -383,9 +383,15 @@ public class AccountManager: RefreshTokenDelegate {
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
             kSecAttrService as String: tag,
             kSecAttrAccount as String: "\(token.userId)",
-            kSecValueData as String: tokenData]
+            kSecValueData as String: tokenData
+        ]
         let resultCode = SecItemAdd(queryAdd as CFDictionary, nil)
         DDLogInfo("Successfully saved token ? \(resultCode == noErr)")
+        if resultCode != noErr {
+            SentrySDK.capture(message: "Failed saving token") { scope in
+                scope.setContext(value: ["Keychain error code": resultCode, "User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970], key: "Error Infos")
+            }
+        }
     }
 
     func loadTokens() -> [ApiToken] {
@@ -418,9 +424,12 @@ public class AccountManager: RefreshTokenDelegate {
                     }
                 }
             }
+        } else {
+            SentrySDK.capture(message: "Failed loading tokens") { scope in
+                scope.setContext(value: ["Keychain error code": resultCode], key: "Error Infos")
+            }
         }
 
         return values
     }
-
 }
