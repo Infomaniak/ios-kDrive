@@ -174,12 +174,7 @@ public class UploadFile: Object {
             return localAsset
         }
         let assets = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil)
-        // swiftlint:disable empty_count
-        if assets.count > 0 {
-            return assets[0]
-        }
-
-        return nil
+        return assets.firstObject
     }
 
     override public class func primaryKey() -> String? {

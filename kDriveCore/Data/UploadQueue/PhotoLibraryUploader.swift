@@ -215,18 +215,39 @@ public class PhotoLibraryUploader {
         }
     }
 
-    func removePicturesFromPhotoLibrary(uploadQueue: [UploadFile]) {
-        var toRemoveAssets = [PHAsset]()
-        for upload in uploadQueue {
-            if upload.getPHAsset() != nil {
-                toRemoveAssets.append(upload.getPHAsset()!)
+    public func removePicturesFromPhotoLibraryIfNeeded() {
+        let askEveryNConnections = 10
+        let removeAssetsCountThreshold = 50
+
+        if PhotoLibraryUploader.instance.isSyncEnabled {
+            BackgroundRealm.uploads.execute { realm in
+                let uploadedFiles = UploadQueue.instance.getUploadedFiles(using: realm)
+                var toRemoveAssets = [PHAsset]()
+                var toRemoveFiles = [UploadFile]()
+
+                for uploadFile in uploadedFiles {
+                    if let asset = uploadFile.getPHAsset() {
+                        toRemoveAssets.append(asset)
+                        toRemoveFiles.append(uploadFile)
+                    }
+                }
+
+                if UserDefaults.shared.numberOfConnections % askEveryNConnections != 0 && toRemoveAssets.count <= removeAssetsCountThreshold {
+                    return
+                }
+
+                PHPhotoLibrary.shared().performChanges {
+                    PHAssetChangeRequest.deleteAssets(toRemoveAssets as NSFastEnumeration)
+                } completionHandler: { success, _ in
+                    if success {
+                        BackgroundRealm.uploads.execute { realm in
+                            try? realm.write {
+                                realm.delete(toRemoveFiles)
+                            }
+                        }
+                    }
+                }
             }
         }
-        PHPhotoLibrary.shared().performChanges {
-            PHAssetChangeRequest.deleteAssets(toRemoveAssets as NSFastEnumeration)
-        } completionHandler: { _, _ in
-
-        }
     }
-
 }
