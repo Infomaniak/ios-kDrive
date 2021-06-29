@@ -92,7 +92,7 @@ public class ApiRoutes {
     }
 
     static func getShareListFor(file: File) -> String {
-        return "\(fileURL(file: file))share?with=*"
+        return "\(fileURL(file: file))share?with=invitation,link,tag"
     }
 
     static func activateShareLinkFor(file: File) -> String {
