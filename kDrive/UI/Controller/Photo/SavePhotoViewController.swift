@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class SavePhotoViewController: SaveFileViewController {
-
     var photo: UIImage!
     var videoUrl: URL!
     var uti: UTI!
@@ -66,60 +65,35 @@ class SavePhotoViewController: SaveFileViewController {
 
     override func didClickOnButton() {
         guard let filename = items.first?.name,
-            let selectedDriveFileManager = selectedDriveFileManager,
-            let selectedDirectory = selectedDirectory else {
+              let selectedDriveFileManager = selectedDriveFileManager,
+              let selectedDirectory = selectedDirectory else {
             return
         }
 
-        if let uploadNewFile = selectedDirectory.rights?.uploadNewFile.value, !uploadNewFile {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileAddRightError)
-            return
-        }
-
-        var data: Data!
-        let name: String
+        var success = false
         if uti == .image {
-            switch format {
-            case .jpg:
-                data = photo.jpegData(compressionQuality: imageCompression)
-            case .heic:
-                data = photo.heicData(compressionQuality: imageCompression)
-            case .png:
-                if photo.imageOrientation != .up {
-                    let format = photo.imageRendererFormat
-                    photo = UIGraphicsImageRenderer(size: photo.size, format: format).image { _ in
-                        photo.draw(at: .zero)
-                    }
-                }
-                data = photo.pngData()
+            do {
+                try FileImportHelper.instance.upload(photo: photo, name: filename, format: format, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+                success = true
+            } catch {
+                success = false
             }
-            name = filename.addingExtension(format.extension)
         } else {
-            data = try? Data(contentsOf: videoUrl)
-            name = filename.addingExtension("mov")
-        }
-        let filepath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-        do {
-            try data?.write(to: filepath)
-            let newFile = UploadFile(
-                parentDirectoryId: selectedDirectory.id,
-                userId: AccountManager.instance.currentAccount.userId,
-                driveId: selectedDriveFileManager.drive.id,
-                url: filepath,
-                name: name
-            )
-            UploadQueue.instance.addToQueue(file: newFile)
-            dismiss(animated: true) {
-                if let parent = self.presentingViewController {
-                    parent.dismiss(animated: true) {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(name))
-                    }
-                } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(name))
-                }
+            do {
+                try FileImportHelper.instance.upload(videoUrl: videoUrl, name: filename, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+                success = true
+            } catch {
+                success = false
             }
-        } catch {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+        }
+        dismiss(animated: true) {
+            if let parent = self.presentingViewController {
+                parent.dismiss(animated: true) {
+                    UIConstants.showSnackBar(message: success ? KDriveStrings.Localizable.allUploadInProgress(filename) : KDriveStrings.Localizable.errorUpload)
+                }
+            } else {
+                UIConstants.showSnackBar(message: success ? KDriveStrings.Localizable.allUploadInProgress(filename) : KDriveStrings.Localizable.errorUpload)
+            }
         }
     }
 

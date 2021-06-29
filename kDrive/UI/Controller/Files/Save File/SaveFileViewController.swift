@@ -1,42 +1,28 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
-import PhotosUI
+import CocoaLumberjackSwift
 import InfomaniakCore
 import kDriveCore
-import CocoaLumberjackSwift
+import PhotosUI
+import UIKit
 
 class SaveFileViewController: UIViewController {
-
-    let imageCompression: CGFloat = 0.8
-
-    class ImportedFile {
-        var name: String
-        var path: URL
-        var uti: UTI
-        internal init(name: String, path: URL, uti: UTI) {
-            self.name = name
-            self.path = path
-            self.uti = uti
-        }
-    }
-
     enum SaveFileSection {
         case fileName
         case fileType
@@ -44,6 +30,7 @@ class SaveFileViewController: UIViewController {
         case directorySelection
         case importing
     }
+
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
 
     private var originalDriveId = AccountManager.instance.currentDriveId
@@ -62,6 +49,7 @@ class SaveFileViewController: UIViewController {
             footer.footerButton.isEnabled = enableButton
         }
     }
+
     private var importInProgress: Bool {
         if let progress = importProgress {
             return progress.fractionCompleted < 1
@@ -79,7 +67,7 @@ class SaveFileViewController: UIViewController {
         // Set selected drive and directory to last values
         if selectedDirectory == nil {
             if let drive = DriveInfosManager.instance.getDrive(id: UserDefaults.shared.lastSelectedDrive, userId: AccountManager.instance.currentUserId),
-                let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+               let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
                 selectedDriveFileManager = driveFileManager
             }
             selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
@@ -139,156 +127,17 @@ class SaveFileViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    public static func getDefaultFileName() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd_HHmmssSS"
-        return formatter.string(from: Date())
-    }
-
-    func save(data: Data, name: String, uti: UTI) {
-        let url = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-        do {
-            try data.write(to: url)
-            items.append(ImportedFile(name: name.addingExtension(uti.preferredFilenameExtension ?? ""), path: url, uti: uti))
-        } catch {
-            DDLogError("Error while saving image to disk: \(error)")
-        }
-    }
-
     func setItemProviders(_ itemProviders: [NSItemProvider]) {
         sections = [.importing]
-        let perItemUnitCount: Int64 = 10
-        importProgress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
+        importProgress = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles in
+            self?.items = importedFiles
+        }
         progressObserver = importProgress?.observe(\.fractionCompleted) { _, _ in
             // Observe progress to update table view when import is finished
             DispatchQueue.main.async { [weak self] in
                 self?.updateTableViewAfterImport()
             }
         }
-        for itemProvider in itemProviders {
-            if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier) {
-                // We don't handle saving web url, only file url
-                importProgress?.completedUnitCount += perItemUnitCount
-            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider) {
-                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { filename, url in
-                    if let url = url {
-                        let name = itemProvider.suggestedName ?? SaveFileViewController.getDefaultFileName()
-                        self.items.append(ImportedFile(name: filename ?? name, path: url, uti: UTI(typeIdentifier) ?? .data))
-                    }
-                }
-                importProgress?.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else {
-                // For some reason registeredTypeIdentifiers is empty (shouldn't occur)
-                importProgress?.completedUnitCount += perItemUnitCount
-            }
-        }
-    }
-
-    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider) -> String? {
-        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) {
-            return UTI.heic.identifier
-        } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
-            return UTI.jpeg.identifier
-        } else {
-            return itemProvider.registeredTypeIdentifiers.first
-        }
-    }
-
-    func getPhoto(from itemProvider: NSItemProvider, completion: @escaping (UIImage?) -> Void) -> Progress {
-        let progress = Progress(totalUnitCount: 10)
-        guard itemProvider.canLoadObject(ofClass: UIImage.self) else {
-            completion(nil)
-            progress.completedUnitCount = progress.totalUnitCount
-            return progress
-        }
-
-        let childProgress = itemProvider.loadObject(ofClass: UIImage.self) { object, error in
-            if let error = error {
-                DDLogError("Error while loading UIImage: \(error)")
-                completion(nil)
-            }
-
-            if let image = object as? UIImage {
-                completion(image)
-            } else {
-                completion(nil)
-            }
-            progress.completedUnitCount += 2
-        }
-        progress.addChild(childProgress, withPendingUnitCount: 8)
-        return progress
-    }
-
-    func getLivePhoto(from itemProvider: NSItemProvider, completion: @escaping (Data?) -> Void) -> Progress {
-        let progress = Progress(totalUnitCount: 10)
-        guard itemProvider.canLoadObject(ofClass: PHLivePhoto.self) else {
-            completion(nil)
-            progress.completedUnitCount = progress.totalUnitCount
-            return progress
-        }
-
-        let childProgress = itemProvider.loadObject(ofClass: PHLivePhoto.self) { object, error in
-            if let error = error {
-                DDLogError("Error while loading PHLivePhoto: \(error)")
-                completion(nil)
-            }
-
-            if let livePhoto = object as? PHLivePhoto {
-                let livePhotoResources = PHAssetResource.assetResources(for: livePhoto)
-                if let resource = livePhotoResources.first(where: { $0.type == .photo }) {
-                    var data = Data()
-                    PHAssetResourceManager.default().requestData(for: resource, options: nil) { chunk in
-                        data.append(chunk)
-                    } completionHandler: { error in
-                        if let error = error {
-                            DDLogError("Error while requesting live photo data: \(error)")
-                            completion(nil)
-                        } else {
-                            completion(data)
-                        }
-                        progress.completedUnitCount += 2
-                    }
-                } else {
-                    completion(nil)
-                    progress.completedUnitCount += 2
-                }
-            } else {
-                completion(nil)
-                progress.completedUnitCount += 2
-            }
-        }
-        progress.addChild(childProgress, withPendingUnitCount: 8)
-        return progress
-    }
-
-    func getFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
-        let progress = Progress(totalUnitCount: 10)
-        let childProgress = itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
-            if let error = error {
-                DDLogError("Error while loading file representation: \(error)")
-                completion(nil, nil)
-            }
-
-            if let url = url {
-                let targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-
-                do {
-                    if FileManager.default.fileExists(atPath: targetURL.path) {
-                        try FileManager.default.removeItem(at: targetURL)
-                    }
-
-                    try FileManager.default.copyItem(at: url, to: targetURL)
-
-                    completion(url.lastPathComponent, targetURL)
-                } catch {
-                    DDLogError("Error while loading file representation: \(error)")
-                    completion(nil, nil)
-                }
-            }
-            progress.completedUnitCount += 2
-        }
-        progress.addChild(childProgress, withPendingUnitCount: 8)
-        return progress
     }
 
     private func updateButton() {
@@ -342,11 +191,11 @@ class SaveFileViewController: UIViewController {
         importProgress?.cancel()
         navigationController?.dismiss(animated: true)
     }
-
 }
-// MARK: - UITableViewDataSource
-extension SaveFileViewController: UITableViewDataSource {
 
+// MARK: - UITableViewDataSource
+
+extension SaveFileViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let section = sections[section]
         if section == .fileName {
@@ -432,11 +281,11 @@ extension SaveFileViewController: UITableViewDataSource {
         }
         return nil
     }
-
 }
-// MARK: - UITableViewDelegate
-extension SaveFileViewController: UITableViewDelegate {
 
+// MARK: - UITableViewDelegate
+
+extension SaveFileViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         switch sections[indexPath.section] {
@@ -448,7 +297,7 @@ extension SaveFileViewController: UITableViewDelegate {
                     tableView.reloadRows(at: [indexPath], with: .automatic)
                 }
                 alert.textFieldConfiguration = .fileNameConfiguration
-                alert.textFieldConfiguration.selectedRange = item.name.startIndex..<(item.name.lastIndex(where: { $0 == "." }) ?? item.name.endIndex)
+                alert.textFieldConfiguration.selectedRange = item.name.startIndex ..< (item.name.lastIndex(where: { $0 == "." }) ?? item.name.endIndex)
                 present(alert, animated: true)
             }
         case .driveSelection:
@@ -465,12 +314,11 @@ extension SaveFileViewController: UITableViewDelegate {
             break
         }
     }
-
 }
 
 // MARK: - SelectFolderDelegate
-extension SaveFileViewController: SelectFolderDelegate {
 
+extension SaveFileViewController: SelectFolderDelegate {
     func didSelectFolder(_ folder: File) {
         if folder.id == DriveFileManager.constants.rootID {
             selectedDirectory = selectedDriveFileManager?.getRootFile()
@@ -482,8 +330,8 @@ extension SaveFileViewController: SelectFolderDelegate {
 }
 
 // MARK: - SelectDriveDelegate
-extension SaveFileViewController: SelectDriveDelegate {
 
+extension SaveFileViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
         if let selectedDriveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
             self.selectedDriveFileManager = selectedDriveFileManager
@@ -492,35 +340,26 @@ extension SaveFileViewController: SelectDriveDelegate {
         }
         updateButton()
     }
-
 }
 
 // MARK: - FooterButtonDelegate
+
 extension SaveFileViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
         guard let selectedDriveFileManager = selectedDriveFileManager,
-            let selectedDirectory = selectedDirectory else {
+              let selectedDirectory = selectedDirectory else {
             return
         }
 
-        if let uploadNewFile = selectedDirectory.rights?.uploadNewFile.value, !uploadNewFile {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileAddRightError)
-            return
+        let message: String
+        do {
+            try FileImportHelper.instance.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+            message = items.count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveStrings.Localizable.allUploadInProgress(items[0].name)
+        } catch {
+            message = KDriveStrings.Localizable.errorUpload
         }
 
-        for item in items {
-            let newFile = UploadFile(
-                parentDirectoryId: selectedDirectory.id,
-                userId: AccountManager.instance.currentAccount.userId,
-                driveId: selectedDriveFileManager.drive.id,
-                url: item.path,
-                name: item.name
-            )
-            UploadQueue.instance.addToQueue(file: newFile)
-        }
-
-        navigationController?.dismiss(animated: true) { [self] in
-            let message = items.count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveStrings.Localizable.allUploadInProgress(items[0].name)
+        navigationController?.dismiss(animated: true) {
             UIConstants.showSnackBar(message: message)
         }
     }
