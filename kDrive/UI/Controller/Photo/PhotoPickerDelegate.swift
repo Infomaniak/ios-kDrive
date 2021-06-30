@@ -16,93 +16,88 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import CocoaLumberjackSwift
 import kDriveCore
 import Photos
 import PhotosUI
-import CocoaLumberjackSwift
+import UIKit
 
 class PhotoPickerDelegate: NSObject {
-
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
-    var viewController: UIViewController!
 
-    func handleError(_ error: Error?) {
-        if let error = error {
-            DDLogError("Error while selecting media: \(error)")
-        }
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+    private func handleError(_ error: Error) {
+        DDLogError("Error while uploading file: \(error)")
+        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
     }
 
+    private func showUploadSnackbar(count: Int, filename: String) {
+        let message = count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(count) : KDriveStrings.Localizable.allUploadInProgress(filename)
+        UIConstants.showSnackBar(message: message)
+    }
 }
 
 // MARK: - Image picker controller delegate
 
 extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true)
 
-        let savePhotoNavigationController = SavePhotoViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-
-        guard let savePhotoVC = savePhotoNavigationController.viewControllers.first as? SavePhotoViewController,
-            let mediaType = info[.mediaType] as? String, let uti = UTI(mediaType) else {
+        guard let mediaType = info[.mediaType] as? String, let uti = UTI(mediaType) else {
             return
         }
-
-        savePhotoVC.uti = uti
-        savePhotoVC.selectedDirectory = currentDirectory
-        savePhotoVC.items = [.init(name: SavePhotoViewController.getDefaultFileName(), path: URL(string: "/")!, uti: uti)]
-        savePhotoVC.skipOptionsSelection = true
 
         switch uti {
         case .image:
             guard let image = info[.originalImage] as? UIImage else {
-                return picker.dismiss(animated: true)
+                return
             }
-            savePhotoVC.photo = image
+            let filename = FileImportHelper.instance.getDefaultFileName()
+            do {
+                try FileImportHelper.instance.upload(photo: image, name: filename, format: .jpg, in: currentDirectory, drive: driveFileManager.drive)
+                showUploadSnackbar(count: 1, filename: filename)
+            } catch {
+                handleError(error)
+            }
         case .movie:
             guard let selectedVideo = info[.mediaURL] as? URL else {
-                return picker.dismiss(animated: true)
+                return
             }
-            savePhotoVC.videoUrl = selectedVideo
+            let filename = FileImportHelper.instance.getDefaultFileName()
+            do {
+                try FileImportHelper.instance.upload(videoUrl: selectedVideo, name: filename, in: currentDirectory, drive: driveFileManager.drive)
+                showUploadSnackbar(count: 1, filename: filename)
+            } catch {
+                handleError(error)
+            }
         default:
             break
         }
-
-        if picker.sourceType == .camera {
-            // Don't present view
-            picker.dismiss(animated: true) {
-                savePhotoVC.didClickOnButton()
-            }
-        } else {
-            viewController.present(savePhotoNavigationController, animated: true)
-        }
     }
-
 }
 
 // MARK: - Picker view controller delegate
 
 @available(iOS 14, *)
 extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
-
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true)
+        picker.dismiss(animated: true) {
+            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
+        }
 
         if !results.isEmpty {
-            let saveFileNavigationController = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-
-            guard let saveFileVC = saveFileNavigationController.viewControllers.first as? SaveFileViewController else {
-                return
+            _ = FileImportHelper.instance.importItems(results.map(\.itemProvider)) { importedFiles in
+                do {
+                    try FileImportHelper.instance.upload(files: importedFiles, in: self.currentDirectory, drive: self.driveFileManager.drive)
+                    DispatchQueue.main.async {
+                        self.showUploadSnackbar(count: importedFiles.count, filename: importedFiles[0].name)
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.handleError(error)
+                    }
+                }
             }
-            saveFileVC.selectedDirectory = currentDirectory
-            saveFileVC.skipOptionsSelection = true
-            saveFileVC.setItemProviders(results.map(\.itemProvider))
-
-            viewController.present(saveFileNavigationController, animated: true)
         }
     }
-
 }

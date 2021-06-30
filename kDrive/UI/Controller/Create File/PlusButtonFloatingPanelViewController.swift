@@ -165,7 +165,6 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         case .takePictureAction, .importMediaAction:
             mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
             mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory
-            mainTabViewController.photoPickerDelegate.viewController = mainTabViewController
 
             if #available(iOS 14, *), action == .importMediaAction {
                 // Present new photo picker

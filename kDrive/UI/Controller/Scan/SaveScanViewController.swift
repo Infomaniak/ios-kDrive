@@ -71,43 +71,16 @@ class SaveScanViewController: SaveFileViewController {
             footer.footerButton.setLoading(false)
             return
         }
-        if let uploadNewFile = selectedDirectory.rights?.uploadNewFile.value, !uploadNewFile {
-            footer.footerButton.setLoading(false)
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileAddRightError)
-            return
-        }
+
         DispatchQueue.global(qos: .userInteractive).async { [self] in
-            let data: Data?
-            let name = filename.addingExtension(scanType.extension)
-            switch scanType {
-            case .pdf:
-                let pdfDocument = PDFDocument()
-                for i in 0..<scan.pageCount {
-                    let pdfPage = PDFPage(image: scan.imageOfPage(at: i))
-                    pdfDocument.insert(pdfPage!, at: i)
-                }
-                data = pdfDocument.dataRepresentation()
-            case .image:
-                let image = scan.imageOfPage(at: 0)
-                data = image.jpegData(compressionQuality: imageCompression)
-            }
-            let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
             do {
-                try data?.write(to: filePath)
-                let newFile = UploadFile(
-                    parentDirectoryId: selectedDirectory.id,
-                    userId: AccountManager.instance.currentAccount.userId,
-                    driveId: selectedDriveFileManager.drive.id,
-                    url: filePath,
-                    name: name
-                )
-                UploadQueue.instance.addToQueue(file: newFile)
+                try FileImportHelper.instance.upload(scan: scan, name: filename, scanType: scanType, in: selectedDirectory, drive: selectedDriveFileManager.drive)
                 DispatchQueue.main.async {
                     let parent = presentingViewController
                     footer.footerButton.setLoading(false)
                     dismiss(animated: true) {
                         parent?.dismiss(animated: true) {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(name))
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(filename))
                         }
                     }
                 }

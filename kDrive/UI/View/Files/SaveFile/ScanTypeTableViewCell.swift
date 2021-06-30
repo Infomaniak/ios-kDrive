@@ -16,69 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 import VisionKit
-import kDriveCore
-
-enum ScanFileFormat: Int, CaseIterable {
-    case pdf, image
-
-    var title: String {
-        switch self {
-        case .pdf:
-            return "PDF"
-        case .image:
-            return "Image (.JPG)"
-        }
-    }
-
-    var uti: UTI {
-        switch self {
-        case .pdf:
-            return .pdf
-        case .image:
-            return .jpeg
-        }
-    }
-
-    var `extension`: String {
-        return uti.preferredFilenameExtension!
-    }
-}
-
-enum PhotoFileFormat: Int, CaseIterable {
-    case jpg, heic, png
-
-    var title: String {
-        switch self {
-        case .jpg:
-            return "JPG"
-        case .heic:
-            return "HEIF"
-        case .png:
-            return "PNG"
-        }
-    }
-
-    var uti: UTI {
-        switch self {
-        case .jpg:
-            return .jpeg
-        case .heic:
-            return .heic
-        case .png:
-            return .png
-        }
-    }
-
-    var `extension`: String {
-        return uti.preferredFilenameExtension!
-    }
-}
 
 class ScanTypeTableViewCell: UITableViewCell {
-
     @IBOutlet weak var segmentedControl: UISegmentedControl!
+
     var didSelectIndex: ((Int) -> Void)?
 
     @IBAction func segmentedControlChanged(_ sender: UISegmentedControl) {
@@ -112,5 +56,4 @@ class ScanTypeTableViewCell: UITableViewCell {
             segmentedControl.setTitle(fileFormat.title, forSegmentAt: fileFormat.rawValue)
         }
     }
-
 }

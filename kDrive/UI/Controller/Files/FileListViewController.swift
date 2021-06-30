@@ -474,7 +474,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             group.notify(queue: DispatchQueue.main) {
                 if success {
                     if files.count == 1 {
-                        UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: KDriveStrings.Localizable.buttonCancel) {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                             guard let cancelId = cancelId else { return }
                             self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { error in
                                 self.getNewChanges()
@@ -482,7 +482,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
                                 }
                             }
-                        }
+                        })
                     } else {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
                     }
