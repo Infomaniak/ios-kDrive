@@ -27,20 +27,25 @@ class PhotoListViewController: UIViewController {
     @IBOutlet weak var headerImageView: UIImageView!
     @IBOutlet weak var headerTitleLabel: IKLabel!
 
-    private let dateFormatter = DateFormatter()
     private class GroupedPictures {
         let referenceDate: Date
         let dateComponents: DateComponents
+        let sortMode: PhotoSortMode
         var pictures: [File]
 
-        init(referenceDate: Date) {
+        var formattedDate: String {
+            return sortMode.dateFormatter.string(from: referenceDate)
+        }
+
+        init(referenceDate: Date, sortMode: PhotoSortMode) {
             self.referenceDate = referenceDate
-            dateComponents = Calendar.current.dateComponents([.year, .month], from: referenceDate)
+            self.dateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: referenceDate)
+            self.sortMode = sortMode
             self.pictures = [File]()
         }
     }
 
-    private var pictureForYearMonth = [GroupedPictures]()
+    private var groupedPictures = [GroupedPictures]()
     private var pictures = [File]()
     private var page = 1
     private var hasNextPage = true
@@ -51,6 +56,9 @@ class PhotoListViewController: UIViewController {
     }
     private var isLargeTitle = true
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
+    private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
+        didSet { updateSort() }
+    }
     private var floatingPanelViewController: DriveFloatingPanelController?
 
     private var shouldLoadMore: Bool {
@@ -73,7 +81,6 @@ class PhotoListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         headerTitleLabel.textColor = .white
-        dateFormatter.dateFormat = KDriveStrings.Localizable.photosHeaderDateFormat
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
@@ -103,6 +110,21 @@ class PhotoListViewController: UIViewController {
 
     @IBAction func searchButtonPressed(_ sender: Any) {
         present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager, fileType: .imagesRow), animated: true)
+    }
+
+    @IBAction func sortButtonPressed(_ sender: UIBarButtonItem) {
+        let floatingPanelViewController = DriveFloatingPanelController()
+        let sortViewController = FloatingPanelPhotoSortViewController()
+
+        sortViewController.selectedSortMode = sortMode
+        sortViewController.delegate = self
+
+        //sortViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = sortViewController
+
+        floatingPanelViewController.set(contentViewController: sortViewController)
+        floatingPanelViewController.track(scrollView: sortViewController.tableView)
+        present(floatingPanelViewController, animated: true)
     }
 
     func applyGradient(view: UIImageView) {
@@ -146,7 +168,7 @@ class PhotoListViewController: UIViewController {
     func forceRefresh() {
         page = 1
         pictures = []
-        pictureForYearMonth = []
+        groupedPictures = []
         fetchNextPage()
     }
 
@@ -156,29 +178,7 @@ class PhotoListViewController: UIViewController {
             if let fetchedPictures = response {
 
                 self.collectionView.performBatchUpdates {
-                    for picture in fetchedPictures {
-                        let currentDateComponents = Calendar.current.dateComponents([.year, .month], from: picture.lastModifiedDate)
-
-                        var currentSectionIndex: Int!
-                        var currentYearMonth: GroupedPictures!
-                        let lastYearMonth = self.pictureForYearMonth.last
-                        if lastYearMonth?.dateComponents == currentDateComponents {
-                            currentYearMonth = lastYearMonth
-                            currentSectionIndex = self.pictureForYearMonth.count - 1
-                        } else if let yearMonthIndex = self.pictureForYearMonth.firstIndex(where: { $0.dateComponents == currentDateComponents }) {
-                            currentYearMonth = self.pictureForYearMonth[yearMonthIndex]
-                            currentSectionIndex = yearMonthIndex
-                        } else {
-                            currentYearMonth = GroupedPictures(referenceDate: picture.lastModifiedDate)
-                            self.pictureForYearMonth.append(currentYearMonth)
-                            currentSectionIndex = self.pictureForYearMonth.count - 1
-                            self.collectionView.insertSections([currentSectionIndex + 1])
-                        }
-                        currentYearMonth.pictures.append(picture)
-                        self.collectionView.insertItems(at: [IndexPath(row: currentYearMonth.pictures.count - 1, section: currentSectionIndex + 1)])
-                    }
-                } completion: { _ in
-
+                    self.insertAndSort(pictures: fetchedPictures, updateCollection: true)
                 }
 
                 self.pictures += fetchedPictures
@@ -187,7 +187,7 @@ class PhotoListViewController: UIViewController {
                 self.hasNextPage = fetchedPictures.count == DriveApiFetcher.itemPerPage
             }
             self.isLoading = false
-            if self.pictureForYearMonth.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+            if self.groupedPictures.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
                 self.hasNextPage = false
                 self.showEmptyView(.noNetwork, showButton: true)
             }
@@ -195,7 +195,7 @@ class PhotoListViewController: UIViewController {
     }
 
     func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
-        if pictureForYearMonth.isEmpty {
+        if groupedPictures.isEmpty {
             let background = EmptyTableView.instantiate(type: type, button: showButton, setCenteringEnabled: true)
             background.actionHandler = { _ in
                 self.forceRefresh()
@@ -206,11 +206,48 @@ class PhotoListViewController: UIViewController {
         }
     }
 
+    private func insertAndSort(pictures: [File], updateCollection: Bool) {
+        let sortMode = self.sortMode
+        for picture in pictures {
+            let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedDate)
+
+            var currentSectionIndex: Int!
+            var currentYearMonth: GroupedPictures!
+            let lastYearMonth = groupedPictures.last
+            if lastYearMonth?.dateComponents == currentDateComponents {
+                currentYearMonth = lastYearMonth
+                currentSectionIndex = groupedPictures.count - 1
+            } else if let yearMonthIndex = groupedPictures.firstIndex(where: { $0.dateComponents == currentDateComponents }) {
+                currentYearMonth = groupedPictures[yearMonthIndex]
+                currentSectionIndex = yearMonthIndex
+            } else {
+                currentYearMonth = GroupedPictures(referenceDate: picture.lastModifiedDate, sortMode: sortMode)
+                groupedPictures.append(currentYearMonth)
+                currentSectionIndex = groupedPictures.count - 1
+                if updateCollection {
+                    collectionView.insertSections([currentSectionIndex + 1])
+                }
+            }
+            currentYearMonth.pictures.append(picture)
+            if updateCollection {
+                collectionView.insertItems(at: [IndexPath(row: currentYearMonth.pictures.count - 1, section: currentSectionIndex + 1)])
+            }
+        }
+    }
+
+    private func updateSort() {
+        UserDefaults.shared.photoSortMode = sortMode
+        groupedPictures = []
+        insertAndSort(pictures: pictures, updateCollection: false)
+        collectionView.reloadData()
+    }
+
     class func instantiate() -> PhotoListViewController {
         return Storyboard.menu.instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
     }
 
     // MARK: - Scroll view delegate
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         isLargeTitle = UIApplication.shared.statusBarOrientation.isPortrait ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         headerView.isHidden = isLargeTitle
@@ -225,9 +262,9 @@ class PhotoListViewController: UIViewController {
             }
         }
         if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY), from: headerTitleLabel)) {
-            headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[indexPath.section - 1].referenceDate)
-        } else if !pictureForYearMonth.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
-            headerTitleLabel.text = dateFormatter.string(from: pictureForYearMonth[0].referenceDate)
+            headerTitleLabel.text = groupedPictures[indexPath.section - 1].formattedDate
+        } else if !groupedPictures.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
+            headerTitleLabel.text = groupedPictures[0].formattedDate
         }
 
         // Infinite scroll
@@ -260,23 +297,24 @@ class PhotoListViewController: UIViewController {
 }
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
+
 extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDataSource {
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return pictureForYearMonth.count + 1
+        return groupedPictures.count + 1
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if section == 0 {
             return 0
         } else {
-            return pictureForYearMonth[section - 1].pictures.count
+            return groupedPictures[section - 1].pictures.count
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: HomeLastPicCollectionViewCell.self, for: indexPath)
-        cell.configureWith(file: pictureForYearMonth[indexPath.section - 1].pictures[indexPath.row], roundedCorners: false)
+        cell.configureWith(file: groupedPictures[indexPath.section - 1].pictures[indexPath.row], roundedCorners: false)
         return cell
     }
 
@@ -317,19 +355,20 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
         } else {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! PhotoSectionHeaderView
             if indexPath.section > 0 {
-                let yearMonth = pictureForYearMonth[indexPath.section - 1]
-                headerView.titleLabel.text = dateFormatter.string(from: yearMonth.referenceDate)
+                let yearMonth = groupedPictures[indexPath.section - 1]
+                headerView.titleLabel.text = yearMonth.formattedDate
             }
             return headerView
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        filePresenter.present(driveFileManager: driveFileManager, file: pictureForYearMonth[indexPath.section - 1].pictures[indexPath.row], files: pictures, normalFolderHierarchy: false)
+        filePresenter.present(driveFileManager: driveFileManager, file: groupedPictures[indexPath.section - 1].pictures[indexPath.row], files: pictures, normalFolderHierarchy: false)
     }
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
+
 extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         guard let collectionViewLayout = collectionViewLayout as? UICollectionViewFlowLayout else {
@@ -339,4 +378,14 @@ extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
         let cellWidth = width / CGFloat(numberOfColumns)
         return CGSize(width: floor(cellWidth), height: floor(cellWidth))
     }
+}
+
+// MARK: - Photo sort delegate
+
+extension PhotoListViewController: PhotoSortDelegate {
+
+    func didSelect(sortMode: PhotoSortMode) {
+        self.sortMode = sortMode
+    }
+
 }
