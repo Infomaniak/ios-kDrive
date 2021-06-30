@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import UserNotifications
-import CocoaLumberjackSwift
 
-public class NotificationsHelper {
-
+public enum NotificationsHelper {
     public static let uploadCategoryId = "com.kdrive.notification.upload"
     private static let uploadQueueCountNotificationId = "uploadQueueCount"
     private static let uploadDoneNotificationId = "uploadDone"
@@ -31,6 +30,11 @@ public class NotificationsHelper {
     public static let parentIdKey = "parentIdKey"
     public static let generalCategoryId = "com.kdrive.notification.general"
     private static let migrateNotificationId = "migrate"
+
+    private struct SnackbarAction {
+        let title: String
+        let action: () -> Void
+    }
 
     public static var isNotificationEnabled: Bool {
         return UserDefaults.shared.isNotificationEnabled
@@ -84,8 +88,10 @@ public class NotificationsHelper {
             content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
             content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
             content.userInfo[parentIdKey] = parentId
-
-            sendImmediately(notification: content, id: uploadDoneNotificationId)
+            let action = SnackbarAction(title: "Locate") {
+                NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId])
+            }
+            sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
         }
     }
 
@@ -97,7 +103,10 @@ public class NotificationsHelper {
         content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
         content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
         content.userInfo[parentIdKey] = parentId
-        sendImmediately(notification: content, id: uploadDoneNotificationId)
+        let action = SnackbarAction(title: "Locate") {
+            NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId as Any])
+        }
+        sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
     }
 
     public static func sendPausedUploadQueueNotification() {
@@ -127,7 +136,7 @@ public class NotificationsHelper {
         sendImmediately(notification: content, id: migrateNotificationId)
     }
 
-    private static func sendImmediately(notification: UNMutableNotificationContent, id: String) {
+    private static func sendImmediately(notification: UNMutableNotificationContent, id: String, action: SnackbarAction? = nil) {
         DispatchQueue.main.async {
             if notification.categoryIdentifier == uploadCategoryId && !NotificationsHelper.importNotificationsEnabled {
                 return
@@ -140,9 +149,16 @@ public class NotificationsHelper {
                 let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
                 UNUserNotificationCenter.current().add(request)
             } else {
-                IKSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
+                if let action = action {
+                    IKSnackBar.make(message: notification.body, duration: .lengthLong, action: action.title, completion: action.action)?.show()
+                } else {
+                    IKSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
+                }
             }
         }
     }
+}
 
+public extension Notification.Name {
+    static let locateUploadActionTapped = Notification.Name(rawValue: "kDriveLocateUploadActionTapped")
 }

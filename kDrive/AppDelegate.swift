@@ -16,22 +16,21 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import AVFoundation
-import UserNotifications
-import InfomaniakLogin
-import InfomaniakCore
 import Atlantis
-import Kingfisher
-import kDriveCore
+import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
-import StoreKit
+import InfomaniakCore
+import InfomaniakLogin
+import kDriveCore
+import Kingfisher
 import Sentry
+import StoreKit
+import UIKit
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, UNUserNotificationCenterDelegate {
-
     var window: UIWindow?
 
     private var accountManager: AccountManager!
@@ -77,6 +76,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         if #available(iOS 13.0, *) {
             window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         }
+
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLocateUploadNotification), name: .locateUpload, object: nil)
 
         return true
     }
@@ -150,11 +151,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     func applicationDidEnterBackground(_ application: UIApplication) {
         if #available(iOS 13.0, *) {
             /* To debug background tasks:
-             Launch ->
-             e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
-             Force early termination ->
-             e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
-            */
+              Launch ->
+              e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
+              Force early termination ->
+              e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
+             */
             scheduleBackgroundRefresh()
         }
         if UserDefaults.shared.isAppLockEnabled && !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
@@ -241,7 +242,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 }
             })
             if let currentDriveFileManager = accountManager.currentDriveFileManager,
-                UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
+               UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
                 let floatingPanelViewController = SavePhotosFloatingPanelViewController.instantiatePanel()
                 let savePhotosFloatingPanelViewController = (floatingPanelViewController.contentViewController as? SavePhotosFloatingPanelViewController)
                 savePhotosFloatingPanelViewController?.driveFileManager = currentDriveFileManager
@@ -276,7 +277,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
 
     func refreshCacheData(preload: Bool, isSwitching: Bool) {
         let currentAccount = AccountManager.instance.currentAccount!
-        let rootViewController = self.window?.rootViewController as? SwitchAccountDelegate
+        let rootViewController = window?.rootViewController as? SwitchAccountDelegate
 
         if preload {
             DispatchQueue.main.async {
@@ -307,15 +308,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
                 }
                 if let drive = switchedDrive,
-                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
-                    !drive.maintenance {
+                   let driveFileManager = accountManager.getDriveFileManager(for: drive),
+                   !drive.maintenance {
                     (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                 }
 
                 if let currentDrive = accountManager.getDrive(for: accountManager.currentUserId, driveId: accountManager.currentDriveId),
-                    currentDrive.maintenance {
+                   currentDrive.maintenance {
                     if let nextAvailableDrive = DriveInfosManager.instance.getDrives(for: currentAccount.userId).first(where: { !$0.maintenance }),
-                        let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
+                       let driveFileManager = accountManager.getDriveFileManager(for: nextAvailableDrive) {
                         accountManager.setCurrentDriveForCurrentAccount(drive: nextAvailableDrive)
                         (rootViewController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
                     } else {
@@ -349,8 +350,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             // Read drive folder
             let driveFolderURL = folderURL.appendingPathComponent(driveFolder)
             guard let driveId = Int(driveFolder),
-                let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
-                let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
+                  let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: accountManager.currentUserId),
+                  let fileFolders = try? FileManager.default.contentsOfDirectory(atPath: driveFolderURL.path) else {
                 DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
             }
@@ -358,8 +359,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 // Read file folder
                 let fileFolderURL = driveFolderURL.appendingPathComponent(fileFolder)
                 guard let fileId = Int(fileFolder),
-                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
-                    let file = driveFileManager.getCachedFile(id: fileId) else {
+                      let driveFileManager = accountManager.getDriveFileManager(for: drive),
+                      let file = driveFileManager.getCachedFile(id: fileId) else {
                     DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
@@ -371,11 +372,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     if modificationDate > file.lastModifiedDate {
                         // Copy and upload file
                         let uploadFile = UploadFile(parentDirectoryId: file.parentId,
-                            userId: accountManager.currentUserId,
-                            driveId: driveId,
-                            url: fileURL,
-                            name: file.name,
-                            shouldRemoveAfterUpload: false)
+                                                    userId: accountManager.currentUserId,
+                                                    driveId: driveId,
+                                                    url: fileURL,
+                                                    name: file.name,
+                                                    shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true
                         uploadQueue.observeFileUploaded(self, fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
@@ -466,6 +467,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
     }
 
+    func present(file: File, driveFileManager: DriveFileManager) {
+        guard let rootViewController = window?.rootViewController as? MainTabViewController,
+              let navController = rootViewController.selectedViewController as? UINavigationController,
+              let viewController = navController.topViewController as? FileListViewController else {
+            return
+        }
+
+        // Dismiss all view controllers presented
+        rootViewController.dismiss(animated: false)
+        // Select Files tab
+        rootViewController.selectedIndex = 1
+
+        if !file.isRoot && viewController.currentDirectory.id != file.id {
+            // Pop to root
+            navController.popToRootViewController(animated: false)
+            // Present file
+            let filePresenter = FilePresenter(viewController: viewController, floatingPanelViewController: nil)
+            filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+        }
+    }
+
+    @objc func handleLocateUploadNotification(_ notification: Notification) {
+        if let parentId = notification.userInfo?["parentId"] as? Int,
+           let driveFileManager = accountManager.currentDriveFileManager,
+           let folder = driveFileManager.getCachedFile(id: parentId) {
+            present(file: folder, driveFileManager: driveFileManager)
+        }
+    }
+
     // MARK: - Account manager delegate
 
     func currentAccountNeedsAuthentication() {
@@ -494,26 +524,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             switch response.actionIdentifier {
             case UNNotificationDefaultActionIdentifier:
                 // Notification tapped: open parent folder
-                guard let rootViewController = UIApplication.shared.keyWindow?.rootViewController as? MainTabViewController else {
-                    completionHandler()
-                    return
-                }
-                // Dismiss all view controllers presented
-                rootViewController.dismiss(animated: false)
-                // Select Files tab
-                rootViewController.selectedIndex = 1
-
-                if let navController = rootViewController.selectedViewController as? UINavigationController {
-                    // Pop to root
-                    navController.popToRootViewController(animated: false)
-                    // Present folder (if it's not root)
-                    if let parentId = parentId, parentId > DriveFileManager.constants.rootID,
-                        let driveFileManager = accountManager.currentDriveFileManager,
-                        let directory = driveFileManager.getCachedFile(id: parentId) {
-                        let filesList = FileListViewController.instantiate(driveFileManager: driveFileManager)
-                        filesList.currentDirectory = directory
-                        navController.pushViewController(filesList, animated: false)
-                    }
+                if let parentId = parentId,
+                   let driveFileManager = accountManager.currentDriveFileManager,
+                   let folder = driveFileManager.getCachedFile(id: parentId) {
+                    present(file: folder, driveFileManager: driveFileManager)
                 }
             default:
                 break
