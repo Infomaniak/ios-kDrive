@@ -88,7 +88,7 @@ public enum NotificationsHelper {
             content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
             content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
             content.userInfo[parentIdKey] = parentId
-            let action = SnackbarAction(title: "Locate") {
+            let action = SnackbarAction(title: KDriveCoreStrings.Localizable.locateButton) {
                 NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId])
             }
             sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
@@ -103,7 +103,7 @@ public enum NotificationsHelper {
         content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
         content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
         content.userInfo[parentIdKey] = parentId
-        let action = SnackbarAction(title: "Locate") {
+        let action = SnackbarAction(title: KDriveCoreStrings.Localizable.locateButton) {
             NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId as Any])
         }
         sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
