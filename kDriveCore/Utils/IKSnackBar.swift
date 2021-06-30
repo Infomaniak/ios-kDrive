@@ -20,6 +20,15 @@ import UIKit
 import SnackBar
 
 public class IKSnackBar: SnackBar {
+    public struct Action {
+        let title: String
+        let action: () -> Void
+
+        public init(title: String, action: @escaping () -> Void) {
+            self.title = title
+            self.action = action
+        }
+    }
 
     required init(contextView: UIView, message: String, duration: Duration) {
         super.init(contextView: contextView, message: message, duration: duration)
@@ -79,12 +88,7 @@ public class IKSnackBar: SnackBar {
         }
     }
 
-    public static func make(message: String, duration: Duration, view: UIView? = nil, action: String, completion: @escaping () -> Void) -> Self? {
-        if let view = view {
-            return Self.make(in: view, message: message, duration: .lengthLong).setAction(with: action, action: completion) as? Self
-        } else {
-            guard let vc = getTopViewController() else { return nil }
-            return Self.make(in: vc.view, message: message, duration: .lengthLong).setAction(with: action, action: completion) as? Self
-        }
+    public func setAction(_ action: Action) -> SnackBarPresentable {
+        return setAction(with: action.title, action: action.action)
     }
 }

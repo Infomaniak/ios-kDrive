@@ -77,7 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         }
 
-        NotificationCenter.default.addObserver(self, selector: #selector(handleLocateUploadNotification), name: .locateUpload, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLocateUploadNotification), name: .locateUploadActionTapped, object: nil)
 
         return true
     }

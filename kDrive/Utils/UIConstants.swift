@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class UIConstants {
     static let inputCornerRadius: CGFloat = 2
@@ -33,12 +33,13 @@ class UIConstants {
     static let largeTitleHeight: CGFloat = 96
     static let insufficientStorageMinimumPercentage: Double = 90.0
 
-    static func showSnackBar(message: String, view: UIView? = nil) {
-        IKSnackBar.make(message: message, duration: .lengthLong, view: view)?.show()
-    }
-
-    static func showSnackBarWithAction(message: String, view: UIView? = nil, action: String, completion: @escaping () -> Void) {
-        IKSnackBar.make(message: message, duration: .lengthLong, view: view, action: action, completion: completion)?.show()
+    static func showSnackBar(message: String, view: UIView? = nil, action: IKSnackBar.Action? = nil) {
+        let snackbar = IKSnackBar.make(message: message, duration: .lengthLong, view: view)
+        if let action = action {
+            snackbar?.setAction(action).show()
+        } else {
+            snackbar?.show()
+        }
     }
 
     static func openUrl(_ string: String, from viewController: UIViewController) {

@@ -31,11 +31,6 @@ public enum NotificationsHelper {
     public static let generalCategoryId = "com.kdrive.notification.general"
     private static let migrateNotificationId = "migrate"
 
-    private struct SnackbarAction {
-        let title: String
-        let action: () -> Void
-    }
-
     public static var isNotificationEnabled: Bool {
         return UserDefaults.shared.isNotificationEnabled
     }
@@ -88,7 +83,7 @@ public enum NotificationsHelper {
             content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
             content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
             content.userInfo[parentIdKey] = parentId
-            let action = SnackbarAction(title: KDriveCoreStrings.Localizable.locateButton) {
+            let action = IKSnackBar.Action(title: KDriveCoreStrings.Localizable.locateButton) {
                 NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId])
             }
             sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
@@ -103,7 +98,7 @@ public enum NotificationsHelper {
         content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
         content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
         content.userInfo[parentIdKey] = parentId
-        let action = SnackbarAction(title: KDriveCoreStrings.Localizable.locateButton) {
+        let action = IKSnackBar.Action(title: KDriveCoreStrings.Localizable.locateButton) {
             NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId as Any])
         }
         sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
@@ -136,7 +131,7 @@ public enum NotificationsHelper {
         sendImmediately(notification: content, id: migrateNotificationId)
     }
 
-    private static func sendImmediately(notification: UNMutableNotificationContent, id: String, action: SnackbarAction? = nil) {
+    private static func sendImmediately(notification: UNMutableNotificationContent, id: String, action: IKSnackBar.Action? = nil) {
         DispatchQueue.main.async {
             if notification.categoryIdentifier == uploadCategoryId && !NotificationsHelper.importNotificationsEnabled {
                 return
@@ -149,10 +144,11 @@ public enum NotificationsHelper {
                 let request = UNNotificationRequest(identifier: id, content: notification, trigger: trigger)
                 UNUserNotificationCenter.current().add(request)
             } else {
+                let snackbar = IKSnackBar.make(message: notification.body, duration: .lengthLong)
                 if let action = action {
-                    IKSnackBar.make(message: notification.body, duration: .lengthLong, action: action.title, completion: action.action)?.show()
+                    snackbar?.setAction(action).show()
                 } else {
-                    IKSnackBar.make(message: notification.body, duration: .lengthLong)?.show()
+                    snackbar?.show()
                 }
             }
         }

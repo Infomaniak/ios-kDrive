@@ -428,7 +428,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         }
                         // Show snackbar (wait for panel dismissal)
                         group.notify(queue: .main) {
-                            UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: KDriveStrings.Localizable.buttonCancel) {
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                                 if let cancelId = cancelId {
                                     self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
                                         if error == nil {
@@ -436,7 +436,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                                         }
                                     }
                                 }
-                            }
+                            })
                         }
                     } else {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete, view: self.view)
@@ -514,7 +514,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     if error != nil {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove, view: self.view)
                     } else {
-                        UIConstants.showSnackBarWithAction(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), view: self.view, action: KDriveStrings.Localizable.buttonCancel) {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), view: self.view, action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                             if let cancelId = response?.id {
                                 self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
                                     if error == nil {
@@ -522,7 +522,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                                     }
                                 }
                             }
-                        }
+                        })
                         self.presentingParent?.navigationController?.popViewController(animated: true)
                     }
                 }
