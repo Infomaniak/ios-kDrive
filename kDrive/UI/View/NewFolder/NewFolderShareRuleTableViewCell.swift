@@ -34,9 +34,9 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         rights = false
         collectionView.isHidden = true
         accessoryImageView.isHidden = false
+        collectionView.register(cellView: NewFolderShareRuleUserCollectionViewCell.self)
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.register(cellView: NewFolderShareRuleUserCollectionViewCell.self)
     }
 
     override func prepareForReuse() {

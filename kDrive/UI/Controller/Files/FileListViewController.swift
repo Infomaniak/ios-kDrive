@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import CocoaLumberjackSwift
 import DifferenceKit
+import kDriveCore
+import UIKit
 
 extension SwipeCellAction {
     static let share = SwipeCellAction(identifier: "share", title: KDriveStrings.Localizable.buttonFileRights, backgroundColor: KDriveAsset.infomaniakColor.color, icon: KDriveAsset.share.image)
@@ -27,7 +27,6 @@ extension SwipeCellAction {
 }
 
 class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource {
-
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
@@ -75,6 +74,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             setTitle()
         }
     }
+
     lazy var configuration = Configuration(emptyViewType: .emptyFolder)
     private var uploadingFilesCount = 0
     private var nextPage = 1
@@ -85,17 +85,20 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         }
     }
+
     var sortType = FileListOptions.instance.currentSortType {
         didSet {
             headerView?.sortButton.setTitle(sortType.value.translation, for: .normal)
         }
     }
+
     var sortedFiles: [File] = []
     var selectionMode = false {
         didSet {
             toggleMultipleSelection()
         }
     }
+
     var selectedFiles = Set<File>()
     #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
@@ -127,6 +130,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationItem.backButtonTitle = ""
 
         // Set up collection view
+        collectionView.register(cellView: FileCollectionViewCell.self)
+        collectionView.register(cellView: FileGridCollectionViewCell.self)
+        collectionView.register(UINib(nibName: headerViewIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier)
         if configuration.isRefreshControlEnabled {
             refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
             collectionView.refreshControl = refreshControl
@@ -134,9 +140,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
-        collectionView.register(cellView: FileCollectionViewCell.self)
-        collectionView.register(cellView: FileGridCollectionViewCell.self)
-        collectionView.register(UINib(nibName: headerViewIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier)
         collectionViewLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         collectionViewLayout?.sectionHeadersPinToVisibleBounds = true
 
@@ -512,10 +515,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
         // Reload corners
         if listStyle == .list,
-            let oldFirstFileId = firstFileId,
-            let oldLastFileId = lastFileId,
-            let newFirstFileId = sortedFiles.first?.id,
-            let newLastFileId = sortedFiles.last?.id {
+           let oldFirstFileId = firstFileId,
+           let oldLastFileId = lastFileId,
+           let newFirstFileId = sortedFiles.first?.id,
+           let newLastFileId = sortedFiles.last?.id {
             var indexPaths = [IndexPath]()
             if oldFirstFileId != newFirstFileId {
                 indexPaths.append(IndexPath(item: 0, section: 0))
@@ -788,13 +791,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // Drive File Manager should be consistent
         let maybeDriveFileManager: DriveFileManager?
         #if ISEXTENSION
-        maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
-        #else
-        if !(self is SharedWithMeViewController) {
-            maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
-        } else {
             maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
-        }
+        #else
+            if !(self is SharedWithMeViewController) {
+                maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
+            } else {
+                maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
+            }
         #endif
         guard let driveFileManager = maybeDriveFileManager else {
             // Handle error?
@@ -810,13 +813,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         observeFiles()
         reloadData()
     }
-
 }
 
 // MARK: - Collection view delegate flow layout
 
 extension FileListViewController: UICollectionViewDelegateFlowLayout {
-
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         switch listStyle {
         case .list:
@@ -864,7 +865,6 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - File cell delegate
 
 extension FileListViewController: FileCellDelegate {
-
     @objc func didTapMoreButton(_ cell: FileCollectionViewCell) {
         #if !ISEXTENSION
             guard let indexPath = collectionView.indexPath(for: cell) else {
@@ -873,13 +873,11 @@ extension FileListViewController: FileCellDelegate {
             showQuickActionsPanel(file: sortedFiles[indexPath.row])
         #endif
     }
-
 }
 
 // MARK: - Files header view delegate
 
 extension FileListViewController: FilesHeaderViewDelegate {
-
     func sortButtonPressed() {
         let floatingPanelViewController = DriveFloatingPanelController()
         let sortOptionsViewController = FloatingPanelSortOptionTableViewController()
@@ -982,18 +980,16 @@ extension FileListViewController: FilesHeaderViewDelegate {
             }
             floatingPanelViewController.set(contentViewController: selectViewController)
             floatingPanelViewController.track(scrollView: selectViewController.tableView)
-            self.present(floatingPanelViewController, animated: true)
+            present(floatingPanelViewController, animated: true)
         }
     #endif
 
-    @objc func removeFileTypeButtonPressed() { }
-
+    @objc func removeFileTypeButtonPressed() {}
 }
 
 // MARK: - Sort options delegate
 
 extension FileListViewController: SortOptionsDelegate {
-
     func didClickOnSortingOption(type: SortType) {
         sortType = type
         if !trashSort {
@@ -1003,16 +999,14 @@ extension FileListViewController: SortOptionsDelegate {
             reloadData()
         }
     }
-
 }
 
 // MARK: - Switch drive delegate
 
 #if !ISEXTENSION
     extension FileListViewController: SwitchDriveDelegate {
-
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-            self.driveFileManager = newDriveFileManager
+            driveFileManager = newDriveFileManager
             currentDirectory = driveFileManager.getRootFile()
             setTitle()
             if configuration.showUploadingFiles {
@@ -1026,18 +1020,15 @@ extension FileListViewController: SortOptionsDelegate {
             reloadData()
             navigationController?.popToRootViewController(animated: false)
         }
-
     }
 #endif
 
 // MARK: - Top scrollable
 
 extension FileListViewController: TopScrollable {
-
     func scrollToTop() {
         if isViewLoaded {
             collectionView.scrollToTop(animated: true, navigationController: navigationController)
         }
     }
-
 }

@@ -29,11 +29,10 @@ class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelega
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        collectionView.register(cellView: NewFolderLocationCollectionViewCell.self)
         collectionView.delegate = self
         collectionView.dataSource = self
         (collectionView.collectionViewLayout as! AlignedCollectionViewFlowLayout).horizontalAlignment = .leading
-
-        collectionView.register(cellView: NewFolderLocationCollectionViewCell.self)
     }
 
     override func prepareForReuse() {

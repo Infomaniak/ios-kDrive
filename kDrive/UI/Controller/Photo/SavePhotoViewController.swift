@@ -26,8 +26,8 @@ class SavePhotoViewController: SaveFileViewController {
     var format = PhotoFileFormat(rawValue: 0)!
 
     override func viewDidLoad() {
-        super.viewDidLoad()
         tableView.register(cellView: ScanTypeTableViewCell.self)
+        super.viewDidLoad()
         if uti == .image {
             sections = [.fileName, .fileType, .directorySelection]
         } else {

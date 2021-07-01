@@ -29,8 +29,8 @@ class SaveScanViewController: SaveFileViewController {
     var scanType = ScanFileFormat(rawValue: 0)!
 
     override func viewDidLoad() {
-        super.viewDidLoad()
         tableView.register(cellView: ScanTypeTableViewCell.self)
+        super.viewDidLoad()
         sections = [.fileName, .fileType, .directorySelection]
     }
 
