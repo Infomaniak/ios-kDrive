@@ -36,10 +36,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     private var accountManager: AccountManager!
     private var uploadQueue: UploadQueue!
     private var reachabilityListener: ReachabilityListener!
-
+    private var service: MQService!
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
-
+        service = MQService()
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = 20
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
