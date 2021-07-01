@@ -114,12 +114,14 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InsufficientStorageTableViewCell.self)
 
+        refreshControl?.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
         tableView.sectionFooterHeight = 22
         tableView.contentInsetAdjustmentBehavior = .never
-        if UIDevice.current.orientation.isPortrait {
-            tableView.contentInset.top = navigationController?.tabBarController?.view.safeAreaInsets.bottom == 0 ? -UIConstants.homeListPaddingTop : UIConstants.homeListPaddingTop
+        if UIApplication.shared.statusBarOrientation.isPortrait {
+            tableView.contentInset.top = UIConstants.homeListPaddingTop
         } else {
             tableView.contentInset.top = 0
         }
@@ -176,6 +178,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         navigationController?.navigationBar.isUserInteractionEnabled = true
         navigationController?.navigationBar.layoutIfNeeded()
         NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
+    }
+
+    @objc func forceRefresh() {
+        reloadData()
     }
 
     @objc func rotated() {
@@ -333,7 +339,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         driveFileManager.getLastPictures(page: lastPicturesInfo.page) { files, _ in
             if let files = files {
                 self.lastPictures += files
-
+                self.refreshControl?.endRefreshing()
                 // self.showFooter(false)
                 self.activityOrPicturesIsLoading = false
                 self.reload(sections: [.activityOrPictures])
@@ -341,6 +347,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 self.lastPicturesInfo.hasNextPage = files.count == DriveApiFetcher.itemPerPage
                 self.lastPicturesInfo.isLoading = false
             } else {
+                self.refreshControl?.endRefreshing()
                 // self.showFooter(false)
                 self.activityOrPicturesIsLoading = false
                 self.lastPicturesInfo.isLoading = false
@@ -359,6 +366,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         recentActivityController.loadNextRecentActivities { error in
             self.showFooter(false)
             self.activityOrPicturesIsLoading = false
+            self.refreshControl?.endRefreshing()
             if let error = error {
                 DDLogError("Error while fetching recent activities: \(error)")
             } else {
@@ -384,6 +392,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             loadNextLastPictures()
         }
         reload(sections: [.lastModify, .activityOrPictures])
+
     }
 
     func showFooter(_ show: Bool) {
