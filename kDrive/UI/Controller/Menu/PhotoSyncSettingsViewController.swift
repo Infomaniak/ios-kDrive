@@ -385,8 +385,8 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .deleteAssetsAfterImport:
                 let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow()
-                cell.titleLabel.text = "KDriveStrings.Localizable.createDatedSubFoldersTitle"
-                cell.detailsLabel.text = "KDriveStrings.Localizable.createDatedSubFoldersDescription"
+                cell.titleLabel.text = KDriveStrings.Localizable.deletePicturesTitle
+                cell.detailsLabel.text = KDriveStrings.Localizable.deletePicturesDescription
                 cell.valueSwitch.setOn(deleteAssetsAfterImport, animated: true)
                 cell.switchHandler = { sender in
                     self.deleteAssetsAfterImport = sender.isOn
