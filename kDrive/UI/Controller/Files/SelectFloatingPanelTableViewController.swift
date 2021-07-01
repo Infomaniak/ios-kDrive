@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewController {
-
     var files: [File]!
     var changedFiles: [File]? = []
     var downloadInProgress = false
@@ -120,7 +119,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         case .favorite:
             let isFavorite = filesAreFavorite
             addAction = !isFavorite
-            for file in files where (file.rights?.canFavorite.value ?? false) {
+            for file in files where file.rights?.canFavorite.value ?? false {
                 group.enter()
                 driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { error in
                     if error != nil {
@@ -141,11 +140,12 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                     group.enter()
                     DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
-                        if error != nil {
+                        if error == nil {
+                            DispatchQueue.main.async {
+                                saveLocalFile(file: file)
+                            }
+                        } else {
                             success = false
-                        }
-                        DispatchQueue.main.async {
-                            saveLocalFile(file: file)
                         }
                         group.leave()
                     }
@@ -156,7 +156,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             break
         }
 
-        group.notify(queue: DispatchQueue.main) {
+        group.notify(queue: .main) {
             if success {
                 if action == .offline && addAction {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.count))
