@@ -45,12 +45,12 @@ class RecentActivityTableViewCell: InsetTableViewCell, UICollectionViewDelegate,
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        collectionView.register(cellView: RecentActivityCollectionViewCell.self)
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.register(cellView: RecentActivityCollectionViewCell.self)
+        tableView.register(cellView: RecentActivityBottomTableViewCell.self)
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(cellView: RecentActivityBottomTableViewCell.self)
         avatarImage.cornerRadius = avatarImage.frame.width / 2
     }
 

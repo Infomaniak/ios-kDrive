@@ -85,11 +85,11 @@ class SaveFileViewController: UIViewController {
         closeBarButtonItem.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         tableView.separatorColor = .clear
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: ImportingTableViewCell.self)
         tableView.register(cellView: LocationTableViewCell.self)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
         hideKeyboardWhenTappedAround()
