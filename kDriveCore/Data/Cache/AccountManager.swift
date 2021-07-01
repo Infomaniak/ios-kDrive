@@ -101,7 +101,9 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func reloadTokensAndAccounts() {
         accounts = loadAccounts()
-        tokens = loadTokens()
+        if !accounts.isEmpty {
+            tokens = loadTokens()
+        }
 
         // remove accounts with no user
         for account in accounts where account.user == nil {
