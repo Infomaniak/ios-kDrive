@@ -130,6 +130,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationItem.backButtonTitle = ""
 
         // Set up collection view
+        collectionView.register(cellView: FileCollectionViewCell.self)
+        collectionView.register(cellView: FileGridCollectionViewCell.self)
+        collectionView.register(UINib(nibName: headerViewIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier)
         if configuration.isRefreshControlEnabled {
             refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
             collectionView.refreshControl = refreshControl
@@ -137,9 +140,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
-        collectionView.register(cellView: FileCollectionViewCell.self)
-        collectionView.register(cellView: FileGridCollectionViewCell.self)
-        collectionView.register(UINib(nibName: headerViewIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier)
         collectionViewLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         collectionViewLayout?.sectionHeadersPinToVisibleBounds = true
 
