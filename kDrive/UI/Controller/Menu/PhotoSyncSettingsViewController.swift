@@ -45,6 +45,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         case importVideosSwitch
         case importScreenshotsSwitch
         case createDatedSubFolders
+        case deleteAssetsAfterImport
         case syncMode
     }
     private enum PhotoSyncDeniedRows: CaseIterable {
@@ -62,6 +63,7 @@ class PhotoSyncSettingsViewController: UIViewController {
     private var syncPicturesEnabled: Bool!
     private var syncScreenshotsEnabled: Bool!
     private var createDatedSubFolders: Bool!
+    private var deleteAssetsAfterImport: Bool!
     private var currentUserId: Int!
     private var currentDriveId: Int!
     private var syncMode: PhotoSyncMode = .new
@@ -89,6 +91,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         syncPicturesEnabled = currentSyncSettings.syncPicturesEnabled
         syncScreenshotsEnabled = currentSyncSettings.syncScreenshotsEnabled
         createDatedSubFolders = currentSyncSettings.createDatedSubFolders
+        deleteAssetsAfterImport = currentSyncSettings.deleteAssetsAfterImport
         let savedCurrentId = currentSyncSettings.userId
         currentUserId = savedCurrentId == -1 ? AccountManager.instance.currentAccount.userId : savedCurrentId
         let savedCurrentDrive = currentSyncSettings.driveId
@@ -154,6 +157,7 @@ class PhotoSyncSettingsViewController: UIViewController {
                 currentSyncSettings.syncVideosEnabled != syncVideosEnabled ||
                 currentSyncSettings.syncScreenshotsEnabled != syncScreenshotsEnabled ||
                 currentSyncSettings.createDatedSubFolders != createDatedSubFolders ||
+                currentSyncSettings.deleteAssetsAfterImport != deleteAssetsAfterImport ||
                 currentSyncSettings.syncMode != syncMode
         }
         saveButton.isHidden = !isEdited
@@ -186,14 +190,15 @@ class PhotoSyncSettingsViewController: UIViewController {
             }
 
             let newSettings = PhotoSyncSettings(userId: currentUserId,
-                driveId: currentDriveId,
-                parentDirectoryId: selectedDirectory!.id,
-                lastSync: lastSyncDate,
-                syncMode: syncMode,
-                syncPictures: syncPicturesEnabled,
-                syncVideos: syncVideosEnabled,
-                syncScreenshots: syncScreenshotsEnabled,
-                createDatedSubFolders: createDatedSubFolders)
+                                                driveId: currentDriveId,
+                                                parentDirectoryId: selectedDirectory!.id,
+                                                lastSync: lastSyncDate,
+                                                syncMode: syncMode,
+                                                syncPictures: syncPicturesEnabled,
+                                                syncVideos: syncVideosEnabled,
+                                                syncScreenshots: syncScreenshotsEnabled,
+                                                createDatedSubFolders: createDatedSubFolders,
+                                                deleteAssetsAfterImport: deleteAssetsAfterImport)
             PhotoLibraryUploader.instance.enableSync(with: newSettings)
         } else {
             PhotoLibraryUploader.instance.disableSync()
@@ -377,9 +382,20 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                     self.updateSaveButtonState()
                 }
                 return cell
+            case .deleteAssetsAfterImport:
+                let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow()
+                cell.titleLabel.text = KDriveStrings.Localizable.deletePicturesTitle
+                cell.detailsLabel.text = KDriveStrings.Localizable.deletePicturesDescription
+                cell.valueSwitch.setOn(deleteAssetsAfterImport, animated: true)
+                cell.switchHandler = { sender in
+                    self.deleteAssetsAfterImport = sender.isOn
+                    self.updateSaveButtonState()
+                }
+                return cell
             case .syncMode:
                 let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == (self.tableView(tableView, numberOfRowsInSection: indexPath.section)) - 1)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
                 cell.titleLabel.text = KDriveStrings.Localizable.syncSettingsButtonSaveDate
                 cell.valueLabel.text = syncMode == .new ? KDriveStrings.Localizable.syncSettingsSaveDateNowValue : KDriveStrings.Localizable.syncSettingsSaveDateAllPictureValue
                 return cell

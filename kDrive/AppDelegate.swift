@@ -272,6 +272,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             }
             refreshCacheData(preload: false, isSwitching: false)
             uploadEditedFiles()
+            PhotoLibraryUploader.instance.removePicturesFromPhotoLibraryIfNeeded()
         }
     }
 

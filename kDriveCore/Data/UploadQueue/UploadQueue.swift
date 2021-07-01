@@ -156,6 +156,10 @@ public class UploadQueue {
         }
     }
 
+    public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
+    }
+
     public func suspendAllOperations() {
         forceSuspendQueue = true
         operationQueue.isSuspended = true
