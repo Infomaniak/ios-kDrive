@@ -114,8 +114,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InsufficientStorageTableViewCell.self)
 
-        refreshControl?.addTarget(self, action: #selector(reloadData), for: .valueChanged)
-
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
         tableView.sectionFooterHeight = 22
@@ -127,6 +125,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
         tableView.contentInset.bottom = UIConstants.listPaddingBottom
         tableView.scrollIndicatorInsets = UIEdgeInsets(top: navbarHeight, left: 0, bottom: 0, right: 0)
+        if let refreshControl = tableView.refreshControl {
+            refreshControl.addTarget(self, action: #selector(reloadData), for: .valueChanged)
+            refreshControl.bounds = refreshControl.bounds.offsetBy(dx: 0, dy: -24)
+        }
 
         initViewWithCurrentDrive()
 
