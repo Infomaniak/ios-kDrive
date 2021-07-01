@@ -114,7 +114,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InsufficientStorageTableViewCell.self)
 
-        refreshControl?.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+        refreshControl?.addTarget(self, action: #selector(reloadData), for: .valueChanged)
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
@@ -178,10 +178,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         navigationController?.navigationBar.isUserInteractionEnabled = true
         navigationController?.navigationBar.layoutIfNeeded()
         NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
-    }
-
-    @objc func forceRefresh() {
-        reloadData()
     }
 
     @objc func rotated() {
@@ -375,7 +371,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
     }
 
-    func reloadData() {
+    @objc func reloadData() {
         guard !activityOrPicturesIsLoading, driveFileManager != nil else {
             return
         }
