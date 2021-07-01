@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import InfomaniakLogin
-import InfomaniakCore
 import CocoaLumberjackSwift
+import Foundation
+import InfomaniakCore
+import InfomaniakLogin
 import Sentry
 
 public protocol SwitchAccountDelegate: AnyObject {
@@ -32,7 +32,6 @@ public protocol AccountManagerDelegate: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate {
-
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
     private let accessGroup: String
@@ -48,14 +47,17 @@ public class AccountManager: RefreshTokenDelegate {
             UserDefaults.shared.currentDriveUserId = currentUserId
         }
     }
+
     public var currentDriveId: Int {
         didSet {
             UserDefaults.shared.currentDriveId = currentDriveId
         }
     }
+
     public var drives: [Drive] {
         return DriveInfosManager.instance.getDrives(for: currentUserId)
     }
+
     public var currentDriveFileManager: DriveFileManager? {
         if let currentDriveFileManager = getDriveFileManager(for: currentDriveId, userId: currentUserId) {
             return currentDriveFileManager
@@ -66,12 +68,13 @@ public class AccountManager: RefreshTokenDelegate {
             return nil
         }
     }
+
     private var driveFileManagers = [String: DriveFileManager]()
     private var apiFetchers = [Int: DriveApiFetcher]()
 
     private init() {
         let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
-        accessGroup = appIdentifierPrefix + AccountManager.group
+        self.accessGroup = appIdentifierPrefix + AccountManager.group
         KeychainHelper.initKeychainAccessiblity(accessGroup: accessGroup)
         DDLogInfo("[Keychain] Accessible ? \(KeychainHelper.isKeychainAccessible)")
 
@@ -82,8 +85,8 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func forceReload() {
-        self.currentDriveId = UserDefaults.shared.currentDriveId
-        self.currentUserId = UserDefaults.shared.currentDriveUserId
+        currentDriveId = UserDefaults.shared.currentDriveId
+        currentUserId = UserDefaults.shared.currentDriveUserId
 
         reloadTokensAndAccounts()
 
@@ -97,8 +100,8 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func reloadTokensAndAccounts() {
-        self.tokens = loadTokens()
-        self.accounts = loadAccounts()
+        accounts = loadAccounts()
+        tokens = loadTokens()
 
         // remove accounts with no user
         for account in accounts where account.user == nil {
@@ -106,7 +109,7 @@ public class AccountManager: RefreshTokenDelegate {
         }
 
         for token in tokens {
-            if let account = self.accounts.first(where: { $0.userId == token.userId }) {
+            if let account = accounts.first(where: { $0.userId == token.userId }) {
                 account.token = token
             } else {
                 // Remove token with no account
@@ -125,7 +128,7 @@ public class AccountManager: RefreshTokenDelegate {
         if let driveFileManager = driveFileManagers[objectId] {
             return driveFileManager
         } else if let token = getTokenForUserId(userId),
-            let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
+                  let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: userId) {
             let apiFetcher = getApiFetcher(for: userId, token: token)
             driveFileManagers[objectId] = DriveFileManager(drive: drive, apiFetcher: apiFetcher)
             return driveFileManagers[objectId]
@@ -153,7 +156,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
-        self.updateToken(newToken: newToken, oldToken: oldToken)
+        updateToken(newToken: newToken, oldToken: oldToken)
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
@@ -161,7 +164,7 @@ public class AccountManager: RefreshTokenDelegate {
             scope.setContext(value: ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970], key: "Token Infos")
         }
         tokens.removeAll { $0.userId == token.userId }
-        self.deleteToken(token)
+        deleteToken(token)
         if let account = getAccountForToken(token: token) {
             account.token = nil
             if account.userId == currentUserId {
@@ -183,8 +186,8 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func createAndSetCurrentAccount(token: ApiToken, completion: @escaping (Account?, Error?) -> Void) {
         let newAccount = Account(apiToken: token)
-        self.addAccount(account: newAccount)
-        self.setCurrentAccount(account: newAccount)
+        addAccount(account: newAccount)
+        setCurrentAccount(account: newAccount)
         let apiFetcher = ApiFetcher(token: token, delegate: self)
         apiFetcher.getUserForAccount { response, error in
             if let user = response?.data {
@@ -192,7 +195,7 @@ public class AccountManager: RefreshTokenDelegate {
 
                 apiFetcher.getUserDrives { response, error in
                     if let driveResponse = response?.data,
-                        !driveResponse.drives.main.isEmpty {
+                       !driveResponse.drives.main.isEmpty {
                         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
 
                         guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
@@ -223,7 +226,7 @@ public class AccountManager: RefreshTokenDelegate {
                 account.user = user
                 apiFetcher.getUserDrives { response, error in
                     if let driveResponse = response?.data,
-                        !driveResponse.drives.main.isEmpty {
+                       !driveResponse.drives.main.isEmpty {
                         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
                         var switchedDrive: Drive?
                         for driveRemoved in driveRemovedList {
@@ -303,11 +306,11 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func addAccount(account: Account) {
         if accounts.contains(account) {
-            self.removeAccount(toDeleteAccount: account)
+            removeAccount(toDeleteAccount: account)
         }
         accounts.append(account)
-        self.storeToken(account.token)
-        self.saveAccounts()
+        storeToken(account.token)
+        saveAccounts()
     }
 
     public func removeAccount(toDeleteAccount: Account) {
@@ -327,9 +330,9 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func removeTokenAndAccount(token: ApiToken) {
         tokens.removeAll { $0.userId == token.userId }
-        self.deleteToken(token)
+        deleteToken(token)
         if let account = getAccountForToken(token: token) {
-            self.removeAccount(toDeleteAccount: account)
+            removeAccount(toDeleteAccount: account)
         }
     }
 
@@ -340,8 +343,8 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
-        self.deleteToken(oldToken)
-        self.storeToken(newToken)
+        deleteToken(oldToken)
+        storeToken(newToken)
         for account in accounts where oldToken.userId == account.userId {
             account.token = newToken
         }
@@ -374,7 +377,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     func storeToken(_ token: ApiToken) {
-        self.deleteToken(token)
+        deleteToken(token)
         // swiftlint:disable force_try
         let tokenData = try! JSONEncoder().encode(token)
         let queryAdd: [String: Any] = [
