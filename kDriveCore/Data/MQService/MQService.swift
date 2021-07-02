@@ -24,6 +24,7 @@ public class MQService {
     private let webSocket: CocoaMQTTWebSocket
     private let mqtt: CocoaMQTT
     private var currentToken: IPSToken?
+    private let decoder = JSONDecoder()
 
     public init() {
         webSocket = CocoaMQTTWebSocket(uri: "/ws")
@@ -79,10 +80,17 @@ extension MQService: CocoaMQTTDelegate {
     public func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16) {}
 
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
-        let data = Data(message.payload)
-        if let message = String(data: data, encoding: .utf8) {
-            print(message)
+        guard let driveFileManager = AccountManager.instance.currentDriveFileManager else {
+            return
         }
+
+        let data = Data(message.payload)
+        if let message = try? decoder.decode(ActionNotification.self, from: data) {
+            if message.driveId == driveFileManager.drive.id,
+               let file = driveFileManager.getCachedFile(id: message.parentId) {
+                driveFileManager.notifyObserversWith(file: file)
+            }
+        } else if let message = try? decoder.decode(ActionProgressNotification.self, from: data) {}
     }
 
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {}

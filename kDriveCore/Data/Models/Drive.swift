@@ -24,6 +24,14 @@ public class DriveResponse: Codable {
     public let drives: DriveList
     public let users: [Int: DriveUser]
     public let tags: [Tag]
+    public let ipsToken: IPSToken
+
+    enum CodingKeys: String, CodingKey {
+        case drives
+        case users
+        case tags
+        case ipsToken = "ips_token"
+    }
 }
 
 public class DriveList: Codable {
