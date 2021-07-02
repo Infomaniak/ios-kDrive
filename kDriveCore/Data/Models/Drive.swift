@@ -34,19 +34,16 @@ public class DriveList: Codable {
         case main
         case sharedWithMe = "shared_with_me"
     }
-
 }
 
 public class DriveUsersCategories: Object, Codable {
-
     @objc public dynamic var objectId: String = ""
     public var account = List<Int>()
     public var drive = List<Int>()
     public var internalUsers = List<Int>()
     public var externalUsers = List<Int>()
 
-    public override init() {
-    }
+    override public init() {}
 
     enum CodingKeys: String, CodingKey {
         case account
@@ -55,11 +52,11 @@ public class DriveUsersCategories: Object, Codable {
         case externalUsers = "external"
     }
 
-    public override static func primaryKey() -> String? {
+    override public static func primaryKey() -> String? {
         return "objectId"
     }
-
 }
+
 public enum DrivePack: String, Codable {
     case solo
     case pro
@@ -76,8 +73,7 @@ public class DrivePackFunctionality: Object, Codable {
     @objc public dynamic var hasTeamSpace = false
     @objc public dynamic var versionsKeptForDays: Int = 0
 
-    public override init() {
-    }
+    override public init() {}
 
     enum CodingKeys: String, CodingKey {
         case dropbox
@@ -88,10 +84,9 @@ public class DrivePackFunctionality: Object, Codable {
         case versionsKeptForDays = "versions_kept_for_days"
     }
 
-    public override static func primaryKey() -> String? {
+    override public static func primaryKey() -> String? {
         return "objectId"
     }
-
 }
 
 public class DrivePreferences: Object, Codable {
@@ -99,12 +94,12 @@ public class DrivePreferences: Object, Codable {
     @objc public dynamic var color: String
     @objc public dynamic var hide: Bool
 
-    public override init() {
+    override public init() {
         color = "#0098FF"
         hide = false
     }
 
-    public override static func primaryKey() -> String? {
+    override public static func primaryKey() -> String? {
         return "objectId"
     }
 
@@ -115,7 +110,6 @@ public class DrivePreferences: Object, Codable {
 }
 
 public class Drive: Object, Codable {
-
     @objc public dynamic var objectId: String = ""
     /*
      User data
@@ -150,8 +144,7 @@ public class Drive: Object, Codable {
         }
     }
 
-    public override init() {
-    }
+    override public init() {}
 
     public var pack: DrivePack {
         return DrivePack(rawValue: _pack)!
@@ -173,7 +166,7 @@ public class Drive: Object, Codable {
         return pack == .pro || pack == .team
     }
 
-    public override static func primaryKey() -> String? {
+    override public static func primaryKey() -> String? {
         return "objectId"
     }
 

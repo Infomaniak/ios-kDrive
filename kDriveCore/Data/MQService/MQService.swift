@@ -55,6 +55,8 @@ public class MQService {
     }
 }
 
+// MARK: - CocoaMQTTDelegate
+
 extension MQService: CocoaMQTTDelegate {
     public func mqtt(_ mqtt: CocoaMQTT, didReceive trust: SecTrust, completionHandler: @escaping (Bool) -> Void) {
         completionHandler(true)
@@ -83,9 +85,7 @@ extension MQService: CocoaMQTTDelegate {
         }
     }
 
-    public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
-        print("subscribed: \(success), failed: \(failed)")
-    }
+    public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {}
 
     public func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {}
 
