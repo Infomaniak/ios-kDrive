@@ -35,6 +35,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private let leftRightInset: CGFloat = 12
     private let gridInnerSpacing: CGFloat = 16
     private let maxDiffChanges = DriveApiFetcher.itemPerPage
+    private let bulkActionThreshold = 10
     private let headerViewIdentifier = "FilesHeaderView"
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
     private let fileObserverThrottler = Throttler<File>(timeInterval: 5, queue: .global())
@@ -473,45 +474,65 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let group = DispatchGroup()
         var success = true
         var cancelId: String?
-        for file in files {
+
+        if files.count > 1 {
+            let fileIds = files.map(\.id)
             group.enter()
-            driveFileManager.deleteFile(file: file) { response, error in
-                cancelId = response?.id
+            driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, fileIds: fileIds) { response, error in
+                cancelId = response?.data?.id
                 if let error = error {
                     success = false
                     DDLogError("Error while deleting file: \(error)")
+                } else {
+                    AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
+                        DDLogError("observeActionProgress \(actionProgress.progress.message)")
+                        UIConstants.showSnackBar(message: "\(actionProgress.progress.message) \(actionProgress.progress.total - actionProgress.progress.todo)/\(actionProgress.progress.total)")
+                    }
                 }
                 group.leave()
             }
-        }
-        if async {
-            group.notify(queue: DispatchQueue.main) {
-                if success {
-                    if files.count == 1 {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
-                            guard let cancelId = cancelId else { return }
-                            self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { error in
-                                self.getNewChanges()
-                                if error == nil {
-                                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
-                                }
-                            }
-                        })
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
-                    }
-                } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
-                }
-                if self.selectionMode {
-                    self.selectionMode = false
-                }
-                self.getNewChanges()
-            }
             return nil
         } else {
-            let result = group.wait(timeout: .now() + 5)
-            return success && result != .timedOut
+            for file in files {
+                group.enter()
+                driveFileManager.deleteFile(file: file) { response, error in
+                    cancelId = response?.id
+                    if let error = error {
+                        success = false
+                        DDLogError("Error while deleting file: \(error)")
+                    }
+                    group.leave()
+                }
+            }
+            if async {
+                group.notify(queue: DispatchQueue.main) {
+                    if success {
+                        if files.count == 1 {
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
+                                guard let cancelId = cancelId else { return }
+                                self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { error in
+                                    self.getNewChanges()
+                                    if error == nil {
+                                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
+                                    }
+                                }
+                            })
+                        } else {
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
+                        }
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
+                    }
+                    if self.selectionMode {
+                        self.selectionMode = false
+                    }
+                    self.getNewChanges()
+                }
+                return nil
+            } else {
+                let result = group.wait(timeout: .now() + 5)
+                return success && result != .timedOut
+            }
         }
     }
 

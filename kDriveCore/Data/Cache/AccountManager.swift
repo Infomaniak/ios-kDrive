@@ -74,7 +74,7 @@ public class AccountManager: RefreshTokenDelegate {
 
     private var driveFileManagers = [String: DriveFileManager]()
     private var apiFetchers = [Int: DriveApiFetcher]()
-    private let mqService = MQService()
+    public let mqService = MQService()
 
     private init() {
         self.currentDriveId = UserDefaults.shared.currentDriveId

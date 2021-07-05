@@ -25,6 +25,7 @@ public class MQService {
     private let mqtt: CocoaMQTT
     private var currentToken: IPSToken?
     private let decoder = JSONDecoder()
+    private var actionProgressObservers = [UUID: (ActionProgressNotification) -> Void]()
 
     public init() {
         webSocket = CocoaMQTTWebSocket(uri: "/ws")
@@ -90,7 +91,11 @@ extension MQService: CocoaMQTTDelegate {
                let file = driveFileManager.getCachedFile(id: message.parentId) {
                 driveFileManager.notifyObserversWith(file: file)
             }
-        } else if let message = try? decoder.decode(ActionProgressNotification.self, from: data) {}
+        } else if let message = try? decoder.decode(ActionProgressNotification.self, from: data) {
+            for observer in actionProgressObservers.values {
+                observer(message)
+            }
+        }
     }
 
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {}
@@ -103,5 +108,37 @@ extension MQService: CocoaMQTTDelegate {
 
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?) {
         // TODO: Handle disconnect
+    }
+}
+
+// MARK: - Observation
+
+public extension MQService {
+    typealias ActionId = String
+
+    @discardableResult
+    func observeActionProgress<T: AnyObject>(_ observer: T, actionId: ActionId?, using closure: @escaping (ActionProgressNotification) -> Void)
+        -> ObservationToken {
+        let key = UUID()
+        actionProgressObservers[key] = { [weak self, weak observer] action in
+            // If the observer has been deallocated, we can
+            // automatically remove the observation closure.
+            guard observer != nil else {
+                self?.actionProgressObservers.removeValue(forKey: key)
+                return
+            }
+
+            if actionId == action.actionUuid {
+                closure(action)
+            }
+
+            if action.progress.message == "done" {
+                self?.actionProgressObservers.removeValue(forKey: key)
+            }
+        }
+
+        return ObservationToken { [weak self] in
+            self?.actionProgressObservers.removeValue(forKey: key)
+        }
     }
 }

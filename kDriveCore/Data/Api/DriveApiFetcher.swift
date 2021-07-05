@@ -644,6 +644,16 @@ public class DriveApiFetcher: ApiFetcher {
                 self.handleResponse(response: response, completion: completion)
             }
     }
+
+    public func bulkAction(driveId: Int, action: BulkAction, fileIds: [Int], completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.bulkAction(driveId: driveId)
+        let body: [String: Any] = ["action": action.rawValue, "file_ids": fileIds]
+
+        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
+            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {

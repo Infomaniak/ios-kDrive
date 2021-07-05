@@ -19,20 +19,20 @@
 
 import Foundation
 
-class ActionNotification: Codable {
-    let uid: String
-    let driveId: Int
-    let fileId: Int
-    let parentId: Int
-    let simpleAction: SimpleAction
-    let action: Action
+public enum BulkAction: String {
+    case trash
+}
 
-    enum CodingKeys: String, CodingKey {
-        case uid
-        case driveId = "drive_id"
-        case fileId = "file_id"
-        case parentId = "parent_id"
-        case simpleAction = "simple_action"
-        case action
-    }
+enum SimpleAction: String, Codable {
+    case create
+    case update
+    case delete
+}
+
+enum Action: String, Codable {
+    case fileCreate = "file_create"
+    case fileRename = "file_rename"
+    case fileMove = "file_move"
+    case fileRestore = "file_restore"
+    case fileTrash = "file_trash"
 }

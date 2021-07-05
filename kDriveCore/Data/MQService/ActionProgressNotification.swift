@@ -18,12 +18,12 @@
 
 import Foundation
 
-class ActionProgressNotification: Codable {
+public class ActionProgressNotification: Codable {
     let uid: String
     let driveId: Int
     let action: String
     let actionUuid: String
-    let progress: ActionProgress
+    public let progress: ActionProgress
 
     enum CodingKeys: String, CodingKey {
         case uid

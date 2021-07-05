@@ -19,11 +19,11 @@
 
 import Foundation
 
-class ActionProgress: Codable {
-    let todo: Int
-    let success: Int
-    let error: Int
-    let total: Int
-    let percent: Int
-    let message: String
+public class ActionProgress: Codable {
+    public let todo: Int
+    public let success: Int
+    public let error: Int
+    public let total: Int
+    public let percent: Int
+    public let message: String
 }
