@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
-import CocoaLumberjackSwift
 
 public class UploadQueue {
-
     public static let instance = UploadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.upload"
 
@@ -39,6 +38,7 @@ public class UploadQueue {
         queue.isSuspended = shouldSuspendQueue
         return queue
     }()
+
     private lazy var foregroundSession: URLSession = {
         let urlSessionConfiguration = URLSessionConfiguration.default
         urlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
@@ -49,7 +49,9 @@ public class UploadQueue {
         urlSessionConfiguration.networkServiceType = .default
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
     }()
+
     private var fileUploadedCount = 0
+    /// This Realm instance is bound to `dispatchQueue`
     private var realm: Realm!
 
     private var bestSession: FileUploadSession {
@@ -170,7 +172,7 @@ public class UploadQueue {
                 let uploadingFiles = self.getUploadingFiles(withParent: parentId, using: self.realm)
                 uploadingFiles.forEach { file in
                     if !file.isInvalidated,
-                        let operation = self.operationsInQueue[file.id] {
+                       let operation = self.operationsInQueue[file.id] {
                         operation.cancel()
                     }
                 }
@@ -306,7 +308,8 @@ public class UploadQueue {
             schemaVersion: DriveFileManager.constants.currentUploadDbVersion,
             migrationBlock: DriveFileManager.constants.migrationBlock,
             shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
+            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self]
+        )
         do {
             _ = try Realm(configuration: config)
         } catch {
@@ -317,7 +320,7 @@ public class UploadQueue {
     private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
         fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
         if let error = result.uploadFile.error,
-            error != .networkError || error != .taskCancelled || error != .taskRescheduled {
+           error != .networkError || error != .taskCancelled || error != .taskRescheduled {
             NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
             if operationQueue.operationCount == 0 {
                 fileUploadedCount = 0
@@ -331,18 +334,16 @@ public class UploadQueue {
             fileUploadedCount = 0
         }
     }
-
 }
 
 // MARK: - Observation
 
-extension UploadQueue {
-
-    public typealias UploadedFileId = String
-    public typealias Progress = Double
+public extension UploadQueue {
+    typealias UploadedFileId = String
+    typealias Progress = Double
 
     @discardableResult
-    public func observeFileUploaded<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadFile, File?) -> Void)
+    func observeFileUploaded<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadFile, File?) -> Void)
         -> ObservationToken {
         let key = UUID()
         observations.didUploadFile[key] = { [weak self, weak observer] uploadFile, driveFile in
@@ -364,7 +365,7 @@ extension UploadQueue {
     }
 
     @discardableResult
-    public func observeUploadCountInParent<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
+    func observeUploadCountInParent<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         let key = UUID()
         observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
             guard observer != nil else {
@@ -383,7 +384,7 @@ extension UploadQueue {
     }
 
     @discardableResult
-    public func observeFileUploadProgress<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadedFileId, Progress) -> Void)
+    func observeFileUploadProgress<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadedFileId, Progress) -> Void)
         -> ObservationToken {
         let key = UUID()
         observations.didChangeProgress[key] = { [weak self, weak observer] uploadedFileId, progress in

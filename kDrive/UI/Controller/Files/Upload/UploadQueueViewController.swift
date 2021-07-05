@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import DifferenceKit
 import kDriveCore
 import RealmSwift
-import DifferenceKit
+import UIKit
 
 class UploadQueueViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var retryButton: UIBarButtonItem!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
@@ -113,21 +112,19 @@ class UploadQueueViewController: UIViewController {
         let directoryId = coder.decodeInteger(forKey: "DirectoryID")
 
         guard let drive = DriveInfosManager.instance.getDrive(id: driveId, userId: AccountManager.instance.currentUserId),
-            let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
-            let directory = driveFileManager.getCachedFile(id: directoryId) else {
+              let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+              let directory = driveFileManager.getCachedFile(id: directoryId) else {
             // Handle error?
             return
         }
         currentDirectory = directory
         reloadData(reloadTableView: true)
     }
-
 }
 
-// MARK: Table view data source
+// MARK: - Table view data source
 
 extension UploadQueueViewController: UITableViewDataSource {
-
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return uploadingFiles.count
     }
@@ -139,5 +136,4 @@ extension UploadQueueViewController: UITableViewDataSource {
         cell.configureWith(uploadFile: file, progress: progressForFileId[file.id])
         return cell
     }
-
 }
