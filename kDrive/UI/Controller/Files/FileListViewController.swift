@@ -399,7 +399,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     final func updateUploadCount() {
         guard currentDirectory != nil else { return }
-        uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id).count
+        uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: driveFileManager.drive.id).count
     }
 
     final func showEmptyViewIfNeeded(type: EmptyTableView.EmptyTableViewType? = nil, files: [File]) {

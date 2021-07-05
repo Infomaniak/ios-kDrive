@@ -64,7 +64,7 @@ class UploadQueueViewController: UIViewController {
     }
 
     func reloadData(reloadTableView: Bool = true) {
-        let newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, using: realm).freeze())
+        let newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm).freeze())
         newUploadingFiles.first?.isFirstInCollection = true
         newUploadingFiles.last?.isLastInCollection = true
 
@@ -83,12 +83,12 @@ class UploadQueueViewController: UIViewController {
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
-        UploadQueue.instance.cancelAllOperations(withParent: currentDirectory.id)
+        UploadQueue.instance.cancelAllOperations(withParent: currentDirectory.id, driveId: currentDirectory.driveId)
         reloadData()
     }
 
     @IBAction func retryButtonPressed(_ sender: UIBarButtonItem) {
-        UploadQueue.instance.retryAllOperations(withParent: currentDirectory.id)
+        UploadQueue.instance.retryAllOperations(withParent: currentDirectory.id, driveId: currentDirectory.driveId)
         reloadData()
     }
 

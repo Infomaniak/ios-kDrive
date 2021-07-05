@@ -116,13 +116,8 @@ public class UploadQueue {
         }
     }
 
-    public func getUploadingFiles(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        if let driveId = AccountManager.instance.currentDriveFileManager?.drive.id {
-            let userId = AccountManager.instance.currentAccount.user.id
-            return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId)).sorted(byKeyPath: "taskCreationDate")
-        } else {
-            return realm.objects(UploadFile.self).filter("FALSEPREDICATE")
-        }
+    public func getUploadingFiles(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId)).sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
@@ -160,16 +155,16 @@ public class UploadQueue {
                         self.realm.delete(file)
                     }
                 }
-                self.publishUploadCount(withParent: parentId)
+                self.publishUploadCount(withParent: parentId, userId: file.userId, driveId: file.driveId, using: self.realm)
             }
         }
     }
 
-    public func cancelAllOperations(withParent parentId: Int) {
+    public func cancelAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
         dispatchQueue.async {
             autoreleasepool {
                 self.suspendAllOperations()
-                let uploadingFiles = self.getUploadingFiles(withParent: parentId, using: self.realm)
+                let uploadingFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
                 uploadingFiles.forEach { file in
                     if !file.isInvalidated,
                        let operation = self.operationsInQueue[file.id] {
@@ -179,7 +174,7 @@ public class UploadQueue {
                 try? self.realm.safeWrite {
                     self.realm.delete(uploadingFiles)
                 }
-                self.publishUploadCount(withParent: parentId, using: self.realm)
+                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
                 self.resumeAllOperations()
             }
         }
@@ -199,10 +194,10 @@ public class UploadQueue {
         }
     }
 
-    public func retryAllOperations(withParent parentId: Int) {
+    public func retryAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
         dispatchQueue.async {
             autoreleasepool {
-                let failedUploadFiles = self.getUploadingFiles(withParent: parentId, using: self.realm).filter("_error != nil")
+                let failedUploadFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm).filter("_error != nil")
                 try? self.realm.safeWrite {
                     failedUploadFiles.forEach { file in
                         file.error = nil
@@ -253,21 +248,21 @@ public class UploadQueue {
 
         let operation = UploadOperation(file: file, urlSession: bestSession)
         operation.queuePriority = file.priority
-        operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id] in
+        operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             self.dispatchQueue.async {
                 self.operationsInQueue.removeValue(forKey: fileId)
                 self.publishFileUploaded(result: operation.result)
-                self.publishUploadCount(withParent: parentId, using: self.realm)
+                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
             }
         }
         operationQueue.addOperation(operation)
         operationsInQueue[file.id] = operation
 
-        publishUploadCount(withParent: file.parentDirectoryId, using: realm)
+        publishUploadCount(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId, using: realm)
     }
 
-    private func publishUploadCount(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        let uploadCount = getUploadingFiles(withParent: parentId, using: realm).count
+    private func publishUploadCount(withParent parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
         observations.didChangeUploadCountInParent.values.forEach { closure in
             closure(parentId, uploadCount)
         }
