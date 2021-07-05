@@ -89,7 +89,7 @@ public struct DriveError: Error, Equatable {
     public static let noDrive = DriveError(type: .serverError, code: "no_drive")
     public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveCoreStrings.Localizable.errorConflict)
     public static let maintenance = DriveError(type: .serverError, code: "product_maintenance", localizedString: KDriveCoreStrings.Localizable.driveMaintenanceDescription)
-    public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveCoreStrings.Localizable.errorUpload)
+    public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveCoreStrings.Localizable.errorFileLocked)
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
