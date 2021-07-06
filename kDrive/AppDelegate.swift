@@ -274,7 +274,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             uploadEditedFiles()
             // Ask to remove uploaded pictures
             if let toRemoveItems = PhotoLibraryUploader.instance.getPicturesToRemove() {
-                let alert = AlertTextViewController(title: "Suppression automatique des photos", message: "Souhaitez-vous supprimer de votre appareil \(toRemoveItems.assets.count) photos transférées dans kDrive ?", action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: false) {
+                let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalDeletePhotosTitle, message: KDriveStrings.Localizable.modalDeletePhotosDescription, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: false) {
                     // Proceed with removal
                     PhotoLibraryUploader.instance.removePicturesFromPhotoLibrary(toRemoveItems)
                 }
