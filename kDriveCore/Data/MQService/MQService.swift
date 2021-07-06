@@ -40,6 +40,7 @@ public class MQService {
 
     public func registerForNotifications(with token: IPSToken) {
         if let currentToken = currentToken {
+            actionProgressObservers.removeAll()
             mqtt.unsubscribe(topicFor(token: currentToken))
         }
         currentToken = token

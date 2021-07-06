@@ -55,7 +55,7 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/PhilippeWeidmann/SnackBar.swift", .upToNextMajor(from: "0.1.2")),
             .package(url: "https://github.com/flowbe/SwiftRegex.git", .upToNextMajor(from: "1.0.0")),
             .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "6.2.1")),
-            .package(url: "https://github.com/emqx/CocoaMQTT.git", .branch("master")),
+            .package(url: "https://github.com/emqx/CocoaMQTT.git", .branch("master"))
     ],
     targets: [
         Target(name: "kDrive",
