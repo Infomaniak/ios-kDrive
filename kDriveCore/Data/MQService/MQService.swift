@@ -89,9 +89,7 @@ extension MQService: CocoaMQTTDelegate {
         let data = Data(message.payload)
         if let message = try? decoder.decode(ActionNotification.self, from: data) {
             if message.driveId == driveFileManager.drive.id,
-               let file = driveFileManager.getCachedFile(id: message.parentId) {
-                driveFileManager.notifyObserversWith(file: file)
-            }
+               let file = driveFileManager.getCachedFile(id: message.parentId) {}
         } else if let message = try? decoder.decode(ActionProgressNotification.self, from: data) {
             for observer in actionProgressObservers.values {
                 observer(message)

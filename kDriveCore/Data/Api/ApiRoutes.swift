@@ -235,4 +235,8 @@ public enum ApiRoutes {
     public static func bulkAction(driveId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/bulk"
     }
+
+    public static func fileCount(driveId: Int, fileId: Int) -> String {
+        return "\(driveApiUrl)\(driveId)/file/\(fileId)/count"
+    }
 }
