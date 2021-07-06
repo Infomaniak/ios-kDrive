@@ -469,70 +469,73 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    private func bulkDeleteFiles(_ files: [File]) {
+        let fileIds = files.map(\.id)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, fileIds: fileIds) { response, error in
+            self.selectionMode = false
+            let cancelId = response?.data?.id
+            if let error = error {
+                DDLogError("Error while deleting file: \(error)")
+            } else {
+                let progressSnack = UIConstants.showSnackBar(message: "Starting to delete", view: self.view, duration: .infinite)
+                AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
+                    DDLogError("observeActionProgress \(actionProgress.progress.message)")
+                    progressSnack?.message = "\(actionProgress.progress.message) \(actionProgress.progress.total - actionProgress.progress.todo)/\(actionProgress.progress.total)"
+                    if actionProgress.progress.message == "done" {
+                        progressSnack?.message = "Ending delete"
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            progressSnack?.dismiss()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @discardableResult
     private func deleteFiles(_ files: [File], async: Bool = true) -> Bool? {
         let group = DispatchGroup()
         var success = true
         var cancelId: String?
-
-        if files.count > 1 {
-            let fileIds = files.map(\.id)
+        for file in files {
             group.enter()
-            driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, fileIds: fileIds) { response, error in
-                cancelId = response?.data?.id
+            driveFileManager.deleteFile(file: file) { response, error in
+                cancelId = response?.id
                 if let error = error {
                     success = false
                     DDLogError("Error while deleting file: \(error)")
-                } else {
-                    AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
-                        DDLogError("observeActionProgress \(actionProgress.progress.message)")
-                        UIConstants.showSnackBar(message: "\(actionProgress.progress.message) \(actionProgress.progress.total - actionProgress.progress.todo)/\(actionProgress.progress.total)")
-                    }
                 }
                 group.leave()
             }
+        }
+        if async {
+            group.notify(queue: DispatchQueue.main) {
+                if success {
+                    if files.count == 1 {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
+                            guard let cancelId = cancelId else { return }
+                            self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { error in
+                                self.getNewChanges()
+                                if error == nil {
+                                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
+                                }
+                            }
+                        })
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
+                    }
+                } else {
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
+                }
+                if self.selectionMode {
+                    self.selectionMode = false
+                }
+                self.getNewChanges()
+            }
             return nil
         } else {
-            for file in files {
-                group.enter()
-                driveFileManager.deleteFile(file: file) { response, error in
-                    cancelId = response?.id
-                    if let error = error {
-                        success = false
-                        DDLogError("Error while deleting file: \(error)")
-                    }
-                    group.leave()
-                }
-            }
-            if async {
-                group.notify(queue: DispatchQueue.main) {
-                    if success {
-                        if files.count == 1 {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
-                                guard let cancelId = cancelId else { return }
-                                self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { error in
-                                    self.getNewChanges()
-                                    if error == nil {
-                                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
-                                    }
-                                }
-                            })
-                        } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
-                        }
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
-                    }
-                    if self.selectionMode {
-                        self.selectionMode = false
-                    }
-                    self.getNewChanges()
-                }
-                return nil
-            } else {
-                let result = group.wait(timeout: .now() + 5)
-                return success && result != .timedOut
-            }
+            let result = group.wait(timeout: .now() + 5)
+            return success && result != .timedOut
         }
     }
 
@@ -979,21 +982,28 @@ extension FileListViewController: FilesHeaderViewDelegate {
                 message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedFiles.count))
             }
 
-            let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true, loading: true) {
-                let message: String
-                if let success = self.deleteFiles(Array(self.selectedFiles), async: false), success {
-                    if self.selectedFiles.count == 1 {
-                        message = KDriveStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedFiles.first!.name)
-                    } else {
-                        message = KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(self.selectedFiles.count)
-                    }
-                } else {
-                    message = KDriveStrings.Localizable.errorMove
+            var alert: AlertTextViewController
+            if selectedFiles.count > bulkActionThreshold {
+                alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
+                    self.bulkDeleteFiles(Array(self.selectedFiles))
                 }
-                DispatchQueue.main.async {
-                    UIConstants.showSnackBar(message: message)
-                    self.selectionMode = false
-                    self.getNewChanges()
+            } else {
+                alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true, loading: true) {
+                    let message: String
+                    if let success = self.deleteFiles(Array(self.selectedFiles), async: false), success {
+                        if self.selectedFiles.count == 1 {
+                            message = KDriveStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedFiles.first!.name)
+                        } else {
+                            message = KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(self.selectedFiles.count)
+                        }
+                    } else {
+                        message = KDriveStrings.Localizable.errorMove
+                    }
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: message)
+                        self.selectionMode = false
+                        self.getNewChanges()
+                    }
                 }
             }
             present(alert, animated: true)
