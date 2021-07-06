@@ -11,12 +11,12 @@
         }
       },
       {
-        "package": "Atlantis",
+        "package": "atlantis",
         "repositoryURL": "https://github.com/ProxymanApp/atlantis",
         "state": {
           "branch": null,
-          "revision": "9d125e08268437e4231bcbae99cccb337d5ee5df",
-          "version": "1.10.0"
+          "revision": "97c724688eb777b27f4155606ac9437b9621695f",
+          "version": "1.11.1"
         }
       },
       {
@@ -65,7 +65,7 @@
         }
       },
       {
-        "package": "InfomaniakCore",
+        "package": "ios-core",
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
@@ -74,7 +74,7 @@
         }
       },
       {
-        "package": "InfomaniakLogin",
+        "package": "ios-login",
         "repositoryURL": "https://github.com/Infomaniak/ios-login.git",
         "state": {
           "branch": null,
@@ -101,7 +101,7 @@
         }
       },
       {
-        "package": "Lottie",
+        "package": "lottie-ios",
         "repositoryURL": "https://github.com/airbnb/lottie-ios.git",
         "state": {
           "branch": null,
@@ -119,25 +119,25 @@
         }
       },
       {
-        "package": "Realm",
+        "package": "realm-cocoa",
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "7e5c77fd7fbb30259e8e6e6a41f32289f72e0812",
-          "version": "10.7.6"
+          "revision": "628c59a9048aae3b6bcf129ba56216dbe3dce808",
+          "version": "10.9.0"
         }
       },
       {
-        "package": "RealmDatabase",
+        "package": "realm-core",
         "repositoryURL": "https://github.com/realm/realm-core",
         "state": {
           "branch": null,
-          "revision": "018adb3469c2882904febca251778129ef4a9b70",
-          "version": "10.7.2"
+          "revision": "95da0df7815d7cbaff14ed5e8b73fe4c2a992816",
+          "version": "11.0.4"
         }
       },
       {
-        "package": "Sentry",
+        "package": "sentry-cocoa",
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
@@ -146,12 +146,12 @@
         }
       },
       {
-        "package": "SnackBar",
+        "package": "SnackBar.swift",
         "repositoryURL": "https://github.com/PhilippeWeidmann/SnackBar.swift",
         "state": {
           "branch": null,
-          "revision": "822ef100ec55f1deb8435d1c1d7488e80cb1cf61",
-          "version": "0.1.2"
+          "revision": "6f6ed22beeb9a13d235e82a9ef834d658b97a39c",
+          "version": "0.1.3"
         }
       },
       {
