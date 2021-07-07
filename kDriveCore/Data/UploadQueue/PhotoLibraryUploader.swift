@@ -16,19 +16,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import Photos
-import CocoaLumberjackSwift
 import RealmSwift
 import Sentry
 
 public class PhotoLibraryUploader {
-
     public static let instance = PhotoLibraryUploader()
     public private(set) var settings: PhotoSyncSettings?
     public var isSyncEnabled: Bool {
         return settings != nil
     }
+
     private let requestImageOption = PHImageRequestOptions()
     private let requestVideoOption = PHVideoRequestOptions()
     private let dateFormatter = DateFormatter()
@@ -135,7 +135,7 @@ public class PhotoLibraryUploader {
 
     public func addNewPicturesToUploadQueue(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
         var assets = PHFetchResult<PHAsset>()
-        if let settings = settings, (PHPhotoLibrary.authorizationStatus() == .authorized || PHPhotoLibrary.authorizationStatus() == .restricted) {
+        if let settings = settings, PHPhotoLibrary.authorizationStatus() == .authorized || PHPhotoLibrary.authorizationStatus() == .restricted {
             let options = PHFetchOptions()
             options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
             // Create predicate from settings
@@ -215,15 +215,21 @@ public class PhotoLibraryUploader {
         }
     }
 
-    public func removePicturesFromPhotoLibraryIfNeeded() {
+    public struct PicturesAssets {
+        public let files: [UploadFile]
+        public let assets: [PHAsset]
+    }
+
+    public func getPicturesToRemove() -> PicturesAssets? {
         let askEveryNConnections = 10
         let removeAssetsCountThreshold = 50
 
-        if PhotoLibraryUploader.instance.isSyncEnabled {
+        if let settings = settings, settings.deleteAssetsAfterImport {
+            var toRemoveAssets = [PHAsset]()
+            var toRemoveFiles = [UploadFile]()
+
             BackgroundRealm.uploads.execute { realm in
                 let uploadedFiles = UploadQueue.instance.getUploadedFiles(using: realm)
-                var toRemoveAssets = [PHAsset]()
-                var toRemoveFiles = [UploadFile]()
 
                 for uploadFile in uploadedFiles {
                     if let asset = uploadFile.getPHAsset() {
@@ -231,20 +237,29 @@ public class PhotoLibraryUploader {
                         toRemoveFiles.append(uploadFile)
                     }
                 }
+            }
 
-                if UserDefaults.shared.numberOfConnections % askEveryNConnections != 0 && toRemoveAssets.count <= removeAssetsCountThreshold {
-                    return
-                }
+            /*guard UserDefaults.shared.numberOfConnections % askEveryNConnections == 0 && toRemoveAssets.count >= removeAssetsCountThreshold else {
+                return nil
+            }*/
+            guard !toRemoveAssets.isEmpty else {
+                return nil
+            }
 
-                PHPhotoLibrary.shared().performChanges {
-                    PHAssetChangeRequest.deleteAssets(toRemoveAssets as NSFastEnumeration)
-                } completionHandler: { success, _ in
-                    if success {
-                        BackgroundRealm.uploads.execute { realm in
-                            try? realm.write {
-                                realm.delete(toRemoveFiles)
-                            }
-                        }
+            return PicturesAssets(files: toRemoveFiles, assets: toRemoveAssets)
+        }
+
+        return nil
+    }
+
+    public func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
+        PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.deleteAssets(toRemoveItems.assets as NSFastEnumeration)
+        } completionHandler: { success, _ in
+            if success {
+                BackgroundRealm.uploads.execute { realm in
+                    try? realm.write {
+                        realm.delete(toRemoveItems.files)
                     }
                 }
             }

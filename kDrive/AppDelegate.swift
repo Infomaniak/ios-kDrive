@@ -224,7 +224,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         } else {
             UserDefaults.shared.numberOfConnections += 1
             var appVersion = AppVersion()
-            appVersion.loadVersionData(handler: { [self] version in
+            appVersion.loadVersionData { [self] version in
                 appVersion.version = version.version
                 appVersion.currentVersionReleaseDate = version.currentVersionReleaseDate
 
@@ -240,7 +240,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                         self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
                     }
                 }
-            })
+            }
             if let currentDriveFileManager = accountManager.currentDriveFileManager,
                UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
                 let floatingPanelViewController = SavePhotosFloatingPanelViewController.instantiatePanel()
@@ -272,7 +272,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             }
             refreshCacheData(preload: false, isSwitching: false)
             uploadEditedFiles()
-            PhotoLibraryUploader.instance.removePicturesFromPhotoLibraryIfNeeded()
+            // Ask to remove uploaded pictures
+            if let toRemoveItems = PhotoLibraryUploader.instance.getPicturesToRemove() {
+                let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalDeletePhotosTitle, message: KDriveStrings.Localizable.modalDeletePhotosDescription, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: false) {
+                    // Proceed with removal
+                    PhotoLibraryUploader.instance.removePicturesFromPhotoLibrary(toRemoveItems)
+                }
+                DispatchQueue.main.async {
+                    self.window?.rootViewController?.present(alert, animated: true)
+                }
+            }
         }
     }
 
