@@ -1156,7 +1156,7 @@ public class DriveFileManager {
             newFile.isAvailableOffline = savedChild.isAvailableOffline
             if keepStandard {
                 newFile.fullyDownloaded = savedChild.fullyDownloaded
-                newFile.children = savedChild.children
+                newFile.children = savedChild.children.freeze()
                 newFile.responseAt = savedChild.responseAt
             }
             if keepExtras {
