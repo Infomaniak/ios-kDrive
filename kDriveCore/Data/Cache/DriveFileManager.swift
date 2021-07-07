@@ -559,6 +559,7 @@ public class DriveFileManager {
                 if let file = activity.file {
                     let safeFile = File(value: file)
                     keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
+                    safeFile.children = safeFile.children.realm != nil ? safeFile.children.freeze() : safeFile.children
                     homeRootFile.children.append(safeFile)
                     safeActivity.file = safeFile
                     if let rights = file.rights {
@@ -585,6 +586,7 @@ public class DriveFileManager {
                 let realm = getRealm()
                 for file in files {
                     keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
+                    file.children = file.children.realm != nil ? file.children.freeze() : file.children
                     root.children.append(file)
                     if let rights = file.rights {
                         file.rights = Rights(value: rights)
@@ -1156,7 +1158,7 @@ public class DriveFileManager {
             newFile.isAvailableOffline = savedChild.isAvailableOffline
             if keepStandard {
                 newFile.fullyDownloaded = savedChild.fullyDownloaded
-                newFile.children = savedChild.children.freeze()
+                newFile.children = savedChild.children
                 newFile.responseAt = savedChild.responseAt
             }
             if keepExtras {
