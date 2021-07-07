@@ -35,6 +35,8 @@ public class MQService {
         mqtt.password = "8QC5EwBqpZ2Z"
         mqtt.delegate = self
         mqtt.keepAlive = 30
+        mqtt.autoReconnect = true
+        mqtt.autoReconnectTimeInterval = 20
         _ = mqtt.connect(timeout: 20)
     }
 
