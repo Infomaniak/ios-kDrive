@@ -36,7 +36,7 @@ public class BackgroundRealm {
         if let instance = instances[fileURL.absoluteString] {
             return instance
         } else {
-            let queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)")
+            let queue = DispatchQueue(label: "com.infomaniak.drive.\(fileURL.lastPathComponent)", autoreleaseFrequency: .workItem)
             var realm: Realm!
             queue.sync {
                 do {
