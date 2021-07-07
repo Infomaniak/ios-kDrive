@@ -51,7 +51,7 @@ class FloatingPanelTitleTableViewCell: InsetTableViewCell {
         availableOfflineImageView.isHidden = !file.isAvailableOffline
         separator?.isHidden = true
         titleLabel.text = file.name
-        let formattedDate = Constants.formatFileLastModifiedDate(file.lastModifiedDate)
+        let formattedDate = Constants.formatFileLastModifiedRelativeDate(file.lastModifiedDate)
         detailLabel.text = file.isDirectory ? formattedDate : file.getFileSize() + " • " + formattedDate
     }
 
