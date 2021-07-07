@@ -113,7 +113,7 @@ public class DriveFileManager {
             return File(id: DriveFileManager.constants.rootID, name: drive.name)
         }
     }
-    let backgroundQueue = DispatchQueue(label: "background-db")
+    let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public var realmConfiguration: Realm.Configuration
     public var drive: Drive
     public private(set) var apiFetcher: DriveApiFetcher
@@ -131,7 +131,7 @@ public class DriveFileManager {
 
         // Only compact in the background
         if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
-            compactRealmsIfNeeded()
+            //compactRealmsIfNeeded()
         }
 
         // Get root file
