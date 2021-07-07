@@ -50,7 +50,7 @@ public class FileActivity: Object, Codable {
     @objc private dynamic var rawAction: String = ""
     @objc public dynamic var id: Int = 0
     @objc public dynamic var path: String = ""
-    public let userId = RealmOptional<Int>()
+    public let userId = RealmProperty<Int?>()
     @objc public dynamic var createdAt: Int = 0
     @objc public dynamic var fileId: Int = 0
     @objc public dynamic var file: File?

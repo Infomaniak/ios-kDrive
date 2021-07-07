@@ -24,21 +24,21 @@ public class Rights: Object, Codable {
 
     @objc public dynamic var fileId: Int = 0
     @objc public dynamic var rightsRight: String = ""
-    public var show = RealmOptional<Bool>()
-    public var read = RealmOptional<Bool>()
-    public var write = RealmOptional<Bool>()
-    public var share = RealmOptional<Bool>()
-    public var leave = RealmOptional<Bool>()
-    public var delete = RealmOptional<Bool>()
-    public var rename = RealmOptional<Bool>()
-    public var move = RealmOptional<Bool>()
-    public var createNewFolder = RealmOptional<Bool>()
-    public var createNewFile = RealmOptional<Bool>()
-    public var uploadNewFile = RealmOptional<Bool>()
-    public var moveInto = RealmOptional<Bool>()
-    public var canBecomeCollab = RealmOptional<Bool>()
-    public var canBecomeLink = RealmOptional<Bool>()
-    public var canFavorite = RealmOptional<Bool>()
+    public var show = RealmProperty<Bool?>()
+    public var read = RealmProperty<Bool?>()
+    public var write = RealmProperty<Bool?>()
+    public var share = RealmProperty<Bool?>()
+    public var leave = RealmProperty<Bool?>()
+    public var delete = RealmProperty<Bool?>()
+    public var rename = RealmProperty<Bool?>()
+    public var move = RealmProperty<Bool?>()
+    public var createNewFolder = RealmProperty<Bool?>()
+    public var createNewFile = RealmProperty<Bool?>()
+    public var uploadNewFile = RealmProperty<Bool?>()
+    public var moveInto = RealmProperty<Bool?>()
+    public var canBecomeCollab = RealmProperty<Bool?>()
+    public var canBecomeLink = RealmProperty<Bool?>()
+    public var canFavorite = RealmProperty<Bool?>()
 
     override public init() {
         rightsRight = ""
