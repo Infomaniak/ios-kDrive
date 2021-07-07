@@ -186,9 +186,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
         let formattedDate: String
         if let deletedAtDate = file.deletedAtDate {
-            formattedDate = Constants.formatFileDeletionDate(deletedAtDate)
+            formattedDate = Constants.formatFileDeletionRelativeDate(deletedAtDate)
         } else {
-            formattedDate = Constants.formatFileLastModifiedDate(file.lastModifiedDate)
+            formattedDate = Constants.formatFileLastModifiedRelativeDate(file.lastModifiedDate)
         }
 
         if file.type == "file" {

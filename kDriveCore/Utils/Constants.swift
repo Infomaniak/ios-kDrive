@@ -18,8 +18,7 @@
 
 import Foundation
 
-public class Constants {
-
+public enum Constants {
     public static let isInExtension: Bool = {
         let bundleUrl: URL = Bundle.main.bundleURL
         let bundlePathExtension: String = bundleUrl.pathExtension
@@ -71,9 +70,31 @@ public class Constants {
         return formatDate(Date(timeIntervalSince1970: timeInterval), style: style, relative: relative)
     }
 
+    public static func formatFileLastModifiedRelativeDate(_ lastModified: Date) -> String {
+        if #available(iOS 13.0, *) {
+            let relativeDateFormatter = RelativeDateTimeFormatter()
+            if Date().timeIntervalSince(lastModified) < 3_600 * 24 * 7 {
+                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: lastModified.timeIntervalSinceNow)
+                return KDriveCoreStrings.Localizable.allLastModifiedFileRelativeTime(relativeTime)
+            }
+        }
+        return formatFileLastModifiedDate(lastModified)
+    }
+
     public static func formatFileLastModifiedDate(_ lastModified: Date) -> String {
         dateFormatter.dateFormat = KDriveCoreStrings.Localizable.allLastModifiedFilePattern
         return dateFormatter.string(from: lastModified)
+    }
+
+    public static func formatFileDeletionRelativeDate(_ deletionDate: Date) -> String {
+        if #available(iOS 13.0, *) {
+            let relativeDateFormatter = RelativeDateTimeFormatter()
+            if Date().timeIntervalSince(deletionDate) < 3_600 * 24 * 7 {
+                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: deletionDate.timeIntervalSinceNow)
+                return KDriveCoreStrings.Localizable.allDeletedFileRelativeTime(relativeTime)
+            }
+        }
+        return formatFileDeletionDate(deletionDate)
     }
 
     public static func formatFileDeletionDate(_ deletionDate: Date) -> String {
