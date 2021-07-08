@@ -135,6 +135,7 @@ extension UploadQueueViewController: UITableViewDataSource {
         let file = uploadingFiles[indexPath.row]
         cell.initWithPositionAndShadow(isFirst: file.isFirstInCollection, isLast: file.isLastInCollection)
         cell.configureWith(uploadFile: file, progress: progressForFileId[file.id])
+        cell.selectionStyle = .none
         return cell
     }
 }
