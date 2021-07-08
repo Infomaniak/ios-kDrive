@@ -239,10 +239,7 @@ public class PhotoLibraryUploader {
                 }
             }
 
-            /*guard UserDefaults.shared.numberOfConnections % askEveryNConnections == 0 && toRemoveAssets.count >= removeAssetsCountThreshold else {
-                return nil
-            }*/
-            guard !toRemoveAssets.isEmpty else {
+            guard UserDefaults.shared.numberOfConnections % askEveryNConnections == 0 && toRemoveAssets.count >= removeAssetsCountThreshold else {
                 return nil
             }
 
