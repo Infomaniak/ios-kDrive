@@ -64,6 +64,7 @@ class UploadQueueViewController: UIViewController {
     }
 
     func reloadData(reloadTableView: Bool = true) {
+        guard currentDirectory != nil else { return }
         let newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm).freeze())
         newUploadingFiles.first?.isFirstInCollection = true
         newUploadingFiles.last?.isLastInCollection = true
