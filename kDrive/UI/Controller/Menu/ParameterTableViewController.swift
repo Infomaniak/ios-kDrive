@@ -22,7 +22,7 @@ import UIKit
 class ParameterTableViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
 
-    private enum parameterOption {
+    private enum ParameterOption {
         case photos
         case theme
         case notifications
@@ -31,7 +31,7 @@ class ParameterTableViewController: UITableViewController {
         case about
     }
 
-    private var tableContent: [parameterOption] {
+    private var tableContent: [ParameterOption] {
         if #available(iOS 13.0, *) {
             return [.photos, .theme, .notifications, .security, .wifi, .about]
         } else {
@@ -41,6 +41,7 @@ class ParameterTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterAboutTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
@@ -48,6 +49,7 @@ class ParameterTableViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
         tableView.reloadData()
     }
 
