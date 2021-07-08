@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import Sentry
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
+import Sentry
+import UIKit
 
 public class FloatingPanelAction: Equatable {
     let id: Int
@@ -98,17 +98,23 @@ protocol FileActionDelegate: AnyObject {
 }
 
 class FileQuickActionsFloatingPanelViewController: UITableViewController {
-
     var driveFileManager: DriveFileManager!
     private(set) var file: File!
     var sharedWithMe: Bool {
         return driveFileManager?.drive.sharedWithMe ?? false
     }
+
+    private enum DownloadTypes {
+        case notDownloading
+        case download
+        case downloadOffline
+    }
+
     var normalFolderHierarchy = true
     weak var presentingParent: UIViewController?
     private var listActions = FloatingPanelAction.listActions
     private var quickActions = FloatingPanelAction.quickActions
-    private var downloadProgress: CGFloat?
+    private var downloadType: DownloadTypes = .notDownloading
     private var fileObserver: ObservationToken?
     private var interactionController: UIDocumentInteractionController!
 
@@ -162,11 +168,10 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     }
                 }
             }
-            downloadProgress = nil
             setupContent()
             UIView.transition(with: tableView,
-                duration: 0.35,
-                options: .transitionCrossDissolve) { self.tableView.reloadData() }
+                              duration: 0.35,
+                              options: .transitionCrossDissolve) { self.tableView.reloadData() }
         }
     }
 
@@ -269,7 +274,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 cell.titleLabel.text = action.reverseName
                 cell.accessoryImageView.tintColor = KDriveAsset.favoriteColor.color
             } else if action == .offline {
-                cell.configureAvailableOffline(with: file, progress: downloadProgress)
+                cell.configureAvailableOffline(with: file, progress: downloadType == .downloadOffline ? -1 : nil)
+            } else if action == .download {
+                cell.configureDownload(with: file, progress: downloadType == .download ? -1 : nil)
             }
 
             return cell
@@ -331,7 +338,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             } else {
                 action.isLoading = true
-                self.tableView.reloadSections([1], with: .none)
+                tableView.reloadSections([1], with: .none)
                 DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, _ in
                     action.isLoading = false
                     DispatchQueue.main.async {
@@ -445,12 +452,13 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
             present(alert, animated: true)
         case .download:
+            downloadType = .download
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
                 saveLocalFile(file: file)
-                self.tableView.reloadRows(at: [indexPath], with: .fade)
+                tableView.reloadRows(at: [indexPath], with: .fade)
             } else {
                 action.isLoading = true
-                self.tableView.reloadRows(at: [indexPath], with: .fade)
+                tableView.reloadRows(at: [indexPath], with: .fade)
                 DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                     action.isLoading = false
                     DispatchQueue.main.async {
@@ -465,14 +473,14 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 DownloadQueue.instance.addToQueue(file: file)
             }
         case .offline:
-            downloadProgress = -1
+            downloadType = .downloadOffline
             driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
                 if error != nil {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorCache)
                 }
                 self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)], animated: false)
             }
-            self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
+            refreshFileAndRows(oldFile: file, rows: [indexPath, IndexPath(row: 0, section: 0)])
         case .duplicate:
             let file = self.file.freeze()
             let pathString = self.file.name as NSString
@@ -583,7 +591,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 presentShareSheetForCurrentFile()
             } else {
                 action.isLoading = true
-                self.tableView.reloadSections([1], with: .none)
+                tableView.reloadSections([1], with: .none)
                 DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, _ in
                     action.isLoading = false
                     DispatchQueue.main.async {
@@ -597,7 +605,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             if file.visibility == .isCollaborativeFolder {
                 // Copy drop box link
                 action.isLoading = true
-                self.tableView.reloadSections([1], with: .none)
+                tableView.reloadSections([1], with: .none)
                 driveFileManager.apiFetcher.getDropBoxSettings(directory: file) { response, _ in
                     action.isLoading = false
                     self.tableView.reloadSections([1], with: .none)
@@ -613,7 +621,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             } else {
                 // Create share link
                 action.isLoading = true
-                self.tableView.reloadSections([1], with: .none)
+                tableView.reloadSections([1], with: .none)
                 driveFileManager.activateShareLink(for: file) { newFile, shareLink, error in
                     if let newFile = newFile, let link = shareLink {
                         self.file = newFile
@@ -681,12 +689,11 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 self?.present(documentExportViewController, animated: true)
             }
         }
-
     }
 
     private func presentShareSheetForCurrentFile() {
         let activityViewController = UIActivityViewController(activityItems: [file.localUrl], applicationActivities: nil)
-        activityViewController.popoverPresentationController?.sourceView = self.view
+        activityViewController.popoverPresentationController?.sourceView = view
         present(activityViewController, animated: true, completion: nil)
     }
 
@@ -749,7 +756,6 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             self.tableView.reloadData()
         }
     }
-
 }
 
 // MARK: FileActionDelegate
@@ -763,10 +769,8 @@ extension FileQuickActionsFloatingPanelViewController: FileActionDelegate {
 // MARK: Document interaction controller delegate
 
 extension FileQuickActionsFloatingPanelViewController: UIDocumentInteractionControllerDelegate {
-
     func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
         // Dismiss interaction controller when the user taps an app
         controller.dismissMenu(animated: true)
     }
-
 }
