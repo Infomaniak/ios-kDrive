@@ -87,7 +87,8 @@ let project = Project(name: "kDrive",
                     .package(product: "FloatingPanel"),
                     .package(product: "BetterSegmentedControl"),
                     .package(product: "Lottie"),
-                    .package(product: "DropDown")
+                    .package(product: "DropDown"),
+                    .sdk(name: "StoreKit.framework", status: .required)
             ],
             settings: Settings(base: baseSettings)),
         Target(name: "kDriveTests",

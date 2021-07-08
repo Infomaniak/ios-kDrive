@@ -43,6 +43,7 @@ class MenuViewController: UIViewController {
 
         static let switchUserAction = MenuAction(name: KDriveStrings.Localizable.switchUserTitle, image: KDriveAsset.userSwitch.image, segue: "switchUserSegue")
         static let parametersAction = MenuAction(name: KDriveStrings.Localizable.settingsTitle, image: KDriveAsset.parameters.image, segue: "toParameterSegue")
+        static let storeAction = MenuAction(name: "Store", image: KDriveAsset.star.image, segue: "store")
         static let helpAction = MenuAction(name: KDriveStrings.Localizable.supportTitle, image: KDriveAsset.supportLink.image, segue: "help")
         static let disconnectAction = MenuAction(name: KDriveStrings.Localizable.buttonLogout, image: KDriveAsset.logout.image, segue: "disconnect")
     }
@@ -50,7 +51,7 @@ class MenuViewController: UIViewController {
     private var tableContent: [[MenuAction]] = [
         [],
         [.sharedWithMeAction, .lastModificationAction, .imagesAction, .offlineAction, .mySharedAction, .trashAction],
-        [.switchUserAction, .parametersAction, .helpAction, .disconnectAction]
+        [.switchUserAction, .parametersAction, .storeAction, .helpAction, .disconnectAction]
     ]
     private var currentAccount: Account!
 
@@ -119,7 +120,7 @@ class MenuViewController: UIViewController {
     }
 }
 
-// MARK: - UITableView Delegate
+// MARK: - Table view delegate
 
 extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -187,6 +188,15 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                         AccountManager.instance.saveAccounts()
                     }
                     present(alert, animated: true)
+                } else if segue == "store" {
+                    let style: UITableView.Style
+                    if #available(iOS 13.0, *) {
+                        style = .insetGrouped
+                    } else {
+                        style = .grouped
+                    }
+                    let viewController = StoreViewController(style: style)
+                    navigationController?.pushViewController(viewController, animated: true)
                 } else if segue == MenuAction.helpAction.segue {
                     if let url = URL(string: Constants.helpURL) {
                         UIApplication.shared.open(url)
@@ -198,7 +208,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    // MARK: Cell Button Action
+    // MARK: - Cell Button Action
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
         performSegue(withIdentifier: "toSwitchDriveSegue", sender: nil)
