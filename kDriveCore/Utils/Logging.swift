@@ -16,17 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import CocoaLumberjack
 import Atlantis
+import CocoaLumberjack
+import CocoaLumberjackSwift
+import Foundation
 import Sentry
 
-public class Logging {
-
+public enum Logging {
     public static func initLogging() {
         initLogger()
         initNetworkLogging()
         initSentry()
+        copyDebugInformations()
     }
 
     private static func initLogger() {
@@ -63,5 +64,31 @@ public class Logging {
                 #endif
             }
         }
+    }
+
+    private static func copyDebugInformations() {
+        #if DEBUG
+            let fileManager = FileManager.default
+            let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("debug", isDirectory: true))!
+
+            if !fileManager.fileExists(atPath: debugDirectory.path) {
+                try? fileManager.createDirectory(atPath: debugDirectory.path, withIntermediateDirectories: true, attributes: nil)
+            }
+
+            do {
+                let documentDrivesPath = debugDirectory.appendingPathComponent("drive", isDirectory: true).path
+                let documentLogsPath = debugDirectory.appendingPathComponent("logs", isDirectory: true).path
+
+                try? fileManager.removeItem(atPath: documentDrivesPath)
+                try? fileManager.removeItem(atPath: documentLogsPath)
+
+                try fileManager.copyItem(atPath: DriveFileManager.constants.rootDocumentsURL.path, toPath: documentDrivesPath)
+                if let cachedLogsUrl = (fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("Logs", isDirectory: true)) {
+                    try fileManager.copyItem(atPath: cachedLogsUrl.path, toPath: documentLogsPath)
+                }
+            } catch {
+                DDLogError("Failed to copy debug informations \(error)")
+            }
+        #endif
     }
 }
