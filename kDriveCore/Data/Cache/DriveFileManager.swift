@@ -559,7 +559,6 @@ public class DriveFileManager {
                 if let file = activity.file {
                     let safeFile = File(value: file)
                     keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
-                    safeFile.children = safeFile.children.realm != nil ? safeFile.children.freeze() : safeFile.children
                     homeRootFile.children.append(safeFile)
                     safeActivity.file = safeFile
                     if let rights = file.rights {
@@ -571,35 +570,28 @@ public class DriveFileManager {
 
             try? realm.safeWrite {
                 realm.delete(realm.objects(FileActivity.self))
-                // Delete orphan files which are NOT root
-                deleteOrphanFiles(root: DriveFileManager.homeRootFile, using: realm)
-
                 realm.add(activitiesSafe, update: .modified)
                 realm.add(homeRootFile, update: .modified)
             }
+            deleteOrphanFiles(root: DriveFileManager.homeRootFile, newFiles: Array(homeRootFile.children), using: realm)
         }
     }
 
     public func setLocalFiles(_ files: [File], root: File, completion: (() -> Void)? = nil) {
         backgroundQueue.async { [self] in
-            autoreleasepool {
-                let realm = getRealm()
-                for file in files {
-                    keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
-                    file.children = file.children.realm != nil ? file.children.freeze() : file.children
-                    root.children.append(file)
-                    if let rights = file.rights {
-                        file.rights = Rights(value: rights)
-                    }
-                }
-
-                try? realm.safeWrite {
-                    // Delete orphan files which are NOT root
-                    deleteOrphanFiles(root: root, using: realm)
-
-                    realm.add(root, update: .modified)
+            let realm = getRealm()
+            for file in files {
+                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
+                root.children.append(file)
+                if let rights = file.rights {
+                    file.rights = Rights(value: rights)
                 }
             }
+
+            try? realm.safeWrite {
+                realm.add(root, update: .modified)
+            }
+            deleteOrphanFiles(root: root, newFiles: files, using: realm)
             completion?()
         }
     }
@@ -1095,14 +1087,20 @@ public class DriveFileManager {
         }
     }
 
-    private func deleteOrphanFiles(root: File..., using realm: Realm? = nil) {
+    private func deleteOrphanFiles(root: File..., newFiles: [File]? = nil, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
-        let orphanFiles = realm.objects(File.self).filter("parentLink.@count == 1").filter(NSPredicate(format: "ANY parentLink.id IN %@", root.map(\.id)))
-        for orphanFile in orphanFiles {
-            if fileManager.fileExists(atPath: orphanFile.localContainerUrl.path) {
-                try? fileManager.removeItem(at: orphanFile.localContainerUrl) // Check that it was correctly removed?
+        let maybeOrphanFiles = realm.objects(File.self).filter("parentLink.@count == 1").filter(NSPredicate(format: "ANY parentLink.id IN %@", root.map(\.id)))
+        var orphanFiles = [File]()
+
+        for maybeOrphanFile in maybeOrphanFiles {
+            if newFiles == nil || !(newFiles ?? []).contains(maybeOrphanFile) {
+                if fileManager.fileExists(atPath: maybeOrphanFile.localContainerUrl.path) {
+                    try? fileManager.removeItem(at: maybeOrphanFile.localContainerUrl) // Check that it was correctly removed?
+                }
+                orphanFiles.append(maybeOrphanFile)
             }
         }
+
         try? realm.safeWrite {
             realm.delete(orphanFiles)
         }

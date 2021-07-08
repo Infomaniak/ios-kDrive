@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/ProxymanApp/atlantis",
         "state": {
           "branch": null,
-          "revision": "97c724688eb777b27f4155606ac9437b9621695f",
-          "version": "1.11.1"
+          "revision": "2ee37f1da01b438d67012cc1405617e158f358a1",
+          "version": "1.11.2"
         }
       },
       {
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "628c59a9048aae3b6bcf129ba56216dbe3dce808",
-          "version": "10.9.0"
+          "revision": "77658519b13388c098a7624a94491738f8bb2983",
+          "version": "10.10.0"
         }
       },
       {
