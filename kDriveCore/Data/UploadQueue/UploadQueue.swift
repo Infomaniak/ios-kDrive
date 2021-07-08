@@ -27,7 +27,7 @@ public class UploadQueue {
 
     public var pausedNotificationSent = false
 
-    private let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync")
+    private let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", autoreleaseFrequency: .workItem)
 
     private(set) var operationsInQueue: [String: UploadOperation] = [:]
     private(set) lazy var operationQueue: OperationQueue = {
@@ -110,9 +110,7 @@ public class UploadQueue {
 
     public func addToQueue(file: UploadFile) {
         dispatchQueue.async {
-            autoreleasepool {
-                self.addToQueue(file: file, using: self.realm)
-            }
+            self.addToQueue(file: file, using: self.realm)
         }
     }
 
@@ -162,50 +160,44 @@ public class UploadQueue {
 
     public func cancelAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
         dispatchQueue.async {
-            autoreleasepool {
-                self.suspendAllOperations()
-                let uploadingFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
-                uploadingFiles.forEach { file in
-                    if !file.isInvalidated,
-                       let operation = self.operationsInQueue[file.id] {
-                        operation.cancel()
-                    }
+            self.suspendAllOperations()
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+            uploadingFiles.forEach { file in
+                if !file.isInvalidated,
+                   let operation = self.operationsInQueue[file.id] {
+                    operation.cancel()
                 }
-                try? self.realm.safeWrite {
-                    self.realm.delete(uploadingFiles)
-                }
-                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
-                self.resumeAllOperations()
             }
+            try? self.realm.safeWrite {
+                self.realm.delete(uploadingFiles)
+            }
+            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+            self.resumeAllOperations()
         }
     }
 
     public func retry(_ file: UploadFile) {
         let safeFile = ThreadSafeReference(to: file)
         dispatchQueue.async {
-            autoreleasepool {
-                guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
-                try? self.realm.safeWrite {
-                    file.error = nil
-                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
-                }
-                self.addToQueue(file: file, using: self.realm)
+            guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
+            try? self.realm.safeWrite {
+                file.error = nil
+                file.maxRetryCount = UploadFile.defaultMaxRetryCount
             }
+            self.addToQueue(file: file, using: self.realm)
         }
     }
 
     public func retryAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
         dispatchQueue.async {
-            autoreleasepool {
-                let failedUploadFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm).filter("_error != nil")
-                try? self.realm.safeWrite {
-                    failedUploadFiles.forEach { file in
-                        file.error = nil
-                        file.maxRetryCount = UploadFile.defaultMaxRetryCount
-                    }
+            let failedUploadFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm).filter("_error != nil")
+            try? self.realm.safeWrite {
+                failedUploadFiles.forEach { file in
+                    file.error = nil
+                    file.maxRetryCount = UploadFile.defaultMaxRetryCount
                 }
-                failedUploadFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
             }
+            failedUploadFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
         }
     }
 
