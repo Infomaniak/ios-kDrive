@@ -34,25 +34,31 @@ class UploadQueueViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         tableView.register(cellView: UploadTableViewCell.self)
 
         retryButton.accessibilityLabel = KDriveStrings.Localizable.buttonRetry
         cancelButton.accessibilityLabel = KDriveStrings.Localizable.buttonCancel
 
         reloadData(reloadTableView: false)
-        UploadQueue.instance.observeFileUploaded(self) { _, _ in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                if self.isViewLoaded {
-                    self.reloadData()
+        UploadQueue.instance.observeFileUploaded(self) { [unowned self] uploadedFile, _ in
+            DispatchQueue.main.async { [weak self, uploadedFileId = uploadedFile.id] in
+                guard let self = self,
+                      let index = self.uploadingFiles.firstIndex(where: { $0.id == uploadedFileId }),
+                      self.isViewLoaded else {
+                    return
                 }
+                var newUploadingFiles = self.uploadingFiles
+                newUploadingFiles.remove(at: index)
+                newUploadingFiles.first?.isFirstInCollection = true
+                self.reloadData(with: newUploadingFiles)
             }
         }
-        UploadQueue.instance.observeFileUploadProgress(self) { fileId, progress in
+        UploadQueue.instance.observeFileUploadProgress(self) { [unowned self] fileId, progress in
             DispatchQueue.main.async { [weak self] in
-                guard let strongSelf = self else { return }
-                strongSelf.progressForFileId[fileId] = CGFloat(progress)
-                for cell in strongSelf.tableView.visibleCells {
+                guard let self = self else { return }
+                self.progressForFileId[fileId] = CGFloat(progress)
+                for cell in self.tableView.visibleCells {
                     (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: CGFloat(progress))
                 }
             }
@@ -63,11 +69,16 @@ class UploadQueueViewController: UIViewController {
         }
     }
 
-    func reloadData(reloadTableView: Bool = true) {
-        guard currentDirectory != nil else { return }
-        let newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm).freeze())
-        newUploadingFiles.first?.isFirstInCollection = true
-        newUploadingFiles.last?.isLastInCollection = true
+    func reloadData(with maybeNewUploadingFiles: [UploadFile]? = nil, reloadTableView: Bool = true) {
+        var newUploadingFiles: [UploadFile]
+        if let uploadingFiles = maybeNewUploadingFiles {
+            newUploadingFiles = uploadingFiles
+        } else {
+            guard currentDirectory != nil else { return }
+            newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm).freeze())
+            newUploadingFiles.first?.isFirstInCollection = true
+            newUploadingFiles.last?.isLastInCollection = true
+        }
 
         if reloadTableView {
             let changeSet = StagedChangeset(source: uploadingFiles, target: newUploadingFiles)
