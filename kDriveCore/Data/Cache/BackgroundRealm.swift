@@ -21,7 +21,6 @@ import RealmSwift
 import Sentry
 
 public class BackgroundRealm {
-
     public static let uploads = getQueue(for: DriveFileManager.constants.uploadsRealmConfiguration)
     private static var instances: [String: BackgroundRealm] = [:]
 
@@ -46,7 +45,7 @@ public class BackgroundRealm {
                     SentrySDK.capture(error: error) { scope in
                         scope.setContext(value: [
                             "File URL": configuration.fileURL?.absoluteString ?? ""
-                            ], key: "Realm")
+                        ], key: "Realm")
                     }
                     fatalError("Failed creating background realm")
                 }
@@ -62,12 +61,9 @@ public class BackgroundRealm {
         self.queue = queue
     }
 
-    public func execute(_ block: ((Realm) -> Void)) {
+    public func execute(_ block: (Realm) -> Void) {
         queue.sync {
-            autoreleasepool {
-                block(realm)
-            }
+            block(realm)
         }
     }
-
 }
