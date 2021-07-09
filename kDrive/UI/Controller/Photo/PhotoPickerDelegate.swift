@@ -82,7 +82,9 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
 extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true) {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
+            if !results.isEmpty {
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
+            }
         }
 
         if !results.isEmpty {
