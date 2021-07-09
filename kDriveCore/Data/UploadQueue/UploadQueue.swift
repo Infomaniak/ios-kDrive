@@ -16,18 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
-import CocoaLumberjackSwift
 
 public class UploadQueue {
-
     public static let instance = UploadQueue()
     public static let backgroundIdentifier = "com.infomaniak.background.upload"
 
     public var pausedNotificationSent = false
-    private var fileUploadedCount = 0
+
+    private let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.upload-sync", autoreleaseFrequency: .workItem)
 
     private(set) var operationsInQueue: [String: UploadOperation] = [:]
     private(set) lazy var operationQueue: OperationQueue = {
@@ -38,6 +38,7 @@ public class UploadQueue {
         queue.isSuspended = shouldSuspendQueue
         return queue
     }()
+
     private lazy var foregroundSession: URLSession = {
         let urlSessionConfiguration = URLSessionConfiguration.default
         urlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
@@ -48,6 +49,10 @@ public class UploadQueue {
         urlSessionConfiguration.networkServiceType = .default
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
     }()
+
+    private var fileUploadedCount = 0
+    /// This Realm instance is bound to `dispatchQueue`
+    private var realm: Realm!
 
     private var bestSession: FileUploadSession {
         return Constants.isInExtension ? BackgroundUploadSessionManager.instance : foregroundSession
@@ -66,14 +71,12 @@ public class UploadQueue {
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void]()
     )
 
-    private class Locks {
-        let addToQueueFromRealm = DispatchGroup()
-        let addToQueue = DispatchGroup()
-    }
-
-    private let locks = Locks()
-
     private init() {
+        // Create Realm
+        dispatchQueue.sync {
+            // swiftlint:disable force_try
+            realm = try! Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: dispatchQueue)
+        }
         // Initialize operation queue with files from Realm
         addToQueueFromRealm()
         // Observe network changes
@@ -81,6 +84,8 @@ public class UploadQueue {
             self.operationQueue.isSuspended = shouldSuspendQueue || forceSuspendQueue
         }
     }
+
+    // MARK: - Public methods
 
     public func waitForCompletion(_ completionHandler: @escaping () -> Void) {
         DispatchQueue.global(qos: .default).async {
@@ -90,14 +95,13 @@ public class UploadQueue {
     }
 
     public func addToQueueFromRealm() {
-        DispatchQueue.global(qos: .default).async {
-            self.locks.addToQueueFromRealm.performLocked {
-                // self.compactRealmIfNeeded()
-                BackgroundRealm.uploads.execute { uploadsRealm in
-                    let uploadingFiles = uploadsRealm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
-                    uploadingFiles.forEach { self.addToQueue(file: $0, using: uploadsRealm) }
-                }
+        dispatchQueue.async {
+            // self.compactRealmIfNeeded()
+            autoreleasepool {
+                let uploadingFiles = self.realm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
+                uploadingFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
             }
+            // Perform cleanup operation in background
             DispatchQueue.global(qos: .background).async {
                 self.cleanupOrphanFiles()
             }
@@ -105,55 +109,13 @@ public class UploadQueue {
     }
 
     public func addToQueue(file: UploadFile) {
-        BackgroundRealm.uploads.execute { uploadsRealm in
-            addToQueue(file: file, using: uploadsRealm)
+        dispatchQueue.async {
+            self.addToQueue(file: file, using: self.realm)
         }
     }
 
-    public func addToQueue(file: UploadFile, using realm: Realm) {
-        locks.addToQueue.performLocked {
-            guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
-                return
-            }
-
-            if file.realm == nil {
-                // Save drive and directory
-                UserDefaults.shared.lastSelectedDrive = file.driveId
-                UserDefaults.shared.lastSelectedDirectory = file.parentDirectoryId
-            }
-
-            try? realm.safeWrite {
-                if file.realm == nil {
-                    realm.add(file, update: .modified)
-                }
-                if file.error != nil {
-                    file.error = nil
-                }
-            }
-
-            let operation = UploadOperation(file: file, urlSession: bestSession)
-            operation.queuePriority = file.priority
-            operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id] in
-                self.operationsInQueue.removeValue(forKey: fileId)
-                self.publishFileUploaded(result: operation.result)
-                BackgroundRealm.uploads.execute { realm in
-                    self.publishUploadCount(withParent: parentId, using: realm)
-                }
-            }
-            operationQueue.addOperation(operation)
-            operationsInQueue[file.id] = operation
-
-            publishUploadCount(withParent: file.parentDirectoryId, using: realm)
-        }
-    }
-
-    public func getUploadingFiles(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        if let driveId = AccountManager.instance.currentDriveFileManager?.drive.id {
-            let userId = AccountManager.instance.currentAccount.user.id
-            return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId)).sorted(byKeyPath: "taskCreationDate")
-        } else {
-            return realm.objects(UploadFile.self).filter("FALSEPREDICATE")
-        }
+    public func getUploadingFiles(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId)).sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
@@ -178,91 +140,121 @@ public class UploadQueue {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
-    public func cancel(_ file: UploadFile, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        locks.addToQueue.performLocked {
-            guard !file.isInvalidated else { return }
-            if let operation = operationsInQueue[file.id] {
+    public func cancel(_ file: UploadFile) {
+        let safeFile = ThreadSafeReference(to: file)
+        dispatchQueue.async {
+            guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
+            if let operation = self.operationsInQueue[file.id] {
                 operation.cancel()
             } else {
                 let parentId = file.parentDirectoryId
                 autoreleasepool {
-                    try? realm.safeWrite {
-                        realm.delete(file)
+                    try? self.realm.safeWrite {
+                        self.realm.delete(file)
                     }
                 }
-                publishUploadCount(withParent: parentId)
+                self.publishUploadCount(withParent: parentId, userId: file.userId, driveId: file.driveId, using: self.realm)
             }
         }
     }
 
-    public func cancelAllOperations(withParent parentId: Int) {
-        DispatchQueue.global(qos: .userInteractive).async { [self] in
+    public func cancelAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
+        dispatchQueue.async {
             self.suspendAllOperations()
-            BackgroundRealm.uploads.execute { uploadsRealm in
-                let uploadingFiles = self.getUploadingFiles(withParent: parentId, using: uploadsRealm)
-                uploadingFiles.forEach { file in
-                    if !file.isInvalidated,
-                        let operation = self.operationsInQueue[file.id] {
-                        operation.cancel()
-                    }
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+            uploadingFiles.forEach { file in
+                if !file.isInvalidated,
+                   let operation = self.operationsInQueue[file.id] {
+                    operation.cancel()
                 }
-                try? uploadsRealm.safeWrite {
-                    uploadsRealm.delete(uploadingFiles)
-                }
-                publishUploadCount(withParent: parentId, using: uploadsRealm)
             }
+            try? self.realm.safeWrite {
+                self.realm.delete(uploadingFiles)
+            }
+            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
             self.resumeAllOperations()
         }
     }
 
-    public func retry(_ file: UploadFile, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        try? realm.safeWrite {
-            file.error = nil
-            file.maxRetryCount = UploadFile.defaultMaxRetryCount
+    public func retry(_ file: UploadFile) {
+        let safeFile = ThreadSafeReference(to: file)
+        dispatchQueue.async {
+            guard let file = self.realm.resolve(safeFile), !file.isInvalidated else { return }
+            try? self.realm.safeWrite {
+                file.error = nil
+                file.maxRetryCount = UploadFile.defaultMaxRetryCount
+            }
+            self.addToQueue(file: file, using: self.realm)
         }
-        addToQueue(file: file)
     }
 
-    public func retryAllOperations(withParent parentId: Int) {
-        BackgroundRealm.uploads.execute { realm in
-            let failedUploadFiles = getUploadingFiles(withParent: parentId, using: realm).filter("_error != nil")
-            try? realm.safeWrite {
+    public func retryAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
+        dispatchQueue.async {
+            let failedUploadFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm).filter("_error != nil")
+            try? self.realm.safeWrite {
                 failedUploadFiles.forEach { file in
                     file.error = nil
                     file.maxRetryCount = UploadFile.defaultMaxRetryCount
                 }
             }
-            failedUploadFiles.forEach { addToQueue(file: $0) }
+            failedUploadFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
         }
     }
 
     public func sendPausedNotificationIfNeeded() {
-        if !pausedNotificationSent {
-            NotificationsHelper.sendPausedUploadQueueNotification()
-            pausedNotificationSent = true
+        dispatchQueue.async {
+            if !self.pausedNotificationSent {
+                NotificationsHelper.sendPausedUploadQueueNotification()
+                self.pausedNotificationSent = true
+            }
         }
     }
 
-    private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
-        fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
-        if let error = result.uploadFile.error,
-            error != .networkError || error != .taskCancelled || error != .taskRescheduled {
-            NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
-            if operationQueue.operationCount == 0 {
-                fileUploadedCount = 0
-            }
-        } else if operationQueue.operationCount == 0 {
-            if fileUploadedCount == 1 {
-                NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId)
-            } else {
-                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
-            }
-            fileUploadedCount = 0
+    func publishProgress(_ progress: Double, for fileId: String) {
+        observations.didChangeProgress.values.forEach { closure in
+            closure(fileId, progress)
         }
     }
 
-    private func publishUploadCount(withParent parentId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        let uploadCount = getUploadingFiles(withParent: parentId, using: realm).count
+    // MARK: - Private methods
+
+    private func addToQueue(file: UploadFile, using realm: Realm) {
+        guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
+            return
+        }
+
+        if file.realm == nil {
+            // Save drive and directory
+            UserDefaults.shared.lastSelectedDrive = file.driveId
+            UserDefaults.shared.lastSelectedDirectory = file.parentDirectoryId
+        }
+
+        try? realm.safeWrite {
+            if file.realm == nil {
+                realm.add(file, update: .modified)
+            }
+            if file.error != nil {
+                file.error = nil
+            }
+        }
+
+        let operation = UploadOperation(file: file, urlSession: bestSession)
+        operation.queuePriority = file.priority
+        operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
+            self.dispatchQueue.async {
+                self.operationsInQueue.removeValue(forKey: fileId)
+                self.publishFileUploaded(result: operation.result)
+                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+            }
+        }
+        operationQueue.addOperation(operation)
+        operationsInQueue[file.id] = operation
+
+        publishUploadCount(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId, using: realm)
+    }
+
+    private func publishUploadCount(withParent parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
         observations.didChangeUploadCountInParent.values.forEach { closure in
             closure(parentId, uploadCount)
         }
@@ -272,12 +264,6 @@ public class UploadQueue {
         sendFileUploadedNotificationIfNeeded(with: result)
         observations.didUploadFile.values.forEach { closure in
             closure(result.uploadFile, result.driveFile)
-        }
-    }
-
-    func publishProgress(_ progress: Double, for fileId: String) {
-        observations.didChangeProgress.values.forEach { closure in
-            closure(fileId, progress)
         }
     }
 
@@ -309,7 +295,8 @@ public class UploadQueue {
             schemaVersion: DriveFileManager.constants.currentUploadDbVersion,
             migrationBlock: DriveFileManager.constants.migrationBlock,
             shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
+            objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self]
+        )
         do {
             _ = try Realm(configuration: config)
         } catch {
@@ -317,17 +304,33 @@ public class UploadQueue {
         }
     }
 
+    private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
+        fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
+        if let error = result.uploadFile.error,
+           error != .networkError || error != .taskCancelled || error != .taskRescheduled {
+            NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
+            if operationQueue.operationCount == 0 {
+                fileUploadedCount = 0
+            }
+        } else if operationQueue.operationCount == 0 {
+            if fileUploadedCount == 1 {
+                NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId)
+            } else {
+                NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
+            }
+            fileUploadedCount = 0
+        }
+    }
 }
 
 // MARK: - Observation
 
-extension UploadQueue {
-
-    public typealias UploadedFileId = String
-    public typealias Progress = Double
+public extension UploadQueue {
+    typealias UploadedFileId = String
+    typealias Progress = Double
 
     @discardableResult
-    public func observeFileUploaded<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadFile, File?) -> Void)
+    func observeFileUploaded<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadFile, File?) -> Void)
         -> ObservationToken {
         let key = UUID()
         observations.didUploadFile[key] = { [weak self, weak observer] uploadFile, driveFile in
@@ -349,7 +352,7 @@ extension UploadQueue {
     }
 
     @discardableResult
-    public func observeUploadCountInParent<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
+    func observeUploadCountInParent<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         let key = UUID()
         observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
             guard observer != nil else {
@@ -368,7 +371,7 @@ extension UploadQueue {
     }
 
     @discardableResult
-    public func observeFileUploadProgress<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadedFileId, Progress) -> Void)
+    func observeFileUploadProgress<T: AnyObject>(_ observer: T, fileId: String? = nil, using closure: @escaping (UploadedFileId, Progress) -> Void)
         -> ObservationToken {
         let key = UUID()
         observations.didChangeProgress[key] = { [weak self, weak observer] uploadedFileId, progress in

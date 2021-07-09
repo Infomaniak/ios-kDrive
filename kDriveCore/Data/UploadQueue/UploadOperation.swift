@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
-import CocoaLumberjackSwift
 
 public class UploadTokenManager {
-
     public static let instance = UploadTokenManager()
 
     private var tokens: [Int: UploadToken] = [:]
@@ -35,8 +34,8 @@ public class UploadTokenManager {
             completionHandler(token)
             lock.leave()
         } else if let userToken = AccountManager.instance.getTokenForUserId(userId),
-            let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
-            let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+                  let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
+                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
             driveFileManager.apiFetcher.getPublicUploadTokenWithToken(userToken, driveId: drive.id) { response, _ in
                 let token = response?.data
                 self.tokens[userId] = token
@@ -56,7 +55,6 @@ public struct UploadCompletionResult {
 }
 
 public class UploadOperation: Operation {
-
     // MARK: - Attributes
 
     private var file: UploadFile
@@ -86,15 +84,15 @@ public class UploadOperation: Operation {
         }
     }
 
-    public override var isExecuting: Bool {
+    override public var isExecuting: Bool {
         return _executing
     }
 
-    public override var isFinished: Bool {
+    override public var isFinished: Bool {
         return _finished
     }
 
-    public override var isAsynchronous: Bool {
+    override public var isAsynchronous: Bool {
         return true
     }
 
@@ -114,7 +112,7 @@ public class UploadOperation: Operation {
         self.result = UploadCompletionResult()
     }
 
-    public override func start() {
+    override public func start() {
         assert(!isExecuting, "Operation is already started")
 
         DDLogInfo("[UploadOperation] Job \(file.id) started")
@@ -151,7 +149,7 @@ public class UploadOperation: Operation {
         main()
     }
 
-    public override func main() {
+    override public func main() {
         DDLogInfo("[UploadOperation] Executing job \(file.id)")
         guard let token = uploadToken else {
             DDLogInfo("[UploadOperation] Failed to fetch upload token for job \(file.id)")
@@ -168,7 +166,7 @@ public class UploadOperation: Operation {
         file.maxRetryCount -= 1
 
         if let filePath = file.pathURL,
-            FileManager.default.isReadableFile(atPath: filePath.path) {
+           FileManager.default.isReadableFile(atPath: filePath.path) {
             task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
             task?.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
             task?.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
@@ -185,7 +183,7 @@ public class UploadOperation: Operation {
         }
     }
 
-    public override func cancel() {
+    override public func cancel() {
         DDLogInfo("[UploadOperation] Job \(file.id) canceled")
         super.cancel()
         task?.cancel()
@@ -207,7 +205,7 @@ public class UploadOperation: Operation {
         if file.type == .phAsset && file.pathURL == nil {
             DDLogInfo("[UploadOperation] Need to fetch photo asset")
             if let asset = file.getPHAsset(),
-                let url = PhotoLibraryUploader.instance.getUrlForPHAssetSync(asset) {
+               let url = PhotoLibraryUploader.instance.getUrlForPHAssetSync(asset) {
                 DDLogInfo("[UploadOperation] Got photo asset, writing URL")
                 file.pathURL = url
             } else {
@@ -238,14 +236,18 @@ public class UploadOperation: Operation {
                 file.error = .networkError
             }
         } else if let data = data,
-            let response = try? ApiFetcher.decoder.decode(ApiResponse<[File]>.self, from: data),
-            let driveFile = response.data?.first {
+                  let response = try? ApiFetcher.decoder.decode(ApiResponse<[File]>.self, from: data),
+                  let driveFile = response.data?.first {
             // Success
             DDLogError("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
-            if let drive = AccountManager.instance.getDrive(for: file.userId, driveId: file.driveId),
-                let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-
+            var driveFileManager: DriveFileManager?
+            BackgroundRealm.getQueue(for: DriveInfosManager.instance.realmConfiguration).execute { realm in
+                if let drive = AccountManager.instance.getDrive(for: file.userId, driveId: file.driveId, using: realm) {
+                    driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
+                }
+            }
+            if let driveFileManager = driveFileManager {
                 // File is already or has parent in DB let's update it
                 BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, using: realm) != nil || file.relativePath.isEmpty {
@@ -259,7 +261,7 @@ public class UploadOperation: Operation {
                         if let parent = parent {
                             driveFileManager.notifyObserversWith(file: parent)
                         }
-                        result.driveFile = driveFile.freeze()
+                        result.driveFile = File(value: driveFile)
                     }
                 }
             }
@@ -267,7 +269,7 @@ public class UploadOperation: Operation {
             // Server-side error
             var error = DriveError.serverError
             if let data = data,
-                let apiError = try? ApiFetcher.decoder.decode(ApiResponse<EmptyResponse>.self, from: data).error {
+               let apiError = try? ApiFetcher.decoder.decode(ApiResponse<EmptyResponse>.self, from: data).error {
                 error = DriveError(apiError: apiError)
             }
             DDLogError("[UploadOperation] Server error for job \(file.id) (code: \(statusCode)): \(error)")
@@ -278,7 +280,7 @@ public class UploadOperation: Operation {
             } else if error == .objectNotFound {
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
-                UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId)
+                UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)
                 if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.parentDirectoryId == file.parentDirectoryId {
                     PhotoLibraryUploader.instance.disableSync()
                 }
