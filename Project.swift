@@ -73,6 +73,7 @@ let project = Project(name: "kDrive",
                 "kDrive/**/*.stringsdict",
                 "kDrive/**/*.xib",
                 "kDrive/**/*.json",
+                "kDrive/IAP/ProductIds.plist",
                 "kDriveCore/GoogleService-Info.plist"
             ],
             entitlements: "kDrive/Resources/kDrive.entitlements",
