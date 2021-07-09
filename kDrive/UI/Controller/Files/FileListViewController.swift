@@ -229,11 +229,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func getNewChanges() {
         guard currentDirectory != nil else { return }
+        isLoadingData = true
         driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] results, _, error in
             self?.isLoadingData = false
             if results != nil {
                 self?.reloadData(showRefreshControl: false, withActivities: false)
-            } else if let error = error as? DriveError, error == DriveError.objectNotFound {
+            } else if let error = error as? DriveError, error == .objectNotFound {
                 // Pop view controller
                 self?.navigationController?.popViewController(animated: true)
             }
@@ -309,14 +310,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     self.reloadData(page: page + 1, forceRefresh: forceRefresh, showRefreshControl: showRefreshControl, withActivities: withActivities)
                 } else {
                     self.isContentLoaded = true
+                    self.isLoadingData = false
                     if withActivities {
                         self.getNewChanges()
-                    } else {
-                        self.isLoadingData = false
                     }
                 }
             case .failure(let error):
-                if let error = error as? DriveError, error == DriveError.objectNotFound {
+                if let error = error as? DriveError, error == .objectNotFound {
                     // Pop view controller
                     self.navigationController?.popViewController(animated: true)
                 }
