@@ -151,8 +151,10 @@ public class UploadOperation: Operation {
 
     override public func main() {
         DDLogInfo("[UploadOperation] Executing job \(file.id)")
+        file.maxRetryCount -= 1
         guard let token = uploadToken else {
             DDLogInfo("[UploadOperation] Failed to fetch upload token for job \(file.id)")
+            file.error = .refreshToken
             end()
             return
         }
@@ -163,7 +165,6 @@ public class UploadOperation: Operation {
         request.setValue("Bearer \(token.token)", forHTTPHeaderField: "Authorization")
 
         file.sessionUrl = url.absoluteString
-        file.maxRetryCount -= 1
 
         if let filePath = file.pathURL,
            FileManager.default.isReadableFile(atPath: filePath.path) {
@@ -179,6 +180,7 @@ public class UploadOperation: Operation {
             task?.resume()
         } else {
             DDLogInfo("[UploadOperation] No file path found for job \(file.id)")
+            file.error = .fileNotFound
             end()
         }
     }
