@@ -36,6 +36,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private let gridInnerSpacing: CGFloat = 16
     private let maxDiffChanges = 100
     private let headerViewIdentifier = "FilesHeaderView"
+    private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
+    private let fileObserverThrottler = Throttler<File>(timeInterval: 1, queue: .global())
 
     // MARK: - Configuration
 
@@ -78,7 +80,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     lazy var configuration = Configuration(emptyViewType: .emptyFolder)
     private var uploadingFilesCount = 0
     private var nextPage = 1
-    private var isLoading = false
+    private var isLoadingData = false
+    private var isReloading = false
     private var isContentLoaded = false
     var listStyle = FileListOptions.instance.currentStyle {
         didSet {
@@ -185,7 +188,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         #endif
 
         // Refresh data
-        if isContentLoaded && !isLoading && currentDirectory != nil && currentDirectory.fullyDownloaded {
+        if isContentLoaded && !isLoadingData && currentDirectory != nil && currentDirectory.fullyDownloaded {
             getNewChanges()
         }
     }
@@ -227,8 +230,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func getNewChanges() {
         guard currentDirectory != nil else { return }
         driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] results, _, error in
+            self?.isLoadingData = false
             if results != nil {
-                self?.reloadData(withActivities: false)
+                self?.reloadData(showRefreshControl: false, withActivities: false)
             } else if let error = error as? DriveError, error == DriveError.objectNotFound {
                 // Pop view controller
                 self?.navigationController?.popViewController(animated: true)
@@ -268,12 +272,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - Public methods
 
-    final func reloadData(page: Int = 1, forceRefresh: Bool = false, withActivities: Bool = true) {
-        if page == 1 && configuration.isRefreshControlEnabled {
+    final func reloadData(page: Int = 1, forceRefresh: Bool = false, showRefreshControl: Bool = true, withActivities: Bool = true) {
+        guard !isLoadingData || page > 1 else { return }
+        isLoadingData = true
+        if page == 1 && configuration.isRefreshControlEnabled && showRefreshControl {
             // Show refresh control if loading is slow
-            isLoading = true
+            isReloading = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if self.isLoading && !self.refreshControl.isRefreshing {
+                if self.isReloading && !self.refreshControl.isRefreshing {
                     self.refreshControl.beginRefreshing()
                     let offsetPoint = CGPoint(x: 0, y: self.collectionView.contentOffset.y - self.refreshControl.frame.size.height)
                     self.collectionView.setContentOffset(offsetPoint, animated: true)
@@ -283,7 +289,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] result, moreComing, replaceFiles in
             guard let self = self else { return }
-            self.isLoading = false
+            self.isReloading = false
             if self.configuration.isRefreshControlEnabled {
                 self.refreshControl.endRefreshing()
             }
@@ -300,11 +306,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 self.reloadCollectionView(with: files)
 
                 if moreComing {
-                    self.reloadData(page: page + 1, forceRefresh: forceRefresh)
+                    self.reloadData(page: page + 1, forceRefresh: forceRefresh, showRefreshControl: showRefreshControl, withActivities: withActivities)
                 } else {
                     self.isContentLoaded = true
                     if withActivities {
                         self.getNewChanges()
+                    } else {
+                        self.isLoadingData = false
                     }
                 }
             case .failure(let error):
@@ -335,35 +343,38 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     final func observeUploads() {
         guard configuration.showUploadingFiles && currentDirectory != nil && uploadsObserver == nil else { return }
 
-        uploadsObserver = UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] _, uploadCount in
+        uploadCountThrottler.handler = { [weak self] uploadCount in
+            guard let self = self, self.isViewLoaded else { return }
             self.uploadingFilesCount = uploadCount
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self, self.isViewLoaded else { return }
-
-                let shouldHideUploadCard: Bool
-                if uploadCount > 0 {
-                    self.headerView?.uploadCardView.setUploadCount(uploadCount)
-                    shouldHideUploadCard = false
-                } else {
-                    shouldHideUploadCard = true
-                }
-                // Only perform reload if needed
-                if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
-                    self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
-                    self.collectionView.performBatchUpdates(nil)
-                }
+            let shouldHideUploadCard: Bool
+            if uploadCount > 0 {
+                self.headerView?.uploadCardView.setUploadCount(uploadCount)
+                shouldHideUploadCard = false
+            } else {
+                shouldHideUploadCard = true
             }
+            // Only perform reload if needed
+            if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
+                self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
+                self.collectionView.performBatchUpdates(nil)
+            }
+        }
+        uploadsObserver = UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] _, uploadCount in
+            self.uploadCountThrottler.call(uploadCount)
         }
     }
 
     final func observeFiles() {
         guard filesObserver == nil else { return }
-        filesObserver = driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
-            if file.id == self.currentDirectory?.id {
-                reloadData()
-            } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
-                updateChild(file, at: index)
+        fileObserverThrottler.handler = { [weak self] file in
+            if file.id == self?.currentDirectory?.id {
+                self?.reloadData(showRefreshControl: false)
+            } else if let index = self?.sortedFiles.firstIndex(where: { $0.id == file.id }) {
+                self?.updateChild(file, at: index)
             }
+        }
+        filesObserver = driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+            fileObserverThrottler.call(file)
         }
     }
 
@@ -393,7 +404,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         // Sort type observer
         sortTypeObserver = FileListOptions.instance.observeSortTypeChange(self) { [unowned self] newSortType in
             self.sortType = newSortType
-            reloadData()
+            reloadData(showRefreshControl: false)
         }
     }
 
@@ -996,7 +1007,7 @@ extension FileListViewController: SortOptionsDelegate {
             FileListOptions.instance.currentSortType = sortType
             // Collection view will be reloaded via the observer
         } else {
-            reloadData()
+            reloadData(showRefreshControl: false)
         }
     }
 }
