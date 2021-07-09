@@ -32,7 +32,8 @@ public enum Logging {
 
     private static func initLogger() {
         DDLog.add(DDOSLogger.sharedInstance)
-        let fileLogger = DDFileLogger()
+        let logFileManager = DDLogFileManagerDefault(logsDirectory: DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true).path)
+        let fileLogger = DDFileLogger(logFileManager: logFileManager)
         fileLogger.rollingFrequency = 60 * 60 * 24 // 24 hours
         fileLogger.logFileManager.maximumNumberOfLogFiles = 7
         DDLog.add(fileLogger)
@@ -68,6 +69,7 @@ public enum Logging {
 
     private static func copyDebugInformations() {
         #if DEBUG
+            guard !Constants.isInExtension else { return }
             let fileManager = FileManager.default
             let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("debug", isDirectory: true))!
 
@@ -82,8 +84,11 @@ public enum Logging {
                 try? fileManager.removeItem(atPath: documentDrivesPath)
                 try? fileManager.removeItem(atPath: documentLogsPath)
 
-                try fileManager.copyItem(atPath: DriveFileManager.constants.rootDocumentsURL.path, toPath: documentDrivesPath)
-                if let cachedLogsUrl = (fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("Logs", isDirectory: true)) {
+                if fileManager.fileExists(atPath: DriveFileManager.constants.rootDocumentsURL.path) {
+                    try fileManager.copyItem(atPath: DriveFileManager.constants.rootDocumentsURL.path, toPath: documentDrivesPath)
+                }
+                let cachedLogsUrl = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true)
+                if fileManager.fileExists(atPath: cachedLogsUrl.path) {
                     try fileManager.copyItem(atPath: cachedLogsUrl.path, toPath: documentLogsPath)
                 }
             } catch {
