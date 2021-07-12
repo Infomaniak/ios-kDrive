@@ -16,41 +16,32 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import StoreKit
 import UIKit
 
-class StoreViewController: UITableViewController {
-    private enum Section: CaseIterable {
-        case availableProducts, invalidProducts, purchased, restored
-
-        var title: String {
-            switch self {
-            case .availableProducts:
-                return "Available Products"
-            case .invalidProducts:
-                return "Invalid Products"
-            case .purchased:
-                return "Purchased"
-            case .restored:
-                return "Restored"
-            }
-        }
+class StoreViewController: UICollectionViewController {
+    struct Item {
+        let pack: DrivePack
+        let identifier: String
+        var product: SKProduct? = nil
     }
 
-    private let cellIdentifier = "cell"
+    var driveFileManager: DriveFileManager!
 
-    private var sections = Section.allCases
-    private var availableProducts: [SKProduct] = []
-    private var invalidProductIdentifiers: [String] = []
+    private var items: [Item] = [
+        Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo"),
+        Item(pack: .team, identifier: "com.infomaniak.drive.iap.team"),
+        Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro")
+    ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
-        tableView.backgroundColor = KDriveAsset.backgroundColor.color
+        collectionView.register(cellView: StoreCollectionViewCell.self)
+        collectionView.decelerationRate = .fast
 
-        title = "Store"
-
+        // Set up delegates
         StoreManager.shared.delegate = self
         StoreObserver.shared.delegate = self
 
@@ -73,9 +64,6 @@ class StoreViewController: UITableViewController {
         }
 
         if !identifiers.isEmpty {
-            invalidProductIdentifiers = identifiers
-            reload()
-
             // Fetch product information
             StoreManager.shared.startProductRequest(with: identifiers)
         } else {
@@ -84,84 +72,60 @@ class StoreViewController: UITableViewController {
         }
     }
 
-    private func reload() {
-        var sections = [Section]()
-        if !availableProducts.isEmpty {
-            sections.append(.availableProducts)
-        }
-        if !invalidProductIdentifiers.isEmpty {
-            sections.append(.invalidProducts)
-        }
-        if !StoreObserver.shared.purchased.isEmpty {
-            sections.append(.purchased)
-        }
-        if !StoreObserver.shared.restored.isEmpty {
-            sections.append(.restored)
-        }
-        self.sections = sections
-        tableView.reloadData()
+    static func instantiate(driveFileManager: DriveFileManager) -> StoreViewController {
+        let viewController = Storyboard.menu.instantiateViewController(withIdentifier: "StoreViewController") as! StoreViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
-    // MARK: - Table view data source
+    // MARK: - Collection view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return sections.count
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch sections[section] {
-        case .availableProducts:
-            return availableProducts.count
-        case .invalidProducts:
-            return invalidProductIdentifiers.count
-        case .purchased:
-            return StoreObserver.shared.purchased.count
-        case .restored:
-            return StoreObserver.shared.restored.count
-        }
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
-
-        switch sections[indexPath.section] {
-        case .availableProducts:
-            let product = availableProducts[indexPath.row]
-            cell.textLabel?.text = product.localizedTitle
-            if let formattedPrice = product.regularPrice {
-                cell.detailTextLabel?.text = formattedPrice
-            }
-        case .invalidProducts:
-            cell.textLabel?.text = invalidProductIdentifiers[indexPath.row]
-        case .purchased:
-            let transaction = StoreObserver.shared.purchased[indexPath.row]
-            cell.textLabel?.text = StoreManager.shared.title(matchingPaymentTransaction: transaction)
-        case .restored:
-            let transaction = StoreObserver.shared.restored[indexPath.row]
-            cell.textLabel?.text = StoreManager.shared.title(matchingPaymentTransaction: transaction)
-        }
-
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
+        let item = items[indexPath.row]
+        cell.configure(with: item, currentPack: driveFileManager.drive.pack)
+        cell.delegate = self
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return sections[section].title
-    }
+    // MARK: - Scroll view delegate
 
-    // MARK: - Table view delegate
+    override func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let itemWidth = collectionView.bounds.size.width - 48 + 10
+        let inertialTargetX = targetContentOffset.pointee.x
+        let offsetFromPreviousPage = (inertialTargetX + collectionView.contentInset.left).truncatingRemainder(dividingBy: itemWidth)
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let section = sections[indexPath.section]
-
-        // Only available products can be bought
-        if section == .availableProducts {
-            let product = availableProducts[indexPath.row]
-
-            // Attempt to purchase the tapped product
-            StoreObserver.shared.buy(product)
+        // Snap to nearest page
+        let pagedX: CGFloat
+        if offsetFromPreviousPage > itemWidth / 2 {
+            pagedX = inertialTargetX + (itemWidth - offsetFromPreviousPage)
+        } else {
+            pagedX = inertialTargetX - offsetFromPreviousPage
         }
 
-        tableView.deselectRow(at: indexPath, animated: true)
+        let point = CGPoint(x: pagedX, y: targetContentOffset.pointee.y)
+        targetContentOffset.pointee = point
+    }
+}
+
+// MARK: - Collection view flow delegate
+
+extension StoreViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.bounds.size.width - 48, height: 400)
+    }
+}
+
+// MARK: - Store cell delegate
+
+extension StoreViewController: StoreCellDelegate {
+    func selectButtonTapped(product: SKProduct) {
+        // Attempt to purchase the tapped product
+        StoreObserver.shared.buy(product)
     }
 }
 
@@ -169,9 +133,11 @@ class StoreViewController: UITableViewController {
 
 extension StoreViewController: StoreManagerDelegate {
     func storeManagerDidReceiveResponse(_ response: StoreResponse) {
-        availableProducts = response.availableProducts
-        invalidProductIdentifiers = response.invalidProductIdentifiers
-        reload()
+        // Update items product
+        for i in 0 ..< items.count {
+            items[i].product = response.availableProducts.first { $0.productIdentifier == items[i].identifier }
+        }
+        collectionView.reloadData()
     }
 
     func storeManagerDidReceiveMessage(_ message: String) {

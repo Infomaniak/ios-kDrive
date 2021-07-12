@@ -57,4 +57,17 @@ public enum UIConstants {
             UIApplication.shared.open(url)
         #endif
     }
+
+    static func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
+        #if ISEXTENSION
+        // TODO: Open app
+        #else
+        let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
+        if let navigationController = viewController.navigationController {
+            navigationController.pushViewController(storeViewController, animated: true)
+        } else {
+            viewController.present(viewController, animated: true)
+        }
+        #endif
+    }
 }

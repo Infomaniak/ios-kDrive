@@ -518,9 +518,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 cell.configureCell(with: driveFileManager.drive)
                 cell.selectionStyle = .none
                 cell.actionHandler = { [weak self] _ in
-                    if let driveFileManager = self?.driveFileManager, let url = URL(string: "\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)") {
-                        UIApplication.shared.open(url)
-                    }
+                    guard let self = self else { return }
+                    UIConstants.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self = self else { return }

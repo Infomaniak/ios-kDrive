@@ -253,7 +253,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
                     guard let self = self else { return }
-                    UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
+                    UIConstants.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
                 self?.present(floatingPanelViewController, animated: true)
             }
