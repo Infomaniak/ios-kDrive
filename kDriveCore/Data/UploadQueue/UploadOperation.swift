@@ -294,6 +294,12 @@ public class UploadOperation: Operation {
 
     private func end() {
         DDLogError("[UploadOperation] Job \(file.id) ended")
+
+        if let path = file.pathURL,
+           file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
+            try? FileManager.default.removeItem(at: path)
+        }
+
         // Save upload file
         result.uploadFile = UploadFile(value: file)
         if file.error != .taskCancelled {

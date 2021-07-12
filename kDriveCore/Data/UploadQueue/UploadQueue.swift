@@ -101,10 +101,6 @@ public class UploadQueue {
                 let uploadingFiles = self.realm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
                 uploadingFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
             }
-            // Perform cleanup operation in background
-            DispatchQueue.global(qos: .background).async {
-                self.cleanupOrphanFiles()
-            }
         }
     }
 
@@ -264,21 +260,6 @@ public class UploadQueue {
         sendFileUploadedNotificationIfNeeded(with: result)
         observations.didUploadFile.values.forEach { closure in
             closure(result.uploadFile, result.driveFile)
-        }
-    }
-
-    private func cleanupOrphanFiles() {
-        let importDirectory = DriveFileManager.constants.importDirectoryURL
-        let importedFiles = (try? FileManager.default.contentsOfDirectory(atPath: importDirectory.path)) ?? []
-
-        autoreleasepool {
-            let realm = DriveFileManager.constants.uploadsRealm
-            for file in importedFiles {
-                let filePath = importDirectory.appendingPathComponent(file, isDirectory: false).path
-                if realm.objects(UploadFile.self).filter(NSPredicate(format: "url = %@", filePath)).isEmpty {
-                    try? FileManager.default.removeItem(atPath: filePath)
-                }
-            }
         }
     }
 
