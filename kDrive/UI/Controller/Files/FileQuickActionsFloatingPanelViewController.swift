@@ -174,9 +174,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             }
             setupContent()
-            UIView.transition(with: tableView,
-                              duration: 0.35,
-                              options: .transitionCrossDissolve) { self.tableView.reloadData() }
+            UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
+                self.tableView.reloadData()
+            }
         }
     }
 
@@ -324,7 +324,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { [weak self] _ in
                     guard let self = self else { return }
-                    UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
+                    UIConstants.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
                 present(floatingPanelViewController, animated: true)
                 return
