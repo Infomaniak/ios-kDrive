@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import CocoaLumberjackSwift
+import Foundation
 
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
-
     // MARK: - Type aliases
 
     associatedtype Task
@@ -43,7 +42,6 @@ protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?)
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession)
     func getCompletionHandler(for task: Task) -> CompletionHandler?
-
 }
 
 extension BackgroundSessionManager {
@@ -56,10 +54,9 @@ public protocol FileUploadSession {
     func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionUploadTask
 }
 
-extension URLSession: FileUploadSession { }
+extension URLSession: FileUploadSession {}
 
 public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionManager, URLSessionDataDelegate, FileUploadSession {
-
     public typealias Task = URLSessionUploadTask
     public typealias CompletionHandler = (Data?, URLResponse?, Error?) -> Void
     public typealias Operation = UploadOperation
@@ -76,7 +73,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     var progressObservers: [Int: NSKeyValueObservation] = [:]
     var operations = [Operation]()
 
-    private override init() {
+    override private init() {
         super.init()
         let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: UploadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
@@ -94,8 +91,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                    let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-                    .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
+                   let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
                     self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
@@ -109,8 +106,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     public func rescheduleForBackground(task: URLSessionDataTask?, fileUrl: URL?) -> Bool {
         if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
-            let request = task?.originalRequest,
-            let fileUrl = fileUrl {
+           let request = task?.originalRequest,
+           let fileUrl = fileUrl {
             let task = backgroundSession.uploadTask(with: request, fromFile: fileUrl)
             task.resume()
             DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "")")
@@ -148,9 +145,8 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         if let completionHandler = tasksCompletionHandler[task.taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-            let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-            .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
-
+                  let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+                  .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
             let operation = UploadOperation(file: file, task: task, urlSession: self)
             tasksCompletionHandler[task.taskIdentifier] = operation.uploadCompletion
             operations.append(operation)
