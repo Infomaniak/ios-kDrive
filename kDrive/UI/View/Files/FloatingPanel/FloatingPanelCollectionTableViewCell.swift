@@ -54,6 +54,8 @@ class FloatingPanelCollectionTableViewCell: UITableViewCell, UICollectionViewDel
             } else if file.shareLink != nil {
                 cell.actionLabel.text = action.reverseName
             }
+        } else if action == .sendCopy {
+            cell.configureDownload(with: file, action: action, progress: action.isLoading ? -1 : nil)
         }
         cell.darkLayer.isHidden = action.isEnabled
         cell.accessibilityLabel = action.name
