@@ -16,40 +16,37 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import Foundation
 import Alamofire
-import InfomaniakLogin
+import Foundation
 import InfomaniakCore
+import InfomaniakLogin
 import Kingfisher
 import Sentry
+import UIKit
 
 extension ApiFetcher {
-
     convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
         self.init()
-        self.setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
+        setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
     }
 
     public func getUserDrives(completion: @escaping (ApiResponse<DriveResponse>?, Error?) -> Void) {
         authenticatedSession.request(ApiRoutes.getAllDrivesData(), method: .get)
             .validate()
             .responseDecodable(of: ApiResponse<DriveResponse>.self, decoder: ApiFetcher.decoder) { response in
-
-            self.handleResponse(response: response) { response, error in
-                if let driveResponse = response?.data,
-                    driveResponse.drives.main.isEmpty {
-                    completion(nil, DriveError.noDrive)
-                } else {
-                    completion(response, error)
+                self.handleResponse(response: response) { response, error in
+                    if let driveResponse = response?.data,
+                       driveResponse.drives.main.isEmpty {
+                        completion(nil, DriveError.noDrive)
+                    } else {
+                        completion(response, error)
+                    }
                 }
-            }
             }
     }
 }
 
 public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
-
     weak var apiFetcher: ApiFetcher?
 
     init(apiFetcher: ApiFetcher) {
@@ -68,17 +65,16 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 }
 
 public class DriveApiFetcher: ApiFetcher {
-
     public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
     public static let itemPerPage = 200
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
-    public override init() {
+    override public init() {
         super.init()
         authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
-    public override func handleResponse<Type>(response: DataResponse<Type, AFError>, completion: @escaping (Type?, Error?) -> Void) {
+    override public func handleResponse<Type>(response: DataResponse<Type, AFError>, completion: @escaping (Type?, Error?) -> Void) {
         super.handleResponse(response: response) { res, error in
             if let error = error as? InfomaniakCore.ApiError {
                 completion(res, DriveError(apiError: error))
@@ -103,7 +99,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -117,7 +113,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -131,16 +127,16 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
     public func setupDropBox(directory: File,
-        password: String?,
-        validUntil: Date?,
-        emailWhenFinished: Bool,
-        limitFileSize: Int?,
-        completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
+                             password: String?,
+                             validUntil: Date?,
+                             emailWhenFinished: Bool,
+                             limitFileSize: Int?,
+                             completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
@@ -158,7 +154,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<DropBox>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -167,16 +163,16 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<DropBox>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
     public func updateDropBox(directory: File,
-        password: String?,
-        validUntil: Date?,
-        emailWhenFinished: Bool,
-        limitFileSize: Int?,
-        completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+                              password: String?,
+                              validUntil: Date?,
+                              emailWhenFinished: Bool,
+                              limitFileSize: Int?,
+                              completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
@@ -194,7 +190,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .put, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -203,7 +199,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .delete)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -213,7 +209,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -222,7 +218,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -242,7 +238,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -251,7 +247,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -269,7 +265,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post)
             .validate()
             .responseDecodable(of: ApiResponse<ShareLink>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -358,7 +354,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -426,7 +422,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .delete)
             .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -435,7 +431,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .delete)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -444,7 +440,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .delete)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -454,7 +450,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -464,7 +460,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -473,7 +469,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post)
             .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -482,7 +478,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[FileActivity]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -492,7 +488,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .validate()
             .responseDecodable(of: ApiResponse<[FileActivity]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -501,7 +497,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post)
             .responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -510,7 +506,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .delete)
             .responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -550,7 +546,7 @@ public class DriveApiFetcher: ApiFetcher {
             if let token = token {
                 AF.request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])
                     .responseDecodable(of: ApiResponse<UploadToken>.self, decoder: ApiFetcher.decoder) { response in
-                    self.handleResponse(response: response, completion: completion)
+                        self.handleResponse(response: response, completion: completion)
                     }
             } else {
                 completion(nil, error)
@@ -563,7 +559,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -573,7 +569,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .get)
             .validate()
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -583,7 +579,7 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post)
             .validate()
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -594,22 +590,22 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedSession.request(url, method: .post, parameters: body)
             .validate()
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
     public func searchFiles(driveId: Int, query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
         var url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
         if let query = query {
-            url += ("&query=\(query)")
+            url += "&query=\(query)"
         }
         if let fileType = fileType {
-            url += ("&converted_type=\(fileType)")
+            url += "&converted_type=\(fileType)"
         }
 
         authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -618,7 +614,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -628,7 +624,7 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post, parameters: body)
             .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 
@@ -637,13 +633,12 @@ public class DriveApiFetcher: ApiFetcher {
 
         authenticatedSession.request(url, method: .post)
             .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
+                self.handleResponse(response: response, completion: completion)
             }
     }
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
-
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
         AccountManager.instance.refreshTokenLockedQueue.async {
             if !KeychainHelper.isKeychainAccessible {
@@ -654,7 +649,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
             // Maybe someone else refreshed our token
             AccountManager.instance.reloadTokensAndAccounts()
             if let token = AccountManager.instance.getTokenForUserId(credential.userId),
-                token.expirationDate > credential.expirationDate {
+               token.expirationDate > credential.expirationDate {
                 completion(.success(token))
                 return
             }
@@ -684,7 +679,6 @@ class SyncedAuthenticator: OAuthAuthenticator {
 }
 
 class NetworkRequestRetrier: RequestInterceptor {
-
     let maxRetry: Int
     private var retriedRequests: [String: Int] = [:]
     let timeout = -1001
@@ -695,10 +689,8 @@ class NetworkRequestRetrier: RequestInterceptor {
     }
 
     func retry(_ request: Request, for session: Session, dueTo error: Error, completion: @escaping (RetryResult) -> Void) {
-        guard
-        request.task?.response == nil,
-            let url = request.request?.url?.absoluteString
-            else {
+        guard request.task?.response == nil,
+              let url = request.request?.url?.absoluteString else {
             removeCachedUrlRequest(url: request.request?.url?.absoluteString)
             completion(.doNotRetry)
             return
@@ -706,7 +698,6 @@ class NetworkRequestRetrier: RequestInterceptor {
 
         let errorGenerated = error as NSError
         switch errorGenerated.code {
-
         case timeout, connectionLost:
             guard let retryCount = retriedRequests[url] else {
                 retriedRequests[url] = 1
