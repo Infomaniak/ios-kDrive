@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
+import UIKit
 
 class PhotoListViewController: UIViewController {
-
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var headerView: UIView!
     @IBOutlet weak var headerImageView: UIImageView!
@@ -54,11 +53,13 @@ class PhotoListViewController: UIViewController {
             collectionView?.collectionViewLayout.invalidateLayout()
         }
     }
+
     private var isLargeTitle = true
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
         didSet { updateSort() }
     }
+
     private var floatingPanelViewController: DriveFloatingPanelController?
 
     private var shouldLoadMore: Bool {
@@ -119,7 +120,7 @@ class PhotoListViewController: UIViewController {
         sortViewController.selectedSortMode = sortMode
         sortViewController.delegate = self
 
-        //sortViewController.isRemovalInteractionEnabled = true
+        // sortViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = sortViewController
 
         floatingPanelViewController.set(contentViewController: sortViewController)
@@ -176,7 +177,6 @@ class PhotoListViewController: UIViewController {
         isLoading = true
         driveFileManager?.getLastPictures(page: page) { response, _ in
             if let fetchedPictures = response {
-
                 self.collectionView.performBatchUpdates {
                     self.insertAndSort(pictures: fetchedPictures, updateCollection: true)
                 }
@@ -293,13 +293,11 @@ class PhotoListViewController: UIViewController {
         self.driveFileManager = driveFileManager
         forceRefresh()
     }
-
 }
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
 extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return groupedPictures.count + 1
     }
@@ -350,7 +348,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
             NSLayoutConstraint.activate([
                 indicator.centerXAnchor.constraint(equalTo: footerView.centerXAnchor),
                 indicator.centerYAnchor.constraint(equalTo: footerView.centerYAnchor)
-                ])
+            ])
             return footerView
         } else {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! PhotoSectionHeaderView
@@ -383,9 +381,7 @@ extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - Photo sort delegate
 
 extension PhotoListViewController: PhotoSortDelegate {
-
     func didSelect(sortMode: PhotoSortMode) {
         self.sortMode = sortMode
     }
-
 }

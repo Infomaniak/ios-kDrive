@@ -16,15 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import RealmSwift
 import CocoaLumberjackSwift
-import SwiftRegex
-import InfomaniakLogin
+import Foundation
 import InfomaniakCore
+import InfomaniakLogin
+import RealmSwift
+import SwiftRegex
 
 public class DriveFileManager {
-
     public class DriveFileManagerConstants {
         private let fileManager = FileManager.default
         public let rootDocumentsURL: URL
@@ -46,6 +45,7 @@ public class DriveFileManager {
                 // Migration to version 4 & 5 is not needed
             }
         }
+
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
             fileURL: rootDocumentsURL.appendingPathComponent("/uploads.realm"),
             schemaVersion: currentUploadDbVersion,
@@ -79,27 +79,35 @@ public class DriveFileManager {
     public static var favoriteRootFile: File {
         return File(id: -1, name: "Favorite")
     }
+
     public static var trashRootFile: File {
         return File(id: -2, name: "Trash")
     }
+
     public static var sharedWithMeRootFile: File {
         return File(id: -3, name: "Shared with me")
     }
+
     public static var mySharedRootFile: File {
         return File(id: -4, name: "My shares")
     }
+
     public static var searchFilesRootFile: File {
         return File(id: -5, name: "Search")
     }
+
     public static var homeRootFile: File {
         return File(id: -6, name: "Home")
     }
+
     public static var lastModificationsRootFile: File {
         return File(id: -7, name: "Recent changes")
     }
+
     public static var lastPicturesRootFile: File {
         return File(id: -8, name: "Images")
     }
+
     public func getRootFile(using realm: Realm? = nil) -> File {
         if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) {
             if root.name != drive.name {
@@ -113,6 +121,7 @@ public class DriveFileManager {
             return File(id: DriveFileManager.constants.rootID, name: drive.name)
         }
     }
+
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public var realmConfiguration: Realm.Configuration
     public var drive: Drive
@@ -131,12 +140,12 @@ public class DriveFileManager {
 
         // Only compact in the background
         if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
-            //compactRealmsIfNeeded()
+            // compactRealmsIfNeeded()
         }
 
         // Get root file
         let realm = getRealm()
-        if getCachedFile(id: DriveFileManager.constants.rootID, using: realm) == nil {
+        if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
             let rootFile = getRootFile(using: realm)
             try? realm.safeWrite {
                 realm.add(rootFile)
@@ -209,8 +218,8 @@ public class DriveFileManager {
     public func getFile(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
         let realm = getRealm()
         if var cachedFile = realm.object(ofType: File.self, forPrimaryKey: id),
-            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
-            (cachedFile.fullyDownloaded && !forceRefresh && cachedFile.responseAt > 0 && !withExtras) || ReachabilityListener.instance.currentStatus == .offline {
+           // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
+           (cachedFile.fullyDownloaded && !forceRefresh && cachedFile.responseAt > 0 && !withExtras) || ReachabilityListener.instance.currentStatus == .offline {
             // Sometimes realm isn't up to date
             realm.refresh()
             cachedFile = cachedFile.freeze()
@@ -397,9 +406,9 @@ public class DriveFileManager {
         let sharedSpaces = children.filter(NSPredicate(format: "rawVisibility = %@", VisibilityType.isSharedSpace.rawValue))
         let dirs = children.filter(
             NSPredicate(format: "rawVisibility != %@ AND rawVisibility != %@ AND type = %@",
-                VisibilityType.isTeamSpace.rawValue,
-                VisibilityType.isSharedSpace.rawValue,
-                "dir")
+                        VisibilityType.isTeamSpace.rawValue,
+                        VisibilityType.isSharedSpace.rawValue,
+                        "dir")
         )
         let files = children.filter(NSPredicate(format: "type = %@", "file"))
 
@@ -480,7 +489,6 @@ public class DriveFileManager {
                 }
                 DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
             }
-
         }
     }
 
@@ -668,7 +676,7 @@ public class DriveFileManager {
         let fileId = file.id
         apiFetcher.getFileActivitiesFromDate(file: file, date: fromDate, page: page) { response, error in
             if let activities = response?.data,
-                let timestamp = response?.responseAt {
+               let timestamp = response?.responseAt {
                 self.backgroundQueue.async { [self] in
                     let realm = getRealm()
                     guard let file = realm.object(ofType: File.self, forPrimaryKey: fileId) else {
@@ -725,8 +733,8 @@ public class DriveFileManager {
                     pagedActions[fileId] = .fileDelete
                 case .fileMoveOut:
                     if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
-                        let oldParent = file.parent,
-                        let index = oldParent.children.index(of: file) {
+                       let oldParent = file.parent,
+                       let index = oldParent.children.index(of: file) {
                         oldParent.children.remove(at: index)
                     }
                     if let file = activity.file {
@@ -735,7 +743,7 @@ public class DriveFileManager {
                     pagedActions[fileId] = .fileDelete
                 case .fileRename:
                     if let oldFile = realm.object(ofType: File.self, forPrimaryKey: fileId),
-                        let renamedFile = activity.file {
+                       let renamedFile = activity.file {
                         try? renameCachedFile(updatedFile: renamedFile, oldFile: oldFile)
                         // If the file is a folder we have to copy the old attributes which are not returned by the API
                         keepCacheAttributesForFile(newFile: renamedFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
@@ -766,8 +774,8 @@ public class DriveFileManager {
                         realm.add(newFile, update: .modified)
                         // If was already had a local parent, remove it
                         if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
-                            let oldParent = file.parent,
-                            let index = oldParent.children.index(of: file) {
+                           let oldParent = file.parent,
+                           let index = oldParent.children.index(of: file) {
                             oldParent.children.remove(at: index)
                         }
                         // It shouldn't be necessary to check for duplicates before adding the child
@@ -798,7 +806,7 @@ public class DriveFileManager {
         // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow: -3600).timeIntervalSince1970))
         let files = getRealm().objects(File.self).sorted(byKeyPath: "lastModifiedAt", ascending: false)
         var result = [File]()
-        for i in 0..<min(20, files.count) {
+        for i in 0 ..< min(20, files.count) {
             result.append(files[i])
         }
         return result
@@ -855,8 +863,7 @@ public class DriveFileManager {
                 // Add the moved file to the realm db
                 let realm = self.getRealm()
                 if let newParent = realm.resolve(safeParent),
-                    let file = realm.resolve(safeFile) {
-
+                   let file = realm.resolve(safeFile) {
                     let oldParent = file.parent
                     try? realm.write {
                         if let index = oldParent?.children.index(of: file) {
@@ -885,7 +892,7 @@ public class DriveFileManager {
         apiFetcher.renameFile(file: file, newName: newName) { [self] response, error in
             let realm = getRealm()
             if let updatedFile = response?.data,
-                let file = realm.resolve(safeFile) {
+               let file = realm.resolve(safeFile) {
                 do {
                     updatedFile.isAvailableOffline = file.isAvailableOffline
                     let updatedFile = try self.updateFileInDatabase(updatedFile: updatedFile, oldFile: file, using: realm)
@@ -1004,7 +1011,6 @@ public class DriveFileManager {
                             completion(nil, nil, error)
                         }
                     }
-
                 }
             } else {
                 completion(nil, nil, error)
@@ -1017,7 +1023,7 @@ public class DriveFileManager {
         apiFetcher.createOfficeFile(driveId: drive.id, parentDirectory: parentDirectory, name: name, type: type) { response, error in
             let realm = self.getRealm()
             if let file = response?.data,
-                let createdFile = try? self.updateFileInDatabase(updatedFile: file, using: realm) {
+               let createdFile = try? self.updateFileInDatabase(updatedFile: file, using: realm) {
                 // Add file to parent
                 let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
                 try? realm.write {
@@ -1120,7 +1126,7 @@ public class DriveFileManager {
         let realm = realm ?? getRealm()
         // rename file if it was renamed in the drive
         if let oldFile = oldFile {
-            try self.renameCachedFile(updatedFile: updatedFile, oldFile: oldFile)
+            try renameCachedFile(updatedFile: updatedFile, oldFile: oldFile)
         }
 
         try realm.write {
@@ -1185,8 +1191,8 @@ public class DriveFileManager {
     }
 }
 
-extension Realm {
-    public func safeWrite(_ block: (() throws -> Void)) throws {
+public extension Realm {
+    func safeWrite(_ block: () throws -> Void) throws {
         if isInWriteTransaction {
             try block()
         } else {
@@ -1196,11 +1202,12 @@ extension Realm {
 }
 
 // MARK: - Observation
-extension DriveFileManager {
-    public typealias FileId = Int
+
+public extension DriveFileManager {
+    typealias FileId = Int
 
     @discardableResult
-    public func observeFileUpdated<T: AnyObject>(_ observer: T, fileId: FileId?, using closure: @escaping (File) -> Void)
+    func observeFileUpdated<T: AnyObject>(_ observer: T, fileId: FileId?, using closure: @escaping (File) -> Void)
         -> ObservationToken {
         let key = UUID()
         didUpdateFileObservers[key] = { [weak self, weak observer] updatedDirectory in
@@ -1221,7 +1228,7 @@ extension DriveFileManager {
         }
     }
 
-    public func notifyObserversWith(file: File) {
+    func notifyObserversWith(file: File) {
         for observer in didUpdateFileObservers.values {
             observer(file.isFrozen ? file : file.freeze())
         }

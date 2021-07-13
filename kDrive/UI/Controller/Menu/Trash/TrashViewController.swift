@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
-import InfomaniakCore
 import CocoaLumberjackSwift
+import InfomaniakCore
+import kDriveCore
+import UIKit
 
 class TrashViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "TrashViewController" }
 
@@ -184,7 +183,7 @@ class TrashViewController: FileListViewController {
         if file.isDirectory {
             let trashCV = TrashViewController.instantiate(driveFileManager: driveFileManager)
             trashCV.currentDirectory = file
-            self.navigationController?.pushViewController(trashCV, animated: true)
+            navigationController?.pushViewController(trashCV, animated: true)
         } else {
             showFloatingPanel(files: [file])
         }
@@ -232,13 +231,11 @@ class TrashViewController: FileListViewController {
             showFloatingPanel(files: Array(selectedFiles))
         }
     #endif
-
 }
 
 // MARK: - Trash options delegate
 
 extension TrashViewController: TrashOptionsDelegate {
-
     func didClickOnTrashOption(option: TrashOption, files: [File]) {
         switch option {
         case .restoreIn:
@@ -274,13 +271,11 @@ extension TrashViewController: TrashOptionsDelegate {
             deleteFiles(files)
         }
     }
-
 }
 
 // MARK: - Select folder delegate
 
 extension TrashViewController: SelectFolderDelegate {
-
     func didSelectFolder(_ folder: File) {
         let group = DispatchGroup()
         for file in filesToRestore {
@@ -303,5 +298,4 @@ extension TrashViewController: SelectFolderDelegate {
             }
         }
     }
-
 }
