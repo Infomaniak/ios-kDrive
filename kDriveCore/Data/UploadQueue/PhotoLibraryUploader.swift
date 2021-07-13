@@ -20,7 +20,6 @@ import CocoaLumberjackSwift
 import Foundation
 import Photos
 import RealmSwift
-import Sentry
 
 public class PhotoLibraryUploader {
     public static let instance = PhotoLibraryUploader()
@@ -60,7 +59,6 @@ public class PhotoLibraryUploader {
     }
 
     public func disableSync(using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        SentrySDK.capture(message: "Photo sync disabled")
         try? realm.write {
             realm.delete(realm.objects(PhotoSyncSettings.self))
         }
@@ -221,32 +219,31 @@ public class PhotoLibraryUploader {
     }
 
     public func getPicturesToRemove() -> PicturesAssets? {
-        let askEveryNConnections = 10
-        let removeAssetsCountThreshold = 50
-
-        if let settings = settings, settings.deleteAssetsAfterImport {
-            var toRemoveAssets = [PHAsset]()
-            var toRemoveFiles = [UploadFile]()
-
-            BackgroundRealm.uploads.execute { realm in
-                let uploadedFiles = UploadQueue.instance.getUploadedFiles(using: realm)
-
-                for uploadFile in uploadedFiles {
-                    if let asset = uploadFile.getPHAsset() {
-                        toRemoveAssets.append(asset)
-                        toRemoveFiles.append(uploadFile)
-                    }
-                }
-            }
-
-            guard UserDefaults.shared.numberOfConnections % askEveryNConnections == 0 && toRemoveAssets.count >= removeAssetsCountThreshold else {
-                return nil
-            }
-
-            return PicturesAssets(files: toRemoveFiles, assets: toRemoveAssets)
+        // Check that we have photo sync enabled with the delete option
+        guard let settings = settings, settings.deleteAssetsAfterImport else {
+            return nil
         }
 
-        return nil
+        let removeAssetsCountThreshold = 10
+        var toRemoveAssets = [PHAsset]()
+        var toRemoveFiles = [UploadFile]()
+
+        BackgroundRealm.uploads.execute { realm in
+            let uploadedFiles = UploadQueue.instance.getUploadedFiles(using: realm)
+
+            for uploadFile in uploadedFiles {
+                if let asset = uploadFile.getPHAsset() {
+                    toRemoveAssets.append(asset)
+                    toRemoveFiles.append(uploadFile)
+                }
+            }
+        }
+
+        guard toRemoveAssets.count >= removeAssetsCountThreshold && UploadQueue.instance.operationQueue.operationCount == 0 else {
+            return nil
+        }
+
+        return PicturesAssets(files: toRemoveFiles, assets: toRemoveAssets)
     }
 
     public func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
