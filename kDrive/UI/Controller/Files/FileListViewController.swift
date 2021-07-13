@@ -37,7 +37,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private let maxDiffChanges = 100
     private let headerViewIdentifier = "FilesHeaderView"
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
-    private let fileObserverThrottler = Throttler<File>(timeInterval: 1, queue: .global())
+    private let fileObserverThrottler = Throttler<File>(timeInterval: 5, queue: .global())
 
     // MARK: - Configuration
 
@@ -366,15 +366,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     final func observeFiles() {
         guard filesObserver == nil else { return }
-        fileObserverThrottler.handler = { [weak self] file in
-            if file.id == self?.currentDirectory?.id {
-                self?.reloadData(showRefreshControl: false)
-            } else if let index = self?.sortedFiles.firstIndex(where: { $0.id == file.id }) {
-                self?.updateChild(file, at: index)
-            }
+        fileObserverThrottler.handler = { [weak self] _ in
+            self?.reloadData(showRefreshControl: false)
         }
         filesObserver = driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
-            fileObserverThrottler.call(file)
+            if file.id == currentDirectory?.id {
+                fileObserverThrottler.call(file)
+            } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
+                updateChild(file, at: index)
+            }
         }
     }
 
