@@ -87,7 +87,7 @@ class TrashViewController: FileListViewController {
     // MARK: - Actions
 
     @IBAction func emptyTrash(_ sender: UIBarButtonItem) {
-        let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalEmptyTrashTitle, message: KDriveStrings.Localizable.modalEmptyTrashDescription, action: KDriveStrings.Localizable.buttonEmpty, destructive: true, loading: true) { [unowned self] in
+        let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalEmptyTrashTitle, message: KDriveStrings.Localizable.modalEmptyTrashDescription, action: KDriveStrings.Localizable.buttonEmpty, destructive: true, loading: true) { [self] in
             let group = DispatchGroup()
             var success = false
             group.enter()
