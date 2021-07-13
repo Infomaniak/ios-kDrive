@@ -20,7 +20,6 @@ import CocoaLumberjackSwift
 import Foundation
 import Photos
 import RealmSwift
-import Sentry
 
 public class PhotoLibraryUploader {
     public static let instance = PhotoLibraryUploader()
@@ -60,7 +59,6 @@ public class PhotoLibraryUploader {
     }
 
     public func disableSync(using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        SentrySDK.capture(message: "Photo sync disabled")
         try? realm.write {
             realm.delete(realm.objects(PhotoSyncSettings.self))
         }
