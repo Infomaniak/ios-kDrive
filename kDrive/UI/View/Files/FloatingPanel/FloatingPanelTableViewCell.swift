@@ -113,17 +113,14 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
 
     func configureDownload(with file: File, progress: CGFloat?) {
         observationToken?.cancel()
-        if file.isDownloading {
-            setProgress(progress)
-        } else {
+        if progress == nil {
             accessoryImageView.isHidden = false
             progressView.isHidden = true
 
             accessoryImageView.image = KDriveAsset.download.image
             accessoryImageView.tintColor = KDriveAsset.iconColor.color
         }
-
-        if progress != nil {
+        else {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 DispatchQueue.main.async { [weak self] in
                     self?.setProgress(CGFloat(progress))
