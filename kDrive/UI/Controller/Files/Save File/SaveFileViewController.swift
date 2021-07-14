@@ -354,6 +354,10 @@ extension SaveFileViewController: FooterButtonDelegate {
         let message: String
         do {
             try FileImportHelper.instance.upload(files: items, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+            guard !items.isEmpty else {
+                navigationController?.dismiss(animated: true)
+                return
+            }
             message = items.count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveStrings.Localizable.allUploadInProgress(items[0].name)
         } catch {
             message = KDriveStrings.Localizable.errorUpload
