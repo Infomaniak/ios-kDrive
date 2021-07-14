@@ -452,10 +452,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
+        DDLogInfo("[Background Session] background session relaunched \(identifier)")
         if identifier == DownloadQueue.backgroundIdentifier {
             BackgroundDownloadSessionManager.instance.backgroundCompletionHandler = completionHandler
-        } else if identifier == UploadQueue.backgroundIdentifier {
-            BackgroundUploadSessionManager.instance.backgroundCompletionHandler = completionHandler
+        } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
+            BackgroundUploadSessionManager.instance.handleEventsForBackgroundURLSession(identifier: identifier, completionHandler: completionHandler)
         } else {
             completionHandler()
         }

@@ -60,13 +60,15 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     public typealias Task = URLSessionUploadTask
     public typealias CompletionHandler = (Data?, URLResponse?, Error?) -> Void
     public typealias Operation = UploadOperation
+    public typealias BackgroundCompletionHandler = () -> Void
 
     public static let instance = BackgroundUploadSessionManager()
 
     public var backgroundCompletionHandler: (() -> Void)?
-
+    private var backgroundCompletionHandlers: [String: BackgroundCompletionHandler] = [:]
     static let maxBackgroundTasks = 10
 
+    private var managedSessions: [String: URLSession] = [:]
     var backgroundSession: URLSession!
     var tasksCompletionHandler: [Int: CompletionHandler] = [:]
     var tasksData: [Int: Data] = [:]
@@ -75,16 +77,30 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     override private init() {
         super.init()
-        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: UploadQueue.backgroundIdentifier)
+        backgroundSession = getSession(for: UploadQueue.backgroundIdentifier)
+    }
+
+    public func getSession(for identifier: String) -> URLSession {
+        if let session = managedSessions[identifier] {
+            return session
+        }
+
+        let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
-        backgroundUrlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         backgroundUrlSessionConfiguration.allowsCellularAccess = true
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
         backgroundUrlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         backgroundUrlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
         backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 24 * 3 // 3 days before giving up
         backgroundUrlSessionConfiguration.networkServiceType = .default
-        backgroundSession = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
+        let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
+        managedSessions[identifier] = session
+        return session
+    }
+
+    public func handleEventsForBackgroundURLSession(identifier: String, completionHandler: @escaping BackgroundCompletionHandler) {
+        _ = getSession(for: identifier)
+        backgroundCompletionHandlers[identifier] = completionHandler
     }
 
     public func reconnectBackgroundTasks() {
@@ -157,9 +173,11 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        guard let identifier = session.configuration.identifier else { return }
+
         DispatchQueue.main.async {
-            self.backgroundCompletionHandler?()
-            self.backgroundCompletionHandler = nil
+            self.backgroundCompletionHandlers[identifier]?()
+            self.backgroundCompletionHandlers[identifier] = nil
         }
     }
 }

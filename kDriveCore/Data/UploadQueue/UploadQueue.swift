@@ -23,7 +23,10 @@ import RealmSwift
 
 public class UploadQueue {
     public static let instance = UploadQueue()
-    public static let backgroundIdentifier = "com.infomaniak.background.upload"
+    public static let backgroundBaseIdentifier = ".backgroundsession.upload"
+    public static var backgroundIdentifier: String {
+        return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + backgroundBaseIdentifier
+    }
 
     public var pausedNotificationSent = false
 
