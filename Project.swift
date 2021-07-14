@@ -21,7 +21,7 @@ import ProjectDescription
 let baseSettings: [String: SettingValue] = [
     "CODE_SIGN_STYLE": "Automatic",
     "DEVELOPMENT_TEAM": "864VDCS2QY",
-    "CURRENT_PROJECT_VERSION": "3",
+    "CURRENT_PROJECT_VERSION": "5",
     "MARKETING_VERSION": "4.0.6"
 ]
 
