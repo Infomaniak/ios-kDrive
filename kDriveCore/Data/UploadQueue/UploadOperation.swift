@@ -180,6 +180,13 @@ public class UploadOperation: Operation {
                 UploadQueue.instance.publishProgress(newValue, for: fileId)
             }
             task?.resume()
+
+            // Save UploadFile state (we are mainly interested in saving sessionUrl)
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                try? uploadsRealm.safeWrite {
+                    uploadsRealm.add(UploadFile(value: file), update: .modified)
+                }
+            }
         } else {
             DDLogInfo("[UploadOperation] No file path found for job \(file.id)")
             file.error = .fileNotFound
