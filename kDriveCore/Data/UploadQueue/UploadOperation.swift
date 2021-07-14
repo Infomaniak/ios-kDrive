@@ -126,19 +126,21 @@ public class UploadOperation: Operation {
         }
 
         // Start background task
-        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
-            DDLogInfo("[UploadOperation] Background task expired")
-            let rescheduled = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
-            if rescheduled {
-                self.file.error = .taskRescheduled
-            } else {
-                self.file.sessionUrl = ""
-                self.file.error = .taskExpirationCancelled
-                UploadQueue.instance.sendPausedNotificationIfNeeded()
+        if !Constants.isInExtension {
+            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
+                DDLogInfo("[UploadOperation] Background task expired")
+                let rescheduled = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
+                if rescheduled {
+                    self.file.error = .taskRescheduled
+                } else {
+                    self.file.sessionUrl = ""
+                    self.file.error = .taskExpirationCancelled
+                    UploadQueue.instance.sendPausedNotificationIfNeeded()
+                }
+                UploadQueue.instance.suspendAllOperations()
+                self.task?.cancel()
+                self.end()
             }
-            UploadQueue.instance.suspendAllOperations()
-            self.task?.cancel()
-            self.end()
         }
 
         getUploadTokenSync()
@@ -217,10 +219,6 @@ public class UploadOperation: Operation {
     }
 
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
-        guard file.error != .taskExpirationCancelled && file.error != .taskRescheduled else {
-            return
-        }
-
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {
@@ -241,7 +239,7 @@ public class UploadOperation: Operation {
                   let response = try? ApiFetcher.decoder.decode(ApiResponse<[File]>.self, from: data),
                   let driveFile = response.data?.first {
             // Success
-            DDLogError("[UploadOperation] Job \(file.id) successful")
+            DDLogInfo("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
             if let driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: file.userId) {
                 // File is already or has parent in DB let's update it
@@ -287,7 +285,7 @@ public class UploadOperation: Operation {
     }
 
     private func end() {
-        DDLogError("[UploadOperation] Job \(file.id) ended")
+        DDLogInfo("[UploadOperation] Job \(file.id) ended")
 
         if let path = file.pathURL,
            file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {

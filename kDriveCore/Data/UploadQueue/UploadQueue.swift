@@ -288,7 +288,7 @@ public class UploadQueue {
     private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
         fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
         if let error = result.uploadFile.error,
-           error != .networkError || error != .taskCancelled || error != .taskRescheduled {
+           error != .networkError && error != .taskCancelled && error != .taskRescheduled {
             NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
             if operationQueue.operationCount == 0 {
                 fileUploadedCount = 0
