@@ -498,16 +498,16 @@ public class DriveFileManager {
             completion(DriveError.fileNotFound)
             return
         }
-
+        let oldUrl = file.localUrl
+        let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote()
         if available {
             try? realm.safeWrite {
                 file.isAvailableOffline = true
             }
-
-            if !file.isLocalVersionOlderThanRemote() {
+            if !isLocalVersionOlderThanRemote {
                 do {
                     try fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-                    try fileManager.moveItem(at: file.localUrl, to: file.localUrl)
+                    try fileManager.moveItem(at: oldUrl, to: file.localUrl)
                     notifyObserversWith(file: file)
                     completion(nil)
                 } catch {
@@ -532,9 +532,8 @@ public class DriveFileManager {
                 file.isAvailableOffline = false
             }
             try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
-            try? fileManager.moveItem(at: file.localUrl, to: file.localUrl)
+            try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
             notifyObserversWith(file: file)
-
             try? fileManager.removeItem(at: oldUrl)
             completion(nil)
         }

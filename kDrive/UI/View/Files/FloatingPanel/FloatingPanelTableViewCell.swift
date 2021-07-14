@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 class FloatingPanelTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var offlineSwitch: UISwitch!
     @IBOutlet weak var progressView: RPCircularProgress!
     @IBOutlet weak var disabledView: UIView!
@@ -100,11 +99,33 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
             accessoryImageView.tintColor = KDriveAsset.iconColor.color
         }
 
-        observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
-            DispatchQueue.main.async { [weak self] in
-                self?.setProgress(CGFloat(progress))
-                if progress >= 1 {
-                    self?.configureAvailableOffline(with: file, progress: nil)
+        if progress != nil {
+            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+                DispatchQueue.main.async { [weak self] in
+                    self?.setProgress(CGFloat(progress))
+                    if progress >= 1 {
+                        self?.configureAvailableOffline(with: file, progress: nil)
+                    }
+                }
+            }
+        }
+    }
+
+    func configureDownload(with file: File, progress: CGFloat?) {
+        observationToken?.cancel()
+        if progress == nil {
+            accessoryImageView.isHidden = false
+            progressView.isHidden = true
+
+            accessoryImageView.image = KDriveAsset.download.image
+            accessoryImageView.tintColor = KDriveAsset.iconColor.color
+        } else {
+            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+                DispatchQueue.main.async { [weak self] in
+                    self?.setProgress(CGFloat(progress))
+                    if progress >= 1 {
+                        self?.configureDownload(with: file, progress: nil)
+                    }
                 }
             }
         }
