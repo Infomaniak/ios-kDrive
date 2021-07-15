@@ -49,10 +49,11 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        observationToken?.cancel()
+        observationToken = nil
         actionImage.isHidden = false
         progressView.isHidden = true
         progressView.updateProgress(0, animated: false)
-        observationToken?.cancel()
     }
 
     func setProgress(_ progress: CGFloat? = -1) {
@@ -83,6 +84,7 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
             loadingIndicator.stopAnimating()
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 DispatchQueue.main.async { [weak self] in
+                    guard self?.observationToken != nil else { return }
                     self?.setProgress(CGFloat(progress))
                     if progress >= 1 {
                         self?.configureDownload(with: file, action: action, progress: nil)
