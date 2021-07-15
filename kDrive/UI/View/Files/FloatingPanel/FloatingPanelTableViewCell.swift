@@ -38,13 +38,14 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        observationToken?.cancel()
+        observationToken = nil
         offlineSwitch.setOn(true, animated: false)
         contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         accessoryImageView.isHidden = false
         offlineSwitch.isHidden = true
         progressView.isHidden = true
         progressView.updateProgress(0, animated: false)
-        observationToken?.cancel()
     }
 
     func setEnabled(_ enabled: Bool) {
@@ -98,10 +99,10 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
             accessoryImageView.image = KDriveAsset.availableOffline.image
             accessoryImageView.tintColor = KDriveAsset.iconColor.color
         }
-
         if progress != nil {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 DispatchQueue.main.async { [weak self] in
+                    guard self?.observationToken != nil else { return }
                     self?.setProgress(CGFloat(progress))
                     if progress >= 1 {
                         self?.configureAvailableOffline(with: file, progress: nil)
@@ -122,6 +123,7 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
         } else {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 DispatchQueue.main.async { [weak self] in
+                    guard self?.observationToken != nil else { return }
                     self?.setProgress(CGFloat(progress))
                     if progress >= 1 {
                         self?.configureDownload(with: file, progress: nil)
