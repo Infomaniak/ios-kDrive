@@ -74,7 +74,8 @@ public enum Constants {
         if #available(iOS 13.0, *) {
             let relativeDateFormatter = RelativeDateTimeFormatter()
             if Date().timeIntervalSince(lastModified) < 3_600 * 24 * 7 {
-                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: lastModified.timeIntervalSinceNow)
+                let timeInterval = lastModified.timeIntervalSinceNow < -1 ? lastModified.timeIntervalSinceNow : -1
+                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
                 return KDriveCoreStrings.Localizable.allLastModifiedFileRelativeTime(relativeTime)
             }
         }
@@ -90,7 +91,8 @@ public enum Constants {
         if #available(iOS 13.0, *) {
             let relativeDateFormatter = RelativeDateTimeFormatter()
             if Date().timeIntervalSince(deletionDate) < 3_600 * 24 * 7 {
-                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: deletionDate.timeIntervalSinceNow)
+                let timeInterval = deletionDate.timeIntervalSinceNow < -1 ? deletionDate.timeIntervalSinceNow : -1
+                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
                 return KDriveCoreStrings.Localizable.allDeletedFileRelativeTime(relativeTime)
             }
         }
