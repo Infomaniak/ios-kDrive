@@ -34,14 +34,14 @@ protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     var backgroundTaskCount: Int { get }
 
     var backgroundSession: URLSession! { get }
-    var tasksCompletionHandler: [Int: CompletionHandler] { get set }
-    var progressObservers: [Int: NSKeyValueObservation] { get set }
+    var tasksCompletionHandler: [String: CompletionHandler] { get set }
+    var progressObservers: [String: NSKeyValueObservation] { get set }
     var operations: [Operation] { get set }
 
     func reconnectBackgroundTasks()
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?)
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession)
-    func getCompletionHandler(for task: Task) -> CompletionHandler?
+    func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler?
 }
 
 extension BackgroundSessionManager {
@@ -50,7 +50,21 @@ extension BackgroundSessionManager {
     }
 }
 
-public protocol FileUploadSession {
+public protocol BackgroundSession {
+    var identifier: String { get }
+}
+
+extension URLSession: BackgroundSession {
+    public var identifier: String {
+        return configuration.identifier ?? "foreground"
+    }
+
+    public func identifierFor(task: URLSessionTask) -> String {
+        return "\(identifier)-\(task.taskIdentifier)"
+    }
+}
+
+public protocol FileUploadSession: BackgroundSession {
     func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionUploadTask
 }
 
@@ -70,9 +84,13 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     private var managedSessions: [String: URLSession] = [:]
     var backgroundSession: URLSession!
-    var tasksCompletionHandler: [Int: CompletionHandler] = [:]
-    var tasksData: [Int: Data] = [:]
-    var progressObservers: [Int: NSKeyValueObservation] = [:]
+    public var identifier: String {
+        return backgroundSession.identifier
+    }
+
+    var tasksCompletionHandler: [String: CompletionHandler] = [:]
+    var tasksData: [String: Data] = [:]
+    var progressObservers: [String: NSKeyValueObservation] = [:]
     var operations = [Operation]()
 
     override private init() {
@@ -104,12 +122,15 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func reconnectBackgroundTasks() {
+        /* let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND sessionUrl != \"\""))
+         for file in uploadedFiles {} */
+
         backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
                    let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                    .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
+                    self.progressObservers[self.backgroundSession.identifierFor(task: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
                         }
@@ -120,51 +141,54 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         }
     }
 
-    public func rescheduleForBackground(task: URLSessionDataTask?, fileUrl: URL?) -> Bool {
+    public func rescheduleForBackground(task: URLSessionDataTask?, fileUrl: URL?) -> String? {
         if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
            let request = task?.originalRequest,
            let fileUrl = fileUrl {
             let task = backgroundSession.uploadTask(with: request, fromFile: fileUrl)
             task.resume()
             DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "")")
-            return true
+            return backgroundSession.identifier
         } else {
-            return false
+            return nil
         }
     }
 
     public func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping CompletionHandler) -> Task {
         let task = backgroundSession.uploadTask(with: request, fromFile: fileURL)
-        tasksCompletionHandler[task.taskIdentifier] = completionHandler
+        tasksCompletionHandler[backgroundSession.identifierFor(task: task)] = completionHandler
         return task
     }
 
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        if tasksData[dataTask.taskIdentifier] != nil {
-            tasksData[dataTask.taskIdentifier]!.append(data)
+        let taskIdentifier = session.identifierFor(task: dataTask)
+        if tasksData[taskIdentifier] != nil {
+            tasksData[taskIdentifier]!.append(data)
         } else {
-            tasksData[dataTask.taskIdentifier] = data
+            tasksData[taskIdentifier] = data
         }
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        let taskIdentifier = session.identifierFor(task: task)
         if let task = task as? URLSessionUploadTask {
-            getCompletionHandler(for: task)?(tasksData[task.taskIdentifier], task.response, error)
+            getCompletionHandler(for: task, session: session)?(tasksData[taskIdentifier], task.response, error)
         }
-        progressObservers[task.taskIdentifier]?.invalidate()
-        progressObservers[task.taskIdentifier] = nil
-        tasksData[task.taskIdentifier] = nil
-        tasksCompletionHandler[task.taskIdentifier] = nil
+        progressObservers[taskIdentifier]?.invalidate()
+        progressObservers[taskIdentifier] = nil
+        tasksData[taskIdentifier] = nil
+        tasksCompletionHandler[taskIdentifier] = nil
     }
 
-    func getCompletionHandler(for task: Task) -> CompletionHandler? {
-        if let completionHandler = tasksCompletionHandler[task.taskIdentifier] {
+    func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
+        let taskIdentifier = session.identifierFor(task: task)
+        if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
             let operation = UploadOperation(file: file, task: task, urlSession: self)
-            tasksCompletionHandler[task.taskIdentifier] = operation.uploadCompletion
+            tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
             operations.append(operation)
             return operation.uploadCompletion
         } else {

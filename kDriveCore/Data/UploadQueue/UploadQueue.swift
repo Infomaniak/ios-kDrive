@@ -242,8 +242,10 @@ public class UploadQueue {
         operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             self.dispatchQueue.async {
                 self.operationsInQueue.removeValue(forKey: fileId)
-                self.publishFileUploaded(result: operation.result)
-                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+                if operation.result.uploadFile.error != .taskRescheduled {
+                    self.publishFileUploaded(result: operation.result)
+                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+                }
             }
         }
         operationQueue.addOperation(operation)

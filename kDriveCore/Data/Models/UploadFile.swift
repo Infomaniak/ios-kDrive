@@ -33,6 +33,7 @@ public class UploadFile: Object {
     @objc public dynamic var id: String = ""
     @objc public dynamic var name: String = ""
     @objc dynamic var relativePath: String = ""
+    @objc dynamic var sessionId: String?
     @objc dynamic var sessionUrl: String = ""
     @objc private dynamic var url: String?
     @objc private dynamic var rawType: String = "file"

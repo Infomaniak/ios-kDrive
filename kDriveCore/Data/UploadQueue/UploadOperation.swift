@@ -129,8 +129,9 @@ public class UploadOperation: Operation {
         if !Constants.isInExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
                 DDLogInfo("[UploadOperation] Background task expired")
-                let rescheduled = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
-                if rescheduled {
+                let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
+                if let sessionId = rescheduledSessionId {
+                    self.file.sessionId = sessionId
                     self.file.error = .taskRescheduled
                 } else {
                     self.file.sessionUrl = ""
@@ -167,6 +168,7 @@ public class UploadOperation: Operation {
         request.setValue("Bearer \(token.token)", forHTTPHeaderField: "Authorization")
 
         file.sessionUrl = url.absoluteString
+        file.sessionId = urlSession.identifier
 
         if let filePath = file.pathURL,
            FileManager.default.isReadableFile(atPath: filePath.path) {
@@ -233,6 +235,9 @@ public class UploadOperation: Operation {
             DDLogError("[UploadOperation] Client-side error for job \(file.id): \(error)")
             if file.error != .taskRescheduled {
                 file.sessionUrl = ""
+            } else {
+                // We return because we don't want end() to be called as it is already called in the expiration hadnler
+                return
             }
             if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
                 if file.error != .taskExpirationCancelled && file.error != .taskRescheduled {
@@ -248,6 +253,7 @@ public class UploadOperation: Operation {
             // Success
             DDLogInfo("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
+            file.error = nil
             if let driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: file.userId) {
                 // File is already or has parent in DB let's update it
                 BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
