@@ -122,19 +122,21 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func reconnectBackgroundTasks() {
-        /* let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND sessionUrl != \"\""))
-         for file in uploadedFiles {} */
-
-        backgroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
-            for task in uploadTasks {
-                if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                    self.progressObservers[self.backgroundSession.identifierFor(task: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
-                        guard let newValue = value.newValue else {
-                            return
+        let uploadedFiles = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND sessionUrl != \"\""))
+        let uniqueSessionIdentifiers = Set(uploadedFiles.compactMap(\.sessionId))
+        for sessionIdentifier in uniqueSessionIdentifiers {
+            let session = getSession(for: sessionIdentifier)
+            session.getTasksWithCompletionHandler { _, uploadTasks, _ in
+                for task in uploadTasks {
+                    if let sessionUrl = task.originalRequest?.url?.absoluteString,
+                       let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+                       .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
+                        self.progressObservers[session.identifierFor(task: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
+                            guard let newValue = value.newValue else {
+                                return
+                            }
+                            UploadQueue.instance.publishProgress(newValue, for: fileId)
                         }
-                        UploadQueue.instance.publishProgress(newValue, for: fileId)
                     }
                 }
             }
