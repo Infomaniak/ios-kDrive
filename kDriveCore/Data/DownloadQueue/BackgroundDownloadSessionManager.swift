@@ -58,7 +58,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
             let realm = DriveFileManager.constants.uploadsRealm
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                   let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "AND sessionUrl = %@", sessionUrl)).first?.fileId {
+                   let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?.fileId {
                     self.progressObservers[self.backgroundSession.identifierFor(task: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
