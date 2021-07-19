@@ -33,7 +33,7 @@ public enum Logging {
 
     class LogFormatter: NSObject, DDLogFormatter {
         func format(message logMessage: DDLogMessage) -> String? {
-            return "[Infomaniak] [\(logMessage.fileName):\(logMessage.line)]: \(logMessage.message)"
+            return "[Infomaniak] \(logMessage.message)"
         }
     }
 

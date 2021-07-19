@@ -156,7 +156,7 @@ public class UploadOperation: Operation {
         DDLogInfo("[UploadOperation] Executing job \(file.id)")
         file.maxRetryCount -= 1
         guard let token = uploadToken else {
-            DDLogInfo("[UploadOperation] Failed to fetch upload token for job \(file.id)")
+            DDLogError("[UploadOperation] Failed to fetch upload token for job \(file.id)")
             file.error = .refreshToken
             end()
             return
@@ -190,7 +190,7 @@ public class UploadOperation: Operation {
                 }
             }
         } else {
-            DDLogInfo("[UploadOperation] No file path found for job \(file.id)")
+            DDLogError("[UploadOperation] No file path found for job \(file.id)")
             file.error = .fileNotFound
             end()
         }
@@ -222,7 +222,7 @@ public class UploadOperation: Operation {
                 DDLogInfo("[UploadOperation] Got photo asset, writing URL")
                 file.pathURL = url
             } else {
-                DDLogWarn("[UploadOperation] Failed to get photo asset")
+                DDLogError("[UploadOperation] Failed to get photo asset")
             }
         }
     }
