@@ -59,7 +59,7 @@ extension URLSession: BackgroundSession {
         return configuration.identifier ?? "foreground"
     }
 
-    public func identifierFor(task: URLSessionTask) -> String {
+    public func identifier(for task: URLSessionTask) -> String {
         return "\(identifier)-\(task.taskIdentifier)"
     }
 }
@@ -131,7 +131,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
                     if let sessionUrl = task.originalRequest?.url?.absoluteString,
                        let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                        .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                        self.progressObservers[session.identifierFor(task: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
+                        self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                             guard let newValue = value.newValue else {
                                 return
                             }
@@ -158,12 +158,12 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     public func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping CompletionHandler) -> Task {
         let task = backgroundSession.uploadTask(with: request, fromFile: fileURL)
-        tasksCompletionHandler[backgroundSession.identifierFor(task: task)] = completionHandler
+        tasksCompletionHandler[backgroundSession.identifier(for: task)] = completionHandler
         return task
     }
 
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        let taskIdentifier = session.identifierFor(task: dataTask)
+        let taskIdentifier = session.identifier(for: dataTask)
         if tasksData[taskIdentifier] != nil {
             tasksData[taskIdentifier]!.append(data)
         } else {
@@ -172,7 +172,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        let taskIdentifier = session.identifierFor(task: task)
+        let taskIdentifier = session.identifier(for: task)
         if let task = task as? URLSessionUploadTask {
             getCompletionHandler(for: task, session: session)?(tasksData[taskIdentifier], task.response, error)
         }
@@ -183,7 +183,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     }
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
-        let taskIdentifier = session.identifierFor(task: task)
+        let taskIdentifier = session.identifier(for: task)
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,

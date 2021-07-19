@@ -59,7 +59,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
                    let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?.fileId {
-                    self.progressObservers[self.backgroundSession.identifierFor(task: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
+                    self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
                         }
@@ -72,12 +72,12 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
 
     public func downloadTask(with request: URLRequest, completionHandler: @escaping CompletionHandler) -> Task {
         let task = backgroundSession.downloadTask(with: request)
-        tasksCompletionHandler[backgroundSession.identifierFor(task: task)] = completionHandler
+        tasksCompletionHandler[backgroundSession.identifier(for: task)] = completionHandler
         return task
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        let taskIdentifier = session.identifierFor(task: task)
+        let taskIdentifier = session.identifier(for: task)
         // Unsuccessful completion
         if let task = task as? URLSessionDownloadTask {
             getCompletionHandler(for: task, session: session)?(nil, task.response, error)
@@ -89,7 +89,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
 
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         // Successful completion
-        let taskIdentifier = session.identifierFor(task: downloadTask)
+        let taskIdentifier = session.identifier(for: downloadTask)
         getCompletionHandler(for: downloadTask, session: session)?(location, downloadTask.response, nil)
         progressObservers[taskIdentifier]?.invalidate()
         progressObservers[taskIdentifier] = nil
@@ -97,7 +97,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     }
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
-        let taskIdentifier = session.identifierFor(task: task)
+        let taskIdentifier = session.identifier(for: task)
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
