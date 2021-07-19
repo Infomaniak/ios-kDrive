@@ -34,7 +34,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     private let leftRightInset: CGFloat = 12
     private let gridInnerSpacing: CGFloat = 16
-    private let maxDiffChanges = 100
+    private let maxDiffChanges = DriveApiFetcher.itemPerPage
     private let headerViewIdentifier = "FilesHeaderView"
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
     private let fileObserverThrottler = Throttler<File>(timeInterval: 5, queue: .global())
