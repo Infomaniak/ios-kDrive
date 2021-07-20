@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 class UploadTableViewCell: InsetTableViewCell {
-
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String!
@@ -47,10 +46,11 @@ class UploadTableViewCell: InsetTableViewCell {
     }
 
     private func setStatusFor(uploadFile: UploadFile) {
-        cardContentView.retryButton?.isHidden = uploadFile.error == nil
-        if let error = uploadFile.error {
+        if let error = uploadFile.error, error != .taskRescheduled {
+            cardContentView.retryButton?.isHidden = false
             cardContentView.detailsLabel.text = KDriveStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
         } else {
+            cardContentView.retryButton?.isHidden = true
             var status = KDriveStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
                 status = KDriveStrings.Localizable.uploadNetworkErrorDescription

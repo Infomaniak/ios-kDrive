@@ -126,19 +126,22 @@ public class UploadOperation: Operation {
         }
 
         // Start background task
-        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
-            DDLogInfo("[UploadOperation] Background task expired")
-            let rescheduled = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
-            if rescheduled {
-                self.file.error = .taskRescheduled
-            } else {
-                self.file.sessionUrl = ""
-                self.file.error = .taskExpirationCancelled
-                UploadQueue.instance.sendPausedNotificationIfNeeded()
+        if !Constants.isInExtension {
+            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
+                DDLogInfo("[UploadOperation] Background task expired")
+                let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
+                if let sessionId = rescheduledSessionId {
+                    self.file.sessionId = sessionId
+                    self.file.error = .taskRescheduled
+                } else {
+                    self.file.sessionUrl = ""
+                    self.file.error = .taskExpirationCancelled
+                    UploadQueue.instance.sendPausedNotificationIfNeeded()
+                }
+                UploadQueue.instance.suspendAllOperations()
+                self.task?.cancel()
+                self.end()
             }
-            UploadQueue.instance.suspendAllOperations()
-            self.task?.cancel()
-            self.end()
         }
 
         getUploadTokenSync()
@@ -153,7 +156,7 @@ public class UploadOperation: Operation {
         DDLogInfo("[UploadOperation] Executing job \(file.id)")
         file.maxRetryCount -= 1
         guard let token = uploadToken else {
-            DDLogInfo("[UploadOperation] Failed to fetch upload token for job \(file.id)")
+            DDLogError("[UploadOperation] Failed to fetch upload token for job \(file.id)")
             file.error = .refreshToken
             end()
             return
@@ -165,6 +168,7 @@ public class UploadOperation: Operation {
         request.setValue("Bearer \(token.token)", forHTTPHeaderField: "Authorization")
 
         file.sessionUrl = url.absoluteString
+        file.sessionId = urlSession.identifier
 
         if let filePath = file.pathURL,
            FileManager.default.isReadableFile(atPath: filePath.path) {
@@ -178,8 +182,15 @@ public class UploadOperation: Operation {
                 UploadQueue.instance.publishProgress(newValue, for: fileId)
             }
             task?.resume()
+
+            // Save UploadFile state (we are mainly interested in saving sessionUrl)
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                try? uploadsRealm.safeWrite {
+                    uploadsRealm.add(UploadFile(value: file), update: .modified)
+                }
+            }
         } else {
-            DDLogInfo("[UploadOperation] No file path found for job \(file.id)")
+            DDLogError("[UploadOperation] No file path found for job \(file.id)")
             file.error = .fileNotFound
             end()
         }
@@ -211,16 +222,12 @@ public class UploadOperation: Operation {
                 DDLogInfo("[UploadOperation] Got photo asset, writing URL")
                 file.pathURL = url
             } else {
-                DDLogWarn("[UploadOperation] Failed to get photo asset")
+                DDLogError("[UploadOperation] Failed to get photo asset")
             }
         }
     }
 
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
-        guard file.error != .taskExpirationCancelled && file.error != .taskRescheduled else {
-            return
-        }
-
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {
@@ -228,6 +235,9 @@ public class UploadOperation: Operation {
             DDLogError("[UploadOperation] Client-side error for job \(file.id): \(error)")
             if file.error != .taskRescheduled {
                 file.sessionUrl = ""
+            } else {
+                // We return because we don't want end() to be called as it is already called in the expiration hadnler
+                return
             }
             if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
                 if file.error != .taskExpirationCancelled && file.error != .taskRescheduled {
@@ -241,8 +251,9 @@ public class UploadOperation: Operation {
                   let response = try? ApiFetcher.decoder.decode(ApiResponse<[File]>.self, from: data),
                   let driveFile = response.data?.first {
             // Success
-            DDLogError("[UploadOperation] Job \(file.id) successful")
+            DDLogInfo("[UploadOperation] Job \(file.id) successful")
             file.uploadDate = Date()
+            file.error = nil
             if let driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: file.userId) {
                 // File is already or has parent in DB let's update it
                 BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
@@ -287,7 +298,7 @@ public class UploadOperation: Operation {
     }
 
     private func end() {
-        DDLogError("[UploadOperation] Job \(file.id) ended")
+        DDLogInfo("[UploadOperation] Job \(file.id) ended")
 
         if let path = file.pathURL,
            file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {

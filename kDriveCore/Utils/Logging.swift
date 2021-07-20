@@ -24,13 +24,21 @@ import Sentry
 
 public enum Logging {
     public static func initLogging() {
+        UserDefaults.standard.set(true, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         initLogger()
         initNetworkLogging()
         initSentry()
         copyDebugInformations()
     }
 
+    class LogFormatter: NSObject, DDLogFormatter {
+        func format(message logMessage: DDLogMessage) -> String? {
+            return "[Infomaniak] \(logMessage.message)"
+        }
+    }
+
     private static func initLogger() {
+        DDOSLogger.sharedInstance.logFormatter = LogFormatter()
         DDLog.add(DDOSLogger.sharedInstance)
         let logFileManager = DDLogFileManagerDefault(logsDirectory: DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true).path)
         let fileLogger = DDFileLogger(logFileManager: logFileManager)

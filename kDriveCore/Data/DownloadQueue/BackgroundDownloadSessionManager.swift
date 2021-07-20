@@ -18,13 +18,16 @@
 
 import Foundation
 
-public protocol FileDownloadSession {
+public protocol FileDownloadSession: BackgroundSession {
     func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask
 }
 
-extension URLSession: FileDownloadSession { }
+extension URLSession: FileDownloadSession {}
 
 public final class BackgroundDownloadSessionManager: NSObject, BackgroundSessionManager, URLSessionDownloadDelegate, FileDownloadSession {
+    public var identifier: String {
+        return backgroundSession.identifier
+    }
 
     public typealias Task = URLSessionDownloadTask
     public typealias CompletionHandler = (URL?, URLResponse?, Error?) -> Void
@@ -37,11 +40,11 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
     static let maxBackgroundTasks = 10
 
     var backgroundSession: URLSession!
-    var tasksCompletionHandler: [Int: CompletionHandler] = [:]
-    var progressObservers: [Int: NSKeyValueObservation] = [:]
+    var tasksCompletionHandler: [String: CompletionHandler] = [:]
+    var progressObservers: [String: NSKeyValueObservation] = [:]
     var operations = [Operation]()
 
-    private override init() {
+    override private init() {
         super.init()
         let backgroundUrlSessionConfiguration = URLSessionConfiguration.background(withIdentifier: DownloadQueue.backgroundIdentifier)
         backgroundUrlSessionConfiguration.sessionSendsLaunchEvents = true
@@ -55,8 +58,8 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
             let realm = DriveFileManager.constants.uploadsRealm
             for task in uploadTasks {
                 if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                    let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "AND sessionUrl = %@", sessionUrl)).first?.fileId {
-                    self.progressObservers[task.taskIdentifier] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
+                   let fileId = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first?.fileId {
+                    self.progressObservers[self.backgroundSession.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
                         guard let newValue = value.newValue else {
                             return
                         }
@@ -69,39 +72,41 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
 
     public func downloadTask(with request: URLRequest, completionHandler: @escaping CompletionHandler) -> Task {
         let task = backgroundSession.downloadTask(with: request)
-        tasksCompletionHandler[task.taskIdentifier] = completionHandler
+        tasksCompletionHandler[backgroundSession.identifier(for: task)] = completionHandler
         return task
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        let taskIdentifier = session.identifier(for: task)
         // Unsuccessful completion
         if let task = task as? URLSessionDownloadTask {
-            getCompletionHandler(for: task)?(nil, task.response, error)
+            getCompletionHandler(for: task, session: session)?(nil, task.response, error)
         }
-        progressObservers[task.taskIdentifier]?.invalidate()
-        progressObservers[task.taskIdentifier] = nil
-        tasksCompletionHandler[task.taskIdentifier] = nil
+        progressObservers[taskIdentifier]?.invalidate()
+        progressObservers[taskIdentifier] = nil
+        tasksCompletionHandler[taskIdentifier] = nil
     }
 
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         // Successful completion
-        getCompletionHandler(for: downloadTask)?(location, downloadTask.response, nil)
-        progressObservers[downloadTask.taskIdentifier]?.invalidate()
-        progressObservers[downloadTask.taskIdentifier] = nil
-        tasksCompletionHandler[downloadTask.taskIdentifier] = nil
+        let taskIdentifier = session.identifier(for: downloadTask)
+        getCompletionHandler(for: downloadTask, session: session)?(location, downloadTask.response, nil)
+        progressObservers[taskIdentifier]?.invalidate()
+        progressObservers[taskIdentifier] = nil
+        tasksCompletionHandler[taskIdentifier] = nil
     }
 
-    func getCompletionHandler(for task: Task) -> CompletionHandler? {
-        if let completionHandler = tasksCompletionHandler[task.taskIdentifier] {
+    func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
+        let taskIdentifier = session.identifier(for: task)
+        if let completionHandler = tasksCompletionHandler[taskIdentifier] {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
-            let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
-            .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
-            let drive = AccountManager.instance.getDrive(for: downloadTask.userId, driveId: downloadTask.driveId),
-            let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
-            let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
+                  let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
+                  .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
+                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
+                  let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
-            tasksCompletionHandler[task.taskIdentifier] = operation.downloadCompletion
+            tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion
             operations.append(operation)
             return operation.downloadCompletion
         } else {

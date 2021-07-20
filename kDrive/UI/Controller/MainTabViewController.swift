@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import InfomaniakCore
 import FloatingPanel
+import InfomaniakCore
 import kDriveCore
+import UIKit
 
 class MainTabViewController: UITabBarController, MainTabBarDelegate {
-
     var floatingPanelViewController: DriveFloatingPanelController?
     // swiftlint:disable weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
@@ -150,8 +149,8 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     func getCurrentDirectory(completion: @escaping (File?) -> Void) {
         if let filesViewController = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController,
-            let directory = filesViewController.currentDirectory,
-            directory.id >= DriveFileManager.constants.rootID {
+           let directory = filesViewController.currentDirectory,
+           directory.id >= DriveFileManager.constants.rootID {
             completion(directory)
         } else {
             driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
@@ -182,6 +181,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 }
 
 // MARK: - Tab bar controller delegate
+
 extension MainTabViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         if let homeViewController = (viewController as? UINavigationController)?.topViewController as? HomeTableViewController {
@@ -203,8 +203,8 @@ extension MainTabViewController: UITabBarControllerDelegate {
 }
 
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
-extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
 
+extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
@@ -240,17 +240,29 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
 }
 
 // MARK: - UIDocumentPickerDelegate
-extension MainTabViewController: UIDocumentPickerDelegate {
 
+extension MainTabViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         if let documentPicker = controller as? DriveImportDocumentPickerViewController {
             for url in urls {
-                UploadQueue.instance.addToQueue(file:
+                let targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+
+                do {
+                    if FileManager.default.fileExists(atPath: targetURL.path) {
+                        try FileManager.default.removeItem(at: targetURL)
+                    }
+
+                    try FileManager.default.moveItem(at: url, to: targetURL)
+                    UploadQueue.instance.addToQueue(file:
                         UploadFile(
-                        parentDirectoryId: documentPicker.importDriveDirectory.id,
-                        userId: AccountManager.instance.currentAccount.userId,
-                        driveId: driveFileManager.drive.id,
-                        url: url))
+                            parentDirectoryId: documentPicker.importDriveDirectory.id,
+                            userId: AccountManager.instance.currentAccount.userId,
+                            driveId: driveFileManager.drive.id,
+                            url: targetURL,
+                            name: url.lastPathComponent))
+                } catch {
+                    UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
+                }
             }
         }
     }

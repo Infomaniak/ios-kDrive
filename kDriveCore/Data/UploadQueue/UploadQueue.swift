@@ -23,7 +23,10 @@ import RealmSwift
 
 public class UploadQueue {
     public static let instance = UploadQueue()
-    public static let backgroundIdentifier = "com.infomaniak.background.upload"
+    public static let backgroundBaseIdentifier = ".backgroundsession.upload"
+    public static var backgroundIdentifier: String {
+        return (Bundle.main.bundleIdentifier ?? "com.infomaniak.drive") + backgroundBaseIdentifier
+    }
 
     public var pausedNotificationSent = false
 
@@ -239,8 +242,10 @@ public class UploadQueue {
         operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             self.dispatchQueue.async {
                 self.operationsInQueue.removeValue(forKey: fileId)
-                self.publishFileUploaded(result: operation.result)
-                self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+                if operation.result.uploadFile.error != .taskRescheduled {
+                    self.publishFileUploaded(result: operation.result)
+                    self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+                }
             }
         }
         operationQueue.addOperation(operation)
@@ -288,7 +293,7 @@ public class UploadQueue {
     private func sendFileUploadedNotificationIfNeeded(with result: UploadCompletionResult) {
         fileUploadedCount += (result.uploadFile.error == nil ? 1 : 0)
         if let error = result.uploadFile.error,
-           error != .networkError || error != .taskCancelled || error != .taskRescheduled {
+           error != .networkError && error != .taskCancelled && error != .taskRescheduled {
             NotificationsHelper.sendUploadError(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId, error: error)
             if operationQueue.operationCount == 0 {
                 fileUploadedCount = 0
