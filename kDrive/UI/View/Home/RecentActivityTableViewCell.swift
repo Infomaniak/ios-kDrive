@@ -128,6 +128,8 @@ class RecentActivityTableViewCell: InsetTableViewCell, UICollectionViewDelegate,
                 self.avatarImage.image = image.withRenderingMode(.alwaysOriginal)
             }
         }
+        collectionView.reloadData()
+        tableView.reloadData()
     }
 
     @IBAction func bottomViewTap() {
