@@ -103,8 +103,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let downloadTask = DriveFileManager.constants.uploadsRealm.objects(DownloadTask.self)
                   .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first,
-                  let drive = AccountManager.instance.getDrive(for: downloadTask.userId, driveId: downloadTask.driveId),
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId),
                   let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, task: task, urlSession: self)
             tasksCompletionHandler[taskIdentifier] = operation.downloadCompletion
