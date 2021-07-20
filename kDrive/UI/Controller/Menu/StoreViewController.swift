@@ -24,16 +24,16 @@ class StoreViewController: UICollectionViewController {
     struct Item {
         let pack: DrivePack
         let identifier: String
-        var product: SKProduct? = nil
+        var product: SKProduct?
+
+        static let solo = Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo")
+        static let team = Item(pack: .team, identifier: "com.infomaniak.drive.iap.team")
+        static let pro = Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro")
     }
 
     var driveFileManager: DriveFileManager!
 
-    private var items: [Item] = [
-        Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo"),
-        Item(pack: .team, identifier: "com.infomaniak.drive.iap.team"),
-        Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro")
-    ]
+    private var items: [Item] = [.solo, .team, .pro]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -123,9 +123,11 @@ extension StoreViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - Store cell delegate
 
 extension StoreViewController: StoreCellDelegate {
-    func selectButtonTapped(product: SKProduct) {
-        // Attempt to purchase the tapped product
-        StoreObserver.shared.buy(product)
+    func selectButtonTapped(item: Item) {
+        if let product = item.product {
+            // Attempt to purchase the tapped product
+            StoreObserver.shared.buy(product)
+        }
     }
 }
 
