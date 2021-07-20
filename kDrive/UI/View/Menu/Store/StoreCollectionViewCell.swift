@@ -21,7 +21,7 @@ import StoreKit
 import UIKit
 
 protocol StoreCellDelegate: AnyObject {
-    func selectButtonTapped(product: SKProduct)
+    func selectButtonTapped(item: StoreViewController.Item)
 }
 
 class StoreCollectionViewCell: UICollectionViewCell {
@@ -33,7 +33,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
 
     weak var delegate: StoreCellDelegate?
 
-    private var product: SKProduct?
+    private var item: StoreViewController.Item?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -42,6 +42,8 @@ class StoreCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with item: StoreViewController.Item, currentPack: DrivePack) {
+        self.item = item
+
         switch item.pack {
         case .free:
             break
@@ -56,21 +58,8 @@ class StoreCollectionViewCell: UICollectionViewCell {
             descriptionLabel.text = "6 utilisateurs inclus et au maximum\nDès 6 To jusqu’à 108 To maximum"
         }
 
-        if let formattedPrice = product?.regularPrice, let subscriptionPeriod = product?.subscriptionPeriod {
-            let unit: String
-            switch subscriptionPeriod.unit {
-            case .day:
-                unit = "jour"
-            case .week:
-                unit = "semaine"
-            case .month:
-                unit = "mois"
-            case .year:
-                unit = "year"
-            @unknown default:
-                unit = "période"
-            }
-            priceLabel.text = "\(formattedPrice) par \(unit)"
+        if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
+            priceLabel.text = "\(formattedPrice) par \(subscriptionPeriod.unit.localizedString)"
         } else {
             priceLabel.text = "Prix inconnu"
         }
@@ -79,13 +68,30 @@ class StoreCollectionViewCell: UICollectionViewCell {
             selectButton.isEnabled = false
             selectButton.setTitle("Sélectionné", for: .normal)
         } else {
-            selectButton.isEnabled = product != nil
+            selectButton.isEnabled = item.product != nil
         }
     }
 
     @IBAction func selectButtonTapped(_ sender: Any) {
-        if let product = product {
-            delegate?.selectButtonTapped(product: product)
+        if let item = item {
+            delegate?.selectButtonTapped(item: item)
+        }
+    }
+}
+
+extension SKProduct.PeriodUnit {
+    var localizedString: String {
+        switch self {
+        case .day:
+            return "jour"
+        case .week:
+            return "semaine"
+        case .month:
+            return "mois"
+        case .year:
+            return "year"
+        @unknown default:
+            return "période"
         }
     }
 }
