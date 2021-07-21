@@ -801,7 +801,7 @@ public class DriveFileManager {
         return ActivitiesResult(inserted: insertedFiles.map { $0.freeze() }, updated: updatedFiles.map { $0.freeze() }, deleted: deletedFiles)
     }
 
-    public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (Result<[Int: [FileActivity]], Error>) -> Void) {
+    public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (Result<[Int: FilesActivitiesContent], Error>) -> Void) {
         apiFetcher.getFilesActivities(driveId: driveId, files: files, from: date) { response, error in
             if let error = error {
                 completion(.failure(error))

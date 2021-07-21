@@ -16,8 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import InfomaniakCore
 import RealmSwift
+import UIKit
 
 public enum FileActivityType: String, Codable {
     case fileAccess = "file_access"
@@ -75,7 +76,7 @@ public class FileActivity: Object, Codable {
         }
     }
 
-    required public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         rawAction = (try? values.decode(String.self, forKey: .rawAction)) ?? ""
         id = try values.decode(Int.self, forKey: .id)
@@ -88,9 +89,9 @@ public class FileActivity: Object, Codable {
         file = try? values.decode(File.self, forKey: .file)
     }
 
-    public override init() { }
+    override public init() {}
 
-    public override class func primaryKey() -> String? {
+    override public class func primaryKey() -> String? {
         return "id"
     }
 
@@ -118,10 +119,10 @@ public class FileDetailActivity: Codable {
     public var oldPath: String
 
     enum CodingKeys: String, CodingKey {
-        case action = "action"
-        case id = "id"
-        case path = "path"
-        case user = "user"
+        case action
+        case id
+        case path
+        case user
         case createdAt = "created_at"
         case fileId = "file_id"
         case newPath = "new_path"
@@ -129,8 +130,8 @@ public class FileDetailActivity: Codable {
     }
 }
 
-public class FileActivities: Codable {
-    public var activities: [Int: [FileActivity]]
+public class FilesActivities: Codable {
+    public var activities: [Int: FilesActivitiesContent]
 
     struct DynamicCodingKeys: CodingKey {
         var stringValue: String
@@ -146,19 +147,20 @@ public class FileActivities: Codable {
         }
     }
 
-    enum ResultCodingKeys: String, CodingKey {
-        case status, activities
-    }
-
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
-        var activities = [Int: [FileActivity]]()
+        var activities = [Int: FilesActivitiesContent]()
         for key in container.allKeys {
             guard let id = Int(key.stringValue) else { continue }
-            let activitiesContainer = try container.nestedContainer(keyedBy: ResultCodingKeys.self, forKey: key)
-            activities[id] = try activitiesContainer.decodeIfPresent([FileActivity].self, forKey: .activities)
+            activities[id] = try container.decode(FilesActivitiesContent.self, forKey: key)
         }
         self.activities = activities
     }
+}
+
+public class FilesActivitiesContent: Codable {
+    public var status: ApiResult
+    public var activities: [FileActivity]?
+    public var error: ApiError?
 }
