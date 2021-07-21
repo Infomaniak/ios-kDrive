@@ -95,7 +95,7 @@ public class IKWindowProvider {
         return snackBar
     }
 
-    func displayPendingEntryOrRollbackWindow() {
+    func displayRollbackWindowIfNeeded() {
         if snackBar == nil {
             displayRollbackWindow()
         }
@@ -175,6 +175,6 @@ public class IKSnackBar: SnackBar {
 
     override public func removeFromSuperview() {
         super.removeFromSuperview()
-        IKWindowProvider.shared.displayPendingEntryOrRollbackWindow()
+        IKWindowProvider.shared.displayRollbackWindowIfNeeded()
     }
 }
