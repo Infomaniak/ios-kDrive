@@ -59,6 +59,8 @@ public class IKWindowProvider {
         return entryWindow?.rootViewController
     }
 
+    private weak var snackBar: IKSnackBar?
+
     private weak var mainRollbackWindow: UIWindow?
 
     private init() {}
@@ -82,7 +84,24 @@ public class IKWindowProvider {
         return entryViewController
     }
 
-    func displayRollbackWindow() {
+    func displaySnackBar(message: String, duration: IKSnackBar.Duration) -> IKSnackBar {
+        // Remove old snackbar
+        snackBar?.dismiss()
+        // Create new snackbar
+        let vc = setupWindowAndRootVC()
+        let snackBar = IKSnackBar(contextView: vc.view, message: message, duration: duration)
+        entryWindow.isHidden = false
+        self.snackBar = snackBar
+        return snackBar
+    }
+
+    func displayPendingEntryOrRollbackWindow() {
+        if snackBar == nil {
+            displayRollbackWindow()
+        }
+    }
+
+    private func displayRollbackWindow() {
         if #available(iOS 13.0, *) {
             entryWindow.windowScene = nil
         }
@@ -147,8 +166,7 @@ public class IKSnackBar: SnackBar {
     }
 
     public static func make(message: String, duration: Duration) -> Self? {
-        let vc = IKWindowProvider.shared.setupWindowAndRootVC()
-        return Self.make(in: vc.view, message: message, duration: duration)
+        return IKWindowProvider.shared.displaySnackBar(message: message, duration: duration) as? Self
     }
 
     public func setAction(_ action: Action) -> SnackBarPresentable {
@@ -157,6 +175,6 @@ public class IKSnackBar: SnackBar {
 
     override public func removeFromSuperview() {
         super.removeFromSuperview()
-        IKWindowProvider.shared.displayRollbackWindow()
+        IKWindowProvider.shared.displayPendingEntryOrRollbackWindow()
     }
 }
