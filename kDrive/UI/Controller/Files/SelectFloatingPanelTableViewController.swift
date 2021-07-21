@@ -103,6 +103,8 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             if !isAvailableOffline {
                 downloadInProgress = true
                 self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                // Update offline files before setting new file to synchronize them
+                (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             }
             for file in files where !file.isDirectory {
                 group.enter()

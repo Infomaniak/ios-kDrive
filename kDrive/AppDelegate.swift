@@ -417,7 +417,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         }
     }
 
-    private func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
+    func updateAvailableOfflineFiles(status: ReachabilityListener.NetworkStatus) {
         guard status != .offline && (!UserDefaults.shared.isWifiOnly || status == .wifi) else {
             return
         }
