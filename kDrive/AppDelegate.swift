@@ -269,6 +269,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     SKStoreReviewController.requestReview()
                 }
             }
+            if UserDefaults.shared.betaInviteDisplayed == false {
+                let floatingPanelViewController = BetaInviteFloatingPanelViewController.instantiatePanel()
+                (floatingPanelViewController.contentViewController as? BetaInviteFloatingPanelViewController)?.actionHandler = { _ in
+                    if let url = URL(string: "https://testflight.apple.com/join/qZHSGy5B") {
+                        UserDefaults.shared.betaInviteDisplayed = true
+                        UIApplication.shared.open(url)
+                        floatingPanelViewController.dismiss(animated: true)
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
+                }
+            }
             refreshCacheData(preload: false, isSwitching: false)
             uploadEditedFiles()
             // Ask to remove uploaded pictures
