@@ -422,30 +422,57 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             return
         }
 
-        let drives = DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false)
-        for drive in drives {
+        for drive in DriveInfosManager.instance.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
             guard let driveFileManager = accountManager.getDriveFileManager(for: drive) else {
                 continue
             }
 
             let offlineFiles = driveFileManager.getAvailableOfflineFiles()
-            for file in offlineFiles {
-                driveFileManager.getFile(id: file.id, withExtras: true) { newFile, _, error in
-                    if let error = error {
-                        if let error = error as? DriveError, error == .objectNotFound {
-                            driveFileManager.setFileAvailableOffline(file: file, available: false) { _ in }
-                        } else {
-                            SentrySDK.capture(error: error)
+            guard !offlineFiles.isEmpty else { continue }
+            driveFileManager.getFilesActivities(driveId: drive.id, files: offlineFiles, from: UserDefaults.shared.lastSyncDateOfflineFiles) { result in
+                switch result {
+                case .success(let filesActivities):
+                    for (fileId, content) in filesActivities {
+                        guard let file = offlineFiles.first(where: { $0.id == fileId }) else {
+                            continue
                         }
-                        // Silently handle error
-                        DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(error)")
-                    } else if let newFile = newFile {
-                        try? driveFileManager.renameCachedFile(updatedFile: newFile, oldFile: file)
-                        if newFile.isLocalVersionOlderThanRemote() {
-                            // Download new version
-                            DownloadQueue.instance.addToQueue(file: newFile, userId: driveFileManager.drive.userId)
+
+                        if let activities = content.activities {
+                            // Apply activities to file
+                            var handledActivities = Set<FileActivityType>()
+                            for activity in activities where !handledActivities.contains(activity.action) {
+                                switch activity.action {
+                                case .fileRename:
+                                    // Rename file
+                                    driveFileManager.getFile(id: file.id, withExtras: true) { newFile, _, _ in
+                                        if let newFile = newFile {
+                                            try? driveFileManager.renameCachedFile(updatedFile: newFile, oldFile: file)
+                                        }
+                                    }
+                                case .fileUpdate:
+                                    // Download new version
+                                    DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId)
+                                case .fileDelete:
+                                    // File has been deleted -- remove it from offline files
+                                    driveFileManager.setFileAvailableOffline(file: file, available: false) { _ in }
+                                default:
+                                    break
+                                }
+                                handledActivities.insert(activity.action)
+                            }
+                        } else if let error = content.error {
+                            if DriveError(apiError: error) == .objectNotFound {
+                                driveFileManager.setFileAvailableOffline(file: file, available: false) { _ in }
+                            } else {
+                                SentrySDK.capture(error: error)
+                            }
+                            // Silently handle error
+                            DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(error)")
                         }
                     }
+                case .failure(let error):
+                    // Silently handle error
+                    DDLogError("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)")
                 }
             }
         }
