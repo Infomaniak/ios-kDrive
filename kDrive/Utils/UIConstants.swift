@@ -33,8 +33,8 @@ class UIConstants {
     static let largeTitleHeight: CGFloat = 96
     static let insufficientStorageMinimumPercentage: Double = 90.0
 
-    static func showSnackBar(message: String, view: UIView? = nil, action: IKSnackBar.Action? = nil) {
-        let snackbar = IKSnackBar.make(message: message, duration: .lengthLong, view: view)
+    static func showSnackBar(message: String, action: IKSnackBar.Action? = nil) {
+        let snackbar = IKSnackBar.make(message: message, duration: .lengthLong)
         if let action = action {
             snackbar?.setAction(action).show()
         } else {

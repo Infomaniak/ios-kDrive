@@ -389,7 +389,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         if success {
                             self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
                         } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRename, view: self.view)
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRename)
                         }
                     }
                 }
@@ -446,7 +446,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                             })
                         }
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete)
                     }
                 }
             }
@@ -466,7 +466,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                             saveLocalFile(file: file)
                             refreshFileAndRows(oldFile: file, rows: [indexPath])
                         } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload, view: view)
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
                         }
                     }
                 }
@@ -499,10 +499,10 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     _ = group.wait(timeout: .now() + 5)
                     DispatchQueue.main.async {
                         if success {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListDuplicationConfirmationSnackbar(1), view: self.view)
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
                             self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
                         } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDuplicate, view: self.view)
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDuplicate)
                         }
                     }
                 }
@@ -520,13 +520,13 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             selectFolderViewController?.selectHandler = { selectedFolder in
                 self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { response, _, error in
                     if error != nil {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), view: self.view, action: .init(title: KDriveStrings.Localizable.buttonCancel) {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                             if let cancelId = response?.id {
                                 self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
                                     if error == nil {
-                                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileMoveCancelled, view: self.view)
+                                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileMoveCancelled)
                                     }
                                 }
                             }
@@ -551,11 +551,11 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 _ = group.wait(timeout: .now() + 5)
                 DispatchQueue.main.async {
                     if success {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarLeaveShareConfirmation, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarLeaveShareConfirmation)
                         self.presentingParent?.navigationController?.popViewController(animated: true)
                         self.dismiss(animated: true)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorLeaveShare, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorLeaveShare)
                     }
                 }
             }
@@ -666,9 +666,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 PhotoLibrarySaver.instance.save(image: image) { success, _ in
                     DispatchQueue.main.async {
                         if success {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarImageSavedConfirmation, view: self.view)
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarImageSavedConfirmation)
                         } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorSave, view: self.view)
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorSave)
                         }
                     }
                 }
@@ -677,9 +677,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             PhotoLibrarySaver.instance.save(videoUrl: file.localUrl) { success, _ in
                 DispatchQueue.main.async {
                     if success {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarVideoSavedConfirmation, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarVideoSavedConfirmation)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorSave, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorSave)
                     }
                 }
             }

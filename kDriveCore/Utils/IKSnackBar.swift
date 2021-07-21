@@ -54,9 +54,12 @@ public class IKWindowProvider {
     public static let shared = IKWindowProvider()
 
     var entryWindow: IKWindow!
+
     var rootViewController: UIViewController? {
         return entryWindow?.rootViewController
     }
+
+    private weak var mainRollbackWindow: UIWindow?
 
     private init() {}
 
@@ -66,10 +69,45 @@ public class IKWindowProvider {
             entryViewController = UIViewController()
             entryWindow = IKWindow(with: entryViewController)
             entryWindow.isHidden = false
+            mainRollbackWindow = UIApplication.shared.keyWindow
+            // Adjust insets based on presented view controller under
+            if let topViewInsets = mainRollbackWindow?.rootViewController?.displayedViewController.view.safeAreaInsets {
+                let safeAreaInsets = entryViewController.view.safeAreaInsets
+                let insets = UIEdgeInsets(top: topViewInsets.top - safeAreaInsets.top, left: topViewInsets.left - safeAreaInsets.left, bottom: topViewInsets.bottom - safeAreaInsets.bottom, right: topViewInsets.right - safeAreaInsets.right)
+                entryViewController.additionalSafeAreaInsets = insets
+            }
         } else {
             entryViewController = rootViewController!
         }
         return entryViewController
+    }
+
+    func displayRollbackWindow() {
+        if #available(iOS 13.0, *) {
+            entryWindow.windowScene = nil
+        }
+        entryWindow = nil
+        if let mainRollbackWindow = mainRollbackWindow {
+            mainRollbackWindow.makeKeyAndVisible()
+        } else {
+            UIApplication.shared.keyWindow?.makeKeyAndVisible()
+        }
+    }
+}
+
+extension UIViewController {
+    var displayedViewController: UIViewController {
+        if let controller = self as? UINavigationController, let visibleViewController = controller.visibleViewController {
+            return visibleViewController.displayedViewController
+        } else if let controller = self as? UISplitViewController, let lastViewController = controller.viewControllers.last {
+            return lastViewController.displayedViewController
+        } else if let controller = self as? UITabBarController, let selectedViewController = controller.selectedViewController {
+            return selectedViewController.displayedViewController
+        } else if let controller = presentedViewController {
+            return controller.displayedViewController
+        } else {
+            return self
+        }
     }
 }
 
@@ -108,47 +146,17 @@ public class IKSnackBar: SnackBar {
         return style
     }
 
-    private static func getTopViewController() -> UIViewController? {
-        let windows = UIApplication.shared.windows
-        let keyWindow = windows.count == 1 ? windows.first : windows.first(where: \.isKeyWindow)
-        if let topController = keyWindow?.rootViewController {
-            return getVisibleViewController(from: topController)
-        } else {
-            return nil
-        }
-    }
-
-    private static func getVisibleViewController(from viewController: UIViewController) -> UIViewController {
-        if let navigationController = viewController as? UINavigationController,
-           let visibleController = navigationController.visibleViewController {
-            return getVisibleViewController(from: visibleController)
-        } else if let tabBarController = viewController as? UITabBarController,
-                  let selectedTabController = tabBarController.selectedViewController {
-            return getVisibleViewController(from: selectedTabController)
-        } else {
-            if let presentedViewController = viewController.presentedViewController {
-                return getVisibleViewController(from: presentedViewController)
-            } else {
-                return viewController
-            }
-        }
-    }
-
-    public static func make(message: String, duration: Duration, view: UIView? = nil) -> Self? {
-        if let view = view {
-            return Self.make(in: view, message: message, duration: duration)
-        } else {
-            let vc = IKWindowProvider.shared.setupWindowAndRootVC()
-            return Self.make(in: vc.view, message: message, duration: duration)
-        }
+    public static func make(message: String, duration: Duration) -> Self? {
+        let vc = IKWindowProvider.shared.setupWindowAndRootVC()
+        return Self.make(in: vc.view, message: message, duration: duration)
     }
 
     public func setAction(_ action: Action) -> SnackBarPresentable {
         return setAction(with: action.title, action: action.action)
     }
 
-    public override func removeFromSuperview() {
+    override public func removeFromSuperview() {
         super.removeFromSuperview()
-        // Remove window
+        IKWindowProvider.shared.displayRollbackWindow()
     }
 }
