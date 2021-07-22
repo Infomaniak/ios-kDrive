@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import QuickLook
 import Alamofire
-import RealmSwift
-import Kingfisher
 import DifferenceKit
+import Foundation
+import Kingfisher
+import QuickLook
+import RealmSwift
 
 public enum ConvertedType: String, CaseIterable {
     case archive, audio, code, folder, font, image, pdf, presentation, spreadsheet, text, unknown, video
@@ -95,7 +95,6 @@ public enum ConvertedType: String, CaseIterable {
     public static let remotePlayableTypes = Set<ConvertedType>(arrayLiteral: .audio, .video)
     // Currently it's the same as the downloadableTypes but later this could change
     public static let ignoreThumbnailTypes = downloadableTypes
-
 }
 
 public enum VisibilityType: String {
@@ -152,7 +151,6 @@ public enum SortType: String {
 }
 
 public class File: Object, Codable {
-
     @objc public dynamic var id: Int = 0
     @objc public dynamic var parentId: Int = 0
     @objc public dynamic var name: String = ""
@@ -317,7 +315,7 @@ public class File: Object, Codable {
     public var visibility: VisibilityType {
         get {
             if let type = VisibilityType(rawValue: rawVisibility),
-                type == .root || type == .isTeamSpace || type == .isTeamSpaceFolder || type == .isInTeamSpaceFolder || type == .isSharedSpace {
+               type == .root || type == .isTeamSpace || type == .isTeamSpaceFolder || type == .isInTeamSpaceFolder || type == .isSharedSpace {
                 return type
             } else if let collaborativeFolder = collaborativeFolder, !collaborativeFolder.isBlank {
                 return VisibilityType.isCollaborativeFolder
@@ -347,7 +345,7 @@ public class File: Object, Codable {
     @discardableResult
     public func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
         if let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: self.imagePreviewUrl, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
+            return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF), .preloadAllAnimationData]) { result in
                 if let image = try? result.get().image {
                     completion(image)
                 } else {
@@ -375,7 +373,7 @@ public class File: Object, Codable {
         }
     }
 
-    required public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         collaborativeFolder = (try? values.decode(String.self, forKey: .collaborativeFolder)) ?? ""
         rawConvertedType = try? values.decode(String.self, forKey: .rawConvertedType)
@@ -414,28 +412,27 @@ public class File: Object, Codable {
     }
 
     // We have to keep it for Realm
-    override public init() { }
+    override public init() {}
 
     init(id: Int, name: String) {
         self.id = id
         self.name = name
-        self.type = "dir"
+        type = "dir"
         children = List<File>()
     }
 
-    public func encode(to encoder: Encoder) throws {
-    }
+    public func encode(to encoder: Encoder) throws {}
 
-    public override static func primaryKey() -> String? {
+    override public static func primaryKey() -> String? {
         return "id"
     }
 
     enum CodingKeys: String, CodingKey {
-        case id = "id"
+        case id
         case parentId = "parent_id"
-        case name = "name"
+        case name
         case nameNaturalSorting = "name_natural_sorting"
-        case children = "children"
+        case children
         case canUseTag = "can_use_tag"
         case createdBy = "created_by"
         case createdAt = "created_at"
@@ -449,16 +446,16 @@ public class File: Object, Codable {
         case lastModifiedAt = "last_modified_at"
         case nbVersion = "nb_version"
         case rawConvertedType = "converted_type"
-        case path = "path"
+        case path
         case collaborativeFolder = "collaborative_folder"
-        case rights = "rights"
+        case rights
         case shareLink = "share_link"
-        case size = "size"
+        case size
         case sizeWithVersion = "size_with_version"
-        case status = "status"
-        case tags = "tags"
-        case type = "type"
-        case users = "users"
+        case status
+        case tags
+        case type
+        case users
         case rawVisibility = "visibility"
         case onlyOffice = "onlyoffice"
         case onlyOfficeConvertExtension = "onlyoffice_convert_extension"
@@ -466,14 +463,13 @@ public class File: Object, Codable {
 }
 
 extension File: Differentiable {
-
     public var differenceIdentifier: Int {
         return id
     }
 
     public func isContentEqual(to source: File) -> Bool {
         autoreleasepool {
-            return lastModifiedAt == source.lastModifiedAt
+            lastModifiedAt == source.lastModifiedAt
                 && nameNaturalSorting == source.nameNaturalSorting
                 && isFavorite == source.isFavorite
                 && isAvailableOffline == source.isAvailableOffline
