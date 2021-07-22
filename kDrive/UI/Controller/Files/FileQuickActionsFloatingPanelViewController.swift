@@ -474,6 +474,10 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
         case .offline:
             downloadType = .downloadOffline
+            if !file.isAvailableOffline {
+                // Update offline files before setting new file to synchronize them
+                (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
+            }
             driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
                 if error != nil {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorCache)

@@ -801,6 +801,22 @@ public class DriveFileManager {
         return ActivitiesResult(inserted: insertedFiles.map { $0.freeze() }, updated: updatedFiles.map { $0.freeze() }, deleted: deletedFiles)
     }
 
+    public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (Result<[Int: FilesActivitiesContent], Error>) -> Void) {
+        apiFetcher.getFilesActivities(driveId: driveId, files: files, from: date) { response, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let activities = response?.data?.activities {
+                completion(.success(activities))
+            } else {
+                completion(.failure(DriveError.serverError))
+            }
+            // Update last sync date
+            if let responseAt = response?.responseAt {
+                UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
+            }
+        }
+    }
+
     public func getWorkingSet() -> [File] {
         // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow: -3600).timeIntervalSince1970))
         let files = getRealm().objects(File.self).sorted(byKeyPath: "lastModifiedAt", ascending: false)
