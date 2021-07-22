@@ -173,8 +173,7 @@ public class IKSnackBar: SnackBar {
         return setAction(with: action.title, action: action.action)
     }
 
-    override public func removeFromSuperview() {
-        super.removeFromSuperview()
+    deinit {
         IKWindowProvider.shared.displayRollbackWindowIfNeeded()
     }
 }
