@@ -19,6 +19,22 @@
 import SnackBar
 import UIKit
 
+class IKWrapperView: UIView {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let view = super.hitTest(point, with: event)
+        if view != self {
+            return view
+        }
+        return nil
+    }
+}
+
+class IKRootViewController: UIViewController {
+    override func loadView() {
+        view = IKWrapperView()
+    }
+}
+
 class IKWindow: UIWindow {
     init(with rootVC: UIViewController) {
         if #available(iOS 13.0, *) {
@@ -41,9 +57,8 @@ class IKWindow: UIWindow {
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        if let rootViewController = IKWindowProvider.shared.rootViewController,
-           let view = rootViewController.view.subviews.first {
-            return view.hitTest(point, with: event)
+        if let rootViewController = IKWindowProvider.shared.rootViewController {
+            return rootViewController.view.hitTest(point, with: event)
         }
 
         return nil
@@ -68,7 +83,7 @@ public class IKWindowProvider {
     func setupWindowAndRootVC() -> UIViewController {
         let entryViewController: UIViewController
         if entryWindow == nil {
-            entryViewController = UIViewController()
+            entryViewController = IKRootViewController()
             entryWindow = IKWindow(with: entryViewController)
             entryWindow.isHidden = false
             mainRollbackWindow = UIApplication.shared.keyWindow
