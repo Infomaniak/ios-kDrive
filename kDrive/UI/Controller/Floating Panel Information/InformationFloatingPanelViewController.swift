@@ -24,7 +24,9 @@ import kDriveCore
 class InformationFloatingPanelViewController: UIViewController {
 
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var imageViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var animationView: AnimationView!
+    @IBOutlet weak var animationViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var additionalInformationLabel: UILabel!

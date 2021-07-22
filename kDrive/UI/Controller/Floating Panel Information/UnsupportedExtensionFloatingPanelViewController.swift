@@ -26,6 +26,7 @@ class UnsupportedExtensionFloatingPanelViewController: InformationFloatingPanelV
         super.viewDidLoad()
 
         imageView.image = KDriveAsset.info.image
+        imageViewHeightConstraint.constant = 50
         imageView.tintColor = KDriveAsset.iconColor.color
         animationView.isHidden = true
         titleLabel.text = KDriveStrings.Localizable.notSupportedExtensionTitle("")

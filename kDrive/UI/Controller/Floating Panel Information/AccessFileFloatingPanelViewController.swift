@@ -25,6 +25,7 @@ class AccessFileFloatingPanelViewController: InformationFloatingPanelViewControl
         super.viewDidLoad()
 
         imageView.image = KDriveAsset.stop.image
+        imageViewHeightConstraint.constant = 70
         animationView.isHidden = true
         titleLabel.text = KDriveStrings.Localizable.accessDeniedTitle
         descriptionLabel.text = KDriveStrings.Localizable.accessDeniedDescriptionIsAdmin

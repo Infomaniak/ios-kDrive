@@ -25,6 +25,7 @@ class DriveMaintenanceFloatingPanelViewController: InformationFloatingPanelViewC
         super.viewDidLoad()
 
         imageView.image = KDriveAsset.maintenance.image
+        imageViewHeightConstraint.constant = 70
         imageView.tintColor = KDriveAsset.iconColor.color
         animationView.isHidden = true
         descriptionLabel.text = KDriveStrings.Localizable.driveMaintenanceDescription

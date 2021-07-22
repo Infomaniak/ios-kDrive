@@ -26,6 +26,7 @@ class UpdateFloatingPanelViewController: InformationFloatingPanelViewController 
 
         imageView.isHidden = true
         animationView.animation = Animation.named("illu-maj")
+        animationViewHeightConstraint.constant = 105
         titleLabel.text = KDriveStrings.Localizable.updateAvailableTitle
         descriptionLabel.text = KDriveStrings.Localizable.updateAvailableDescription
         additionalInformationLabel.isHidden = true
