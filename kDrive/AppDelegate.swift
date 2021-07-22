@@ -269,7 +269,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     SKStoreReviewController.requestReview()
                 }
             }
-            if UserDefaults.shared.betaInviteDisplayed == false {
+            if !UserDefaults.shared.betaInviteDisplayed {
                 let floatingPanelViewController = BetaInviteFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? BetaInviteFloatingPanelViewController)?.actionHandler = { _ in
                     if let url = URL(string: "https://testflight.apple.com/join/qZHSGy5B") {
@@ -278,7 +278,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                         floatingPanelViewController.dismiss(animated: true)
                     }
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.main.async {
                     self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
                 }
             }
