@@ -104,7 +104,7 @@ class TrashViewController: FileListViewController {
             _ = group.wait(timeout: .now() + 5)
             DispatchQueue.main.async {
                 let message = success ? KDriveStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveStrings.Localizable.errorDelete
-                UIConstants.showSnackBar(message: message, view: self.view)
+                UIConstants.showSnackBar(message: message)
             }
         }
         present(alert, animated: true)
@@ -162,7 +162,7 @@ class TrashViewController: FileListViewController {
                 } else {
                     message = KDriveStrings.Localizable.errorDelete
                 }
-                UIConstants.showSnackBar(message: message, view: self.view)
+                UIConstants.showSnackBar(message: message)
                 if self.selectionMode {
                     self.selectionMode = false
                 }
@@ -284,7 +284,7 @@ extension TrashViewController: SelectFolderDelegate {
                 folder.signalChanges(userId: driveFileManager.drive.userId)
                 if error == nil {
                     removeFileFromList(id: file.id)
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, folder.name), view: self.view)
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, folder.name))
                 } else {
                     UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorRestore)
                 }

@@ -319,7 +319,7 @@ class FileDetailViewController: UIViewController {
                     self.comments.insert(comment, at: 0)
                     self.tableView.reloadSections(IndexSet(integersIn: 1...1), with: .automatic)
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorAddComment, view: self.view)
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorAddComment)
                 }
             }
 
@@ -566,7 +566,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                             self.tableView.reloadSections(IndexSet([1]), with: .automatic)
                         }
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete)
                     }
                     completionHandler(success)
                 }
@@ -593,7 +593,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                         self.comments[indexPath.row].body = comment
                         self.tableView.reloadRows(at: [indexPath], with: .automatic)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorModification, view: self.view)
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorModification)
                     }
                     completionHandler(success)
                 }
