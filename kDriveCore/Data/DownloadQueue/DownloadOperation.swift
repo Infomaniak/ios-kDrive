@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import FileProvider
 import CocoaLumberjackSwift
+import FileProvider
+import Foundation
 
 public class DownloadOperation: Operation {
-
     // MARK: - Attributes
 
     private let file: File
@@ -55,15 +54,15 @@ public class DownloadOperation: Operation {
         }
     }
 
-    public override var isExecuting: Bool {
+    override public var isExecuting: Bool {
         return _executing
     }
 
-    public override var isFinished: Bool {
+    override public var isFinished: Bool {
         return _finished
     }
 
-    public override var isAsynchronous: Bool {
+    override public var isAsynchronous: Bool {
         return true
     }
 
@@ -84,7 +83,7 @@ public class DownloadOperation: Operation {
         self.itemIdentifier = nil
     }
 
-    public override func start() {
+    override public func start() {
         assert(!isExecuting, "Operation is already started")
 
         DDLogInfo("[DownloadOperation] Download of \(file.id) started")
@@ -101,8 +100,8 @@ public class DownloadOperation: Operation {
         main()
     }
 
-    public override func main() {
-        DDLogInfo("[DownloadOperation] Downloading \(file.id)")
+    override public func main() {
+        DDLogInfo("[DownloadOperation] Downloading \(file.id) with session \(urlSession.identifier)")
 
         let url = URL(string: ApiRoutes.downloadFile(file: file))!
 
@@ -115,7 +114,7 @@ public class DownloadOperation: Operation {
         }
 
         if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, error in
+            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, _ in
                 if let token = token {
                     var request = URLRequest(url: url)
                     request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
@@ -143,7 +142,7 @@ public class DownloadOperation: Operation {
         }
     }
 
-    public override func cancel() {
+    override public func cancel() {
         DDLogInfo("[DownloadOperation] Download of \(file.id) canceled")
         super.cancel()
         task?.cancel()
