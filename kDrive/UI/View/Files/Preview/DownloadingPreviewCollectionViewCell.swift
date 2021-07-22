@@ -16,15 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import AVKit
 import kDriveCore
 import Kingfisher
-import AVKit
+import UIKit
 
 protocol DownloadProgressObserver {
     var progressView: UIProgressView! { get set }
     func setDownloadProgress(_ progress: Progress)
 }
+
 extension DownloadProgressObserver {
     func setDownloadProgress(_ progress: Progress) {
         progressView.isHidden = false
@@ -33,7 +34,6 @@ extension DownloadProgressObserver {
 }
 
 class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDelegate, DownloadProgressObserver {
-
     @IBOutlet weak var previewZoomView: UIScrollView!
     @IBOutlet weak var previewImageView: UIImageView!
     @IBOutlet weak var progressView: UIProgressView!
@@ -69,9 +69,9 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 
             let scrollSize = previewZoomView.frame.size
             let size = CGSize(width: scrollSize.width / 3,
-                height: scrollSize.height / 3)
+                              height: scrollSize.height / 3)
             let origin = CGPoint(x: point.x - size.width / 2,
-                y: point.y - size.height / 2)
+                                 y: point.y - size.height / 2)
             previewZoomView.zoom(to: CGRect(origin: origin, size: size), animated: true)
         } else {
             previewZoomView.zoom(to: previewImageView.frame, animated: true)
