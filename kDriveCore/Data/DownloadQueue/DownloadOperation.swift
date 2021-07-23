@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import FileProvider
 import CocoaLumberjackSwift
+import FileProvider
+import Foundation
 
 public class DownloadOperation: Operation {
-
     // MARK: - Attributes
 
     private let file: File
@@ -29,6 +28,7 @@ public class DownloadOperation: Operation {
     private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     public var task: URLSessionDownloadTask?
     public var error: DriveError?
@@ -55,15 +55,15 @@ public class DownloadOperation: Operation {
         }
     }
 
-    public override var isExecuting: Bool {
+    override public var isExecuting: Bool {
         return _executing
     }
 
-    public override var isFinished: Bool {
+    override public var isFinished: Bool {
         return _finished
     }
 
-    public override var isAsynchronous: Bool {
+    override public var isAsynchronous: Bool {
         return true
     }
 
@@ -84,7 +84,7 @@ public class DownloadOperation: Operation {
         self.itemIdentifier = nil
     }
 
-    public override func start() {
+    override public func start() {
         assert(!isExecuting, "Operation is already started")
 
         DDLogInfo("[DownloadOperation] Download of \(file.id) started")
@@ -96,26 +96,49 @@ public class DownloadOperation: Operation {
             return
         }
 
+        if !Constants.isInExtension {
+            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
+                DownloadQueue.instance.suspendAllOperations()
+                DDLogInfo("[DownloadOperation] Background task expired")
+                if let rescheduledSessionId = BackgroundDownloadSessionManager.instance.rescheduleForBackground(task: self.task),
+                   let task = self.task,
+                   let sessionUrl = task.originalRequest?.url?.absoluteString {
+                    self.error = .taskRescheduled
+
+                    let downloadTask = DownloadTask(fileId: self.file.id, driveId: self.file.driveId, userId: self.driveFileManager.drive.userId, sessionId: rescheduledSessionId, sessionUrl: sessionUrl)
+                    BackgroundRealm.uploads.execute { realm in
+                        try? realm.safeWrite {
+                            realm.add(downloadTask, update: .modified)
+                        }
+                    }
+                } else {
+                    // We couldn't reschedule the download
+                    // TODO: Send notification to tell the user the download failed ?
+                }
+                self.end(sessionUrl: self.task?.originalRequest?.url)
+            }
+        }
+
         // If the operation is not canceled, begin executing the task
         _executing = true
         main()
     }
 
-    public override func main() {
-        DDLogInfo("[DownloadOperation] Downloading \(file.id)")
+    override public func main() {
+        DDLogInfo("[DownloadOperation] Downloading \(file.id) with session \(urlSession.identifier)")
 
         let url = URL(string: ApiRoutes.downloadFile(file: file))!
 
         // Add download task to Realm
-        let downloadTask = DownloadTask(fileId: file.id, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionUrl: url.absoluteString)
+        let downloadTask = DownloadTask(fileId: file.id, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionId: urlSession.identifier, sessionUrl: url.absoluteString)
         BackgroundRealm.uploads.execute { realm in
             try? realm.safeWrite {
-                realm.add(downloadTask)
+                realm.add(downloadTask, update: .modified)
             }
         }
 
         if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, error in
+            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, _ in
                 if let token = token {
                     var request = URLRequest(url: url)
                     request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
@@ -143,7 +166,7 @@ public class DownloadOperation: Operation {
         }
     }
 
-    public override func cancel() {
+    override public func cancel() {
         DDLogInfo("[DownloadOperation] Download of \(file.id) canceled")
         super.cancel()
         task?.cancel()
@@ -157,7 +180,10 @@ public class DownloadOperation: Operation {
         if let error = error {
             // Client-side error
             DDLogError("[DownloadOperation] Client-side error for \(file.id): \(error)")
-            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
+            if self.error == .taskRescheduled {
+                // We return because we don't want end() to be called as it is already called in the expiration handler
+                return
+            } else if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
                 self.error = .taskCancelled
             } else {
                 self.error = .networkError
@@ -187,7 +213,8 @@ public class DownloadOperation: Operation {
     private func end(sessionUrl: URL?) {
         DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
         // Delete download task
-        if let sessionUrl = sessionUrl {
+        if error != .taskRescheduled,
+           let sessionUrl = sessionUrl {
             BackgroundRealm.uploads.execute { realm in
                 if let task = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl.absoluteString)).first {
                     try? realm.safeWrite {
@@ -196,7 +223,11 @@ public class DownloadOperation: Operation {
                 }
             }
         }
+
         progressObservation?.invalidate()
+        if backgroundTaskIdentifier != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+        }
         _executing = false
         _finished = true
     }
