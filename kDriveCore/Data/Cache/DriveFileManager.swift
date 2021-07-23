@@ -32,7 +32,7 @@ public class DriveFileManager {
         public let cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-        public let currentUploadDbVersion: UInt64 = 7
+        public let currentUploadDbVersion: UInt64 = 8
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
             if oldSchemaVersion < strongSelf.currentUploadDbVersion {
@@ -43,11 +43,15 @@ public class DriveFileManager {
                     }
                 }
                 // Migration to version 4 -> 7 is not needed
+                // Migration from version 7 to version 8
+                if oldSchemaVersion < 8 {
+                    migration.deleteData(forType: DownloadTask.className())
+                }
             }
         }
 
         public lazy var uploadsRealmConfiguration = Realm.Configuration(
-            fileURL: rootDocumentsURL.appendingPathComponent("/uploads.realm"),
+            fileURL: rootDocumentsURL.appendingPathComponent("uploads.realm"),
             schemaVersion: currentUploadDbVersion,
             migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])

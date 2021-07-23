@@ -236,7 +236,7 @@ public class UploadOperation: Operation {
             if file.error != .taskRescheduled {
                 file.sessionUrl = ""
             } else {
-                // We return because we don't want end() to be called as it is already called in the expiration hadnler
+                // We return because we don't want end() to be called as it is already called in the expiration handler
                 return
             }
             if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {

@@ -21,14 +21,16 @@ import Foundation
 import RealmSwift
 
 public class DownloadTask: Object {
-    @objc public dynamic var fileId: Int = 0
-    @objc public dynamic var driveId: Int = 0
-    @objc public dynamic var userId: Int = 0
-    @objc public dynamic var sessionUrl: String = ""
+    @Persisted(primaryKey: true) var fileId: Int = 0
+    @Persisted var driveId: Int = 0
+    @Persisted var userId: Int = 0
+    @Persisted var sessionUrl: String = ""
+    @Persisted var sessionId: String?
 
-    init(fileId: Int, driveId: Int, userId: Int, sessionUrl: String) {
+    init(fileId: Int, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
         self.fileId = fileId
         self.driveId = driveId
+        self.sessionId = sessionId
         self.sessionUrl = sessionUrl
         self.userId = userId
     }
@@ -63,6 +65,9 @@ public class DownloadQueue {
         didDownloadFile: [UUID: (DownloadedFileId, DriveError?) -> Void](),
         didChangeProgress: [UUID: (DownloadedFileId, Double) -> Void]()
     )
+    private var bestSession: FileDownloadSession {
+        return Constants.isInExtension ? BackgroundDownloadSessionManager.instance : foregroundSession
+    }
 
     // MARK: - Public methods
 
@@ -73,7 +78,7 @@ public class DownloadQueue {
             return
         }
 
-        let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: BackgroundDownloadSessionManager.instance, itemIdentifier: itemIdentifier)
+        let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: bestSession, itemIdentifier: itemIdentifier)
         operation.completionBlock = { [fileId = file.id] in
             self.operationsInQueue.removeValue(forKey: fileId)
             self.publishFileDownloaded(fileId: fileId, error: operation.error)

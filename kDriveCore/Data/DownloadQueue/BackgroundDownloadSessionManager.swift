@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 
 public protocol FileDownloadSession: BackgroundSession {
@@ -67,6 +68,26 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
                     }
                 }
             }
+        }
+    }
+
+    public func rescheduleForBackground(task: URLSessionDownloadTask?, completion: @escaping (String?) -> Void) {
+        if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
+           let request = task?.originalRequest {
+            task?.cancel { data in
+                let rescheduledTask: URLSessionDownloadTask
+                if let data = data {
+                    DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "") with resume data")
+                    rescheduledTask = self.backgroundSession.downloadTask(withResumeData: data)
+                } else {
+                    DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "")")
+                    rescheduledTask = self.backgroundSession.downloadTask(with: request)
+                }
+                rescheduledTask.resume()
+                return completion(self.backgroundSession.identifier)
+            }
+        } else {
+            return completion(nil)
         }
     }
 

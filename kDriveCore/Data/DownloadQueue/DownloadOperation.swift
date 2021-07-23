@@ -28,6 +28,7 @@ public class DownloadOperation: Operation {
     private let urlSession: FileDownloadSession
     private let itemIdentifier: NSFileProviderItemIdentifier?
     private var progressObservation: NSKeyValueObservation?
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     public var task: URLSessionDownloadTask?
     public var error: DriveError?
@@ -95,6 +96,37 @@ public class DownloadOperation: Operation {
             return
         }
 
+        if !Constants.isInExtension {
+            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
+                DDLogInfo("[DownloadOperation] Background task expired")
+                self.error = .taskRescheduled
+                BackgroundDownloadSessionManager.instance.rescheduleForBackground(task: self.task) { backgroundSessionIdentifier in
+                    if let task = self.task,
+                       let sessionUrl = task.originalRequest?.url?.absoluteString {
+                        if let backgroundSessionIdentifier = backgroundSessionIdentifier {
+                            let downloadTask = DownloadTask(fileId: self.file.id, driveId: self.file.driveId, userId: self.driveFileManager.drive.userId, sessionId: backgroundSessionIdentifier, sessionUrl: sessionUrl)
+                            BackgroundRealm.uploads.execute { realm in
+                                try? realm.safeWrite {
+                                    realm.add(downloadTask, update: .modified)
+                                }
+                            }
+                        } else {
+                            // We couldn't reschedule the download, we remove it from database
+                            BackgroundRealm.uploads.execute { realm in
+                                if let task = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first {
+                                    try? realm.safeWrite {
+                                        realm.delete(task)
+                                    }
+                                }
+                            }
+                            // TODO: Send notification to tell the user the download failed ?
+                        }
+                    }
+                    self.end(sessionUrl: self.task?.originalRequest?.url)
+                }
+            }
+        }
+
         // If the operation is not canceled, begin executing the task
         _executing = true
         main()
@@ -106,10 +138,10 @@ public class DownloadOperation: Operation {
         let url = URL(string: ApiRoutes.downloadFile(file: file))!
 
         // Add download task to Realm
-        let downloadTask = DownloadTask(fileId: file.id, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionUrl: url.absoluteString)
+        let downloadTask = DownloadTask(fileId: file.id, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionId: urlSession.identifier, sessionUrl: url.absoluteString)
         BackgroundRealm.uploads.execute { realm in
             try? realm.safeWrite {
-                realm.add(downloadTask)
+                realm.add(downloadTask, update: .modified)
             }
         }
 
@@ -156,7 +188,10 @@ public class DownloadOperation: Operation {
         if let error = error {
             // Client-side error
             DDLogError("[DownloadOperation] Client-side error for \(file.id): \(error)")
-            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
+            if self.error == .taskRescheduled {
+                // We return because we don't want end() to be called as it is already called in the expiration handler
+                return
+            } else if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
                 self.error = .taskCancelled
             } else {
                 self.error = .networkError
@@ -186,7 +221,8 @@ public class DownloadOperation: Operation {
     private func end(sessionUrl: URL?) {
         DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
         // Delete download task
-        if let sessionUrl = sessionUrl {
+        if error != .taskRescheduled,
+           let sessionUrl = sessionUrl {
             BackgroundRealm.uploads.execute { realm in
                 if let task = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl.absoluteString)).first {
                     try? realm.safeWrite {
@@ -195,7 +231,11 @@ public class DownloadOperation: Operation {
                 }
             }
         }
+
         progressObservation?.invalidate()
+        if backgroundTaskIdentifier != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+        }
         _executing = false
         _finished = true
     }
