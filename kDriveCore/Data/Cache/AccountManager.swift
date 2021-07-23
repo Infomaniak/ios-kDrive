@@ -20,8 +20,8 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakLogin
-import Sentry
 import RealmSwift
+import Sentry
 
 public protocol SwitchAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)
@@ -33,9 +33,10 @@ public protocol AccountManagerDelegate: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate {
+    private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
-    private let accessGroup: String
+    public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group
     public static var instance = AccountManager()
     private let tag = "ch.infomaniak.token".data(using: .utf8)!
     public var currentAccount: Account!
@@ -75,11 +76,6 @@ public class AccountManager: RefreshTokenDelegate {
     private var apiFetchers = [Int: DriveApiFetcher]()
 
     private init() {
-        let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
-        self.accessGroup = appIdentifierPrefix + AccountManager.group
-        KeychainHelper.initKeychainAccessiblity(accessGroup: accessGroup)
-        DDLogInfo("[Keychain] Accessible ? \(KeychainHelper.isKeychainAccessible)")
-
         self.currentDriveId = UserDefaults.shared.currentDriveId
         self.currentUserId = UserDefaults.shared.currentDriveUserId
 
@@ -104,7 +100,7 @@ public class AccountManager: RefreshTokenDelegate {
     public func reloadTokensAndAccounts() {
         accounts = loadAccounts()
         if !accounts.isEmpty {
-            tokens = loadTokens()
+            tokens = KeychainHelper.loadTokens()
         }
 
         // remove accounts with no user
@@ -168,7 +164,7 @@ public class AccountManager: RefreshTokenDelegate {
             scope.setContext(value: ["User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970], key: "Token Infos")
         }
         tokens.removeAll { $0.userId == token.userId }
-        deleteToken(token)
+        KeychainHelper.deleteToken(for: token.userId)
         if let account = getAccountForToken(token: token) {
             account.token = nil
             if account.userId == currentUserId {
@@ -313,7 +309,7 @@ public class AccountManager: RefreshTokenDelegate {
             removeAccount(toDeleteAccount: account)
         }
         accounts.append(account)
-        storeToken(account.token)
+        KeychainHelper.storeToken(account.token)
         saveAccounts()
     }
 
@@ -334,7 +330,7 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func removeTokenAndAccount(token: ApiToken) {
         tokens.removeAll { $0.userId == token.userId }
-        deleteToken(token)
+        KeychainHelper.deleteToken(for: token.userId)
         if let account = getAccountForToken(token: token) {
             removeAccount(toDeleteAccount: account)
         }
@@ -347,8 +343,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
-        deleteToken(oldToken)
-        storeToken(newToken)
+        KeychainHelper.storeToken(newToken)
         for account in accounts where oldToken.userId == account.userId {
             account.token = newToken
         }
@@ -359,91 +354,5 @@ public class AccountManager: RefreshTokenDelegate {
         for driveFileManager in driveFileManagers.values where driveFileManager.drive != currentDriveFileManager?.drive && driveFileManager.apiFetcher.currentToken?.userId == newToken.userId {
             driveFileManager.apiFetcher.currentToken = newToken
         }
-    }
-
-    public func deleteAllTokens() {
-        keychainQueue.sync {
-            let queryDelete: [String: Any] = [
-                kSecClass as String: kSecClassGenericPassword,
-                kSecAttrService as String: tag
-            ]
-            let resultCode = SecItemDelete(queryDelete as CFDictionary)
-            DDLogInfo("Successfully deleted all tokens ? \(resultCode == noErr)")
-        }
-    }
-
-    func deleteToken(_ token: ApiToken) {
-        keychainQueue.sync {
-            let queryDelete: [String: Any] = [
-                kSecClass as String: kSecClassGenericPassword,
-                kSecAttrService as String: tag,
-                kSecAttrAccount as String: "\(token.userId)"
-            ]
-            let resultCode = SecItemDelete(queryDelete as CFDictionary)
-            DDLogInfo("Successfully deleted token ? \(resultCode == noErr)")
-        }
-    }
-
-    func storeToken(_ token: ApiToken) {
-        deleteToken(token)
-        keychainQueue.sync {
-            // swiftlint:disable force_try
-            let tokenData = try! JSONEncoder().encode(token)
-            let queryAdd: [String: Any] = [
-                kSecClass as String: kSecClassGenericPassword,
-                kSecAttrAccessGroup as String: accessGroup,
-                kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
-                kSecAttrService as String: tag,
-                kSecAttrAccount as String: "\(token.userId)",
-                kSecValueData as String: tokenData
-            ]
-            let resultCode = SecItemAdd(queryAdd as CFDictionary, nil)
-            DDLogInfo("Successfully saved token ? \(resultCode == noErr)")
-            if resultCode != noErr {
-                SentrySDK.capture(message: "Failed saving token") { scope in
-                    scope.setContext(value: ["Keychain error code": resultCode, "User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970], key: "Error Infos")
-                }
-            }
-        }
-    }
-
-    func loadTokens() -> [ApiToken] {
-        var values = [ApiToken]()
-        keychainQueue.sync {
-            let query: [String: Any] = [
-                kSecClass as String: kSecClassGenericPassword,
-                kSecAttrService as String: tag,
-                kSecAttrAccessGroup as String: accessGroup,
-                kSecReturnData as String: kCFBooleanTrue as Any,
-                kSecReturnAttributes as String: kCFBooleanTrue as Any,
-                kSecReturnRef as String: kCFBooleanTrue as Any,
-                kSecMatchLimit as String: kSecMatchLimitAll
-            ]
-
-            var result: AnyObject?
-
-            let resultCode = withUnsafeMutablePointer(to: &result) {
-                SecItemCopyMatching(query as CFDictionary, UnsafeMutablePointer($0))
-            }
-            DDLogInfo("Successfully loaded tokens ? \(resultCode == noErr)")
-
-            if resultCode == noErr {
-                let jsonDecoder = JSONDecoder()
-                if let array = result as? [[String: Any]] {
-                    for item in array {
-                        if let value = item[kSecValueData as String] as? Data {
-                            if let token = try? jsonDecoder.decode(ApiToken.self, from: value) {
-                                values.append(token)
-                            }
-                        }
-                    }
-                }
-            } else {
-                SentrySDK.capture(message: "Failed loading tokens") { scope in
-                    scope.setContext(value: ["Keychain error code": resultCode], key: "Error Infos")
-                }
-            }
-        }
-        return values
     }
 }

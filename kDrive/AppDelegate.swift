@@ -214,7 +214,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
             window?.makeKeyAndVisible()
         } else if UserDefaults.isFirstLaunch() || accountManager.accounts.isEmpty {
             if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
-                accountManager.deleteAllTokens()
+                KeychainHelper.deleteAllTokens()
                 window?.rootViewController = OnboardingViewController.instantiate()
                 window?.makeKeyAndVisible()
             }
