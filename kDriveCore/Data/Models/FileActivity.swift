@@ -45,6 +45,8 @@ public enum FileActivityType: String, Codable {
     case commentLike = "comment_like"
     case commentUnlike = "comment_unlike"
     case commentResolve = "comment_resolve"
+    case collaborativeFolderCreate = "collaborative_folder_create"
+    case collaborativeFolderDelete = "collaborative_folder_delete"
 }
 
 public class FileActivity: Object, Codable {

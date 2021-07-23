@@ -106,6 +106,8 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = "fileDetailsActivityCommentResolve"
         case .fileMoveIn, .fileMoveOut:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderMove" : "fileDetailsActivityFileMove"
+        case .collaborativeFolderCreate, .collaborativeFolderDelete:
+            localizedKey = "fileActivityUnknown"
         }
         detailLabel.text = localizedKey.localized
 
