@@ -45,7 +45,7 @@
                                                     <constraint firstAttribute="height" constant="36" id="4pa-4D-1jZ"/>
                                                 </constraints>
                                                 <color key="textColor" name="titleColor"/>
-                                                <fontDescription key="fontDescription" name="AppleColorEmoji" family="Apple Color Emoji" pointSize="13"/>
+                                                <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="13"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" pointerInteraction="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KEo-B6-Qkr" customClass="ImageButton" customModule="InfomaniakCore">
@@ -105,6 +105,9 @@
     <designables>
         <designable name="KEo-B6-Qkr">
             <size key="intrinsicContentSize" width="24" height="24"/>
+        </designable>
+        <designable name="wGz-LN-h9i">
+            <size key="intrinsicContentSize" width="163" height="17"/>
         </designable>
     </designables>
     <resources>

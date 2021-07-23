@@ -69,7 +69,7 @@
                                             <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="https://drive.infomaniak.com/app/…" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="V97-ak-e55">
                                                 <rect key="frame" x="0.0" y="0.0" width="320" height="38"/>
                                                 <color key="textColor" name="titleColor"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="13"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gEz-bo-BeO">
@@ -174,11 +174,20 @@
         </scene>
     </scenes>
     <designables>
+        <designable name="3Vq-p2-Xx9">
+            <size key="intrinsicContentSize" width="706.5" height="17"/>
+        </designable>
+        <designable name="BGB-3b-Vqr">
+            <size key="intrinsicContentSize" width="357" height="16"/>
+        </designable>
         <designable name="PIZ-xp-A8m">
-            <size key="intrinsicContentSize" width="78" height="29"/>
+            <size key="intrinsicContentSize" width="69" height="32"/>
         </designable>
         <designable name="Pnz-dr-Pio">
-            <size key="intrinsicContentSize" width="92" height="29"/>
+            <size key="intrinsicContentSize" width="95" height="32"/>
+        </designable>
+        <designable name="VHD-ey-zw3">
+            <size key="intrinsicContentSize" width="188.5" height="21.5"/>
         </designable>
     </designables>
     <resources>
