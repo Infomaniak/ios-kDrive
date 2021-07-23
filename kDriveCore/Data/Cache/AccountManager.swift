@@ -76,8 +76,6 @@ public class AccountManager: RefreshTokenDelegate {
     private var apiFetchers = [Int: DriveApiFetcher]()
 
     private init() {
-        DDLogInfo("[Keychain] Accessible ? \(KeychainHelper.isKeychainAccessible)")
-
         self.currentDriveId = UserDefaults.shared.currentDriveId
         self.currentUserId = UserDefaults.shared.currentDriveUserId
 

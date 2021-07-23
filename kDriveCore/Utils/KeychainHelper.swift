@@ -22,7 +22,7 @@ import InfomaniakLogin
 import Sentry
 
 public enum KeychainHelper {
-    private static var accessGroup = AccountManager.accessGroup
+    private static let accessGroup = AccountManager.accessGroup
     private static let tag = "ch.infomaniak.token".data(using: .utf8)!
     private static let keychainQueue = DispatchQueue(label: "com.infomaniak.drive.keychain")
 
@@ -127,7 +127,7 @@ public enum KeychainHelper {
             keychainQueue.sync {
                 let queryAdd: [String: Any] = [
                     kSecClass as String: kSecClassGenericPassword,
-                    kSecAttrAccessGroup as String: AccountManager.accessGroup,
+                    kSecAttrAccessGroup as String: accessGroup,
                     kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
                     kSecAttrService as String: tag,
                     kSecAttrAccount as String: "\(token.userId)",
@@ -150,7 +150,7 @@ public enum KeychainHelper {
             let queryFindOne: [String: Any] = [
                 kSecClass as String: kSecClassGenericPassword,
                 kSecAttrService as String: tag,
-                kSecAttrAccessGroup as String: AccountManager.accessGroup,
+                kSecAttrAccessGroup as String: accessGroup,
                 kSecAttrAccount as String: "\(userId)",
                 kSecReturnData as String: kCFBooleanTrue as Any,
                 kSecReturnAttributes as String: kCFBooleanTrue as Any,
@@ -180,7 +180,7 @@ public enum KeychainHelper {
             let query: [String: Any] = [
                 kSecClass as String: kSecClassGenericPassword,
                 kSecAttrService as String: tag,
-                kSecAttrAccessGroup as String: AccountManager.accessGroup,
+                kSecAttrAccessGroup as String: accessGroup,
                 kSecReturnData as String: kCFBooleanTrue as Any,
                 kSecReturnAttributes as String: kCFBooleanTrue as Any,
                 kSecReturnRef as String: kCFBooleanTrue as Any,
