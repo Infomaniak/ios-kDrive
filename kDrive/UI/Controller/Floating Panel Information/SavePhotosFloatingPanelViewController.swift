@@ -1,27 +1,26 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
-import Lottie
 import kDriveCore
+import Lottie
+import UIKit
 
 class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewController {
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -29,7 +28,11 @@ class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewControl
         animationView.animation = Animation.named("illu_photos")
         animationViewHeightConstraint.constant = 258
         titleLabel.text = KDriveStrings.Localizable.syncConfigureTitle
-        descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.syncConfigureDescription(driveFileManager.drive.name), boldText: driveFileManager.drive.name)
+        if let drive = drive {
+            descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.syncConfigureDescription(drive.name), boldText: drive.name)
+        } else {
+            descriptionLabel.text = nil
+        }
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
@@ -41,5 +44,4 @@ class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewControl
         object_setClass(contentViewController, SavePhotosFloatingPanelViewController.self)
         return contentViewController
     }
-
 }

@@ -34,8 +34,6 @@ class DropBoxFloatingPanelViewController: InformationFloatingPanelViewController
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
         rightButton.setTitle(KDriveStrings.Localizable.buttonUpgradeOffer, for: .normal)
-        rightButton?.titleLabel?.lineBreakMode = NSLineBreakMode.byWordWrapping
-        rightButton.titleLabel?.textAlignment = NSTextAlignment.center
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
