@@ -1,4 +1,3 @@
-//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2021 Infomaniak Network SA
@@ -26,13 +25,4 @@ class ActionNotification: Codable {
     let parentId: Int
     let simpleAction: SimpleAction
     let action: Action
-
-    enum CodingKeys: String, CodingKey {
-        case uid
-        case driveId = "drive_id"
-        case fileId = "file_id"
-        case parentId = "parent_id"
-        case simpleAction = "simple_action"
-        case action
-    }
 }

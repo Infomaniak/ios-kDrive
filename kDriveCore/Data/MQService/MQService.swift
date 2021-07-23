@@ -21,22 +21,33 @@ import CocoaMQTTWebSocket
 import Foundation
 
 public class MQService {
-    private let webSocket: CocoaMQTTWebSocket
-    private let mqtt: CocoaMQTT
-    private var currentToken: IPSToken?
-    private let decoder = JSONDecoder()
-    private var actionProgressObservers = [UUID: (ActionProgressNotification) -> Void]()
+    private lazy var decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
 
-    public init() {
-        webSocket = CocoaMQTTWebSocket(uri: "/ws")
+    private lazy var webSocket: CocoaMQTTWebSocket = {
+        let webSocket = CocoaMQTTWebSocket(uri: "/ws")
         webSocket.enableSSL = true
-        mqtt = CocoaMQTT(clientID: "", host: "info-mq.infomaniak.com", port: 443, socket: webSocket)
+        return webSocket
+    }()
+
+    private lazy var mqtt: CocoaMQTT = {
+        let mqtt = CocoaMQTT(clientID: "", host: "info-mq.infomaniak.com", port: 443, socket: webSocket)
         mqtt.username = "ips:ips-public"
         mqtt.password = "8QC5EwBqpZ2Z"
         mqtt.delegate = self
         mqtt.keepAlive = 30
         mqtt.autoReconnect = true
         mqtt.autoReconnectTimeInterval = 20
+        return mqtt
+    }()
+
+    private var currentToken: IPSToken?
+    private var actionProgressObservers = [UUID: (ActionProgressNotification) -> Void]()
+
+    public init() {
         _ = mqtt.connect(timeout: 20)
     }
 
@@ -84,14 +95,12 @@ extension MQService: CocoaMQTTDelegate {
     public func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16) {}
 
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
-        guard let driveFileManager = AccountManager.instance.currentDriveFileManager else {
-            return
-        }
-
         let data = Data(message.payload)
         if let message = try? decoder.decode(ActionNotification.self, from: data) {
-            if message.driveId == driveFileManager.drive.id,
-               let file = driveFileManager.getCachedFile(id: message.parentId) {}
+            if let driveFileManager = AccountManager.instance.getDriveFileManager(for: message.driveId, userId: AccountManager.instance.currentUserId),
+               let file = driveFileManager.getCachedFile(id: message.parentId) {
+                // TODO: Update file
+            }
         } else if let message = try? decoder.decode(ActionProgressNotification.self, from: data) {
             for observer in actionProgressObservers.values {
                 observer(message)

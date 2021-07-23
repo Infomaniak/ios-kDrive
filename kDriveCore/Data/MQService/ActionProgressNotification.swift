@@ -24,12 +24,4 @@ public class ActionProgressNotification: Codable {
     let action: String
     let actionUuid: String
     public let progress: ActionProgress
-
-    enum CodingKeys: String, CodingKey {
-        case uid
-        case driveId = "drive_id"
-        case action
-        case actionUuid = "action_uuid"
-        case progress
-    }
 }
