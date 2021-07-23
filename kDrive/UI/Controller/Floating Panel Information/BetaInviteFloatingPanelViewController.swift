@@ -25,6 +25,7 @@ class BetaInviteFloatingPanelViewController: InformationFloatingPanelViewControl
         super.viewDidLoad()
 
         imageView.image = KDriveAsset.logoKdriveBeta.image
+        imageViewHeightConstraint.constant = 70
         animationView.isHidden = true
         titleLabel.text = KDriveStrings.Localizable.betaTestTitle
         descriptionLabel.text = KDriveStrings.Localizable.betaTestDescription
