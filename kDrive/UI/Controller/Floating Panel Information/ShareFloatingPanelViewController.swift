@@ -25,6 +25,7 @@ class ShareFloatingPanelViewController: InformationFloatingPanelViewController {
         super.viewDidLoad()
 
         imageView.image = KDriveAsset.folderDropBox.image
+        imageViewHeightConstraint.constant = 78
         animationView.isHidden = true
         titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle("")
         descriptionLabel.text = KDriveStrings.Localizable.dropBoxResultDescription

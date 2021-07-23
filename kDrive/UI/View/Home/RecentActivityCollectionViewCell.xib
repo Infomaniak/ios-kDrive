@@ -73,7 +73,6 @@
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="tri-Qp-rsn" secondAttribute="bottom" id="1n8-8T-Tma"/>
                                     <constraint firstAttribute="bottom" secondItem="2eT-ZB-Mma" secondAttribute="bottom" id="2Rt-oG-lkf"/>
-                                    <constraint firstAttribute="bottom" secondItem="j9K-4i-jdP" secondAttribute="bottom" id="DB8-Ob-5gd"/>
                                     <constraint firstAttribute="trailing" secondItem="2eT-ZB-Mma" secondAttribute="trailing" id="EvU-G5-N2q"/>
                                     <constraint firstItem="goV-EI-MiC" firstAttribute="centerX" secondItem="aCp-2c-Jek" secondAttribute="centerX" id="F78-4D-iY8"/>
                                     <constraint firstItem="2eT-ZB-Mma" firstAttribute="top" secondItem="aCp-2c-Jek" secondAttribute="top" id="HHG-L2-c9R"/>
@@ -125,11 +124,6 @@
             <point key="canvasLocation" x="72.463768115942031" y="172.43303571428569"/>
         </collectionViewCell>
     </objects>
-    <designables>
-        <designable name="goV-EI-MiC">
-            <size key="intrinsicContentSize" width="37.5" height="26.5"/>
-        </designable>
-    </designables>
     <resources>
         <image name="exclamationmark.bubble.fill" catalog="system" width="128" height="110"/>
         <image name="folder-filled" width="24" height="24"/>

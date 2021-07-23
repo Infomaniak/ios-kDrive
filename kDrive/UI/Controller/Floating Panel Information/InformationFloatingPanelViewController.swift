@@ -1,30 +1,31 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
 import FloatingPanel
-import Lottie
 import kDriveCore
+import Lottie
+import UIKit
 
 class InformationFloatingPanelViewController: UIViewController {
-
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var imageViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var animationView: AnimationView!
+    @IBOutlet weak var animationViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var additionalInformationLabel: UILabel!
@@ -38,10 +39,14 @@ class InformationFloatingPanelViewController: UIViewController {
     var cancelHandler: ((UIButton) -> Void)?
     var actionHandler: ((UIButton) -> Void)?
 
-    var driveFileManager: DriveFileManager!
+    var drive: Drive?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        leftButton.titleLabel?.numberOfLines = 2
+        leftButton.titleLabel?.textAlignment = .center
+        rightButton.titleLabel?.numberOfLines = 2
+        rightButton.titleLabel?.textAlignment = .center
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -70,8 +75,9 @@ class InformationFloatingPanelViewController: UIViewController {
         return Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
     }
 
-    class func instantiatePanel() -> DriveFloatingPanelController {
+    class func instantiatePanel(drive: Drive? = nil) -> DriveFloatingPanelController {
         let contentVC = instantiate()
+        contentVC.drive = drive
 
         let floatingPanelViewController = DriveFloatingPanelController()
         floatingPanelViewController.layout = InformationViewFloatingPanelLayout()

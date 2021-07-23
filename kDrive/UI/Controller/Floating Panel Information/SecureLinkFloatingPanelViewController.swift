@@ -26,6 +26,7 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
 
         imageView.isHidden = true
         animationView.animation = Animation.named("illu_upgrade")
+        animationViewHeightConstraint.constant = 105
         titleLabel.text = KDriveStrings.Localizable.secureLinkShareTitle
         descriptionLabel.text = KDriveStrings.Localizable.secureLinkShareDescription
         let teams = "Solo, Team & Pro"
