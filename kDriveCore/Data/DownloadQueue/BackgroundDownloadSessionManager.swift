@@ -71,9 +71,12 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
         }
     }
 
-    public func rescheduleForBackground(task: URLSessionDownloadTask?, completion: @escaping (String?) -> Void) {
+    public func rescheduleForBackground(task: URLSessionDownloadTask?) -> String? {
+        let syncLock = DispatchGroup()
         if backgroundTaskCount < BackgroundUploadSessionManager.maxBackgroundTasks,
            let request = task?.originalRequest {
+            var sessionIdentifier: String?
+            syncLock.enter()
             task?.cancel { data in
                 let rescheduledTask: URLSessionDownloadTask
                 if let data = data {
@@ -84,10 +87,14 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundSession
                     rescheduledTask = self.backgroundSession.downloadTask(with: request)
                 }
                 rescheduledTask.resume()
-                return completion(self.backgroundSession.identifier)
+                sessionIdentifier = self.backgroundSession.identifier
+                syncLock.leave()
             }
+
+            syncLock.wait()
+            return sessionIdentifier
         } else {
-            return completion(nil)
+            return nil
         }
     }
 

@@ -98,32 +98,24 @@ public class DownloadOperation: Operation {
 
         if !Constants.isInExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
+                DownloadQueue.instance.suspendAllOperations()
                 DDLogInfo("[DownloadOperation] Background task expired")
-                self.error = .taskRescheduled
-                BackgroundDownloadSessionManager.instance.rescheduleForBackground(task: self.task) { backgroundSessionIdentifier in
-                    if let task = self.task,
-                       let sessionUrl = task.originalRequest?.url?.absoluteString {
-                        if let backgroundSessionIdentifier = backgroundSessionIdentifier {
-                            let downloadTask = DownloadTask(fileId: self.file.id, driveId: self.file.driveId, userId: self.driveFileManager.drive.userId, sessionId: backgroundSessionIdentifier, sessionUrl: sessionUrl)
-                            BackgroundRealm.uploads.execute { realm in
-                                try? realm.safeWrite {
-                                    realm.add(downloadTask, update: .modified)
-                                }
-                            }
-                        } else {
-                            // We couldn't reschedule the download, we remove it from database
-                            BackgroundRealm.uploads.execute { realm in
-                                if let task = realm.objects(DownloadTask.self).filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first {
-                                    try? realm.safeWrite {
-                                        realm.delete(task)
-                                    }
-                                }
-                            }
-                            // TODO: Send notification to tell the user the download failed ?
+                if let rescheduledSessionId = BackgroundDownloadSessionManager.instance.rescheduleForBackground(task: self.task),
+                   let task = self.task,
+                   let sessionUrl = task.originalRequest?.url?.absoluteString {
+                    self.error = .taskRescheduled
+
+                    let downloadTask = DownloadTask(fileId: self.file.id, driveId: self.file.driveId, userId: self.driveFileManager.drive.userId, sessionId: rescheduledSessionId, sessionUrl: sessionUrl)
+                    BackgroundRealm.uploads.execute { realm in
+                        try? realm.safeWrite {
+                            realm.add(downloadTask, update: .modified)
                         }
                     }
-                    self.end(sessionUrl: self.task?.originalRequest?.url)
+                } else {
+                    // We couldn't reschedule the download
+                    // TODO: Send notification to tell the user the download failed ?
                 }
+                self.end(sessionUrl: self.task?.originalRequest?.url)
             }
         }
 
