@@ -20,7 +20,6 @@ import Foundation
 import Network
 
 public class ReachabilityListener {
-
     public enum NetworkStatus {
         case undefined
         case offline
@@ -36,7 +35,11 @@ public class ReachabilityListener {
     init() {
         networkMonitor = NWPathMonitor()
         currentStatus = .undefined
-        networkMonitor.pathUpdateHandler = { path in
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            guard let self = self else {
+                return
+            }
+
             let newStatus = self.pathToStatus(path)
             if newStatus != self.currentStatus {
                 self.currentStatus = newStatus
@@ -63,9 +66,10 @@ public class ReachabilityListener {
 }
 
 // MARK: - Observation
-extension ReachabilityListener {
+
+public extension ReachabilityListener {
     @discardableResult
-    public func observeNetworkChange<T: AnyObject>(_ observer: T, using closure: @escaping (NetworkStatus) -> Void)
+    func observeNetworkChange<T: AnyObject>(_ observer: T, using closure: @escaping (NetworkStatus) -> Void)
         -> ObservationToken {
         let key = UUID()
         didChangeNetworkStatus[key] = { [weak self, weak observer] status in
