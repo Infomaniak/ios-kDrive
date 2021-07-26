@@ -32,6 +32,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     }
 
     var selectionMode = false
+    var file: File?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -61,11 +62,14 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     func configureWith(file: File, roundedCorners: Bool = true, selectionMode: Bool = false) {
         self.selectionMode = selectionMode
+        self.file = file
         checkmarkImage.isHidden = !selectionMode
         darkLayer.isHidden = false
-        file.getThumbnail { image, isThumbnail in
-            self.darkLayer.isHidden = true
-            self.fileImage.image = isThumbnail ? image : KDriveAsset.fileImageSmall.image
+        file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
+            if fileId == self?.file?.id {
+                self?.darkLayer.isHidden = true
+                self?.fileImage.image = isThumbnail ? image : KDriveAsset.fileImageSmall.image
+            }
         }
         accessibilityLabel = file.name
         isAccessibilityElement = true
