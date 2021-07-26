@@ -43,6 +43,7 @@ extension UserDefaults {
         case lastSelectedDirectory
         case theme
         case photoSortMode
+        case betaInviteDisplayed
         case lastSyncDateOfflineFiles
     }
 
@@ -245,6 +246,15 @@ extension UserDefaults {
             return set(newValue.rawValue, forKey: key(.photoSortMode))
         }
     }
+    
+    public var betaInviteDisplayed: Bool {
+        get {
+            return bool(forKey: key(.betaInviteDisplayed))
+        }
+        set {
+            set(newValue, forKey: key(.betaInviteDisplayed))
+		}
+	}
 
     public var lastSyncDateOfflineFiles: Int {
         get {
