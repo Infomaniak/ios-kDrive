@@ -493,13 +493,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         } else {
             let progressSnack = UIConstants.showSnackBar(message: "Starting to delete", duration: .infinite)
             AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
-                DDLogError("observeActionProgress \(actionProgress.progress.message)")
-                self.driveFileManager.notifyObserversWith(file: self.currentDirectory)
-                progressSnack?.message = "\(actionProgress.progress.message) \(actionProgress.progress.total - actionProgress.progress.todo)/\(actionProgress.progress.total)"
-                if actionProgress.progress.message == "done" {
-                    progressSnack?.message = "Ending delete"
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        progressSnack?.dismiss()
+                DispatchQueue.main.async {
+                    DDLogError("observeActionProgress \(actionProgress.progress.message)")
+                    self.driveFileManager.notifyObserversWith(file: self.currentDirectory)
+                    progressSnack?.message = "\(actionProgress.progress.message) \(actionProgress.progress.total - actionProgress.progress.todo)/\(actionProgress.progress.total)"
+                    if actionProgress.progress.message == "done" {
+                        progressSnack?.message = "Ending delete"
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            progressSnack?.dismiss()
+                        }
                     }
                 }
             }

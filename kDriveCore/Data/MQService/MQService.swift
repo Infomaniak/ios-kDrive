@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaMQTT
-import CocoaMQTTWebSocket
+import CocoaLumberjackSwift
 import Foundation
+import MQTTNIO
 
 public class MQService {
     private lazy var decoder: JSONDecoder = {
@@ -27,97 +27,83 @@ public class MQService {
         return decoder
     }()
 
-    private lazy var webSocket: CocoaMQTTWebSocket = {
-        let webSocket = CocoaMQTTWebSocket(uri: "/ws")
-        webSocket.enableSSL = true
-        return webSocket
-    }()
+    private var queue = DispatchQueue(label: "com.infomaniak.mqservice")
 
-    private lazy var mqtt: CocoaMQTT = {
-        let mqtt = CocoaMQTT(clientID: "", host: "info-mq.infomaniak.com", port: 443, socket: webSocket)
-        mqtt.username = "ips:ips-public"
-        mqtt.password = "8QC5EwBqpZ2Z"
-        mqtt.delegate = self
-        mqtt.keepAlive = 30
-        mqtt.autoReconnect = true
-        mqtt.autoReconnectTimeInterval = 20
-        return mqtt
+    private lazy var mqtt: MQTTClient = {
+        var configuration = MQTTClient.Configuration(
+            keepAliveInterval: .seconds(30),
+            connectTimeout: .seconds(20),
+            userName: "ips:ips-public",
+            password: "8QC5EwBqpZ2Z",
+            useSSL: true,
+            useWebSockets: true,
+            webSocketURLPath: "/ws"
+        )
+
+        let client = MQTTClient(
+            host: "info-mq.infomaniak.com",
+            port: 443,
+            identifier: "MQTT",
+            eventLoopGroupProvider: .createNew,
+            configuration: configuration
+        )
+
+        return client
     }()
 
     private var currentToken: IPSToken?
     private var actionProgressObservers = [UUID: (ActionProgressNotification) -> Void]()
 
-    public init() {
-        _ = mqtt.connect(timeout: 20)
-    }
+    public init() {}
 
     public func registerForNotifications(with token: IPSToken) {
-        if let currentToken = currentToken {
-            actionProgressObservers.removeAll()
-            mqtt.unsubscribe(topicFor(token: currentToken))
-        }
-        currentToken = token
-        if !isSubscribed(token: token) {
-            mqtt.subscribe(topicFor(token: token))
+        queue.async { [self] in
+            if !mqtt.isActive() {
+                do {
+                    _ = try mqtt.connect().wait()
+                } catch {
+                    DDLogError("[MQService] Error while connecting \(error)")
+                }
+            }
+            if let currentToken = currentToken {
+                actionProgressObservers.removeAll()
+                do {
+                    try mqtt.unsubscribe(from: [topicFor(token: currentToken)]).wait()
+                } catch {
+                    DDLogError("[MQService] Error while unsubscribing \(error)")
+                }
+            }
+            currentToken = token
+            do {
+                _ = try mqtt.subscribe(to: [MQTTSubscribeInfo(topicFilter: topicFor(token: token), qos: .exactlyOnce)]).wait()
+                mqtt.addPublishListener(named: "Drive notifications listener") { result in
+                    switch result {
+                    case .success(let message):
+                        var buffer = message.payload
+                        if let data = buffer.readData(length: buffer.readableBytes) {
+                            if let message = try? self.decoder.decode(ActionNotification.self, from: data) {
+                                if let driveFileManager = AccountManager.instance.getDriveFileManager(for: message.driveId, userId: AccountManager.instance.currentUserId),
+                                   let file = driveFileManager.getCachedFile(id: message.parentId) {
+                                    // TODO: Update file
+                                }
+                            } else if let message = try? self.decoder.decode(ActionProgressNotification.self, from: data) {
+                                for observer in self.actionProgressObservers.values {
+                                    observer(message)
+                                }
+                            }
+                        }
+                    case .failure(let error):
+                        DDLogError("[MQService] Error while listening \(error)")
+                    }
+                }
+            } catch {
+                DDLogError("[MQService] Error while subscribing \(error)")
+            }
         }
     }
 
     private func topicFor(token: IPSToken) -> String {
         return "drive/\(token.uuid)"
-    }
-
-    private func isSubscribed(token: IPSToken) -> Bool {
-        return mqtt.subscriptions[topicFor(token: token)] != nil
-    }
-}
-
-// MARK: - CocoaMQTTDelegate
-
-extension MQService: CocoaMQTTDelegate {
-    public func mqtt(_ mqtt: CocoaMQTT, didReceive trust: SecTrust, completionHandler: @escaping (Bool) -> Void) {
-        completionHandler(true)
-    }
-
-    public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck) {
-        if ack == .accept {
-            if let currentToken = currentToken {
-                registerForNotifications(with: currentToken)
-            }
-        }
-    }
-
-    public func mqtt(_ mqtt: CocoaMQTT, didStateChangeTo state: CocoaMQTTConnState) {
-        // TODO: Handle disconnect
-    }
-
-    public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16) {}
-
-    public func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16) {}
-
-    public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
-        let data = Data(message.payload)
-        if let message = try? decoder.decode(ActionNotification.self, from: data) {
-            if let driveFileManager = AccountManager.instance.getDriveFileManager(for: message.driveId, userId: AccountManager.instance.currentUserId),
-               let file = driveFileManager.getCachedFile(id: message.parentId) {
-                // TODO: Update file
-            }
-        } else if let message = try? decoder.decode(ActionProgressNotification.self, from: data) {
-            for observer in actionProgressObservers.values {
-                observer(message)
-            }
-        }
-    }
-
-    public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {}
-
-    public func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {}
-
-    public func mqttDidPing(_ mqtt: CocoaMQTT) {}
-
-    public func mqttDidReceivePong(_ mqtt: CocoaMQTT) {}
-
-    public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?) {
-        // TODO: Handle disconnect
     }
 }
 

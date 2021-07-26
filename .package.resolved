@@ -29,30 +29,12 @@
         }
       },
       {
-        "package": "CocoaAsyncSocket",
-        "repositoryURL": "https://github.com/robbiehanson/CocoaAsyncSocket",
-        "state": {
-          "branch": null,
-          "revision": "dbdc00669c1ced63b27c3c5f052ee4d28f10150c",
-          "version": "7.6.5"
-        }
-      },
-      {
         "package": "CocoaLumberjack",
         "repositoryURL": "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
         "state": {
           "branch": null,
           "revision": "e518eb6e362df327574ba5e04269cd6d29f40aec",
           "version": "3.7.2"
-        }
-      },
-      {
-        "package": "CocoaMQTT",
-        "repositoryURL": "https://github.com/emqx/CocoaMQTT.git",
-        "state": {
-          "branch": "master",
-          "revision": "8be5c863b1f6adca4ce2212085d7473aa9e599f9",
-          "version": null
         }
       },
       {
@@ -137,6 +119,15 @@
         }
       },
       {
+        "package": "mqtt-nio",
+        "repositoryURL": "https://github.com/adam-fowler/mqtt-nio",
+        "state": {
+          "branch": null,
+          "revision": "ea6bc32772ec637ff3461510330187c9bc4e94ca",
+          "version": "2.1.0"
+        }
+      },
+      {
         "package": "Realm",
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
@@ -182,15 +173,6 @@
         }
       },
       {
-        "package": "Starscream",
-        "repositoryURL": "https://github.com/daltoniam/Starscream.git",
-        "state": {
-          "branch": null,
-          "revision": "e6b65c6d9077ea48b4a7bdda8994a1d3c6969c8d",
-          "version": "3.1.1"
-        }
-      },
-      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
@@ -200,12 +182,30 @@
         }
       },
       {
-        "package": "swift-nio-zlib-support",
-        "repositoryURL": "https://github.com/apple/swift-nio-zlib-support.git",
+        "package": "swift-nio",
+        "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "37760e9a52030bb9011972c5213c3350fa9d41fd",
-          "version": "1.0.0"
+          "revision": "d79e33308b0ac83326b0ead0ea6446e604b8162d",
+          "version": "2.30.0"
+        }
+      },
+      {
+        "package": "swift-nio-ssl",
+        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
+        "state": {
+          "branch": null,
+          "revision": "9db7cee4b62c39160a6bd513a47a1ecdcceac18a",
+          "version": "2.14.0"
+        }
+      },
+      {
+        "package": "swift-nio-transport-services",
+        "repositoryURL": "https://github.com/apple/swift-nio-transport-services.git",
+        "state": {
+          "branch": null,
+          "revision": "39587bceccda72780e2a8a8c5e857e42a9df2fa8",
+          "version": "1.11.0"
         }
       },
       {
