@@ -491,7 +491,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if let error = error {
             DDLogError("Error while deleting file: \(error)")
         } else {
-            let progressSnack = UIConstants.showSnackBar(message: "Starting to delete", view: view, duration: .infinite)
+            let progressSnack = UIConstants.showSnackBar(message: "Starting to delete", duration: .infinite)
             AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
                 DDLogError("observeActionProgress \(actionProgress.progress.message)")
                 self.driveFileManager.notifyObserversWith(file: self.currentDirectory)
