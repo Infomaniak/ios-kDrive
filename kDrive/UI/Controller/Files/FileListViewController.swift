@@ -994,23 +994,27 @@ extension FileListViewController: FilesHeaderViewDelegate {
             let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
             selectFolderViewController?.disabledDirectoriesSelection = [selectedFiles.first?.parent ?? driveFileManager.getRootFile()]
             selectFolderViewController?.selectHandler = { selectedFolder in
-                let group = DispatchGroup()
-                var success = true
-                for file in self.selectedFiles {
-                    group.enter()
-                    self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { _, _, error in
-                        if let error = error {
-                            success = false
-                            DDLogError("Error while moving file: \(error)")
+                if selectedFiles.count > bulkActionThreshold {
+                    //TODO: bulk
+                } else {
+                    let group = DispatchGroup()
+                    var success = true
+                    for file in self.selectedFiles {
+                        group.enter()
+                        self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { _, _, error in
+                            if let error = error {
+                                success = false
+                                DDLogError("Error while moving file: \(error)")
+                            }
+                            group.leave()
                         }
-                        group.leave()
                     }
-                }
-                group.notify(queue: DispatchQueue.main) {
-                    let message = success ? KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedFiles.count, selectedFolder.name) : KDriveStrings.Localizable.errorMove
-                    UIConstants.showSnackBar(message: message)
-                    self.selectionMode = false
-                    self.getNewChanges()
+                    group.notify(queue: DispatchQueue.main) {
+                        let message = success ? KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedFiles.count, selectedFolder.name) : KDriveStrings.Localizable.errorMove
+                        UIConstants.showSnackBar(message: message)
+                        self.selectionMode = false
+                        self.getNewChanges()
+                    }
                 }
             }
             present(selectFolderNavigationController, animated: true)
