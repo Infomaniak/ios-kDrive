@@ -16,20 +16,24 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
+import UIKit
+
+protocol DropBoxLinkDelegate: AnyObject {
+    func didClickOnShareLink(link: String)
+}
 
 class DropBoxLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var copyTextField: UITextField!
     @IBOutlet weak var copyButton: ImageButton!
+    weak var delegate: DropBoxLinkDelegate?
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonCopy
+        copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        UIPasteboard.general.url = URL(string: copyTextField.text ?? "")
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileInfoLinkCopiedToClipboard)
+        delegate?.didClickOnShareLink(link: copyTextField.text ?? "")
     }
 }

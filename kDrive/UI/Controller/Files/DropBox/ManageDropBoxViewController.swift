@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
     @IBOutlet weak var tableView: UITableView!
 
     var driveFileManager: DriveFileManager!
@@ -31,6 +30,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             getSettings()
         }
     }
+
     var convertingFolder = false {
         didSet { setTitle() }
     }
@@ -46,6 +46,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     private var sections: [Section] {
         return convertingFolder ? [.options] : Section.allCases
     }
+
     private let optionsRows = OptionsRow.allCases
 
     private var dropBox: DropBox?
@@ -101,7 +102,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         guard folder != nil else { return }
         let truncatedName: String
         if folder.name.count > 20 {
-            truncatedName = folder.name[folder.name.startIndex..<folder.name.index(folder.name.startIndex, offsetBy: 20)] + "…"
+            truncatedName = folder.name[folder.name.startIndex ..< folder.name.index(folder.name.startIndex, offsetBy: 20)] + "…"
         } else {
             truncatedName = folder.name
         }
@@ -110,32 +111,32 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
     private func getSettings() {
         if convertingFolder {
-            self.settings = [
-                    .optionMail: true,
-                    .optionPassword: false,
-                    .optionDate: false,
-                    .optionSize: false
+            settings = [
+                .optionMail: true,
+                .optionPassword: false,
+                .optionDate: false,
+                .optionSize: false
             ]
-            self.settingsValue = [
-                    .optionPassword: nil,
-                    .optionDate: nil,
-                    .optionSize: nil
+            settingsValue = [
+                .optionPassword: nil,
+                .optionDate: nil,
+                .optionSize: nil
             ]
-            self.newPassword = false
+            newPassword = false
         } else {
             driveFileManager.apiFetcher.getDropBoxSettings(directory: folder) { response, _ in
                 self.dropBox = response?.data
                 if let dropBox = response?.data {
                     self.settings = [
-                            .optionMail: dropBox.emailWhenFinished,
-                            .optionPassword: dropBox.password,
-                            .optionDate: dropBox.validUntil != nil,
-                            .optionSize: dropBox.limitFileSize != nil
+                        .optionMail: dropBox.emailWhenFinished,
+                        .optionPassword: dropBox.password,
+                        .optionDate: dropBox.validUntil != nil,
+                        .optionSize: dropBox.limitFileSize != nil
                     ]
                     self.settingsValue = [
-                            .optionPassword: nil,
-                            .optionDate: dropBox.validUntil,
-                            .optionSize: dropBox.limitFileSize
+                        .optionPassword: nil,
+                        .optionDate: dropBox.validUntil,
+                        .optionSize: dropBox.limitFileSize
                     ]
                     self.newPassword = dropBox.password
                 } else {
@@ -197,6 +198,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         case .shareLink:
             let cell = tableView.dequeueReusableCell(type: DropBoxLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.delegate = self
             cell.copyTextField.text = dropBox?.url
             return cell
         case .options:
@@ -267,6 +269,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 }
 
 // MARK: - NewFolderSettingsDelegate
+
 extension ManageDropBoxViewController: NewFolderSettingsDelegate {
     func didUpdateSettings(index: Int, isOn: Bool) {
         let option = optionsRows[index]
@@ -292,6 +295,7 @@ extension ManageDropBoxViewController: NewFolderSettingsDelegate {
 }
 
 // MARK: - FooterButtonDelegate
+
 extension ManageDropBoxViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
@@ -319,5 +323,12 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
             }
         }
     }
+}
 
+extension ManageDropBoxViewController: DropBoxLinkDelegate {
+    func didClickOnShareLink(link: String) {
+        let items = [URL(string: link)!]
+        let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        present(ac, animated: true)
+    }
 }
