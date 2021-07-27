@@ -52,7 +52,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         shareLinkRightsView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(shareLinkRightsButtonPressed)))
         shareLinkRightsView.accessibilityTraits = .button
         shareLinkRightsView.isAccessibilityElement = true
-        copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonCopy
+        copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
