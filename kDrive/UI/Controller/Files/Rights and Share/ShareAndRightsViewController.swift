@@ -16,12 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import UIKit
-import kDriveCore
 import DropDown
+import kDriveCore
+import UIKit
 
 class ShareAndRightsViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
 
     private enum ShareAndRightsSections {
@@ -29,6 +28,7 @@ class ShareAndRightsViewController: UIViewController {
         case link
         case access
     }
+
     private let sections: [ShareAndRightsSections] = [.invite, .link, .access]
 
     var shareLinkIsActive = false
@@ -123,8 +123,8 @@ class ShareAndRightsViewController: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
-extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSource {
 
+extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
@@ -169,11 +169,11 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(sharedFile: sharedFile, isOfficeFile: (file?.isOfficeFile ?? false), enabled: (file?.rights?.canBecomeLink.value ?? false) || file?.shareLink != nil)
+            cell.configureWith(sharedFile: sharedFile, isOfficeFile: file?.isOfficeFile ?? false, enabled: (file?.rights?.canBecomeLink.value ?? false) || file?.shareLink != nil)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == (self.tableView(tableView, numberOfRowsInSection: indexPath.section)) - 1, radius: 6)
+            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1, radius: 6)
             if indexPath.row < sharedFile!.tags.count {
                 cell.configureWith(tag: (sharedFile!.tags[indexPath.row])!, drive: driveFileManager.drive)
             } else if indexPath.row < (sharedFile!.tags.count) + (sharedFile!.users.count) {
@@ -232,7 +232,6 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
                 }
                 present(rightsSelectionViewController, animated: true)
             }
-
         }
     }
 
@@ -247,11 +246,11 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
 }
 
 // MARK: - RightsSelectionDelegate
+
 extension ShareAndRightsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         if let sharedLink = sharedFile?.link, shareLinkRights {
             driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == "write", permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
-
             }
         } else if let index = selectedUserIndex {
             driveFileManager.apiFetcher.updateUserRights(file: file, user: sharedFile!.users[index], permission: value) { response, _ in
@@ -288,7 +287,14 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
 }
 
 // MARK: - ShareLinkTableViewCellDelegate
+
 extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
+    func shareLinkSharedButtonPressed(link: String) {
+        let items = [URL(string: link)!]
+        let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        present(ac, animated: true)
+    }
+
     func shareLinkRightsButtonPressed() {
         guard let sharedLink = sharedFile?.link else {
             return
@@ -333,6 +339,7 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
 }
 
 // MARK: - SearchUserDelegate
+
 extension ShareAndRightsViewController: SearchUserDelegate {
     func didSelectUser(user: DriveUser) {
         let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
