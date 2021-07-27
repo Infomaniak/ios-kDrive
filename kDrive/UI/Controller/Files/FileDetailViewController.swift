@@ -316,7 +316,7 @@ class FileDetailViewController: UIViewController {
             DispatchQueue.main.async {
                 if let comment = newComment {
                     self.comments.insert(comment, at: 0)
-                    self.tableView.reloadSections(IndexSet(integersIn: 1 ... 1), with: .automatic)
+                    self.tableView.reloadSections([1], with: .automatic)
                 } else {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorAddComment)
                 }
