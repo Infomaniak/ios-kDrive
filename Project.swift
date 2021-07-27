@@ -54,7 +54,8 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/RomanTysiachnik/DropDown.git", .branch("master")),
             .package(url: "https://github.com/PhilippeWeidmann/SnackBar.swift", .upToNextMajor(from: "0.1.2")),
             .package(url: "https://github.com/flowbe/SwiftRegex.git", .upToNextMajor(from: "1.0.0")),
-            .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "6.2.1"))
+            .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "6.2.1")),
+            .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "8.0.0"))
     ],
     targets: [
         Target(name: "kDrive",
@@ -70,7 +71,8 @@ let project = Project(name: "kDrive",
                 "kDrive/**/*.strings",
                 "kDrive/**/*.stringsdict",
                 "kDrive/**/*.xib",
-                "kDrive/**/*.json"
+                "kDrive/**/*.json",
+                "kDriveCore/GoogleService-Info.plist"
             ],
             entitlements: "kDrive/Resources/kDrive.entitlements",
             actions: [
@@ -123,7 +125,8 @@ let project = Project(name: "kDrive",
                 "kDriveCore/**/*.storyboard",
                 "kDriveCore/**/*.xcassets",
                 "kDriveCore/**/*.xib",
-                "kDriveCore/**/*.json"
+                "kDriveCore/**/*.json",
+                "kDriveCore/GoogleService-Info.plist"
             ],
             dependencies: [
                     .package(product: "Alamofire"),
@@ -138,7 +141,8 @@ let project = Project(name: "kDrive",
                     .package(product: "MaterialOutlinedTextField"),
                     .package(product: "SnackBar"),
                     .package(product: "SwiftRegex"),
-                    .package(product: "Sentry")
+                    .package(product: "Sentry"),
+                    .package(product: "FirebaseMessaging")
             ]),
         Target(name: "kDriveFileProvider",
             platform: .iOS,

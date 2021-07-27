@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
-	<true/>
 	<key>AppIdentifierPrefix</key>
 	<string>$(AppIdentifierPrefix)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
@@ -67,16 +63,18 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>To be able to scan documents and take pictures you must allow the use of the camera</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>To be able to record movies you must allow the use of the microphone</string>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Only used for debug purpose</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Auto upload</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Save picture</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>To be able to lock the app</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Only used for debug purpose</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To be able to record movies you must allow the use of the microphone</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save picture</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Auto upload</string>
+	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -85,6 +83,8 @@
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

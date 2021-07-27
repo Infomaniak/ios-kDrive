@@ -20,6 +20,7 @@ import Atlantis
 import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
+import Firebase
 import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
@@ -83,6 +84,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        FirebaseApp.configure()
+
         return true
     }
 
