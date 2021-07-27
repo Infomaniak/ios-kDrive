@@ -81,12 +81,7 @@ public class MQService {
                     case .success(let message):
                         var buffer = message.payload
                         if let data = buffer.readData(length: buffer.readableBytes) {
-                            if let message = try? self.decoder.decode(ActionNotification.self, from: data) {
-                                if let driveFileManager = AccountManager.instance.getDriveFileManager(for: message.driveId, userId: AccountManager.instance.currentUserId),
-                                   let file = driveFileManager.getCachedFile(id: message.parentId) {
-                                    // TODO: Update file
-                                }
-                            } else if let message = try? self.decoder.decode(ActionProgressNotification.self, from: data) {
+                            if let message = try? self.decoder.decode(ActionProgressNotification.self, from: data) {
                                 for observer in self.actionProgressObservers.values {
                                     observer(message)
                                 }
