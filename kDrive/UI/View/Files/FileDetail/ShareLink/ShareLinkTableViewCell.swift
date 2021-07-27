@@ -16,18 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 protocol ShareLinkTableViewCellDelegate: AnyObject {
     func shareLinkSwitchToggled(isOn: Bool)
     func shareLinkRightsButtonPressed()
     func shareLinkSettingsButtonPressed()
+    func shareLinkSharedButtonPressed(link: String)
 }
 
 class ShareLinkTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var shareLinkSwitch: UISwitch!
     @IBOutlet weak var shareLinkStackView: UIStackView!
     @IBOutlet weak var activeLabel: UILabel!
@@ -52,7 +52,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         shareLinkRightsView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(shareLinkRightsButtonPressed)))
         shareLinkRightsView.accessibilityTraits = .button
         shareLinkRightsView.isAccessibilityElement = true
-        copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonCopy
+        copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -102,8 +102,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        UIPasteboard.general.url = URL(string: copyTextField.text ?? "")
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileInfoLinkCopiedToClipboard)
+        delegate?.shareLinkSharedButtonPressed(link: copyTextField.text ?? "")
     }
 
     @IBAction func shareLinkSwitchChanged(_ sender: UISwitch) {

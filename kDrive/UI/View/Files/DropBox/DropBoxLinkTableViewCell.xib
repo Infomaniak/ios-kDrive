@@ -55,7 +55,7 @@
                                                     <constraint firstAttribute="width" constant="24" id="gbC-g4-vxL"/>
                                                 </constraints>
                                                 <color key="tintColor" name="iconColor"/>
-                                                <state key="normal" image="copy"/>
+                                                <state key="normal" image="export-ios"/>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="imageWidth">
                                                         <real key="value" value="25"/>
@@ -107,11 +107,11 @@
             <size key="intrinsicContentSize" width="24" height="24"/>
         </designable>
         <designable name="wGz-LN-h9i">
-            <size key="intrinsicContentSize" width="163" height="17"/>
+            <size key="intrinsicContentSize" width="111.5" height="17"/>
         </designable>
     </designables>
     <resources>
-        <image name="copy" width="24" height="24"/>
+        <image name="export-ios" width="24" height="24"/>
         <namedColor name="iconColor">
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
