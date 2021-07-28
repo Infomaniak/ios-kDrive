@@ -16,14 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class HomeLastPicCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var contentInsetView: UIView!
     @IBOutlet weak var fileImage: UIImageView!
     @IBOutlet weak var darkLayer: UIView!
+    @IBOutlet weak var checkmarkImage: UIImageView!
+
+    override var isSelected: Bool {
+        didSet {
+            configureForSelection()
+        }
+    }
+
+    var selectionMode = false
+    var file: File?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -46,20 +55,32 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     func configureLoading() {
         darkLayer.isHidden = true
+        checkmarkImage.isHidden = true
         fileImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
         contentInsetView.cornerRadius = UIConstants.cornerRadius
     }
 
-    func configureWith(file: File, roundedCorners: Bool = true) {
+    func configureWith(file: File, roundedCorners: Bool = true, selectionMode: Bool = false) {
+        self.selectionMode = selectionMode
+        self.file = file
+        checkmarkImage.isHidden = !selectionMode
         darkLayer.isHidden = false
-        file.getThumbnail { image, isThumbnail in
-            self.darkLayer.isHidden = true
-            self.fileImage.image = isThumbnail ? image : KDriveAsset.fileImageSmall.image
+        file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
+            if fileId == self?.file?.id {
+                self?.darkLayer.isHidden = true
+                self?.fileImage.image = isThumbnail ? image : KDriveAsset.fileImageSmall.image
+            }
         }
         accessibilityLabel = file.name
         isAccessibilityElement = true
         if roundedCorners {
             contentInsetView.cornerRadius = UIConstants.cornerRadius
         }
+        configureForSelection()
+    }
+
+    private func configureForSelection() {
+        guard selectionMode else { return }
+        checkmarkImage.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
     }
 }

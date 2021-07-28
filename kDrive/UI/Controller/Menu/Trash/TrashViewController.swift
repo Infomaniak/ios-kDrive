@@ -224,11 +224,11 @@ class TrashViewController: FileListViewController {
 
     #if !ISEXTENSION
         override func deleteButtonPressed() {
-            deleteFiles(Array(selectedFiles))
+            deleteFiles(Array(selectedItems))
         }
 
         override func menuButtonPressed() {
-            showFloatingPanel(files: Array(selectedFiles))
+            showFloatingPanel(files: Array(selectedItems))
         }
     #endif
 }
