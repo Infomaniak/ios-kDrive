@@ -443,6 +443,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         let realm = driveFileManager.getRealm()
         previewFiles = previewFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
         currentIndex = IndexPath(row: coder.decodeInteger(forKey: "CurrentIndex"), section: 0)
+        if currentIndex.row >= previewFiles.count {
+            navigationController?.popViewController(animated: true)
+            return
+        }
         // Update UI
         DispatchQueue.main.async { [self] in
             collectionView.reloadData()
