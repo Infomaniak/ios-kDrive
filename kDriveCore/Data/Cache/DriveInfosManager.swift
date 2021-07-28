@@ -16,14 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import FileProvider
-import RealmSwift
-import InfomaniakCore
 import CocoaLumberjackSwift
+import FileProvider
+import Foundation
+import InfomaniakCore
+import RealmSwift
 
 public class DriveInfosManager {
-
     public static let instance = DriveInfosManager()
     private static let currentDbVersion: UInt64 = 1
     public let realmConfiguration: Realm.Configuration
@@ -204,7 +203,7 @@ public class DriveInfosManager {
 
     public func getUsers(for driveId: Int, using realm: Realm? = nil) -> [DriveUser] {
         let realm = realm ?? getRealm()
-        let drive = getDrive(id: driveId, userId: AccountManager.instance.currentAccount.userId)
+        let drive = getDrive(id: driveId, userId: AccountManager.instance.currentUserId)
         let realmUserList = realm.objects(DriveUser.self)
             .sorted(byKeyPath: "id", ascending: true)
         var users: [DriveUser] = []

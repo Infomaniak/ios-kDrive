@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class SharedDrivesViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
 
     var drives: [Drive?] = []
@@ -30,7 +29,7 @@ class SharedDrivesViewController: UIViewController {
         title = KDriveStrings.Localizable.sharedWithMeTitle
         tableView.register(cellView: MenuTableViewCell.self)
 
-        drives = DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentAccount.userId, sharedWithMe: true)
+        drives = DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true)
         showEmptyView()
     }
 
@@ -58,17 +57,17 @@ class SharedDrivesViewController: UIViewController {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toSharedWithMeSegue",
-            let nextVC = segue.destination as? SharedWithMeViewController,
-            let drive = sender as? Drive,
-            let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+           let nextVC = segue.destination as? SharedWithMeViewController,
+           let drive = sender as? Drive,
+           let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
             nextVC.driveFileManager = driveFileManager
         }
     }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
-extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource {
 
+extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return drives.count
     }

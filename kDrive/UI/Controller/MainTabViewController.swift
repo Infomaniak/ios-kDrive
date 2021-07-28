@@ -256,7 +256,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                     UploadQueue.instance.addToQueue(file:
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
-                            userId: AccountManager.instance.currentAccount.userId,
+                            userId: AccountManager.instance.currentUserId,
                             driveId: driveFileManager.drive.id,
                             url: targetURL,
                             name: url.lastPathComponent))
