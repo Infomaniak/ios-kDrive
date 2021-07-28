@@ -72,7 +72,7 @@ public class DownloadQueue {
     // MARK: - Public methods
 
     public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        guard !file.isInvalidated && operationsInQueue[file.id] == nil,
+        guard !file.isInvalidated && operation(for: file) == nil,
               let drive = AccountManager.instance.getDrive(for: userId, driveId: file.driveId),
               let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
             return
@@ -117,6 +117,10 @@ public class DownloadQueue {
 
     public func cancelRunningOperations() {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
+    }
+
+    public func operation(for file: File) -> DownloadOperation? {
+        return operationsInQueue[file.id]
     }
 
     // MARK: - Private methods

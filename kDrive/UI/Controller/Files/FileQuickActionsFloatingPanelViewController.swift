@@ -456,6 +456,12 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
                 saveLocalFile(file: file)
                 tableView.reloadRows(at: [indexPath], with: .fade)
+            } else if let operation = DownloadQueue.instance.operation(for: file) {
+                // Download is already scheduled, ask to cancel
+                let alert = AlertTextViewController(title: KDriveStrings.Localizable.cancelDownloadTitle, message: KDriveStrings.Localizable.cancelDownloadDescription, action: KDriveStrings.Localizable.buttonYes, destructive: true) {
+                    operation.cancel()
+                }
+                present(alert, animated: true)
             } else {
                 action.isLoading = true
                 tableView.reloadRows(at: [indexPath], with: .fade)
@@ -464,10 +470,10 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     DispatchQueue.main.async {
                         if error == nil {
                             saveLocalFile(file: file)
-                            refreshFileAndRows(oldFile: file, rows: [indexPath])
-                        } else {
+                        } else if error != .taskCancelled && error != .taskRescheduled {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
                         }
+                        refreshFileAndRows(oldFile: file, rows: [indexPath])
                     }
                 }
                 DownloadQueue.instance.addToQueue(file: file)
