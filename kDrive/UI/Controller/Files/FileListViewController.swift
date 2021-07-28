@@ -409,7 +409,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     final func updateUploadCount() {
-        guard currentDirectory != nil else { return }
+        guard driveFileManager != nil && currentDirectory != nil else { return }
         uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: driveFileManager.drive.id).count
     }
 
@@ -820,6 +820,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             navigationController?.popViewController(animated: true)
         }
         setTitle()
+        if configuration.showUploadingFiles {
+            updateUploadCount()
+        }
         observeUploads()
         observeFiles()
         reloadData()

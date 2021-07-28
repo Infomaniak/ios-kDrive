@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import DropDown
 import InfomaniakCore
 import kDriveCore
-import DropDown
+import UIKit
 
 protocol SearchUserDelegate: AnyObject {
     func didSelectUser(user: DriveUser)
@@ -27,7 +27,6 @@ protocol SearchUserDelegate: AnyObject {
 }
 
 class InviteUserTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var dropDownAnchorView: UIView!
 
@@ -39,12 +38,13 @@ class InviteUserTableViewCell: InsetTableViewCell {
             guard drive != nil else { return }
             users = DriveInfosManager.instance.getUsers(for: drive.id)
             users.removeAll {
-                $0.id == AccountManager.instance.currentAccount.user.id ||
+                $0.id == AccountManager.instance.currentUserId ||
                     removeUsers.contains($0.id)
             }
             filterContent(for: "")
         }
     }
+
     var removeEmails: [String] = []
 
     private var users: [DriveUser] = []
@@ -56,7 +56,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
             guard drive != nil else { return }
             users = DriveInfosManager.instance.getUsers(for: drive.id)
             users.sort { user1, user2 -> Bool in
-                return user1.displayName < user2.displayName
+                user1.displayName < user2.displayName
             }
             results = users
 
@@ -142,6 +142,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 }
 
 // MARK: - UITextFieldDelegate
+
 extension InviteUserTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         dropDown.setupCornerRadius(UIConstants.cornerRadius)

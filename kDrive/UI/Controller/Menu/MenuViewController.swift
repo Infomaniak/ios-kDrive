@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
 import Sentry
+import UIKit
 
 class MenuViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var userAvatarFrame: UIView!
     @IBOutlet weak var userAvatarImageView: UIImageView!
@@ -96,7 +95,7 @@ class MenuViewController: UIViewController {
 
         // Hide shared with me action if no shared with me drive
         let sharedWithMeInList = tableContent[1].contains { $0 == .sharedWithMeAction }
-        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentAccount.userId, sharedWithMe: true).isEmpty
+        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true).isEmpty
         if sharedWithMeInList && !hasSharedWithMe {
             tableContent[1].removeFirst()
         } else if !sharedWithMeInList && hasSharedWithMe {
@@ -122,7 +121,6 @@ class MenuViewController: UIViewController {
 // MARK: - UITableView Delegate
 
 extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
-
     func numberOfSections(in tableView: UITableView) -> Int {
         return tableContent.count
     }
@@ -199,7 +197,6 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension MenuViewController: SwitchDriveDelegate, SwitchAccountDelegate {
-
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         self.currentAccount = currentAccount
         needsContentUpdate = true
@@ -215,17 +212,14 @@ extension MenuViewController: SwitchDriveDelegate, SwitchAccountDelegate {
         needsContentUpdate = true
         updateContentIfNeeded()
     }
-
 }
 
 // MARK: - Top scrollable
 
 extension MenuViewController: TopScrollable {
-
     func scrollToTop() {
         if isViewLoaded {
             tableView.scrollToTop(animated: true, navigationController: navigationController)
         }
     }
-
 }

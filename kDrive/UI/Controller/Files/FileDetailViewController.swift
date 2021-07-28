@@ -632,7 +632,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 $0 == answerAction
             }
         }
-        if comments[indexPath.row].user.id != AccountManager.instance.currentAccount.user.id {
+        if comments[indexPath.row].user.id != AccountManager.instance.currentUserId {
             actions.removeAll {
                 $0 == deleteAction || $0 == editAction
             }
