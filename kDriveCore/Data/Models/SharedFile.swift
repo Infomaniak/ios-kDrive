@@ -28,13 +28,13 @@ public class SharedFile: NSObject, NSCoding, Codable {
     public var tags: [Tag?]
 
     enum CodingKeys: String, CodingKey {
-        case id = "id"
-        case path = "path"
+        case id
+        case path
         case canUseTag = "can_use_tag"
-        case users = "users"
-        case link = "link"
-        case invitations = "invitations"
-        case tags = "tags"
+        case users
+        case link
+        case invitations
+        case tags
     }
 
     public func encode(with coder: NSCoder) {
@@ -49,9 +49,9 @@ public class SharedFile: NSObject, NSCoding, Codable {
 
     public required init?(coder: NSCoder) {
         guard let path = coder.decodeObject(forKey: "Path") as? String,
-            let users = coder.decodeObject(forKey: "Users") as? [Int]/*,
-            let invitations = coder.decodeObject(forKey: "Invitations") as? [Invitation?],
-            let tags = coder.decodeObject(forKey: "Tags") as? [Tag?]*/ else {
+              let users = coder.decodeObject(forKey: "Users") as? [Int] /* ,
+               let invitations = coder.decodeObject(forKey: "Invitations") as? [Invitation?],
+               let tags = coder.decodeObject(forKey: "Tags") as? [Tag?] */ else {
             return nil
         }
         self.id = coder.decodeInteger(forKey: "Id")
@@ -60,8 +60,8 @@ public class SharedFile: NSObject, NSCoding, Codable {
         let realm = DriveInfosManager.instance.getRealm()
         self.users = users.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
         self.link = coder.decodeObject(forKey: "Link") as? ShareLink
-        self.invitations = []// invitations
-        self.tags = []// tags
+        self.invitations = [] // invitations
+        self.tags = [] // tags
     }
 }
 
@@ -96,7 +96,7 @@ public class ShareLink: NSObject, NSCoding, Codable {
 
     public required init?(coder: NSCoder) {
         guard let url = coder.decodeObject(forKey: "URL") as? String,
-            let permission = coder.decodeObject(forKey: "Permission") as? String else {
+              let permission = coder.decodeObject(forKey: "Permission") as? String else {
             return nil
         }
         self.canEdit = coder.decodeBool(forKey: "CanEdit")
@@ -134,6 +134,7 @@ public class Invitation: Codable {
 }
 
 // MARK: - Share with users
+
 public class SharedUsers: Codable {
     public var errors: [String]
     public var valid: SharedUsersValid

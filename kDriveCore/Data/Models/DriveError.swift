@@ -23,7 +23,7 @@ public class ErrorUserInfo: Codable {
     var intValue: Int?
     var stringValue: String?
 
-    required public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let intValue = try? container.decode(Int.self) {
             self.intValue = intValue
@@ -42,7 +42,6 @@ public class ErrorUserInfo: Codable {
 }
 
 public struct DriveError: Error, Equatable {
-
     public enum DriveErrorType: String, Codable {
         case localError
         case networkError
@@ -67,7 +66,7 @@ public struct DriveError: Error, Equatable {
     private init(type: DriveErrorType, code: String, localizedString: String = KDriveCoreStrings.Localizable.errorGeneric) {
         self.type = type
         self.code = code
-        self.localizedDescription = localizedString
+        localizedDescription = localizedString
     }
 
     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
@@ -144,7 +143,6 @@ extension DriveError: LocalizedError {
 }
 
 extension DriveError: Codable {
-
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         type = try values.decode(DriveErrorType.self, forKey: .type)
@@ -168,5 +166,4 @@ extension DriveError: Codable {
         case code
         case userInfo
     }
-
 }

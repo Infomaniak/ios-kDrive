@@ -34,19 +34,14 @@ public class DriveList: Codable {
         case main
         case sharedWithMe = "shared_with_me"
     }
-
 }
 
 public class DriveUsersCategories: Object, Codable {
-
-    @objc public dynamic var objectId: String = ""
-    public var account = List<Int>()
-    public var drive = List<Int>()
-    public var internalUsers = List<Int>()
-    public var externalUsers = List<Int>()
-
-    public override init() {
-    }
+    @Persisted(primaryKey: true) public var objectId: String = ""
+    @Persisted public var account: List<Int>
+    @Persisted public var drive: List<Int>
+    @Persisted public var internalUsers: List<Int>
+    @Persisted public var externalUsers: List<Int>
 
     enum CodingKeys: String, CodingKey {
         case account
@@ -54,12 +49,8 @@ public class DriveUsersCategories: Object, Codable {
         case internalUsers = "internal"
         case externalUsers = "external"
     }
-
-    public override static func primaryKey() -> String? {
-        return "objectId"
-    }
-
 }
+
 public enum DrivePack: String, Codable {
     case solo
     case pro
@@ -68,16 +59,13 @@ public enum DrivePack: String, Codable {
 }
 
 public class DrivePackFunctionality: Object, Codable {
-    @objc public dynamic var objectId: String = ""
-    @objc public dynamic var versionsNumber: Int = 0
-    @objc public dynamic var dropbox = false
-    @objc public dynamic var versioning = false
-    @objc public dynamic var manageRight = false
-    @objc public dynamic var hasTeamSpace = false
-    @objc public dynamic var versionsKeptForDays: Int = 0
-
-    public override init() {
-    }
+    @Persisted(primaryKey: true) public var objectId: String = ""
+    @Persisted public var versionsNumber: Int = 0
+    @Persisted public var dropbox = false
+    @Persisted public var versioning = false
+    @Persisted public var manageRight = false
+    @Persisted public var hasTeamSpace = false
+    @Persisted public var versionsKeptForDays: Int = 0
 
     enum CodingKeys: String, CodingKey {
         case dropbox
@@ -87,25 +75,16 @@ public class DrivePackFunctionality: Object, Codable {
         case versionsNumber = "number_of_versions"
         case versionsKeptForDays = "versions_kept_for_days"
     }
-
-    public override static func primaryKey() -> String? {
-        return "objectId"
-    }
-
 }
 
 public class DrivePreferences: Object, Codable {
-    @objc public dynamic var objectId: String = ""
-    @objc public dynamic var color: String
-    @objc public dynamic var hide: Bool
+    @Persisted(primaryKey: true) public var objectId: String = ""
+    @Persisted public var color: String
+    @Persisted public var hide: Bool
 
-    public override init() {
+    override public init() {
         color = "#0098FF"
         hide = false
-    }
-
-    public override static func primaryKey() -> String? {
-        return "objectId"
     }
 
     enum CodingKeys: String, CodingKey {
@@ -115,32 +94,31 @@ public class DrivePreferences: Object, Codable {
 }
 
 public class Drive: Object, Codable {
-
-    @objc public dynamic var objectId: String = ""
+    @Persisted(primaryKey: true) public var objectId: String = ""
     /*
      User data
      */
-    @objc public dynamic var canAddUser = false
-    @objc public dynamic var canCreateTeamFolder = false
-    @objc public dynamic var hasTechnicalRight = false
-    @objc public dynamic var name: String = ""
-    @objc private dynamic var _preferences: DrivePreferences?
-    @objc public dynamic var role: String = ""
+    @Persisted public var canAddUser = false
+    @Persisted public var canCreateTeamFolder = false
+    @Persisted public var hasTechnicalRight = false
+    @Persisted public var name: String = ""
+    @Persisted private var _preferences: DrivePreferences?
+    @Persisted public var role: String = ""
 
     /*
      Drive data
      */
     /// Account id of the drive CREATOR
-    @objc public dynamic var accountId: Int = -1
-    @objc public dynamic var id: Int = -1
-    @objc private dynamic var _pack: String = ""
-    @objc public dynamic var packFunctionality: DrivePackFunctionality?
-    @objc public dynamic var sharedWithMe = false
-    @objc public dynamic var size: Int64 = 0
-    @objc public dynamic var usedSize: Int64 = 0
-    @objc private dynamic var _users: DriveUsersCategories? = DriveUsersCategories()
-    @objc public dynamic var maintenance = false
-    @objc public dynamic var userId: Int = 0 {
+    @Persisted public var accountId: Int = -1
+    @Persisted public var id: Int = -1
+    @Persisted private var _pack: String = ""
+    @Persisted public var packFunctionality: DrivePackFunctionality?
+    @Persisted public var sharedWithMe = false
+    @Persisted public var size: Int64 = 0
+    @Persisted public var usedSize: Int64 = 0
+    @Persisted private var _users: DriveUsersCategories? = DriveUsersCategories()
+    @Persisted public var maintenance = false
+    @Persisted public var userId: Int = 0 {
         didSet {
             let objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
             self.objectId = objectId
@@ -148,9 +126,6 @@ public class Drive: Object, Codable {
             packFunctionality?.objectId = objectId
             _users?.objectId = objectId
         }
-    }
-
-    public override init() {
     }
 
     public var pack: DrivePack {
@@ -173,10 +148,6 @@ public class Drive: Object, Codable {
         return pack == .pro || pack == .team
     }
 
-    public override static func primaryKey() -> String? {
-        return "objectId"
-    }
-
     public required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         accountId = try values.decode(Int.self, forKey: .accountId)
@@ -194,6 +165,8 @@ public class Drive: Object, Codable {
         canCreateTeamFolder = try values.decode(Bool.self, forKey: .canCreateTeamFolder)
         maintenance = try values.decode(Bool.self, forKey: .maintenance)
     }
+
+    override public init() {}
 
     enum CodingKeys: String, CodingKey {
         case accountId = "account_id"

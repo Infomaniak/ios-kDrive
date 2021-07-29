@@ -181,15 +181,15 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             let offline = ReachabilityListener.instance.currentStatus == .offline
             switch action {
             case .shareAndRights:
-                if !(file.rights?.share.value ?? false) || offline {
+                if !(file.rights?.share ?? false) || offline {
                     action.isEnabled = false
                 }
             case .shareLink:
-                if (!(file.rights?.canBecomeLink.value ?? false) || offline) && file.shareLink == nil && file.visibility != .isCollaborativeFolder {
+                if (!(file.rights?.canBecomeLink ?? false) || offline) && file.shareLink == nil && file.visibility != .isCollaborativeFolder {
                     action.isEnabled = false
                 }
             case .add:
-                if !(file.rights?.createNewFile.value ?? false) || !(file.rights?.createNewFolder.value ?? false) {
+                if !(file.rights?.createNewFile ?? false) || !(file.rights?.createNewFolder ?? false) {
                     action.isEnabled = false
                 }
             default:
@@ -200,13 +200,13 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         listActions = (file.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions).filter { action -> Bool in
             switch action {
             case .openWith:
-                return file.rights?.write.value ?? false
+                return file.rights?.write ?? false
             case .edit:
-                return file.isOfficeFile && (file.rights?.write.value ?? false)
+                return file.isOfficeFile && (file.rights?.write ?? false)
             case .favorite:
-                return (file.rights?.canFavorite.value ?? false) && !sharedWithMe
+                return (file.rights?.canFavorite ?? false) && !sharedWithMe
             case .convertToDropbox:
-                return (file.rights?.canBecomeCollab.value ?? false) && file.shareLink == nil
+                return (file.rights?.canBecomeCollab ?? false) && file.shareLink == nil
             case .manageDropbox:
                 return file.visibility == .isCollaborativeFolder
             case .seeFolder:
@@ -214,15 +214,15 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             case .offline:
                 return !sharedWithMe
             case .move:
-                return (file.rights?.move.value ?? false) && !sharedWithMe
+                return (file.rights?.move ?? false) && !sharedWithMe
             case .duplicate:
                 return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
             case .rename:
-                return (file.rights?.rename.value ?? false) && !sharedWithMe
+                return (file.rights?.rename ?? false) && !sharedWithMe
             case .delete:
-                return file.rights?.delete.value ?? false
+                return file.rights?.delete ?? false
             case .leaveShare:
-                return file.rights?.leave.value ?? false
+                return file.rights?.leave ?? false
             default:
                 return true
             }

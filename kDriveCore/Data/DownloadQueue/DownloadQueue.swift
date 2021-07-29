@@ -27,15 +27,14 @@ public class DownloadTask: Object {
     @Persisted var sessionUrl: String = ""
     @Persisted var sessionId: String?
 
-    init(fileId: Int, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
+    convenience init(fileId: Int, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
+        self.init()
         self.fileId = fileId
         self.driveId = driveId
         self.sessionId = sessionId
         self.sessionUrl = sessionUrl
         self.userId = userId
     }
-
-    override public init() {}
 }
 
 public class DownloadQueue {

@@ -19,7 +19,6 @@
 import Foundation
 
 public class UploadToken: Codable {
-
     public let token: String
     public let expiration: Date
 

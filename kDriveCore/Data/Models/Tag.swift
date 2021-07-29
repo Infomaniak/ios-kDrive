@@ -20,23 +20,16 @@ import Foundation
 import RealmSwift
 
 public class Tag: Object, Codable {
-    @objc public dynamic var id: Int
-    @objc public dynamic var name: String
-    @objc public dynamic var color: Int
+    @Persisted(primaryKey: true) public var id: Int
+    @Persisted public var name: String
+    @Persisted public var color: Int
     public var right: UserPermission?
 
-    enum CodingKeys: String, CodingKey {
-        case id
-        case name
-        case color
-        case right
-    }
-
-    public func isAllDriveUsersTag() -> Bool {
+    public var isAllDriveUsersTag: Bool {
         return id == 0
     }
 
-    public func getColor() -> String {
+    public var colorHex: String {
         let colors = [
             "#4051B5",
             "#30ABFF",
@@ -51,9 +44,4 @@ public class Tag: Object, Codable {
         ]
         return color < 10 ? colors[color] : "#30ABFF"
     }
-
-    public override class func primaryKey() -> String? {
-        return "id"
-    }
-
 }

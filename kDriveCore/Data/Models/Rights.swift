@@ -16,67 +16,58 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DifferenceKit
 import Foundation
 import RealmSwift
-import DifferenceKit
 
 public class Rights: Object, Codable {
+    @Persisted(primaryKey: true) public var fileId: Int = 0
+    @Persisted public var show: Bool
+    @Persisted public var read: Bool
+    @Persisted public var write: Bool
+    @Persisted public var share: Bool
+    @Persisted public var leave: Bool
+    @Persisted public var delete: Bool
+    @Persisted public var rename: Bool
+    @Persisted public var move: Bool
+    @Persisted public var createNewFolder: Bool
+    @Persisted public var createNewFile: Bool
+    @Persisted public var uploadNewFile: Bool
+    @Persisted public var moveInto: Bool
+    @Persisted public var canBecomeCollab: Bool
+    @Persisted public var canBecomeLink: Bool
+    @Persisted public var canFavorite: Bool
 
-    @objc public dynamic var fileId: Int = 0
-    @objc public dynamic var rightsRight: String = ""
-    public var show = RealmProperty<Bool?>()
-    public var read = RealmProperty<Bool?>()
-    public var write = RealmProperty<Bool?>()
-    public var share = RealmProperty<Bool?>()
-    public var leave = RealmProperty<Bool?>()
-    public var delete = RealmProperty<Bool?>()
-    public var rename = RealmProperty<Bool?>()
-    public var move = RealmProperty<Bool?>()
-    public var createNewFolder = RealmProperty<Bool?>()
-    public var createNewFile = RealmProperty<Bool?>()
-    public var uploadNewFile = RealmProperty<Bool?>()
-    public var moveInto = RealmProperty<Bool?>()
-    public var canBecomeCollab = RealmProperty<Bool?>()
-    public var canBecomeLink = RealmProperty<Bool?>()
-    public var canFavorite = RealmProperty<Bool?>()
-
-    override public init() {
-        rightsRight = ""
-    }
-
-    required public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        show.value = try? values.decode(Bool.self, forKey: .show)
-        read.value = try? values.decode(Bool.self, forKey: .read)
-        write.value = try? values.decode(Bool.self, forKey: .write)
-        share.value = try? values.decode(Bool.self, forKey: .share)
-        leave.value = try? values.decode(Bool.self, forKey: .leave)
-        delete.value = try? values.decode(Bool.self, forKey: .delete)
-        rename.value = try? values.decode(Bool.self, forKey: .rename)
-        move.value = try? values.decode(Bool.self, forKey: .move)
-        createNewFolder.value = try? values.decode(Bool.self, forKey: .createNewFolder)
-        createNewFile.value = try? values.decode(Bool.self, forKey: .createNewFile)
-        uploadNewFile.value = try? values.decode(Bool.self, forKey: .uploadNewFile)
-        moveInto.value = try? values.decode(Bool.self, forKey: .moveInto)
-        canBecomeCollab.value = try? values.decode(Bool.self, forKey: .canBecomeCollab)
-        canBecomeLink.value = try? values.decode(Bool.self, forKey: .canBecomeLink)
-        canFavorite.value = try? values.decode(Bool.self, forKey: .canFavorite)
+        show = try values.decodeIfPresent(Bool.self, forKey: .show) ?? false
+        read = try values.decodeIfPresent(Bool.self, forKey: .read) ?? false
+        write = try values.decodeIfPresent(Bool.self, forKey: .write) ?? false
+        share = try values.decodeIfPresent(Bool.self, forKey: .share) ?? false
+        leave = try values.decodeIfPresent(Bool.self, forKey: .leave) ?? false
+        delete = try values.decodeIfPresent(Bool.self, forKey: .delete) ?? false
+        rename = try values.decodeIfPresent(Bool.self, forKey: .rename) ?? false
+        move = try values.decodeIfPresent(Bool.self, forKey: .move) ?? false
+        createNewFolder = try values.decodeIfPresent(Bool.self, forKey: .createNewFolder) ?? false
+        createNewFile = try values.decodeIfPresent(Bool.self, forKey: .createNewFile) ?? false
+        uploadNewFile = try values.decodeIfPresent(Bool.self, forKey: .uploadNewFile) ?? false
+        moveInto = try values.decodeIfPresent(Bool.self, forKey: .moveInto) ?? false
+        canBecomeCollab = try values.decodeIfPresent(Bool.self, forKey: .canBecomeCollab) ?? false
+        canBecomeLink = try values.decodeIfPresent(Bool.self, forKey: .canBecomeLink) ?? false
+        canFavorite = try values.decodeIfPresent(Bool.self, forKey: .canFavorite) ?? false
     }
 
-    public override static func primaryKey() -> String? {
-        return "fileId"
-    }
+    override public init() {}
 
     enum CodingKeys: String, CodingKey {
-        case rightsRight = "right"
-        case show = "show"
-        case read = "read"
-        case write = "write"
-        case share = "share"
-        case leave = "leave"
-        case delete = "delete"
-        case rename = "rename"
-        case move = "move"
+        case show
+        case read
+        case write
+        case share
+        case leave
+        case delete
+        case rename
+        case move
         case createNewFolder = "new_folder"
         case createNewFile = "new_file"
         case uploadNewFile = "upload_new_file"
@@ -88,14 +79,12 @@ public class Rights: Object, Codable {
 }
 
 extension Rights: Differentiable {
-
     public var differenceIdentifier: Int {
         return fileId
     }
 
     public func isContentEqual(to source: Rights) -> Bool {
-        return rightsRight == source.rightsRight
-            && show == source.show
+        return show == source.show
             && read == source.read
             && write == source.write
             && share == source.share

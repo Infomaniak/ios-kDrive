@@ -121,7 +121,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         case .favorite:
             let isFavorite = filesAreFavorite
             addAction = !isFavorite
-            for file in files where file.rights?.canFavorite.value ?? false {
+            for file in files where file.rights?.canFavorite ?? false {
                 group.enter()
                 driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { error in
                     if error != nil {

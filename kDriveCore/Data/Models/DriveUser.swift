@@ -17,10 +17,10 @@
  */
 
 import Foundation
-import UIKit
 import InfomaniakCore
-import RealmSwift
 import Kingfisher
+import RealmSwift
+import UIKit
 
 public enum UserPermission: String, Codable, CaseIterable {
     case read
@@ -56,15 +56,15 @@ public enum UserPermission: String, Codable, CaseIterable {
 }
 
 public class DriveUser: Object, Codable, InfomaniakUser {
-    @objc public dynamic var id: Int = -1
-    @objc public dynamic var email: String = ""
-    @objc private dynamic var _avatar: String = ""
-    @objc private dynamic var _avatarUrl: String?
-    @objc public dynamic var displayName: String = ""
-    @objc private dynamic var _permission: String?
+    @Persisted(primaryKey: true) public var id: Int = -1
+    @Persisted public var email: String = ""
+    @Persisted private var _avatar: String = ""
+    @Persisted private var _avatarUrl: String?
+    @Persisted public var displayName: String = ""
+    @Persisted private var _permission: String?
 
     public var avatar: String {
-        return !_avatar.isBlank ? _avatar: (_avatarUrl ?? "")
+        return !_avatar.isBlank ? _avatar : (_avatarUrl ?? "")
     }
 
     public var permission: UserPermission? {
@@ -76,13 +76,6 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         }
     }
 
-    public override init() {
-    }
-
-    public override static func primaryKey() -> String? {
-        return "id"
-    }
-
     enum CodingKeys: String, CodingKey {
         case id
         case email
@@ -92,3 +85,21 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _permission = "permission"
     }
 }
+
+// This should be fixed in the next Realm version so we won't need that anymore :)
+
+/// Taken from https://github.com/GottaGetSwifty/CodableWrappers/blob/1b449bf3f19d3654571f00a7726786683dc950f0/Sources/CodableWrappers/OptionalWrappers.swift#L34
+/// Protocol for a PropertyWrapper to properly handle Coding when the wrappedValue is Optional
+public protocol OptionalCodingWrapper {
+    associatedtype WrappedType: ExpressibleByNilLiteral
+    init(wrappedValue: WrappedType)
+}
+
+public extension KeyedDecodingContainer {
+    // This is used to override the default decoding behavior for OptionalCodingWrapper to allow a value to avoid a missing key Error
+    func decode<T>(_ type: T.Type, forKey key: KeyedDecodingContainer<K>.Key) throws -> T where T: Decodable, T: OptionalCodingWrapper {
+        return try decodeIfPresent(T.self, forKey: key) ?? T(wrappedValue: nil)
+    }
+}
+
+extension Persisted: OptionalCodingWrapper where Value: ExpressibleByNilLiteral {}
