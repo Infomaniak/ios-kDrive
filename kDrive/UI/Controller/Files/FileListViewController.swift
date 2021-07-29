@@ -476,6 +476,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
+    private func bulkMoveFiles(_ files: [File], destinationId: Int) {
+        let fileIds = files.map(\.id)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .move, fileIds: fileIds, destinationId: destinationId, completion: bulkObservation(response:error:))
+    }
+
+    private func bulkMoveAll(destinationId: Int) {
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .move, parentId: currentDirectory.id, destinationId: destinationId, completion: bulkObservation(response:error:))
+    }
+
     private func bulkDeleteFiles(_ files: [File]) {
         let fileIds = files.map(\.id)
         driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, fileIds: fileIds, completion: bulkObservation(response:error:))
@@ -993,9 +1002,14 @@ extension FileListViewController: FilesHeaderViewDelegate {
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
             let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
             selectFolderViewController?.disabledDirectoriesSelection = [selectedFiles.first?.parent ?? driveFileManager.getRootFile()]
-            selectFolderViewController?.selectHandler = { selectedFolder in
+            selectFolderViewController?.selectHandler = { [self] selectedFolder in
                 if selectedFiles.count > bulkActionThreshold {
-                    //TODO: bulk
+                    if let count = currentDirectoryCount?.count,
+                       selectAllMode {
+                        self.bulkMoveAll(destinationId: selectedFolder.id)
+                    } else {
+                        self.bulkMoveFiles(Array(self.selectedFiles), destinationId: selectedFolder.id)
+                    }
                 } else {
                     let group = DispatchGroup()
                     var success = true

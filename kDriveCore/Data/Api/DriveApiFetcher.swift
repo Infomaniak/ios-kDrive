@@ -645,9 +645,12 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
-    public func bulkAction(driveId: Int, action: BulkAction, fileIds: [Int], completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
+    public func bulkAction(driveId: Int, action: BulkAction, fileIds: [Int], destinationId: Int? = nil, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
         let url = ApiRoutes.bulkAction(driveId: driveId)
-        let body: [String: Any] = ["action": action.rawValue, "file_ids": fileIds]
+        var body: [String: Any] = ["action": action.rawValue, "file_ids": fileIds]
+        if let destinationId = destinationId {
+            body["destination_directory_id"] = destinationId
+        }
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
@@ -655,10 +658,12 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
-    public func bulkAction(driveId: Int, action: BulkAction, parentId: Int, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
+    public func bulkAction(driveId: Int, action: BulkAction, parentId: Int, destinationId: Int? = nil, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
         let url = ApiRoutes.bulkAction(driveId: driveId)
-        let body: [String: Any] = ["action": action.rawValue, "parent_id": parentId]
-
+        var body: [String: Any] = ["action": action.rawValue, "parent_id": parentId]
+        if let destinationId = destinationId {
+            body["destination_directory_id"] = destinationId
+        }
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
                 self.handleResponse(response: response, completion: completion)

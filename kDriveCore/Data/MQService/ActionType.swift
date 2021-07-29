@@ -20,6 +20,7 @@ import Foundation
 
 public enum BulkAction: String {
     case trash
+    case move
 }
 
 enum SimpleAction: String, Codable {
