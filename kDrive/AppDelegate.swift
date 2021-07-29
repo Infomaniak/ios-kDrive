@@ -31,7 +31,7 @@ import UIKit
 import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     var window: UIWindow?
 
     private var accountManager: AccountManager!
@@ -86,7 +86,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
 
+        // Register for remote notifications. This shows a permission dialog on first run, to
+        // show the dialog at a more appropriate time move this registration accordingly.
+        // [START register_for_notifications]
+        // For iOS 10 display notification (sent via APNS)
+        UNUserNotificationCenter.current().delegate = self
+
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions,
+            completionHandler: { _, _ in }
+        )
+
+        application.registerForRemoteNotifications()
+        Messaging.messaging().delegate = self
+
         return true
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Unable to registerfor remote notifications: \(error.localizedDescription)")
     }
 
     @available(iOS 13.0, *)
@@ -564,8 +587,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         return !(UserDefaults.isFirstLaunch() || accountManager.accounts.isEmpty)
     }
+}
 
-    // MARK: - User notification center delegate
+// MARK: - User notification center delegate
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    // In Foreground
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        // Treat notification
+    }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
@@ -590,5 +620,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         }
 
         completionHandler()
+    }
+}
+
+// MARK: - MessagingDelegate
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        let dataDict = ["token": fcmToken ?? ""]
+        NotificationCenter.default.post(name: Notification.Name("FCMToken"), object: nil, userInfo: dataDict)
     }
 }
