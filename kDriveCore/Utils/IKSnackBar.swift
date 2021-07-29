@@ -118,7 +118,7 @@ public class IKWindowProvider {
 
     private func displayRollbackWindow() {
         if #available(iOS 13.0, *) {
-            entryWindow.windowScene = nil
+            entryWindow?.windowScene = nil
         }
         entryWindow = nil
         if let mainRollbackWindow = mainRollbackWindow {
