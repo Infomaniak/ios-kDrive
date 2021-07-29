@@ -49,6 +49,12 @@ class StoreViewController: UICollectionViewController {
         fetchProductInformation()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
     private func fetchProductInformation() {
         guard StoreObserver.shared.isAuthorizedForPayments else {
             // Warn the user that they are not allowed to make purchases
@@ -81,7 +87,7 @@ class StoreViewController: UICollectionViewController {
     // MARK: - Collection view data source
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
+        return driveFileManager == nil ? 0 : items.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -109,6 +115,25 @@ class StoreViewController: UICollectionViewController {
 
         let point = CGPoint(x: pagedX, y: targetContentOffset.pointee.y)
         targetContentOffset.pointee = point
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        collectionView.reloadData()
     }
 }
 

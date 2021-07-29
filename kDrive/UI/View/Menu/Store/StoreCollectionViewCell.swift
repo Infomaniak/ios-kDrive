@@ -59,7 +59,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
         }
 
         if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
-            priceLabel.text = "\(formattedPrice) par \(subscriptionPeriod.unit.localizedString)"
+            priceLabel.text = "\(formattedPrice) pour \(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)"
         } else {
             priceLabel.text = "Prix inconnu"
         }
@@ -69,6 +69,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
             selectButton.setTitle("Sélectionné", for: .normal)
         } else {
             selectButton.isEnabled = item.product != nil
+            selectButton.setTitle("Sélectionner", for: .normal)
         }
     }
 
