@@ -20,20 +20,51 @@ import kDriveCore
 import StoreKit
 import UIKit
 
-class StoreViewController: UICollectionViewController {
+class StoreViewController: UIViewController {
     struct Item {
         let pack: DrivePack
         let identifier: String
+        let period: PeriodTab
         var product: SKProduct?
 
-        static let solo = Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo")
-        static let team = Item(pack: .team, identifier: "com.infomaniak.drive.iap.team")
-        static let pro = Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro")
+        static let allItems = [
+            Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo", period: .monthly),
+            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team", period: .monthly),
+            Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro", period: .monthly),
+            Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo.yearly", period: .yearly),
+            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team.yearly", period: .yearly),
+            Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro.yearly", period: .yearly)
+        ]
     }
+
+    enum PeriodTab: Int, CaseIterable {
+        case monthly, yearly
+
+        var title: String {
+            switch self {
+            case .monthly:
+                return "Mensuel"
+            case .yearly:
+                return "Annuel"
+            }
+        }
+    }
+
+    @IBOutlet weak var segmentedControl: IKSegmentedControl!
+    @IBOutlet weak var collectionView: UICollectionView!
+
+    private let headerIdentifier = "TabsHeader"
 
     var driveFileManager: DriveFileManager!
 
-    private var items: [Item] = [.solo, .team, .pro]
+    private var items = Item.allItems
+    private var selectedPeriod = PeriodTab.monthly {
+        didSet { collectionView.reloadData() }
+    }
+
+    private var displayedItems: [Item] {
+        return items.filter { $0.period == selectedPeriod }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,6 +76,9 @@ class StoreViewController: UICollectionViewController {
         // Set up delegates
         StoreManager.shared.delegate = self
         StoreObserver.shared.delegate = self
+
+        // Set up segmented control
+        segmentedControl.setSegments(PeriodTab.allCases.map(\.title))
 
         // Fetch product information
         fetchProductInformation()
@@ -79,43 +113,16 @@ class StoreViewController: UICollectionViewController {
         }
     }
 
+    @IBAction func periodChanged(_ sender: Any) {
+        if let period = PeriodTab(rawValue: segmentedControl.selectedSegmentIndex) {
+            selectedPeriod = period
+        }
+    }
+
     static func instantiate(driveFileManager: DriveFileManager) -> StoreViewController {
         let viewController = Storyboard.menu.instantiateViewController(withIdentifier: "StoreViewController") as! StoreViewController
         viewController.driveFileManager = driveFileManager
         return viewController
-    }
-
-    // MARK: - Collection view data source
-
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return driveFileManager == nil ? 0 : items.count
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
-        let item = items[indexPath.row]
-        cell.configure(with: item, currentPack: driveFileManager.drive.pack)
-        cell.delegate = self
-        return cell
-    }
-
-    // MARK: - Scroll view delegate
-
-    override func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        let itemWidth = collectionView.bounds.size.width - 48 + 10
-        let inertialTargetX = targetContentOffset.pointee.x
-        let offsetFromPreviousPage = (inertialTargetX + collectionView.contentInset.left).truncatingRemainder(dividingBy: itemWidth)
-
-        // Snap to nearest page
-        let pagedX: CGFloat
-        if offsetFromPreviousPage > itemWidth / 2 {
-            pagedX = inertialTargetX + (itemWidth - offsetFromPreviousPage)
-        } else {
-            pagedX = inertialTargetX - offsetFromPreviousPage
-        }
-
-        let point = CGPoint(x: pagedX, y: targetContentOffset.pointee.y)
-        targetContentOffset.pointee = point
     }
 
     // MARK: - State restoration
@@ -138,6 +145,43 @@ class StoreViewController: UICollectionViewController {
     }
 }
 
+// MARK: - Collection view data source
+
+extension StoreViewController: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return driveFileManager == nil ? 0 : displayedItems.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
+        let item = displayedItems[indexPath.row]
+        cell.configure(with: item, currentPack: driveFileManager.drive.pack)
+        cell.delegate = self
+        return cell
+    }
+}
+
+// MARK: - Scroll view delegate
+
+extension StoreViewController: UIScrollViewDelegate {
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let itemWidth = collectionView.bounds.size.width - 48 + 10
+        let inertialTargetX = targetContentOffset.pointee.x
+        let offsetFromPreviousPage = (inertialTargetX + collectionView.contentInset.left).truncatingRemainder(dividingBy: itemWidth)
+
+        // Snap to nearest page
+        let pagedX: CGFloat
+        if offsetFromPreviousPage > itemWidth / 2 {
+            pagedX = inertialTargetX + (itemWidth - offsetFromPreviousPage)
+        } else {
+            pagedX = inertialTargetX - offsetFromPreviousPage
+        }
+
+        let point = CGPoint(x: pagedX, y: targetContentOffset.pointee.y)
+        targetContentOffset.pointee = point
+    }
+}
+
 // MARK: - Collection view flow delegate
 
 extension StoreViewController: UICollectionViewDelegateFlowLayout {
@@ -152,7 +196,7 @@ extension StoreViewController: StoreCellDelegate {
     func selectButtonTapped(item: Item) {
         if let product = item.product {
             // Attempt to purchase the tapped product
-            StoreObserver.shared.buy(product)
+            StoreObserver.shared.buy(product, userId: AccountManager.instance.currentUserId, driveId: driveFileManager.drive.id)
         }
     }
 }
