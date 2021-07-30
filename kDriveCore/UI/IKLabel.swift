@@ -28,13 +28,14 @@ public struct TextStyle: RawRepresentable {
     public static let subtitle1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle1")
     public static let subtitle2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle2")
     public static let body1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "body1")
+    public static let body2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.primaryTextColor.color, rawValue: "body2")
     public static let caption = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: KDriveCoreAsset.primaryTextColor.color, rawValue: "caption")
     public static let header1Light = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: .white, rawValue: "header1Light")
     public static let captionLight = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: .white, rawValue: "captionLight")
     public static let body1Light = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: .white, rawValue: "body1Light")
     public static let action = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.infomaniakColor.color, rawValue: "action")
 
-    static let allValues = [header1, header2, header3, subtitle1, subtitle2, body1, caption, header1Light, captionLight, body1Light, action]
+    static let allValues = [header1, header2, header3, subtitle1, subtitle2, body1, body2, caption, header1Light, captionLight, body1Light, action]
 
     public typealias RawValue = String
     public var rawValue: String

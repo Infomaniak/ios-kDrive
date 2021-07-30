@@ -26,7 +26,7 @@
                         </constraints>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Solo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HMm-XV-G0e" customClass="IKLabel" customModule="kDriveCore">
-                        <rect key="frame" x="60" y="30" width="253" height="14.5"/>
+                        <rect key="frame" x="60" y="28.5" width="253" height="17"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -35,23 +35,23 @@
                         </userDefinedRuntimeAttributes>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EVY-6R-JpA" customClass="IKLabel" customModule="kDriveCore">
-                        <rect key="frame" x="20" y="72" width="293" height="25.5"/>
+                        <rect key="frame" x="20" y="72" width="293" height="33.5"/>
                         <string key="text">1 utilisateur maximum
 2 To de stockage</string>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body2"/>
                         </userDefinedRuntimeAttributes>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CHF 5.95 par mois" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Zf-mp-FnH" customClass="IKLabel" customModule="kDriveCore">
-                        <rect key="frame" x="20" y="111.5" width="293" height="14.5"/>
+                        <rect key="frame" x="20" y="119.5" width="293" height="17"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                         </userDefinedRuntimeAttributes>
                     </label>
                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0y2-ji-vxm" customClass="IKLargeButton" customModule="kDriveCore">
@@ -64,25 +64,36 @@
                             <action selector="selectButtonTapped:" destination="gTV-IL-0wX" eventType="touchUpInside" id="W2C-Ol-ace"/>
                         </connections>
                     </button>
+                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" scrollEnabled="NO" style="plain" separatorStyle="none" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="O1d-Zc-C35">
+                        <rect key="frame" x="20" y="144.5" width="293" height="145.5"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <connections>
+                            <outlet property="dataSource" destination="gTV-IL-0wX" id="UEM-Iu-ooI"/>
+                            <outlet property="delegate" destination="gTV-IL-0wX" id="2sK-kn-qFs"/>
+                        </connections>
+                    </tableView>
                 </subviews>
             </view>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <color key="backgroundColor" name="backgroundCardView"/>
             <constraints>
-                <constraint firstItem="0y2-ji-vxm" firstAttribute="top" relation="greaterThanOrEqual" secondItem="5Zf-mp-FnH" secondAttribute="bottom" constant="40" id="7EE-E8-iRO"/>
                 <constraint firstItem="5Zf-mp-FnH" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="87i-Rw-5sb"/>
                 <constraint firstAttribute="trailing" secondItem="5Zf-mp-FnH" secondAttribute="trailing" constant="20" id="8qg-2J-hXe"/>
                 <constraint firstItem="0y2-ji-vxm" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="9Si-NY-6co"/>
+                <constraint firstItem="O1d-Zc-C35" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="Co1-xI-K2U"/>
                 <constraint firstItem="EVY-6R-JpA" firstAttribute="top" secondItem="kcr-vE-qpe" secondAttribute="bottom" constant="20" id="Fo7-w1-YIU"/>
                 <constraint firstAttribute="trailing" secondItem="0y2-ji-vxm" secondAttribute="trailing" constant="20" id="M9U-cf-26A"/>
                 <constraint firstItem="kcr-vE-qpe" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="PRG-Bb-tcO"/>
                 <constraint firstItem="HMm-XV-G0e" firstAttribute="leading" secondItem="kcr-vE-qpe" secondAttribute="trailing" constant="10" id="Tet-Wj-O4o"/>
                 <constraint firstItem="5Zf-mp-FnH" firstAttribute="top" secondItem="EVY-6R-JpA" secondAttribute="bottom" constant="14" id="UM6-bs-IIT"/>
+                <constraint firstItem="O1d-Zc-C35" firstAttribute="top" secondItem="5Zf-mp-FnH" secondAttribute="bottom" constant="8" id="Uf7-Rg-Oxo"/>
                 <constraint firstItem="EVY-6R-JpA" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="WTU-Af-Fyj"/>
                 <constraint firstAttribute="trailing" secondItem="HMm-XV-G0e" secondAttribute="trailing" constant="20" id="bZY-0Y-WKc"/>
                 <constraint firstAttribute="bottom" secondItem="0y2-ji-vxm" secondAttribute="bottom" constant="20" id="fGj-xq-0SP"/>
+                <constraint firstAttribute="trailing" secondItem="O1d-Zc-C35" secondAttribute="trailing" constant="20" id="fqd-XQ-NwM"/>
                 <constraint firstItem="kcr-vE-qpe" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="22" id="gJR-dW-FDB"/>
                 <constraint firstAttribute="trailing" secondItem="EVY-6R-JpA" secondAttribute="trailing" constant="20" id="hw4-Sp-4PN"/>
+                <constraint firstItem="0y2-ji-vxm" firstAttribute="top" secondItem="O1d-Zc-C35" secondAttribute="bottom" constant="16" id="wVm-CD-9KX"/>
                 <constraint firstItem="HMm-XV-G0e" firstAttribute="centerY" secondItem="kcr-vE-qpe" secondAttribute="centerY" id="x7G-Yc-qlq"/>
             </constraints>
             <connections>
@@ -90,23 +101,24 @@
                 <outlet property="imageView" destination="kcr-vE-qpe" id="dMW-uX-xfK"/>
                 <outlet property="priceLabel" destination="5Zf-mp-FnH" id="B1u-IU-HfM"/>
                 <outlet property="selectButton" destination="0y2-ji-vxm" id="fUg-4r-IBD"/>
+                <outlet property="tableView" destination="O1d-Zc-C35" id="tKW-Mg-yhd"/>
                 <outlet property="titleLabel" destination="HMm-XV-G0e" id="Vum-MG-kDm"/>
             </connections>
-            <point key="canvasLocation" x="139" y="80"/>
+            <point key="canvasLocation" x="138.40579710144928" y="79.6875"/>
         </collectionViewCell>
     </objects>
     <designables>
         <designable name="0y2-ji-vxm">
-            <size key="intrinsicContentSize" width="94" height="32"/>
+            <size key="intrinsicContentSize" width="84" height="29"/>
         </designable>
         <designable name="5Zf-mp-FnH">
-            <size key="intrinsicContentSize" width="105" height="14.5"/>
+            <size key="intrinsicContentSize" width="122.5" height="17"/>
         </designable>
         <designable name="EVY-6R-JpA">
-            <size key="intrinsicContentSize" width="109.5" height="25.5"/>
+            <size key="intrinsicContentSize" width="140" height="33.5"/>
         </designable>
         <designable name="HMm-XV-G0e">
-            <size key="intrinsicContentSize" width="25.5" height="14.5"/>
+            <size key="intrinsicContentSize" width="29.5" height="17"/>
         </designable>
     </designables>
     <resources>
