@@ -21,7 +21,7 @@ import UIKit
 import VisionKit
 
 class ScanTypeTableViewCell: UITableViewCell {
-    @IBOutlet weak var segmentedControl: UISegmentedControl!
+    @IBOutlet weak var segmentedControl: IKSegmentedControl!
 
     var didSelectIndex: ((Int) -> Void)?
 
@@ -31,13 +31,8 @@ class ScanTypeTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        var size: CGFloat = 14
-        if UIScreen.main.bounds.width < 390 {
-            size = ceil(size * UIScreen.main.bounds.width / 390)
-        }
-        let font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: size))
-        segmentedControl.setTitleTextAttributes([.foregroundColor: KDriveAsset.disconnectColor.color, .font: font], for: .normal)
-        segmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white, .font: font], for: .selected)
+
+        segmentedControl.backgroundColor = KDriveCoreAsset.backgroundCardViewColor.color
     }
 
     func configureForPhoto() {

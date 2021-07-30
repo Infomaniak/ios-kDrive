@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -18,7 +18,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="322" height="57"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="qzj-9B-tvW">
+                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="qzj-9B-tvW" customClass="IKSegmentedControl" customModule="kDriveCore">
                         <rect key="frame" x="24" y="8" width="274" height="42"/>
                         <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
@@ -30,7 +30,7 @@
                         </segments>
                         <color key="selectedSegmentTintColor" name="infomaniakColor"/>
                         <connections>
-                            <action selector="segmentedControlChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="zQu-qs-cAw"/>
+                            <action selector="segmentedControlChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="QeZ-XE-V58"/>
                         </connections>
                     </segmentedControl>
                 </subviews>
@@ -45,7 +45,7 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
-                <outlet property="segmentedControl" destination="qzj-9B-tvW" id="nvN-et-liH"/>
+                <outlet property="segmentedControl" destination="qzj-9B-tvW" id="t6d-3u-xp0"/>
             </connections>
             <point key="canvasLocation" x="139.13043478260872" y="148.66071428571428"/>
         </tableViewCell>
