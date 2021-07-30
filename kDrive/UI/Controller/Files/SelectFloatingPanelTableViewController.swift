@@ -24,6 +24,8 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
     var changedFiles: [File]? = []
     var downloadInProgress = false
 
+    private let bulkActionThreshold = 10
+
     var filesAvailableOffline: Bool {
         return files.allSatisfy(\.isAvailableOffline)
     }
@@ -33,7 +35,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
     }
 
     lazy var actions: [FloatingPanelAction] = {
-        if sharedWithMe {
+        if sharedWithMe || files.count > bulkActionThreshold {
             return FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else {
             return FloatingPanelAction.multipleSelectionActions
