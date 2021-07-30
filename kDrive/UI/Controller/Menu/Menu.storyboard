@@ -60,7 +60,7 @@
                         <segue destination="XvF-Yr-0F4" kind="show" identifier="toMySharedSegue" id="J1x-fu-5jd"/>
                         <segue destination="UJN-BO-Tu3" kind="show" identifier="toOfflineSegue" id="aEo-BZ-U5c"/>
                         <segue destination="6wp-0R-3mI" kind="show" identifier="toLastModificationsSegue" id="FXj-6K-uCY"/>
-                        <segue destination="8kX-fk-CmP" kind="show" identifier="toStoreSegue" id="eLL-Ao-625"/>
+                        <segue destination="Fsr-PN-VS5" kind="show" identifier="toStoreSegue" id="N2u-2S-RrF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="t0l-FY-zPZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -120,30 +120,65 @@
             <point key="canvasLocation" x="517" y="1669"/>
         </scene>
         <!--Modifier votre offre-->
-        <scene sceneID="Qhv-h3-qn0">
+        <scene sceneID="BeN-WZ-fN6">
             <objects>
-                <collectionViewController storyboardIdentifier="StoreViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="8kX-fk-CmP" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" id="d0m-bo-h8m">
+                <viewController hidesBottomBarWhenPushed="YES" id="Fsr-PN-VS5" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="9zg-AP-wRg">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="aMz-Tk-Nco">
+                                <rect key="frame" x="0.0" y="104" width="414" height="360"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="360" id="w9E-mf-akq"/>
+                                </constraints>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="f4a-gd-TTj">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="24" minY="0.0" maxX="24" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells/>
+                                <connections>
+                                    <outlet property="dataSource" destination="Fsr-PN-VS5" id="Ei2-rm-jhU"/>
+                                    <outlet property="delegate" destination="Fsr-PN-VS5" id="TUq-Xc-nD6"/>
+                                </connections>
+                            </collectionView>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="xE8-Ry-LKd" customClass="IKSegmentedControl" customModule="kDriveCore">
+                                <rect key="frame" x="24" y="44" width="366" height="41"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="KRD-8S-kqb"/>
+                                </constraints>
+                                <segments>
+                                    <segment title="First"/>
+                                    <segment title="Second"/>
+                                </segments>
+                                <connections>
+                                    <action selector="periodChanged:" destination="Fsr-PN-VS5" eventType="valueChanged" id="l8d-DI-0Ls"/>
+                                </connections>
+                            </segmentedControl>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="QgJ-Px-rGh"/>
                         <color key="backgroundColor" name="backgroundColor"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="aje-8k-lM1">
-                            <size key="itemSize" width="128" height="128"/>
-                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                            <inset key="sectionInset" minX="24" minY="0.0" maxX="24" maxY="0.0"/>
-                        </collectionViewFlowLayout>
-                        <cells/>
-                        <connections>
-                            <outlet property="dataSource" destination="8kX-fk-CmP" id="I1k-WP-9f1"/>
-                            <outlet property="delegate" destination="8kX-fk-CmP" id="mXT-qm-tXu"/>
-                        </connections>
-                    </collectionView>
-                    <navigationItem key="navigationItem" title="Modifier votre offre" largeTitleDisplayMode="always" id="oak-lq-XfI"/>
-                </collectionViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="IIw-6Y-dO6" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                        <constraints>
+                            <constraint firstItem="xE8-Ry-LKd" firstAttribute="top" secondItem="QgJ-Px-rGh" secondAttribute="top" id="40l-Wl-lbc"/>
+                            <constraint firstItem="xE8-Ry-LKd" firstAttribute="leading" secondItem="QgJ-Px-rGh" secondAttribute="leading" constant="24" id="79i-Zg-DBG"/>
+                            <constraint firstItem="aMz-Tk-Nco" firstAttribute="leading" secondItem="QgJ-Px-rGh" secondAttribute="leading" id="7pV-xI-Yug"/>
+                            <constraint firstItem="aMz-Tk-Nco" firstAttribute="trailing" secondItem="QgJ-Px-rGh" secondAttribute="trailing" id="P7B-6w-kf8"/>
+                            <constraint firstItem="aMz-Tk-Nco" firstAttribute="top" secondItem="xE8-Ry-LKd" secondAttribute="bottom" constant="20" id="zgH-8t-UNy"/>
+                            <constraint firstItem="QgJ-Px-rGh" firstAttribute="trailing" secondItem="xE8-Ry-LKd" secondAttribute="trailing" constant="24" id="zw6-zZ-V6Z"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Modifier votre offre" id="0uH-wd-iUL"/>
+                    <connections>
+                        <outlet property="collectionView" destination="aMz-Tk-Nco" id="ghu-Jh-vYb"/>
+                        <outlet property="segmentedControl" destination="xE8-Ry-LKd" id="gud-3W-ZEY"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="wAw-yQ-Xhd" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-448" y="921"/>
+            <point key="canvasLocation" x="-461" y="921"/>
         </scene>
         <!--Shared Drives View Controller-->
         <scene sceneID="KtL-Ub-qLh">
@@ -769,7 +804,7 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="318" width="350" height="18.5"/>
+                                <rect key="frame" x="32" y="318" width="350" height="21.5"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -779,7 +814,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M26-GT-YZh">
-                                <rect key="frame" x="32" y="352.5" width="46" height="2"/>
+                                <rect key="frame" x="32" y="355.5" width="46" height="2"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="46" id="EjK-HW-r8M"/>
@@ -787,7 +822,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="370.5" width="350" height="14.5"/>
+                                <rect key="frame" x="32" y="373.5" width="350" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -797,10 +832,10 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RCf-P4-yUy" customClass="ShadowView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="32" y="417" width="350" height="80"/>
+                                <rect key="frame" x="32" y="422.5" width="350" height="80"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activer le verouillage Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="xyY-1J-PGU" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="16" y="31.5" width="261" height="17"/>
+                                        <rect key="frame" x="16" y="30.5" width="261" height="19.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -972,23 +1007,23 @@
     </scenes>
     <designables>
         <designable name="0Ow-gT-FNm">
-            <size key="intrinsicContentSize" width="121" height="18.5"/>
+            <size key="intrinsicContentSize" width="138" height="21.5"/>
         </designable>
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="130.5" height="21.5"/>
         </designable>
         <designable name="SeG-hp-Rwt"/>
         <designable name="abC-af-U6z">
-            <size key="intrinsicContentSize" width="85" height="32"/>
+            <size key="intrinsicContentSize" width="76" height="29"/>
         </designable>
         <designable name="ahf-mt-ZbI">
             <size key="intrinsicContentSize" width="146" height="17"/>
         </designable>
         <designable name="gJI-rA-NpO">
-            <size key="intrinsicContentSize" width="133" height="14.5"/>
+            <size key="intrinsicContentSize" width="152" height="17"/>
         </designable>
         <designable name="xyY-1J-PGU">
-            <size key="intrinsicContentSize" width="153" height="17"/>
+            <size key="intrinsicContentSize" width="171.5" height="19.5"/>
         </designable>
     </designables>
     <resources>

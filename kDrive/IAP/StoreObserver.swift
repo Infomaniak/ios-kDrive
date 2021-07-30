@@ -46,8 +46,9 @@ class StoreObserver: NSObject {
     // MARK: - Public methods
 
     /// Create and add a payment request to the payment queue.
-    func buy(_ product: SKProduct) {
+    func buy(_ product: SKProduct, userId: Int, driveId: Int) {
         let payment = SKMutablePayment(product: product)
+        payment.applicationUsername = "\(userId)_\(driveId)"
         SKPaymentQueue.default().add(payment)
     }
 

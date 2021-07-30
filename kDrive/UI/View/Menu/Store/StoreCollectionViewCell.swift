@@ -121,7 +121,7 @@ extension SKProduct.PeriodUnit {
         case .month:
             return "mois"
         case .year:
-            return "year"
+            return "an"
         @unknown default:
             return "période"
         }
