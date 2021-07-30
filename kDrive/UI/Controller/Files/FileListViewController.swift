@@ -817,7 +817,14 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if selectionMode {
+        guard selectionMode else {
+            return
+        }
+        if selectAllMode {
+            deselectAllChildren()
+            selectChild(at: indexPath)
+            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init(rawValue: 0))
+        } else {
             deselectChild(at: indexPath)
         }
     }
