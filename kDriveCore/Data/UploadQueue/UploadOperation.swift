@@ -313,6 +313,14 @@ public class UploadOperation: Operation {
                     uploadsRealm.add(UploadFile(value: file), update: .modified)
                 }
             }
+        } else {
+            BackgroundRealm.uploads.execute { uploadsRealm in
+                if let toDelete = uploadsRealm.object(ofType: UploadFile.self, forPrimaryKey: file.id) {
+                    try? uploadsRealm.safeWrite {
+                        uploadsRealm.delete(toDelete)
+                    }
+                }
+            }
         }
 
         progressObservation?.invalidate()
