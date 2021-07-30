@@ -60,7 +60,7 @@
                         <segue destination="XvF-Yr-0F4" kind="show" identifier="toMySharedSegue" id="J1x-fu-5jd"/>
                         <segue destination="UJN-BO-Tu3" kind="show" identifier="toOfflineSegue" id="aEo-BZ-U5c"/>
                         <segue destination="6wp-0R-3mI" kind="show" identifier="toLastModificationsSegue" id="FXj-6K-uCY"/>
-                        <segue destination="Fsr-PN-VS5" kind="show" identifier="toStoreSegue" id="N2u-2S-RrF"/>
+                        <segue destination="goi-8i-QHp" kind="show" identifier="toStoreSegue" id="1Km-GE-ZEy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="t0l-FY-zPZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -120,65 +120,23 @@
             <point key="canvasLocation" x="517" y="1669"/>
         </scene>
         <!--Modifier votre offre-->
-        <scene sceneID="BeN-WZ-fN6">
+        <scene sceneID="dJH-S6-ALV">
             <objects>
-                <viewController hidesBottomBarWhenPushed="YES" id="Fsr-PN-VS5" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="9zg-AP-wRg">
+                <tableViewController hidesBottomBarWhenPushed="YES" id="goi-8i-QHp" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="QsL-m2-UyU">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceHorizontal="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="aMz-Tk-Nco">
-                                <rect key="frame" x="0.0" y="104" width="414" height="360"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="360" id="w9E-mf-akq"/>
-                                </constraints>
-                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="f4a-gd-TTj">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="24" minY="0.0" maxX="24" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="Fsr-PN-VS5" id="Ei2-rm-jhU"/>
-                                    <outlet property="delegate" destination="Fsr-PN-VS5" id="TUq-Xc-nD6"/>
-                                </connections>
-                            </collectionView>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="xE8-Ry-LKd" customClass="IKSegmentedControl" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="44" width="366" height="41"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="40" id="KRD-8S-kqb"/>
-                                </constraints>
-                                <segments>
-                                    <segment title="First"/>
-                                    <segment title="Second"/>
-                                </segments>
-                                <connections>
-                                    <action selector="periodChanged:" destination="Fsr-PN-VS5" eventType="valueChanged" id="l8d-DI-0Ls"/>
-                                </connections>
-                            </segmentedControl>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="QgJ-Px-rGh"/>
                         <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="xE8-Ry-LKd" firstAttribute="top" secondItem="QgJ-Px-rGh" secondAttribute="top" id="40l-Wl-lbc"/>
-                            <constraint firstItem="xE8-Ry-LKd" firstAttribute="leading" secondItem="QgJ-Px-rGh" secondAttribute="leading" constant="24" id="79i-Zg-DBG"/>
-                            <constraint firstItem="aMz-Tk-Nco" firstAttribute="leading" secondItem="QgJ-Px-rGh" secondAttribute="leading" id="7pV-xI-Yug"/>
-                            <constraint firstItem="aMz-Tk-Nco" firstAttribute="trailing" secondItem="QgJ-Px-rGh" secondAttribute="trailing" id="P7B-6w-kf8"/>
-                            <constraint firstItem="aMz-Tk-Nco" firstAttribute="top" secondItem="xE8-Ry-LKd" secondAttribute="bottom" constant="20" id="zgH-8t-UNy"/>
-                            <constraint firstItem="QgJ-Px-rGh" firstAttribute="trailing" secondItem="xE8-Ry-LKd" secondAttribute="trailing" constant="24" id="zw6-zZ-V6Z"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Modifier votre offre" id="0uH-wd-iUL"/>
-                    <connections>
-                        <outlet property="collectionView" destination="aMz-Tk-Nco" id="ghu-Jh-vYb"/>
-                        <outlet property="segmentedControl" destination="xE8-Ry-LKd" id="gud-3W-ZEY"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="wAw-yQ-Xhd" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                        <connections>
+                            <outlet property="dataSource" destination="goi-8i-QHp" id="jx2-pi-3Jq"/>
+                            <outlet property="delegate" destination="goi-8i-QHp" id="Wuy-kU-qW0"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Modifier votre offre" id="1i2-IT-eSc"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="bwi-5w-xVg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-461" y="921"/>
+            <point key="canvasLocation" x="-435" y="921"/>
         </scene>
         <!--Shared Drives View Controller-->
         <scene sceneID="KtL-Ub-qLh">
@@ -1014,16 +972,13 @@
         </designable>
         <designable name="SeG-hp-Rwt"/>
         <designable name="abC-af-U6z">
-            <size key="intrinsicContentSize" width="76" height="29"/>
+            <size key="intrinsicContentSize" width="85" height="32"/>
         </designable>
         <designable name="ahf-mt-ZbI">
             <size key="intrinsicContentSize" width="146" height="17"/>
         </designable>
         <designable name="gJI-rA-NpO">
             <size key="intrinsicContentSize" width="152" height="17"/>
-        </designable>
-        <designable name="xE8-Ry-LKd">
-            <size key="intrinsicContentSize" width="131" height="31"/>
         </designable>
         <designable name="xyY-1J-PGU">
             <size key="intrinsicContentSize" width="171.5" height="19.5"/>

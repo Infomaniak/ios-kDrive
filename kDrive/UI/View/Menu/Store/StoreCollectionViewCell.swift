@@ -52,12 +52,14 @@ class StoreCollectionViewCell: UICollectionViewCell {
         case .free:
             break
         case .solo:
+            imageView.image = KDriveAsset.circleSolo.image
             titleLabel.text = "Solo"
             descriptionLabel.text = "1 utilisateur maximum\n2 To de stockage"
             features = ["Personnalisation des liens de partage",
                         "Support du protocole WebDAV",
                         "Support 7/7j"]
         case .team:
+            imageView.image = KDriveAsset.circleTeam.image
             titleLabel.text = "Team"
             descriptionLabel.text = "6 utilisateurs inclus et au maximum\nDe 3 à 18 To de stockage"
             features = ["Tout ce qu’il y a dans l’offre Solo",
@@ -65,6 +67,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
                         "Boîte de dépôt",
                         "Gestion simple des utilisateurs"]
         case .pro:
+            imageView.image = KDriveAsset.circlePro.image
             titleLabel.text = "Pro"
             descriptionLabel.text = "Dès 3 utilisateurs\nDe 6 à 108 To de stockage"
             features = ["Tout ce qu’il y a dans l’offre Team",
