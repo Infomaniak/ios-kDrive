@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>solo</title>
+    <g id="v222" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Drive---App-mobile---Modifier-offre---Select" transform="translate(-45.000000, -195.000000)">
+            <g id="Group-4" transform="translate(25.000000, 173.000000)">
+                <g id="solo" transform="translate(20.000000, 22.000000)">
+                    <circle id="Oval" fill="#00BCD4" cx="15" cy="15" r="15"></circle>
+                    <g id="Group" transform="translate(3.000000, 3.000000)" fill="#FFFFFF">
+                        <g id="icon" transform="translate(4.000000, 4.000000)">
+                            <path d="M8.33333333,9 C11.8294615,9.00404113 14.6626255,11.8372052 14.6666667,15.3333333 C14.6666667,15.5174282 14.5174282,15.6666667 14.3333333,15.6666667 L14.3333333,15.6666667 L2.33333333,15.6666667 C2.14923842,15.6666667 2,15.5174282 2,15.3333333 C2.00404113,11.8372052 4.83720518,9.00404113 8.33333333,9 Z M8.33333333,0.666666667 C10.3583774,0.666666667 12,2.30828925 12,4.33333333 C12,6.35837742 10.3583774,8 8.33333333,8 C6.30828925,8 4.66666667,6.35837742 4.66666667,4.33333333 C4.66666667,2.30828925 6.30828925,0.666666667 8.33333333,0.666666667 Z" id="Combined-Shape"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

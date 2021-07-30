@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="15px" height="11px" viewBox="0 0 15 11" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>small-check</title>
+    <g id="v222" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Drive---App-mobile---Modifier-offre---Select" transform="translate(-45.000000, -357.000000)" fill="#333333">
+            <g id="Group-4" transform="translate(25.000000, 173.000000)">
+                <g id="Group-2" transform="translate(20.000000, 177.678261)">
+                    <path d="M1.85002254,13.5505571 C1.29773779,13.5505571 0.85002254,13.1028418 0.85002254,12.5505571 L0.85002254,6.62653108 C0.85002254,6.07424633 1.29773779,5.62653108 1.85002254,5.62653108 L2.01668921,5.62653108 C2.56897396,5.62653108 3.01668921,6.07424633 3.01668921,6.62653108 L3.01602254,11.3835311 L13.1759966,11.3838904 C13.7282813,11.3838904 14.1759966,11.8316056 14.1759966,12.3838904 L14.1759966,12.5505571 C14.1759966,13.1028418 13.7282813,13.5505571 13.1759966,13.5505571 L1.85002254,13.5505571 Z" id="small-check" transform="translate(7.513010, 9.588544) rotate(-45.000000) translate(-7.513010, -9.588544) "></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -20,7 +20,7 @@ import kDriveCore
 import StoreKit
 import UIKit
 
-class StoreViewController: UIViewController {
+class StoreViewController: UITableViewController {
     struct Item {
         let pack: DrivePack
         let identifier: String
@@ -50,16 +50,17 @@ class StoreViewController: UIViewController {
         }
     }
 
-    @IBOutlet weak var segmentedControl: IKSegmentedControl!
-    @IBOutlet weak var collectionView: UICollectionView!
+    private enum Row: CaseIterable {
+        case segmentedControl, offers
+    }
 
-    private let headerIdentifier = "TabsHeader"
+    private let rows = Row.allCases
 
     var driveFileManager: DriveFileManager!
 
     private var items = Item.allItems
     private var selectedPeriod = PeriodTab.monthly {
-        didSet { collectionView.reloadData() }
+        didSet { updateOffers() }
     }
 
     private var displayedItems: [Item] {
@@ -69,16 +70,13 @@ class StoreViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        collectionView.register(cellView: StoreCollectionViewCell.self)
-        collectionView.allowsSelection = false
-        collectionView.decelerationRate = .fast
+        // Set up table view
+        tableView.register(cellView: StoreControlTableViewCell.self)
+        tableView.register(cellView: StoreOffersTableViewCell.self)
 
         // Set up delegates
         StoreManager.shared.delegate = self
         StoreObserver.shared.delegate = self
-
-        // Set up segmented control
-        segmentedControl.setSegments(PeriodTab.allCases.map(\.title))
 
         // Fetch product information
         fetchProductInformation()
@@ -113,9 +111,35 @@ class StoreViewController: UIViewController {
         }
     }
 
-    @IBAction func periodChanged(_ sender: Any) {
-        if let period = PeriodTab(rawValue: segmentedControl.selectedSegmentIndex) {
-            selectedPeriod = period
+    private func updateOffers() {
+        if let index = rows.firstIndex(of: .offers) {
+            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        }
+    }
+
+    // MARK: - Table view data source
+
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return Row.allCases.count
+    }
+
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch rows[indexPath.row] {
+        case .segmentedControl:
+            let cell = tableView.dequeueReusableCell(type: StoreControlTableViewCell.self, for: indexPath)
+            cell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title))
+            cell.onChange = { [weak self] index in
+                if let period = PeriodTab(rawValue: index) {
+                    self?.selectedPeriod = period
+                }
+            }
+            return cell
+        case .offers:
+            let cell = tableView.dequeueReusableCell(type: StoreOffersTableViewCell.self, for: indexPath)
+            cell.driveFileManager = driveFileManager
+            cell.items = displayedItems
+            cell.collectionView.reloadData()
+            return cell
         }
     }
 
@@ -141,63 +165,7 @@ class StoreViewController: UIViewController {
             return
         }
         self.driveFileManager = driveFileManager
-        collectionView.reloadData()
-    }
-}
-
-// MARK: - Collection view data source
-
-extension StoreViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return driveFileManager == nil ? 0 : displayedItems.count
-    }
-
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
-        let item = displayedItems[indexPath.row]
-        cell.configure(with: item, currentPack: driveFileManager.drive.pack)
-        cell.delegate = self
-        return cell
-    }
-}
-
-// MARK: - Scroll view delegate
-
-extension StoreViewController: UIScrollViewDelegate {
-    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        let itemWidth = collectionView.bounds.size.width - 48 + 10
-        let inertialTargetX = targetContentOffset.pointee.x
-        let offsetFromPreviousPage = (inertialTargetX + collectionView.contentInset.left).truncatingRemainder(dividingBy: itemWidth)
-
-        // Snap to nearest page
-        let pagedX: CGFloat
-        if offsetFromPreviousPage > itemWidth / 2 {
-            pagedX = inertialTargetX + (itemWidth - offsetFromPreviousPage)
-        } else {
-            pagedX = inertialTargetX - offsetFromPreviousPage
-        }
-
-        let point = CGPoint(x: pagedX, y: targetContentOffset.pointee.y)
-        targetContentOffset.pointee = point
-    }
-}
-
-// MARK: - Collection view flow delegate
-
-extension StoreViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.bounds.size.width - 48, height: 360)
-    }
-}
-
-// MARK: - Store cell delegate
-
-extension StoreViewController: StoreCellDelegate {
-    func selectButtonTapped(item: Item) {
-        if let product = item.product {
-            // Attempt to purchase the tapped product
-            StoreObserver.shared.buy(product, userId: AccountManager.instance.currentUserId, driveId: driveFileManager.drive.id)
-        }
+        updateOffers()
     }
 }
 
@@ -209,7 +177,7 @@ extension StoreViewController: StoreManagerDelegate {
         for i in 0 ..< items.count {
             items[i].product = response.availableProducts.first { $0.productIdentifier == items[i].identifier }
         }
-        collectionView.reloadData()
+        updateOffers()
     }
 
     func storeManagerDidReceiveMessage(_ message: String) {
