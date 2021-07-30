@@ -36,7 +36,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UWl-eJ-LdL" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="218" width="531" height="16"/>
+                                <rect key="frame" x="24" y="219.5" width="531" height="14.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
@@ -45,7 +45,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PGI-Db-d5r" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="176" width="531" height="34"/>
+                                <rect key="frame" x="24" y="177.5" width="531" height="34"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="28"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
@@ -72,7 +72,7 @@
                             <constraint firstAttribute="trailing" secondItem="PGI-Db-d5r" secondAttribute="trailing" constant="24" id="x38-we-JXu"/>
                         </constraints>
                     </view>
-                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SVY-Sl-aWb">
+                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SVY-Sl-aWb" customClass="IKSegmentedControl" customModule="kDriveCore">
                         <rect key="frame" x="24" y="266" width="531" height="41"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
@@ -88,7 +88,7 @@
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKeys" value="fileDetailsInfosTitle,fileDetailsActivityTitle,fileDetailsCommentsTitle"/>
                         </userDefinedRuntimeAttributes>
                         <connections>
-                            <action selector="segmentedControlUpdated:" destination="KGk-i7-Jjw" eventType="valueChanged" id="Dmo-6R-KPQ"/>
+                            <action selector="segmentedControlUpdated:" destination="KGk-i7-Jjw" eventType="valueChanged" id="Rt5-cH-Pz0"/>
                         </connections>
                     </segmentedControl>
                 </subviews>
@@ -110,11 +110,19 @@
                 <outlet property="fileImage" destination="XXK-DT-f2e" id="rlM-FT-4OB"/>
                 <outlet property="fileImageView" destination="Whr-Jo-7rn" id="CdN-s1-2qf"/>
                 <outlet property="fileNameLabel" destination="PGI-Db-d5r" id="Ulz-ZN-unm"/>
-                <outlet property="segmentedControl" destination="SVY-Sl-aWb" id="lCJ-6p-Ogl"/>
+                <outlet property="segmentedControl" destination="SVY-Sl-aWb" id="BtE-EN-nhB"/>
             </connections>
             <point key="canvasLocation" x="-113.768115942029" y="242.74553571428569"/>
         </tableViewCell>
     </objects>
+    <designables>
+        <designable name="PGI-Db-d5r">
+            <size key="intrinsicContentSize" width="71.5" height="33.5"/>
+        </designable>
+        <designable name="UWl-eJ-LdL">
+            <size key="intrinsicContentSize" width="31" height="14.5"/>
+        </designable>
+    </designables>
     <resources>
         <image name="test-image" width="2000" height="1333"/>
         <namedColor name="backgroundColor">
