@@ -127,7 +127,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="aMz-Tk-Nco">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceHorizontal="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="aMz-Tk-Nco">
                                 <rect key="frame" x="0.0" y="104" width="414" height="360"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
@@ -1021,6 +1021,9 @@
         </designable>
         <designable name="gJI-rA-NpO">
             <size key="intrinsicContentSize" width="152" height="17"/>
+        </designable>
+        <designable name="xE8-Ry-LKd">
+            <size key="intrinsicContentSize" width="131" height="31"/>
         </designable>
         <designable name="xyY-1J-PGU">
             <size key="intrinsicContentSize" width="171.5" height="19.5"/>

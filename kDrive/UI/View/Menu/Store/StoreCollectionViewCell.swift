@@ -76,7 +76,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
         if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
             priceLabel.text = "\(formattedPrice) pour \(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)"
         } else {
-            priceLabel.text = "Prix inconnu"
+            priceLabel.text = "Récupération…"
         }
 
         if currentPack == item.pack {
