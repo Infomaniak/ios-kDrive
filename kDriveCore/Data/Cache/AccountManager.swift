@@ -48,6 +48,7 @@ public class AccountManager: RefreshTokenDelegate {
     public var currentUserId: Int {
         didSet {
             UserDefaults.shared.currentDriveUserId = currentUserId
+            setSentryUserId(userId: currentUserId)
         }
     }
 
@@ -78,6 +79,7 @@ public class AccountManager: RefreshTokenDelegate {
     private init() {
         self.currentDriveId = UserDefaults.shared.currentDriveId
         self.currentUserId = UserDefaults.shared.currentDriveUserId
+        setSentryUserId(userId: currentUserId)
 
         forceReload()
     }
@@ -293,8 +295,13 @@ public class AccountManager: RefreshTokenDelegate {
     private func setCurrentAccount(account: Account) {
         currentAccount = account
         currentUserId = account.userId
-        // Set Sentry user
-        let user = Sentry.User(userId: "\(account.userId)")
+    }
+
+    private func setSentryUserId(userId: Int) {
+        guard userId != 0 else {
+            return
+        }
+        let user = Sentry.User(userId: "\(userId)")
         user.ipAddress = "{{auto}}"
         SentrySDK.setUser(user)
     }
