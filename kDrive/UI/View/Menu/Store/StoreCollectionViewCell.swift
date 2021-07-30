@@ -29,16 +29,20 @@ class StoreCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var titleLabel: IKLabel!
     @IBOutlet weak var descriptionLabel: IKLabel!
     @IBOutlet weak var priceLabel: IKLabel!
+    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var selectButton: IKLargeButton!
 
     weak var delegate: StoreCellDelegate?
 
     private var item: StoreViewController.Item?
+    private var features = [String]()
 
     override func awakeFromNib() {
         super.awakeFromNib()
 
         cornerRadius = UIConstants.cornerRadius
+        backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        tableView.register(cellView: StoreFeatureTableViewCell.self)
     }
 
     func configure(with item: StoreViewController.Item, currentPack: DrivePack) {
@@ -50,12 +54,23 @@ class StoreCollectionViewCell: UICollectionViewCell {
         case .solo:
             titleLabel.text = "Solo"
             descriptionLabel.text = "1 utilisateur maximum\n2 To de stockage"
+            features = ["Personnalisation des liens de partage",
+                        "Support du protocole WebDAV",
+                        "Support 7/7j"]
         case .team:
             titleLabel.text = "Team"
-            descriptionLabel.text = "6 utilisateurs inclus et au maximum\nDès 3 To jusqu’à 18 To maximum"
+            descriptionLabel.text = "6 utilisateurs inclus et au maximum\nDe 3 à 18 To de stockage"
+            features = ["Tout ce qu’il y a dans l’offre Solo",
+                        "Travail en collaboration avec plusieurs utilisateurs",
+                        "Boîte de dépôt",
+                        "Gestion simple des utilisateurs"]
         case .pro:
             titleLabel.text = "Pro"
-            descriptionLabel.text = "6 utilisateurs inclus et au maximum\nDès 6 To jusqu’à 108 To maximum"
+            descriptionLabel.text = "Dès 3 utilisateurs\nDe 6 à 108 To de stockage"
+            features = ["Tout ce qu’il y a dans l’offre Team",
+                        "Gestion complète des utilisateurs",
+                        "Transfert des données d’un utilisateur supprimé",
+                        "Statistiques avancées"]
         }
 
         if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
@@ -77,6 +92,22 @@ class StoreCollectionViewCell: UICollectionViewCell {
         if let item = item {
             delegate?.selectButtonTapped(item: item)
         }
+    }
+}
+
+// MARK: - Table view data source
+
+extension StoreCollectionViewCell: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return features.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: StoreFeatureTableViewCell.self, for: indexPath)
+
+        cell.label.text = features[indexPath.row]
+
+        return cell
     }
 }
 

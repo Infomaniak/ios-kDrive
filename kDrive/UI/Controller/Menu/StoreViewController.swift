@@ -39,6 +39,7 @@ class StoreViewController: UICollectionViewController {
         super.viewDidLoad()
 
         collectionView.register(cellView: StoreCollectionViewCell.self)
+        collectionView.allowsSelection = false
         collectionView.decelerationRate = .fast
 
         // Set up delegates
@@ -141,7 +142,7 @@ class StoreViewController: UICollectionViewController {
 
 extension StoreViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.bounds.size.width - 48, height: 400)
+        return CGSize(width: collectionView.bounds.size.width - 48, height: 360)
     }
 }
 
