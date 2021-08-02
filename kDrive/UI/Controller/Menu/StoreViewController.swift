@@ -120,7 +120,7 @@ class StoreViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Row.allCases.count
+        return driveFileManager == nil ? 1 : rows.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -139,6 +139,12 @@ class StoreViewController: UITableViewController {
             cell.driveFileManager = driveFileManager
             cell.items = displayedItems
             cell.collectionView.reloadData()
+            DispatchQueue.main.async {
+                // Scroll to current pack
+                if let index = self.items.firstIndex(where: { $0.pack == self.driveFileManager.drive.pack }) {
+                    cell.collectionView.scrollToItem(at: IndexPath(row: index, section: 0), at: .centeredHorizontally, animated: false)
+                }
+            }
             return cell
         }
     }

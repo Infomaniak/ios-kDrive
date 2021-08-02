@@ -40,7 +40,7 @@ class StoreOffersTableViewCell: UITableViewCell {
 
 extension StoreOffersTableViewCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return driveFileManager == nil ? 0 : items.count
+        return items.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
