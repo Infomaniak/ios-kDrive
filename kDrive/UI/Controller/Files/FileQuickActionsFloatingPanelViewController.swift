@@ -597,15 +597,21 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             #endif
         case .sendCopy:
+            var source: UIView = tableView!
+            if let cell = (tableView.cellForRow(at: indexPath) as? FloatingPanelCollectionTableViewCell),
+               let index = cell.menu.firstIndex(of: .sendCopy),
+               let quickActionCell = cell.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) {
+                source = quickActionCell
+            }
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
-                presentShareSheetForCurrentFile()
+                presentShareSheetForCurrentFile(sender: source)
             } else {
                 action.isLoading = true
                 tableView.reloadSections([1], with: .none)
                 DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, _ in
                     action.isLoading = false
                     DispatchQueue.main.async {
-                        presentShareSheetForCurrentFile()
+                        presentShareSheetForCurrentFile(sender: source)
                         tableView.reloadSections([1], with: .none)
                     }
                 }
@@ -701,9 +707,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         }
     }
 
-    private func presentShareSheetForCurrentFile() {
+    private func presentShareSheetForCurrentFile(sender: UIView) {
         let activityViewController = UIActivityViewController(activityItems: [file.localUrl], applicationActivities: nil)
-        activityViewController.popoverPresentationController?.sourceView = view
+        activityViewController.popoverPresentationController?.sourceView = sender
         present(activityViewController, animated: true, completion: nil)
     }
 

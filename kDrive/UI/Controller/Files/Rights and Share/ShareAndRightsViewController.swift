@@ -289,9 +289,10 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
 // MARK: - ShareLinkTableViewCellDelegate
 
 extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
-    func shareLinkSharedButtonPressed(link: String) {
+    func shareLinkSharedButtonPressed(link: String, sender: UIView) {
         let items = [URL(string: link)!]
         let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        ac.popoverPresentationController?.sourceView = sender
         present(ac, animated: true)
     }
 

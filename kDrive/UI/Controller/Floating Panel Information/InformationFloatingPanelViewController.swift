@@ -57,6 +57,7 @@ class InformationFloatingPanelViewController: UIViewController {
     @IBAction func copyButtonPressed(_ sender: UIButton) {
         let items = [URL(string: copyTextField.text!)!]
         let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        ac.popoverPresentationController?.sourceView = sender
         present(ac, animated: true)
     }
 

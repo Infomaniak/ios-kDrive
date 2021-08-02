@@ -326,9 +326,10 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
 }
 
 extension ManageDropBoxViewController: DropBoxLinkDelegate {
-    func didClickOnShareLink(link: String) {
+    func didClickOnShareLink(link: String, sender: UIView) {
         let items = [URL(string: link)!]
         let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        ac.popoverPresentationController?.sourceView = sender
         present(ac, animated: true)
     }
 }
