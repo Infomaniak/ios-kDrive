@@ -20,7 +20,7 @@ import InfomaniakCore
 import UIKit
 
 protocol DropBoxLinkDelegate: AnyObject {
-    func didClickOnShareLink(link: String)
+    func didClickOnShareLink(link: String, sender: UIView)
 }
 
 class DropBoxLinkTableViewCell: InsetTableViewCell {
@@ -33,7 +33,8 @@ class DropBoxLinkTableViewCell: InsetTableViewCell {
         copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
     }
 
-    @IBAction func copyButtonPressed(_ sender: UIButton) {
-        delegate?.didClickOnShareLink(link: copyTextField.text ?? "")
+    @IBAction func
+    copyButtonPressed(_ sender: UIButton) {
+        delegate?.didClickOnShareLink(link: copyTextField.text ?? "", sender: sender)
     }
 }

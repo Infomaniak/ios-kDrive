@@ -24,7 +24,7 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
     func shareLinkSwitchToggled(isOn: Bool)
     func shareLinkRightsButtonPressed()
     func shareLinkSettingsButtonPressed()
-    func shareLinkSharedButtonPressed(link: String)
+    func shareLinkSharedButtonPressed(link: String, sender: UIView)
 }
 
 class ShareLinkTableViewCell: InsetTableViewCell {
@@ -102,7 +102,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        delegate?.shareLinkSharedButtonPressed(link: copyTextField.text ?? "")
+        delegate?.shareLinkSharedButtonPressed(link: copyTextField.text ?? "", sender: sender)
     }
 
     @IBAction func shareLinkSwitchChanged(_ sender: UISwitch) {
