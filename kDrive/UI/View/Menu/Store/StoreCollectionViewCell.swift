@@ -89,6 +89,8 @@ class StoreCollectionViewCell: UICollectionViewCell {
             selectButton.isEnabled = item.product != nil
             selectButton.setTitle("Sélectionner", for: .normal)
         }
+
+        tableView.reloadData()
     }
 
     @IBAction func selectButtonTapped(_ sender: Any) {
