@@ -120,6 +120,7 @@ public enum KeychainHelper {
                     ]
                     resultCode = SecItemUpdate(queryUpdate as CFDictionary, attributes as CFDictionary)
                     DDLogInfo("Successfully updated token ? \(resultCode == noErr)")
+                    SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfuly updated token"))
                 }
             }
         } else {
@@ -135,12 +136,11 @@ public enum KeychainHelper {
                 ]
                 resultCode = SecItemAdd(queryAdd as CFDictionary, nil)
                 DDLogInfo("Successfully saved token ? \(resultCode == noErr)")
+                SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfuly saved token"))
             }
         }
         if resultCode != noErr {
-            SentrySDK.capture(message: "Failed saving token") { scope in
-                scope.setContext(value: ["Keychain error code": resultCode, "User id": token.userId, "Expiration date": token.expirationDate.timeIntervalSince1970], key: "Error Infos")
-            }
+            SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .error, message: "Failed saving token", keychainError: resultCode))
         }
     }
 
@@ -204,11 +204,16 @@ public enum KeychainHelper {
                             }
                         }
                     }
+                    if let token = values.first {
+                        SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfuly loaded token"))
+                    }
                 }
             } else {
-                SentrySDK.capture(message: "Failed loading tokens") { scope in
-                    scope.setContext(value: ["Keychain error code": resultCode], key: "Error Infos")
-                }
+                let crumb = Breadcrumb(level: .error, category: "Token")
+                crumb.type = "error"
+                crumb.message = "Failed loading tokens"
+                crumb.data = ["Keychain error code": resultCode]
+                SentrySDK.addBreadcrumb(crumb: crumb)
             }
         }
         return values

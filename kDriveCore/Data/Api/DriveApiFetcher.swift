@@ -649,7 +649,11 @@ public class DriveApiFetcher: ApiFetcher {
 class SyncedAuthenticator: OAuthAuthenticator {
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
         AccountManager.instance.refreshTokenLockedQueue.async {
+            SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .info, message: "Refreshing token - Starting"))
+
             if !KeychainHelper.isKeychainAccessible {
+                SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Keychain unaccessible"))
+
                 completion(.failure(DriveError.refreshToken))
                 return
             }
@@ -658,6 +662,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
             AccountManager.instance.reloadTokensAndAccounts()
             if let token = AccountManager.instance.getTokenForUserId(credential.userId),
                token.expirationDate > credential.expirationDate {
+                SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with local"))
                 completion(.success(token))
                 return
             }
@@ -667,15 +672,18 @@ class SyncedAuthenticator: OAuthAuthenticator {
             InfomaniakLogin.refreshToken(token: credential) { token, error in
                 // New token has been fetched correctly
                 if let token = token {
+                    SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with remote"))
                     self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
                     completion(.success(token))
                 } else {
                     // Couldn't refresh the token, API says it's invalid
                     if let error = error as NSError?, error.domain == "invalid_grant" {
+                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Invalid grant"))
                         self.refreshTokenDelegate?.didFailRefreshToken(credential)
                         completion(.failure(error))
                     } else {
                         // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
+                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Other"))
                         completion(.success(credential))
                     }
                 }
