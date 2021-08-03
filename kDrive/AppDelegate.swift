@@ -91,13 +91,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // [START register_for_notifications]
         // For iOS 10 display notification (sent via APNS)
         UNUserNotificationCenter.current().delegate = self
-
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(
             options: authOptions,
             completionHandler: { _, _ in }
         )
-
         application.registerForRemoteNotifications()
         Messaging.messaging().delegate = self
 
@@ -544,9 +542,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func present(file: File, driveFileManager: DriveFileManager) {
-        guard let rootViewController = window?.rootViewController as? MainTabViewController,
-              let navController = rootViewController.selectedViewController as? UINavigationController,
-              let viewController = navController.topViewController as? FileListViewController else {
+        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
             return
         }
 
@@ -555,7 +551,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // Select Files tab
         rootViewController.selectedIndex = 1
 
-        if !file.isRoot && viewController.currentDirectory.id != file.id {
+        guard let navController = rootViewController.selectedViewController as? UINavigationController,
+              let viewController = navController.topViewController as? FileListViewController else {
+            return
+        }
+
+        if !file.isRoot && viewController.currentDirectory?.id != file.id {
             // Pop to root
             navController.popToRootViewController(animated: false)
             // Present file
@@ -594,32 +595,54 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 extension AppDelegate: UNUserNotificationCenterDelegate {
     // In Foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // Treat notification
+        _ = notification.request.content.userInfo
+
+        // Change this to your preferred presentation option
+        completionHandler([.alert, .badge, .sound])
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
 
-        if response.notification.request.content.categoryIdentifier == NotificationsHelper.uploadCategoryId {
-            // Upload notification
-            let parentId = userInfo[NotificationsHelper.parentIdKey] as? Int
+        switch response.notification.request.trigger {
+        case is UNPushNotificationTrigger:
+            processPushNotification(response.notification)
+        default:
+            if response.notification.request.content.categoryIdentifier == NotificationsHelper.uploadCategoryId {
+                // Upload notification
+                let parentId = userInfo[NotificationsHelper.parentIdKey] as? Int
 
-            switch response.actionIdentifier {
-            case UNNotificationDefaultActionIdentifier:
-                // Notification tapped: open parent folder
-                if let parentId = parentId,
-                   let driveFileManager = accountManager.currentDriveFileManager,
-                   let folder = driveFileManager.getCachedFile(id: parentId) {
-                    present(file: folder, driveFileManager: driveFileManager)
+                switch response.actionIdentifier {
+                case UNNotificationDefaultActionIdentifier:
+                    // Notification tapped: open parent folder
+                    if let parentId = parentId,
+                       let driveFileManager = accountManager.currentDriveFileManager,
+                       let folder = driveFileManager.getCachedFile(id: parentId) {
+                        present(file: folder, driveFileManager: driveFileManager)
+                    }
+                default:
+                    break
                 }
-            default:
-                break
+            } else {
+                // Handle other notification types...
             }
-        } else {
-            // Handle other notification types...
         }
 
         completionHandler()
+    }
+
+    private func processPushNotification(_ notification: UNNotification) {
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        let userInfo = notification.request.content.userInfo
+
+        let parentId = Int(userInfo["parentId"] as? String ?? "")
+        if let parentId = parentId,
+           let driveFileManager = accountManager.currentDriveFileManager,
+           let folder = driveFileManager.getCachedFile(id: parentId) {
+            present(file: folder, driveFileManager: driveFileManager)
+        }
+
+        Messaging.messaging().appDidReceiveMessage(userInfo)
     }
 }
 
