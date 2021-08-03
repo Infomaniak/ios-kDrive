@@ -37,6 +37,7 @@ class IKSelectButton: IKLargeButton {
     override func setBackgroundColor() {
         if isSelected {
             super.setBackgroundColor()
+            borderWidth = 0
         } else {
             backgroundColor = nil
             borderColor = isEnabled ? style.backgroundColor : KDriveCoreAsset.buttonDisabledBackgroundColor.color
