@@ -77,6 +77,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         }
 
+        // Attach an observer to the payment queue.
+        SKPaymentQueue.default().add(StoreObserver.shared)
+
         NotificationCenter.default.addObserver(self, selector: #selector(handleLocateUploadNotification), name: .locateUploadActionTapped, object: nil)
 
         return true
@@ -112,6 +115,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         }
 
         return true
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        // Remove the observer.
+        SKPaymentQueue.default().remove(StoreObserver.shared)
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
