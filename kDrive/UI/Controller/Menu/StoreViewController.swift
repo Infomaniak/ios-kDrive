@@ -194,6 +194,17 @@ extension StoreViewController: StoreManagerDelegate {
 // MARK: - Store observer delegate
 
 extension StoreViewController: StoreObserverDelegate {
+    func storeObserverPurchaseDidSucceed(transaction: SKPaymentTransaction, receiptString: String) {
+        // Send receipt to the server
+        let body = ReceiptInfo(latestReceipt: receiptString,
+                               userId: AccountManager.instance.currentUserId,
+                               itemId: driveFileManager.drive.id,
+                               productId: transaction.payment.productIdentifier,
+                               transactionId: transaction.transactionIdentifier ?? "",
+                               bundleId: Bundle.main.bundleIdentifier ?? "")
+        StoreRequest.shared.sendReceipt(body: body)
+    }
+
     func storeObserverRestoreDidSucceed() {
         // TODO: Do something
     }
