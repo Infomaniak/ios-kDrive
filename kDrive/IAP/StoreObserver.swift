@@ -16,11 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
+import kDriveCore
 import StoreKit
 
 protocol StoreObserverDelegate: AnyObject {
     func storeObserverRestoreDidSucceed()
+    func storeObserverPurchaseDidSucceed(transaction: SKPaymentTransaction, receiptString: String)
     func storeObserverDidReceiveMessage(_ message: String)
 }
 
@@ -68,6 +71,11 @@ class StoreObserver: NSObject {
         purchased.append(transaction)
         print("Deliver content for \(transaction.payment.productIdentifier)")
 
+        if let receiptString = getReceipt() {
+            DispatchQueue.main.async {
+                self.delegate?.storeObserverPurchaseDidSucceed(transaction: transaction, receiptString: receiptString)
+            }
+        }
         // Finish the successful transaction
         SKPaymentQueue.default().finishTransaction(transaction)
     }
@@ -100,6 +108,24 @@ class StoreObserver: NSObject {
         }
         // Finishes the restored transaction
         SKPaymentQueue.default().finishTransaction(transaction)
+    }
+
+    private func getReceipt() -> String? {
+        // Get the receipt if it's available
+        if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
+           FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
+            do {
+                let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
+
+                return receiptData.base64EncodedString()
+            } catch {
+                DDLogError("Couldn't read receipt data with error: \(error.localizedDescription)")
+            }
+        } else {
+            DDLogError("Cannot find App Store receipt")
+        }
+
+        return nil
     }
 }
 
