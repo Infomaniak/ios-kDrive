@@ -83,11 +83,13 @@ class StoreCollectionViewCell: UICollectionViewCell {
         }
 
         selectButton.isSelected = currentPack == item.pack
+        // selectButton.isEnabled = item.product != nil || currentPack == item.pack
 
         tableView.reloadData()
     }
 
     @IBAction func selectButtonTapped(_ sender: Any) {
+        selectButton.isSelected = true
         if let item = item {
             delegate?.selectButtonTapped(item: item)
         }
