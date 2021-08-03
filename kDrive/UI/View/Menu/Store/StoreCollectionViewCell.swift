@@ -82,13 +82,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
             priceLabel.text = "Récupération…"
         }
 
-        if currentPack == item.pack {
-            selectButton.isEnabled = false
-            selectButton.setTitle("Sélectionné", for: .normal)
-        } else {
-            selectButton.isEnabled = item.product != nil
-            selectButton.setTitle("Sélectionner", for: .normal)
-        }
+        selectButton.isSelected = currentPack == item.pack
 
         tableView.reloadData()
     }

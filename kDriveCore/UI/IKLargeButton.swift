@@ -104,6 +104,7 @@ import UIKit
     }
 
     func setBackgroundColor() {
+        tintColor = style.backgroundColor
         backgroundColor = isEnabled ? style.backgroundColor : KDriveCoreAsset.buttonDisabledBackgroundColor.color
     }
 

@@ -54,7 +54,7 @@
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                         </userDefinedRuntimeAttributes>
                     </label>
-                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0y2-ji-vxm" customClass="IKLargeButton" customModule="kDriveCore">
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0y2-ji-vxm" customClass="IKSelectButton" customModule="kDriveCore">
                         <rect key="frame" x="20" y="306" width="293" height="62"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="62" id="TOB-Pb-V6l"/>
@@ -109,7 +109,7 @@
     </objects>
     <designables>
         <designable name="0y2-ji-vxm">
-            <size key="intrinsicContentSize" width="84" height="29"/>
+            <size key="intrinsicContentSize" width="94" height="32"/>
         </designable>
         <designable name="5Zf-mp-FnH">
             <size key="intrinsicContentSize" width="122.5" height="17"/>
