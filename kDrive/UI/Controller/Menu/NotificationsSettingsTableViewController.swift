@@ -16,25 +16,38 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class NotificationsSettingsTableViewController: UITableViewController {
-
     private enum NotificationRow {
         case receiveNotification
         case importFile
         case sharedWithMe
         case newComments
+        case notificationMainSetting
     }
-    private let rows: [NotificationRow] = [.receiveNotification, .importFile, .sharedWithMe, .newComments]
+
+    private var rows: [NotificationRow]! = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
+        tableView.register(cellView: ParameterAccessDeniedTableViewCell.self)
         tableView.separatorColor = .clear
         navigationController?.navigationBar.sizeToFit()
+
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            if settings.authorizationStatus == .denied {
+                self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments, .notificationMainSetting]
+            } else {
+                self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments]
+            }
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
     }
 
     // MARK: - Table view data source
@@ -48,10 +61,9 @@ class NotificationsSettingsTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-
         switch rows[indexPath.row] {
         case .receiveNotification:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationReceiveNotifications
             cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
@@ -63,7 +75,9 @@ class NotificationsSettingsTableViewController: UITableViewController {
                     tableView.reloadRows(at: [IndexPath(row: 1, section: 0), IndexPath(row: 2, section: 0), IndexPath(row: 3, section: 0)], with: .none)
                 }
             }
+            return cell
         case .importFile:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationFileUpload
             cell.separator?.isHidden = true
@@ -72,7 +86,9 @@ class NotificationsSettingsTableViewController: UITableViewController {
                 UserDefaults.shared.importNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
+            return cell
         case .sharedWithMe:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationSharedWithMeChannelName
             cell.separator?.isHidden = true
@@ -81,7 +97,9 @@ class NotificationsSettingsTableViewController: UITableViewController {
                 UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
+            return cell
         case .newComments:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isLast: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationCommentChannelName
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
@@ -89,8 +107,12 @@ class NotificationsSettingsTableViewController: UITableViewController {
                 UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
                 updateSwitchViews()
             }
+            return cell
+        case .notificationMainSetting:
+            let cell = tableView.dequeueReusableCell(type: ParameterAccessDeniedTableViewCell.self, for: indexPath)
+            cell.descriptionLabel.text = "Application's notifications are disabled: you can change this in the Settings"
+            return cell
         }
-        return cell
     }
 
     private func updateSwitchViews() {
