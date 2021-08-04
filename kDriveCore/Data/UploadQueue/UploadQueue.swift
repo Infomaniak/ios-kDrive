@@ -303,7 +303,7 @@ public class UploadQueue {
             // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file *successfully* uploaded
             if fileUploadedCount == 1 && result.uploadFile.error == nil {
                 NotificationsHelper.sendUploadDoneNotification(filename: result.uploadFile.name, parentId: result.uploadFile.parentDirectoryId)
-            } else {
+            } else if fileUploadedCount > 0 {
                 NotificationsHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount, parentId: result.uploadFile.parentDirectoryId)
             }
             fileUploadedCount = 0
