@@ -19,17 +19,17 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'accès à vos photos est désactivé, pouvez changer ce paramètre dans les réglages." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O86-Nn-Dhm" customClass="IKLabel" customModule="kDriveCore">
-                        <rect key="frame" x="24" y="8" width="442" height="17"/>
+                        <rect key="frame" x="24" y="8" width="442" height="33.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="textColor" name="primaryTextColor"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="photoAccessDeniedDescription"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notificationsDisabledDescription"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                         </userDefinedRuntimeAttributes>
                     </label>
                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fDF-73-Tfc" customClass="IKButton" customModule="kDriveCore">
-                        <rect key="frame" x="180.5" y="126" width="129" height="29"/>
+                        <rect key="frame" x="165.5" y="125" width="159" height="30"/>
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                         <state key="normal" title="Aller dans les réglages"/>
                         <userDefinedRuntimeAttributes>
@@ -61,10 +61,10 @@
     </objects>
     <designables>
         <designable name="O86-Nn-Dhm">
-            <size key="intrinsicContentSize" width="203" height="17"/>
+            <size key="intrinsicContentSize" width="546" height="17"/>
         </designable>
         <designable name="fDF-73-Tfc">
-            <size key="intrinsicContentSize" width="129" height="29"/>
+            <size key="intrinsicContentSize" width="159" height="30"/>
         </designable>
     </designables>
     <resources>

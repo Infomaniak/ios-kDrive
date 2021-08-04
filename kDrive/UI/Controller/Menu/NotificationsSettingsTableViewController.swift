@@ -110,7 +110,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             return cell
         case .notificationMainSetting:
             let cell = tableView.dequeueReusableCell(type: ParameterAccessDeniedTableViewCell.self, for: indexPath)
-            cell.descriptionLabel.text = "Application's notifications are disabled: you can change this in the Settings"
+            cell.descriptionLabel.text = KDriveStrings.Localizable.notificationsDisabledDescription
             return cell
         }
     }
