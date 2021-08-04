@@ -35,7 +35,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private let leftRightInset: CGFloat = 12
     private let gridInnerSpacing: CGFloat = 16
     private let maxDiffChanges = DriveApiFetcher.itemPerPage
-    private let bulkActionThreshold = 10
     private let headerViewIdentifier = "FilesHeaderView"
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
     private let fileObserverThrottler = Throttler<File>(timeInterval: 5, queue: .global())
@@ -1010,7 +1009,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
             let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
             selectFolderViewController?.disabledDirectoriesSelection = [selectedFiles.first?.parent ?? driveFileManager.getRootFile()]
             selectFolderViewController?.selectHandler = { [self] selectedFolder in
-                if selectedFiles.count > bulkActionThreshold {
+                if selectedFiles.count > Constants.bulkActionThreshold {
                     if let count = currentDirectoryCount?.count,
                        selectAllMode {
                         self.bulkMoveAll(destinationId: selectedFolder.id)
@@ -1045,7 +1044,7 @@ extension FileListViewController: FilesHeaderViewDelegate {
             let message: NSMutableAttributedString
             let alert: AlertTextViewController
 
-            if selectedFiles.count > bulkActionThreshold {
+            if selectedFiles.count > Constants.bulkActionThreshold {
                 if let count = currentDirectoryCount?.count,
                    selectAllMode {
                     message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(count))
