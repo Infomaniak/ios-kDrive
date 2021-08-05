@@ -43,13 +43,14 @@ class MenuViewController: UIViewController {
 
         static let switchUserAction = MenuAction(name: KDriveStrings.Localizable.switchUserTitle, image: KDriveAsset.userSwitch.image, segue: "switchUserSegue")
         static let parametersAction = MenuAction(name: KDriveStrings.Localizable.settingsTitle, image: KDriveAsset.parameters.image, segue: "toParameterSegue")
+        static let helpAction = MenuAction(name: KDriveStrings.Localizable.supportTitle, image: KDriveAsset.supportLink.image, segue: "help")
         static let disconnectAction = MenuAction(name: KDriveStrings.Localizable.buttonLogout, image: KDriveAsset.logout.image, segue: "disconnect")
     }
 
     private var tableContent: [[MenuAction]] = [
         [],
         [.sharedWithMeAction, .lastModificationAction, .imagesAction, .offlineAction, .mySharedAction, .trashAction],
-        [.switchUserAction, .parametersAction, .disconnectAction]
+        [.switchUserAction, .parametersAction, .helpAction, .disconnectAction]
     ]
     private var currentAccount: Account!
 
@@ -182,6 +183,10 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                         AccountManager.instance.saveAccounts()
                     }
                     present(alert, animated: true)
+                } else if segue == "help" {
+                    if let url = URL(string: Constants.helpURL) {
+                        UIApplication.shared.open(url)
+                    }
                 } else {
                     performSegue(withIdentifier: segue, sender: nil)
                 }
