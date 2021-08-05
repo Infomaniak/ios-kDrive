@@ -121,6 +121,12 @@ class StoreViewController: UITableViewController {
         }
     }
 
+    private func showSuccessView() {
+        let successViewController = StoreSuccessViewController.instantiate()
+        successViewController.modalPresentationStyle = .fullScreen
+        present(successViewController, animated: true)
+    }
+
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -242,6 +248,8 @@ extension StoreViewController: StoreObserverDelegate {
                                transactionId: transaction.transactionIdentifier ?? "",
                                bundleId: Bundle.main.bundleIdentifier ?? "")
         StoreRequest.shared.sendReceipt(body: body)
+        // Show success view controller
+        showSuccessView()
     }
 
     func storeObserverRestoreDidSucceed() {
