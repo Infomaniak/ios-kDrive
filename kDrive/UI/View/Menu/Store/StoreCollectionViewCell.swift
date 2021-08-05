@@ -83,7 +83,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
         }
 
         selectButton.isSelected = currentPack == item.pack
-        // selectButton.isEnabled = item.product != nil || currentPack == item.pack
+        selectButton.isEnabled = item.product != nil || currentPack == item.pack
 
         tableView.reloadData()
     }
