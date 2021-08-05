@@ -45,6 +45,7 @@ extension UserDefaults {
         case photoSortMode
         case betaInviteDisplayed
         case lastSyncDateOfflineFiles
+        case fileProviderExtension
     }
 
     private func key(_ key: Keys) -> String {
@@ -122,7 +123,7 @@ extension UserDefaults {
             set(newValue, forKey: key(.appLock))
         }
     }
-
+    
     public var updateLater: Bool {
         get {
             return bool(forKey: key(.updateLater))
@@ -262,6 +263,15 @@ extension UserDefaults {
         }
         set {
             setValue(newValue, forKey: key(.lastSyncDateOfflineFiles))
+        }
+    }
+    
+    public var isFileProviderExtensionEnabled: Bool {
+        get {
+            return bool(forKey: key(.fileProviderExtension))
+        }
+        set {
+            set(newValue, forKey: key(.fileProviderExtension))
         }
     }
 }
