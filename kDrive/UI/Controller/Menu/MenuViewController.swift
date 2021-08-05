@@ -35,7 +35,7 @@ class MenuViewController: UIViewController {
         static var header = Section(actions: [])
         static var upgrade = Section(actions: [.store])
         static var more = Section(actions: [.sharedWithMe, .lastModifications, .images, .offline, .myShares, .trash])
-        static var options = Section(actions: [.switchUser, .parameters, .disconnect])
+        static var options = Section(actions: [.switchUser, .parameters, .help, .disconnect])
     }
 
     private struct MenuAction: Equatable {
