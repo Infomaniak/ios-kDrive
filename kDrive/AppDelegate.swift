@@ -99,6 +99,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         application.registerForRemoteNotifications()
         Messaging.messaging().delegate = self
 
+        if UserDefaults.shared.importNotificationsEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicUpload)
+        }
+        if UserDefaults.shared.sharingNotificationsEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicShared)
+        }
+        if UserDefaults.shared.newCommentNotificationsEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicComments)
+        }
+        if UserDefaults.shared.generalNotificationEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicGeneral)
+        }
+
         return true
     }
 

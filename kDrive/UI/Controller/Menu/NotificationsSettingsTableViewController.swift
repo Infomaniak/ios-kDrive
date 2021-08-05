@@ -16,12 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FirebaseMessaging
 import kDriveCore
 import UIKit
 
 class NotificationsSettingsTableViewController: UITableViewController {
     private enum NotificationRow {
         case receiveNotification
+        case general
         case importFile
         case sharedWithMe
         case newComments
@@ -46,15 +48,23 @@ class NotificationsSettingsTableViewController: UITableViewController {
     @objc private func updateTableViewContent() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             if settings.authorizationStatus == .denied {
-                self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments, .notificationMainSetting]
+                self.rows = [.receiveNotification, .general, .importFile, .sharedWithMe, .newComments, .notificationMainSetting]
                 self.disableSwitch = true
             } else {
-                self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments]
+                self.rows = [.receiveNotification, .general, .importFile, .sharedWithMe, .newComments]
                 self.disableSwitch = false
             }
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
+        }
+    }
+
+    private func subscriptionTo(topic: String, subscribe: Bool) {
+        if subscribe {
+            Messaging.messaging().subscribe(toTopic: topic)
+        } else {
+            Messaging.messaging().unsubscribe(fromTopic: topic)
         }
     }
 
@@ -85,6 +95,19 @@ class NotificationsSettingsTableViewController: UITableViewController {
                 }
             }
             return cell
+        case .general:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow()
+            cell.titleLabel.text = KDriveStrings.Localizable.notificationGeneralChannelName
+            cell.separator?.isHidden = true
+            cell.valueSwitch.isEnabled = !disableSwitch
+            cell.valueSwitch.isOn = UserDefaults.shared.generalNotificationEnabled
+            cell.switchHandler = { [self] sender in
+                UserDefaults.shared.generalNotificationEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicGeneral, subscribe: sender.isOn)
+                updateSwitchViews()
+            }
+            return cell
         case .importFile:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
@@ -94,6 +117,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.importNotificationsEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicUpload, subscribe: sender.isOn)
                 updateSwitchViews()
             }
             return cell
@@ -106,6 +130,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicShared, subscribe: sender.isOn)
                 updateSwitchViews()
             }
             return cell
@@ -117,6 +142,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicComments, subscribe: sender.isOn)
                 updateSwitchViews()
             }
             return cell
