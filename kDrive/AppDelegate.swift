@@ -633,16 +633,18 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
     private func processPushNotification(_ notification: UNNotification) {
         UIApplication.shared.applicationIconBadgeNumber = 0
-        let userInfo = notification.request.content.userInfo
-
-        let parentId = Int(userInfo["parentId"] as? String ?? "")
-        if let parentId = parentId,
-           let driveFileManager = accountManager.currentDriveFileManager,
-           let folder = driveFileManager.getCachedFile(id: parentId) {
-            present(file: folder, driveFileManager: driveFileManager)
-        }
-
-        Messaging.messaging().appDidReceiveMessage(userInfo)
+//        PROCESS NOTIFICATION
+        
+//        let userInfo = notification.request.content.userInfo
+//
+//        let parentId = Int(userInfo["parentId"] as? String ?? "")
+//        if let parentId = parentId,
+//           let driveFileManager = accountManager.currentDriveFileManager,
+//           let folder = driveFileManager.getCachedFile(id: parentId) {
+//            present(file: folder, driveFileManager: driveFileManager)
+//        }
+//
+//        Messaging.messaging().appDidReceiveMessage(userInfo)
     }
 }
 
