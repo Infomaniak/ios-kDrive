@@ -33,7 +33,7 @@ class SecurityTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: ParameterTableViewCell.self)
-        tableView.register(cellView: ParameterSwitchTableViewCell.self)
+        tableView.register(cellView: ParameterWifiTableViewCell.self)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -59,10 +59,11 @@ class SecurityTableViewController: UITableViewController {
             cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
             return cell
         case .fileProviderExtension:
-            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
+            let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isLast: true)
             cell.valueSwitch.isOn = UserDefaults.shared.isFileProviderExtensionEnabled
             cell.titleLabel.text = KDriveStrings.Localizable.fileProviderExtensionTitle
+            cell.detailsLabel.text = KDriveStrings.Localizable.fileProviderExtensionDescription
             cell.switchHandler = { sender in
                 UserDefaults.shared.isFileProviderExtensionEnabled = sender.isOn
             }
