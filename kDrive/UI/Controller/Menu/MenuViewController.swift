@@ -168,7 +168,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.section > 0 {
             let segue = tableContent[indexPath.section][indexPath.row].segue
             if !segue.isEmpty {
-                if segue == "disconnect" {
+                if segue == MenuAction.disconnectAction.segue {
                     let alert = AlertTextViewController(title: KDriveStrings.Localizable.alertRemoveUserTitle, message: KDriveStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveStrings.Localizable.buttonConfirm, destructive: true) {
                         AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
                         if let nextAccount = AccountManager.instance.accounts.first {
@@ -183,7 +183,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                         AccountManager.instance.saveAccounts()
                     }
                     present(alert, animated: true)
-                } else if segue == "help" {
+                } else if segue == MenuAction.helpAction.segue {
                     if let url = URL(string: Constants.helpURL) {
                         UIApplication.shared.open(url)
                     }
