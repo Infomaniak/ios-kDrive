@@ -77,6 +77,81 @@
             </objects>
             <point key="canvasLocation" x="3292" y="92"/>
         </scene>
+        <!--Store Success View Controller-->
+        <scene sceneID="wDu-Op-Gjv">
+            <objects>
+                <viewController storyboardIdentifier="StoreSuccessViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="GUY-UU-JfR" customClass="StoreSuccessViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="tcC-IV-wbn">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Let-jx-exJ" customClass="IKLargeButton" customModule="kDriveCore">
+                                <rect key="frame" x="24" y="778" width="366" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="jCK-Db-hTf"/>
+                                </constraints>
+                                <state key="normal" title="Revenir à l’accueil"/>
+                                <connections>
+                                    <action selector="homeButtonPressed:" destination="GUY-UU-JfR" eventType="touchUpInside" id="I9s-zh-cZO"/>
+                                </connections>
+                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgD-0d-5ra">
+                                <rect key="frame" x="24" y="306.5" width="366" height="283.5"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="order-success" translatesAutoresizingMaskIntoConstraints="NO" id="vmx-9Y-v0i">
+                                        <rect key="frame" x="108" y="0.0" width="150" height="150"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="150" id="UMO-Jw-E4w"/>
+                                            <constraint firstAttribute="height" constant="150" id="UvD-X0-Sdb"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="kDriveCore">
+                                        <rect key="frame" x="0.0" y="174" width="366" height="43"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="kDriveCore">
+                                        <rect key="frame" x="0.0" y="233" width="366" height="50.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="Bwo-OH-mV3" firstAttribute="top" secondItem="Yth-Zq-eKV" secondAttribute="bottom" constant="16" id="1hG-yv-ubx"/>
+                                    <constraint firstItem="vmx-9Y-v0i" firstAttribute="top" secondItem="MgD-0d-5ra" secondAttribute="top" id="3Pm-e7-Abx"/>
+                                    <constraint firstItem="Yth-Zq-eKV" firstAttribute="leading" secondItem="MgD-0d-5ra" secondAttribute="leading" id="D7S-9D-wSP"/>
+                                    <constraint firstAttribute="trailing" secondItem="Yth-Zq-eKV" secondAttribute="trailing" id="Gvd-Ll-Vum"/>
+                                    <constraint firstItem="vmx-9Y-v0i" firstAttribute="centerX" secondItem="MgD-0d-5ra" secondAttribute="centerX" id="RNt-uc-GSg"/>
+                                    <constraint firstAttribute="bottom" secondItem="Bwo-OH-mV3" secondAttribute="bottom" id="aUf-d8-c9G"/>
+                                    <constraint firstAttribute="trailing" secondItem="Bwo-OH-mV3" secondAttribute="trailing" id="l0S-lL-R6Z"/>
+                                    <constraint firstItem="Yth-Zq-eKV" firstAttribute="top" secondItem="vmx-9Y-v0i" secondAttribute="bottom" constant="24" id="pgn-wn-es0"/>
+                                    <constraint firstItem="Bwo-OH-mV3" firstAttribute="leading" secondItem="MgD-0d-5ra" secondAttribute="leading" id="q7l-nP-Z7I"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="web-M0-5Gi"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Let-jx-exJ" firstAttribute="leading" secondItem="web-M0-5Gi" secondAttribute="leading" constant="24" id="8K0-Mr-v9B"/>
+                            <constraint firstItem="MgD-0d-5ra" firstAttribute="leading" secondItem="tcC-IV-wbn" secondAttribute="leading" constant="24" id="Q5A-6U-Lcf"/>
+                            <constraint firstItem="MgD-0d-5ra" firstAttribute="centerX" secondItem="tcC-IV-wbn" secondAttribute="centerX" id="S6h-a4-yY7"/>
+                            <constraint firstItem="web-M0-5Gi" firstAttribute="bottom" secondItem="Let-jx-exJ" secondAttribute="bottom" constant="24" id="lj1-FC-L9g"/>
+                            <constraint firstAttribute="trailing" secondItem="MgD-0d-5ra" secondAttribute="trailing" constant="24" id="rGi-GC-rBf"/>
+                            <constraint firstItem="MgD-0d-5ra" firstAttribute="centerY" secondItem="tcC-IV-wbn" secondAttribute="centerY" id="yqv-kx-bWV"/>
+                            <constraint firstItem="web-M0-5Gi" firstAttribute="trailing" secondItem="Let-jx-exJ" secondAttribute="trailing" constant="24" id="zeI-Ac-vcm"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="449-4f-Z4n" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-436.23188405797106" y="1668.75"/>
+        </scene>
         <!--Shared With Me View Controller-->
         <scene sceneID="rIZ-ST-S3h">
             <objects>
@@ -967,10 +1042,19 @@
         <designable name="0Ow-gT-FNm">
             <size key="intrinsicContentSize" width="138" height="21.5"/>
         </designable>
+        <designable name="Bwo-OH-mV3">
+            <size key="intrinsicContentSize" width="725" height="17"/>
+        </designable>
+        <designable name="Let-jx-exJ">
+            <size key="intrinsicContentSize" width="133" height="32"/>
+        </designable>
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="130.5" height="21.5"/>
         </designable>
         <designable name="SeG-hp-Rwt"/>
+        <designable name="Yth-Zq-eKV">
+            <size key="intrinsicContentSize" width="672" height="21.5"/>
+        </designable>
         <designable name="abC-af-U6z">
             <size key="intrinsicContentSize" width="85" height="32"/>
         </designable>
@@ -991,6 +1075,7 @@
         <image name="filter" width="24" height="24"/>
         <image name="folder-select" width="24" height="24"/>
         <image name="menu" width="24" height="24"/>
+        <image name="order-success" width="150" height="150"/>
         <image name="switch_user" width="512" height="434"/>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

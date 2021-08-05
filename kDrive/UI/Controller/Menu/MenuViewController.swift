@@ -43,7 +43,7 @@ class MenuViewController: UIViewController {
         let image: UIImage
         let segue: String?
 
-        static let store = MenuAction(name: "Débloquer plus de fonctionnalités et obtenir plus d’espace de stockage !", image: KDriveAsset.star.image, segue: "toStoreSegue")
+        static let store = MenuAction(name: "Débloquer plus de fonctionnalités et obtenir plus d’espace de stockage !", image: KDriveAsset.upgradeKdrive.image, segue: "toStoreSegue")
 
         static let sharedWithMe = MenuAction(name: KDriveStrings.Localizable.sharedWithMeTitle, image: KDriveAsset.folderSelect2.image, segue: "toDriveListSegue")
         static let lastModifications = MenuAction(name: KDriveStrings.Localizable.lastEditsTitle, image: KDriveAsset.clock.image, segue: "toLastModificationsSegue")
