@@ -29,6 +29,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
     }
 
     private var rows: [NotificationRow]! = []
+    private var disableSwitch = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,6 +42,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             if settings.authorizationStatus == .denied {
                 self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments, .notificationMainSetting]
+                self.disableSwitch = true
             } else {
                 self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments]
             }
@@ -66,6 +68,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationReceiveNotifications
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
             cell.switchHandler = { sender in
                 UserDefaults.shared.isNotificationEnabled = sender.isOn
@@ -81,6 +84,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationFileUpload
             cell.separator?.isHidden = true
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.importNotificationsEnabled = sender.isOn
@@ -92,6 +96,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationSharedWithMeChannelName
             cell.separator?.isHidden = true
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
@@ -102,6 +107,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isLast: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationCommentChannelName
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
