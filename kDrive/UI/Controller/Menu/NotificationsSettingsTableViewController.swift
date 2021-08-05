@@ -39,12 +39,18 @@ class NotificationsSettingsTableViewController: UITableViewController {
         tableView.separatorColor = .clear
         navigationController?.navigationBar.sizeToFit()
 
+        updateTableViewContent()
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewContent), name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+
+    @objc private func updateTableViewContent() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             if settings.authorizationStatus == .denied {
                 self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments, .notificationMainSetting]
                 self.disableSwitch = true
             } else {
                 self.rows = [.receiveNotification, .importFile, .sharedWithMe, .newComments]
+                self.disableSwitch = false
             }
             DispatchQueue.main.async {
                 self.tableView.reloadData()
