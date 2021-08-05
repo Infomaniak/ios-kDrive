@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class ParameterTableViewController: UITableViewController {
-
     var driveFileManager: DriveFileManager!
 
     private enum parameterOption {
@@ -52,6 +51,17 @@ class ParameterTableViewController: UITableViewController {
         tableView.reloadData()
     }
 
+    private func getNotificationText() -> String {
+        if !UserDefaults.shared.isNotificationEnabled {
+            return KDriveStrings.Localizable.notificationDisable
+        }
+        if UserDefaults.shared.newCommentNotificationsEnabled && UserDefaults.shared.importNotificationsEnabled && UserDefaults.shared.sharingNotificationsEnabled {
+            return KDriveStrings.Localizable.notificationAll
+        } else {
+            return KDriveStrings.Localizable.notificationCustom
+        }
+    }
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -78,7 +88,7 @@ class ParameterTableViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationTitle
-            cell.valueLabel.text = KDriveStrings.Localizable.notificationAll
+            cell.valueLabel.text = getNotificationText()
             return cell
         case .security:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
@@ -104,13 +114,13 @@ class ParameterTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch tableContent[indexPath.row] {
         case .photos:
-            self.performSegue(withIdentifier: "photoSyncSegue", sender: nil)
+            performSegue(withIdentifier: "photoSyncSegue", sender: nil)
         case .notifications:
-            self.performSegue(withIdentifier: "notificationsSegue", sender: nil)
+            performSegue(withIdentifier: "notificationsSegue", sender: nil)
         case .security:
             performSegue(withIdentifier: "securitySegue", sender: nil)
         case .about:
-            self.performSegue(withIdentifier: "aboutSegue", sender: nil)
+            performSegue(withIdentifier: "aboutSegue", sender: nil)
         case .theme:
             performSegue(withIdentifier: "themeSelectionSegue", sender: nil)
         default:
