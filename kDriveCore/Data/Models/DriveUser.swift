@@ -85,21 +85,3 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _permission = "permission"
     }
 }
-
-// This should be fixed in the next Realm version so we won't need that anymore :)
-
-/// Taken from https://github.com/GottaGetSwifty/CodableWrappers/blob/1b449bf3f19d3654571f00a7726786683dc950f0/Sources/CodableWrappers/OptionalWrappers.swift#L34
-/// Protocol for a PropertyWrapper to properly handle Coding when the wrappedValue is Optional
-public protocol OptionalCodingWrapper {
-    associatedtype WrappedType: ExpressibleByNilLiteral
-    init(wrappedValue: WrappedType)
-}
-
-public extension KeyedDecodingContainer {
-    // This is used to override the default decoding behavior for OptionalCodingWrapper to allow a value to avoid a missing key Error
-    func decode<T>(_ type: T.Type, forKey key: KeyedDecodingContainer<K>.Key) throws -> T where T: Decodable, T: OptionalCodingWrapper {
-        return try decodeIfPresent(T.self, forKey: key) ?? T(wrappedValue: nil)
-    }
-}
-
-extension Persisted: OptionalCodingWrapper where Value: ExpressibleByNilLiteral {}
