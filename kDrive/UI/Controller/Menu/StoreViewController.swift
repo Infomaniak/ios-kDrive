@@ -51,14 +51,16 @@ class StoreViewController: UITableViewController {
     }
 
     private enum Row: CaseIterable {
-        case segmentedControl, offers
+        case segmentedControl, offers, storage, nextButton
     }
 
-    private let rows = Row.allCases
+    private var rows: [Row] = [.segmentedControl, .offers]
 
     var driveFileManager: DriveFileManager!
 
     private var items = Item.allItems
+    private lazy var selectedPack = driveFileManager.drive.pack
+    private var selectedStorage = 1
     private var selectedPeriod = PeriodTab.monthly {
         didSet { updateOffers() }
     }
@@ -73,6 +75,8 @@ class StoreViewController: UITableViewController {
         // Set up table view
         tableView.register(cellView: StoreControlTableViewCell.self)
         tableView.register(cellView: StoreOffersTableViewCell.self)
+        tableView.register(cellView: StoreStorageTableViewCell.self)
+        tableView.register(cellView: StoreNextTableViewCell.self)
 
         // Set up delegates
         StoreManager.shared.delegate = self
@@ -136,15 +140,24 @@ class StoreViewController: UITableViewController {
             return cell
         case .offers:
             let cell = tableView.dequeueReusableCell(type: StoreOffersTableViewCell.self, for: indexPath)
-            cell.driveFileManager = driveFileManager
+            cell.selectedPack = selectedPack
             cell.items = displayedItems
+            cell.cellDelegate = self
             cell.collectionView.reloadData()
             DispatchQueue.main.async {
                 // Scroll to current pack
-                if let index = self.items.firstIndex(where: { $0.pack == self.driveFileManager.drive.pack }) {
+                if let index = self.items.firstIndex(where: { $0.pack == self.selectedPack }) {
                     cell.collectionView.scrollToItem(at: IndexPath(row: index, section: 0), at: .centeredHorizontally, animated: false)
                 }
             }
+            return cell
+        case .storage:
+            let cell = tableView.dequeueReusableCell(type: StoreStorageTableViewCell.self, for: indexPath)
+            cell.delegate = self
+            return cell
+        case .nextButton:
+            let cell = tableView.dequeueReusableCell(type: StoreNextTableViewCell.self, for: indexPath)
+            cell.delegate = self
             return cell
         }
     }
@@ -172,6 +185,32 @@ class StoreViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
         updateOffers()
+    }
+}
+
+// MARK: - Cell delegates
+
+extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate {
+    func selectButtonTapped(item: StoreViewController.Item) {
+        if item.pack == .team {
+            rows = [.segmentedControl, .offers, .storage, .nextButton]
+        } else {
+            rows = [.segmentedControl, .offers, .nextButton]
+        }
+        selectedPack = item.pack
+        tableView.reloadData()
+        tableView.scrollToRow(at: IndexPath(row: rows.count - 1, section: 0), at: .bottom, animated: true)
+    }
+
+    func storageDidChange(_ newValue: Int) {
+        selectedStorage = newValue
+    }
+
+    func nextButtonTapped() {
+        if let product = displayedItems.first(where: { $0.pack == selectedPack })?.product {
+            // Attempt to purchase the tapped product
+            StoreObserver.shared.buy(product, userId: AccountManager.instance.currentUserId, driveId: driveFileManager.drive.id)
+        }
     }
 }
 

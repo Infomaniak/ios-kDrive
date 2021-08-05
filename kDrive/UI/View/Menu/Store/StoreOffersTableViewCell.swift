@@ -23,8 +23,10 @@ import UIKit
 class StoreOffersTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
 
-    var driveFileManager: DriveFileManager!
+    var selectedPack: DrivePack!
     var items = [StoreViewController.Item]()
+
+    weak var cellDelegate: StoreCellDelegate?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -46,8 +48,8 @@ extension StoreOffersTableViewCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
         let item = items[indexPath.row]
-        cell.configure(with: item, currentPack: driveFileManager.drive.pack)
-        cell.delegate = self
+        cell.configure(with: item, currentPack: selectedPack)
+        cell.delegate = cellDelegate
         return cell
     }
 }
@@ -78,16 +80,5 @@ extension StoreOffersTableViewCell: UIScrollViewDelegate {
 extension StoreOffersTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.bounds.size.width - 48, height: 360)
-    }
-}
-
-// MARK: - Store cell delegate
-
-extension StoreOffersTableViewCell: StoreCellDelegate {
-    func selectButtonTapped(item: StoreViewController.Item) {
-        if let product = item.product {
-            // Attempt to purchase the tapped product
-            StoreObserver.shared.buy(product, userId: AccountManager.instance.currentUserId, driveId: driveFileManager.drive.id)
-        }
     }
 }
