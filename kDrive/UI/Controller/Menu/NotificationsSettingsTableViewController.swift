@@ -45,6 +45,10 @@ class NotificationsSettingsTableViewController: UITableViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewContent), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     @objc private func updateTableViewContent() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             if settings.authorizationStatus == .denied {
