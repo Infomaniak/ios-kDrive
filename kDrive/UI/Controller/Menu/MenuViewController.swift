@@ -170,7 +170,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             if !segue.isEmpty {
                 if segue == MenuAction.disconnectAction.segue {
                     let alert = AlertTextViewController(title: KDriveStrings.Localizable.alertRemoveUserTitle, message: KDriveStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveStrings.Localizable.buttonConfirm, destructive: true) {
-                        AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
+                        if let token = AccountManager.instance.currentAccount.token {
+                            AccountManager.instance.removeTokenAndAccount(token: token)
+                        } else {
+                            AccountManager.instance.removeAccount(toDeleteAccount: AccountManager.instance.currentAccount)
+                        }
                         if let nextAccount = AccountManager.instance.accounts.first {
                             AccountManager.instance.switchAccount(newAccount: nextAccount)
                             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
