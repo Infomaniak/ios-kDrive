@@ -21,12 +21,12 @@ import kDriveCore
 
 class SecurityTableViewController: UITableViewController {
 
-    private enum secutityOption {
+    private enum SecurityOption {
         case appLock
         case fileProviderExtension
     }
 
-    private var tableContent: [secutityOption] {
+    private var tableContent: [SecurityOption] {
         return [.appLock, .fileProviderExtension]
     }
 
