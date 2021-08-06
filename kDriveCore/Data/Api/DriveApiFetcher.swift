@@ -669,6 +669,24 @@ class SyncedAuthenticator: OAuthAuthenticator {
 
             let group = DispatchGroup()
             group.enter()
+            var taskIdentifier: UIBackgroundTaskIdentifier = .invalid
+            if !Constants.isInExtension {
+                // It is absolutely necessary that the app stays awake while we refresh the token
+                taskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Refresh token") {
+                    SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Background task expired"))
+                    // If we didn't fetch the new token in the given time there is not much we can do apart from hoping that it wasn't revoked
+                    if taskIdentifier != .invalid {
+                        UIApplication.shared.endBackgroundTask(taskIdentifier)
+                        taskIdentifier = .invalid
+                    }
+                }
+
+                if taskIdentifier == .invalid {
+                    // We couldn't request additional time to refresh token maybe try later...
+                    completion(.failure(DriveError.refreshToken))
+                    return
+                }
+            }
             InfomaniakLogin.refreshToken(token: credential) { token, error in
                 // New token has been fetched correctly
                 if let token = token {
@@ -686,6 +704,10 @@ class SyncedAuthenticator: OAuthAuthenticator {
                         SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Other \(error?.localizedDescription ?? "")"))
                         completion(.success(credential))
                     }
+                }
+                if taskIdentifier != .invalid {
+                    UIApplication.shared.endBackgroundTask(taskIdentifier)
+                    taskIdentifier = .invalid
                 }
                 group.leave()
             }
