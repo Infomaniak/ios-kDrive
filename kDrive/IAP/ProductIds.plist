@@ -4,5 +4,9 @@
 <array>
 	<string>com.infomaniak.drive.iap.solo.yearly</string>
 	<string>com.infomaniak.drive.iap.solo</string>
+	<string>com.infomaniak.drive.iap.team</string>
+	<string>com.infomaniak.drive.iap.team.yearly</string>
+	<string>com.infomaniak.drive.iap.pro</string>
+	<string>com.infomaniak.drive.iap.pro.yearly</string>
 </array>
 </plist>
