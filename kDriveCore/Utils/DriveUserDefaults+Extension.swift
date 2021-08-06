@@ -268,6 +268,9 @@ extension UserDefaults {
 
     public var isFileProviderExtensionEnabled: Bool {
         get {
+            if object(forKey: key(.fileProviderExtension)) == nil {
+                set(true, forKey: key(.fileProviderExtension))
+            }
             return bool(forKey: key(.fileProviderExtension))
         }
         set {
