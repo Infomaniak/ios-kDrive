@@ -38,6 +38,7 @@ extension UserDefaults {
         case importNotificationsEnabled
         case sharingNotificationsEnabled
         case newCommentNotificationsEnabled
+        case generalNotificationEnabled
         case didDemoSwipe
         case lastSelectedDrive
         case lastSelectedDirectory
@@ -196,6 +197,18 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.newCommentNotificationsEnabled))
+        }
+    }
+
+    public var generalNotificationEnabled: Bool {
+        get {
+            if object(forKey: key(.generalNotificationEnabled)) == nil {
+                set(true, forKey: key(.generalNotificationEnabled))
+            }
+            return bool(forKey: key(.generalNotificationEnabled))
+        }
+        set {
+            set(newValue, forKey: key(.generalNotificationEnabled))
         }
     }
 
