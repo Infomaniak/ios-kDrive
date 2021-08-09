@@ -17,25 +17,20 @@
  */
 
 import Foundation
-import XCTest
-import InfomaniakLogin
 import InfomaniakCore
+import InfomaniakLogin
 import kDriveCore
+import XCTest
 
 @testable import kDrive
 
 class FakeTokenDelegate: RefreshTokenDelegate {
-    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
+    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {}
 
-    }
-
-    func didFailRefreshToken(_ token: ApiToken) {
-
-    }
+    func didFailRefreshToken(_ token: ApiToken) {}
 }
 
 final class DriveApiTests: XCTestCase {
-
     static let defaultTimeout = 10.0
     static var apiFetcher: DriveApiFetcher!
 
@@ -47,6 +42,7 @@ final class DriveApiTests: XCTestCase {
     }
 
     // MARK: - Tests setup
+
     func setUpTest(testName: String, completion: @escaping (File) -> Void) {
         getRootDirectory { rootFile in
             self.createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootFile) { file in
@@ -63,6 +59,7 @@ final class DriveApiTests: XCTestCase {
     }
 
     // MARK: - Helping methods
+
     func getRootDirectory(completion: @escaping (File) -> Void) {
         DriveApiTests.apiFetcher.getFileListForDirectory(parentId: DriveFileManager.constants.rootID) { response, _ in
             XCTAssertNotNil(response?.data, "Failed to get root directory")
@@ -98,7 +95,7 @@ final class DriveApiTests: XCTestCase {
         }
     }
 
-// MARK: - Test methods
+    // MARK: - Test methods
 
     func testGetRootFile() {
         let expectation = XCTestExpectation(description: "Get root file")
@@ -1043,13 +1040,9 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testPerformAuthenticatedRequest() {
+    func testPerformAuthenticatedRequest() {}
 
-    }
-
-    func testGetPublicUploadTokenWithToken() {
-
-    }
+    func testGetPublicUploadTokenWithToken() {}
 
     func testGetTrashedFiles() {
         let testName = "Get trashed file"
@@ -1068,7 +1061,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get children trashed file"
         let expectation = XCTestExpectation(description: testName)
 
-        initOfficeFile(testName: testName) { root, file in
+        initOfficeFile(testName: testName) { root, _ in
             DriveApiTests.apiFetcher.deleteFile(file: root) { response, error in
                 XCTAssertNil(error, "There should be no error")
                 DriveApiTests.apiFetcher.getChildrenTrashedFiles(fileId: root.id) { response, error in
@@ -1164,15 +1157,12 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testRequireFileAccess() {
+    func testRequireFileAccess() {}
 
-    }
-
-    func testCancelAction() {
-
-    }
+    func testCancelAction() {}
 
     // MARK: - Complementary tests
+
     func testComment() {
         let testName = "Comment tests"
         let expectations = [
@@ -1286,7 +1276,6 @@ final class DriveApiTests: XCTestCase {
                                 expectations[2].expectation.fulfill()
                             }
                         }
-
                     }
                 }
             }
