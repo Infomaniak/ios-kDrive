@@ -17,36 +17,39 @@
  */
 
 import Foundation
-import XCTest
-import InfomaniakLogin
 import InfomaniakCore
+import InfomaniakLogin
 import kDriveCore
+import XCTest
 
 @testable import kDrive
 
 class FakeTokenDelegate: RefreshTokenDelegate {
-    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
+    func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {}
 
-    }
-
-    func didFailRefreshToken(_ token: ApiToken) {
-
-    }
+    func didFailRefreshToken(_ token: ApiToken) {}
 }
 
 final class DriveApiTests: XCTestCase {
-
     static let defaultTimeout = 10.0
-    static var apiFetcher: DriveApiFetcher!
+    static var driveFileManager: DriveFileManager!
+    var currentDrive: Drive {
+        return DriveApiTests.driveFileManager.drive
+    }
+
+    var currentApiFetcher: DriveApiFetcher {
+        return DriveApiTests.driveFileManager.apiFetcher
+    }
 
     override class func setUp() {
         super.setUp()
         let drive = DriveInfosManager.instance.getDrive(id: Env.driveId, userId: Env.userId)!
-        apiFetcher = DriveApiFetcher(drive: drive)
-        apiFetcher.setToken(ApiToken(accessToken: Env.token, expiresIn: Int.max, refreshToken: "", scope: "", tokenType: "", userId: Env.userId, expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max))), delegate: FakeTokenDelegate())
+        driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
+        driveFileManager.apiFetcher.setToken(ApiToken(accessToken: Env.token, expiresIn: Int.max, refreshToken: "", scope: "", tokenType: "", userId: Env.userId, expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max))), delegate: FakeTokenDelegate())
     }
 
     // MARK: - Tests setup
+
     func setUpTest(testName: String, completion: @escaping (File) -> Void) {
         getRootDirectory { rootFile in
             self.createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootFile) { file in
@@ -57,21 +60,22 @@ final class DriveApiTests: XCTestCase {
     }
 
     func tearDownTest(directory: File) {
-        DriveApiTests.apiFetcher.deleteFile(file: directory) { response, _ in
+        currentApiFetcher.deleteFile(file: directory) { response, _ in
             XCTAssertNotNil(response, "Failed to delete directory")
         }
     }
 
     // MARK: - Helping methods
+
     func getRootDirectory(completion: @escaping (File) -> Void) {
-        DriveApiTests.apiFetcher.getFileListForDirectory(parentId: DriveFileManager.constants.rootID) { response, _ in
+        currentApiFetcher.getFileListForDirectory(driveId: currentDrive.id, parentId: DriveFileManager.constants.rootID) { response, _ in
             XCTAssertNotNil(response?.data, "Failed to get root directory")
             completion(response!.data!)
         }
     }
 
     func createTestDirectory(name: String, parentDirectory: File, completion: @escaping (File) -> Void) {
-        DriveApiTests.apiFetcher.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { response, error in
+        currentApiFetcher.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { response, error in
             XCTAssertNotNil(response?.data, "Failed to create test directory")
             XCTAssertNil(error, "There should be no error")
             completion(response!.data!)
@@ -81,7 +85,7 @@ final class DriveApiTests: XCTestCase {
     func initDropbox(testName: String, completion: @escaping (File, File) -> Void) {
         setUpTest(testName: testName) { rootFile in
             self.createTestDirectory(name: "dropbox-\(Date())", parentDirectory: rootFile) { dir in
-                DriveApiTests.apiFetcher.setupDropBox(directory: dir, password: "", validUntil: nil, emailWhenFinished: false, limitFileSize: nil) { response, _ in
+                self.currentApiFetcher.setupDropBox(directory: dir, password: "", validUntil: nil, emailWhenFinished: false, limitFileSize: nil) { response, _ in
                     XCTAssertNotNil(response?.data, "Failed to create dropbox")
                     completion(rootFile, dir)
                 }
@@ -91,19 +95,19 @@ final class DriveApiTests: XCTestCase {
 
     func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
         setUpTest(testName: testName) { rootFile in
-            DriveApiTests.apiFetcher.createOfficeFile(parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { response, _ in
+            self.currentApiFetcher.createOfficeFile(driveId: self.currentDrive.id, parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { response, _ in
                 XCTAssertNotNil(response?.data, "Failed to create office file")
                 completion(rootFile, response!.data!)
             }
         }
     }
 
-// MARK: - Test methods
+    // MARK: - Test methods
 
     func testGetRootFile() {
         let expectation = XCTestExpectation(description: "Get root file")
 
-        DriveApiTests.apiFetcher.getFileListForDirectory(parentId: DriveFileManager.constants.rootID) { response, error in
+        currentApiFetcher.getFileListForDirectory(driveId: currentDrive.id, parentId: DriveFileManager.constants.rootID) { response, error in
             XCTAssertNotNil(response?.data, "Root file shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -115,7 +119,7 @@ final class DriveApiTests: XCTestCase {
     func testGetCommonDocuments() {
         let expectation = XCTestExpectation(description: "Get 'Common documents' file")
 
-        DriveApiTests.apiFetcher.getFileListForDirectory(parentId: Env.commonDocumentsId) { response, error in
+        currentApiFetcher.getFileListForDirectory(driveId: currentDrive.id, parentId: Env.commonDocumentsId) { response, error in
             XCTAssertNotNil(response?.data, "Root file shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -131,7 +135,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.createDirectory(parentDirectory: rootFile, name: "\(testName)-\(Date())", onlyForMe: true) { response, error in
+            self.currentApiFetcher.createDirectory(parentDirectory: rootFile, name: "\(testName)-\(Date())", onlyForMe: true) { response, error in
                 XCTAssertNotNil(response?.data, "Created file shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -147,7 +151,7 @@ final class DriveApiTests: XCTestCase {
         let expectation = XCTestExpectation(description: testName)
         var rootFile = File()
 
-        DriveApiTests.apiFetcher.createCommonDirectory(name: "\(testName)-\(Date())", forAllUser: true) { response, error in
+        currentApiFetcher.createCommonDirectory(driveId: currentDrive.id, name: "\(testName)-\(Date())", forAllUser: true) { response, error in
             XCTAssertNotNil(response?.data, "Created common directory shouldn't be nil")
             rootFile = response!.data!
             XCTAssertNil(error, "There should be no error")
@@ -165,7 +169,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.createOfficeFile(parentDirectory: rootFile, name: "\(testName)-\(Date())", type: "docx") { response, error in
+            self.currentApiFetcher.createOfficeFile(driveId: self.currentDrive.id, parentDirectory: rootFile, name: "\(testName)-\(Date())", type: "docx") { response, error in
                 XCTAssertNotNil(response?.data, "Created office file shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -188,7 +192,7 @@ final class DriveApiTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
             self.createTestDirectory(name: testName, parentDirectory: rootFile) { dir in
-                DriveApiTests.apiFetcher.setupDropBox(directory: dir, password: password, validUntil: validUntil, emailWhenFinished: false, limitFileSize: limitFileSize) { response, error in
+                self.currentApiFetcher.setupDropBox(directory: dir, password: password, validUntil: validUntil, emailWhenFinished: false, limitFileSize: limitFileSize) { response, error in
                     XCTAssertNotNil(response?.data, "Dropbox shouldn't be nil")
                     XCTAssertNil(error, "There should be no error")
                     let dropbox = response!.data!
@@ -217,9 +221,9 @@ final class DriveApiTests: XCTestCase {
         initDropbox(testName: testName) { root, dropbox in
             rootFile = root
 
-            DriveApiTests.apiFetcher.updateDropBox(directory: dropbox, password: password, validUntil: validUntil, emailWhenFinished: false, limitFileSize: limitFileSize) { _, error in
+            self.currentApiFetcher.updateDropBox(directory: dropbox, password: password, validUntil: validUntil, emailWhenFinished: false, limitFileSize: limitFileSize) { _, error in
                 XCTAssertNil(error, "There should be no error")
-                DriveApiTests.apiFetcher.getDropBoxSettings(directory: dropbox) { dropboxSetting, error in
+                self.currentApiFetcher.getDropBoxSettings(directory: dropbox) { dropboxSetting, error in
                     XCTAssertNotNil(dropboxSetting?.data, "Dropbox shouldn't be nil")
                     XCTAssertNil(error, "There should be no error")
                     expectations[0].expectation.fulfill()
@@ -244,12 +248,12 @@ final class DriveApiTests: XCTestCase {
 
         initDropbox(testName: testName) { root, dropbox in
             rootFile = root
-            DriveApiTests.apiFetcher.getDropBoxSettings(directory: dropbox) { response, error in
+            self.currentApiFetcher.getDropBoxSettings(directory: dropbox) { response, error in
                 XCTAssertNotNil(response?.data, "Dropbox shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
-                DriveApiTests.apiFetcher.disableDropBox(directory: dropbox) { _, disableError in
+                self.currentApiFetcher.disableDropBox(directory: dropbox) { _, disableError in
                     XCTAssertNil(disableError, "There should be no error")
-                    DriveApiTests.apiFetcher.getDropBoxSettings(directory: dropbox) { invalidDropbox, invalidError in
+                    self.currentApiFetcher.getDropBoxSettings(directory: dropbox) { invalidDropbox, invalidError in
                         XCTAssertNil(invalidDropbox?.data, "There should be no dropbox")
                         XCTAssertNil(invalidError, "There should be no error")
                         expectation.fulfill()
@@ -266,7 +270,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get favorite files"
         let expectation = XCTestExpectation(description: testName)
 
-        DriveApiTests.apiFetcher.getFavoriteFiles { response, error in
+        currentApiFetcher.getFavoriteFiles(driveId: currentDrive.id) { response, error in
             XCTAssertNotNil(response?.data, "Favorite files shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -279,7 +283,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get my shared files"
         let expectation = XCTestExpectation(description: testName)
 
-        DriveApiTests.apiFetcher.getMyShared { response, error in
+        currentApiFetcher.getMyShared(driveId: currentDrive.id) { response, error in
             XCTAssertNotNil(response?.data, "My shared files shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -292,7 +296,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get last modified files"
         let expectation = XCTestExpectation(description: testName)
 
-        DriveApiTests.apiFetcher.getLastModifiedFiles { response, error in
+        currentApiFetcher.getLastModifiedFiles(driveId: currentDrive.id) { response, error in
             XCTAssertNotNil(response?.data, "Last modified files shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -305,7 +309,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get last pictures"
         let expectation = XCTestExpectation(description: testName)
 
-        DriveApiTests.apiFetcher.getLastPictures { response, error in
+        currentApiFetcher.getLastPictures(driveId: currentDrive.id) { response, error in
             XCTAssertNotNil(response?.data, "Last pictures shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -321,7 +325,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { response, error in
+            self.currentApiFetcher.getShareListFor(file: rootFile) { response, error in
                 XCTAssertNotNil(response?.data, "Share list shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -339,11 +343,11 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.activateShareLinkFor(file: rootFile) { response, error in
+            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { response, error in
                 XCTAssertNotNil(response?.data, "Share link shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
 
-                DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                     XCTAssertNotNil(shareResponse, "Share response shouldn't be nil")
                     XCTAssertNil(shareError, "There should be no error")
                     let share = shareResponse!.data!
@@ -366,12 +370,12 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.activateShareLinkFor(file: rootFile) { _, _ in
-                DriveApiTests.apiFetcher.updateShareLinkWith(file: rootFile, canEdit: true, permission: "password", password: "password", date: nil, blockDownloads: true, blockComments: false, blockInformation: false, isFree: false) { updateResponse, updateError in
+            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { _, _ in
+                self.currentApiFetcher.updateShareLinkWith(file: rootFile, canEdit: true, permission: "password", password: "password", date: nil, blockDownloads: true, blockComments: false, blockInformation: false, isFree: false) { updateResponse, updateError in
                     XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                     XCTAssertNil(updateError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Share response shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
                         let share = shareResponse!.data!
@@ -400,11 +404,11 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "manage") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "manage") { response, error in
                 XCTAssertNotNil(response?.data, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
 
-                DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                     XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                     XCTAssertNil(shareError, "There should be no error")
                     let share = shareResponse!.data!
@@ -432,7 +436,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], permission: "manage") { response, error in
+            self.currentApiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], permission: "manage") { response, error in
                 XCTAssertNotNil(response, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -450,16 +454,16 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "read") { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let user = response?.data?.valid.users?.first { $0.id == Env.inviteUserId }
                 XCTAssertNotNil(user, "User shouldn't be nil")
                 if let user = user {
-                    DriveApiTests.apiFetcher.updateUserRights(file: rootFile, user: user, permission: "manage") { updateResponse, updateError in
+                    self.currentApiFetcher.updateUserRights(file: rootFile, user: user, permission: "manage") { updateResponse, updateError in
                         XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                         XCTAssertNil(updateError, "There should be no error")
 
-                        DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                        self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                             XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                             XCTAssertNil(shareError, "There should be no error")
                             let share = shareResponse!.data!
@@ -486,16 +490,16 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "read") { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let user = response?.data?.valid.users?.first { $0.id == Env.inviteUserId }
                 XCTAssertNotNil(user, "User shouldn't be nil")
                 if let user = user {
-                    DriveApiTests.apiFetcher.deleteUserRights(file: rootFile, user: user) { deleteResponse, deleteError in
+                    self.currentApiFetcher.deleteUserRights(file: rootFile, user: user) { deleteResponse, deleteError in
                         XCTAssertNotNil(deleteResponse, "Response shouldn't be nil")
                         XCTAssertNil(deleteError, "There should be no error")
 
-                        DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                        self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                             XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                             XCTAssertNil(shareError, "There should be no error")
                             let deletedUser = shareResponse!.data!.users.first {
@@ -520,15 +524,15 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let invitation = response?.data?.valid.invitations?.first { $0.email == Env.inviteMail }
                 XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
-                DriveApiTests.apiFetcher.updateInvitationRights(invitation: invitation!, permission: "write") { updateResponse, updateError in
+                self.currentApiFetcher.updateInvitationRights(driveId: self.currentDrive.id, invitation: invitation!, permission: "write") { updateResponse, updateError in
                     XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                     XCTAssertNil(updateError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
                         let share = shareResponse!.data!
@@ -555,15 +559,15 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let invitation = response?.data?.valid.invitations?.first { $0.email == Env.inviteMail }
                 XCTAssertNotNil(invitation, "User shouldn't be nil")
-                DriveApiTests.apiFetcher.deleteInvitationRights(invitation: invitation!) { deleteResponse, deleteError in
+                self.currentApiFetcher.deleteInvitationRights(driveId: self.currentDrive.id, invitation: invitation!) { deleteResponse, deleteError in
                     XCTAssertNotNil(deleteResponse, "Response shouldn't be nil")
                     XCTAssertNil(deleteError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
                         let deletedInvitation = shareResponse!.data!.users.first {
@@ -587,13 +591,13 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.activateShareLinkFor(file: rootFile) { _, error in
+            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { _, error in
                 XCTAssertNil(error, "There should be no error")
-                DriveApiTests.apiFetcher.removeShareLinkFor(file: rootFile) { removeResponse, removeError in
+                self.currentApiFetcher.removeShareLinkFor(file: rootFile) { removeResponse, removeError in
                     XCTAssertNotNil(removeResponse, "Response shouldn't be nil")
                     XCTAssertNil(removeError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Share file shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
                         XCTAssertNil(shareResponse?.data?.link, "Share link should be nil")
@@ -614,7 +618,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.getFileDetail(fileId: rootFile.id) { response, error in
+            self.currentApiFetcher.getFileDetail(driveId: self.currentDrive.id, fileId: rootFile.id) { response, error in
                 XCTAssertNotNil(response?.data, "File detail shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -632,7 +636,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.getFileDetailActivity(file: rootFile, page: 1) { response, error in
+            self.currentApiFetcher.getFileDetailActivity(file: rootFile, page: 1) { response, error in
                 XCTAssertNotNil(response, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -650,7 +654,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.getFileDetailComment(file: rootFile, page: 1) { response, error in
+            self.currentApiFetcher.getFileDetailComment(file: rootFile, page: 1) { response, error in
                 XCTAssertNotNil(response, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -668,13 +672,13 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
+            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
                 XCTAssertNotNil(response?.data, "Comment shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let comment = response!.data!
                 XCTAssertTrue(comment.body == "Testing comment", "Comment body should be equal to 'Testing comment'")
 
-                DriveApiTests.apiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
+                self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
                     XCTAssertNotNil(commentResponse?.data, "Comments shouldn't be nil")
                     XCTAssertNil(commentError, "There should be no error")
                     let recievedComment = commentResponse!.data!.first {
@@ -697,16 +701,16 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
+            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
                 XCTAssertNotNil(response?.data, "Comment shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let comment = response!.data!
 
-                DriveApiTests.apiFetcher.likeComment(file: file, like: false, comment: response!.data!) { likeResponse, likeError in
+                self.currentApiFetcher.likeComment(file: file, like: false, comment: response!.data!) { likeResponse, likeError in
                     XCTAssertNotNil(likeResponse?.data, "Like response shouldn't be nil")
                     XCTAssertNil(likeError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
+                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
                         XCTAssertNotNil(commentResponse?.data, "Comments shouldn't be nil")
                         XCTAssertNil(commentError, "There should be no error")
                         let recievedComment = commentResponse!.data!.first {
@@ -731,16 +735,16 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
+            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
                 XCTAssertNotNil(response?.data, "Comment shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let comment = response!.data!
 
-                DriveApiTests.apiFetcher.deleteComment(file: file, comment: response!.data!) { deleteResponse, deleteError in
+                self.currentApiFetcher.deleteComment(file: file, comment: response!.data!) { deleteResponse, deleteError in
                     XCTAssertNotNil(deleteResponse, "Comment response shouldn't be nil")
                     XCTAssertNil(deleteError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
+                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
                         XCTAssertNotNil(commentResponse, "Comments shouldn't be nil")
                         XCTAssertNil(commentError, "There should be no error")
                         let deletedComment = commentResponse!.data?.first {
@@ -764,16 +768,16 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
+            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
                 XCTAssertNotNil(response?.data, "Comment shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let comment = response!.data!
 
-                DriveApiTests.apiFetcher.editComment(file: file, text: testName, comment: response!.data!) { editResponse, editError in
+                self.currentApiFetcher.editComment(file: file, text: testName, comment: response!.data!) { editResponse, editError in
                     XCTAssertNotNil(editResponse, "Comment response shouldn't be nil")
                     XCTAssertNil(editError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
+                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
                         XCTAssertNotNil(commentResponse?.data, "Comments shouldn't be nil")
                         XCTAssertNil(commentError, "There should be no error")
                         let editedComment = commentResponse!.data?.first {
@@ -798,17 +802,17 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
+            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
                 XCTAssertNotNil(response?.data, "Comment shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let comment = response!.data!
 
-                DriveApiTests.apiFetcher.answerComment(file: file, text: "Answer comment", comment: response!.data!) { answerResponse, answerError in
+                self.currentApiFetcher.answerComment(file: file, text: "Answer comment", comment: response!.data!) { answerResponse, answerError in
                     XCTAssertNotNil(answerResponse?.data, "Comment response shouldn't be nil")
                     XCTAssertNil(answerError, "There should be no error")
                     let answer = answerResponse!.data!
 
-                    DriveApiTests.apiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
+                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
                         XCTAssertNotNil(commentResponse, "Comments shouldn't be nil")
                         XCTAssertNil(commentError, "There should be no error")
                         let firstComment = commentResponse!.data?.first {
@@ -840,11 +844,11 @@ final class DriveApiTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
             self.createTestDirectory(name: testName, parentDirectory: rootFile) { directory in
-                DriveApiTests.apiFetcher.deleteFile(file: directory) { response, error in
+                self.currentApiFetcher.deleteFile(file: directory) { response, error in
                     XCTAssertNotNil(response?.data, "Deleted file response shouldn't be nil")
                     XCTAssertNil(error, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getFileListForDirectory(parentId: rootFile.id) { rootResponse, rootError in
+                    self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: rootFile.id) { rootResponse, rootError in
                         XCTAssertNotNil(rootResponse?.data, "Root file shouldn't be nil")
                         XCTAssertNil(rootError, "There should be no error")
                         let deletedFile = rootResponse!.data?.children.first {
@@ -852,7 +856,7 @@ final class DriveApiTests: XCTestCase {
                         }
                         XCTAssertNil(deletedFile, "Deleted file should be nil")
 
-                        DriveApiTests.apiFetcher.getTrashedFiles { trashResponse, trashError in
+                        self.currentApiFetcher.getTrashedFiles(driveId: self.currentDrive.id, sortType: .newerDelete) { trashResponse, trashError in
                             XCTAssertNotNil(trashResponse, "Trashed files shouldn't be nil")
                             XCTAssertNil(trashError, "There should be no error")
                             let fileInTrash = trashResponse!.data!.first {
@@ -860,16 +864,16 @@ final class DriveApiTests: XCTestCase {
                             }
                             XCTAssertNotNil(fileInTrash, "Deleted file shouldn't be nil")
                             expectations[0].expectation.fulfill()
-
-                            DriveApiTests.apiFetcher.deleteFileDefinitely(file: fileInTrash!) { definitelyResponse, definitelyError in
+                            guard let file = fileInTrash else { return }
+                            self.currentApiFetcher.deleteFileDefinitely(file: file) { definitelyResponse, definitelyError in
                                 XCTAssertNotNil(definitelyResponse, "Response shouldn't be nil")
                                 XCTAssertNil(definitelyError, "There should be no error")
 
-                                DriveApiTests.apiFetcher.getTrashedFiles { finalResponse, finalError in
+                                self.currentApiFetcher.getTrashedFiles(driveId: self.currentDrive.id, sortType: .newerDelete) { finalResponse, finalError in
                                     XCTAssertNotNil(finalResponse, "Trashed files shouldn't be nil")
                                     XCTAssertNil(finalError, "There should be no error")
-                                    let deletedFile = finalResponse!.data!.first {
-                                        $0.id == fileInTrash!.id
+                                    let deletedFile = finalResponse?.data?.first {
+                                        $0.id == file.id
                                     }
                                     XCTAssertNil(deletedFile, "Deleted file should be nil")
                                     expectations[1].expectation.fulfill()
@@ -892,12 +896,12 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.renameFile(file: file, newName: "renamed office file") { renameResponse, renameError in
+            self.currentApiFetcher.renameFile(file: file, newName: "renamed office file") { renameResponse, renameError in
                 XCTAssertNotNil(renameResponse?.data, "Renamed file shouldn't be nil")
                 XCTAssertNil(renameError, "There should be no error")
                 XCTAssertTrue(renameResponse!.data!.name == "renamed office file", "File name should have changed")
 
-                DriveApiTests.apiFetcher.getFileListForDirectory(parentId: file.id) { response, error in
+                self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: file.id) { response, error in
                     XCTAssertNotNil(response?.data, "Renamed file shouldn't be nil")
                     XCTAssertNil(error, "There should be no error")
                     XCTAssertTrue(response!.data!.name == "renamed office file", "File name should have changed")
@@ -917,11 +921,11 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.duplicateFile(file: file, duplicateName: "duplicate-\(Date())") { duplicateResponse, duplicateError in
+            self.currentApiFetcher.duplicateFile(file: file, duplicateName: "duplicate-\(Date())") { duplicateResponse, duplicateError in
                 XCTAssertNotNil(duplicateResponse?.data, "Duplicated file shouldn't be nil")
                 XCTAssertNil(duplicateError, "There should be no error")
 
-                DriveApiTests.apiFetcher.getFileListForDirectory(parentId: rootFile.id) { response, error in
+                self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: rootFile.id) { response, error in
                     XCTAssertNotNil(response?.data, "Response shouldn't be nil")
                     XCTAssertNil(error, "There should be no error")
                     XCTAssertTrue(response!.data!.children.count == 2, "Root file should have 2 children")
@@ -942,11 +946,11 @@ final class DriveApiTests: XCTestCase {
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
             self.createTestDirectory(name: "destination-\(Date())", parentDirectory: rootFile) { destination in
-                DriveApiTests.apiFetcher.moveFile(file: file, newParent: destination) { moveResponse, moveError in
+                self.currentApiFetcher.moveFile(file: file, newParent: destination) { moveResponse, moveError in
                     XCTAssertNotNil(moveResponse, "Response shouldn't be nil")
                     XCTAssertNil(moveError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getFileListForDirectory(parentId: destination.id) { response, error in
+                    self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: destination.id) { response, error in
                         XCTAssertNotNil(response?.data, "Response shouldn't be nil")
                         XCTAssertNil(error, "There should be no error")
                         let movedFile = response!.data!.children.contains { $0.id == file.id }
@@ -965,7 +969,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get recent activity"
         let expectation = XCTestExpectation(description: testName)
 
-        DriveApiTests.apiFetcher.getRecentActivity { response, error in
+        currentApiFetcher.getRecentActivity(driveId: currentDrive.id) { response, error in
             XCTAssertNotNil(response?.data, "Response shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -984,7 +988,7 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.getFileActivitiesFromDate(file: file, date: time, page: 1) { response, error in
+            self.currentApiFetcher.getFileActivitiesFromDate(file: file, date: time, page: 1) { response, error in
                 XCTAssertNotNil(response?.data, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -1005,11 +1009,11 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.postFavoriteFile(file: file) { postResponse, postError in
+            self.currentApiFetcher.postFavoriteFile(file: file) { postResponse, postError in
                 XCTAssertNotNil(postResponse, "Response shouldn't be nil")
                 XCTAssertNil(postError, "There should be no error")
 
-                DriveApiTests.apiFetcher.getFavoriteFiles(page: 1, sortType: .newer) { favoriteResponse, favoriteError in
+                self.currentApiFetcher.getFavoriteFiles(driveId: self.currentDrive.id, page: 1, sortType: .newer) { favoriteResponse, favoriteError in
                     XCTAssertNotNil(favoriteResponse?.data, "Favorite files shouldn't be nil")
                     XCTAssertNil(favoriteError, "There should be no error")
                     let favoriteFile = favoriteResponse!.data!.first { $0.id == file.id }
@@ -1017,17 +1021,17 @@ final class DriveApiTests: XCTestCase {
                     XCTAssertTrue(favoriteFile!.isFavorite, "File should be favorite")
                     expectations[0].expectation.fulfill()
 
-                    DriveApiTests.apiFetcher.deleteFavoriteFile(file: file) { deleteResponse, deleteError in
+                    self.currentApiFetcher.deleteFavoriteFile(file: file) { deleteResponse, deleteError in
                         XCTAssertNotNil(deleteResponse, "Response shouldn't be nil")
                         XCTAssertNil(deleteError, "There should be no error")
 
-                        DriveApiTests.apiFetcher.getFavoriteFiles(page: 1, sortType: .newer) { response, error in
+                        self.currentApiFetcher.getFavoriteFiles(driveId: self.currentDrive.id, page: 1, sortType: .newer) { response, error in
                             XCTAssertNotNil(response?.data, "Favorite files shouldn't be nil")
                             XCTAssertNil(error, "There should be no error")
                             let favoriteFile = response!.data!.contains { $0.id == file.id }
                             XCTAssertFalse(favoriteFile, "File shouldn't be in Favorite files")
 
-                            DriveApiTests.apiFetcher.getFileListForDirectory(parentId: file.id) { finalResponse, finalError in
+                            self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: file.id) { finalResponse, finalError in
                                 XCTAssertNotNil(finalResponse?.data, "File shouldn't be nil")
                                 XCTAssertNil(finalError, "There should be no error")
                                 XCTAssertFalse(finalResponse!.data!.isFavorite, "File shouldn't be favorite")
@@ -1043,19 +1047,15 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testPerformAuthenticatedRequest() {
+    func testPerformAuthenticatedRequest() {}
 
-    }
-
-    func testGetPublicUploadTokenWithToken() {
-
-    }
+    func testGetPublicUploadTokenWithToken() {}
 
     func testGetTrashedFiles() {
         let testName = "Get trashed file"
         let expectation = XCTestExpectation(description: testName)
 
-        DriveApiTests.apiFetcher.getTrashedFiles { response, error in
+        currentApiFetcher.getTrashedFiles(driveId: currentDrive.id, sortType: .newerDelete) { response, error in
             XCTAssertNotNil(response, "Response shouldn't be nil")
             XCTAssertNil(error, "There should be no error")
             expectation.fulfill()
@@ -1068,10 +1068,10 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get children trashed file"
         let expectation = XCTestExpectation(description: testName)
 
-        initOfficeFile(testName: testName) { root, file in
-            DriveApiTests.apiFetcher.deleteFile(file: root) { response, error in
+        initOfficeFile(testName: testName) { root, _ in
+            self.currentApiFetcher.deleteFile(file: root) { response, error in
                 XCTAssertNil(error, "There should be no error")
-                DriveApiTests.apiFetcher.getChildrenTrashedFiles(fileId: root.id) { response, error in
+                self.currentApiFetcher.getChildrenTrashedFiles(driveId: self.currentDrive.id, fileId: root.id) { response, error in
                     XCTAssertNotNil(response?.data, "Children trashed file shouldn't be nil")
                     XCTAssertNil(error, "There should be no error")
                     expectation.fulfill()
@@ -1089,13 +1089,13 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.deleteFile(file: file) { _, deleteError in
+            self.currentApiFetcher.deleteFile(file: file) { _, deleteError in
                 XCTAssertNil(deleteError, "There should be no error")
-                DriveApiTests.apiFetcher.restoreTrashedFile(file: file) { restoreResponse, restoreError in
+                self.currentApiFetcher.restoreTrashedFile(file: file) { restoreResponse, restoreError in
                     XCTAssertNotNil(restoreResponse, "Response shouldn't be nil")
                     XCTAssertNil(restoreError, "There should be no error")
 
-                    DriveApiTests.apiFetcher.getFileListForDirectory(parentId: rootFile.id) { response, error in
+                    self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: rootFile.id) { response, error in
                         XCTAssertNotNil(response?.data, "Root file shouldn't be nil")
                         XCTAssertNil(error, "There should be no error")
                         let restoreFile = response!.data!.children.contains { $0.id == file.id }
@@ -1117,16 +1117,16 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.deleteFile(file: file) { _, deleteError in
+            self.currentApiFetcher.deleteFile(file: file) { _, deleteError in
                 XCTAssertNil(deleteError, "There should be no error")
 
                 self.createTestDirectory(name: "restore destination - \(Date())", parentDirectory: rootFile) { directory in
 
-                    DriveApiTests.apiFetcher.restoreTrashedFile(file: file, in: directory.id) { restoreResponse, restoreError in
+                    self.currentApiFetcher.restoreTrashedFile(file: file, in: directory.id) { restoreResponse, restoreError in
                         XCTAssertNotNil(restoreResponse, "Response shouldn't be nil")
                         XCTAssertNil(restoreError, "There should be no error")
 
-                        DriveApiTests.apiFetcher.getFileListForDirectory(parentId: directory.id) { response, error in
+                        self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: directory.id) { response, error in
                             XCTAssertNotNil(response?.data, "Root file shouldn't be nil")
                             XCTAssertNil(error, "There should be no error")
                             let restoreFile = response!.data!.children.contains { $0.id == file.id }
@@ -1149,7 +1149,7 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            DriveApiTests.apiFetcher.searchFiles(query: "officeFile") { response, error in
+            self.currentApiFetcher.searchFiles(driveId: self.currentDrive.id, query: "officeFile") { response, error in
                 XCTAssertNotNil(response, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let fileFound = response?.data?.first {
@@ -1164,15 +1164,12 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testRequireFileAccess() {
+    func testRequireFileAccess() {}
 
-    }
-
-    func testCancelAction() {
-
-    }
+    func testCancelAction() {}
 
     // MARK: - Complementary tests
+
     func testComment() {
         let testName = "Comment tests"
         let expectations = [
@@ -1188,44 +1185,44 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, officeFile in
             rootFile = root
-            DriveApiTests.apiFetcher.addCommentTo(file: officeFile, comment: expectations[0].name) { response, error in
+            self.currentApiFetcher.addCommentTo(file: officeFile, comment: expectations[0].name) { response, error in
                 XCTAssertNotNil(response?.data, "Comment shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let comment = response!.data!
                 XCTAssertTrue(comment.body == expectations[0].name, "Comment body is wrong")
                 expectations[0].expectation.fulfill()
 
-                DriveApiTests.apiFetcher.likeComment(file: officeFile, like: true, comment: comment) { responseLike, errorLike in
+                self.currentApiFetcher.likeComment(file: officeFile, like: true, comment: comment) { responseLike, errorLike in
                     XCTAssertNotNil(responseLike, "Response like shouldn't be nil")
                     XCTAssertNil(errorLike, "There should be no error")
                     expectations[1].expectation.fulfill()
 
-                    DriveApiTests.apiFetcher.editComment(file: officeFile, text: expectations[2].name, comment: comment) { responseEdit, errorEdit in
+                    self.currentApiFetcher.editComment(file: officeFile, text: expectations[2].name, comment: comment) { responseEdit, errorEdit in
                         XCTAssertNotNil(responseEdit, "Response edit shouldn't be nil")
                         XCTAssertNil(errorEdit, "There should be no error")
                         XCTAssertTrue(responseEdit!.data!, "Response edit should be true")
                         expectations[2].expectation.fulfill()
 
-                        DriveApiTests.apiFetcher.answerComment(file: officeFile, text: expectations[3].name, comment: comment) { responseAnswer, errorAnswer in
+                        self.currentApiFetcher.answerComment(file: officeFile, text: expectations[3].name, comment: comment) { responseAnswer, errorAnswer in
                             XCTAssertNotNil(responseAnswer, "Answer comment shouldn't be nil")
                             XCTAssertNil(errorAnswer, "There should be no error")
                             let answer = responseAnswer!.data!
                             XCTAssertTrue(answer.body == expectations[3].name, "Answer body is wrong")
                             expectations[3].expectation.fulfill()
 
-                            DriveApiTests.apiFetcher.getFileDetailComment(file: officeFile, page: 1) { responseAllComment, errorAllComment in
+                            self.currentApiFetcher.getFileDetailComment(file: officeFile, page: 1) { responseAllComment, errorAllComment in
                                 XCTAssertNotNil(responseAllComment, "All comment file shouldn't be nil")
                                 XCTAssertNil(errorAllComment, "There should be no error")
                                 let allComment = responseAllComment!.data!
                                 numberOfComment = allComment.count
                                 expectations[4].expectation.fulfill()
 
-                                DriveApiTests.apiFetcher.deleteComment(file: officeFile, comment: comment) { responseDelete, errorDelete in
+                                self.currentApiFetcher.deleteComment(file: officeFile, comment: comment) { responseDelete, errorDelete in
                                     XCTAssertNotNil(responseDelete, "Response delete shouldn't be nil")
                                     XCTAssertNil(errorDelete, "There should be no error")
                                     XCTAssertTrue(responseDelete!.data!, "Response delete should be true")
 
-                                    DriveApiTests.apiFetcher.getFileDetailComment(file: officeFile, page: 1) { finalResponse, finalError in
+                                    self.currentApiFetcher.getFileDetailComment(file: officeFile, page: 1) { finalResponse, finalError in
                                         XCTAssertNotNil(finalResponse, "All comment file shouldn't be nil")
                                         XCTAssertNil(finalError, "There should be no error")
                                         XCTAssertTrue(numberOfComment - 1 == finalResponse!.data!.count, "Comment not deleted")
@@ -1254,16 +1251,16 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveApiTests.apiFetcher.activateShareLinkFor(file: rootFile) { activateResponse, activateError in
+            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { activateResponse, activateError in
                 XCTAssertNotNil(activateResponse?.data, "Share link shouldn't be nil")
                 XCTAssertNil(activateError, "There should be no error")
                 XCTAssertNotNil(activateResponse!.data!.url, "Share link url shouldn't be nil")
                 expectations[0].expectation.fulfill()
 
-                DriveApiTests.apiFetcher.updateShareLinkWith(file: rootFile, canEdit: true, permission: "password", password: "password", date: nil, blockDownloads: true, blockComments: false, blockInformation: false, isFree: false) { updateResponse, updateError in
+                self.currentApiFetcher.updateShareLinkWith(file: rootFile, canEdit: true, permission: "password", password: "password", date: nil, blockDownloads: true, blockComments: false, blockInformation: false, isFree: false) { updateResponse, updateError in
                     XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                     XCTAssertNil(updateError, "There should be no error")
-                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Share response shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
                         let share = shareResponse!.data!
@@ -1276,17 +1273,16 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertTrue(!share.link!.blockInformation, "blockInformation should be false")
                         expectations[1].expectation.fulfill()
 
-                        DriveApiTests.apiFetcher.removeShareLinkFor(file: rootFile) { removeResponse, removeError in
+                        self.currentApiFetcher.removeShareLinkFor(file: rootFile) { removeResponse, removeError in
                             XCTAssertNotNil(removeResponse, "Response shouldn't be nil")
                             XCTAssertNil(removeError, "There should be no error")
-                            DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
+                            self.currentApiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
                                 XCTAssertNotNil(finalResponse?.data, "Share file shouldn't be nil")
                                 XCTAssertNil(finalError, "There should be no error")
                                 XCTAssertNil(finalResponse?.data?.link, "Share link should be nil")
                                 expectations[2].expectation.fulfill()
                             }
                         }
-
                     }
                 }
             }
@@ -1309,15 +1305,15 @@ final class DriveApiTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
 
-            DriveApiTests.apiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], permission: "manage") { checkResponse, checkError in
+            self.currentApiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], permission: "manage") { checkResponse, checkError in
                 XCTAssertNotNil(checkResponse, "Response shouldn't be nil")
                 XCTAssertNil(checkError, "There should be no error")
                 expectations[0].expectation.fulfill()
 
-                DriveApiTests.apiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "manage") { addResponse, addError in
+                self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "manage") { addResponse, addError in
                     XCTAssertNotNil(addResponse?.data, "Response shouldn't be nil")
                     XCTAssertNil(addError, "There should be no error")
-                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
                         let share = shareResponse!.data!
@@ -1330,11 +1326,11 @@ final class DriveApiTests: XCTestCase {
                         }
                         XCTAssertNotNil(userAdded, "Added user should be in share list")
                         expectations[1].expectation.fulfill()
-
-                        DriveApiTests.apiFetcher.updateUserRights(file: rootFile, user: userAdded!, permission: "manage") { updateResponse, updateError in
+                        guard let user = userAdded else { return }
+                        self.currentApiFetcher.updateUserRights(file: rootFile, user: user, permission: "manage") { updateResponse, updateError in
                             XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                             XCTAssertNil(updateError, "There should be no error")
-                            DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareUpdateResponse, shareUpdateError in
+                            self.currentApiFetcher.getShareListFor(file: rootFile) { shareUpdateResponse, shareUpdateError in
                                 XCTAssertNotNil(shareUpdateResponse?.data, "Response shouldn't be nil")
                                 XCTAssertNil(shareUpdateError, "There should be no error")
                                 let share = shareUpdateResponse!.data!
@@ -1345,10 +1341,11 @@ final class DriveApiTests: XCTestCase {
                                 XCTAssertTrue(updatedUser?.permission?.rawValue == "manage", "User permission should be equal to 'manage'")
                                 expectations[2].expectation.fulfill()
 
-                                DriveApiTests.apiFetcher.deleteUserRights(file: rootFile, user: updatedUser!) { deleteResponse, deleteError in
+                                guard let user = updatedUser else { return }
+                                self.currentApiFetcher.deleteUserRights(file: rootFile, user: user) { deleteResponse, deleteError in
                                     XCTAssertNotNil(deleteResponse, "Response shouldn't be nil")
                                     XCTAssertNil(deleteError, "There should be no error")
-                                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
+                                    self.currentApiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
                                         XCTAssertNotNil(finalResponse?.data, "Response shouldn't be nil")
                                         XCTAssertNil(finalError, "There should be no error")
                                         let deletedUser = finalResponse!.data!.users.first {
@@ -1382,16 +1379,16 @@ final class DriveApiTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
 
-            DriveApiTests.apiFetcher.checkUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], permission: "read") { checkResponse, checkError in
+            self.currentApiFetcher.checkUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], permission: "read") { checkResponse, checkError in
                 XCTAssertNotNil(checkResponse, "Response shouldn't be nil")
                 XCTAssertNil(checkError, "There should be no error")
                 expectations[0].expectation.fulfill()
 
-                DriveApiTests.apiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { addResponse, addError in
+                self.currentApiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { addResponse, addError in
                     XCTAssertNil(addError, "There should be no error")
                     let invitation = addResponse?.data?.valid.invitations?.first { $0.email == Env.inviteMail }
                     XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
-                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
                         let share = shareResponse!.data!
@@ -1405,10 +1402,10 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertNotNil(invitationAdded, "Added invitation should be in share list")
                         expectations[1].expectation.fulfill()
 
-                        DriveApiTests.apiFetcher.updateInvitationRights(invitation: invitation!, permission: "write") { updateResponse, updateError in
+                        self.currentApiFetcher.updateInvitationRights(driveId: self.currentDrive.id, invitation: invitation!, permission: "write") { updateResponse, updateError in
                             XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                             XCTAssertNil(updateError, "There should be no error")
-                            DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { shareUpdateResponse, shareUpdateError in
+                            self.currentApiFetcher.getShareListFor(file: rootFile) { shareUpdateResponse, shareUpdateError in
                                 XCTAssertNotNil(shareUpdateResponse?.data, "Response shouldn't be nil")
                                 XCTAssertNil(shareUpdateError, "There should be no error")
                                 let share = shareUpdateResponse!.data!
@@ -1420,10 +1417,10 @@ final class DriveApiTests: XCTestCase {
                                 XCTAssertTrue(updatedInvitation?.permission.rawValue == "write", "Invitation permission should be equal to 'manage'")
                                 expectations[2].expectation.fulfill()
 
-                                DriveApiTests.apiFetcher.deleteInvitationRights(invitation: invitation!) { deleteResponse, deleteError in
+                                self.currentApiFetcher.deleteInvitationRights(driveId: self.currentDrive.id, invitation: invitation!) { deleteResponse, deleteError in
                                     XCTAssertNotNil(deleteResponse, "Response shouldn't be nil")
                                     XCTAssertNil(deleteError, "There should be no error")
-                                    DriveApiTests.apiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
+                                    self.currentApiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
                                         XCTAssertNotNil(finalResponse?.data, "Response shouldn't be nil")
                                         XCTAssertNil(finalError, "There should be no error")
                                         let deletedInvitation = finalResponse!.data!.users.first {
