@@ -45,6 +45,7 @@ extension UserDefaults {
         case photoSortMode
         case betaInviteDisplayed
         case lastSyncDateOfflineFiles
+        case fileProviderExtension
     }
 
     private func key(_ key: Keys) -> String {
@@ -246,7 +247,7 @@ extension UserDefaults {
             return set(newValue.rawValue, forKey: key(.photoSortMode))
         }
     }
-    
+
     public var betaInviteDisplayed: Bool {
         get {
             return bool(forKey: key(.betaInviteDisplayed))
@@ -262,6 +263,18 @@ extension UserDefaults {
         }
         set {
             setValue(newValue, forKey: key(.lastSyncDateOfflineFiles))
+        }
+    }
+
+    public var isFileProviderExtensionEnabled: Bool {
+        get {
+            if object(forKey: key(.fileProviderExtension)) == nil {
+                set(true, forKey: key(.fileProviderExtension))
+            }
+            return bool(forKey: key(.fileProviderExtension))
+        }
+        set {
+            set(newValue, forKey: key(.fileProviderExtension))
         }
     }
 }

@@ -27,16 +27,16 @@ class ParameterTableViewController: UITableViewController {
         case photos
         case theme
         case notifications
-        case appLock
+        case security
         case wifi
         case about
     }
 
     private var tableContent: [parameterOption] {
         if #available(iOS 13.0, *) {
-            return [.photos, .theme, .notifications, .appLock, .wifi, .about]
+            return [.photos, .theme, .notifications, .security, .wifi, .about]
         } else {
-            return [.photos, .notifications, .appLock, .wifi, .about]
+            return [.photos, .notifications, .security, .wifi, .about]
         }
     }
 
@@ -80,11 +80,10 @@ class ParameterTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveStrings.Localizable.notificationTitle
             cell.valueLabel.text = KDriveStrings.Localizable.notificationAll
             return cell
-        case .appLock:
-            let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+        case .security:
+            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.appSecurityTitle
-            cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+            cell.titleLabel.text = KDriveStrings.Localizable.securityTitle
             return cell
         case .wifi:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
@@ -108,13 +107,8 @@ class ParameterTableViewController: UITableViewController {
             self.performSegue(withIdentifier: "photoSyncSegue", sender: nil)
         case .notifications:
             self.performSegue(withIdentifier: "notificationsSegue", sender: nil)
-        case .appLock:
-            let appLockSettingsVC = AppLockSettingsViewController.instantiate()
-            appLockSettingsVC.closeActionHandler = {
-                appLockSettingsVC.dismiss(animated: true)
-                self.tableView.reloadData()
-            }
-            present(appLockSettingsVC, animated: true)
+        case .security:
+            performSegue(withIdentifier: "securitySegue", sender: nil)
         case .about:
             self.performSegue(withIdentifier: "aboutSegue", sender: nil)
         case .theme:
