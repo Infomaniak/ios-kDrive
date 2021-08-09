@@ -701,7 +701,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
                         completion(.failure(error))
                     } else {
                         // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
-                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Other \(error?.localizedDescription ?? "")"))
+                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Other \(error.debugDescription)"))
                         completion(.success(credential))
                     }
                 }
