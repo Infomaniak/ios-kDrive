@@ -80,7 +80,8 @@ class ParameterTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveStrings.Localizable.notificationTitle
             cell.valueLabel.text = KDriveStrings.Localizable.notificationAll
             return cell
-        case .security:let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
+        case .security:
+            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.securityTitle
             return cell
