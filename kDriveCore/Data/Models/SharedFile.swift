@@ -138,23 +138,12 @@ public class Invitation: Codable {
 public class SharedUsers: Codable {
     public var errors: [String]
     public var valid: SharedUsersValid
-
-    enum CodingKeys: String, CodingKey {
-        case errors
-        case valid
-    }
 }
 
 public class SharedUsersValid: Codable {
     public var invitations: [Invitation]?
     public var users: [DriveUser]?
     public var tags: [Tag]?
-
-    enum CodingKeys: String, CodingKey {
-        case invitations
-        case users
-        case tags
-    }
 }
 
 public class FileCheckResult: Codable {
