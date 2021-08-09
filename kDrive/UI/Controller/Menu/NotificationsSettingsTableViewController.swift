@@ -30,7 +30,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
         case notificationMainSetting
     }
 
-    private var rows: [NotificationRow]! = []
+    private var rows = [NotificationRow]()
     private var disableSwitch = false
 
     override func viewDidLoad() {

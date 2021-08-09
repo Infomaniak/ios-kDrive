@@ -54,8 +54,7 @@ class ParameterTableViewController: UITableViewController {
     private func getNotificationText() -> String {
         if !UserDefaults.shared.isNotificationEnabled {
             return KDriveStrings.Localizable.notificationDisable
-        }
-        if UserDefaults.shared.newCommentNotificationsEnabled && UserDefaults.shared.importNotificationsEnabled && UserDefaults.shared.sharingNotificationsEnabled {
+        } else if UserDefaults.shared.generalNotificationEnabled && UserDefaults.shared.newCommentNotificationsEnabled && UserDefaults.shared.importNotificationsEnabled && UserDefaults.shared.sharingNotificationsEnabled {
             return KDriveStrings.Localizable.notificationAll
         } else {
             return KDriveStrings.Localizable.notificationCustom
