@@ -120,7 +120,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("Unable to registerfor remote notifications: \(error.localizedDescription)")
+        DDLogError("Unable to register for remote notifications: \(error.localizedDescription)")
     }
 
     @available(iOS 13.0, *)
@@ -611,7 +611,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         _ = notification.request.content.userInfo
 
         // Change this to your preferred presentation option
-        completionHandler([.alert, .badge, .sound])
+        completionHandler([.alert, .sound])
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
@@ -647,7 +647,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     private func processPushNotification(_ notification: UNNotification) {
         UIApplication.shared.applicationIconBadgeNumber = 0
 //        PROCESS NOTIFICATION
-        
 //        let userInfo = notification.request.content.userInfo
 //
 //        let parentId = Int(userInfo["parentId"] as? String ?? "")
