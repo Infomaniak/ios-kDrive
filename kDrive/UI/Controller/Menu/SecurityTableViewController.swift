@@ -21,14 +21,12 @@ import kDriveCore
 
 class SecurityTableViewController: UITableViewController {
 
-    private enum SecurityOption {
+    private enum SecurityOption: CaseIterable {
         case appLock
         case fileProviderExtension
     }
 
-    private var tableContent: [SecurityOption] {
-        return [.appLock, .fileProviderExtension]
-    }
+    private let tableContent = SecurityOption.allCases
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,10 +38,6 @@ class SecurityTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         tableView.reloadData()
         navigationController?.setInfomaniakAppearanceNavigationBar()
-    }
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

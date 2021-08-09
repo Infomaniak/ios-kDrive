@@ -76,9 +76,8 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
-        guard UserDefaults.shared.isFileProviderExtensionEnabled else {
-            throw nsError(code: .notAuthenticated)
-        }
+        try isFileProviderExtensionEnabled()
+
         // Try to reload account if user logged in
         if driveFileManager == nil {
             accountManager.forceReload()
@@ -169,6 +168,12 @@ class FileProviderExtension: NSFileProviderExtension {
             } else {
                 downloadRemoteFile(file: file, for: item, completion: completionHandler)
             }
+        }
+    }
+
+    private func isFileProviderExtensionEnabled() throws {
+        guard UserDefaults.shared.isFileProviderExtensionEnabled else {
+            throw nsError(code: .notAuthenticated)
         }
     }
 
@@ -278,9 +283,8 @@ class FileProviderExtension: NSFileProviderExtension {
     // MARK: - Enumeration
 
     override func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier) throws -> NSFileProviderEnumerator {
-        guard UserDefaults.shared.isFileProviderExtensionEnabled else {
-            throw nsError(code: .notAuthenticated)
-        }
+        try isFileProviderExtensionEnabled()
+
         // Try to reload account if user logged in
         if driveFileManager == nil {
             accountManager.forceReload()
