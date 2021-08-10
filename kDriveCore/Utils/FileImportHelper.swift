@@ -114,6 +114,17 @@ public class FileImportHelper {
                 // We don't handle saving web url, only file url
                 progress.completedUnitCount += perItemUnitCount
                 dispatchGroup.leave()
+            } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.plainText.identifier)
+                && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier)
+                && itemProvider.canLoadObject(ofClass: String.self) {
+                let childProgress = getTextFile(from: itemProvider, typeIdentifier: UTI.plainText.identifier) { filename, url in
+                    if let url = url {
+                        let name = itemProvider.suggestedName ?? self.getDefaultFileName()
+                        items.append(ImportedFile(name: filename ?? name, path: url, uti: .plainText))
+                    }
+                    dispatchGroup.leave()
+                }
+                progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { filename, url in
                     if let url = url {
@@ -236,6 +247,32 @@ public class FileImportHelper {
         }
     }
 
+    private func getTextFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
+        let progress = Progress(totalUnitCount: 1)
+        itemProvider.loadItem(forTypeIdentifier: typeIdentifier, options: nil) { coding, error in
+            if let error = error {
+                DDLogError("Error while loading data representation: \(error)")
+                completion(nil, nil)
+            }
+
+            if let text = coding as? String {
+                let targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false).appendingPathExtension("txt")
+                do {
+                    try text.data(using: .utf8)?.write(to: targetURL)
+                    completion(targetURL.lastPathComponent, targetURL)
+                } catch {
+                    DDLogError("Error while loading data representation: \(error)")
+                    completion(nil, nil)
+                }
+            } else {
+                DDLogError("Error while loading data representation")
+                completion(nil, nil)
+            }
+            progress.completedUnitCount = 1
+        }
+        return progress
+    }
+
     private func getFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
         let progress = Progress(totalUnitCount: 10)
         let childProgress = itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
@@ -248,12 +285,7 @@ public class FileImportHelper {
                 let targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
 
                 do {
-                    if FileManager.default.fileExists(atPath: targetURL.path) {
-                        try FileManager.default.removeItem(at: targetURL)
-                    }
-
-                    try FileManager.default.copyItem(at: url, to: targetURL)
-
+                    try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: targetURL)
                     completion(url.lastPathComponent, targetURL)
                 } catch {
                     DDLogError("Error while loading file representation: \(error)")
