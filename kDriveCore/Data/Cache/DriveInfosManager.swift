@@ -115,6 +115,14 @@ public class DriveInfosManager {
         }
     }
 
+    public func deleteAllFileProviderDomains() {
+        NSFileProviderManager.removeAllDomains { error in
+            if let error = error {
+                DDLogError("Error while removing domains: \(error)")
+            }
+        }
+    }
+
     func getFileProviderDomain(for driveId: String, completion: @escaping (NSFileProviderDomain?) -> Void) {
         NSFileProviderManager.getDomainsWithCompletionHandler { domains, error in
             if let error = error {
