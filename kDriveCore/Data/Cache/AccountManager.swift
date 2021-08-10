@@ -196,8 +196,13 @@ public class AccountManager: RefreshTokenDelegate {
                 newAccount.user = user
 
                 apiFetcher.getUserDrives { response, error in
-                    if let driveResponse = response?.data,
-                       !driveResponse.drives.main.isEmpty {
+                    if let driveResponse = response?.data {
+                        guard !driveResponse.drives.main.isEmpty else {
+                            self.removeAccount(toDeleteAccount: newAccount)
+                            completion(nil, DriveError.noDrive)
+                            return
+                        }
+
                         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
 
                         guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
