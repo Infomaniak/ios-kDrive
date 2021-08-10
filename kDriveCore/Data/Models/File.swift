@@ -151,41 +151,41 @@ public enum SortType: String {
 }
 
 public class File: Object, Codable {
-    @objc public dynamic var id: Int = 0
-    @objc public dynamic var parentId: Int = 0
-    @objc public dynamic var name: String = ""
-    @objc public dynamic var nameNaturalSorting: String = ""
-    private let parentLink = LinkingObjects(fromType: File.self, property: "children")
-    public var children = List<File>()
-    @objc public dynamic var canUseTag = false
-    @objc public dynamic var createdBy: Int = 0
-    @objc private dynamic var createdAt: Int = 0
-    @objc private dynamic var fileCreatedAt: Int = 0
-    @objc public dynamic var deletedBy: Int = 0
-    @objc private dynamic var deletedAt: Int = 0
-    @objc public dynamic var driveId: Int = 0
-    @objc public dynamic var hasThumbnail = false
-    @objc public dynamic var hasVersion = false
-    @objc public dynamic var isFavorite = false
-    @objc public dynamic var lastModifiedAt: Int = 0
-    @objc public dynamic var nbVersion: Int = 0
-    @objc public dynamic var collaborativeFolder: String?
-    @objc private dynamic var rawConvertedType: String?
-    @objc public dynamic var path: String = ""
-    @objc public dynamic var rights: Rights?
-    @objc public dynamic var shareLink: String?
-    @objc public dynamic var size: Int = 0
-    @objc public dynamic var sizeWithVersion: Int = 0
-    @objc public dynamic var status: String?
-    public var tags = List<Int>()
-    @objc public dynamic var type: String = ""
-    public var users = List<Int>()
-    @objc public dynamic var responseAt: Int = 0
-    @objc private dynamic var rawVisibility: String = ""
-    @objc public dynamic var onlyOffice = false
-    @objc public dynamic var onlyOfficeConvertExtension: String?
-    @objc public dynamic var fullyDownloaded = false
-    @objc public dynamic var isAvailableOffline = false
+    @Persisted(primaryKey: true) public var id: Int = 0
+    @Persisted public var parentId: Int = 0
+    @Persisted public var name: String = ""
+    @Persisted public var nameNaturalSorting: String = ""
+    @Persisted(originProperty: "children") private var parentLink: LinkingObjects<File>
+    @Persisted public var children: List<File>
+    @Persisted public var canUseTag = false
+    @Persisted public var createdBy: Int = 0
+    @Persisted private var createdAt: Int = 0
+    @Persisted private var fileCreatedAt: Int = 0
+    @Persisted public var deletedBy: Int = 0
+    @Persisted private var deletedAt: Int = 0
+    @Persisted public var driveId: Int = 0
+    @Persisted public var hasThumbnail = false
+    @Persisted public var hasVersion = false
+    @Persisted public var isFavorite = false
+    @Persisted public var lastModifiedAt: Int = 0
+    @Persisted public var nbVersion: Int = 0
+    @Persisted public var collaborativeFolder: String?
+    @Persisted private var rawConvertedType: String?
+    @Persisted public var path: String = ""
+    @Persisted public var rights: Rights?
+    @Persisted public var shareLink: String?
+    @Persisted public var size: Int = 0
+    @Persisted public var sizeWithVersion: Int = 0
+    @Persisted public var status: String?
+    @Persisted public var tags: List<Int>
+    @Persisted public var type: String = ""
+    @Persisted public var users: List<Int>
+    @Persisted public var responseAt: Int = 0
+    @Persisted private var rawVisibility: String = ""
+    @Persisted public var onlyOffice = false
+    @Persisted public var onlyOfficeConvertExtension: String?
+    @Persisted public var fullyDownloaded = false
+    @Persisted public var isAvailableOffline = false
     public var isFirstInCollection = false
     public var isLastInCollection = false
 
@@ -238,7 +238,7 @@ public class File: Object, Codable {
     }
 
     public var isDisabled: Bool {
-        return rights?.read.value == false && rights?.show.value == false
+        return rights?.read == false && rights?.show == false
     }
 
     public var localUrl: URL {
@@ -375,46 +375,49 @@ public class File: Object, Codable {
 
     public required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        collaborativeFolder = (try? values.decode(String.self, forKey: .collaborativeFolder)) ?? ""
-        rawConvertedType = try? values.decode(String.self, forKey: .rawConvertedType)
+        collaborativeFolder = (try values.decodeIfPresent(String.self, forKey: .collaborativeFolder)) ?? ""
+        rawConvertedType = try values.decodeIfPresent(String.self, forKey: .rawConvertedType)
         driveId = try values.decode(Int.self, forKey: .driveId)
-        createdAt = (try? values.decode(Int.self, forKey: .createdAt)) ?? 0
-        fileCreatedAt = (try? values.decode(Int.self, forKey: .fileCreatedAt)) ?? 0
-        deletedAt = (try? values.decode(Int.self, forKey: .deletedAt)) ?? 0
-        hasThumbnail = (try? values.decode(Bool.self, forKey: .hasThumbnail)) ?? false
-        id = try values.decode(Int.self, forKey: .id)
+        createdAt = (try values.decodeIfPresent(Int.self, forKey: .createdAt)) ?? 0
+        fileCreatedAt = (try values.decodeIfPresent(Int.self, forKey: .fileCreatedAt)) ?? 0
+        deletedAt = (try values.decodeIfPresent(Int.self, forKey: .deletedAt)) ?? 0
+        hasThumbnail = (try values.decodeIfPresent(Bool.self, forKey: .hasThumbnail)) ?? false
+        let id = try values.decode(Int.self, forKey: .id)
+        self.id = id
         parentId = try values.decodeIfPresent(Int.self, forKey: .parentId) ?? 0
-        isFavorite = (try? values.decode(Bool.self, forKey: .isFavorite)) ?? false
-        lastModifiedAt = (try? values.decode(Int.self, forKey: .lastModifiedAt)) ?? 0
+        isFavorite = (try values.decodeIfPresent(Bool.self, forKey: .isFavorite)) ?? false
+        lastModifiedAt = (try values.decodeIfPresent(Int.self, forKey: .lastModifiedAt)) ?? 0
         let name = try values.decode(String.self, forKey: .name)
         self.name = name
-        nameNaturalSorting = (try? values.decode(String.self, forKey: .nameNaturalSorting)) ?? name
-        rights = try? values.decode(Rights.self, forKey: .rights)
+        nameNaturalSorting = (try values.decodeIfPresent(String.self, forKey: .nameNaturalSorting)) ?? name
+        let rights = try values.decodeIfPresent(Rights.self, forKey: .rights)
         rights?.fileId = id
-        shareLink = try? values.decode(String.self, forKey: .shareLink)
-        size = (try? values.decode(Int.self, forKey: .size)) ?? 0
+        self.rights = rights
+        shareLink = try values.decodeIfPresent(String.self, forKey: .shareLink)
+        size = (try values.decodeIfPresent(Int.self, forKey: .size)) ?? 0
         status = try values.decodeIfPresent(String.self, forKey: .status)
         type = try values.decode(String.self, forKey: .type)
-        rawVisibility = (try? values.decode(String.self, forKey: .rawVisibility)) ?? ""
+        rawVisibility = (try values.decodeIfPresent(String.self, forKey: .rawVisibility)) ?? ""
         onlyOffice = try values.decodeIfPresent(Bool.self, forKey: .onlyOffice) ?? false
         onlyOfficeConvertExtension = try values.decodeIfPresent(String.self, forKey: .onlyOfficeConvertExtension)
         children = try values.decodeIfPresent(List<File>.self, forKey: .children) ?? List<File>()
 
         // extras
-        canUseTag = (try? values.decode(Bool.self, forKey: .canUseTag)) ?? false
-        hasVersion = (try? values.decode(Bool.self, forKey: .hasVersion)) ?? false
-        nbVersion = (try? values.decode(Int.self, forKey: .nbVersion)) ?? 0
-        createdBy = (try? values.decode(Int.self, forKey: .createdBy)) ?? 0
-        deletedBy = (try? values.decode(Int.self, forKey: .deletedBy)) ?? 0
-        path = (try? values.decode(String.self, forKey: .path)) ?? ""
-        sizeWithVersion = (try? values.decode(Int.self, forKey: .sizeWithVersion)) ?? 0
+        canUseTag = (try values.decodeIfPresent(Bool.self, forKey: .canUseTag)) ?? false
+        hasVersion = (try values.decodeIfPresent(Bool.self, forKey: .hasVersion)) ?? false
+        nbVersion = (try values.decodeIfPresent(Int.self, forKey: .nbVersion)) ?? 0
+        createdBy = (try values.decodeIfPresent(Int.self, forKey: .createdBy)) ?? 0
+        deletedBy = (try values.decodeIfPresent(Int.self, forKey: .deletedBy)) ?? 0
+        path = (try values.decodeIfPresent(String.self, forKey: .path)) ?? ""
+        sizeWithVersion = (try values.decodeIfPresent(Int.self, forKey: .sizeWithVersion)) ?? 0
         users = try values.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
     }
 
     // We have to keep it for Realm
     override public init() {}
 
-    init(id: Int, name: String) {
+    convenience init(id: Int, name: String) {
+        self.init()
         self.id = id
         self.name = name
         type = "dir"
@@ -422,10 +425,6 @@ public class File: Object, Codable {
     }
 
     public func encode(to encoder: Encoder) throws {}
-
-    override public static func primaryKey() -> String? {
-        return "id"
-    }
 
     enum CodingKeys: String, CodingKey {
         case id

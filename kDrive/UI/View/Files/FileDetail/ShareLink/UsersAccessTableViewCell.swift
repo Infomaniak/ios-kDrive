@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
 import Kingfisher
+import UIKit
 
 class UsersAccessTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var rightsStackView: UIStackView!
     @IBOutlet weak var avatarImage: UIImageView!
     @IBOutlet weak var avatarHeightConstraint: NSLayoutConstraint!
@@ -90,14 +89,14 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         avatarHeightConstraint.constant = 18
         avatarImage.layer.cornerRadius = 0
         avatarImage.tintColor = .white
-        if tag.isAllDriveUsersTag() {
+        if tag.isAllDriveUsersTag {
             titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
             avatarImage.image = KDriveAsset.drive.image
             avatarView.backgroundColor = UIColor(hex: drive.preferences.color)
         } else {
             titleLabel.text = tag.name
             avatarImage.image = KDriveAsset.tag.image
-            avatarView.backgroundColor = UIColor(hex: tag.getColor())
+            avatarView.backgroundColor = UIColor(hex: tag.colorHex)
         }
         detailLabel.text = nil
         rightsLabel.text = tag.right?.title

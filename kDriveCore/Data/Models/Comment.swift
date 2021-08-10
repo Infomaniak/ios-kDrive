@@ -34,17 +34,17 @@ public class Comment: Codable {
     public var isResponse = false
 
     enum CodingKeys: String, CodingKey {
-        case id = "id"
+        case id
         case parentId = "parent_id"
-        case body = "body"
+        case body
         case isResolved = "is_resolved"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
-        case liked = "liked"
+        case liked
         case likesCount = "likes_count"
         case responsesCount = "responses_count"
-        case user = "user"
-        case responses = "responses"
-        case likes = "likes"
+        case user
+        case responses
+        case likes
     }
 }

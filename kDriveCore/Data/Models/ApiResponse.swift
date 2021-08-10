@@ -24,12 +24,9 @@ public enum ApiResult: String, Codable {
     case error
 }
 
-public class EmptyResponse: Codable {
-
-}
+public class EmptyResponse: Codable {}
 
 public class CancelableResponse: Codable {
-
     public let id: String
     public let validUntil: Int
     public var offline: Bool {
@@ -48,7 +45,6 @@ public class CancelableResponse: Codable {
 }
 
 public class ApiResponse<ResponseContent: Codable>: Codable {
-
     public let result: ApiResult
     public let data: ResponseContent?
     public let error: ApiError?

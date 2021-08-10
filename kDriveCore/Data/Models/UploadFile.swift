@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import RealmSwift
-import Photos
 import DifferenceKit
+import Foundation
+import Photos
+import RealmSwift
 import UIKit
 
 enum UploadFileType: String {
@@ -27,27 +27,26 @@ enum UploadFileType: String {
 }
 
 public class UploadFile: Object {
-
     public static let defaultMaxRetryCount = 3
 
-    @objc public dynamic var id: String = ""
-    @objc public dynamic var name: String = ""
-    @objc dynamic var relativePath: String = ""
-    @objc dynamic var sessionId: String?
-    @objc dynamic var sessionUrl: String = ""
-    @objc private dynamic var url: String?
-    @objc private dynamic var rawType: String = "file"
-    @objc public dynamic var parentDirectoryId: Int = 1
-    @objc dynamic var userId: Int = 0
-    @objc dynamic var driveId: Int = 0
-    @objc public dynamic var uploadDate: Date?
-    @objc public dynamic var creationDate: Date?
-    @objc public dynamic var modificationDate: Date?
-    @objc public dynamic var taskCreationDate: Date?
-    @objc dynamic var shouldRemoveAfterUpload = true
-    @objc public dynamic var maxRetryCount: Int = defaultMaxRetryCount
-    @objc private dynamic var rawPriority: Int = 0
-    @objc private dynamic var _error: Data?
+    @Persisted(primaryKey: true) public var id: String = ""
+    @Persisted public var name: String = ""
+    @Persisted var relativePath: String = ""
+    @Persisted var sessionId: String?
+    @Persisted var sessionUrl: String = ""
+    @Persisted private var url: String?
+    @Persisted private var rawType: String = "file"
+    @Persisted public var parentDirectoryId: Int = 1
+    @Persisted var userId: Int = 0
+    @Persisted var driveId: Int = 0
+    @Persisted public var uploadDate: Date?
+    @Persisted public var creationDate: Date?
+    @Persisted public var modificationDate: Date?
+    @Persisted public var taskCreationDate: Date?
+    @Persisted var shouldRemoveAfterUpload = true
+    @Persisted public var maxRetryCount: Int = defaultMaxRetryCount
+    @Persisted private var rawPriority: Int = 0
+    @Persisted private var _error: Data?
 
     private var localAsset: PHAsset?
 
@@ -139,9 +138,7 @@ public class UploadFile: Object {
         self.rawPriority = priority.rawValue
     }
 
-    override init() {
-
-    }
+    override init() {}
 
     public func getIconForUploadFile(placeholder: (UIImage) -> Void, completion: @escaping (UIImage) -> Void) {
         if type == .phAsset {
@@ -178,15 +175,11 @@ public class UploadFile: Object {
         return assets.firstObject
     }
 
-    override public class func primaryKey() -> String? {
-        return "id"
-    }
-
     func setVideoPath(url: URL) {
         self.url = url.path
-        self.name = url.lastPathComponent
+        name = url.lastPathComponent
 
-        self.id = "\(Date().timeIntervalSinceNow)-\(name)"
+        id = "\(Date().timeIntervalSinceNow)-\(name)"
     }
 
     func setDatedRelativePath() {
@@ -194,11 +187,9 @@ public class UploadFile: Object {
         dateFormatter.dateFormat = "yyyy/MM/"
         relativePath = dateFormatter.string(from: creationDate ?? Date())
     }
-
 }
 
 extension UploadFile: Differentiable {
-
     public var differenceIdentifier: String {
         return id
     }

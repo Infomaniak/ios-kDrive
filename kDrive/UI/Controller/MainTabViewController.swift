@@ -197,7 +197,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         getCurrentDirectory { currentDirectory in
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory?.rights?.createNewFile.value ?? true
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory?.rights?.createNewFile ?? true
         }
     }
 }

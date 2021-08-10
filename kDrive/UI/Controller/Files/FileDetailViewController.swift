@@ -58,7 +58,7 @@ class FileDetailViewController: UIViewController {
             if sharedFile != nil || !file.users.isEmpty {
                 rows.append(.users)
             }
-            if file.rights?.share.value ?? false {
+            if file.rights?.share ?? false {
                 rows.append(.share)
             }
             rows.append(.owner)
@@ -452,14 +452,14 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     cell.sharedFile = sharedFile
                     let userIds = file.users.isEmpty ? [file.createdBy] : Array(file.users)
                     cell.fallbackUsers = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0) }
-                    cell.shareButton.isHidden = !(file.rights?.share.value ?? false)
+                    cell.shareButton.isHidden = !(file.rights?.share ?? false)
                     cell.delegate = self
                     cell.collectionView.reloadData()
                     return cell
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink.value ?? false) || file.shareLink != nil, insets: false)
+                    cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
                     return cell
                 case .owner:
                     let cell = tableView.dequeueReusableCell(type: FileInformationOwnerTableViewCell.self, for: indexPath)

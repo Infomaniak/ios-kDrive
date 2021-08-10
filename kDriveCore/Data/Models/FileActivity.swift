@@ -50,15 +50,15 @@ public enum FileActivityType: String, Codable {
 }
 
 public class FileActivity: Object, Codable {
-    @objc private dynamic var rawAction: String = ""
-    @objc public dynamic var id: Int = 0
-    @objc public dynamic var path: String = ""
-    public let userId = RealmProperty<Int?>()
-    @objc public dynamic var createdAt: Int = 0
-    @objc public dynamic var fileId: Int = 0
-    @objc public dynamic var file: File?
-    @objc public dynamic var pathNew: String = ""
-    @objc public dynamic var oldPath: String = ""
+    @Persisted private var rawAction: String = ""
+    @Persisted(primaryKey: true) public var id: Int = 0
+    @Persisted public var path: String = ""
+    @Persisted private var userId: Int?
+    @Persisted public var createdAt: Int = 0
+    @Persisted public var fileId: Int = 0
+    @Persisted public var file: File?
+    @Persisted public var pathNew: String = ""
+    @Persisted public var oldPath: String = ""
     public var mergedFileActivities: [FileActivity] = []
 
     public var action: FileActivityType {
@@ -71,7 +71,7 @@ public class FileActivity: Object, Codable {
     }
 
     public var user: DriveUser? {
-        if let id = userId.value {
+        if let id = userId {
             return DriveInfosManager.instance.getUser(id: id)
         } else {
             return nil
@@ -80,22 +80,18 @@ public class FileActivity: Object, Codable {
 
     public required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        rawAction = (try? values.decode(String.self, forKey: .rawAction)) ?? ""
+        rawAction = (try values.decodeIfPresent(String.self, forKey: .rawAction)) ?? ""
         id = try values.decode(Int.self, forKey: .id)
-        path = (try? values.decode(String.self, forKey: .path)) ?? ""
-        userId.value = (try? values.decode(DriveUser.self, forKey: .userId))?.id
-        createdAt = (try? values.decode(Int.self, forKey: .createdAt)) ?? 0
-        fileId = (try? values.decode(Int.self, forKey: .fileId)) ?? 0
-        pathNew = (try? values.decode(String.self, forKey: .pathNew)) ?? ""
-        oldPath = (try? values.decode(String.self, forKey: .oldPath)) ?? ""
-        file = try? values.decode(File.self, forKey: .file)
+        path = (try values.decodeIfPresent(String.self, forKey: .path)) ?? ""
+        userId = (try values.decodeIfPresent(DriveUser.self, forKey: .userId))?.id
+        createdAt = (try values.decodeIfPresent(Int.self, forKey: .createdAt)) ?? 0
+        fileId = (try values.decodeIfPresent(Int.self, forKey: .fileId)) ?? 0
+        pathNew = (try values.decodeIfPresent(String.self, forKey: .pathNew)) ?? ""
+        oldPath = (try values.decodeIfPresent(String.self, forKey: .oldPath)) ?? ""
+        file = try values.decodeIfPresent(File.self, forKey: .file)
     }
 
     override public init() {}
-
-    override public class func primaryKey() -> String? {
-        return "id"
-    }
 
     enum CodingKeys: String, CodingKey {
         case rawAction = "action"

@@ -174,7 +174,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.rights?.createNewFile.value ?? true
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.rights?.createNewFile ?? true
         #endif
 
         // Refresh data
@@ -660,10 +660,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
         var actions = [SwipeCellAction]()
         let rights = sortedFiles[indexPath.row].rights
-        if rights?.share.value ?? false {
+        if rights?.share ?? false {
             actions.append(.share)
         }
-        if rights?.delete.value ?? false {
+        if rights?.delete ?? false {
             actions.append(.delete)
         }
         return actions

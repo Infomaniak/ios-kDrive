@@ -149,7 +149,7 @@ public class FileImportHelper {
     }
 
     public func upload(files: [ImportedFile], in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile.value, !uploadNewFile {
+        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
 
@@ -166,7 +166,7 @@ public class FileImportHelper {
     }
 
     public func upload(photo: UIImage, name: String, format: PhotoFileFormat, in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile.value, !uploadNewFile {
+        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
 
@@ -194,7 +194,7 @@ public class FileImportHelper {
     }
 
     public func upload(videoUrl: URL, name: String, in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile.value, !uploadNewFile {
+        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
 
@@ -205,7 +205,7 @@ public class FileImportHelper {
 
     @available(iOS 13.0, *)
     public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile.value, !uploadNewFile {
+        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
 
