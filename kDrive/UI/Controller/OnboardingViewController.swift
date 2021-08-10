@@ -21,6 +21,7 @@ import InfomaniakLogin
 import InfomaniakCore
 import kDriveCore
 import Lottie
+import Sentry
 
 class OnboardingViewController: UIViewController {
 
@@ -247,6 +248,11 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                         driveErrorVC.driveErrorViewType = .maintenance
                         self.present(driveErrorVC, animated: true, completion: nil)
                     } else {
+                        if let error = error {
+                            SentrySDK.capture(error: error)
+                        } else {
+                            SentrySDK.capture(message: "Failed to fetch account on login (no error reported)")
+                        }
                         self.okAlert(title: KDriveStrings.Localizable.errorTitle, message: KDriveStrings.Localizable.errorConnection, completion: nil)
                     }
                 }
