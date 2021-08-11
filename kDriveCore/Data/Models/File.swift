@@ -240,6 +240,14 @@ public class File: Object, Codable {
     public var isDisabled: Bool {
         return rights?.read == false && rights?.show == false
     }
+    
+    public var temporaryUrl: URL {
+        return isDirectory ? localContainerUrl.appendingPathComponent("\(name)").appendingPathExtension("zip") : localContainerUrl.appendingPathComponent("\(name)")
+    }
+    
+    public var temporaryContainerUrl: URL {
+        return FileManager.default.temporaryDirectory.appendingPathComponent("\(driveId)", isDirectory: true).appendingPathComponent("\(id)", isDirectory: true)
+    }
 
     public var localUrl: URL {
         return localContainerUrl.appendingPathComponent("\(name)", isDirectory: isDirectory)

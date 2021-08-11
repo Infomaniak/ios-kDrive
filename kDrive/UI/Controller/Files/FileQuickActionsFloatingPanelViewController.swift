@@ -63,7 +63,7 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var folderListActions: [FloatingPanelAction] {
-        return [favorite, convertToDropbox, manageDropbox, seeFolder, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
     static let informations = FloatingPanelAction(id: 13, name: KDriveStrings.Localizable.fileDetailsInfosTitle, image: KDriveAsset.info.image)
@@ -691,6 +691,11 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorSave)
                     }
                 }
+            }
+        case .folder:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
+            DispatchQueue.main.async { [weak self] in
+                self?.present(documentExportViewController, animated: true)
             }
         default:
             let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)

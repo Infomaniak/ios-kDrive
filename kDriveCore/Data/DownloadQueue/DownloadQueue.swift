@@ -22,14 +22,16 @@ import RealmSwift
 
 public class DownloadTask: Object {
     @Persisted(primaryKey: true) var fileId: Int = 0
+    @Persisted var isDirectory: Bool = false
     @Persisted var driveId: Int = 0
     @Persisted var userId: Int = 0
     @Persisted var sessionUrl: String = ""
     @Persisted var sessionId: String?
 
-    convenience init(fileId: Int, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
+    convenience init(fileId: Int, isDirectory: Bool, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
         self.init()
         self.fileId = fileId
+        self.isDirectory = isDirectory
         self.driveId = driveId
         self.sessionId = sessionId
         self.sessionUrl = sessionUrl
