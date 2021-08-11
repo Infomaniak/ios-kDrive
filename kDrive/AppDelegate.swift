@@ -255,6 +255,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 window?.rootViewController = OnboardingViewController.instantiate()
                 window?.makeKeyAndVisible()
             }
+            // Clean File Provider domains on first launch in case we had some dangling
+            DriveInfosManager.instance.deleteAllFileProviderDomains()
         } else if UserDefaults.shared.isAppLockEnabled && AppLockHelper.shared.isAppLocked {
             window?.rootViewController = LockedAppViewController.instantiate()
             window?.makeKeyAndVisible()
