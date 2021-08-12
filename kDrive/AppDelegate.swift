@@ -308,7 +308,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     SKStoreReviewController.requestReview()
                 }
             }
-            if !UserDefaults.shared.betaInviteDisplayed {
+            if !UserDefaults.shared.betaInviteDisplayed && !Bundle.main.isRunningInTestFlight {
                 let floatingPanelViewController = BetaInviteFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? BetaInviteFloatingPanelViewController)?.actionHandler = { _ in
                     if let url = URL(string: "https://testflight.apple.com/join/qZHSGy5B") {
