@@ -359,7 +359,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func getFileDetailActivity(file: File, page: Int, completion: @escaping (ApiResponse<[FileDetailActivity]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=*\(pagination(page: page))"
+        let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=user,mobile\(pagination(page: page))"
 
         authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[FileDetailActivity]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
@@ -367,7 +367,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func getFileDetailComment(file: File, page: Int, completion: @escaping (ApiResponse<[Comment]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileDetailComment(file: file))?with=*\(pagination(page: page))"
+        let url = "\(ApiRoutes.getFileDetailComment(file: file))?with=like,response\(pagination(page: page))"
 
         authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[Comment]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
