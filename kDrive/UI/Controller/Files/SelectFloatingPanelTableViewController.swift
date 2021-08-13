@@ -83,7 +83,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             cell.setEnabled(!files.allSatisfy(\.isDirectory))
         } else if action == .download {
             if let currentArchiveId = currentArchiveId {
-                cell.configureDownload(with: currentArchiveId, progress: 0)
+                cell.observeProgress(true, archiveId: currentArchiveId)
             } else {
                 cell.setProgress(downloadInProgress ? -1 : nil)
             }
