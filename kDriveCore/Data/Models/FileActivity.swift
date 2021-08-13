@@ -112,9 +112,8 @@ public class FileDetailActivity: Codable {
     public var path: String
     public var user: DriveUser?
     public var createdAt: Int
-    public var fileId: Int
-    public var newPath: String
-    public var oldPath: String
+    public var newPath: String?
+    public var oldPath: String?
 
     enum CodingKeys: String, CodingKey {
         case action
@@ -122,7 +121,6 @@ public class FileDetailActivity: Codable {
         case path
         case user
         case createdAt = "created_at"
-        case fileId = "file_id"
         case newPath = "new_path"
         case oldPath = "old_path"
     }
