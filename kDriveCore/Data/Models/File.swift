@@ -242,7 +242,8 @@ public class File: Object, Codable {
     }
 
     public var temporaryUrl: URL {
-        return isDirectory ? localContainerUrl.appendingPathComponent("\(name)").appendingPathExtension("zip") : localContainerUrl.appendingPathComponent("\(name)")
+        let temporaryUrl = temporaryContainerUrl.appendingPathComponent(name)
+        return isDirectory ? temporaryUrl.appendingPathExtension("zip") : temporaryUrl
     }
 
     public var temporaryContainerUrl: URL {
@@ -250,7 +251,7 @@ public class File: Object, Codable {
     }
 
     public var localUrl: URL {
-        return localContainerUrl.appendingPathComponent("\(name)", isDirectory: isDirectory)
+        return localContainerUrl.appendingPathComponent(name, isDirectory: isDirectory)
     }
 
     public var localContainerUrl: URL {

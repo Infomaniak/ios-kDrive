@@ -647,7 +647,7 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func getDownloadArchiveLink(driveId: Int, for files: [File], completion: @escaping (ApiResponse<DownloadArchiveResponse>?, Error?) -> Void) {
         let url = ApiRoutes.downloadArchiveLink(driveId: driveId)
-        let body: [String: Any] = ["file_ids": files.map { $0.id }]
+        let body: [String: Any] = ["file_ids": files.map(\.id)]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
             .responseDecodable(of: ApiResponse<DownloadArchiveResponse>.self, decoder: ApiFetcher.decoder) { response in

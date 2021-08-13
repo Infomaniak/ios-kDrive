@@ -144,7 +144,7 @@ public class DownloadArchiveOperation: Operation {
             // Success
             DDLogInfo("[DownloadOperation] Download of \(archiveId) successful")
             do {
-                let temporaryUrl = FileManager.default.temporaryDirectory.appendingPathComponent("\(archiveId)", isDirectory: true).appendingPathExtension("zip")
+                let temporaryUrl = FileManager.default.temporaryDirectory.appendingPathComponent(archiveId, isDirectory: true).appendingPathExtension("zip")
 
                 if FileManager.default.fileExists(atPath: temporaryUrl.path) {
                     try? FileManager.default.removeItem(at: temporaryUrl)
