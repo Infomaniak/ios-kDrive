@@ -693,13 +693,13 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             }
         case .folder:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
             DispatchQueue.main.async { [weak self] in
+                let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
                 self?.present(documentExportViewController, animated: true)
             }
         default:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
             DispatchQueue.main.async { [weak self] in
+                let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
                 self?.present(documentExportViewController, animated: true)
             }
         }

@@ -20,6 +20,7 @@ import kDriveCore
 import UIKit
 
 class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewController {
+    private var downloadedArchiveUrl: URL?
     var files: [File]!
     var changedFiles: [File]? = []
     var downloadInProgress = false
@@ -134,24 +135,37 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
             }
         case .download:
-            for file in files {
-                if file.isDownloaded {
-                    saveLocalFile(file: file)
-                } else {
-                    downloadInProgress = true
-                    self.tableView.reloadRows(at: [indexPath], with: .fade)
-                    group.enter()
-                    DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
-                        if error == nil {
-                            DispatchQueue.main.async {
-                                saveLocalFile(file: file)
+            // TODO: Replace with constant from bulk actions branch
+            if files.count > 10 {
+                downloadedArchiveUrl = nil
+                downloadInProgress = true
+                self.tableView.reloadRows(at: [indexPath], with: .fade)
+                group.enter()
+                downloadArchivedFiles(files: files) { archiveUrl, _ in
+                    self.downloadedArchiveUrl = archiveUrl
+                    success = archiveUrl != nil
+                    group.leave()
+                }
+            } else {
+                for file in files {
+                    if file.isDownloaded {
+                        saveLocalFile(file: file)
+                    } else {
+                        downloadInProgress = true
+                        self.tableView.reloadRows(at: [indexPath], with: .fade)
+                        group.enter()
+                        DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
+                            if error == nil {
+                                DispatchQueue.main.async {
+                                    saveLocalFile(file: file)
+                                }
+                            } else {
+                                success = false
                             }
-                        } else {
-                            success = false
+                            group.leave()
                         }
-                        group.leave()
+                        DownloadQueue.instance.addToQueue(file: file)
                     }
-                    DownloadQueue.instance.addToQueue(file: file)
                 }
             }
         default:
@@ -171,9 +185,27 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             self.files = self.changedFiles
             self.downloadInProgress = false
             self.tableView.reloadRows(at: [indexPath], with: .fade)
-            self.dismiss(animated: true)
+            self.dismiss(animated: true) { [parent = self.presentingViewController] in
+                if let downloadedArchiveUrl = self.downloadedArchiveUrl {
+                    let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
+                    parent?.present(documentExportViewController, animated: true)
+                }
+            }
             self.reloadAction?()
             self.changedFiles = []
+        }
+    }
+
+    private func downloadArchivedFiles(files: [File], completion: @escaping (URL?, Error?) -> Void) {
+        driveFileManager.apiFetcher.getDownloadArchiveLink(driveId: driveFileManager.drive.id, for: files) { response, error in
+            if let archiveId = response?.data?.uuid {
+                DownloadQueue.instance.observeArchiveDownloaded(self, archiveId: archiveId) { _, archiveUrl, error in
+                    completion(archiveUrl, error)
+                }
+                DownloadQueue.instance.addToQueue(archiveId: archiveId, driveId: self.driveFileManager.drive.id)
+            } else {
+                completion(nil, error)
+            }
         }
     }
 }

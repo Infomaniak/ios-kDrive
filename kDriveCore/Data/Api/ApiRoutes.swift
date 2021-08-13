@@ -18,8 +18,7 @@
 
 import Foundation
 
-public class ApiRoutes {
-
+public enum ApiRoutes {
     static let driveApiUrl = "https://drive.infomaniak.com/drive/"
     static let officeApiUrl = "https://drive.infomaniak.com/app/office/"
     static let with = "with=parent,children,rights,collaborative_folder,favorite,mobile,share_link"
@@ -233,4 +232,11 @@ public class ApiRoutes {
         return "https://welcome.infomaniak.com/signup/ikdrive/steps"
     }
 
+    public static func downloadArchiveLink(driveId: Int) -> String {
+        return "\(driveApiUrl)\(driveId)/file/archive"
+    }
+
+    public static func downloadArchive(driveId: Int, archiveId: String) -> String {
+        return "\(driveApiUrl)\(driveId)/file/archive/\(archiveId)/download"
+    }
 }

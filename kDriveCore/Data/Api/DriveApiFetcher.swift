@@ -644,6 +644,16 @@ public class DriveApiFetcher: ApiFetcher {
                 self.handleResponse(response: response, completion: completion)
             }
     }
+
+    public func getDownloadArchiveLink(driveId: Int, for files: [File], completion: @escaping (ApiResponse<DownloadArchiveResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.downloadArchiveLink(driveId: driveId)
+        let body: [String: Any] = ["file_ids": files.map { $0.id }]
+
+        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
+            .responseDecodable(of: ApiResponse<DownloadArchiveResponse>.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
