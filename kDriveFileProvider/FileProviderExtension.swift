@@ -18,11 +18,10 @@
 
 import CoreServices
 import FileProvider
-import kDriveCore
 import InfomaniakLogin
+import kDriveCore
 
 class FileProviderExtensionState {
-
     static let shared = FileProviderExtensionState()
     var importedDocuments = [NSFileProviderItemIdentifier: FileProviderItem]()
     var workingSet = [NSFileProviderItemIdentifier: FileProviderItem]()
@@ -44,7 +43,6 @@ class FileProviderExtensionState {
 }
 
 class FileProviderExtension: NSFileProviderExtension {
-
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
         fileCoordinator.purposeIdentifier = manager.providerIdentifier
@@ -62,8 +60,8 @@ class FileProviderExtension: NSFileProviderExtension {
 
     private func setDriveFileManager() -> DriveFileManager? {
         if let objectId = domain?.identifier.rawValue,
-            let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
-            let driveFileManager = accountManager.getDriveFileManager(for: drive) {
+           let drive = DriveInfosManager.instance.getDrive(objectId: objectId),
+           let driveFileManager = accountManager.getDriveFileManager(for: drive) {
             return driveFileManager
         } else {
             return accountManager.currentDriveFileManager
@@ -78,6 +76,8 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
+        try isFileProviderExtensionEnabled()
+
         // Try to reload account if user logged in
         if driveFileManager == nil {
             accountManager.forceReload()
@@ -92,7 +92,7 @@ class FileProviderExtension: NSFileProviderExtension {
         } else if let item = FileProviderExtensionState.shared.importedDocuments[identifier] {
             return item
         } else if let fileId = identifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) {
+                  let file = driveFileManager.getCachedFile(id: fileId) {
             return FileProviderItem(file: file, domain: domain)
         } else {
             throw nsError(code: .noSuchItem)
@@ -103,7 +103,7 @@ class FileProviderExtension: NSFileProviderExtension {
         if let item = FileProviderExtensionState.shared.importedDocuments[identifier] {
             return item.storageUrl
         } else if let fileId = identifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) {
+                  let file = driveFileManager.getCachedFile(id: fileId) {
             return FileProviderItem(file: file, domain: domain).storageUrl
         } else {
             return nil
@@ -116,7 +116,7 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override func providePlaceholder(at url: URL, completionHandler: @escaping (_ error: Error?) -> Void) {
         guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             completionHandler(nsError(code: .noSuchItem))
             return
         }
@@ -125,7 +125,7 @@ class FileProviderExtension: NSFileProviderExtension {
             try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
             let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
             try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: FileProviderItem(file: file, domain: domain))
-        } catch let error {
+        } catch {
             print("\(error)")
         }
         completionHandler(nil)
@@ -133,14 +133,14 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override func itemChanged(at url: URL) {
         if let identifier = persistentIdentifierForItem(at: url),
-            let item = try? item(for: identifier) as? FileProviderItem {
+           let item = try? item(for: identifier) as? FileProviderItem {
             backgroundUploadItem(item)
         }
     }
 
     override func startProvidingItem(at url: URL, completionHandler: @escaping (Error?) -> Void) {
         guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             if FileManager.default.fileExists(atPath: url.path) {
                 completionHandler(nil)
             } else {
@@ -168,6 +168,12 @@ class FileProviderExtension: NSFileProviderExtension {
             } else {
                 downloadRemoteFile(file: file, for: item, completion: completionHandler)
             }
+        }
+    }
+
+    private func isFileProviderExtensionEnabled() throws {
+        guard UserDefaults.shared.isFileProviderExtensionEnabled else {
+            throw nsError(code: .notAuthenticated)
         }
     }
 
@@ -224,10 +230,10 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override func stopProvidingItem(at url: URL) {
         if let identifier = persistentIdentifierForItem(at: url),
-            let item = try? item(for: identifier) as? FileProviderItem {
+           let item = try? item(for: identifier) as? FileProviderItem {
             if let remoteModificationDate = item.contentModificationDate,
-                let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
-                remoteModificationDate > localModificationDate {
+               let localModificationDate = try? item.storageUrl.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
+               remoteModificationDate > localModificationDate {
                 backgroundUploadItem(item) {
                     self.cleanupAt(url: url)
                 }
@@ -238,7 +244,6 @@ class FileProviderExtension: NSFileProviderExtension {
             // The document isn't in realm maybe it was recently imported?
             cleanupAt(url: url)
         }
-
     }
 
     private func cleanupAt(url: URL) {
@@ -249,7 +254,7 @@ class FileProviderExtension: NSFileProviderExtension {
         }
 
         // write out a placeholder to facilitate future property lookups
-        self.providePlaceholder(at: url) { _ in
+        providePlaceholder(at: url) { _ in
             // TODO: handle any error, do any necessary cleanup
         }
     }
@@ -278,6 +283,8 @@ class FileProviderExtension: NSFileProviderExtension {
     // MARK: - Enumeration
 
     override func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier) throws -> NSFileProviderEnumerator {
+        try isFileProviderExtensionEnabled()
+
         // Try to reload account if user logged in
         if driveFileManager == nil {
             accountManager.forceReload()

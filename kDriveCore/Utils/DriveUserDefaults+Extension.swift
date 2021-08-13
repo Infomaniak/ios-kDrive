@@ -38,6 +38,7 @@ extension UserDefaults {
         case importNotificationsEnabled
         case sharingNotificationsEnabled
         case newCommentNotificationsEnabled
+        case generalNotificationEnabled
         case didDemoSwipe
         case lastSelectedDrive
         case lastSelectedDirectory
@@ -45,6 +46,7 @@ extension UserDefaults {
         case photoSortMode
         case betaInviteDisplayed
         case lastSyncDateOfflineFiles
+        case fileProviderExtension
     }
 
     private func key(_ key: Keys) -> String {
@@ -198,6 +200,18 @@ extension UserDefaults {
         }
     }
 
+    public var generalNotificationEnabled: Bool {
+        get {
+            if object(forKey: key(.generalNotificationEnabled)) == nil {
+                set(true, forKey: key(.generalNotificationEnabled))
+            }
+            return bool(forKey: key(.generalNotificationEnabled))
+        }
+        set {
+            set(newValue, forKey: key(.generalNotificationEnabled))
+        }
+    }
+
     public var didDemoSwipe: Bool {
         get {
             return bool(forKey: key(.didDemoSwipe))
@@ -246,7 +260,7 @@ extension UserDefaults {
             return set(newValue.rawValue, forKey: key(.photoSortMode))
         }
     }
-    
+
     public var betaInviteDisplayed: Bool {
         get {
             return bool(forKey: key(.betaInviteDisplayed))
@@ -262,6 +276,18 @@ extension UserDefaults {
         }
         set {
             setValue(newValue, forKey: key(.lastSyncDateOfflineFiles))
+        }
+    }
+
+    public var isFileProviderExtensionEnabled: Bool {
+        get {
+            if object(forKey: key(.fileProviderExtension)) == nil {
+                set(true, forKey: key(.fileProviderExtension))
+            }
+            return bool(forKey: key(.fileProviderExtension))
+        }
+        set {
+            set(newValue, forKey: key(.fileProviderExtension))
         }
     }
 }

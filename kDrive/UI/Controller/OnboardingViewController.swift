@@ -16,14 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import InfomaniakLogin
 import InfomaniakCore
+import InfomaniakLogin
 import kDriveCore
 import Lottie
+import Sentry
+import UIKit
 
 class OnboardingViewController: UIViewController {
-
     @IBOutlet weak var navigationBar: UINavigationBar!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var pageControl: UIPageControl!
@@ -151,21 +151,21 @@ class OnboardingViewController: UIViewController {
 
     private func createSlides() -> [Slide] {
         let slide1 = Slide(backgroundImage: KDriveAsset.background1.image,
-            illustrationImage: KDriveAsset.illuDevices.image,
-            animationName: "illu_devices",
-            title: KDriveStrings.Localizable.onBoardingTitle1,
-            description: KDriveStrings.Localizable.onBoardingDescription1)
+                           illustrationImage: KDriveAsset.illuDevices.image,
+                           animationName: "illu_devices",
+                           title: KDriveStrings.Localizable.onBoardingTitle1,
+                           description: KDriveStrings.Localizable.onBoardingDescription1)
 
         let slide2 = Slide(backgroundImage: KDriveAsset.background2.image,
-            illustrationImage: KDriveAsset.illuCollab.image,
-            animationName: "illu_collab", title: KDriveStrings.Localizable.onBoardingTitle2,
-            description: KDriveStrings.Localizable.onBoardingDescription2)
+                           illustrationImage: KDriveAsset.illuCollab.image,
+                           animationName: "illu_collab", title: KDriveStrings.Localizable.onBoardingTitle2,
+                           description: KDriveStrings.Localizable.onBoardingDescription2)
 
         let slide3 = Slide(backgroundImage: KDriveAsset.background3.image,
-            illustrationImage: KDriveAsset.illuPhotos.image,
-            animationName: "illu_photos",
-            title: KDriveStrings.Localizable.onBoardingTitle3,
-            description: KDriveStrings.Localizable.onBoardingDescription3)
+                           illustrationImage: KDriveAsset.illuPhotos.image,
+                           animationName: "illu_photos",
+                           title: KDriveStrings.Localizable.onBoardingTitle3,
+                           description: KDriveStrings.Localizable.onBoardingDescription3)
 
         return [slide1, slide2, slide3]
     }
@@ -178,7 +178,6 @@ class OnboardingViewController: UIViewController {
 // MARK: - UICollectionView Delegate
 
 extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -217,8 +216,8 @@ extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDa
 }
 
 // MARK: - Infomaniak Login Delegate
-extension OnboardingViewController: InfomaniakLoginDelegate {
 
+extension OnboardingViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
         let previousAccount = AccountManager.instance.currentAccount
         signInButton.setLoading(true)
@@ -242,11 +241,16 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                         let driveErrorVC = DriveErrorViewController.instantiate()
                         driveErrorVC.driveErrorViewType = .noDrive
                         self.present(driveErrorVC, animated: true, completion: nil)
-                    } else if let maintenanceError = error as? DriveError, maintenanceError.code == DriveError.maintenance.code {
+                    } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance {
                         let driveErrorVC = DriveErrorViewController.instantiate()
-                        driveErrorVC.driveErrorViewType = .maintenance
+                        driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
                         self.present(driveErrorVC, animated: true, completion: nil)
                     } else {
+                        if let error = error {
+                            SentrySDK.capture(error: error)
+                        } else {
+                            SentrySDK.capture(message: "Failed to fetch account on login (no error reported)")
+                        }
                         self.okAlert(title: KDriveStrings.Localizable.errorTitle, message: KDriveStrings.Localizable.errorConnection, completion: nil)
                     }
                 }
@@ -256,6 +260,6 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
 
     func didFailLoginWith(error: String) {
         signInButton.setLoading(false)
-        self.registerButton.isEnabled = true
+        registerButton.isEnabled = true
     }
 }

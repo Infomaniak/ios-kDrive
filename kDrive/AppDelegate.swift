@@ -20,6 +20,7 @@ import Atlantis
 import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
+import Firebase
 import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
@@ -30,7 +31,7 @@ import UIKit
 import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     var window: UIWindow?
 
     private var accountManager: AccountManager!
@@ -82,7 +83,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        FirebaseApp.configure()
+
+        // Register for remote notifications. This shows a permission dialog on first run, to
+        // show the dialog at a more appropriate time move this registration accordingly.
+        // [START register_for_notifications]
+        // For iOS 10 display notification (sent via APNS)
+        UNUserNotificationCenter.current().delegate = self
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions,
+            completionHandler: { _, _ in }
+        )
+        application.registerForRemoteNotifications()
+        Messaging.messaging().delegate = self
+
+        if UserDefaults.shared.importNotificationsEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicUpload)
+        }
+        if UserDefaults.shared.sharingNotificationsEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicShared)
+        }
+        if UserDefaults.shared.newCommentNotificationsEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicComments)
+        }
+        if UserDefaults.shared.generalNotificationEnabled {
+            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicGeneral)
+        }
+
         return true
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        DDLogError("Unable to register for remote notifications: \(error.localizedDescription)")
     }
 
     @available(iOS 13.0, *)
@@ -217,6 +254,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                 window?.rootViewController = OnboardingViewController.instantiate()
                 window?.makeKeyAndVisible()
             }
+            // Clean File Provider domains on first launch in case we had some dangling
+            DriveInfosManager.instance.deleteAllFileProviderDomains()
         } else if UserDefaults.shared.isAppLockEnabled && AppLockHelper.shared.isAppLocked {
             window?.rootViewController = LockedAppViewController.instantiate()
             window?.makeKeyAndVisible()
@@ -268,7 +307,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
                     SKStoreReviewController.requestReview()
                 }
             }
-            if !UserDefaults.shared.betaInviteDisplayed {
+            if !UserDefaults.shared.betaInviteDisplayed && !Bundle.main.isRunningInTestFlight {
                 let floatingPanelViewController = BetaInviteFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? BetaInviteFloatingPanelViewController)?.actionHandler = { _ in
                     if let url = URL(string: "https://testflight.apple.com/join/qZHSGy5B") {
@@ -517,9 +556,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     }
 
     func present(file: File, driveFileManager: DriveFileManager) {
-        guard let rootViewController = window?.rootViewController as? MainTabViewController,
-              let navController = rootViewController.selectedViewController as? UINavigationController,
-              let viewController = navController.topViewController as? FileListViewController else {
+        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
             return
         }
 
@@ -528,7 +565,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
         // Select Files tab
         rootViewController.selectedIndex = 1
 
-        if !file.isRoot && viewController.currentDirectory.id != file.id {
+        guard let navController = rootViewController.selectedViewController as? UINavigationController,
+              let viewController = navController.topViewController as? FileListViewController else {
+            return
+        }
+
+        if !file.isRoot && viewController.currentDirectory?.id != file.id {
             // Pop to root
             navController.popToRootViewController(animated: false)
             // Present file
@@ -560,31 +602,70 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate, U
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         return !(UserDefaults.isFirstLaunch() || accountManager.accounts.isEmpty)
     }
+}
 
-    // MARK: - User notification center delegate
+// MARK: - User notification center delegate
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    // In Foreground
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        _ = notification.request.content.userInfo
+
+        // Change this to your preferred presentation option
+        completionHandler([.alert, .sound])
+    }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
 
-        if response.notification.request.content.categoryIdentifier == NotificationsHelper.uploadCategoryId {
-            // Upload notification
-            let parentId = userInfo[NotificationsHelper.parentIdKey] as? Int
+        switch response.notification.request.trigger {
+        case is UNPushNotificationTrigger:
+            processPushNotification(response.notification)
+        default:
+            if response.notification.request.content.categoryIdentifier == NotificationsHelper.uploadCategoryId {
+                // Upload notification
+                let parentId = userInfo[NotificationsHelper.parentIdKey] as? Int
 
-            switch response.actionIdentifier {
-            case UNNotificationDefaultActionIdentifier:
-                // Notification tapped: open parent folder
-                if let parentId = parentId,
-                   let driveFileManager = accountManager.currentDriveFileManager,
-                   let folder = driveFileManager.getCachedFile(id: parentId) {
-                    present(file: folder, driveFileManager: driveFileManager)
+                switch response.actionIdentifier {
+                case UNNotificationDefaultActionIdentifier:
+                    // Notification tapped: open parent folder
+                    if let parentId = parentId,
+                       let driveFileManager = accountManager.currentDriveFileManager,
+                       let folder = driveFileManager.getCachedFile(id: parentId) {
+                        present(file: folder, driveFileManager: driveFileManager)
+                    }
+                default:
+                    break
                 }
-            default:
-                break
+            } else {
+                // Handle other notification types...
             }
-        } else {
-            // Handle other notification types...
         }
 
         completionHandler()
+    }
+
+    private func processPushNotification(_ notification: UNNotification) {
+        UIApplication.shared.applicationIconBadgeNumber = 0
+//        PROCESS NOTIFICATION
+//        let userInfo = notification.request.content.userInfo
+//
+//        let parentId = Int(userInfo["parentId"] as? String ?? "")
+//        if let parentId = parentId,
+//           let driveFileManager = accountManager.currentDriveFileManager,
+//           let folder = driveFileManager.getCachedFile(id: parentId) {
+//            present(file: folder, driveFileManager: driveFileManager)
+//        }
+//
+//        Messaging.messaging().appDidReceiveMessage(userInfo)
+    }
+}
+
+// MARK: - MessagingDelegate
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        let dataDict = ["token": fcmToken ?? ""]
+        NotificationCenter.default.post(name: Notification.Name("FCMToken"), object: nil, userInfo: dataDict)
     }
 }

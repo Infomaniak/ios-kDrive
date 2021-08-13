@@ -16,25 +16,60 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import FirebaseMessaging
 import kDriveCore
+import UIKit
 
 class NotificationsSettingsTableViewController: UITableViewController {
-
     private enum NotificationRow {
         case receiveNotification
+        case general
         case importFile
         case sharedWithMe
         case newComments
+        case notificationMainSetting
     }
-    private let rows: [NotificationRow] = [.receiveNotification, .importFile, .sharedWithMe, .newComments]
+
+    private var rows = [NotificationRow]()
+    private var disableSwitch = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
+        tableView.register(cellView: ParameterAccessDeniedTableViewCell.self)
         tableView.separatorColor = .clear
         navigationController?.navigationBar.sizeToFit()
+
+        updateTableViewContent()
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewContent), name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func updateTableViewContent() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            if settings.authorizationStatus == .denied {
+                self.rows = [.receiveNotification, .general, .importFile, .sharedWithMe, .newComments, .notificationMainSetting]
+                self.disableSwitch = true
+            } else {
+                self.rows = [.receiveNotification, .general, .importFile, .sharedWithMe, .newComments]
+                self.disableSwitch = false
+            }
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
+
+    private func subscriptionTo(topic: String, subscribe: Bool) {
+        if subscribe {
+            Messaging.messaging().subscribe(toTopic: topic)
+        } else {
+            Messaging.messaging().unsubscribe(fromTopic: topic)
+        }
     }
 
     // MARK: - Table view data source
@@ -48,61 +83,102 @@ class NotificationsSettingsTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-
         switch rows[indexPath.row] {
         case .receiveNotification:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationReceiveNotifications
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
-            cell.switchHandler = { sender in
+            cell.switchHandler = { [self] sender in
                 UserDefaults.shared.isNotificationEnabled = sender.isOn
-                if UserDefaults.shared.isNotificationEnabled {
-                    tableView.reloadRows(at: [IndexPath(row: 1, section: 0), IndexPath(row: 2, section: 0), IndexPath(row: 3, section: 0)], with: .none)
-                } else {
-                    tableView.reloadRows(at: [IndexPath(row: 1, section: 0), IndexPath(row: 2, section: 0), IndexPath(row: 3, section: 0)], with: .none)
-                }
+                activateNotification(activate: sender.isOn)
             }
+            return cell
+        case .general:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow()
+            cell.titleLabel.text = KDriveStrings.Localizable.notificationGeneralChannelName
+            cell.separator?.isHidden = true
+            cell.valueSwitch.isEnabled = !disableSwitch
+            cell.valueSwitch.isOn = UserDefaults.shared.generalNotificationEnabled
+            cell.switchHandler = { [self] sender in
+                UserDefaults.shared.generalNotificationEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicGeneral, subscribe: sender.isOn)
+                updateSwitchViews()
+            }
+            return cell
         case .importFile:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationFileUpload
             cell.separator?.isHidden = true
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.importNotificationsEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicUpload, subscribe: sender.isOn)
                 updateSwitchViews()
             }
+            return cell
         case .sharedWithMe:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveStrings.Localizable.notificationSharedWithMeChannelName
             cell.separator?.isHidden = true
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicShared, subscribe: sender.isOn)
                 updateSwitchViews()
             }
+            return cell
         case .newComments:
+            let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isLast: true)
             cell.titleLabel.text = KDriveStrings.Localizable.notificationCommentChannelName
+            cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
             cell.switchHandler = { [self] sender in
                 UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
+                subscriptionTo(topic: Constants.notificationTopicComments, subscribe: sender.isOn)
                 updateSwitchViews()
             }
+            return cell
+        case .notificationMainSetting:
+            let cell = tableView.dequeueReusableCell(type: ParameterAccessDeniedTableViewCell.self, for: indexPath)
+            cell.descriptionLabel.text = KDriveStrings.Localizable.notificationsDisabledDescription
+            return cell
         }
-        return cell
+    }
+
+    private func activateNotification(activate: Bool) {
+        UserDefaults.shared.sharingNotificationsEnabled = activate
+        UserDefaults.shared.importNotificationsEnabled = activate
+        UserDefaults.shared.newCommentNotificationsEnabled = activate
+        UserDefaults.shared.generalNotificationEnabled = activate
+        updateSubscriptions()
+        tableView.reloadData()
     }
 
     private func updateSwitchViews() {
-        if !UserDefaults.shared.importNotificationsEnabled && !UserDefaults.shared.sharingNotificationsEnabled && !UserDefaults.shared.newCommentNotificationsEnabled {
+        if !UserDefaults.shared.importNotificationsEnabled && !UserDefaults.shared.sharingNotificationsEnabled && !UserDefaults.shared.newCommentNotificationsEnabled && !UserDefaults.shared.generalNotificationEnabled {
             UserDefaults.shared.isNotificationEnabled = false
             tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             return
         }
-        if UserDefaults.shared.importNotificationsEnabled || UserDefaults.shared.sharingNotificationsEnabled || UserDefaults.shared.newCommentNotificationsEnabled {
+        if UserDefaults.shared.importNotificationsEnabled || UserDefaults.shared.sharingNotificationsEnabled || UserDefaults.shared.newCommentNotificationsEnabled || UserDefaults.shared.generalNotificationEnabled {
             UserDefaults.shared.isNotificationEnabled = true
             tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             return
         }
+    }
+
+    private func updateSubscriptions() {
+        subscriptionTo(topic: Constants.notificationTopicComments, subscribe: UserDefaults.shared.newCommentNotificationsEnabled)
+        subscriptionTo(topic: Constants.notificationTopicShared, subscribe: UserDefaults.shared.sharingNotificationsEnabled)
+        subscriptionTo(topic: Constants.notificationTopicUpload, subscribe: UserDefaults.shared.importNotificationsEnabled)
+        subscriptionTo(topic: Constants.notificationTopicGeneral, subscribe: UserDefaults.shared.generalNotificationEnabled)
     }
 }

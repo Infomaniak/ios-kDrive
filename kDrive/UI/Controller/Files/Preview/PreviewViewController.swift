@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import FloatingPanel
 import InfomaniakCore
 import kDriveCore
 import PDFKit
-import FloatingPanel
 import Sentry
+import UIKit
 
 protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
@@ -29,7 +29,6 @@ protocol PreviewContentCellDelegate: AnyObject {
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
-
     @IBOutlet weak var collectionView: UICollectionView!
     private var previewFiles: [File] = []
     private var driveFileManager: DriveFileManager!
@@ -249,7 +248,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // Fix scrollToItem for iOS 12
-        guard isViewDidLayoutCallFirstTime, let rect = self.collectionView.layoutAttributesForItem(at: currentIndex)?.frame else { return }
+        guard isViewDidLayoutCallFirstTime, let rect = collectionView.layoutAttributesForItem(at: currentIndex)?.frame else { return }
         isViewDidLayoutCallFirstTime = false
         collectionView.scrollRectToVisible(rect, animated: false)
     }
@@ -270,16 +269,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         if !currentFile.isLocalVersionOlderThanRemote() {
             switch currentFile.convertedType {
             case .pdf:
-                if let pdfCell = (self.collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
-                    let currentPage = pdfCell.pdfPreview.currentPage?.pageRef?.pageNumber,
-                    let totalPages = pdfCell.pdfPreview.document?.pageCount {
-
+                if let pdfCell = (collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
+                   let currentPage = pdfCell.pdfPreview.currentPage?.pageRef?.pageNumber,
+                   let totalPages = pdfCell.pdfPreview.document?.pageCount {
                     setNavbarForPdf(currentPage: currentPage, totalPages: totalPages)
                 } else {
                     setNavbarStandard()
                 }
             case .text, .presentation, .spreadsheet:
-                if currentFile.rights?.write.value ?? false {
+                if currentFile.rights?.write ?? false {
                     setNavbarForEditing()
                 } else {
                     setNavbarStandard()
@@ -336,7 +334,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
         UIView.animate(withDuration: 0.2) {
             self.setNeedsStatusBarAppearanceUpdate()
-            let hideStatusBar = CGAffineTransform(translationX: 0, y: self.fullScreenPreview ? -(self.statusBarView.frame.height) : 0)
+            let hideStatusBar = CGAffineTransform(translationX: 0, y: self.fullScreenPreview ? -self.statusBarView.frame.height : 0)
             self.statusBarView.transform = hideStatusBar
         }
         UIView.animate(withDuration: 0.4) {
@@ -350,7 +348,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if let centerCellIndexPath = collectionView.indexPathForItem(at: view.convert(view.center, to: collectionView)),
-            currentIndex != centerCellIndexPath {
+           currentIndex != centerCellIndexPath {
             let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
             previousCell?.didEndDisplaying()
 
@@ -394,7 +392,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 }
             }
             if let progress = currentDownloadOperation?.task?.progress,
-                let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
+               let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
                 cell.setDownloadProgress(progress)
             }
         }
@@ -443,6 +441,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         let realm = driveFileManager.getRealm()
         previewFiles = previewFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
         currentIndex = IndexPath(row: coder.decodeInteger(forKey: "CurrentIndex"), section: 0)
+        if currentIndex.row >= previewFiles.count {
+            navigationController?.popViewController(animated: true)
+            return
+        }
         // Update UI
         DispatchQueue.main.async { [self] in
             collectionView.reloadData()
@@ -458,7 +460,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 // MARK: - Collection view data source
 
 extension PreviewViewController: UICollectionViewDataSource {
-
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return previewFiles.count
     }
@@ -535,8 +536,8 @@ extension PreviewViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             cell.parentViewController = self
             if let downloadOperation = currentDownloadOperation,
-                let progress = downloadOperation.task?.progress,
-                downloadOperation.fileId == file.id {
+               let progress = downloadOperation.task?.progress,
+               downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
             cell.previewDelegate = self
@@ -553,8 +554,8 @@ extension PreviewViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file)
             if let downloadOperation = currentDownloadOperation,
-                let progress = downloadOperation.task?.progress,
-                downloadOperation.fileId == file.id {
+               let progress = downloadOperation.task?.progress,
+               downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
             let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
@@ -565,8 +566,8 @@ extension PreviewViewController: UICollectionViewDataSource {
 }
 
 // MARK: - Collection view delegate flow layout
-extension PreviewViewController: UICollectionViewDelegateFlowLayout {
 
+extension PreviewViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return collectionView.bounds.size
     }
@@ -582,17 +583,15 @@ extension PreviewViewController: UICollectionViewDelegateFlowLayout {
 
         return newOriginForOldIndex ?? proposedContentOffset
     }
-
 }
 
 // MARK: - Collection view delegate
-extension PreviewViewController: UICollectionViewDelegate {
 
-}
+extension PreviewViewController: UICollectionViewDelegate {}
 
 // MARK: - Floating Panel Controller Delegate
-extension PreviewViewController: FloatingPanelControllerDelegate {
 
+extension PreviewViewController: FloatingPanelControllerDelegate {
     func floatingPanelShouldBeginDragging(_ vc: FloatingPanelController) -> Bool {
         return !fromActivities
     }

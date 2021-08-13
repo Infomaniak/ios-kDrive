@@ -20,6 +20,9 @@ import kDriveCore
 import UIKit
 
 class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewController {
+    private var downloadedArchiveUrl: URL?
+    private var currentArchiveId: String?
+    private var downloadError: DriveError?
     var files: [File]!
     var changedFiles: [File]? = []
     var downloadInProgress = false
@@ -79,7 +82,11 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             // Disable cell if all selected items are folders
             cell.setEnabled(!files.allSatisfy(\.isDirectory))
         } else if action == .download {
-            cell.setProgress(downloadInProgress ? -1 : nil)
+            if let currentArchiveId = currentArchiveId {
+                cell.observeProgress(true, archiveId: currentArchiveId)
+            } else {
+                cell.setProgress(downloadInProgress ? -1 : nil)
+            }
         }
         return cell
     }
@@ -121,7 +128,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         case .favorite:
             let isFavorite = filesAreFavorite
             addAction = !isFavorite
-            for file in files where file.rights?.canFavorite.value ?? false {
+            for file in files where file.rights?.canFavorite ?? false {
                 group.enter()
                 driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { error in
                     if error != nil {
@@ -134,24 +141,48 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
             }
         case .download:
-            for file in files {
-                if file.isDownloaded {
-                    saveLocalFile(file: file)
+            // TODO: Replace with constant from bulk actions branch
+            if files.count > 10 || !files.allSatisfy({ !$0.isDirectory }) {
+                if downloadInProgress,
+                   let currentArchiveId = currentArchiveId,
+                   let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
+                    let alert = AlertTextViewController(title: KDriveStrings.Localizable.cancelDownloadTitle, message: KDriveStrings.Localizable.cancelDownloadDescription, action: KDriveStrings.Localizable.buttonYes, destructive: true) {
+                        operation.cancel()
+                    }
+                    present(alert, animated: true)
+                    return
                 } else {
+                    downloadedArchiveUrl = nil
                     downloadInProgress = true
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                     group.enter()
-                    DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
-                        if error == nil {
-                            DispatchQueue.main.async {
-                                saveLocalFile(file: file)
-                            }
-                        } else {
-                            success = false
-                        }
+                    downloadArchivedFiles(files: files, downloadCellPath: indexPath) { archiveUrl, error in
+                        self.downloadedArchiveUrl = archiveUrl
+                        success = archiveUrl != nil
+                        self.downloadError = error
                         group.leave()
                     }
-                    DownloadQueue.instance.addToQueue(file: file)
+                }
+            } else {
+                for file in files {
+                    if file.isDownloaded {
+                        saveLocalFile(file: file)
+                    } else {
+                        downloadInProgress = true
+                        self.tableView.reloadRows(at: [indexPath], with: .fade)
+                        group.enter()
+                        DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
+                            if error == nil {
+                                DispatchQueue.main.async {
+                                    saveLocalFile(file: file)
+                                }
+                            } else {
+                                success = false
+                            }
+                            group.leave()
+                        }
+                        DownloadQueue.instance.addToQueue(file: file)
+                    }
                 }
             }
         default:
@@ -166,14 +197,38 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
                 }
             } else {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                if self.downloadError != .taskCancelled {
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                }
             }
             self.files = self.changedFiles
             self.downloadInProgress = false
             self.tableView.reloadRows(at: [indexPath], with: .fade)
-            self.dismiss(animated: true)
+            self.dismiss(animated: true) { [parent = self.presentingViewController] in
+                if let downloadedArchiveUrl = self.downloadedArchiveUrl {
+                    let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
+                    parent?.present(documentExportViewController, animated: true)
+                }
+            }
             self.reloadAction?()
             self.changedFiles = []
+        }
+    }
+
+    private func downloadArchivedFiles(files: [File], downloadCellPath: IndexPath, completion: @escaping (URL?, DriveError?) -> Void) {
+        driveFileManager.apiFetcher.getDownloadArchiveLink(driveId: driveFileManager.drive.id, for: files) { response, error in
+            if let archiveId = response?.data?.uuid {
+                self.currentArchiveId = archiveId
+                DownloadQueue.instance.observeArchiveDownloaded(self, archiveId: archiveId) { _, archiveUrl, error in
+                    completion(archiveUrl, error)
+                }
+                DownloadQueue.instance.addToQueue(archiveId: archiveId, driveId: self.driveFileManager.drive.id)
+                DispatchQueue.main.async {
+                    self.tableView.reloadRows(at: [downloadCellPath], with: .fade)
+                }
+            } else {
+                completion(nil, (error as? DriveError) ?? .unknownError)
+            }
         }
     }
 }

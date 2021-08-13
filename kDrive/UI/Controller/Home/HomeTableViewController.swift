@@ -607,7 +607,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             return
         }
         if UIApplication.shared.statusBarOrientation.isPortrait {
-            navigationItem.title = (driveFileManager.drive.name)
+            navigationItem.title = driveFileManager?.drive.name ?? ""
             navigationBar.alpha = min(1, max(0, (scrollOffset + tableView.contentInset.top) / navbarHeight))
             navigationBar.isUserInteractionEnabled = navigationBar.alpha > 0.5
         } else {

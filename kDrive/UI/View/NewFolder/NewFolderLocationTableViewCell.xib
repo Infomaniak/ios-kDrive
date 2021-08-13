@@ -12,8 +12,9 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell userInteractionEnabled="NO" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="NewFolderLocationTableViewCell" rowHeight="155" translatesAutoresizingMaskIntoConstraints="NO" id="KGk-i7-Jjw" customClass="NewFolderLocationTableViewCell" customModule="kDrive" customModuleProvider="target">
+        <tableViewCell userInteractionEnabled="NO" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="NewFolderLocationTableViewCell" rowHeight="155" id="KGk-i7-Jjw" customClass="NewFolderLocationTableViewCell" customModule="kDrive" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="322" height="155"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
                 <rect key="frame" x="0.0" y="0.0" width="322" height="155"/>
                 <autoresizingMask key="autoresizingMask"/>

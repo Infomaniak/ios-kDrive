@@ -33,13 +33,12 @@ extension NSFileProviderItemIdentifier {
         if self == .rootContainer {
             return DriveFileManager.constants.rootID
         } else {
-            return Int(self.rawValue)
+            return Int(rawValue)
         }
     }
 }
 
 class FileProviderItem: NSObject, NSFileProviderItem {
-
     // Required properties
 
     var itemIdentifier: NSFileProviderItemIdentifier
@@ -150,37 +149,37 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     }
 
     /*
-     (write)              .allowsWriting -> rights.write
-     (read properties)    .allowsReading -> rights.read
-     (rename)             .allowsRenaming -> rights.rename
-     (trash)              .allowsTrashing -> rights.delete
-     (delete)             .allowsDeleting -> ~= rights.delete
-     (move file/folder)   .allowsReparenting -> rights.move
-     (add file to folder) .allowsAddingSubItems -> rights.moveInto
-     (list folder files)  .allowsContentEnumerating -> rights.read
-    */
+      (write)              .allowsWriting -> rights.write
+      (read properties)    .allowsReading -> rights.read
+      (rename)             .allowsRenaming -> rights.rename
+      (trash)              .allowsTrashing -> rights.delete
+      (delete)             .allowsDeleting -> ~= rights.delete
+      (move file/folder)   .allowsReparenting -> rights.move
+      (add file to folder) .allowsAddingSubItems -> rights.moveInto
+      (list folder files)  .allowsContentEnumerating -> rights.read
+     */
     private class func rightsToCapabilities(_ rights: Rights) -> NSFileProviderItemCapabilities {
         var capabilities: NSFileProviderItemCapabilities = []
-        if rights.write.value ?? false {
+        if rights.write {
             capabilities.insert(.allowsWriting)
         }
-        if rights.read.value ?? false {
+        if rights.read {
             capabilities.insert(.allowsReading)
         }
-        if rights.rename.value ?? false {
+        if rights.rename {
             capabilities.insert(.allowsRenaming)
         }
-        if rights.delete.value ?? false {
+        if rights.delete {
             capabilities.insert(.allowsDeleting)
             capabilities.insert(.allowsTrashing)
         }
-        if rights.move.value ?? false {
+        if rights.move {
             capabilities.insert(.allowsReparenting)
         }
-        if (rights.moveInto.value ?? false) || (rights.createNewFolder.value ?? false) || (rights.createNewFile.value ?? false) || (rights.uploadNewFile.value ?? false) {
+        if rights.moveInto || rights.createNewFolder || rights.createNewFile || rights.uploadNewFile {
             capabilities.insert(.allowsAddingSubItems)
         }
-        if rights.show.value ?? false {
+        if rights.show {
             capabilities.insert(.allowsContentEnumerating)
         }
         return capabilities
@@ -215,11 +214,10 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         if !FileManager.default.fileExists(atPath: itemFolderURL.path) {
             do {
                 try FileManager.default.createDirectory(at: itemFolderURL, withIntermediateDirectories: true, attributes: nil)
-            } catch let error {
+            } catch {
                 print(error)
             }
         }
         return itemFolderURL.appendingPathComponent(filename)
     }
-
 }

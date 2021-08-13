@@ -55,8 +55,10 @@ class InformationFloatingPanelViewController: UIViewController {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        UIPasteboard.general.string = copyTextField.text
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileInfoLinkCopiedToClipboard)
+        let items = [URL(string: copyTextField.text!)!]
+        let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        ac.popoverPresentationController?.sourceView = sender
+        present(ac, animated: true)
     }
 
     @IBAction func leftButtonPressed(_ sender: UIButton) {

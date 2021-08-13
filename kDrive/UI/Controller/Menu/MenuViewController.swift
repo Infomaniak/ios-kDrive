@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
 import Sentry
+import UIKit
 
 class MenuViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var userAvatarFrame: UIView!
     @IBOutlet weak var userAvatarImageView: UIImageView!
@@ -44,13 +43,14 @@ class MenuViewController: UIViewController {
 
         static let switchUserAction = MenuAction(name: KDriveStrings.Localizable.switchUserTitle, image: KDriveAsset.userSwitch.image, segue: "switchUserSegue")
         static let parametersAction = MenuAction(name: KDriveStrings.Localizable.settingsTitle, image: KDriveAsset.parameters.image, segue: "toParameterSegue")
+        static let helpAction = MenuAction(name: KDriveStrings.Localizable.supportTitle, image: KDriveAsset.supportLink.image, segue: "help")
         static let disconnectAction = MenuAction(name: KDriveStrings.Localizable.buttonLogout, image: KDriveAsset.logout.image, segue: "disconnect")
     }
 
     private var tableContent: [[MenuAction]] = [
         [],
         [.sharedWithMeAction, .lastModificationAction, .imagesAction, .offlineAction, .mySharedAction, .trashAction],
-        [.switchUserAction, .parametersAction, .disconnectAction]
+        [.switchUserAction, .parametersAction, .helpAction, .disconnectAction]
     ]
     private var currentAccount: Account!
 
@@ -96,7 +96,7 @@ class MenuViewController: UIViewController {
 
         // Hide shared with me action if no shared with me drive
         let sharedWithMeInList = tableContent[1].contains { $0 == .sharedWithMeAction }
-        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentAccount.userId, sharedWithMe: true).isEmpty
+        let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true).isEmpty
         if sharedWithMeInList && !hasSharedWithMe {
             tableContent[1].removeFirst()
         } else if !sharedWithMeInList && hasSharedWithMe {
@@ -122,7 +122,6 @@ class MenuViewController: UIViewController {
 // MARK: - UITableView Delegate
 
 extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
-
     func numberOfSections(in tableView: UITableView) -> Int {
         return tableContent.count
     }
@@ -169,9 +168,13 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.section > 0 {
             let segue = tableContent[indexPath.section][indexPath.row].segue
             if !segue.isEmpty {
-                if segue == "disconnect" {
+                if segue == MenuAction.disconnectAction.segue {
                     let alert = AlertTextViewController(title: KDriveStrings.Localizable.alertRemoveUserTitle, message: KDriveStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveStrings.Localizable.buttonConfirm, destructive: true) {
-                        AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
+                        if let token = AccountManager.instance.currentAccount.token {
+                            AccountManager.instance.removeTokenAndAccount(token: token)
+                        } else {
+                            AccountManager.instance.removeAccount(toDeleteAccount: AccountManager.instance.currentAccount)
+                        }
                         if let nextAccount = AccountManager.instance.accounts.first {
                             AccountManager.instance.switchAccount(newAccount: nextAccount)
                             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
@@ -184,6 +187,10 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                         AccountManager.instance.saveAccounts()
                     }
                     present(alert, animated: true)
+                } else if segue == MenuAction.helpAction.segue {
+                    if let url = URL(string: Constants.helpURL) {
+                        UIApplication.shared.open(url)
+                    }
                 } else {
                     performSegue(withIdentifier: segue, sender: nil)
                 }
@@ -199,7 +206,6 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension MenuViewController: SwitchDriveDelegate, SwitchAccountDelegate {
-
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         self.currentAccount = currentAccount
         needsContentUpdate = true
@@ -215,17 +221,14 @@ extension MenuViewController: SwitchDriveDelegate, SwitchAccountDelegate {
         needsContentUpdate = true
         updateContentIfNeeded()
     }
-
 }
 
 // MARK: - Top scrollable
 
 extension MenuViewController: TopScrollable {
-
     func scrollToTop() {
         if isViewLoaded {
             tableView.scrollToTop(animated: true, navigationController: navigationController)
         }
     }
-
 }

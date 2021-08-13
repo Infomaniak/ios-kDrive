@@ -1,31 +1,30 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
+import UIKit
 
 protocol SelectFolderDelegate: AnyObject {
     func didSelectFolder(_ folder: File)
 }
 
 class SelectFolderViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.saveFile }
     override class var storyboardIdentifier: String { "SelectFolderViewController" }
 
@@ -56,9 +55,9 @@ class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
-        addFolderButton.isEnabled = currentDirectory.rights?.createNewFolder.value ?? false
+        addFolderButton.isEnabled = currentDirectory.rights?.createNewFolder ?? false
         addFolderButton.accessibilityLabel = KDriveStrings.Localizable.createFolderTitle
-        selectFolderButton.isEnabled = !(disabledDirectoriesSelection.map(\.id).contains(currentDirectory.id)) && (currentDirectory.rights?.moveInto.value ?? false || currentDirectory.rights?.createNewFile.value ?? false)
+        selectFolderButton.isEnabled = !disabledDirectoriesSelection.map(\.id).contains(currentDirectory.id) && (currentDirectory.rights?.moveInto ?? false || currentDirectory.rights?.createNewFile ?? false)
         if currentDirectory.id == DriveFileManager.constants.rootID {
             // Root directory: set back button if the view controller is presented modally
             let viewControllersCount = navigationController?.viewControllers.count ?? 0
@@ -142,5 +141,4 @@ class SelectFolderViewController: FileListViewController {
         }
         setUpDirectory()
     }
-
 }

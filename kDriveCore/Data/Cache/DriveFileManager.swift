@@ -32,7 +32,7 @@ public class DriveFileManager {
         public let cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-        public let currentUploadDbVersion: UInt64 = 8
+        public let currentUploadDbVersion: UInt64 = 9
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
             if oldSchemaVersion < strongSelf.currentUploadDbVersion {
@@ -43,8 +43,8 @@ public class DriveFileManager {
                     }
                 }
                 // Migration to version 4 -> 7 is not needed
-                // Migration from version 7 to version 8
-                if oldSchemaVersion < 8 {
+                // Migration from version 7 to version 9
+                if oldSchemaVersion < 9 {
                     migration.deleteData(forType: DownloadTask.className())
                 }
             }
@@ -139,7 +139,29 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            deleteRealmIfMigrationNeeded: true,
+            schemaVersion: 1,
+            migrationBlock: { migration, oldSchemaVersion in
+                if oldSchemaVersion < 1 {
+                    // Migration to version 1: migrating rights
+                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
+                        newObject?["show"] = oldObject?["show"] ?? false
+                        newObject?["read"] = oldObject?["read"] ?? false
+                        newObject?["write"] = oldObject?["write"] ?? false
+                        newObject?["share"] = oldObject?["share"] ?? false
+                        newObject?["leave"] = oldObject?["leave"] ?? false
+                        newObject?["delete"] = oldObject?["delete"] ?? false
+                        newObject?["rename"] = oldObject?["rename"] ?? false
+                        newObject?["move"] = oldObject?["move"] ?? false
+                        newObject?["createNewFolder"] = oldObject?["createNewFolder"] ?? false
+                        newObject?["createNewFile"] = oldObject?["createNewFile"] ?? false
+                        newObject?["uploadNewFile"] = oldObject?["uploadNewFile"] ?? false
+                        newObject?["moveInto"] = oldObject?["moveInto"] ?? false
+                        newObject?["canBecomeCollab"] = oldObject?["canBecomeCollab"] ?? false
+                        newObject?["canBecomeLink"] = oldObject?["canBecomeLink"] ?? false
+                        newObject?["canFavorite"] = oldObject?["canFavorite"] ?? false
+                    }
+                }
+            },
             objectTypes: [File.self, Rights.self, FileActivity.self])
 
         // Only compact in the background
@@ -548,7 +570,7 @@ public class DriveFileManager {
         let file = realm.object(ofType: File.self, forPrimaryKey: file.id)
         try? realm.write {
             file?.shareLink = shareLink
-            file?.rights?.canBecomeLink.value = shareLink == nil
+            file?.rights?.canBecomeLink = shareLink == nil
         }
         if let file = file {
             notifyObserversWith(file: file)

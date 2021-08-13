@@ -197,7 +197,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         getCurrentDirectory { currentDirectory in
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory?.rights?.createNewFile.value ?? true
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory?.rights?.createNewFile ?? true
         }
     }
 }
@@ -256,7 +256,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                     UploadQueue.instance.addToQueue(file:
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
-                            userId: AccountManager.instance.currentAccount.userId,
+                            userId: AccountManager.instance.currentUserId,
                             driveId: driveFileManager.drive.id,
                             url: targetURL,
                             name: url.lastPathComponent))

@@ -17,10 +17,10 @@
  */
 
 import Foundation
-import UIKit
 import InfomaniakCore
-import RealmSwift
 import Kingfisher
+import RealmSwift
+import UIKit
 
 public enum UserPermission: String, Codable, CaseIterable {
     case read
@@ -56,15 +56,15 @@ public enum UserPermission: String, Codable, CaseIterable {
 }
 
 public class DriveUser: Object, Codable, InfomaniakUser {
-    @objc public dynamic var id: Int = -1
-    @objc public dynamic var email: String = ""
-    @objc private dynamic var _avatar: String = ""
-    @objc private dynamic var _avatarUrl: String?
-    @objc public dynamic var displayName: String = ""
-    @objc private dynamic var _permission: String?
+    @Persisted(primaryKey: true) public var id: Int = -1
+    @Persisted public var email: String = ""
+    @Persisted private var _avatar: String = ""
+    @Persisted private var _avatarUrl: String?
+    @Persisted public var displayName: String = ""
+    @Persisted private var _permission: String?
 
     public var avatar: String {
-        return !_avatar.isBlank ? _avatar: (_avatarUrl ?? "")
+        return !_avatar.isBlank ? _avatar : (_avatarUrl ?? "")
     }
 
     public var permission: UserPermission? {
@@ -74,13 +74,6 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         set {
             _permission = newValue?.rawValue
         }
-    }
-
-    public override init() {
-    }
-
-    public override static func primaryKey() -> String? {
-        return "id"
     }
 
     enum CodingKeys: String, CodingKey {

@@ -238,5 +238,13 @@ public enum ApiRoutes {
 
     public static func fileCount(driveId: Int, fileId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/\(fileId)/count"
+	}
+
+    public static func downloadArchiveLink(driveId: Int) -> String {
+        return "\(driveApiUrl)\(driveId)/file/archive"
+    }
+
+    public static func downloadArchive(driveId: Int, archiveId: String) -> String {
+        return "\(driveApiUrl)\(driveId)/file/archive/\(archiveId)/download"
     }
 }

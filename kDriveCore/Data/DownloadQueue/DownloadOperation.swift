@@ -105,7 +105,7 @@ public class DownloadOperation: Operation {
                    let sessionUrl = task.originalRequest?.url?.absoluteString {
                     self.error = .taskRescheduled
 
-                    let downloadTask = DownloadTask(fileId: self.file.id, driveId: self.file.driveId, userId: self.driveFileManager.drive.userId, sessionId: rescheduledSessionId, sessionUrl: sessionUrl)
+                    let downloadTask = DownloadTask(fileId: self.file.id, isDirectory: self.file.isDirectory, driveId: self.file.driveId, userId: self.driveFileManager.drive.userId, sessionId: rescheduledSessionId, sessionUrl: sessionUrl)
                     BackgroundRealm.uploads.execute { realm in
                         try? realm.safeWrite {
                             realm.add(downloadTask, update: .modified)
@@ -130,7 +130,7 @@ public class DownloadOperation: Operation {
         let url = URL(string: ApiRoutes.downloadFile(file: file))!
 
         // Add download task to Realm
-        let downloadTask = DownloadTask(fileId: file.id, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionId: urlSession.identifier, sessionUrl: url.absoluteString)
+        let downloadTask = DownloadTask(fileId: file.id, isDirectory: file.isDirectory, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionId: urlSession.identifier, sessionUrl: url.absoluteString)
         BackgroundRealm.uploads.execute { realm in
             try? realm.safeWrite {
                 realm.add(downloadTask, update: .modified)
@@ -192,12 +192,11 @@ public class DownloadOperation: Operation {
             // Success
             DDLogInfo("[DownloadOperation] Download of \(file.id) successful")
             do {
-                if FileManager.default.fileExists(atPath: file.localUrl.path) {
-                    try? FileManager.default.removeItem(at: file.localUrl)
+                if file.isDirectory {
+                    try moveFileToTemporaryDirectory(downloadPath: url)
+                } else {
+                    try moveFileToCache(downloadPath: url)
                 }
-                try FileManager.default.createDirectory(at: file.localUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
-                try FileManager.default.moveItem(at: url, to: file.localUrl)
-                file.applyLastModifiedDateToLocalFile()
             } catch {
                 DDLogError("[DownloadOperation] Error moving file \(file.id): \(error)")
                 self.error = .localError
@@ -208,6 +207,23 @@ public class DownloadOperation: Operation {
             self.error = .serverError
         }
         end(sessionUrl: task?.originalRequest?.url)
+    }
+
+    private func moveFileToCache(downloadPath: URL) throws {
+        if FileManager.default.fileExists(atPath: file.localUrl.path) {
+            try? FileManager.default.removeItem(at: file.localUrl)
+        }
+        try FileManager.default.createDirectory(at: file.localUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.moveItem(at: downloadPath, to: file.localUrl)
+        file.applyLastModifiedDateToLocalFile()
+    }
+
+    private func moveFileToTemporaryDirectory(downloadPath: URL) throws {
+        if FileManager.default.fileExists(atPath: file.temporaryUrl.path) {
+            try? FileManager.default.removeItem(at: file.temporaryUrl)
+        }
+        try FileManager.default.createDirectory(at: file.temporaryUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.moveItem(at: downloadPath, to: file.temporaryUrl)
     }
 
     private func end(sessionUrl: URL?) {

@@ -21,8 +21,8 @@ import ProjectDescription
 let baseSettings: [String: SettingValue] = [
     "CODE_SIGN_STYLE": "Automatic",
     "DEVELOPMENT_TEAM": "864VDCS2QY",
-    "CURRENT_PROJECT_VERSION": "1",
-    "MARKETING_VERSION": "4.0.7"
+    "CURRENT_PROJECT_VERSION": "4",
+    "MARKETING_VERSION": "4.0.9"
 ]
 
 let fileProviderSettings = baseSettings.merging(["SWIFT_OBJC_BRIDGING_HEADER": "kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h", "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION"]) { first, _ in first }
@@ -56,6 +56,7 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/flowbe/SwiftRegex.git", .upToNextMajor(from: "1.0.0")),
             .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "6.2.1")),
             .package(url: "https://github.com/adam-fowler/mqtt-nio", .upToNextMajor(from: "2.1.0")),
+            .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "8.0.0"))
     ],
     targets: [
         Target(name: "kDrive",
@@ -71,7 +72,8 @@ let project = Project(name: "kDrive",
                 "kDrive/**/*.strings",
                 "kDrive/**/*.stringsdict",
                 "kDrive/**/*.xib",
-                "kDrive/**/*.json"
+                "kDrive/**/*.json",
+                "kDriveCore/GoogleService-Info.plist"
             ],
             entitlements: "kDrive/Resources/kDrive.entitlements",
             actions: [
@@ -124,7 +126,8 @@ let project = Project(name: "kDrive",
                 "kDriveCore/**/*.storyboard",
                 "kDriveCore/**/*.xcassets",
                 "kDriveCore/**/*.xib",
-                "kDriveCore/**/*.json"
+                "kDriveCore/**/*.json",
+                "kDriveCore/GoogleService-Info.plist"
             ],
             dependencies: [
                     .package(product: "Alamofire"),
@@ -140,7 +143,8 @@ let project = Project(name: "kDrive",
                     .package(product: "MaterialOutlinedTextField"),
                     .package(product: "SnackBar"),
                     .package(product: "SwiftRegex"),
-                    .package(product: "Sentry")
+                    .package(product: "Sentry"),
+                    .package(product: "FirebaseMessaging")
             ]),
         Target(name: "kDriveFileProvider",
             platform: .iOS,
@@ -191,6 +195,7 @@ let project = Project(name: "kDrive",
                 "kDrive/UI/Controller/Files/Rights and Share/**",
                 "kDrive/UI/Controller/Files/Save File/**",
                 "kDrive/UI/Controller/Files/Search/**",
+                "kDrive/UI/Controller/Files/MultipleSelectionViewController.swift",
                 "kDrive/UI/Controller/Files/FileListViewController.swift",
                 "kDrive/UI/Controller/Files/FloatingPanelSortOptionTableViewController.swift",
                 "kDrive/UI/Controller/Floating Panel Information/**",
@@ -287,6 +292,7 @@ let project = Project(name: "kDrive",
                 "kDrive/UI/Controller/Files/Rights and Share/**",
                 "kDrive/UI/Controller/Files/Save File/**",
                 "kDrive/UI/Controller/Files/Search/**",
+                "kDrive/UI/Controller/Files/MultipleSelectionViewController.swift",
                 "kDrive/UI/Controller/Files/FileListViewController.swift",
                 "kDrive/UI/Controller/Files/FloatingPanelSortOptionTableViewController.swift",
                 "kDrive/UI/Controller/Floating Panel Information/**",

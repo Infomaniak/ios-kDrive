@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class FileDetailViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var commentButton: UIButton!
 
@@ -59,7 +58,7 @@ class FileDetailViewController: UIViewController {
             if sharedFile != nil || !file.users.isEmpty {
                 rows.append(.users)
             }
-            if file.rights?.share.value ?? false {
+            if file.rights?.share ?? false {
                 rows.append(.share)
             }
             rows.append(.owner)
@@ -317,12 +316,11 @@ class FileDetailViewController: UIViewController {
             DispatchQueue.main.async {
                 if let comment = newComment {
                     self.comments.insert(comment, at: 0)
-                    self.tableView.reloadSections(IndexSet(integersIn: 1...1), with: .automatic)
+                    self.tableView.reloadSections([1], with: .automatic)
                 } else {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorAddComment)
                 }
             }
-
         }
         present(messageAlert, animated: true)
     }
@@ -454,14 +452,14 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     cell.sharedFile = sharedFile
                     let userIds = file.users.isEmpty ? [file.createdBy] : Array(file.users)
                     cell.fallbackUsers = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0) }
-                    cell.shareButton.isHidden = !(file.rights?.share.value ?? false)
+                    cell.shareButton.isHidden = !(file.rights?.share ?? false)
                     cell.delegate = self
                     cell.collectionView.reloadData()
                     return cell
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink.value ?? false) || file.shareLink != nil, insets: false)
+                    cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
                     return cell
                 case .owner:
                     let cell = tableView.dequeueReusableCell(type: FileInformationOwnerTableViewCell.self, for: indexPath)
@@ -545,7 +543,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             return nil
         }
 
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { action, _, completionHandler in
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { _, _, completionHandler in
             let deleteAlert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: KDriveStrings.Localizable.modalCommentDeleteDescription, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: true) {
                 let group = DispatchGroup()
                 var success = false
@@ -576,7 +574,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             self.present(deleteAlert, animated: true)
         }
 
-        let editAction = UIContextualAction(style: .normal, title: nil) { action, _, completionHandler in
+        let editAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
             let editAlert = AlertFieldViewController(title: KDriveStrings.Localizable.modalCommentAddTitle, placeholder: KDriveStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveStrings.Localizable.buttonSave, loading: true) { comment in
                 let group = DispatchGroup()
                 var success = false
@@ -603,7 +601,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             self.present(editAlert, animated: true)
         }
 
-        let answerAction = UIContextualAction(style: .normal, title: nil) { action, _, completionHandler in
+        let answerAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
             let answerAlert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonAddComment, placeholder: KDriveStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveStrings.Localizable.buttonSend, loading: true) { comment in
                 self.driveFileManager.apiFetcher.answerComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { response, _ in
                     if let data = response?.data {
@@ -634,7 +632,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 $0 == answerAction
             }
         }
-        if comments[indexPath.row].user.id != AccountManager.instance.currentAccount.user.id {
+        if comments[indexPath.row].user.id != AccountManager.instance.currentUserId {
             actions.removeAll {
                 $0 == deleteAction || $0 == editAction
             }
@@ -719,8 +717,8 @@ extension FileDetailViewController: FileDetailDelegate {
             }
         }
         UIView.transition(with: tableView,
-            duration: 0.35,
-            options: .transitionCrossDissolve) {
+                          duration: 0.35,
+                          options: .transitionCrossDissolve) {
             self.reloadTableView()
             if self.currentTab == .comments {
                 self.commentButton.isHidden = self.file.isOfficeFile
@@ -790,6 +788,13 @@ extension FileDetailViewController: FileCommentDelegate {
 // MARK: - Share link table view cell delegate
 
 extension FileDetailViewController: ShareLinkTableViewCellDelegate {
+    func shareLinkSharedButtonPressed(link: String, sender: UIView) {
+        let items = [URL(string: link)!]
+        let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        ac.popoverPresentationController?.sourceView = sender
+        present(ac, animated: true)
+    }
+
     func shareLinkSwitchToggled(isOn: Bool) {
         if isOn {
             driveFileManager.activateShareLink(for: file) { _, shareLink, _ in
@@ -836,12 +841,12 @@ extension FileDetailViewController: RightsSelectionDelegate {
             return
         }
         driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == "write", permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
-
         }
     }
 }
 
 // MARK: - UIPopoverPresentationControllerDelegate
+
 extension FileDetailViewController: UIPopoverPresentationControllerDelegate {
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         return .none

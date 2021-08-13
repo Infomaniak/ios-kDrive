@@ -22,20 +22,21 @@ import RealmSwift
 
 public class DownloadTask: Object {
     @Persisted(primaryKey: true) var fileId: Int = 0
+    @Persisted var isDirectory = false
     @Persisted var driveId: Int = 0
     @Persisted var userId: Int = 0
     @Persisted var sessionUrl: String = ""
     @Persisted var sessionId: String?
 
-    init(fileId: Int, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
+    convenience init(fileId: Int, isDirectory: Bool, driveId: Int, userId: Int, sessionId: String, sessionUrl: String) {
+        self.init()
         self.fileId = fileId
+        self.isDirectory = isDirectory
         self.driveId = driveId
         self.sessionId = sessionId
         self.sessionUrl = sessionUrl
         self.userId = userId
     }
-
-    override public init() {}
 }
 
 public class DownloadQueue {
@@ -45,6 +46,7 @@ public class DownloadQueue {
     public static let backgroundIdentifier = "com.infomaniak.background.download"
 
     public private(set) var operationsInQueue: [Int: DownloadOperation] = [:]
+    public private(set) var archiveOperationsInQueue: [String: DownloadArchiveOperation] = [:]
     private(set) lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "kDrive download queue"
@@ -63,7 +65,9 @@ public class DownloadQueue {
 
     private var observations = (
         didDownloadFile: [UUID: (DownloadedFileId, DriveError?) -> Void](),
-        didChangeProgress: [UUID: (DownloadedFileId, Double) -> Void]()
+        didChangeProgress: [UUID: (DownloadedFileId, Double) -> Void](),
+        didDownloadArchive: [UUID: (DownloadedArchiveId, URL?, DriveError?) -> Void](),
+        didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
     private var bestSession: FileDownloadSession {
         return Constants.isInExtension ? BackgroundDownloadSessionManager.instance : foregroundSession
@@ -72,7 +76,7 @@ public class DownloadQueue {
     // MARK: - Public methods
 
     public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        guard !file.isInvalidated && operationsInQueue[file.id] == nil,
+        guard !file.isInvalidated && operation(for: file) == nil,
               let drive = AccountManager.instance.getDrive(for: userId, driveId: file.driveId),
               let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
             return
@@ -85,6 +89,21 @@ public class DownloadQueue {
         }
         operationQueue.addOperation(operation)
         operationsInQueue[file.id] = operation
+    }
+
+    public func addToQueue(archiveId: String, driveId: Int, userId: Int = AccountManager.instance.currentUserId) {
+        guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
+              let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
+            return
+        }
+
+        let operation = DownloadArchiveOperation(archiveId: archiveId, driveFileManager: driveFileManager, urlSession: bestSession)
+        operation.completionBlock = {
+            self.archiveOperationsInQueue.removeValue(forKey: archiveId)
+            self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
+        }
+        operationQueue.addOperation(operation)
+        archiveOperationsInQueue[archiveId] = operation
     }
 
     public func temporaryDownload(file: File, completion: @escaping (DriveError?) -> Void) -> DownloadOperation? {
@@ -119,6 +138,10 @@ public class DownloadQueue {
         operationQueue.operations.filter(\.isExecuting).forEach { $0.cancel() }
     }
 
+    public func operation(for file: File) -> DownloadOperation? {
+        return operationsInQueue[file.id]
+    }
+
     // MARK: - Private methods
 
     private init() {}
@@ -134,12 +157,25 @@ public class DownloadQueue {
             closure(fileId, progress)
         }
     }
+
+    private func publishArchiveDownloaded(archiveId: String, archiveUrl: URL?, error: DriveError?) {
+        observations.didDownloadArchive.values.forEach { closure in
+            closure(archiveId, archiveUrl, error)
+        }
+    }
+
+    func publishProgress(_ progress: Double, for archiveId: String) {
+        observations.didChangeArchiveProgress.values.forEach { closure in
+            closure(archiveId, progress)
+        }
+    }
 }
 
 // MARK: - Observation
 
 public extension DownloadQueue {
     typealias DownloadedFileId = Int
+    typealias DownloadedArchiveId = String
 
     @discardableResult
     func observeFileDownloaded<T: AnyObject>(_ observer: T, fileId: Int? = nil, using closure: @escaping (DownloadedFileId, DriveError?) -> Void)
@@ -182,6 +218,50 @@ public extension DownloadQueue {
 
         return ObservationToken { [weak self] in
             self?.observations.didChangeProgress.removeValue(forKey: key)
+        }
+    }
+
+    @discardableResult
+    func observeArchiveDownloaded<T: AnyObject>(_ observer: T, archiveId: String? = nil, using closure: @escaping (DownloadedArchiveId, URL?, DriveError?) -> Void)
+        -> ObservationToken {
+        let key = UUID()
+        observations.didDownloadArchive[key] = { [weak self, weak observer] downloadedArchiveId, archiveUrl, error in
+            // If the observer has been deallocated, we can
+            // automatically remove the observation closure.
+            guard observer != nil else {
+                self?.observations.didDownloadArchive.removeValue(forKey: key)
+                return
+            }
+
+            if archiveId == nil || downloadedArchiveId == archiveId {
+                closure(downloadedArchiveId, archiveUrl, error)
+            }
+        }
+
+        return ObservationToken { [weak self] in
+            self?.observations.didDownloadArchive.removeValue(forKey: key)
+        }
+    }
+
+    @discardableResult
+    func observeArchiveDownloadProgress<T: AnyObject>(_ observer: T, archiveId: String? = nil, using closure: @escaping (DownloadedArchiveId, Double) -> Void)
+        -> ObservationToken {
+        let key = UUID()
+        observations.didChangeArchiveProgress[key] = { [weak self, weak observer] downloadedArchiveId, progress in
+            // If the observer has been deallocated, we can
+            // automatically remove the observation closure.
+            guard observer != nil else {
+                self?.observations.didChangeArchiveProgress.removeValue(forKey: key)
+                return
+            }
+
+            if archiveId == nil || downloadedArchiveId == archiveId {
+                closure(downloadedArchiveId, progress)
+            }
+        }
+
+        return ObservationToken { [weak self] in
+            self?.observations.didChangeArchiveProgress.removeValue(forKey: key)
         }
     }
 }

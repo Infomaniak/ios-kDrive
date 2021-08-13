@@ -359,7 +359,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func getFileDetailActivity(file: File, page: Int, completion: @escaping (ApiResponse<[FileDetailActivity]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=*\(pagination(page: page))"
+        let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=user,mobile\(pagination(page: page))"
 
         authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[FileDetailActivity]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
@@ -367,7 +367,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func getFileDetailComment(file: File, page: Int, completion: @escaping (ApiResponse<[Comment]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileDetailComment(file: file))?with=*\(pagination(page: page))"
+        let url = "\(ApiRoutes.getFileDetailComment(file: file))?with=like,response\(pagination(page: page))"
 
         authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[Comment]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
@@ -678,12 +678,26 @@ public class DriveApiFetcher: ApiFetcher {
                 self.handleResponse(response: response, completion: completion)
             }
     }
+
+    public func getDownloadArchiveLink(driveId: Int, for files: [File], completion: @escaping (ApiResponse<DownloadArchiveResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.downloadArchiveLink(driveId: driveId)
+        let body: [String: Any] = ["file_ids": files.map(\.id)]
+
+        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
+            .responseDecodable(of: ApiResponse<DownloadArchiveResponse>.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
     override func refresh(_ credential: OAuthAuthenticator.Credential, for session: Session, completion: @escaping (Result<OAuthAuthenticator.Credential, Error>) -> Void) {
         AccountManager.instance.refreshTokenLockedQueue.async {
+            SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .info, message: "Refreshing token - Starting"))
+
             if !KeychainHelper.isKeychainAccessible {
+                SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Keychain unaccessible"))
+
                 completion(.failure(DriveError.refreshToken))
                 return
             }
@@ -692,26 +706,52 @@ class SyncedAuthenticator: OAuthAuthenticator {
             AccountManager.instance.reloadTokensAndAccounts()
             if let token = AccountManager.instance.getTokenForUserId(credential.userId),
                token.expirationDate > credential.expirationDate {
+                SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with local"))
                 completion(.success(token))
                 return
             }
 
             let group = DispatchGroup()
             group.enter()
+            var taskIdentifier: UIBackgroundTaskIdentifier = .invalid
+            if !Constants.isInExtension {
+                // It is absolutely necessary that the app stays awake while we refresh the token
+                taskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Refresh token") {
+                    SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Background task expired"))
+                    // If we didn't fetch the new token in the given time there is not much we can do apart from hoping that it wasn't revoked
+                    if taskIdentifier != .invalid {
+                        UIApplication.shared.endBackgroundTask(taskIdentifier)
+                        taskIdentifier = .invalid
+                    }
+                }
+
+                if taskIdentifier == .invalid {
+                    // We couldn't request additional time to refresh token maybe try later...
+                    completion(.failure(DriveError.refreshToken))
+                    return
+                }
+            }
             InfomaniakLogin.refreshToken(token: credential) { token, error in
                 // New token has been fetched correctly
                 if let token = token {
+                    SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Refreshing token - Success with remote"))
                     self.refreshTokenDelegate?.didUpdateToken(newToken: token, oldToken: credential)
                     completion(.success(token))
                 } else {
                     // Couldn't refresh the token, API says it's invalid
                     if let error = error as NSError?, error.domain == "invalid_grant" {
+                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Invalid grant"))
                         self.refreshTokenDelegate?.didFailRefreshToken(credential)
                         completion(.failure(error))
                     } else {
                         // Couldn't refresh the token, keep the old token and fetch it later. Maybe because of bad network ?
+                        SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Other \(error.debugDescription)"))
                         completion(.success(credential))
                     }
+                }
+                if taskIdentifier != .invalid {
+                    UIApplication.shared.endBackgroundTask(taskIdentifier)
+                    taskIdentifier = .invalid
                 }
                 group.leave()
             }

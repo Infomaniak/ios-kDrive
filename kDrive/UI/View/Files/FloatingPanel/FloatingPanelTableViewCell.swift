@@ -24,10 +24,12 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
     @IBOutlet weak var offlineSwitch: UISwitch!
     @IBOutlet weak var progressView: RPCircularProgress!
     @IBOutlet weak var disabledView: UIView!
+
     private var observationToken: ObservationToken?
 
     override func awakeFromNib() {
         super.awakeFromNib()
+
         offlineSwitch.isHidden = true
         progressView.isHidden = true
         progressView.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
@@ -38,6 +40,7 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+
         observationToken?.cancel()
         observationToken = nil
         offlineSwitch.setOn(true, animated: false)
@@ -62,7 +65,7 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
     }
 
     func setProgress(_ progress: CGFloat? = -1) {
-        if let downloadProgress = progress {
+        if let downloadProgress = progress, downloadProgress < 1 {
             accessoryImageView.isHidden = true
             progressView.isHidden = false
             if downloadProgress < 0 {
@@ -77,57 +80,47 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureAvailableOffline(with file: File, progress: CGFloat?) {
-        observationToken?.cancel()
+    func configureAvailableOffline(with file: File) {
         offlineSwitch.isHidden = false
         if offlineSwitch.isOn != file.isAvailableOffline {
             offlineSwitch.setOn(file.isAvailableOffline, animated: true)
         }
 
+        let showProgress: Bool
         if file.isAvailableOffline && FileManager.default.fileExists(atPath: file.localUrl.path) {
-            accessoryImageView.isHidden = false
-            progressView.isHidden = true
-
             accessoryImageView.image = KDriveAsset.check.image
             accessoryImageView.tintColor = KDriveAsset.greenColor.color
+            showProgress = false
         } else if file.isAvailableOffline {
-            setProgress(progress)
+            showProgress = true
         } else {
-            accessoryImageView.isHidden = false
-            progressView.isHidden = true
-
             accessoryImageView.image = KDriveAsset.availableOffline.image
             accessoryImageView.tintColor = KDriveAsset.iconColor.color
+            showProgress = false
         }
-        if progress != nil {
+
+        observeProgress(showProgress, file: file)
+    }
+
+    func observeProgress(_ showProgress: Bool, file: File) {
+        observationToken?.cancel()
+        setProgress(showProgress ? -1 : nil)
+        if showProgress {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 DispatchQueue.main.async { [weak self] in
-                    guard self?.observationToken != nil else { return }
                     self?.setProgress(CGFloat(progress))
-                    if progress >= 1 {
-                        self?.configureAvailableOffline(with: file, progress: nil)
-                    }
                 }
             }
         }
     }
 
-    func configureDownload(with file: File, progress: CGFloat?) {
+    func observeProgress(_ showProgress: Bool, archiveId: String) {
         observationToken?.cancel()
-        if progress == nil {
-            accessoryImageView.isHidden = false
-            progressView.isHidden = true
-
-            accessoryImageView.image = KDriveAsset.download.image
-            accessoryImageView.tintColor = KDriveAsset.iconColor.color
-        } else {
-            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+        setProgress(showProgress ? -1 : nil)
+        if showProgress {
+            observationToken = DownloadQueue.instance.observeArchiveDownloadProgress(self, archiveId: archiveId) { _, progress in
                 DispatchQueue.main.async { [weak self] in
-                    guard self?.observationToken != nil else { return }
                     self?.setProgress(CGFloat(progress))
-                    if progress >= 1 {
-                        self?.configureDownload(with: file, progress: nil)
-                    }
                 }
             }
         }

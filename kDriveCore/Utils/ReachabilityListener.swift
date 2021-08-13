@@ -18,6 +18,7 @@
 
 import Foundation
 import Network
+import UIKit
 
 public class ReachabilityListener {
     public enum NetworkStatus {
@@ -36,7 +37,7 @@ public class ReachabilityListener {
         networkMonitor = NWPathMonitor()
         currentStatus = .undefined
         networkMonitor.pathUpdateHandler = { [weak self] path in
-            guard let self = self else {
+            guard let self = self, UIApplication.shared.applicationState != .background else {
                 return
             }
 
