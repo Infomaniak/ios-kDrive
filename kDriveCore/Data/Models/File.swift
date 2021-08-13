@@ -241,8 +241,17 @@ public class File: Object, Codable {
         return rights?.read == false && rights?.show == false
     }
 
+    public var temporaryUrl: URL {
+        let temporaryUrl = temporaryContainerUrl.appendingPathComponent(name)
+        return isDirectory ? temporaryUrl.appendingPathExtension("zip") : temporaryUrl
+    }
+
+    public var temporaryContainerUrl: URL {
+        return FileManager.default.temporaryDirectory.appendingPathComponent("\(driveId)", isDirectory: true).appendingPathComponent("\(id)", isDirectory: true)
+    }
+
     public var localUrl: URL {
-        return localContainerUrl.appendingPathComponent("\(name)", isDirectory: isDirectory)
+        return localContainerUrl.appendingPathComponent(name, isDirectory: isDirectory)
     }
 
     public var localContainerUrl: URL {

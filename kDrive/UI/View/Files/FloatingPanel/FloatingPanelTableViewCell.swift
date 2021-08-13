@@ -113,4 +113,16 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
             }
         }
     }
+
+    func observeProgress(_ showProgress: Bool, archiveId: String) {
+        observationToken?.cancel()
+        setProgress(showProgress ? -1 : nil)
+        if showProgress {
+            observationToken = DownloadQueue.instance.observeArchiveDownloadProgress(self, archiveId: archiveId) { _, progress in
+                DispatchQueue.main.async { [weak self] in
+                    self?.setProgress(CGFloat(progress))
+                }
+            }
+        }
+    }
 }
