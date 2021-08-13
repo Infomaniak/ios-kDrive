@@ -383,8 +383,8 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func likeComment(file: File, like: Bool, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = like ? ApiRoutes.unlikeComment(file: file, comment: comment) : ApiRoutes.likeComment(file: file, comment: comment)
+    public func likeComment(file: File, liked: Bool, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+        let url = liked ? ApiRoutes.unlikeComment(file: file, comment: comment) : ApiRoutes.likeComment(file: file, comment: comment)
 
         authenticatedSession.request(url, method: .post).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
