@@ -81,6 +81,15 @@ public class DownloadArchiveOperation: Operation {
             return
         }
 
+        if !Constants.isInExtension {
+            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
+                DownloadQueue.instance.suspendAllOperations()
+                // We don't support task rescheduling for archive download
+                self.task?.cancel()
+                self.end(sessionUrl: self.task?.originalRequest?.url)
+            }
+        }
+
         // If the operation is not canceled, begin executing the task
         _executing = true
         main()
@@ -121,11 +130,9 @@ public class DownloadArchiveOperation: Operation {
         if let error = error {
             // Client-side error
             DDLogError("[DownloadOperation] Client-side error for \(archiveId): \(error)")
-            if self.error == .taskRescheduled {
+            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
                 // We return because we don't want end() to be called as it is already called in the expiration handler
                 return
-            } else if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
-                self.error = .taskCancelled
             } else {
                 self.error = .networkError
             }
@@ -159,6 +166,13 @@ public class DownloadArchiveOperation: Operation {
     }
 
     private func end(sessionUrl: URL?) {
+        DDLogInfo("[DownloadOperation] Download of archive \(archiveId) ended")
+
+        progressObservation?.invalidate()
+        if backgroundTaskIdentifier != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+        }
+
         _executing = false
         _finished = true
     }
