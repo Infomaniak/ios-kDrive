@@ -21,6 +21,8 @@ import UIKit
 
 class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewController {
     private var downloadedArchiveUrl: URL?
+    private var currentArchiveId: String?
+    private var downloadError: DriveError?
     var files: [File]!
     var changedFiles: [File]? = []
     var downloadInProgress = false
@@ -136,15 +138,26 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             }
         case .download:
             // TODO: Replace with constant from bulk actions branch
-            if files.count > 10 {
-                downloadedArchiveUrl = nil
-                downloadInProgress = true
-                self.tableView.reloadRows(at: [indexPath], with: .fade)
-                group.enter()
-                downloadArchivedFiles(files: files) { archiveUrl, _ in
-                    self.downloadedArchiveUrl = archiveUrl
-                    success = archiveUrl != nil
-                    group.leave()
+            if files.count > 10 || !files.allSatisfy({ !$0.isDirectory }) {
+                if downloadInProgress,
+                   let currentArchiveId = currentArchiveId,
+                   let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
+                    let alert = AlertTextViewController(title: KDriveStrings.Localizable.cancelDownloadTitle, message: KDriveStrings.Localizable.cancelDownloadDescription, action: KDriveStrings.Localizable.buttonYes, destructive: true) {
+                        operation.cancel()
+                    }
+                    present(alert, animated: true)
+                    return
+                } else {
+                    downloadedArchiveUrl = nil
+                    downloadInProgress = true
+                    self.tableView.reloadRows(at: [indexPath], with: .fade)
+                    group.enter()
+                    downloadArchivedFiles(files: files) { archiveUrl, error in
+                        self.downloadedArchiveUrl = archiveUrl
+                        success = archiveUrl != nil
+                        self.downloadError = error
+                        group.leave()
+                    }
                 }
             } else {
                 for file in files {
@@ -180,7 +193,9 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
                 }
             } else {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                if self.downloadError != .taskCancelled {
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                }
             }
             self.files = self.changedFiles
             self.downloadInProgress = false
@@ -196,15 +211,16 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         }
     }
 
-    private func downloadArchivedFiles(files: [File], completion: @escaping (URL?, Error?) -> Void) {
+    private func downloadArchivedFiles(files: [File], completion: @escaping (URL?, DriveError?) -> Void) {
         driveFileManager.apiFetcher.getDownloadArchiveLink(driveId: driveFileManager.drive.id, for: files) { response, error in
             if let archiveId = response?.data?.uuid {
+                self.currentArchiveId = archiveId
                 DownloadQueue.instance.observeArchiveDownloaded(self, archiveId: archiveId) { _, archiveUrl, error in
                     completion(archiveUrl, error)
                 }
                 DownloadQueue.instance.addToQueue(archiveId: archiveId, driveId: self.driveFileManager.drive.id)
             } else {
-                completion(nil, error)
+                completion(nil, (error as? DriveError) ?? .unknownError)
             }
         }
     }

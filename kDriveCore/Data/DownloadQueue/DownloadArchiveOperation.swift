@@ -84,7 +84,8 @@ public class DownloadArchiveOperation: Operation {
         if !Constants.isInExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
-                // We don't support task rescheduling for archive download
+                // We don't support task rescheduling for archive download but still need to pass error to diffrentiate from user cancel
+                self.error = .taskRescheduled
                 self.task?.cancel()
                 self.end(sessionUrl: self.task?.originalRequest?.url)
             }
@@ -130,9 +131,12 @@ public class DownloadArchiveOperation: Operation {
         if let error = error {
             // Client-side error
             DDLogError("[DownloadOperation] Client-side error for \(archiveId): \(error)")
-            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
+            if self.error == .taskRescheduled {
                 // We return because we don't want end() to be called as it is already called in the expiration handler
                 return
+            }
+            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
+                self.error = .taskCancelled
             } else {
                 self.error = .networkError
             }
