@@ -141,8 +141,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
             }
         case .download:
-            // TODO: Replace with constant from bulk actions branch
-            if files.count > 10 || !files.allSatisfy({ !$0.isDirectory }) {
+            if files.count > Constants.bulkActionThreshold || !files.allSatisfy({ !$0.isDirectory }) {
                 if downloadInProgress,
                    let currentArchiveId = currentArchiveId,
                    let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {

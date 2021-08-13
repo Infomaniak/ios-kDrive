@@ -67,6 +67,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     #if !ISEXTENSION
         private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
     #endif
+    private var loadingBarButtonItem: UIBarButtonItem = {
+        let activityView = UIActivityIndicatorView(style: .gray)
+        activityView.startAnimating()
+        return UIBarButtonItem(customView: activityView)
+    }()
 
     var currentDirectory: File! {
         didSet {
@@ -92,6 +97,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
+    var currentDirectoryCount: FileCount?
+    var selectAllMode = false
     var sortedFiles: [File] = []
     #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
@@ -520,7 +527,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
             navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
-            navigationItem.rightBarButtonItem = nil
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
             generator.impactOccurred()
@@ -545,9 +552,16 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     override final func setSelectedCells() {
-        if selectionMode && !selectedItems.isEmpty {
-            for i in 0 ..< sortedFiles.count where selectedItems.contains(sortedFiles[i]) {
-                collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: .centeredVertically)
+        if selectAllMode {
+            selectedItems = Set(sortedFiles)
+            for i in 0 ..< sortedFiles.count {
+                collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: [])
+            }
+        } else {
+            if selectionMode && !selectedItems.isEmpty {
+                for i in 0 ..< sortedFiles.count where selectedItems.contains(sortedFiles[i]) {
+                    collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: .centeredVertically)
+                }
             }
         }
     }
@@ -559,7 +573,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     override final func updateSelectedCount() {
-        headerView?.selectView.updateTitle(selectedItems.count)
+        if let count = currentDirectoryCount?.count,
+           selectAllMode {
+            headerView?.selectView.updateTitle(count)
+        } else {
+            headerView?.selectView.updateTitle(selectedItems.count)
+        }
     }
 
     // MARK: - Collection view data source
@@ -610,6 +629,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 cell.moreButton.tintColor = file.isDirectory || !file.hasThumbnail ? KDriveAsset.iconColor.color : .white
             }
         }
+
+        if selectAllMode {
+            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
+        }
     }
 
     // MARK: - Collection view delegate
@@ -629,7 +652,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if selectionMode {
+        guard selectionMode else {
+            return
+        }
+        if selectAllMode {
+            deselectAllChildren()
+            selectChild(at: indexPath)
+            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init(rawValue: 0))
+        } else {
             deselectChild(at: indexPath)
         }
     }
@@ -713,6 +743,80 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         observeUploads()
         observeFiles()
         reloadData()
+    }
+
+    // MARK: - Bulk actions
+
+    @objc override func selectAllChildren() {
+        setSelectionButtonsEnabled(false)
+        selectAllMode = true
+        navigationItem.rightBarButtonItem = loadingBarButtonItem
+        driveFileManager.apiFetcher.getFileCount(driveId: driveFileManager.drive.id, fileId: currentDirectory.id) { [self] response, _ in
+            setSelectionButtonsEnabled(true)
+            if let fileCount = response?.data {
+                currentDirectoryCount = fileCount
+                setSelectedCells()
+                updateSelectedCount()
+                navigationItem.rightBarButtonItem = UIBarButtonItem(title: "KDriveStrings.Localizable.buttonDeselectAll", style: .plain, target: self, action: #selector(deselectAllChildren))
+            } else {
+                selectAllMode = false
+                navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
+            }
+        }
+    }
+
+    @objc override func deselectAllChildren() {
+        setSelectionButtonsEnabled(false)
+        selectAllMode = false
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
+        if let indexPaths = collectionView.indexPathsForSelectedItems {
+            for indexPath in indexPaths {
+                collectionView.deselectItem(at: indexPath, animated: true)
+            }
+        }
+        selectedItems.removeAll()
+        updateSelectedCount()
+    }
+
+    private func bulkMoveFiles(_ files: [File], destinationId: Int) {
+        let fileIds = files.map(\.id)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .move, fileIds: fileIds, destinationId: destinationId, completion: bulkObservation(response:error:))
+    }
+
+    private func bulkMoveAll(destinationId: Int) {
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .move, parentId: currentDirectory.id, destinationId: destinationId, completion: bulkObservation(response:error:))
+    }
+
+    private func bulkDeleteFiles(_ files: [File]) {
+        let fileIds = files.map(\.id)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, fileIds: fileIds, completion: bulkObservation(response:error:))
+    }
+
+    private func bulkDeleteAll() {
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, parentId: currentDirectory.id, completion: bulkObservation(response:error:))
+    }
+
+    private func bulkObservation(response: ApiResponse<CancelableResponse>?, error: Error?) {
+        selectionMode = false
+        let cancelId = response?.data?.id
+        if let error = error {
+            DDLogError("Error while deleting file: \(error)")
+        } else {
+            let progressSnack = UIConstants.showSnackBar(message: "Starting to delete", duration: .infinite)
+            AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
+                DispatchQueue.main.async {
+                    DDLogError("observeActionProgress \(actionProgress.progress.message)")
+                    self.driveFileManager.notifyObserversWith(file: self.currentDirectory)
+                    progressSnack?.message = "\(actionProgress.progress.message) \(actionProgress.progress.total - actionProgress.progress.todo)/\(actionProgress.progress.total)"
+                    if actionProgress.progress.message == "done" {
+                        progressSnack?.message = "Ending delete"
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            progressSnack?.dismiss()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -814,11 +918,43 @@ extension FileListViewController: FilesHeaderViewDelegate {
         }
 
         func moveButtonPressed() {
-            moveSelectedItems()
+            if selectedItems.count > Constants.bulkActionThreshold {
+                let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+                let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
+                selectFolderViewController?.disabledDirectoriesSelection = [selectedItems.first?.parent ?? driveFileManager.getRootFile()]
+                selectFolderViewController?.selectHandler = { [self] selectedFolder in
+                    if currentDirectoryCount?.count != nil && selectAllMode {
+                        self.bulkMoveAll(destinationId: selectedFolder.id)
+                    } else {
+                        self.bulkMoveFiles(Array(self.selectedItems), destinationId: selectedFolder.id)
+                    }
+                }
+                present(selectFolderNavigationController, animated: true)
+            } else {
+                moveSelectedItems()
+            }
         }
 
         @objc func deleteButtonPressed() {
-            deleteSelectedItems()
+            if selectedItems.count > Constants.bulkActionThreshold {
+                let message: NSMutableAttributedString
+                let alert: AlertTextViewController
+                if let count = currentDirectoryCount?.count,
+                   selectAllMode {
+                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(count))
+                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
+                        self.bulkDeleteAll()
+                    }
+                } else {
+                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedItems.count))
+                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
+                        self.bulkDeleteFiles(Array(self.selectedItems))
+                    }
+                }
+                present(alert, animated: true)
+            } else {
+                deleteSelectedItems()
+            }
         }
 
         @objc func menuButtonPressed() {
