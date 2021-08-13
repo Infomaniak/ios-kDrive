@@ -82,7 +82,11 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             // Disable cell if all selected items are folders
             cell.setEnabled(!files.allSatisfy(\.isDirectory))
         } else if action == .download {
-            cell.setProgress(downloadInProgress ? -1 : nil)
+            if let currentArchiveId = currentArchiveId {
+                cell.configureDownload(with: currentArchiveId, progress: 0)
+            } else {
+                cell.setProgress(downloadInProgress ? -1 : nil)
+            }
         }
         return cell
     }
@@ -152,7 +156,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     downloadInProgress = true
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                     group.enter()
-                    downloadArchivedFiles(files: files) { archiveUrl, error in
+                    downloadArchivedFiles(files: files, downloadCellPath: indexPath) { archiveUrl, error in
                         self.downloadedArchiveUrl = archiveUrl
                         success = archiveUrl != nil
                         self.downloadError = error
@@ -211,7 +215,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         }
     }
 
-    private func downloadArchivedFiles(files: [File], completion: @escaping (URL?, DriveError?) -> Void) {
+    private func downloadArchivedFiles(files: [File], downloadCellPath: IndexPath, completion: @escaping (URL?, DriveError?) -> Void) {
         driveFileManager.apiFetcher.getDownloadArchiveLink(driveId: driveFileManager.drive.id, for: files) { response, error in
             if let archiveId = response?.data?.uuid {
                 self.currentArchiveId = archiveId
@@ -219,6 +223,9 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     completion(archiveUrl, error)
                 }
                 DownloadQueue.instance.addToQueue(archiveId: archiveId, driveId: self.driveFileManager.drive.id)
+                DispatchQueue.main.async {
+                    self.tableView.reloadRows(at: [downloadCellPath], with: .fade)
+                }
             } else {
                 completion(nil, (error as? DriveError) ?? .unknownError)
             }
