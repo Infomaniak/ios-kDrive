@@ -30,9 +30,9 @@ enum SimpleAction: String, Codable {
 }
 
 enum Action: String, Codable {
-    case fileCreate = "file_create"
-    case fileRename = "file_rename"
-    case fileMove = "file_move"
-    case fileRestore = "file_restore"
-    case fileTrash = "file_trash"
+    case fileCreate
+    case fileRename
+    case fileMove
+    case fileRestore
+    case fileTrash
 }
