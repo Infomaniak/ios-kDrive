@@ -684,6 +684,7 @@ public class DriveApiFetcher: ApiFetcher {
         let body: [String: Any] = ["file_ids": files.map(\.id)]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
+            .validate()
             .responseDecodable(of: ApiResponse<DownloadArchiveResponse>.self, decoder: ApiFetcher.decoder) { response in
                 self.handleResponse(response: response, completion: completion)
             }

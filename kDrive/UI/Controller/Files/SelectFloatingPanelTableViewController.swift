@@ -197,7 +197,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
             } else {
                 if self.downloadError != .taskCancelled {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: self.downloadError?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
                 }
             }
             self.files = self.changedFiles
@@ -226,7 +226,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     self.tableView.reloadRows(at: [downloadCellPath], with: .fade)
                 }
             } else {
-                completion(nil, (error as? DriveError) ?? .unknownError)
+                completion(nil, (error as? DriveError) ?? .serverError)
             }
         }
     }
