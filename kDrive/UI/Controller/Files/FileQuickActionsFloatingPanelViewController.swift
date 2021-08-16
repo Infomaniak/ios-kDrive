@@ -208,10 +208,12 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
                 return !sharedWithMe
+            case .download:
+                return file.rights?.read ?? false
             case .move:
                 return (file.rights?.move ?? false) && !sharedWithMe
             case .duplicate:
-                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
+                return !sharedWithMe && (file.rights?.read ?? false) && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
             case .rename:
                 return (file.rights?.rename ?? false) && !sharedWithMe
             case .delete:
