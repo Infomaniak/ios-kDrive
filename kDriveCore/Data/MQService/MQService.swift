@@ -27,29 +27,23 @@ public class MQService {
         return decoder
     }()
 
-    private var queue = DispatchQueue(label: "com.infomaniak.mqservice")
-
-    private lazy var mqtt: MQTTClient = {
-        var configuration = MQTTClient.Configuration(
-            keepAliveInterval: .seconds(30),
-            connectTimeout: .seconds(20),
-            userName: "ips:ips-public",
-            password: "8QC5EwBqpZ2Z",
-            useSSL: true,
-            useWebSockets: true,
-            webSocketURLPath: "/ws"
-        )
-
-        let client = MQTTClient(
-            host: "info-mq.infomaniak.com",
-            port: 443,
-            identifier: "MQTT",
-            eventLoopGroupProvider: .createNew,
-            configuration: configuration
-        )
-
-        return client
-    }()
+    private let queue = DispatchQueue(label: "com.infomaniak.drive.mqservice")
+    private static let configuration = MQTTClient.Configuration(
+        keepAliveInterval: .seconds(30),
+        connectTimeout: .seconds(20),
+        userName: "ips:ips-public",
+        password: "8QC5EwBqpZ2Z",
+        useSSL: true,
+        useWebSockets: true,
+        webSocketURLPath: "/ws"
+    )
+    private let client = MQTTClient(
+        host: "info-mq.infomaniak.com",
+        port: 443,
+        identifier: "MQTT",
+        eventLoopGroupProvider: .createNew,
+        configuration: configuration
+    )
 
     private var currentToken: IPSToken?
     private var actionProgressObservers = [UUID: (ActionProgressNotification) -> Void]()
@@ -58,25 +52,25 @@ public class MQService {
 
     public func registerForNotifications(with token: IPSToken) {
         queue.async { [self] in
-            if !mqtt.isActive() {
+            if !client.isActive() {
                 do {
-                    _ = try mqtt.connect().wait()
+                    _ = try client.connect().wait()
                 } catch {
-                    DDLogError("[MQService] Error while connecting \(error)")
+                    DDLogError("[MQService] Error while connecting: \(error)")
                 }
             }
             if let currentToken = currentToken {
                 actionProgressObservers.removeAll()
                 do {
-                    try mqtt.unsubscribe(from: [topicFor(token: currentToken)]).wait()
+                    try client.unsubscribe(from: [topic(for: currentToken)]).wait()
                 } catch {
-                    DDLogError("[MQService] Error while unsubscribing \(error)")
+                    DDLogError("[MQService] Error while unsubscribing: \(error)")
                 }
             }
             currentToken = token
             do {
-                _ = try mqtt.subscribe(to: [MQTTSubscribeInfo(topicFilter: topicFor(token: token), qos: .exactlyOnce)]).wait()
-                mqtt.addPublishListener(named: "Drive notifications listener") { result in
+                _ = try client.subscribe(to: [MQTTSubscribeInfo(topicFilter: topic(for: token), qos: .exactlyOnce)]).wait()
+                client.addPublishListener(named: "Drive notifications listener") { result in
                     switch result {
                     case .success(let message):
                         var buffer = message.payload
@@ -88,16 +82,16 @@ public class MQService {
                             }
                         }
                     case .failure(let error):
-                        DDLogError("[MQService] Error while listening \(error)")
+                        DDLogError("[MQService] Error while listening: \(error)")
                     }
                 }
             } catch {
-                DDLogError("[MQService] Error while subscribing \(error)")
+                DDLogError("[MQService] Error while subscribing: \(error)")
             }
         }
     }
 
-    private func topicFor(token: IPSToken) -> String {
+    private func topic(for token: IPSToken) -> String {
         return "drive/\(token.uuid)"
     }
 }
