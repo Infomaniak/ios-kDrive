@@ -18,21 +18,16 @@
 
 import Foundation
 
-public enum BulkActionType: String, Codable {
-    case trash
-    case move
-}
+public struct BulkAction: Encodable {
+    let action: BulkActionType
+    let fileIds: [Int]?
+    let parentId: Int?
+    let destinationDirectoryId: Int?
 
-enum SimpleAction: String, Codable {
-    case create
-    case update
-    case delete
-}
-
-enum Action: String, Codable {
-    case fileCreate
-    case fileRename
-    case fileMove
-    case fileRestore
-    case fileTrash
+    public init(action: BulkActionType, fileIds: [Int]? = nil, parentId: Int? = nil, destinationDirectoryId: Int? = nil) {
+        self.action = action
+        self.fileIds = fileIds
+        self.parentId = parentId
+        self.destinationDirectoryId = destinationDirectoryId
+    }
 }

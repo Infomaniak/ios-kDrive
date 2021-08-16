@@ -779,21 +779,23 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     private func bulkMoveFiles(_ files: [File], destinationId: Int) {
-        let fileIds = files.map(\.id)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .move, fileIds: fileIds, destinationId: destinationId, completion: bulkObservation(response:error:))
+        let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
     }
 
     private func bulkMoveAll(destinationId: Int) {
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .move, parentId: currentDirectory.id, destinationId: destinationId, completion: bulkObservation(response:error:))
+        let action = BulkAction(action: .move, parentId: currentDirectory.id, destinationDirectoryId: destinationId)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
     }
 
     private func bulkDeleteFiles(_ files: [File]) {
-        let fileIds = files.map(\.id)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, fileIds: fileIds, completion: bulkObservation(response:error:))
+        let action = BulkAction(action: .trash, fileIds: files.map(\.id))
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
     }
 
     private func bulkDeleteAll() {
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: .trash, parentId: currentDirectory.id, completion: bulkObservation(response:error:))
+        let action = BulkAction(action: .trash, parentId: currentDirectory.id)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
     }
 
     private func bulkObservation(response: ApiResponse<CancelableResponse>?, error: Error?) {
