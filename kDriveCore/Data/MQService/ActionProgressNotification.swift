@@ -19,9 +19,9 @@
 import Foundation
 
 public class ActionProgressNotification: Codable {
-    let uid: String
-    let driveId: Int
-    let action: String
-    let actionUuid: String
+    public let uid: String
+    public let driveId: Int
+    public let action: String
+    public let actionUuid: String
     public let progress: ActionProgress
 }

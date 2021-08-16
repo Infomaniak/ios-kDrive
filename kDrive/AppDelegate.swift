@@ -357,7 +357,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             }
         }
 
-        accountManager.updateUserForAccount(currentAccount) { [self] _, switchedDrive, error in
+        accountManager.updateUserForAccount(currentAccount, registerToken: true) { [self] _, switchedDrive, error in
             if let error = error {
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")

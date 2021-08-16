@@ -31,7 +31,7 @@ class SwitchDriveViewController: UIViewController {
         super.viewDidLoad()
         filteredDrives = drives
         let accountManager = AccountManager.instance
-        accountManager.updateUserForAccount(accountManager.currentAccount) { _, _, error in
+        accountManager.updateUserForAccount(accountManager.currentAccount, registerToken: false) { _, _, error in
             if error == nil {
                 self.drives = accountManager.drives
                 self.filteredDrives = self.drives
