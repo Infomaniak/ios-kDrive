@@ -22,7 +22,7 @@ import kDriveCore
 
 protocol SelectedUsersDelegate: AnyObject {
     func didDeleteUser(user: DriveUser)
-    func didDeleteMail(mail: String)
+    func didDeleteEmail(email: String)
 }
 
 class InvitedUserTableViewCell: InsetTableViewCell {
@@ -112,7 +112,7 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
             cell.usernameLabel.text = mails[indexPath.row - users.count]
             cell.avatarImage.image = KDriveAsset.circleSend.image
             cell.removeButtonHandler = { _ in
-                self.delegate?.didDeleteMail(mail: self.mails[indexPath.row - self.users.count])
+                self.delegate?.didDeleteEmail(email: self.mails[indexPath.row - self.users.count])
             }
         }
         return cell
