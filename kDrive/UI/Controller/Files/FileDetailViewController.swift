@@ -312,7 +312,7 @@ class FileDetailViewController: UIViewController {
                 }
                 group.leave()
             }
-            _ = group.wait(timeout: .now() + 5)
+            _ = group.wait(timeout: .now() + Constants.timeout)
             DispatchQueue.main.async {
                 if let comment = newComment {
                     self.comments.insert(comment, at: 0)
@@ -554,7 +554,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                     group.leave()
                 }
-                _ = group.wait(timeout: .now() + 5)
+                _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
                     if success {
                         self.comments.remove(at: indexPath.row)
@@ -585,7 +585,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                     group.leave()
                 }
-                _ = group.wait(timeout: .now() + 5)
+                _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
                     if success {
                         self.comments[indexPath.row].body = comment

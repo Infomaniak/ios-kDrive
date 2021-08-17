@@ -217,7 +217,7 @@ class MultipleSelectionViewController: UIViewController {
             }
             return nil
         } else {
-            let result = group.wait(timeout: .now() + 5)
+            let result = group.wait(timeout: .now() + Constants.timeout)
             return success && result != .timedOut
         }
     }

@@ -379,7 +379,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         }
                         group.leave()
                     }
-                    _ = group.wait(timeout: .now() + 5)
+                    _ = group.wait(timeout: .now() + Constants.timeout)
                     DispatchQueue.main.async {
                         if success {
                             self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
@@ -407,7 +407,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     cancelId = response?.id
                     group.leave()
                 }
-                _ = group.wait(timeout: .now() + 5)
+                _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
                     if success {
                         let group = DispatchGroup()
@@ -488,7 +488,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         }
                         group.leave()
                     }
-                    _ = group.wait(timeout: .now() + 5)
+                    _ = group.wait(timeout: .now() + Constants.timeout)
                     DispatchQueue.main.async {
                         if success {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
@@ -540,7 +540,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     success = error == nil
                     group.leave()
                 }
-                _ = group.wait(timeout: .now() + 5)
+                _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
                     if success {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarLeaveShareConfirmation)
