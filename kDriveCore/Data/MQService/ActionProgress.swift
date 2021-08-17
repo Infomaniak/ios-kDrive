@@ -24,5 +24,9 @@ public class ActionProgress: Codable {
     public let error: Int
     public let total: Int
     public let percent: Int
-    public let message: String
+    public let message: ActionProgressMessage
+}
+
+public enum ActionProgressMessage: String, Codable {
+    case starting, processing, canceled, done
 }

@@ -1221,13 +1221,9 @@ public class DriveFileManager {
         }
     }
 
-    public func cancelAction(file: File, cancelId: String, completion: @escaping (Error?) -> Void) {
+    public func cancelAction(cancelId: String, completion: @escaping (Error?) -> Void) {
         apiFetcher.cancelAction(driveId: drive.id, cancelId: cancelId) { _, error in
-            if error == nil {
-                completion(error)
-            } else {
-                completion(error)
-            }
+            completion(error)
         }
     }
 }

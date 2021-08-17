@@ -139,7 +139,7 @@ public extension MQService {
                 closure(action)
             }
 
-            if action.progress.message == "done" {
+            if action.progress.message == .done || action.progress.message == .canceled {
                 self?.actionProgressObservers.removeValue(forKey: key)
             }
         }

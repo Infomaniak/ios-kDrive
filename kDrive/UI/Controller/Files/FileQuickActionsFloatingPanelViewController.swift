@@ -432,7 +432,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         group.notify(queue: .main) {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                                 if let cancelId = cancelId {
-                                    self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
+                                    self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                         if error == nil {
                                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
                                         }
@@ -516,7 +516,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     } else {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                             if let cancelId = response?.id {
-                                self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
+                                self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                     if error == nil {
                                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileMoveCancelled)
                                     }

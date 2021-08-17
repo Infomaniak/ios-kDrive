@@ -527,7 +527,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
             navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
+            updateSelectButton()
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
             generator.impactOccurred()
@@ -579,6 +579,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         } else {
             headerView?.selectView.updateTitle(selectedItems.count)
         }
+        updateSelectButton()
     }
 
     // MARK: - Collection view data source
@@ -757,10 +758,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 currentDirectoryCount = fileCount
                 setSelectedCells()
                 updateSelectedCount()
-                navigationItem.rightBarButtonItem = UIBarButtonItem(title: "KDriveStrings.Localizable.buttonDeselectAll", style: .plain, target: self, action: #selector(deselectAllChildren))
             } else {
                 selectAllMode = false
-                navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
+                updateSelectButton()
             }
         }
     }
@@ -768,7 +768,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     @objc override func deselectAllChildren() {
         setSelectionButtonsEnabled(false)
         selectAllMode = false
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
         if let indexPaths = collectionView.indexPathsForSelectedItems {
             for indexPath in indexPaths {
                 collectionView.deselectItem(at: indexPath, animated: true)
@@ -778,43 +777,95 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         updateSelectedCount()
     }
 
+    private func updateSelectButton() {
+        if selectedItems.count == sortedFiles.count || selectAllMode {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonDeselectAll, style: .plain, target: self, action: #selector(deselectAllChildren))
+        } else {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
+        }
+    }
+
     private func bulkMoveFiles(_ files: [File], destinationId: Int) {
         let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
+            self.bulkObservation(action: .move, response: response, error: error)
+        }
     }
 
     private func bulkMoveAll(destinationId: Int) {
         let action = BulkAction(action: .move, parentId: currentDirectory.id, destinationDirectoryId: destinationId)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
+            self.bulkObservation(action: .move, response: response, error: error)
+        }
     }
 
     private func bulkDeleteFiles(_ files: [File]) {
         let action = BulkAction(action: .trash, fileIds: files.map(\.id))
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
+            self.bulkObservation(action: .trash, response: response, error: error)
+        }
     }
 
     private func bulkDeleteAll() {
         let action = BulkAction(action: .trash, parentId: currentDirectory.id)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action, completion: bulkObservation)
+        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
+            self.bulkObservation(action: .trash, response: response, error: error)
+        }
     }
 
-    private func bulkObservation(response: ApiResponse<CancelableResponse>?, error: Error?) {
+    private func bulkObservation(action: BulkActionType, response: ApiResponse<CancelableResponse>?, error: Error?) {
         selectionMode = false
         let cancelId = response?.data?.id
         if let error = error {
             DDLogError("Error while deleting file: \(error)")
         } else {
-            let progressSnack = UIConstants.showSnackBar(message: "Starting to delete", duration: .infinite)
+            let message: String
+            switch action {
+            case .trash:
+                message = KDriveStrings.Localizable.fileListDeletionStartedSnackbar
+            case .move:
+                message = KDriveStrings.Localizable.fileListMoveStartedSnackbar
+            }
+            let progressSnack = UIConstants.showSnackBar(message: message, duration: .infinite, action: IKSnackBar.Action(title: KDriveStrings.Localizable.buttonCancel) {
+                if let cancelId = cancelId {
+                    self.driveFileManager.cancelAction(cancelId: cancelId) { error in
+                        if let error = error {
+                            DDLogError("Cancel error: \(error)")
+                        }
+                    }
+                }
+            })
             AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
                 DispatchQueue.main.async {
-                    DDLogError("observeActionProgress \(actionProgress.progress.message)")
-                    self.driveFileManager.notifyObserversWith(file: self.currentDirectory)
-                    progressSnack?.message = "\(actionProgress.progress.message) \(actionProgress.progress.total - actionProgress.progress.todo)/\(actionProgress.progress.total)"
-                    if actionProgress.progress.message == "done" {
-                        progressSnack?.message = "Ending delete"
+                    switch actionProgress.progress.message {
+                    case .starting:
+                        break
+                    case .processing:
+                        switch action {
+                        case .trash:
+                            progressSnack?.message = KDriveStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                        case .move:
+                            progressSnack?.message = KDriveStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                        }
+                    case .done:
+                        switch action {
+                        case .trash:
+                            progressSnack?.message = KDriveStrings.Localizable.fileListDeletionDoneSnackbar
+                        case .move:
+                            progressSnack?.message = KDriveStrings.Localizable.fileListMoveDoneSnackbar
+                        }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             progressSnack?.dismiss()
                         }
+                    case .canceled:
+                        let message: String
+                        switch action {
+                        case .trash:
+                            message = KDriveStrings.Localizable.allTrashActionCancelled
+                        case .move:
+                            message = KDriveStrings.Localizable.allFileMoveCancelled
+                        }
+                        UIConstants.showSnackBar(message: message)
                     }
                 }
             }
