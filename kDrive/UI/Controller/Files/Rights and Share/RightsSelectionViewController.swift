@@ -73,7 +73,11 @@ class RightsSelectionViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var closeButton: UIButton!
 
-    var userType: String!
+    enum UserType {
+        case user, invitation, multiUser
+    }
+
+    var userType: UserType = .user
     var user: DriveUser!
     var invitation: Invitation!
     var tag: Tag!
@@ -183,13 +187,16 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
                 self.present(floatingPanelViewController, animated: true)
             }
         } else if right.key == "manage" {
-            var id: Int?
-            if userType == "user" {
+            let id: Int?
+            switch userType {
+            case .user:
                 id = user.id
-            } else if userType == "invitation" {
+            case .invitation:
                 id = invitation.userId
+            case .multiUser:
+                id = nil
             }
-            if userType != "multiUser" && (id == nil || !driveFileManager.drive.users.internalUsers.contains(id!)) {
+            if userType != .multiUser && (id == nil || !driveFileManager.drive.users.internalUsers.contains(id!)) {
                 disable = true
             }
         }
@@ -210,11 +217,12 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         let right = rights[indexPath.row]
         if right.key == "delete" {
             var deleteUser: String
-            if userType == "user" {
+            switch userType {
+            case .user:
                 deleteUser = user.displayName
-            } else if userType == "invitation" {
+            case .invitation:
                 deleteUser = invitation.displayName ?? invitation.email
-            } else {
+            case .multiUser:
                 deleteUser = tag.name
             }
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)

@@ -215,7 +215,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
                     rightsSelectionVC.delegate = self
                     rightsSelectionVC.selectedRight = sharedFile.users[index].permission!.rawValue
                     rightsSelectionVC.user = sharedFile.users[index]
-                    rightsSelectionVC.userType = "user"
+                    rightsSelectionVC.userType = .user
                 }
                 present(rightsSelectionViewController, animated: true)
             } else {
@@ -229,7 +229,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
                     rightsSelectionVC.delegate = self
                     rightsSelectionVC.selectedRight = sharedFile.invitations[index]!.permission.rawValue
                     rightsSelectionVC.invitation = sharedFile.invitations[index]!
-                    rightsSelectionVC.userType = "invitation"
+                    rightsSelectionVC.userType = .invitation
                 }
                 present(rightsSelectionViewController, animated: true)
             }
