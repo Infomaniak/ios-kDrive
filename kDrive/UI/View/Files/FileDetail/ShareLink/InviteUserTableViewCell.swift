@@ -75,16 +75,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
             }
         }
         dropDown.selectionAction = { [unowned self] index, _ in
-            if let email = email {
-                if index == 0 {
-                    delegate?.didSelectEmail(email: email)
-                } else {
-                    delegate?.didSelectUser(user: results[index - 1])
-                }
-            } else {
-                delegate?.didSelectUser(user: results[index])
-            }
-            textField.text = ""
+            selectItem(at: index)
         }
 
         dropDown.dataSource = results.map(\.displayName)
@@ -119,6 +110,19 @@ class InviteUserTableViewCell: InsetTableViewCell {
         let emailPred = NSPredicate(format: "SELF MATCHES %@", Constants.mailRegex)
         return emailPred.evaluate(with: email)
     }
+
+    private func selectItem(at index: Int) {
+        if let email = email {
+            if index == 0 {
+                delegate?.didSelectEmail(email: email)
+            } else {
+                delegate?.didSelectUser(user: results[index - 1])
+            }
+        } else {
+            delegate?.didSelectUser(user: results[index])
+        }
+        textField.text = ""
+    }
 }
 
 // MARK: - UITextFieldDelegate
@@ -127,5 +131,17 @@ extension InviteUserTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         dropDown.setupCornerRadius(UIConstants.cornerRadius)
         dropDown.show()
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // Select first result on text field return
+        if !results.isEmpty || email != nil {
+            // Hide the dropdown to prevent UI glitches
+            dropDown.hide()
+            selectItem(at: 0)
+            return true
+        } else {
+            return false
+        }
     }
 }
