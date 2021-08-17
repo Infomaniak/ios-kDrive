@@ -297,7 +297,9 @@ extension InviteUserViewController: SelectedUsersDelegate {
 extension InviteUserViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         newPermission = UserPermission(rawValue: value)!
-        tableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .automatic)
+        if let index = rows.firstIndex(of: .rights) {
+            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        }
     }
 }
 
