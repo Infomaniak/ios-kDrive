@@ -31,7 +31,7 @@ class FakeTokenDelegate: RefreshTokenDelegate {
 }
 
 final class DriveApiTests: XCTestCase {
-    static let defaultTimeout = 10.0
+    static let defaultTimeout = 30.0
     static var driveFileManager: DriveFileManager!
     var currentDrive: Drive {
         return DriveApiTests.driveFileManager.drive
