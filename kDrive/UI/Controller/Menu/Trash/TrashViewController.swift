@@ -101,7 +101,7 @@ class TrashViewController: FileListViewController {
                 }
                 group.leave()
             }
-            _ = group.wait(timeout: .now() + 5)
+            _ = group.wait(timeout: .now() + Constants.timeout)
             DispatchQueue.main.async {
                 let message = success ? KDriveStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveStrings.Localizable.errorDelete
                 UIConstants.showSnackBar(message: message)
@@ -147,7 +147,7 @@ class TrashViewController: FileListViewController {
                     group.leave()
                 }
             }
-            let result = group.wait(timeout: .now() + 5)
+            let result = group.wait(timeout: .now() + Constants.timeout)
             if result == .timedOut {
                 success = false
             }
