@@ -27,6 +27,7 @@ public class MQService {
         return decoder
     }()
 
+    private let reconnectDelay: Double = 5
     private let queue = DispatchQueue(label: "com.infomaniak.drive.mqservice")
     private static let configuration = MQTTClient.Configuration(
         keepAliveInterval: .seconds(30),
@@ -55,6 +56,7 @@ public class MQService {
             if !client.isActive() {
                 do {
                     _ = try client.connect().wait()
+                    DDLogInfo("[MQService] Connection successful")
                 } catch {
                     DDLogError("[MQService] Error while connecting: \(error)")
                 }
@@ -85,8 +87,28 @@ public class MQService {
                         DDLogError("[MQService] Error while listening: \(error)")
                     }
                 }
+                client.addCloseListener(named: "Drive close listener") { _ in
+                    DDLogWarn("[MQService] Connection closed")
+                    queue.async {
+                        reconnect()
+                    }
+                }
             } catch {
                 DDLogError("[MQService] Error while subscribing: \(error)")
+            }
+        }
+    }
+
+    func reconnect() {
+        guard !client.isActive() else { return }
+        DDLogInfo("[MQService] Reconnecting…")
+        do {
+            _ = try client.connect(cleanSession: false).wait()
+            DDLogInfo("[MQService] Connection successful")
+        } catch {
+            DDLogError("[MQService] Error while connecting: \(error)")
+            queue.asyncAfter(deadline: .now() + reconnectDelay) {
+                self.reconnect()
             }
         }
     }
