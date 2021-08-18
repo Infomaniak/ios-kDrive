@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import AVKit
-import MediaPlayer
 import kDriveCore
+import MediaPlayer
+import UIKit
 
 class AudioCollectionViewCell: PreviewCollectionViewCell {
-
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var elapsedTimeLabel: UILabel!
     @IBOutlet weak var remainingTimeLabel: UILabel!
@@ -40,9 +39,11 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             landscapePlayButton.isEnabled = player != nil
         }
     }
+
     private var playerState: PlayerState = .stopped {
         didSet { updateUI() }
     }
+
     private var isInterrupted = false {
         didSet { updateUI() }
     }
@@ -118,8 +119,8 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     func setUpObservers() {
         interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
-            object: AVAudioSession.sharedInstance(),
-            queue: .main) { [weak self] notification in
+                                                                      object: AVAudioSession.sharedInstance(),
+                                                                      queue: .main) { [weak self] notification in
             self?.handleAudioSessionInterruption(notification: notification)
         }
         timeObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 10), queue: DispatchQueue.main) { [weak self] time in
@@ -138,6 +139,9 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         statusObserver = player?.observe(\.currentItem?.status, options: .initial) { [weak self] _, _ in
             self?.setNowPlayingPlaybackInfo()
         }
+        if let currentItem = player?.currentItem {
+            NotificationCenter.default.addObserver(self, selector: #selector(playerDidFinishPlaying), name: .AVPlayerItemDidPlayToEndTime, object: currentItem)
+        }
         setUpRemoteControlEvents()
     }
 
@@ -155,6 +159,11 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     override func didEndDisplaying() {
         optOut()
+    }
+
+    @objc private func playerDidFinishPlaying() {
+        pause()
+        seek(to: 0)
     }
 
     private func setUpRemoteControlEvents() {
@@ -221,8 +230,8 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     private func handleAudioSessionInterruption(notification: Notification) {
         guard let userInfo = notification.userInfo,
-            let interruptionTypeUInt = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
-            let interruptionType = AVAudioSession.InterruptionType(rawValue: interruptionTypeUInt) else { return }
+              let interruptionTypeUInt = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let interruptionType = AVAudioSession.InterruptionType(rawValue: interruptionTypeUInt) else { return }
 
         switch interruptionType {
         case .began:
@@ -232,7 +241,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
 
             var shouldResume = false
             if let optionsUInt = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt,
-                AVAudioSession.InterruptionOptions(rawValue: optionsUInt).contains(.shouldResume) {
+               AVAudioSession.InterruptionOptions(rawValue: optionsUInt).contains(.shouldResume) {
                 shouldResume = true
             }
 
