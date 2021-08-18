@@ -26,7 +26,7 @@ class SharedWithMeViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(emptyViewType: .noSharedWithMe)
+        configuration = Configuration(selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, emptyViewType: .noSharedWithMe)
         if currentDirectory == nil {
             currentDirectory = driveFileManager?.getCachedFile(id: DriveFileManager.constants.rootID) ?? DriveFileManager.sharedWithMeRootFile
         }

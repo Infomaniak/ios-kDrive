@@ -52,6 +52,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         var isRefreshControlEnabled = true
         /// Is displayed from activities
         var fromActivities = false
+        /// Does this folder support "select all" action (no effect if multiple selection is disabled)
+        var selectAllSupported = true
         /// Root folder title
         var rootTitle: String?
         /// Type of empty view to display
@@ -778,7 +780,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     private func updateSelectButton() {
-        if selectedItems.count == sortedFiles.count || selectAllMode {
+        if !configuration.selectAllSupported {
+            // Select all not supported, don't show button
+            navigationItem.rightBarButtonItem = nil
+        } else if selectedItems.count == sortedFiles.count || selectAllMode {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonDeselectAll, style: .plain, target: self, action: #selector(deselectAllChildren))
         } else {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
