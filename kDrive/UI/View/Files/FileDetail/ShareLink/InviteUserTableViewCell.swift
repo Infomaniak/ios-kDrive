@@ -33,7 +33,11 @@ class InviteUserTableViewCell: InsetTableViewCell {
     weak var delegate: SearchUserDelegate?
     let dropDown = DropDown()
 
-    var removeUsers: [Int] = []
+    var removeUsers: [Int] = [] {
+        didSet {
+            filterContent(for: textField.text?.trimmingCharacters(in: .whitespaces) ?? "")
+        }
+    }
     var removeEmails: [String] = []
 
     private var users: [DriveUser] = []
@@ -45,7 +49,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
             guard drive != nil else { return }
             users = DriveInfosManager.instance.getUsers(for: drive.id)
             users.sort { $0.displayName < $1.displayName }
-            results = users
+            results = users.filter { !removeUsers.contains($0.id) }
 
             configureDropDown()
         }
