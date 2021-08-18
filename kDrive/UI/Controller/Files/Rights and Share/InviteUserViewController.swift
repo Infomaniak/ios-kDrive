@@ -41,6 +41,7 @@ class InviteUserViewController: UIViewController {
     private var newPermission = UserPermission.read
     private var message = String()
     private var emptyInvitation = false
+    private var savedText = String()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -113,12 +114,20 @@ class InviteUserViewController: UIViewController {
     }
 
     func reloadInvited() {
+        // Save text to reassign it after reload
+        if let addUserIndex = rows.firstIndex(of: .addUser) {
+            let cell = tableView.cellForRow(at: IndexPath(row: addUserIndex, section: 0)) as? InviteUserTableViewCell
+            savedText = cell?.textField.text ?? ""
+        }
+
         emptyInvitation = users.isEmpty && emails.isEmpty
+
         if emptyInvitation {
             rows = [.addUser, .rights, .message]
         } else {
             rows = [.invited, .addUser, .rights, .message]
         }
+
         tableView.reloadSections([0], with: .automatic)
     }
 
@@ -199,6 +208,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
             cell.drive = driveFileManager.drive
+            cell.textField.text = savedText
             cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail
             cell.removeUsers = removeUsers
             cell.removeEmails = removeEmails

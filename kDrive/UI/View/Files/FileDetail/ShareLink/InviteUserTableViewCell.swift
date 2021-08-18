@@ -116,6 +116,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
     }
 
     private func selectItem(at index: Int) {
+        textField.text = ""
         if let email = email {
             if index == 0 {
                 delegate?.didSelectEmail(email: email)
@@ -125,7 +126,6 @@ class InviteUserTableViewCell: InsetTableViewCell {
         } else {
             delegate?.didSelectUser(user: results[index])
         }
-        textField.text = ""
     }
 }
 
