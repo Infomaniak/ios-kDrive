@@ -23,7 +23,7 @@ import UIKit
 
 protocol SearchUserDelegate: AnyObject {
     func didSelectUser(user: DriveUser)
-    func didSelectMail(mail: String)
+    func didSelectEmail(email: String)
 }
 
 class InviteUserTableViewCell: InsetTableViewCell {
@@ -35,30 +35,21 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     var removeUsers: [Int] = [] {
         didSet {
-            guard drive != nil else { return }
-            users = DriveInfosManager.instance.getUsers(for: drive.id)
-            users.removeAll {
-                $0.id == AccountManager.instance.currentUserId ||
-                    removeUsers.contains($0.id)
-            }
-            filterContent(for: "")
+            filterContent(for: standardize(text: textField.text ?? ""))
         }
     }
-
     var removeEmails: [String] = []
 
     private var users: [DriveUser] = []
     private var results: [DriveUser] = []
-    private var mail: String?
+    private var email: String?
 
     var drive: Drive! {
         didSet {
             guard drive != nil else { return }
             users = DriveInfosManager.instance.getUsers(for: drive.id)
-            users.sort { user1, user2 -> Bool in
-                user1.displayName < user2.displayName
-            }
-            results = users
+            users.sort { $0.displayName < $1.displayName }
+            results = users.filter { !removeUsers.contains($0.id) }
 
             configureDropDown()
         }
@@ -75,11 +66,11 @@ class InviteUserTableViewCell: InsetTableViewCell {
         dropDown.cellHeight = 65
         dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
 
-        dropDown.customCellConfiguration = { (index: Index, _: String, cell: DropDownCell) -> Void in
+        dropDown.customCellConfiguration = { index, _, cell in
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
-            if let mail = self.mail {
+            if let email = self.email {
                 if index == 0 {
-                    cell.configureWith(mail: mail)
+                    cell.configureWith(mail: email)
                 } else {
                     cell.configureWith(user: self.results[index - 1])
                 }
@@ -87,17 +78,8 @@ class InviteUserTableViewCell: InsetTableViewCell {
                 cell.configureWith(user: self.results[index])
             }
         }
-        dropDown.selectionAction = { [unowned self] (index: Int, _: String) in
-            if let mail = mail {
-                if index == 0 {
-                    delegate?.didSelectMail(mail: mail)
-                } else {
-                    delegate?.didSelectUser(user: results[index - 1])
-                }
-            } else {
-                delegate?.didSelectUser(user: results[index])
-            }
-            textField.text = ""
+        dropDown.selectionAction = { [unowned self] index, _ in
+            selectItem(at: index)
         }
 
         dropDown.dataSource = results.map(\.displayName)
@@ -105,32 +87,25 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     @IBAction func editingDidChanged(_ sender: UITextField) {
         if let searchText = textField.text {
-            filterContent(for: searchText)
+            filterContent(for: standardize(text: searchText))
         }
         dropDown.show()
     }
 
     private func filterContent(for text: String) {
-        var emailExist = false
-        if !text.isEmpty {
-            results.removeAll()
-            for user in users {
-                if user.displayName.contains(text) || user.email.contains(text) {
-                    results.append(user)
-                    if text == user.email {
-                        emailExist = true
-                    }
-                }
-            }
+        if text.isEmpty {
+            // If no text, we return all users, except the one explicitly removed
+            results = users.filter { !removeUsers.contains($0.id) }
         } else {
-            results = users
+            // Filter the users based on the text
+            results = users.filter { !removeUsers.contains($0.id) && ($0.displayName.lowercased().contains(text) || $0.email.contains(text)) }
         }
         dropDown.dataSource.removeAll()
-        if isValidEmail(text) && !emailExist && !removeEmails.contains(text) {
-            mail = text
+        if isValidEmail(text) && !removeEmails.contains(text) && !users.contains(where: { $0.email == text }) {
+            email = text
             dropDown.dataSource.append(text)
         } else {
-            mail = nil
+            email = nil
         }
         dropDown.dataSource.append(contentsOf: results.map(\.displayName))
     }
@@ -138,6 +113,23 @@ class InviteUserTableViewCell: InsetTableViewCell {
     private func isValidEmail(_ email: String) -> Bool {
         let emailPred = NSPredicate(format: "SELF MATCHES %@", Constants.mailRegex)
         return emailPred.evaluate(with: email)
+    }
+
+    private func selectItem(at index: Int) {
+        textField.text = ""
+        if let email = email {
+            if index == 0 {
+                delegate?.didSelectEmail(email: email)
+            } else {
+                delegate?.didSelectUser(user: results[index - 1])
+            }
+        } else {
+            delegate?.didSelectUser(user: results[index])
+        }
+    }
+
+    private func standardize(text: String) -> String {
+        return text.trimmingCharacters(in: .whitespaces).lowercased()
     }
 }
 
@@ -147,5 +139,17 @@ extension InviteUserTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         dropDown.setupCornerRadius(UIConstants.cornerRadius)
         dropDown.show()
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // Select first result on text field return
+        if !results.isEmpty || email != nil {
+            // Hide the dropdown to prevent UI glitches
+            dropDown.hide()
+            selectItem(at: 0)
+            return true
+        } else {
+            return false
+        }
     }
 }

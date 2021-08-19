@@ -1,37 +1,34 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 class InviteUserViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
 
+    var file: File!
+    var driveFileManager: DriveFileManager!
     var removeUsers: [Int] = []
     var removeEmails: [String] = []
     var emails: [String] = []
     var users: [DriveUser] = []
-    var message = String()
-    var file: File!
-
-    var emptyInvitation = false
 
     private enum InviteUserRows: CaseIterable {
         case invited
@@ -39,11 +36,12 @@ class InviteUserViewController: UIViewController {
         case rights
         case message
     }
+
     private var rows = InviteUserRows.allCases
-
     private var newPermission = UserPermission.read
-
-    var driveFileManager: DriveFileManager!
+    private var message = String()
+    private var emptyInvitation = false
+    private var savedText = String()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,9 +50,10 @@ class InviteUserViewController: UIViewController {
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MessageTableViewCell.self)
         tableView.register(cellView: InvitedUserTableViewCell.self)
+
         hideKeyboardWhenTappedAround()
-        navigationController?.setInfomaniakAppearanceNavigationBar()
         setTitle()
+        navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
@@ -85,7 +84,7 @@ class InviteUserViewController: UIViewController {
     }
 
     @objc func closeButtonPressed() {
-        self.dismiss(animated: true)
+        dismiss(animated: true)
     }
 
     func setTitle() {
@@ -110,19 +109,25 @@ class InviteUserViewController: UIViewController {
     func shareAndDismiss() {
         let usersIds = users.map(\.id)
         let tags = [Int]()
-        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in
-
-        }
+        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in }
         dismiss(animated: true)
     }
 
     func reloadInvited() {
+        // Save text to reassign it after reload
+        if let addUserIndex = rows.firstIndex(of: .addUser) {
+            let cell = tableView.cellForRow(at: IndexPath(row: addUserIndex, section: 0)) as? InviteUserTableViewCell
+            savedText = cell?.textField.text ?? ""
+        }
+
         emptyInvitation = users.isEmpty && emails.isEmpty
+
         if emptyInvitation {
             rows = [.addUser, .rights, .message]
         } else {
             rows = [.invited, .addUser, .rights, .message]
         }
+
         tableView.reloadSections([0], with: .automatic)
     }
 
@@ -173,8 +178,8 @@ class InviteUserViewController: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
-extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
 
+extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return rows.count
     }
@@ -203,6 +208,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
             cell.drive = driveFileManager.drive
+            cell.textField.text = savedText
             cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail
             cell.removeUsers = removeUsers
             cell.removeEmails = removeEmails
@@ -243,7 +249,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
                 rightsSelectionVC.delegate = self
                 rightsSelectionVC.selectedRight = newPermission.rawValue
                 rightsSelectionVC.canDelete = false
-                rightsSelectionVC.userType = "multiUser"
+                rightsSelectionVC.userType = .multiUser
             }
             present(rightsSelectionViewController, animated: true)
         default:
@@ -265,7 +271,8 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: - SearchUserDelegate
+// MARK: - Search user delegate
+
 extension InviteUserViewController: SearchUserDelegate {
     func didSelectUser(user: DriveUser) {
         users.append(user)
@@ -273,38 +280,36 @@ extension InviteUserViewController: SearchUserDelegate {
         reloadInvited()
     }
 
-    func didSelectMail(mail: String) {
-        emails.append(mail)
-        removeEmails.append(mail)
+    func didSelectEmail(email: String) {
+        emails.append(email)
+        removeEmails.append(email)
         reloadInvited()
     }
 }
 
-// MARK: - SelectedUsersDelegate
+// MARK: - Selected users delegate
+
 extension InviteUserViewController: SelectedUsersDelegate {
     func didDeleteUser(user: DriveUser) {
-        users.removeAll {
-            $0.id == user.id
-        }
-        removeUsers.removeAll {
-            $0 == user.id
-        }
+        users.removeAll { $0.id == user.id }
+        removeUsers.removeAll { $0 == user.id }
         reloadInvited()
     }
 
-    func didDeleteMail(mail: String) {
-        emails.removeAll {
-            $0 == mail
-        }
+    func didDeleteEmail(email: String) {
+        emails.removeAll { $0 == email }
         reloadInvited()
     }
 }
 
-// MARK: - RightsSelectionDelegate
+// MARK: - Rights selection delegate
+
 extension InviteUserViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         newPermission = UserPermission(rawValue: value)!
-        tableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .automatic)
+        if let index = rows.firstIndex(of: .rights) {
+            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        }
     }
 }
 
@@ -321,5 +326,4 @@ extension InviteUserViewController: FooterButtonDelegate {
             }
         }
     }
-
 }
