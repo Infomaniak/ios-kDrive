@@ -203,11 +203,13 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             self.files = self.changedFiles
             self.downloadInProgress = false
             self.tableView.reloadRows(at: [indexPath], with: .fade)
-            self.dismiss(animated: true) { [parent = self.presentingViewController] in
+            if action == .download {
                 if let downloadedArchiveUrl = self.downloadedArchiveUrl {
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
-                    parent?.present(documentExportViewController, animated: true)
+                    self.present(documentExportViewController, animated: true)
                 }
+            } else {
+                self.dismiss(animated: true)
             }
             self.reloadAction?()
             self.changedFiles = []
