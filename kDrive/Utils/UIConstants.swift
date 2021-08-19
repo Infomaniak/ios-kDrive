@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import SnackBar
 import UIKit
 
 class UIConstants {
@@ -33,13 +34,15 @@ class UIConstants {
     static let largeTitleHeight: CGFloat = 96
     static let insufficientStorageMinimumPercentage: Double = 90.0
 
-    static func showSnackBar(message: String, action: IKSnackBar.Action? = nil) {
-        let snackbar = IKSnackBar.make(message: message, duration: .lengthLong)
+    @discardableResult
+    static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {
+        let snackbar = IKSnackBar.make(message: message, duration: duration)
         if let action = action {
             snackbar?.setAction(action).show()
         } else {
             snackbar?.show()
         }
+        return snackbar
     }
 
     static func openUrl(_ string: String, from viewController: UIViewController) {

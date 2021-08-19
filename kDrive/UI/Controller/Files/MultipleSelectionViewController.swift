@@ -197,7 +197,7 @@ class MultipleSelectionViewController: UIViewController {
                     if files.count == 1 {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                             guard let cancelId = cancelId else { return }
-                            self.driveFileManager.cancelAction(file: files[0], cancelId: cancelId) { error in
+                            self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                 self.getNewChanges()
                                 if error == nil {
                                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)

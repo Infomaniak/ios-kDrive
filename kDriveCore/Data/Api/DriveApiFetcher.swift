@@ -645,11 +645,35 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
+    public func bulkAction(driveId: Int, action: BulkAction, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.bulkAction(driveId: driveId)
+
+        // Create encoder
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        let parameterEncoder = JSONParameterEncoder(encoder: encoder)
+
+        authenticatedSession.request(url, method: .post, parameters: action, encoder: parameterEncoder)
+            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
+
+    public func getFileCount(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<FileCount>?, Error?) -> Void) {
+        let url = ApiRoutes.fileCount(driveId: driveId, fileId: fileId)
+
+        authenticatedSession.request(url, method: .get)
+            .responseDecodable(of: ApiResponse<FileCount>.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
+
     public func getDownloadArchiveLink(driveId: Int, for files: [File], completion: @escaping (ApiResponse<DownloadArchiveResponse>?, Error?) -> Void) {
         let url = ApiRoutes.downloadArchiveLink(driveId: driveId)
         let body: [String: Any] = ["file_ids": files.map(\.id)]
 
         authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
+            .validate()
             .responseDecodable(of: ApiResponse<DownloadArchiveResponse>.self, decoder: ApiFetcher.decoder) { response in
                 self.handleResponse(response: response, completion: completion)
             }

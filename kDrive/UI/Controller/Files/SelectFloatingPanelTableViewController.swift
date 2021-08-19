@@ -36,7 +36,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
     }
 
     lazy var actions: [FloatingPanelAction] = {
-        if sharedWithMe {
+        if sharedWithMe || files.count > Constants.bulkActionThreshold {
             return FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else {
             return FloatingPanelAction.multipleSelectionActions
@@ -141,8 +141,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
             }
         case .download:
-            // TODO: Replace with constant from bulk actions branch
-            if files.count > 10 || !files.allSatisfy({ !$0.isDirectory }) {
+            if files.count > Constants.bulkActionThreshold || !files.allSatisfy({ !$0.isDirectory }) {
                 if downloadInProgress,
                    let currentArchiveId = currentArchiveId,
                    let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
@@ -198,7 +197,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
             } else {
                 if self.downloadError != .taskCancelled {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: self.downloadError?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
                 }
             }
             self.files = self.changedFiles
@@ -227,7 +226,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     self.tableView.reloadRows(at: [downloadCellPath], with: .fade)
                 }
             } else {
-                completion(nil, (error as? DriveError) ?? .unknownError)
+                completion(nil, (error as? DriveError) ?? .serverError)
             }
         }
     }

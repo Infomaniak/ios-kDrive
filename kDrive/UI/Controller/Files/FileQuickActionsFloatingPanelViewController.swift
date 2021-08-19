@@ -208,10 +208,12 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
                 return !sharedWithMe
+            case .download:
+                return file.rights?.read ?? false
             case .move:
                 return (file.rights?.move ?? false) && !sharedWithMe
             case .duplicate:
-                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
+                return !sharedWithMe && (file.rights?.read ?? false) && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
             case .rename:
                 return (file.rights?.rename ?? false) && !sharedWithMe
             case .delete:
@@ -430,7 +432,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                         group.notify(queue: .main) {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                                 if let cancelId = cancelId {
-                                    self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
+                                    self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                         if error == nil {
                                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
                                         }
@@ -514,7 +516,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     } else {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
                             if let cancelId = response?.id {
-                                self.driveFileManager.cancelAction(file: self.file, cancelId: cancelId) { error in
+                                self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                     if error == nil {
                                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileMoveCancelled)
                                     }

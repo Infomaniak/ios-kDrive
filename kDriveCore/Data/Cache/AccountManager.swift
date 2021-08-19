@@ -75,6 +75,7 @@ public class AccountManager: RefreshTokenDelegate {
 
     private var driveFileManagers = [String: DriveFileManager]()
     private var apiFetchers = [Int: DriveApiFetcher]()
+    public let mqService = MQService()
 
     private init() {
         self.currentDriveId = UserDefaults.shared.currentDriveId
@@ -224,7 +225,7 @@ public class AccountManager: RefreshTokenDelegate {
         }
     }
 
-    public func updateUserForAccount(_ account: Account, completion: @escaping (Account?, Drive?, Error?) -> Void) {
+    public func updateUserForAccount(_ account: Account, registerToken: Bool, completion: @escaping (Account?, Drive?, Error?) -> Void) {
         guard account.isConnected else { return }
 
         let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
@@ -247,6 +248,9 @@ public class AccountManager: RefreshTokenDelegate {
                             DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
                         }
                         self.saveAccounts()
+                        if registerToken {
+                            self.mqService.registerForNotifications(with: driveResponse.ipsToken)
+                        }
                         completion(account, switchedDrive, nil)
                     } else {
                         if let error = error as? DriveError, error == .noDrive {

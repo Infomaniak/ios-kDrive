@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakLogin
 import kDriveCore
+import UIKit
 
 class SwitchUserViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
     let accountManager = AccountManager.instance
 
@@ -39,7 +38,7 @@ class SwitchUserViewController: UIViewController {
         tableView.register(cellView: UserAccountTableViewCell.self)
         // Try to update other accounts infos
         for account in accountManager.accounts where account != accountManager.currentAccount {
-            accountManager.updateUserForAccount(account) { _, _, _ in }
+            accountManager.updateUserForAccount(account, registerToken: false) { _, _, _ in }
         }
     }
 
@@ -69,11 +68,11 @@ class SwitchUserViewController: UIViewController {
         navigationController.setInfomaniakAppearanceNavigationBar()
         return navigationController
     }
-
 }
-// MARK: - UITableViewDelegate
-extension SwitchUserViewController: UITableViewDelegate {
 
+// MARK: - Table view delegate
+
+extension SwitchUserViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let account = accountManager.accounts[indexPath.row]
 
@@ -97,15 +96,15 @@ extension SwitchUserViewController: UITableViewDelegate {
             if isRootViewController {
                 (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(MainTabViewController.instantiate())
             } else {
-                self.navigationController?.popViewController(animated: true)
+                navigationController?.popViewController(animated: true)
             }
         }
     }
-
 }
-// MARK: - UITableViewDataSource
-extension SwitchUserViewController: UITableViewDataSource {
 
+// MARK: - Table view data source
+
+extension SwitchUserViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return accountManager.accounts.count
     }
@@ -124,12 +123,11 @@ extension SwitchUserViewController: UITableViewDataSource {
         }
         return cell
     }
-
 }
 
-// MARK: - Infomaniak Login Delegate
-extension SwitchUserViewController: InfomaniakLoginDelegate {
+// MARK: - Infomaniak login delegate
 
+extension SwitchUserViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
         AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { account, _ in
             if account != nil {

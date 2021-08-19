@@ -40,7 +40,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
-
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = 20
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
@@ -358,7 +357,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             }
         }
 
-        accountManager.updateUserForAccount(currentAccount) { [self] _, switchedDrive, error in
+        accountManager.updateUserForAccount(currentAccount, registerToken: true) { [self] _, switchedDrive, error in
             if let error = error {
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")

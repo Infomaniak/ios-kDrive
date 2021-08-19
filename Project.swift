@@ -55,6 +55,7 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/PhilippeWeidmann/SnackBar.swift", .upToNextMajor(from: "0.1.2")),
             .package(url: "https://github.com/flowbe/SwiftRegex.git", .upToNextMajor(from: "1.0.0")),
             .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "6.2.1")),
+            .package(url: "https://github.com/adam-fowler/mqtt-nio", .upToNextMajor(from: "2.1.0")),
             .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "8.0.0"))
     ],
     targets: [
@@ -131,6 +132,7 @@ let project = Project(name: "kDrive",
             dependencies: [
                     .package(product: "Alamofire"),
                     .package(product: "Atlantis"),
+                    .package(product: "MQTTNIO"),
                     .package(product: "InfomaniakCore"),
                     .package(product: "InfomaniakLogin"),
                     .package(product: "RealmSwift"),

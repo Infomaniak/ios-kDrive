@@ -232,6 +232,14 @@ public enum ApiRoutes {
         return "https://welcome.infomaniak.com/signup/ikdrive/steps"
     }
 
+    public static func bulkAction(driveId: Int) -> String {
+        return "\(driveApiUrl)\(driveId)/file/bulk"
+    }
+
+    public static func fileCount(driveId: Int, fileId: Int) -> String {
+        return "\(driveApiUrl)\(driveId)/file/\(fileId)/count"
+	}
+
     public static func downloadArchiveLink(driveId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/archive"
     }
