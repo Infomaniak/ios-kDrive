@@ -22,7 +22,7 @@ import kDriveCore
 extension FileProviderExtension {
     override func createDirectory(withName directoryName: String, inParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
         guard let fileId = parentItemIdentifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             completionHandler(nil, NSFileProviderError(.noSuchItem))
             return
         }
@@ -31,7 +31,7 @@ extension FileProviderExtension {
         let itemsWithSameParent = file.children.map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared.importedDocuments(forParent: parentItemIdentifier)
         let newItemFileName = directoryName.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-            !collidingItem.isTrashed {
+           !collidingItem.isTrashed {
             completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
             return
         }
@@ -71,14 +71,14 @@ extension FileProviderExtension {
 
         // Call completion handler with error if the file name already exists
         guard let fileId = parentItemIdentifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             completionHandler(nil, NSFileProviderError(.noSuchItem))
             return
         }
         let itemsWithSameParent = file.children.map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared.importedDocuments(forParent: parentItemIdentifier)
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-            !collidingItem.isTrashed {
+           !collidingItem.isTrashed {
             completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
             return
         }
@@ -116,7 +116,7 @@ extension FileProviderExtension {
         }
 
         guard let fileId = itemIdentifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             completionHandler(nil, NSFileProviderError(.noSuchItem))
             return
         }
@@ -126,7 +126,7 @@ extension FileProviderExtension {
         let itemsWithSameParent = file.parent!.children.map { FileProviderItem(file: $0, domain: self.domain) } + FileProviderExtensionState.shared.importedDocuments(forParent: item.parentItemIdentifier)
         let newItemFileName = itemName.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-            !collidingItem.isTrashed {
+           !collidingItem.isTrashed {
             completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
             return
         }
@@ -149,9 +149,9 @@ extension FileProviderExtension {
         }
 
         guard let fileId = itemIdentifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId),
-            let parentId = parentItemIdentifier.toFileId(),
-            let parent = driveFileManager.getCachedFile(id: parentId) else {
+              let file = driveFileManager.getCachedFile(id: fileId),
+              let parentId = parentItemIdentifier.toFileId(),
+              let parent = driveFileManager.getCachedFile(id: parentId) else {
             completionHandler(nil, NSFileProviderError(.noSuchItem))
             return
         }
@@ -168,7 +168,7 @@ extension FileProviderExtension {
     override func setFavoriteRank(_ favoriteRank: NSNumber?, forItemIdentifier itemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
         // How should we save favorite rank in database?
         guard let fileId = itemIdentifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             completionHandler(nil, NSFileProviderError(.noSuchItem))
             return
         }
@@ -191,7 +191,7 @@ extension FileProviderExtension {
 
     override func trashItem(withIdentifier itemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
         guard let fileId = itemIdentifier.toFileId(),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             completionHandler(nil, NSFileProviderError(.noSuchItem))
             return
         }
@@ -222,7 +222,7 @@ extension FileProviderExtension {
         driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
             if let file = response?.data {
                 if let parentItemIdentifier = parentItemIdentifier,
-                    let parentId = parentItemIdentifier.toFileId() {
+                   let parentId = parentItemIdentifier.toFileId() {
                     // Restore in given parent
                     self.driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: parentId) { _, error in
                         let item = FileProviderItem(file: file, domain: self.domain)
@@ -257,5 +257,4 @@ extension FileProviderExtension {
             }
         }
     }
-
 }

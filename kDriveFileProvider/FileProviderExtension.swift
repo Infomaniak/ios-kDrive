@@ -77,15 +77,8 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
         try isFileProviderExtensionEnabled()
-
         // Try to reload account if user logged in
-        if driveFileManager == nil {
-            accountManager.forceReload()
-            driveFileManager = setDriveFileManager()
-        }
-        guard driveFileManager != nil else {
-            throw nsError(code: .notAuthenticated)
-        }
+        try updateDriveFileManager()
 
         if let item = FileProviderExtensionState.shared.workingSet[identifier] {
             return item
@@ -114,21 +107,23 @@ class FileProviderExtension: NSFileProviderExtension {
         return FileProviderItem.identifier(for: url, domain: domain)
     }
 
-    override func providePlaceholder(at url: URL, completionHandler: @escaping (_ error: Error?) -> Void) {
-        guard let fileId = FileProviderItem.identifier(for: url, domain: domain)?.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
-            completionHandler(nsError(code: .noSuchItem))
+    override func providePlaceholder(at url: URL, completionHandler: @escaping (Error?) -> Void) {
+        guard let identifier = persistentIdentifierForItem(at: url) else {
+            completionHandler(NSFileProviderError(.noSuchItem))
             return
         }
 
         do {
-            try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+            let fileProviderItem = try item(for: identifier)
+
             let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
-            try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: FileProviderItem(file: file, domain: domain))
+            try? FileManager.default.createDirectory(at: placeholderURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: fileProviderItem)
+
+            completionHandler(nil)
         } catch {
-            print("\(error)")
+            completionHandler(error)
         }
-        completionHandler(nil)
     }
 
     override func itemChanged(at url: URL) {
@@ -177,6 +172,16 @@ class FileProviderExtension: NSFileProviderExtension {
         }
     }
 
+    private func updateDriveFileManager() throws {
+        if driveFileManager == nil {
+            accountManager.forceReload()
+            driveFileManager = setDriveFileManager()
+        }
+        guard driveFileManager != nil else {
+            throw nsError(code: .notAuthenticated)
+        }
+    }
+
     private func fileStorageIsCurrent(item: FileProviderItem, file: File) -> Bool {
         if file.isLocalVersionOlderThanRemote() {
             return false
@@ -190,7 +195,7 @@ class FileProviderExtension: NSFileProviderExtension {
     private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
         if file.isLocalVersionOlderThanRemote() {
             // Prevent observing file multiple times
-            guard DownloadQueue.instance.operationsInQueue[file.id] == nil else {
+            guard DownloadQueue.instance.operation(for: file) == nil else {
                 completion(nil)
                 return
             }
@@ -284,15 +289,8 @@ class FileProviderExtension: NSFileProviderExtension {
 
     override func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier) throws -> NSFileProviderEnumerator {
         try isFileProviderExtensionEnabled()
-
         // Try to reload account if user logged in
-        if driveFileManager == nil {
-            accountManager.forceReload()
-            driveFileManager = setDriveFileManager()
-        }
-        guard driveFileManager != nil else {
-            throw nsError(code: .notAuthenticated)
-        }
+        try updateDriveFileManager()
 
         if containerItemIdentifier == .workingSet {
             return FileProviderEnumerator(containerItemIdentifier: .workingSet, driveFileManager: driveFileManager, domain: domain)
