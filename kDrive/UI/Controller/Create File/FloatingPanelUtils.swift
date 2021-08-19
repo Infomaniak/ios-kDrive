@@ -1,26 +1,26 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import FloatingPanel
+import kDriveCore
 import UIKit
 
 class DriveFloatingPanelController: FloatingPanelController {
-
     init() {
         super.init(delegate: nil)
         let appearance = SurfaceAppearance()
@@ -33,13 +33,13 @@ class DriveFloatingPanelController: FloatingPanelController {
         backdropView.dismissalTapGestureRecognizer.isEnabled = true
     }
 
+    @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
 
 class FileFloatingPanelLayout: FloatingPanelLayout {
-
     var position: FloatingPanelPosition = .bottom
     var initialState: FloatingPanelState = .tip
     var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring]
@@ -50,14 +50,14 @@ class FileFloatingPanelLayout: FloatingPanelLayout {
         self.backdropAlpha = backdropAlpha
         if hideTip {
             anchors = [
-                    .full: FloatingPanelLayoutAnchor(absoluteInset: 16.0, edge: .top, referenceGuide: .safeArea),
-                    .half: FloatingPanelLayoutAnchor(fractionalInset: 0.5, edge: .bottom, referenceGuide: .safeArea)
+                .full: FloatingPanelLayoutAnchor(absoluteInset: 16.0, edge: .top, referenceGuide: .safeArea),
+                .half: FloatingPanelLayoutAnchor(fractionalInset: 0.5, edge: .bottom, referenceGuide: .safeArea)
             ]
         } else {
             anchors = [
-                    .full: FloatingPanelLayoutAnchor(absoluteInset: 16.0, edge: .top, referenceGuide: .safeArea),
-                    .half: FloatingPanelLayoutAnchor(fractionalInset: 0.5, edge: .bottom, referenceGuide: .safeArea),
-                    .tip: FloatingPanelLayoutAnchor(absoluteInset: 86.0 + safeAreaInset, edge: .bottom, referenceGuide: .superview)
+                .full: FloatingPanelLayoutAnchor(absoluteInset: 16.0, edge: .top, referenceGuide: .safeArea),
+                .half: FloatingPanelLayoutAnchor(fractionalInset: 0.5, edge: .bottom, referenceGuide: .safeArea),
+                .tip: FloatingPanelLayoutAnchor(absoluteInset: 86.0 + safeAreaInset, edge: .bottom, referenceGuide: .superview)
             ]
         }
     }
@@ -65,11 +65,9 @@ class FileFloatingPanelLayout: FloatingPanelLayout {
     func backdropAlpha(for state: FloatingPanelState) -> CGFloat {
         return backdropAlpha
     }
-
 }
 
 class PlusButtonFloatingPanelLayout: FloatingPanelLayout {
-
     var position: FloatingPanelPosition = .bottom
     var height: CGFloat = 16
 
@@ -79,7 +77,7 @@ class PlusButtonFloatingPanelLayout: FloatingPanelLayout {
 
     var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring] {
         return [
-                .full: FloatingPanelLayoutAnchor(absoluteInset: height, edge: .bottom, referenceGuide: .safeArea)
+            .full: FloatingPanelLayoutAnchor(absoluteInset: height, edge: .bottom, referenceGuide: .safeArea)
         ]
     }
 
@@ -88,7 +86,6 @@ class PlusButtonFloatingPanelLayout: FloatingPanelLayout {
     func backdropAlpha(for state: FloatingPanelState) -> CGFloat {
         return 0.2
     }
-
 }
 
 class InformationViewFloatingPanelLayout: FloatingPanelLayout {
@@ -98,7 +95,7 @@ class InformationViewFloatingPanelLayout: FloatingPanelLayout {
 
     var anchors: [FloatingPanelState: FloatingPanelLayoutAnchoring] {
         return [
-                .full: FloatingPanelIntrinsicLayoutAnchor(absoluteOffset: 0, referenceGuide: .safeArea)
+            .full: FloatingPanelIntrinsicLayoutAnchor(absoluteOffset: 0, referenceGuide: .safeArea)
         ]
     }
 

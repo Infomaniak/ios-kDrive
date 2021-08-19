@@ -16,26 +16,25 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDriveCore
 import SnackBar
 import UIKit
 
-class UIConstants {
-    static let inputCornerRadius: CGFloat = 2
-    static let imageCornerRadius: CGFloat = 3
-    static let cornerRadius: CGFloat = 6
-    static let alertCornerRadius: CGFloat = 8
-    static let buttonCornerRadius: CGFloat = 10
-    static let floatingPanelCornerRadius: CGFloat = 20
-    static let listPaddingBottom: CGFloat = 50
-    static let listFloatingButtonPaddingBottom: CGFloat = 75
-    static let homeListPaddingTop: CGFloat = 16
-    static let floatingPanelHeaderHeight: CGFloat = 70
-    static let largeTitleHeight: CGFloat = 96
-    static let insufficientStorageMinimumPercentage: Double = 90.0
+public enum UIConstants {
+    public static let inputCornerRadius: CGFloat = 2
+    public static let imageCornerRadius: CGFloat = 3
+    public static let cornerRadius: CGFloat = 6
+    public static let alertCornerRadius: CGFloat = 8
+    public static let buttonCornerRadius: CGFloat = 10
+    public static let floatingPanelCornerRadius: CGFloat = 20
+    public static let listPaddingBottom: CGFloat = 50
+    public static let listFloatingButtonPaddingBottom: CGFloat = 75
+    public static let homeListPaddingTop: CGFloat = 16
+    public static let floatingPanelHeaderHeight: CGFloat = 70
+    public static let largeTitleHeight: CGFloat = 96
+    public static let insufficientStorageMinimumPercentage: Double = 90.0
 
     @discardableResult
-    static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {
+    public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {
         let snackbar = IKSnackBar.make(message: message, duration: duration)
         if let action = action {
             snackbar?.setAction(action).show()
@@ -45,13 +44,13 @@ class UIConstants {
         return snackbar
     }
 
-    static func openUrl(_ string: String, from viewController: UIViewController) {
+    public static func openUrl(_ string: String, from viewController: UIViewController) {
         if let url = URL(string: string) {
             openUrl(url, from: viewController)
         }
     }
 
-    static func openUrl(_ url: URL, from viewController: UIViewController) {
+    public static func openUrl(_ url: URL, from viewController: UIViewController) {
         #if ISEXTENSION
             viewController.extensionContext?.open(url)
         #else

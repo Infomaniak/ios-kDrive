@@ -19,7 +19,6 @@
 import UIKit
 
 @IBDesignable public class IKButton: UIButton {
-
     /// Set button style.
     @IBInspectable public var styleName: String = TextStyle.action.rawValue {
         didSet { setUpButton() }
@@ -35,7 +34,7 @@ import UIKit
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setUpButton()
     }
@@ -45,7 +44,7 @@ import UIKit
         setUpButton()
     }
 
-    public override func prepareForInterfaceBuilder() {
+    override public func prepareForInterfaceBuilder() {
         super.prepareForInterfaceBuilder()
         setUpButton()
     }

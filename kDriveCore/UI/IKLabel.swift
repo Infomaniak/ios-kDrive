@@ -19,7 +19,6 @@
 import UIKit
 
 public struct TextStyle: RawRepresentable {
-
     public var font: UIFont
     public var color: UIColor
 
@@ -56,7 +55,6 @@ public struct TextStyle: RawRepresentable {
 }
 
 @IBDesignable public class IKLabel: UILabel {
-
     /// Set label style.
     @IBInspectable public var styleName: String = TextStyle.body1.rawValue {
         didSet { setUpLabel() }
@@ -72,7 +70,7 @@ public struct TextStyle: RawRepresentable {
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setUpLabel()
     }
@@ -82,7 +80,7 @@ public struct TextStyle: RawRepresentable {
         setUpLabel()
     }
 
-    public override func prepareForInterfaceBuilder() {
+    override public func prepareForInterfaceBuilder() {
         super.prepareForInterfaceBuilder()
         setUpLabel()
     }
