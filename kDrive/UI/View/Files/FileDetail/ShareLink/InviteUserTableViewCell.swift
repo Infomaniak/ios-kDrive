@@ -35,7 +35,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     var removeUsers: [Int] = [] {
         didSet {
-            filterContent(for: textField.text?.trimmingCharacters(in: .whitespaces) ?? "")
+            filterContent(for: standardize(text: textField.text ?? ""))
         }
     }
     var removeEmails: [String] = []
@@ -87,7 +87,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     @IBAction func editingDidChanged(_ sender: UITextField) {
         if let searchText = textField.text {
-            filterContent(for: searchText.trimmingCharacters(in: .whitespaces))
+            filterContent(for: standardize(text: searchText))
         }
         dropDown.show()
     }
@@ -98,7 +98,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
             results = users.filter { !removeUsers.contains($0.id) }
         } else {
             // Filter the users based on the text
-            results = users.filter { !removeUsers.contains($0.id) && ($0.displayName.contains(text) || $0.email.contains(text)) }
+            results = users.filter { !removeUsers.contains($0.id) && ($0.displayName.lowercased().contains(text) || $0.email.contains(text)) }
         }
         dropDown.dataSource.removeAll()
         if isValidEmail(text) && !removeEmails.contains(text) && !users.contains(where: { $0.email == text }) {
@@ -126,6 +126,10 @@ class InviteUserTableViewCell: InsetTableViewCell {
         } else {
             delegate?.didSelectUser(user: results[index])
         }
+    }
+
+    private func standardize(text: String) -> String {
+        return text.trimmingCharacters(in: .whitespaces).lowercased()
     }
 }
 
