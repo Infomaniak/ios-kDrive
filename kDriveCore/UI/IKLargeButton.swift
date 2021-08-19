@@ -19,7 +19,6 @@
 import UIKit
 
 @IBDesignable public class IKLargeButton: UIButton {
-
     /// Toggle shadow elevation.
     @IBInspectable public var elevated: Bool = false {
         didSet { setElevation() }
@@ -46,7 +45,6 @@ import UIKit
     }
 
     public struct Style: RawRepresentable {
-
         var titleFont: UIFont
         var titleColor: UIColor
         var backgroundColor: UIColor
@@ -74,11 +72,11 @@ import UIKit
         }
     }
 
-    public override var isEnabled: Bool {
+    override public var isEnabled: Bool {
         didSet { setEnabled() }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setUpButton()
     }
@@ -88,7 +86,7 @@ import UIKit
         setUpButton()
     }
 
-    public override func prepareForInterfaceBuilder() {
+    override public func prepareForInterfaceBuilder() {
         super.prepareForInterfaceBuilder()
         setUpButton()
     }

@@ -16,24 +16,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import MaterialOutlinedTextField
+import UIKit
 
 /// Alert with text field
-class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
+open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
+    public struct TextFieldConfiguration {
+        public var autocapitalizationType: UITextAutocapitalizationType = .sentences
+        public var autocorrectionType: UITextAutocorrectionType = .default
+        public var spellCheckingType: UITextSpellCheckingType = .default
+        public var keyboardType: UIKeyboardType = .default
+        public var keyboardAppearance: UIKeyboardAppearance = .default
+        public var returnKeyType: UIReturnKeyType = .default
 
-    struct TextFieldConfiguration {
-        var autocapitalizationType: UITextAutocapitalizationType = .sentences
-        var autocorrectionType: UITextAutocorrectionType = .default
-        var spellCheckingType: UITextSpellCheckingType = .default
-        var keyboardType: UIKeyboardType = .default
-        var keyboardAppearance: UIKeyboardAppearance = .default
-        var returnKeyType: UIReturnKeyType = .default
+        public var selectedRange: Range<String.Index>?
 
-        var selectedRange: Range<String.Index>?
-
-        func apply(to textField: UITextField) {
+        public func apply(to textField: UITextField) {
             textField.autocapitalizationType = autocapitalizationType
             textField.autocorrectionType = autocorrectionType
             textField.spellCheckingType = spellCheckingType
@@ -42,17 +40,17 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
             textField.returnKeyType = returnKeyType
         }
 
-        func selectText(in textField: UITextField) {
+        public func selectText(in textField: UITextField) {
             if let selectedRange = selectedRange,
-                let str = textField.text,
-                let startPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.lowerBound.utf16Offset(in: str)),
-                let endPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.upperBound.utf16Offset(in: str)) {
+               let str = textField.text,
+               let startPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.lowerBound.utf16Offset(in: str)),
+               let endPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.upperBound.utf16Offset(in: str)) {
                 textField.selectedTextRange = textField.textRange(from: startPosition, to: endPosition)
             }
         }
 
-        static let defaultConfiguration = TextFieldConfiguration()
-        static let fileNameConfiguration = TextFieldConfiguration(autocapitalizationType: .none, autocorrectionType: .no, spellCheckingType: .no)
+        public static let defaultConfiguration = TextFieldConfiguration()
+        public static let fileNameConfiguration = TextFieldConfiguration(autocapitalizationType: .none, autocorrectionType: .no, spellCheckingType: .no)
     }
 
     private let labelText: String?
@@ -60,15 +58,16 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
     private let text: String?
     private let handler: ((String) -> Void)?
 
-    var textField: MaterialOutlinedTextField!
-    var textFieldConfiguration: TextFieldConfiguration = .defaultConfiguration {
+    public var textField: MaterialOutlinedTextField!
+    public var textFieldConfiguration: TextFieldConfiguration = .defaultConfiguration {
         didSet {
             if textField != nil {
                 textFieldConfiguration.apply(to: textField)
             }
         }
     }
-    var leadingConstraint: NSLayoutConstraint!
+
+    public var leadingConstraint: NSLayoutConstraint!
 
     /**
      Creates a new alert with text field.
@@ -80,7 +79,7 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         - loading: If this is set as true, the action button will automatically be set to the loading state while the `handler` is called. In this case, `handler` has to be **synchronous**
         - handler: Closure to execute when the action button is tapped
      */
-    convenience init(title: String, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public convenience init(title: String, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
         self.init(title: title, label: placeholder, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
     }
 
@@ -95,7 +94,7 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         - loading: If this is set as true, the action button will automatically be set to the loading state while the `handler` is called. In this case, `handler` has to be **synchronous**
         - handler: Closure to execute when the action button is tapped
      */
-    init(title: String, label: String?, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String, label: String?, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
         self.labelText = label
         self.placeholder = placeholder
         self.text = text
@@ -103,17 +102,18 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         super.init(title: title, action: action, loading: loading, handler: nil, cancelHandler: cancelHandler)
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidAppear(_ animated: Bool) {
+    override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         textField.becomeFirstResponder()
         textFieldConfiguration.selectText(in: textField)
     }
 
-    override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
 
         // Observe keyboard
@@ -152,7 +152,7 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
 
     // MARK: - Actions
 
-    @objc override func action() {
+    @objc override open func action() {
         guard let name = textField.text else {
             return
         }
@@ -197,8 +197,7 @@ class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
 
     // MARK: - Text field delegate
 
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    open func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.endEditing(true)
     }
-
 }

@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import MaterialOutlinedTextField
+import UIKit
 
-extension MaterialOutlinedTextField {
-    public func setInfomaniakColors() {
+public extension MaterialOutlinedTextField {
+    func setInfomaniakColors() {
         let textColor = KDriveCoreAsset.titleColor.color
         let normalLabelColor = ColorCompat.placeholderText
         let normalBorderColor = KDriveCoreAsset.borderColor.color
@@ -30,16 +30,16 @@ extension MaterialOutlinedTextField {
         let normalColorModel = ColorModel(textColor: textColor, floatingLabelColor: normalLabelColor, normalLabelColor: normalLabelColor, outlineColor: normalBorderColor)
         let editingColorModel = ColorModel(textColor: textColor, floatingLabelColor: editingColor, normalLabelColor: editingColor, outlineColor: editingColor)
         let disabledColorModel = ColorModel(textColor: textColor.withAlphaComponent(disabledAlpha),
-            floatingLabelColor: normalLabelColor.withAlphaComponent(disabledAlpha),
-            normalLabelColor: normalLabelColor.withAlphaComponent(disabledAlpha),
-            outlineColor: normalBorderColor.withAlphaComponent(disabledAlpha))
+                                            floatingLabelColor: normalLabelColor.withAlphaComponent(disabledAlpha),
+                                            normalLabelColor: normalLabelColor.withAlphaComponent(disabledAlpha),
+                                            outlineColor: normalBorderColor.withAlphaComponent(disabledAlpha))
 
         setColorModel(normalColorModel, for: .normal)
         setColorModel(editingColorModel, for: .editing)
         setColorModel(disabledColorModel, for: .disabled)
     }
 
-    public func setHint(_ hint: String?) {
+    func setHint(_ hint: String?) {
         placeholder = hint
         label.text = hint
     }

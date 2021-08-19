@@ -17,10 +17,9 @@
  */
 
 import UIKit
-import kDriveCore
 
 /// Alert with choices
-class AlertChoiceViewController: AlertViewController {
+public class AlertChoiceViewController: AlertViewController {
     private let choices: [String]
     private var selectedIndex: Int
     private let handler: ((Int) -> Void)?
@@ -32,8 +31,8 @@ class AlertChoiceViewController: AlertViewController {
         let renderer = UIGraphicsImageRenderer(size: size)
 
         return renderer.image { ctx in
-            ctx.cgContext.setFillColor(KDriveAsset.backgroundCardViewColor.color.cgColor)
-            ctx.cgContext.setStrokeColor(KDriveAsset.borderColor.color.cgColor)
+            ctx.cgContext.setFillColor(KDriveCoreAsset.backgroundCardViewColor.color.cgColor)
+            ctx.cgContext.setStrokeColor(KDriveCoreAsset.borderColor.color.cgColor)
             ctx.cgContext.setLineWidth(lineWidth)
 
             let diameter = min(size.width, size.height) - lineWidth
@@ -54,18 +53,19 @@ class AlertChoiceViewController: AlertViewController {
         - handler: Closure to execute when the action button is tapped
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
-    init(title: String, choices: [String], selected: Int = 0, action: String, loading: Bool = false, handler: ((Int) -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String, choices: [String], selected: Int = 0, action: String, loading: Bool = false, handler: ((Int) -> Void)?, cancelHandler: (() -> Void)? = nil) {
         self.choices = choices
         self.selectedIndex = selected
         self.handler = handler
         super.init(title: title, action: action, loading: loading, handler: nil, cancelHandler: cancelHandler)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
 
         var topAnchor = contentView.topAnchor
@@ -116,7 +116,7 @@ class AlertChoiceViewController: AlertViewController {
     }
 
     private func checkmarkImage(for index: Int) -> UIImage {
-        return index == selectedIndex ? KDriveAsset.check.image : AlertChoiceViewController.emptyCheckmarkImage
+        return index == selectedIndex ? KDriveCoreAsset.check.image : AlertChoiceViewController.emptyCheckmarkImage
     }
 
     // MARK: - Actions
@@ -134,7 +134,7 @@ class AlertChoiceViewController: AlertViewController {
         }
     }
 
-    @objc override func action() {
+    @objc override public func action() {
         if loading {
             setLoading(true)
             DispatchQueue.global(qos: .userInitiated).async {
@@ -149,5 +149,4 @@ class AlertChoiceViewController: AlertViewController {
             dismiss(animated: true)
         }
     }
-
 }

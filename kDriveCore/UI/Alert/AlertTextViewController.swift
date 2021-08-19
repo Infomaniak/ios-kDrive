@@ -17,11 +17,9 @@
  */
 
 import UIKit
-import kDriveCore
 
 /// Alert with text content
-class AlertTextViewController: AlertViewController {
-
+public class AlertTextViewController: AlertViewController {
     /**
      Creates a new alert with text content.
      - Parameters:
@@ -34,7 +32,7 @@ class AlertTextViewController: AlertViewController {
         - handler: Closure to execute when the action button is tapped
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
-    convenience init(title: String, message: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public convenience init(title: String, message: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
         let attributedText = NSAttributedString(string: message)
         self.init(title: title, message: attributedText, action: action, hasCancelButton: hasCancelButton, destructive: destructive, loading: loading, handler: handler, cancelHandler: cancelHandler)
     }
@@ -51,7 +49,7 @@ class AlertTextViewController: AlertViewController {
         - handler: Closure to execute when the action button is tapped
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
-    init(title: String, message: NSAttributedString, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String, message: NSAttributedString, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
         let label = IKLabel()
         label.attributedText = message
         label.numberOfLines = 0
@@ -61,8 +59,8 @@ class AlertTextViewController: AlertViewController {
         contentView = label
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
 }

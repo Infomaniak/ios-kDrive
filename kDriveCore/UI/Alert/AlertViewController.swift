@@ -17,14 +17,13 @@
  */
 
 import UIKit
-import kDriveCore
 
 /**
  Alert view controller superclass.
  Do **not** use this class directly, instead subclass it or use one of the existing subclasses:
  `AlertTextViewController`, `AlertFieldViewController`, `AlertChoiceViewController`, or `AlertDocViewController`
  */
-class AlertViewController: UIViewController {
+open class AlertViewController: UIViewController {
     private let actionString: String
     private let hasCancelButton: Bool
     private let destructive: Bool
@@ -32,13 +31,13 @@ class AlertViewController: UIViewController {
     private let handler: (() -> Void)?
     private let cancelHandler: (() -> Void)?
 
-    var contentView = UIView()
-    var alertView: UIView!
-    var actionButton: UIButton!
-    var cancelButton: UIButton!
-    var centerConstraint: NSLayoutConstraint!
+    public var contentView = UIView()
+    public var alertView: UIView!
+    public var actionButton: UIButton!
+    public var cancelButton: UIButton!
+    public var centerConstraint: NSLayoutConstraint!
 
-    init(title: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
         self.actionString = action
         self.hasCancelButton = hasCancelButton
         self.destructive = destructive
@@ -51,11 +50,12 @@ class AlertViewController: UIViewController {
         self.modalTransitionStyle = .crossDissolve
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
 
         // Background
@@ -64,7 +64,7 @@ class AlertViewController: UIViewController {
         // Alert view
         alertView = UIView()
         alertView.cornerRadius = UIConstants.alertCornerRadius
-        alertView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        alertView.backgroundColor = KDriveCoreAsset.backgroundCardViewColor.color
         alertView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(alertView)
 
@@ -94,7 +94,7 @@ class AlertViewController: UIViewController {
 
         // Cancel button
         cancelButton = UIButton(type: .system)
-        cancelButton.setTitle(KDriveStrings.Localizable.buttonCancel, for: .normal)
+        cancelButton.setTitle(KDriveCoreStrings.Localizable.buttonCancel, for: .normal)
         cancelButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: UIFontMetrics.default.scaledValue(for: 15))
         cancelButton.sizeToFit()
         cancelButton.addTarget(self, action: #selector(cancel), for: .touchUpInside)
@@ -137,13 +137,13 @@ class AlertViewController: UIViewController {
                 cancelButton.trailingAnchor.constraint(equalTo: actionButton.leadingAnchor, constant: -16),
                 cancelButton.topAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 16),
                 cancelButton.bottomAnchor.constraint(equalTo: alertView.bottomAnchor, constant: -16)
-                ])
+            ])
         }
         NSLayoutConstraint.activate(constraints)
     }
 
     /// Set or unset the action button to loading state
-    func setLoading(_ loading: Bool) {
+    public func setLoading(_ loading: Bool) {
         actionButton.setLoading(loading, style: .gray)
         cancelButton.isEnabled = !loading
     }
@@ -155,7 +155,7 @@ class AlertViewController: UIViewController {
         cancelHandler?()
     }
 
-    @objc func action() {
+    @objc open func action() {
         if loading {
             setLoading(true)
             DispatchQueue.global(qos: .userInitiated).async {
@@ -170,5 +170,4 @@ class AlertViewController: UIViewController {
             handler?()
         }
     }
-
 }

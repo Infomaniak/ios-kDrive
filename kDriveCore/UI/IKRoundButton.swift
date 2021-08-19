@@ -19,7 +19,6 @@
 import UIKit
 
 public class IKRoundButton: IKLargeButton {
-
     override func setUpButton() {
         super.setUpButton()
 
@@ -31,5 +30,4 @@ public class IKRoundButton: IKLargeButton {
     override func setBackgroundColor() {
         backgroundColor = isEnabled ? KDriveCoreAsset.infomaniakColor.color : KDriveCoreAsset.infomaniakColor.color.withAlphaComponent(0.38)
     }
-
 }
