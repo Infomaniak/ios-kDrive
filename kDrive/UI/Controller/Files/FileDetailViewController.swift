@@ -756,7 +756,7 @@ extension FileDetailViewController: FileLocationDelegate {
 
 extension FileDetailViewController: FileCommentDelegate {
     func didLikeComment(comment: Comment, index: Int) {
-        driveFileManager.apiFetcher.likeComment(file: file, like: comment.liked, comment: comment) { _, _ in
+        driveFileManager.apiFetcher.likeComment(file: file, liked: comment.liked, comment: comment) { _, _ in
             self.comments[index].likesCount = !self.comments[index].liked ? self.comments[index].likesCount + 1 : self.comments[index].likesCount - 1
             self.comments[index].liked = !self.comments[index].liked
             self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)

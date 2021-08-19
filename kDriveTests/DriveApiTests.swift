@@ -31,7 +31,7 @@ class FakeTokenDelegate: RefreshTokenDelegate {
 }
 
 final class DriveApiTests: XCTestCase {
-    static let defaultTimeout = 10.0
+    static let defaultTimeout = 30.0
     static var driveFileManager: DriveFileManager!
     var currentDrive: Drive {
         return DriveApiTests.driveFileManager.drive
@@ -570,9 +570,7 @@ final class DriveApiTests: XCTestCase {
                     self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
                         XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
                         XCTAssertNil(shareError, "There should be no error")
-                        let deletedInvitation = shareResponse!.data!.users.first {
-                            $0.id == Env.inviteUserId
-                        }
+                        let deletedInvitation = shareResponse?.data?.users.first { $0.id == Env.inviteUserId }
                         XCTAssertNil(deletedInvitation, "Deleted invitation should be nil")
                         expectation.fulfill()
                     }
@@ -706,7 +704,7 @@ final class DriveApiTests: XCTestCase {
                 XCTAssertNil(error, "There should be no error")
                 let comment = response!.data!
 
-                self.currentApiFetcher.likeComment(file: file, like: false, comment: response!.data!) { likeResponse, likeError in
+                self.currentApiFetcher.likeComment(file: file, liked: false, comment: comment) { likeResponse, likeError in
                     XCTAssertNotNil(likeResponse?.data, "Like response shouldn't be nil")
                     XCTAssertNil(likeError, "There should be no error")
 
@@ -851,7 +849,7 @@ final class DriveApiTests: XCTestCase {
                     self.currentApiFetcher.getFileListForDirectory(driveId: self.currentDrive.id, parentId: rootFile.id) { rootResponse, rootError in
                         XCTAssertNotNil(rootResponse?.data, "Root file shouldn't be nil")
                         XCTAssertNil(rootError, "There should be no error")
-                        let deletedFile = rootResponse!.data?.children.first {
+                        let deletedFile = rootResponse?.data?.children.first {
                             $0.id == directory.id
                         }
                         XCTAssertNil(deletedFile, "Deleted file should be nil")
@@ -1192,7 +1190,7 @@ final class DriveApiTests: XCTestCase {
                 XCTAssertTrue(comment.body == expectations[0].name, "Comment body is wrong")
                 expectations[0].expectation.fulfill()
 
-                self.currentApiFetcher.likeComment(file: officeFile, like: true, comment: comment) { responseLike, errorLike in
+                self.currentApiFetcher.likeComment(file: officeFile, liked: false, comment: comment) { responseLike, errorLike in
                     XCTAssertNotNil(responseLike, "Response like shouldn't be nil")
                     XCTAssertNil(errorLike, "There should be no error")
                     expectations[1].expectation.fulfill()
