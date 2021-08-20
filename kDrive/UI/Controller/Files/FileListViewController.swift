@@ -322,6 +322,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 if error as? DriveError != .searchCancelled {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }
+                self.isLoadingData = false
             }
         }
     }

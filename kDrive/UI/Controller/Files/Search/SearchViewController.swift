@@ -122,7 +122,7 @@ class SearchViewController: FileListViewController {
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
         guard isDisplayingSearchResults && driveFileManager != nil else {
             DispatchQueue.main.async {
-                completion(.success([]), false, true)
+                completion(.failure(DriveError.searchCancelled), false, true)
             }
             return
         }
