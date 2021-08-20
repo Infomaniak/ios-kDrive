@@ -319,7 +319,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                     // Pop view controller
                     self.navigationController?.popViewController(animated: true)
                 }
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                if error as? DriveError != .searchCancelled {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                }
             }
         }
     }

@@ -79,6 +79,7 @@ public struct DriveError: Error, Equatable {
     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
     public static let taskExpirationCancelled = DriveError(type: .localError, code: "taskExpirationCancelled")
     public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
+    public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")
     public static let quotaExceeded = DriveError(type: .serverError, code: "quota_exceeded_error", localizedString: KDriveCoreStrings.Localizable.notEnoughStorageDescription1)
     public static let shareLinkAlreadyExists = DriveError(type: .serverError, code: "file_share_link_already_exists", localizedString: KDriveCoreStrings.Localizable.errorShareLink)
     public static let objectNotFound = DriveError(type: .serverError, code: "object_not_found", localizedString: KDriveCoreStrings.Localizable.uploadFolderNotFoundError)
