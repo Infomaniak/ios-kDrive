@@ -136,7 +136,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                     self.settingsValue = [
                         .optionPassword: nil,
                         .optionDate: dropBox.validUntil,
-                        .optionSize: dropBox.limitFileSize
+                        .optionSize: dropBox.limitFileSize != nil ? dropBox.limitFileSize! / 1_073_741_824 : nil
                     ]
                     self.newPassword = dropBox.password
                 } else {

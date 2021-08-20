@@ -140,7 +140,8 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
-            let size = Double(limitFileSize) * pow(Double(1024), Double(3))
+            // Convert gigabytes to bytes
+            let size = Double(limitFileSize) * 1_073_741_824
             sizeLimit = Int(size)
         }
         var body: [String: Any] = [
@@ -176,7 +177,8 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.setupDropBox(directory: directory)
         var sizeLimit: Int?
         if let limitFileSize = limitFileSize {
-            let size = Double(limitFileSize) * pow(Double(1024), Double(3))
+            // Convert gigabytes to bytes
+            let size = Double(limitFileSize) * 1_073_741_824
             sizeLimit = Int(size)
         }
         var timestamp: Int?
