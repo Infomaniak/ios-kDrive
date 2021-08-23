@@ -136,7 +136,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                     self.settingsValue = [
                         .optionPassword: nil,
                         .optionDate: dropBox.validUntil,
-                        .optionSize: dropBox.limitFileSize
+                        .optionSize: dropBox.limitFileSize != nil ? dropBox.limitFileSize! / 1_073_741_824 : nil
                     ]
                     self.newPassword = dropBox.password
                 } else {
@@ -165,17 +165,16 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         navigationController?.popViewController(animated: true)
     }
 
-    func updateButton() {
+    func updateButton(footer: FooterButtonView? = nil) {
         var activateButton = true
         for (option, enabled) in settings {
-            if option != .optionMail && enabled && getValue(for: option) == nil {
-                if option != .optionPassword || !newPassword {
-                    activateButton = false
-                }
+            // Disable the button if the option is enabled but has no value, except in case of mail and password
+            if option != .optionMail && enabled && getValue(for: option) == nil && (option != .optionPassword || !newPassword) {
+                activateButton = false
             }
         }
-        let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as! FooterButtonView
-        footer.footerButton.isEnabled = activateButton
+        let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView ?? footer
+        footer?.footerButton.isEnabled = activateButton
     }
 
     // MARK: - Table view data source
@@ -226,6 +225,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         if section == tableView.numberOfSections - 1 {
             let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
             view.delegate = self
+            updateButton(footer: view)
             return view
         }
         return nil

@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
 import MaterialOutlinedTextField
+import UIKit
 
 protocol NewFolderSettingsDelegate: AnyObject {
     func didUpdateSettings(index: Int, isOn: Bool)
@@ -28,7 +28,6 @@ protocol NewFolderSettingsDelegate: AnyObject {
 }
 
 class NewFolderSettingsTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var bottomStackView: UIStackView!
     @IBOutlet weak var settingSwitch: UISwitch!
     @IBOutlet weak var detailLabel: UILabel!
