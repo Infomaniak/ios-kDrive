@@ -611,6 +611,9 @@ public class DriveApiFetcher: ApiFetcher {
         if let fileType = fileType {
             url += "&converted_type=\(fileType)"
         }
+        if let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            url = encodedUrl
+        }
 
         return authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in

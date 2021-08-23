@@ -491,10 +491,14 @@ public class DriveFileManager {
         let realm = getRealm()
         var searchResults = realm.objects(File.self)
         if let query = query, !query.isBlank {
-            searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS %@", query))
+            searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS[cd] %@", query))
         }
         if let fileType = fileType {
-            searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType = %@", fileType))
+            if fileType == ConvertedType.folder.rawValue {
+                searchResults = searchResults.filter(NSPredicate(format: "type == \"dir\""))
+            } else {
+                searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType))
+            }
         }
         var allFiles = [File]()
 
