@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
@@ -447,11 +448,12 @@ public class DriveFileManager {
         return allFiles
     }
 
-    public func searchFile(query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
+    @discardableResult
+    public func searchFile(query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) -> DataRequest? {
         if ReachabilityListener.instance.currentStatus == .offline {
             searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
         } else {
-            apiFetcher.searchFiles(driveId: drive.id, query: query, fileType: fileType, page: page, sortType: sortType) { [self] response, _ in
+            return apiFetcher.searchFiles(driveId: drive.id, query: query, fileType: fileType, page: page, sortType: sortType) { [self] response, error in
                 if let files = response?.data {
                     self.backgroundQueue.async { [self] in
                         autoreleasepool {
@@ -474,20 +476,29 @@ public class DriveFileManager {
                         }
                     }
                 } else {
-                    searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
+                    if error?.asAFError?.isExplicitlyCancelledError ?? false {
+                        completion(nil, nil, DriveError.searchCancelled)
+                    } else {
+                        searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
+                    }
                 }
             }
         }
+        return nil
     }
 
     private func searchOffline(query: String? = nil, fileType: String? = nil, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
         let realm = getRealm()
         var searchResults = realm.objects(File.self)
         if let query = query, !query.isBlank {
-            searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS %@", query))
+            searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS[cd] %@", query))
         }
         if let fileType = fileType {
-            searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType = %@", fileType))
+            if fileType == ConvertedType.folder.rawValue {
+                searchResults = searchResults.filter(NSPredicate(format: "type == \"dir\""))
+            } else {
+                searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType))
+            }
         }
         var allFiles = [File]()
 

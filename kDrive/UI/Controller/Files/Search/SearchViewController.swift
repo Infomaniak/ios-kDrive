@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import Alamofire
 import kDriveCore
+import UIKit
 
 public struct FileTypeRow: RawRepresentable {
-
     public typealias RawValue = String
 
     public var rawValue: String
@@ -56,7 +56,6 @@ public struct FileTypeRow: RawRepresentable {
 }
 
 class SearchViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.search }
     override class var storyboardIdentifier: String { "SearchViewController" }
 
@@ -74,13 +73,17 @@ class SearchViewController: FileListViewController {
     private var currentSearchText: String? {
         didSet { updateList() }
     }
+
     private var selectedFileType: FileTypeRow? {
         didSet { updateList() }
     }
+
     private var isDisplayingSearchResults: Bool {
         (currentSearchText ?? "").count >= minSearchCount || selectedFileType != nil
     }
+
     private var recentSearches = UserDefaults.shared.recentSearches
+    private var currentRequest: DataRequest?
 
     // MARK: - View controller lifecycle
 
@@ -121,12 +124,17 @@ class SearchViewController: FileListViewController {
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
         guard isDisplayingSearchResults && driveFileManager != nil else {
             DispatchQueue.main.async {
-                completion(.success([]), false, true)
+                completion(.failure(DriveError.searchCancelled), false, true)
             }
             return
         }
 
-        driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { file, children, error in
+        currentRequest = driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { file, children, error in
+            guard self.isDisplayingSearchResults else {
+                completion(.failure(DriveError.searchCancelled), false, false)
+                return
+            }
+
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, false)
             } else {
@@ -187,6 +195,9 @@ class SearchViewController: FileListViewController {
         sortedFiles = []
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadData()
+        currentRequest?.cancel()
+        currentRequest = nil
+        isLoadingData = false
         if isDisplayingSearchResults {
             forceRefresh()
         }
@@ -280,15 +291,12 @@ class SearchViewController: FileListViewController {
     override func removeFileTypeButtonPressed() {
         selectedFileType = nil
     }
-
 }
 
 // MARK: - Search results updating
 
 extension SearchViewController: UISearchResultsUpdating {
-
     func updateSearchResults(for searchController: UISearchController) {
         currentSearchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces)
     }
-
 }
