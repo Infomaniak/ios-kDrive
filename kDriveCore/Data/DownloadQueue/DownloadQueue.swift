@@ -70,7 +70,7 @@ public class DownloadQueue {
         didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
     private var bestSession: FileDownloadSession {
-        return Constants.isInExtension ? BackgroundDownloadSessionManager.instance : foregroundSession
+        return foregroundSession
     }
 
     // MARK: - Public methods
