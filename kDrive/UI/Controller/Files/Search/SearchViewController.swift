@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import kDriveCore
 import UIKit
 
@@ -82,6 +83,7 @@ class SearchViewController: FileListViewController {
     }
 
     private var recentSearches = UserDefaults.shared.recentSearches
+    private var currentRequest: DataRequest?
 
     // MARK: - View controller lifecycle
 
@@ -127,7 +129,7 @@ class SearchViewController: FileListViewController {
             return
         }
 
-        driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { file, children, error in
+        currentRequest = driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { file, children, error in
             guard self.isDisplayingSearchResults else {
                 completion(.failure(DriveError.searchCancelled), false, false)
                 return
@@ -193,6 +195,9 @@ class SearchViewController: FileListViewController {
         sortedFiles = []
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadData()
+        currentRequest?.cancel()
+        currentRequest = nil
+        isLoadingData = false
         if isDisplayingSearchResults {
             forceRefresh()
         }

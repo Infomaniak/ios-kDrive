@@ -602,7 +602,8 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
-    public func searchFiles(driveId: Int, query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
+    @discardableResult
+    public func searchFiles(driveId: Int, query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) -> DataRequest {
         var url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
         if let query = query {
             url += "&query=\(query)"
@@ -611,7 +612,7 @@ public class DriveApiFetcher: ApiFetcher {
             url += "&converted_type=\(fileType)"
         }
 
-        authenticatedSession.request(url, method: .get)
+        return authenticatedSession.request(url, method: .get)
             .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
                 self.handleResponse(response: response, completion: completion)
             }

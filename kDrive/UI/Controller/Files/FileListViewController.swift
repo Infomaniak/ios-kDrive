@@ -84,7 +84,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     lazy var configuration = Configuration(emptyViewType: .emptyFolder)
     private var uploadingFilesCount = 0
     private var nextPage = 1
-    private var isLoadingData = false
+    var isLoadingData = false
     private var isReloading = false
     private var isContentLoaded = false
     var listStyle = FileListOptions.instance.currentStyle {
