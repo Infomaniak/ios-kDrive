@@ -27,7 +27,6 @@ public class MQService {
         return decoder
     }()
 
-    private let reconnectDelay: Double = 5
     private let queue = DispatchQueue(label: "com.infomaniak.drive.mqservice")
     private static let configuration = MQTTClient.Configuration(
         keepAliveInterval: .seconds(30),
@@ -46,8 +45,17 @@ public class MQService {
         configuration: configuration
     )
 
+    private let initialReconnectionTimeout: Double = 1
+    private let maxReconnectionTimeout: Double = 300
+
     private var currentToken: IPSToken?
+    private var reconnections = 0
     private var actionProgressObservers = [UUID: (ActionProgressNotification) -> Void]()
+
+    private var reconnectionDelay: Double {
+        reconnections += 1
+        return min(initialReconnectionTimeout * Double(2 * reconnections), maxReconnectionTimeout)
+    }
 
     public init() {}
 
@@ -89,9 +97,7 @@ public class MQService {
                 }
                 client.addCloseListener(named: "Drive close listener") { _ in
                     DDLogWarn("[MQService] Connection closed")
-                    queue.async {
-                        reconnect()
-                    }
+                    reconnect()
                 }
             } catch {
                 DDLogError("[MQService] Error while subscribing: \(error)")
@@ -100,14 +106,15 @@ public class MQService {
     }
 
     func reconnect() {
-        guard !client.isActive() else { return }
-        DDLogInfo("[MQService] Reconnecting…")
-        do {
-            _ = try client.connect(cleanSession: false).wait()
-            DDLogInfo("[MQService] Connection successful")
-        } catch {
-            DDLogError("[MQService] Error while connecting: \(error)")
-            queue.asyncAfter(deadline: .now() + reconnectDelay) {
+        queue.asyncAfter(deadline: .now() + reconnectionDelay) {
+            guard !self.client.isActive() else { return }
+            DDLogInfo("[MQService] Reconnecting…")
+            do {
+                _ = try self.client.connect(cleanSession: false).wait()
+                DDLogInfo("[MQService] Connection successful")
+                self.reconnections = 0
+            } catch {
+                DDLogError("[MQService] Error while connecting: \(error)")
                 self.reconnect()
             }
         }
