@@ -89,6 +89,6 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _avatarUrl = "avatar_url"
         case displayName = "display_name"
         case _permission = "permission"
-        case type = "type"
+        case type
     }
 }

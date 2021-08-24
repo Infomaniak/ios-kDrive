@@ -50,7 +50,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
 
     func configureWith(user: DriveUser, blocked: Bool = false) {
         notAcceptedView.isHidden = true
-        externalUserView.isHidden = user.type == .main ? true : false
+        externalUserView.isHidden = user.type != .shared
         accessoryImageView.isHidden = blocked
 
         titleLabel.text = user.displayName
