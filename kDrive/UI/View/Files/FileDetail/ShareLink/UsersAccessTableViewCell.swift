@@ -29,6 +29,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     @IBOutlet weak var detailLabel: UILabel!
     @IBOutlet weak var rightsLabel: UILabel!
     @IBOutlet weak var notAcceptedView: UIView!
+    @IBOutlet weak var externalUserView: UIView!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -47,8 +48,9 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
     }
 
-    func configureWith(user: DriveUser, blocked: Bool = false) {
+    func configureWith(user: DriveUser, blocked: Bool = false, external: Bool) {
         notAcceptedView.isHidden = true
+        externalUserView.isHidden = !external
         accessoryImageView.isHidden = blocked
 
         titleLabel.text = user.displayName
@@ -65,6 +67,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
 
     func configureWith(invitation: Invitation) {
         notAcceptedView.isHidden = false
+        externalUserView.isHidden = true
 
         titleLabel.text = invitation.displayName
         detailLabel.text = invitation.email
@@ -86,6 +89,8 @@ class UsersAccessTableViewCell: InsetTableViewCell {
 
     func configureWith(tag: Tag, drive: Drive) {
         notAcceptedView.isHidden = true
+        externalUserView.isHidden = true
+
         avatarHeightConstraint.constant = 18
         avatarImage.layer.cornerRadius = 0
         avatarImage.tintColor = .white
