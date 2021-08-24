@@ -48,9 +48,9 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
     }
 
-    func configureWith(user: DriveUser, blocked: Bool = false, external: Bool) {
+    func configureWith(user: DriveUser, blocked: Bool = false) {
         notAcceptedView.isHidden = true
-        externalUserView.isHidden = !external
+        externalUserView.isHidden = user.type == .main ? true : false
         accessoryImageView.isHidden = blocked
 
         titleLabel.text = user.displayName

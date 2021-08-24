@@ -22,6 +22,11 @@ import Kingfisher
 import RealmSwift
 import UIKit
 
+public enum DriveUserType: String, Codable {
+    case shared
+    case main
+}
+
 public enum UserPermission: String, Codable, CaseIterable {
     case read
     case write
@@ -62,6 +67,7 @@ public class DriveUser: Object, Codable, InfomaniakUser {
     @Persisted private var _avatarUrl: String?
     @Persisted public var displayName: String = ""
     @Persisted private var _permission: String?
+    public var type: DriveUserType?
 
     public var avatar: String {
         return !_avatar.isBlank ? _avatar : (_avatarUrl ?? "")
@@ -83,5 +89,6 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _avatarUrl = "avatar_url"
         case displayName = "display_name"
         case _permission = "permission"
+        case type = "type"
     }
 }
