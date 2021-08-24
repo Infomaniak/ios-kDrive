@@ -107,9 +107,9 @@ public class UploadQueue {
         }
     }
 
-    public func addToQueue(file: UploadFile) {
+    public func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         dispatchQueue.async {
-            self.addToQueue(file: file, using: self.realm)
+            self.addToQueue(file: file, itemIdentifier: itemIdentifier, using: self.realm)
         }
     }
 
@@ -217,7 +217,7 @@ public class UploadQueue {
 
     // MARK: - Private methods
 
-    private func addToQueue(file: UploadFile, using realm: Realm) {
+    private func addToQueue(file: UploadFile, itemIdentifier: NSFileProviderItemIdentifier? = nil, using realm: Realm) {
         guard !file.isInvalidated && operationsInQueue[file.id] == nil && file.maxRetryCount > 0 else {
             return
         }
@@ -238,7 +238,7 @@ public class UploadQueue {
             }
         }
 
-        let operation = UploadOperation(file: file, urlSession: bestSession)
+        let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
         operation.queuePriority = file.priority
         operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
             self.dispatchQueue.async {

@@ -60,6 +60,7 @@ public class UploadOperation: Operation {
 
     private var file: UploadFile
     private let urlSession: FileUploadSession
+    private let itemIdentifier: NSFileProviderItemIdentifier?
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
     private var uploadToken: UploadToken?
     private var task: URLSessionUploadTask?
@@ -99,9 +100,10 @@ public class UploadOperation: Operation {
 
     // MARK: - Public methods
 
-    public init(file: UploadFile, urlSession: FileUploadSession = URLSession.shared) {
+    public init(file: UploadFile, urlSession: FileUploadSession = URLSession.shared, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         self.file = UploadFile(value: file)
         self.urlSession = urlSession
+        self.itemIdentifier = itemIdentifier
         self.result = UploadCompletionResult()
     }
 
@@ -110,6 +112,7 @@ public class UploadOperation: Operation {
         self.file.error = nil
         self.task = task
         self.urlSession = urlSession
+        self.itemIdentifier = nil
         self.result = UploadCompletionResult()
     }
 
@@ -188,6 +191,11 @@ public class UploadOperation: Operation {
                     return
                 }
                 UploadQueue.instance.publishProgress(newValue, for: fileId)
+            }
+            if let itemIdentifier = itemIdentifier, let task = task {
+                DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
+                    manager.register(task, forItemWithIdentifier: itemIdentifier) { _ in }
+                }
             }
             task?.resume()
 

@@ -282,7 +282,7 @@ class FileProviderExtension: NSFileProviderExtension {
             }
             completion?()
         }
-        UploadQueue.instance.addToQueue(file: uploadFile)
+        UploadQueue.instance.addToQueue(file: uploadFile, itemIdentifier: item.itemIdentifier)
     }
 
     // MARK: - Enumeration
