@@ -146,23 +146,11 @@ class FileProviderExtension: NSFileProviderExtension {
 
         let item = FileProviderItem(file: file, domain: domain)
 
-        if !FileManager.default.fileExists(atPath: item.storageUrl.path) {
-            // File is not in the file provider we have to download/copy it
-            downloadRemoteFile(file: file, for: item, completion: completionHandler)
-        } else if fileStorageIsCurrent(item: item, file: file) {
+        if fileStorageIsCurrent(item: item, file: file) {
             // File is in the file provider and is the same, nothing to do...
-            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
             completionHandler(nil)
         } else {
-            // File from file provider has changes not synced with cloud, we have to upload the local file
-            if !FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path) {
-                // This is not optimal because we wait for the item to be uploaded before downloading the remote
-                backgroundUploadItem(item) {
-                    self.downloadRemoteFile(file: file, for: item, completion: completionHandler)
-                }
-            } else {
-                downloadRemoteFile(file: file, for: item, completion: completionHandler)
-            }
+            downloadRemoteFile(file: file, for: item, completion: completionHandler)
         }
     }
 
@@ -183,13 +171,7 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     private func fileStorageIsCurrent(item: FileProviderItem, file: File) -> Bool {
-        if file.isLocalVersionOlderThanRemote() {
-            return false
-        } else if FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path) {
-            return true
-        } else {
-            return false
-        }
+        return !file.isLocalVersionOlderThanRemote() && FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path)
     }
 
     private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
