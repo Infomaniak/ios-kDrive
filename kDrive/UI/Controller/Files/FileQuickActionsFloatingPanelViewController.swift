@@ -123,9 +123,15 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
             guard file != nil else { return }
-            self.setupContent()
-            UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
-                self.tableView.reloadData()
+            file.realm?.refresh()
+            if file.isInvalidated {
+                // File has been removed
+                dismiss(animated: true)
+            } else {
+                setupContent()
+                UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
+                    self.tableView.reloadData()
+                }
             }
         }
     }
