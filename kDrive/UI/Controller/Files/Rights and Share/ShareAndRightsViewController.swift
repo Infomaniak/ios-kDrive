@@ -173,7 +173,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             if indexPath.row < sharedFile.tags.count {
                 cell.configureWith(tag: sharedFile.tags[indexPath.row]!, drive: driveFileManager.drive)
             } else if indexPath.row < (sharedFile.tags.count + sharedFile.users.count) {
-                let index = indexPath.row - (sharedFile.tags.count)
+                let index = indexPath.row - sharedFile.tags.count
                 cell.configureWith(user: sharedFile.users[index], blocked: AccountManager.instance.currentUserId == sharedFile.users[index].id)
             } else {
                 let index = indexPath.row - (sharedFile.tags.count + sharedFile.users.count)
