@@ -177,7 +177,7 @@ class FileProviderExtension: NSFileProviderExtension {
     private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
         if file.isLocalVersionOlderThanRemote() {
             // Prevent observing file multiple times
-            guard DownloadQueue.instance.operation(for: file) == nil else {
+            guard !DownloadQueue.instance.hasOperation(for: file) else {
                 completion(nil)
                 return
             }
