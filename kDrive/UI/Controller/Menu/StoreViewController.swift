@@ -82,6 +82,11 @@ class StoreViewController: UITableViewController {
         StoreManager.shared.delegate = self
         StoreObserver.shared.delegate = self
 
+        if presentingViewController != nil {
+            // Show cancel button
+            navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+        }
+
         // Fetch product information
         fetchProductInformation()
     }
@@ -90,6 +95,10 @@ class StoreViewController: UITableViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
+    @objc func closeButtonPressed() {
+        dismiss(animated: true)
     }
 
     private func fetchProductInformation() {

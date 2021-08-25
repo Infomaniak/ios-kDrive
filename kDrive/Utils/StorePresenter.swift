@@ -22,13 +22,15 @@ import UIKit
 class StorePresenter {
     static func showStore(from viewController: UIViewController, driveFileManager: DriveFileManager) {
         #if ISEXTENSION
-        // TODO: Open app
+        UIConstants.openUrl("kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)", from: viewController)
         #else
         let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
         if let navigationController = viewController.navigationController {
             navigationController.pushViewController(storeViewController, animated: true)
         } else {
-            viewController.present(viewController, animated: true)
+            let navigationController = UINavigationController(rootViewController: storeViewController)
+            navigationController.navigationBar.prefersLargeTitles = true
+            viewController.present(navigationController, animated: true)
         }
         #endif
     }
