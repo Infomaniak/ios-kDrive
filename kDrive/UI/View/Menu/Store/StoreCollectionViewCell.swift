@@ -77,9 +77,9 @@ class StoreCollectionViewCell: UICollectionViewCell {
         }
 
         if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
-            priceLabel.text = "\(formattedPrice) pour \(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)"
+            priceLabel.text =  KDriveStrings.Localizable.storePricing(formattedPrice, "\(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)") 
         } else {
-            priceLabel.text = "Récupération…"
+            priceLabel.text = KDriveStrings.Localizable.storeRetrieving
         }
 
         selectButton.isSelected = currentPack == item.pack
@@ -116,15 +116,15 @@ extension SKProduct.PeriodUnit {
     var localizedString: String {
         switch self {
         case .day:
-            return "jour"
+            return KDriveStrings.Localizable.storePeriodDay
         case .week:
-            return "semaine"
+            return KDriveStrings.Localizable.storePeriodWeek
         case .month:
-            return "mois"
+            return KDriveStrings.Localizable.storePeriodMonth
         case .year:
-            return "an"
+            return KDriveStrings.Localizable.storePeriodYear
         @unknown default:
-            return "période"
+            return KDriveStrings.Localizable.storePeriodUnknown
         }
     }
 }

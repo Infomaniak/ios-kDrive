@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19158" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -26,7 +26,7 @@
                         </constraints>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Solo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HMm-XV-G0e" customClass="IKLabel" customModule="kDriveCore">
-                        <rect key="frame" x="60" y="28.5" width="253" height="17"/>
+                        <rect key="frame" x="60" y="27" width="253" height="20.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -35,7 +35,7 @@
                         </userDefinedRuntimeAttributes>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EVY-6R-JpA" customClass="IKLabel" customModule="kDriveCore">
-                        <rect key="frame" x="20" y="72" width="293" height="33.5"/>
+                        <rect key="frame" x="20" y="72" width="293" height="41"/>
                         <string key="text">1 utilisateur maximum
 2 To de stockage</string>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -46,7 +46,7 @@
                         </userDefinedRuntimeAttributes>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CHF 5.95 par mois" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Zf-mp-FnH" customClass="IKLabel" customModule="kDriveCore">
-                        <rect key="frame" x="20" y="119.5" width="293" height="17"/>
+                        <rect key="frame" x="20" y="127" width="293" height="20.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -60,12 +60,15 @@
                             <constraint firstAttribute="height" constant="62" id="TOB-Pb-V6l"/>
                         </constraints>
                         <state key="normal" title="Sélectionner"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonSelect"/>
+                        </userDefinedRuntimeAttributes>
                         <connections>
                             <action selector="selectButtonTapped:" destination="gTV-IL-0wX" eventType="touchUpInside" id="W2C-Ol-ace"/>
                         </connections>
                     </button>
                     <tableView clipsSubviews="YES" contentMode="scaleToFill" bounces="NO" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" style="plain" separatorStyle="none" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="O1d-Zc-C35">
-                        <rect key="frame" x="20" y="144.5" width="293" height="145.5"/>
+                        <rect key="frame" x="20" y="155.5" width="293" height="134.5"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <connections>
                             <outlet property="dataSource" destination="gTV-IL-0wX" id="UEM-Iu-ooI"/>
@@ -109,16 +112,16 @@
     </objects>
     <designables>
         <designable name="0y2-ji-vxm">
-            <size key="intrinsicContentSize" width="94" height="32"/>
+            <size key="intrinsicContentSize" width="87" height="30"/>
         </designable>
         <designable name="5Zf-mp-FnH">
-            <size key="intrinsicContentSize" width="122.5" height="17"/>
+            <size key="intrinsicContentSize" width="141.5" height="20.5"/>
         </designable>
         <designable name="EVY-6R-JpA">
-            <size key="intrinsicContentSize" width="140" height="33.5"/>
+            <size key="intrinsicContentSize" width="164.5" height="41"/>
         </designable>
         <designable name="HMm-XV-G0e">
-            <size key="intrinsicContentSize" width="29.5" height="17"/>
+            <size key="intrinsicContentSize" width="33.5" height="20.5"/>
         </designable>
     </designables>
     <resources>
