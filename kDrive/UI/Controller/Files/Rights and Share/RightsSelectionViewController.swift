@@ -175,8 +175,10 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
             cell.actionHandler = { [weak self] _ in
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
-                    guard let self = self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    floatingPanelViewController.dismiss(animated: true) {
+                        guard let self = self else { return }
+                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    }
                 }
                 self?.present(floatingPanelViewController, animated: true)
             }
