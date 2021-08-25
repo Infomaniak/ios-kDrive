@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19158" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -23,6 +23,9 @@
                             <constraint firstAttribute="height" constant="60" id="tcv-U9-g4Z"/>
                         </constraints>
                         <state key="normal" title="Suivant"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonNext"/>
+                        </userDefinedRuntimeAttributes>
                         <connections>
                             <action selector="buttonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="r5S-cd-dp3"/>
                         </connections>
@@ -43,4 +46,9 @@
             <point key="canvasLocation" x="131.8840579710145" y="101.11607142857143"/>
         </tableViewCell>
     </objects>
+    <designables>
+        <designable name="Dv5-aE-zIQ">
+            <size key="intrinsicContentSize" width="51" height="30"/>
+        </designable>
+    </designables>
 </document>

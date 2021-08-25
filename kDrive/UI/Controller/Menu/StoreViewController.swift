@@ -43,9 +43,9 @@ class StoreViewController: UITableViewController {
         var title: String {
             switch self {
             case .monthly:
-                return "Mensuel"
+                return KDriveStrings.Localizable.storeMonthly
             case .yearly:
-                return "Annuel"
+                return KDriveStrings.Localizable.storeYearly
             }
         }
     }

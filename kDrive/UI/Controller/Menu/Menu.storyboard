@@ -91,6 +91,9 @@
                                     <constraint firstAttribute="height" constant="60" id="jCK-Db-hTf"/>
                                 </constraints>
                                 <state key="normal" title="Revenir à l’accueil"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonStoreSuccessHome"/>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="homeButtonPressed:" destination="GUY-UU-JfR" eventType="touchUpInside" id="I9s-zh-cZO"/>
                                 </connections>
@@ -112,6 +115,7 @@
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="storeSuccessTitle"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="kDriveCore">
@@ -119,6 +123,9 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="storeSuccessDescription"/>
+                                        </userDefinedRuntimeAttributes>
                                     </label>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -207,7 +214,11 @@
                             <outlet property="delegate" destination="goi-8i-QHp" id="Wuy-kU-qW0"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Modifier votre offre" id="1i2-IT-eSc"/>
+                    <navigationItem key="navigationItem" title="Modifier votre offre" id="1i2-IT-eSc">
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="storeTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bwi-5w-xVg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
