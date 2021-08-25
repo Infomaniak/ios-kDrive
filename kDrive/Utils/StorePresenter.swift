@@ -24,14 +24,8 @@ class StorePresenter {
         #if ISEXTENSION
         UIConstants.openUrl("kdrive:store?userId=\(driveFileManager.apiFetcher.currentToken!.userId)&driveId=\(driveFileManager.drive.id)", from: viewController)
         #else
-        let storeViewController = StoreViewController.instantiate(driveFileManager: driveFileManager)
-        if let navigationController = viewController.navigationController {
-            navigationController.pushViewController(storeViewController, animated: true)
-        } else {
-            let navigationController = UINavigationController(rootViewController: storeViewController)
-            navigationController.navigationBar.prefersLargeTitles = true
-            viewController.present(navigationController, animated: true)
-        }
+        let storeViewController = StoreViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+        viewController.present(storeViewController, animated: true)
         #endif
     }
 }

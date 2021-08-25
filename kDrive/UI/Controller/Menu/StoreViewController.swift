@@ -82,9 +82,12 @@ class StoreViewController: UITableViewController {
         StoreManager.shared.delegate = self
         StoreObserver.shared.delegate = self
 
-        if presentingViewController != nil {
+        let viewControllersCount = navigationController?.viewControllers.count ?? 0
+        if presentingViewController != nil && viewControllersCount < 2 {
             // Show cancel button
-            navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+            let closeButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+            closeButton.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+            navigationItem.leftBarButtonItem = closeButton
         }
 
         // Fetch product information
@@ -181,6 +184,13 @@ class StoreViewController: UITableViewController {
         let viewController = Storyboard.menu.instantiateViewController(withIdentifier: "StoreViewController") as! StoreViewController
         viewController.driveFileManager = driveFileManager
         return viewController
+    }
+
+    static func instantiateInNavigationController(driveFileManager: DriveFileManager) -> UINavigationController {
+        let viewController = instantiate(driveFileManager: driveFileManager)
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.navigationBar.prefersLargeTitles = true
+        return navigationController
     }
 
     // MARK: - State restoration
