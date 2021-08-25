@@ -521,7 +521,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 cell.selectionStyle = .none
                 cell.actionHandler = { [weak self] _ in
                     guard let self = self else { return }
-                    UIConstants.showStore(from: self, driveFileManager: self.driveFileManager)
+                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self = self else { return }
