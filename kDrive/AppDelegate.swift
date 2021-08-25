@@ -224,23 +224,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        if url.isFileURL, let currentDriveFileManager = accountManager.currentDriveFileManager {
-            let filename = url.lastPathComponent
-            let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(filename)
-            do {
-                if FileManager.default.fileExists(atPath: importPath.path) {
-                    try FileManager.default.removeItem(atPath: importPath.path)
-                }
-                try FileManager.default.moveItem(at: url, to: importPath)
-                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager, file: .init(name: filename, path: importPath, uti: importPath.uti ?? .data))
-                window?.rootViewController?.present(saveNavigationViewController, animated: true)
-                return true
-            } catch {
-                return false
-            }
-        } else {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+              let params = components.queryItems else {
+            print("Invalid URL")
             return false
         }
+
+        if components.path == "store", let userId = params.first(where: { $0.name == "userId" })?.value, let driveId = params.first(where: { $0.name == "driveId" })?.value {
+            if var viewController = window?.rootViewController, let userId = Int(userId), let driveId = Int(driveId), let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
+                // Get presented view controller
+                while let presentedViewController = viewController.presentedViewController {
+                    viewController = presentedViewController
+                }
+                // Show store
+                StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
+            }
+            return true
+        }
+        return false
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
