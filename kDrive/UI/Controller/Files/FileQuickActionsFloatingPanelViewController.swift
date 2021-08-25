@@ -320,7 +320,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
                 (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { [weak self] _ in
                     guard let self = self else { return }
-                    UIConstants.showStore(from: self, driveFileManager: self.driveFileManager)
+                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
                 present(floatingPanelViewController, animated: true)
                 return
