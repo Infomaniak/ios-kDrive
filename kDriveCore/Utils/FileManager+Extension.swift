@@ -18,7 +18,7 @@
 
 import Foundation
 
-extension FileManager {
+public extension FileManager {
     func copyOrReplace(sourceUrl: URL, destinationUrl: URL) throws {
         if fileExists(atPath: destinationUrl.path) {
             try removeItem(at: destinationUrl)

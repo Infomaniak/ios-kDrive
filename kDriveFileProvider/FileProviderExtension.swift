@@ -189,29 +189,25 @@ class FileProviderExtension: NSFileProviderExtension {
                     self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
                     completion(NSFileProviderError(.serverUnreachable))
                 } else {
-                    self.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-                    self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-                    completion(nil)
+                    do {
+                        try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+                        self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                        completion(nil)
+                    } catch {
+                        completion(error)
+                    }
                 }
             }
             DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId, itemIdentifier: item.itemIdentifier)
             manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
         } else {
-            copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
-            manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-            completion(nil)
-        }
-    }
-
-    private func copyOrReplace(sourceUrl: URL, destinationUrl: URL) {
-        do {
-            let fileManager = FileManager.default
-            if fileManager.fileExists(atPath: destinationUrl.path) {
-                try fileManager.removeItem(at: destinationUrl)
+            do {
+                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                completion(nil)
+            } catch {
+                completion(error)
             }
-            try fileManager.copyItem(at: sourceUrl, to: destinationUrl)
-        } catch let error as NSError {
-            print(error.localizedDescription)
         }
     }
 
