@@ -28,12 +28,12 @@ class StoreViewController: UITableViewController {
         var product: SKProduct?
 
         static let allItems = [
-            Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo", period: .monthly),
-            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team", period: .monthly),
-            Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro", period: .monthly),
+            Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo.monthly", period: .monthly),
+            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team.monthly", period: .monthly),
+            // Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro", period: .monthly),
             Item(pack: .solo, identifier: "com.infomaniak.drive.iap.solo.yearly", period: .yearly),
-            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team.yearly", period: .yearly),
-            Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro.yearly", period: .yearly)
+            Item(pack: .team, identifier: "com.infomaniak.drive.iap.team.yearly", period: .yearly)
+            // Item(pack: .pro, identifier: "com.infomaniak.drive.iap.pro.yearly", period: .yearly)
         ]
     }
 
@@ -217,11 +217,7 @@ class StoreViewController: UITableViewController {
 
 extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate {
     func selectButtonTapped(item: StoreViewController.Item) {
-        if item.pack == .team {
-            rows = [.segmentedControl, .offers, .storage, .nextButton]
-        } else {
-            rows = [.segmentedControl, .offers, .nextButton]
-        }
+        rows = [.segmentedControl, .offers, .nextButton]
         selectedPack = item.pack
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: rows.count - 1, section: 0), at: .bottom, animated: true)
