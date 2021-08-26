@@ -107,7 +107,7 @@ class StoreViewController: UITableViewController {
     private func fetchProductInformation() {
         guard StoreObserver.shared.isAuthorizedForPayments else {
             // Warn the user that they are not allowed to make purchases
-            UIConstants.showSnackBar(message: "In-App Purchases are not allowed.")
+            UIConstants.showSnackBar(message: KDriveStrings.Localizable.storePaymentNotAuthorized)
             return
         }
 
