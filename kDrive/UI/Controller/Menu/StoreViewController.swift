@@ -217,6 +217,7 @@ class StoreViewController: UITableViewController {
 
 extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate {
     func selectButtonTapped(item: StoreViewController.Item) {
+        guard selectedPack != item.pack else { return }
         rows = [.segmentedControl, .offers, .nextButton]
         selectedPack = item.pack
         tableView.reloadData()
