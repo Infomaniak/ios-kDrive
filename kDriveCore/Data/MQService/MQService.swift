@@ -40,7 +40,7 @@ public class MQService {
     private let client = MQTTClient(
         host: "info-mq.infomaniak.com",
         port: 443,
-        identifier: "MQTT",
+        identifier: generateClientIdentifier(),
         eventLoopGroupProvider: .createNew,
         configuration: configuration
     )
@@ -122,6 +122,13 @@ public class MQService {
 
     private func topic(for token: IPSToken) -> String {
         return "drive/\(token.uuid)"
+    }
+
+    private static func generateClientIdentifier() -> String {
+        let length = 10
+        let prefix = "mqttios_kdrive_"
+        let letters = "abcdefghijklmnopqrstuvwxyz"
+        return prefix + String((0 ..< length).map { _ in letters.randomElement()! })
     }
 }
 
