@@ -230,7 +230,7 @@ class NewFolderViewController: UIViewController {
                 }
             }
         }
-        enableButton = activateButton
+        enableButton = activateButton && tableView.indexPathForSelectedRow != nil
     }
 }
 
@@ -403,6 +403,10 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             }
             return nil
         }
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        updateButton()
     }
 }
 
