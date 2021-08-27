@@ -127,7 +127,6 @@ class NewFolderViewController: UIViewController {
         case .commonFolder:
             sections = [.header, .permissions, .location]
             permissionsRows = [.allUsers, .someUser]
-            setupFolderPath()
         case .dropbox:
             sections = [.header, .permissions, .options]
             permissionsRows = [.meOnly]
@@ -138,10 +137,6 @@ class NewFolderViewController: UIViewController {
             break
         }
         tableView.reloadData()
-
-        /* if !(tableView.indexPathsForSelectedRows?.count ?? 0 > 0) {
-             tableView.selectRow(at: IndexPath(row: 0, section: 1), animated: true, scrollPosition: .none)
-         } */
     }
 
     private func canInherit(sharedFile: SharedFile) -> Bool {
@@ -163,37 +158,6 @@ class NewFolderViewController: UIViewController {
         UIView.animate(withDuration: 0.1) {
             self.view.layoutIfNeeded()
         }
-    }
-
-    private func setupFolderPath() {
-        commonFolderPath.append(driveFileManager.drive.name)
-        commonFolderPath.append(contentsOf: currentDirectory.path.split(separator: "/").map { String($0) })
-    }
-
-    func computeHeightForImpactedCell(labels: [String]) -> CGFloat {
-        var currentLineWidth: CGFloat = 0
-        var height: CGFloat = 26
-        let sizeLabel = UILabel()
-        var numberOfLine = 1
-        sizeLabel.numberOfLines = 1
-        for (index, labelText) in labels.enumerated() {
-            sizeLabel.text = labelText
-            sizeLabel.sizeToFit()
-            var cellSize: CGFloat!
-            if index == labels.endIndex - 1 {
-                cellSize = sizeLabel.bounds.width + 23
-            } else {
-                cellSize = sizeLabel.bounds.width + 45
-            }
-            if currentLineWidth + cellSize + 10 < tableView.bounds.width - 48 {
-                currentLineWidth += (cellSize + 10)
-            } else {
-                currentLineWidth = cellSize + 10
-                numberOfLine += 1
-                height += 26
-            }
-        }
-        return height + CGFloat(10 * (numberOfLine - 1))
     }
 
     func showDropBoxLink(url: String, fileName: String) {
@@ -267,13 +231,6 @@ extension NewFolderViewController: NewFolderSettingsDelegate {
 // MARK: - TableView Methods
 
 extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if sections[indexPath.section] == .location {
-            return computeHeightForImpactedCell(labels: commonFolderPath) + 56
-        }
-        return UITableView.automaticDimension
-    }
-
     func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
@@ -355,9 +312,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
         case .location:
             let cell = tableView.dequeueReusableCell(type: NewFolderLocationTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
-            cell.path = commonFolderPath
-            cell.drive = driveFileManager.drive
-            cell.collectionView.reloadData()
+            cell.configure(with: driveFileManager.drive)
             return cell
         case .options:
             let option = optionsRows[indexPath.row]
