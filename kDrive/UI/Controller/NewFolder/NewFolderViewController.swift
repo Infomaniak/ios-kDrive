@@ -50,7 +50,6 @@ class NewFolderViewController: UIViewController {
         .optionDate: nil,
         .optionSize: nil
     ]
-    private var commonFolderPath: [String] = []
     private var enableButton = false {
         didSet {
             guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
