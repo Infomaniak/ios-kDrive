@@ -92,3 +92,22 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case type
     }
 }
+
+extension DriveUser: Shareable {
+    public var right: UserPermission? {
+        get {
+            return permission
+        }
+        set {
+            permission = newValue
+        }
+    }
+
+    public var userId: Int? {
+        return id
+    }
+
+    public var shareableName: String {
+        return displayName
+    }
+}

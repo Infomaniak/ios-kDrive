@@ -27,6 +27,10 @@ public class SharedFile: NSObject, NSCoding, Codable {
     public var invitations: [Invitation?]
     public var teams: [Team]
 
+    public var shareables: [Shareable] {
+        return teams.sorted() + users + invitations.compactMap { $0 }
+    }
+
     enum CodingKeys: String, CodingKey {
         case id
         case path
@@ -130,6 +134,21 @@ public class Invitation: Codable {
         case permission
         case status
         case userId = "user_id"
+    }
+}
+
+extension Invitation: Shareable {
+    public var right: UserPermission? {
+        get {
+            return permission
+        }
+        set {
+            permission = newValue ?? .read
+        }
+    }
+
+    public var shareableName: String {
+        return displayName ?? email
     }
 }
 

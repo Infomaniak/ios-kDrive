@@ -73,6 +73,16 @@ public class Team: Object, Codable {
     }
 }
 
+extension Team: Shareable {
+    public var userId: Int? {
+        return nil
+    }
+
+    public var shareableName: String {
+        return name
+    }
+}
+
 extension Team: Comparable {
     public static func < (lhs: Team, rhs: Team) -> Bool {
         return lhs.isAllUsers || lhs.name.lowercased() < rhs.name.lowercased()

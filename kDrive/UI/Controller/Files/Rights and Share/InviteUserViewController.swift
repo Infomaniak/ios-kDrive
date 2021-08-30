@@ -249,7 +249,6 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
                 rightsSelectionVC.delegate = self
                 rightsSelectionVC.selectedRight = newPermission.rawValue
                 rightsSelectionVC.canDelete = false
-                rightsSelectionVC.userType = .multiple
             }
             present(rightsSelectionViewController, animated: true)
         default:

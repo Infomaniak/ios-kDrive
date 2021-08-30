@@ -48,6 +48,16 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
     }
 
+    func configure(with shareable: Shareable, drive: Drive) {
+        if let user = shareable as? DriveUser {
+            configureWith(user: user, blocked: AccountManager.instance.currentUserId == user.id)
+        } else if let invitation = shareable as? Invitation {
+            configureWith(invitation: invitation)
+        } else if let team = shareable as? Team {
+            configureWith(team: team, drive: drive)
+        }
+    }
+
     func configureWith(user: DriveUser, blocked: Bool = false) {
         notAcceptedView.isHidden = true
         externalUserView.isHidden = user.type != .shared

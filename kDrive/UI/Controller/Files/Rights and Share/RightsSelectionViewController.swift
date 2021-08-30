@@ -73,14 +73,7 @@ class RightsSelectionViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var closeButton: UIButton!
 
-    enum UserType {
-        case user, invitation, team, multiple
-    }
-
-    var userType: UserType = .user
-    var user: DriveUser!
-    var invitation: Invitation!
-    var team: Team!
+    var shareable: Shareable?
 
     var rightSelectionType = RightsSelectionType.addUserRights
 
@@ -187,16 +180,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
                 self.present(floatingPanelViewController, animated: true)
             }
         } else if right.key == "manage" {
-            let userId: Int?
-            switch userType {
-            case .user:
-                userId = user.id
-            case .invitation:
-                userId = invitation.userId
-            case .team, .multiple:
-                userId = nil
-            }
-            if let userId = userId {
+            if let userId = shareable?.userId {
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
         }
@@ -216,17 +200,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let right = rights[indexPath.row]
         if right.key == "delete" {
-            var deleteUser: String
-            switch userType {
-            case .user:
-                deleteUser = user.displayName
-            case .invitation:
-                deleteUser = invitation.displayName ?? invitation.email
-            case .team:
-                deleteUser = team.name
-            case .multiple:
-                deleteUser = ""
-            }
+            let deleteUser = shareable?.shareableName ?? ""
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: attrString, action: KDriveStrings.Localizable.buttonDelete, destructive: true) {
                 self.delegate?.didDeleteUserRight()
