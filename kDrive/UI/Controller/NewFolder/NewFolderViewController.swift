@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 enum FolderType {
     case folder
@@ -27,31 +27,30 @@ enum FolderType {
 }
 
 class NewFolderViewController: UIViewController {
+    @IBOutlet weak var tableView: UITableView!
 
     var folderType: FolderType!
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
     var newFolderName: String = ""
-
     var folderCreated = false
     var dropBoxUrl: String?
     var folderName: String?
 
+    private var sharedFile: SharedFile?
     private var showSettings = false
     private var settings: [OptionsRow: Bool] = [
-            .optionMail: true,
-            .optionPassword: false,
-            .optionDate: false,
-            .optionSize: false
+        .optionMail: true,
+        .optionPassword: false,
+        .optionDate: false,
+        .optionSize: false
     ]
     private var settingsValue: [OptionsRow: Any?] = [
-            .optionPassword: nil,
-            .optionDate: nil,
-            .optionSize: nil
+        .optionPassword: nil,
+        .optionDate: nil,
+        .optionSize: nil
     ]
-
-    @IBOutlet weak var tableView: UITableView!
-    var enableButton = false {
+    private var enableButton = false {
         didSet {
             guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
                 return
@@ -59,8 +58,6 @@ class NewFolderViewController: UIViewController {
             footer.footerButton.isEnabled = enableButton
         }
     }
-
-    var commonFolderPath: [String] = []
 
     private enum Section: CaseIterable {
         case header, permissions, options, location
@@ -91,12 +88,13 @@ class NewFolderViewController: UIViewController {
         tableView.separatorColor = .clear
         hideKeyboardWhenTappedAround()
 
-        driveFileManager.getFile(id: currentDirectory.id, withExtras: true) { file, _, _ in
-            if let file = file {
-                self.currentDirectory = file
+        driveFileManager.apiFetcher.getShareListFor(file: currentDirectory) { response, _ in
+            if let sharedFile = response?.data {
+                self.sharedFile = sharedFile
             }
             self.setupTableViewRows()
         }
+        setupTableViewRows()
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
@@ -117,26 +115,31 @@ class NewFolderViewController: UIViewController {
         }
     }
 
-    func setupTableViewRows() {
+    private func setupTableViewRows() {
         switch folderType {
         case .folder:
             sections = [.header, .permissions]
-            permissionsRows = [.meOnly, currentDirectory.users.count > 1 || !currentDirectory.tags.isEmpty ? .parentsRights : .someUser]
+            permissionsRows = [.meOnly]
+            if let sharedFile = sharedFile {
+                permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+            }
         case .commonFolder:
             sections = [.header, .permissions, .location]
             permissionsRows = [.allUsers, .someUser]
-            setupFolderPath()
         case .dropbox:
             sections = [.header, .permissions, .options]
-            permissionsRows = [.meOnly, currentDirectory.users.count > 1 || !currentDirectory.tags.isEmpty ? .parentsRights : .someUser]
+            permissionsRows = [.meOnly]
+            if let sharedFile = sharedFile {
+                permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+            }
         case .none:
             break
         }
         tableView.reloadData()
+    }
 
-        if !(tableView.indexPathsForSelectedRows?.count ?? 0 > 0) {
-            tableView.selectRow(at: IndexPath(row: 0, section: 1), animated: true, scrollPosition: .none)
-        }
+    private func canInherit(sharedFile: SharedFile) -> Bool {
+        return sharedFile.users.count > 1 || !sharedFile.tags.isEmpty
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {
@@ -154,37 +157,6 @@ class NewFolderViewController: UIViewController {
         UIView.animate(withDuration: 0.1) {
             self.view.layoutIfNeeded()
         }
-    }
-
-    func setupFolderPath() {
-        commonFolderPath.append(driveFileManager.drive.name)
-        commonFolderPath.append(contentsOf: currentDirectory.path.split(separator: "/").map { String.init($0) })
-    }
-
-    func computeHeightForImpactedCell(labels: [String]) -> CGFloat {
-        var currentLineWidth: CGFloat = 0
-        var height: CGFloat = 26
-        let sizeLabel = UILabel()
-        var numberOfLine = 1
-        sizeLabel.numberOfLines = 1
-        for (index, labelText) in labels.enumerated() {
-            sizeLabel.text = labelText
-            sizeLabel.sizeToFit()
-            var cellSize: CGFloat!
-            if index == labels.endIndex - 1 {
-                cellSize = sizeLabel.bounds.width + 23
-            } else {
-                cellSize = sizeLabel.bounds.width + 45
-            }
-            if currentLineWidth + cellSize + 10 < tableView.bounds.width - 48 {
-                currentLineWidth += (cellSize + 10)
-            } else {
-                currentLineWidth = cellSize + 10
-                numberOfLine += 1
-                height += 26
-            }
-        }
-        return height + CGFloat((10 * (numberOfLine - 1)))
     }
 
     func showDropBoxLink(url: String, fileName: String) {
@@ -221,11 +193,12 @@ class NewFolderViewController: UIViewController {
                 }
             }
         }
-        enableButton = activateButton
+        enableButton = activateButton && tableView.indexPathForSelectedRow != nil
     }
 }
 
 // MARK: - TextField and Keyboard Methods
+
 extension NewFolderViewController: NewFolderTextFieldDelegate {
     func textFieldUpdated(content: String) {
         newFolderName = content
@@ -234,6 +207,7 @@ extension NewFolderViewController: NewFolderTextFieldDelegate {
 }
 
 // MARK: - NewFolderSettingsDelegate
+
 extension NewFolderViewController: NewFolderSettingsDelegate {
     func didUpdateSettings(index: Int, isOn: Bool) {
         let option = optionsRows[index + 1]
@@ -254,15 +228,8 @@ extension NewFolderViewController: NewFolderSettingsDelegate {
 }
 
 // MARK: - TableView Methods
+
 extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if sections[indexPath.section] == .location {
-            return computeHeightForImpactedCell(labels: commonFolderPath) + 56
-        }
-        return UITableView.automaticDimension
-    }
-
     func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
@@ -338,15 +305,13 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             case .someUser:
                 cell.configureSomeUser()
             case .parentsRights:
-                cell.configureParentsRights(folderName: currentDirectory.name, userList: currentDirectory.users.map({ $0 }))
+                cell.configureParentsRights(folderName: currentDirectory.name, users: sharedFile?.users ?? [])
             }
             return cell
         case .location:
             let cell = tableView.dequeueReusableCell(type: NewFolderLocationTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
-            cell.path = commonFolderPath
-            cell.drive = driveFileManager.drive
-            cell.collectionView.reloadData()
+            cell.configure(with: driveFileManager.drive)
             return cell
         case .options:
             let option = optionsRows[indexPath.row]
@@ -393,9 +358,14 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             return nil
         }
     }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        updateButton()
+    }
 }
 
 // MARK: - FooterButtonDelegate
+
 extension NewFolderViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let footer = tableView.footerView(forSection: sections.count - 1) as! FooterButtonView

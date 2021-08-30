@@ -68,13 +68,9 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureParentsRights(folderName: String, userList: [Int]) {
+    func configureParentsRights(folderName: String, users: [DriveUser]) {
         rights = true
-        for userId in userList {
-            if let user = DriveInfosManager.instance.getUser(id: userId) {
-                users.append(user)
-            }
-        }
+        self.users = users
 
         if users.count > 3 {
             plusUser = users.count - 3

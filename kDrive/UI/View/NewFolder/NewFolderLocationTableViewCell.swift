@@ -16,56 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
-class NewFolderLocationTableViewCell: InsetTableViewCell, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class NewFolderLocationTableViewCell: InsetTableViewCell {
+    @IBOutlet weak var driveIcon: UIImageView!
+    @IBOutlet weak var driveLabel: IKLabel!
 
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
-    var path: [String] = []
-    var drive: Drive!
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        collectionView.register(cellView: NewFolderLocationCollectionViewCell.self)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        (collectionView.collectionViewLayout as! AlignedCollectionViewFlowLayout).horizontalAlignment = .leading
+    func configure(with drive: Drive) {
+        driveIcon.tintColor = UIColor(hex: drive.preferences.color)
+        driveLabel.text = drive.name
     }
-
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        collectionView.reloadData()
-    }
-
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return path.count
-    }
-
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(type: NewFolderLocationCollectionViewCell.self, for: indexPath)
-        cell.titleLabel.text = path[indexPath.row]
-        if indexPath.item == 0 {
-            cell.accessoryImage.image = KDriveAsset.drive.image
-            cell.accessoryImage.tintColor = UIColor(hex: drive.preferences.color)
-        } else {
-            cell.accessoryImage.image = KDriveAsset.folderCommonDocuments.image
-        }
-        if indexPath.item == path.count - 1 {
-            cell.chevronImage.isHidden = true
-        }
-        return cell
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let sizeLabel = UILabel()
-        sizeLabel.font = sizeLabel.font.withSize(14)
-        sizeLabel.numberOfLines = 1
-        sizeLabel.text = path[indexPath.row]
-        sizeLabel.sizeToFit()
-        return CGSize(width: min(40 + sizeLabel.bounds.width, collectionView.bounds.width), height: 26)
-    }
-
 }
