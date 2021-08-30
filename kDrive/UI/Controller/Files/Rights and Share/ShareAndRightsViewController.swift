@@ -70,12 +70,12 @@ class ShareAndRightsViewController: UIViewController {
         initialLoading = false
     }
 
-    func setTitle() {
+    private func setTitle() {
         guard file != nil else { return }
         title = file.isDirectory ? KDriveStrings.Localizable.fileShareDetailsFolderTitle(file.name) : KDriveStrings.Localizable.fileShareDetailsFileTitle(file.name)
     }
 
-    func updateShareList() {
+    private func updateShareList() {
         driveFileManager?.apiFetcher.getShareListFor(file: file) { response, error in
             if let sharedFile = response?.data {
                 self.sharedFile = sharedFile
@@ -87,6 +87,21 @@ class ShareAndRightsViewController: UIViewController {
                 print(error)
             }
         }
+    }
+
+    private func showRightsSelection(selectedPermission: UserPermission, userType: RightsSelectionViewController.UserType, user: DriveUser? = nil, invitation: Invitation? = nil, team: Team? = nil) {
+        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+        rightsSelectionViewController.modalPresentationStyle = .fullScreen
+        if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
+            rightsSelectionVC.driveFileManager = driveFileManager
+            rightsSelectionVC.delegate = self
+            rightsSelectionVC.selectedRight = selectedPermission.rawValue
+            rightsSelectionVC.user = user
+            rightsSelectionVC.invitation = invitation
+            rightsSelectionVC.team = team
+            rightsSelectionVC.userType = userType
+        }
+        present(rightsSelectionViewController, animated: true)
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {
@@ -204,38 +219,24 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
 
             if indexPath.row < sharedFile.teams.count {
                 // Team selected
+                let team = sharedFile.teams[indexPath.row]
                 selectedTeamIndex = indexPath.row
+                showRightsSelection(selectedPermission: team.right ?? .read, userType: .team, team: team)
             } else if indexPath.row < (sharedFile.teams.count + sharedFile.users.count) {
                 // User selected
                 let index = indexPath.row - sharedFile.teams.count
-                if sharedFile.users[index].id == AccountManager.instance.currentUserId {
+                let user = sharedFile.users[index]
+                if user.id == AccountManager.instance.currentUserId {
                     break
                 }
                 selectedUserIndex = index
-                let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-                rightsSelectionViewController.modalPresentationStyle = .fullScreen
-                if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                    rightsSelectionVC.driveFileManager = driveFileManager
-                    rightsSelectionVC.delegate = self
-                    rightsSelectionVC.selectedRight = sharedFile.users[index].permission!.rawValue
-                    rightsSelectionVC.user = sharedFile.users[index]
-                    rightsSelectionVC.userType = .user
-                }
-                present(rightsSelectionViewController, animated: true)
+                showRightsSelection(selectedPermission: user.permission ?? .read, userType: .user, user: user)
             } else {
                 // Invitation selected
                 let index = indexPath.row - (sharedFile.teams.count + sharedFile.users.count)
+                let invitation = sharedFile.invitations[index]!
                 selectedInvitationIndex = index
-                let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-                rightsSelectionViewController.modalPresentationStyle = .fullScreen
-                if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                    rightsSelectionVC.driveFileManager = driveFileManager
-                    rightsSelectionVC.delegate = self
-                    rightsSelectionVC.selectedRight = sharedFile.invitations[index]!.permission.rawValue
-                    rightsSelectionVC.invitation = sharedFile.invitations[index]!
-                    rightsSelectionVC.userType = .invitation
-                }
-                present(rightsSelectionViewController, animated: true)
+                showRightsSelection(selectedPermission: invitation.permission, userType: .invitation, invitation: invitation)
             }
         }
     }
@@ -273,6 +274,13 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                     self.tableView.reloadRows(at: [IndexPath(row: index + sharedFile.teams.count + sharedFile.users.count, section: 2)], with: .automatic)
                 }
             }
+        } else if let index = selectedTeamIndex {
+            driveFileManager.apiFetcher.updateTeamRights(file: file, team: sharedFile.teams[index], permission: value) { response, _ in
+                if response?.data != nil {
+                    self.sharedFile?.teams[index].right = UserPermission(rawValue: value)
+                    self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+                }
+            }
         }
     }
 
@@ -287,6 +295,12 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
             }
         } else if let index = selectedInvitationIndex {
             driveFileManager.apiFetcher.deleteInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile.invitations[index]!) { response, _ in
+                if response?.data != nil {
+                    self.tableView.reloadSections([0, 2], with: .automatic)
+                }
+            }
+        } else if let index = selectedTeamIndex {
+            driveFileManager.apiFetcher.deleteTeamRights(file: file, team: sharedFile.teams[index]) { response, _ in
                 if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }

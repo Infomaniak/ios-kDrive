@@ -126,6 +126,14 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/invitation/\(invitation.id)"
     }
 
+    static func updateTeamRights(file: File, team: Team) -> String {
+        return "\(fileURL(file: file))share/team/\(team.id)"
+    }
+
+    static func deleteTeamRights(file: File, team: Team) -> String {
+        return "\(fileURL(file: file))share/team/\(team.id)"
+    }
+
     static func deleteFile(file: File) -> String {
         return fileURL(file: file)
     }
@@ -238,7 +246,7 @@ public enum ApiRoutes {
 
     public static func fileCount(driveId: Int, fileId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/\(fileId)/count"
-	}
+    }
 
     public static func downloadArchiveLink(driveId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/archive"

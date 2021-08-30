@@ -109,7 +109,6 @@ class UsersAccessTableViewCell: InsetTableViewCell {
             detailLabel.text = nil
         }
         rightsLabel.text = team.right?.title
-        rightsLabel.textColor = KDriveAsset.secondaryTextColor.color
-        accessoryImageView.isHidden = true
+        rightsLabel.textColor = KDriveAsset.titleColor.color
     }
 }

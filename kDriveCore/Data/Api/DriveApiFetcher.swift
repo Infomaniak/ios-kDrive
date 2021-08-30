@@ -346,6 +346,23 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
+    public func updateTeamRights(file: File, team: Team, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+        let url = ApiRoutes.updateTeamRights(file: file, team: team)
+        let body: [String: Any] = ["permission": permission]
+
+        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
+            self.handleResponse(response: response, completion: completion)
+        }
+    }
+
+    public func deleteTeamRights(file: File, team: Team, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+        let url = ApiRoutes.deleteTeamRights(file: file, team: team)
+
+        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
+            self.handleResponse(response: response, completion: completion)
+        }
+    }
+
     public func removeShareLinkFor(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.removeShareLinkFor(file: file)
 
