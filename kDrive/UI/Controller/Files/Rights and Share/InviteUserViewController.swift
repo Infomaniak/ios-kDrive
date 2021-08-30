@@ -108,8 +108,8 @@ class InviteUserViewController: UIViewController {
 
     func shareAndDismiss() {
         let usersIds = users.map(\.id)
-        let tags = [Int]()
-        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in }
+        let teams = [Int]()
+        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, teams: teams, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in }
         dismiss(animated: true)
     }
 

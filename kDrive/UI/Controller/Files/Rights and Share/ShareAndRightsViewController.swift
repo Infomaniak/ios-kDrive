@@ -117,6 +117,7 @@ class ShareAndRightsViewController: UIViewController {
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
         setTitle()
+        updateShareList()
     }
 }
 
@@ -276,14 +277,16 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
     }
 
     func didDeleteUserRight() {
+        guard let sharedFile = sharedFile else { return }
+
         if let index = selectedUserIndex {
-            driveFileManager.apiFetcher.deleteUserRights(file: file, user: sharedFile!.users[index]) { response, _ in
+            driveFileManager.apiFetcher.deleteUserRights(file: file, user: sharedFile.users[index]) { response, _ in
                 if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }
             }
         } else if let index = selectedInvitationIndex {
-            driveFileManager.apiFetcher.deleteInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile!.invitations[index]!) { response, _ in
+            driveFileManager.apiFetcher.deleteInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile.invitations[index]!) { response, _ in
                 if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }

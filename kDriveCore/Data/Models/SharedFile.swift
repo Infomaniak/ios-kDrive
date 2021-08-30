@@ -143,7 +143,7 @@ public class SharedUsers: Codable {
 public class SharedUsersValid: Codable {
     public var invitations: [Invitation]?
     public var users: [DriveUser]?
-    public var tags: [Tag]?
+    public var teams: [Team]?
 }
 
 public class FileCheckResult: Codable {

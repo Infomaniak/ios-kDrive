@@ -290,9 +290,13 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func addUserRights(file: File, users: [Int], tags: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
+    public func addUserRights(file: File, users: [Int], teams: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
         let url = ApiRoutes.addUserRights(file: file)
-        let body: [String: Any] = ["user_ids": users, "tag_ids": tags, "emails": emails, "permission": permission, "lang": "fr", "message": message]
+        var lang = "en"
+        if let languageCode = Locale.current.languageCode, ["fr", "de", "it", "en", "es"].contains(languageCode) {
+            lang = languageCode
+        }
+        let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission, "lang": lang, "message": message]
 
         authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<SharedUsers>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
