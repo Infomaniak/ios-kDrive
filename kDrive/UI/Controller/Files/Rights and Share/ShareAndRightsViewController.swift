@@ -35,7 +35,7 @@ class ShareAndRightsViewController: UIViewController {
     private var removeUsers: [Int] = []
     private var removeEmails: [String] = []
     private var selectedUserIndex: Int?
-    private var selectedTagIndex: Int?
+    private var selectedTeamIndex: Int?
     private var selectedInvitationIndex: Int?
     private var shareLinkRights = false
     private var initialLoading = true
@@ -76,12 +76,15 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     func updateShareList() {
-        driveFileManager?.apiFetcher.getShareListFor(file: file) { response, _ in
+        driveFileManager?.apiFetcher.getShareListFor(file: file) { response, error in
             if let sharedFile = response?.data {
                 self.sharedFile = sharedFile
+                sharedFile.teams.sort()
                 self.removeUsers = sharedFile.users.map(\.id) + sharedFile.invitations.compactMap { $0?.userId }
                 self.removeEmails = sharedFile.invitations.compactMap { $0?.userId != nil ? nil : $0?.email }
                 self.tableView.reloadData()
+            } else {
+                print(error)
             }
         }
     }
@@ -143,7 +146,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             return 1
         case .access:
             if let sharedFile = sharedFile {
-                return sharedFile.users.count + sharedFile.invitations.count + sharedFile.tags.count
+                return sharedFile.users.count + sharedFile.invitations.count + sharedFile.teams.count
             } else {
                 return 0
             }
@@ -170,13 +173,13 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1, radius: 6)
             let sharedFile = sharedFile!
-            if indexPath.row < sharedFile.tags.count {
-                cell.configureWith(tag: sharedFile.tags[indexPath.row]!, drive: driveFileManager.drive)
-            } else if indexPath.row < (sharedFile.tags.count + sharedFile.users.count) {
-                let index = indexPath.row - sharedFile.tags.count
+            if indexPath.row < sharedFile.teams.count {
+                cell.configureWith(team: sharedFile.teams[indexPath.row], drive: driveFileManager.drive)
+            } else if indexPath.row < (sharedFile.teams.count + sharedFile.users.count) {
+                let index = indexPath.row - sharedFile.teams.count
                 cell.configureWith(user: sharedFile.users[index], blocked: AccountManager.instance.currentUserId == sharedFile.users[index].id)
             } else {
-                let index = indexPath.row - (sharedFile.tags.count + sharedFile.users.count)
+                let index = indexPath.row - (sharedFile.teams.count + sharedFile.users.count)
                 cell.configureWith(invitation: sharedFile.invitations[index]!)
             }
             return cell
@@ -193,17 +196,17 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .access:
             shareLinkRights = false
             selectedUserIndex = nil
-            selectedTagIndex = nil
+            selectedTeamIndex = nil
             selectedInvitationIndex = nil
 
             guard let sharedFile = sharedFile else { return }
 
-            if indexPath.row < sharedFile.tags.count {
-                // Tag selected
-                selectedTagIndex = indexPath.row
-            } else if indexPath.row < (sharedFile.tags.count + sharedFile.users.count) {
+            if indexPath.row < sharedFile.teams.count {
+                // Team selected
+                selectedTeamIndex = indexPath.row
+            } else if indexPath.row < (sharedFile.teams.count + sharedFile.users.count) {
                 // User selected
-                let index = indexPath.row - sharedFile.tags.count
+                let index = indexPath.row - sharedFile.teams.count
                 if sharedFile.users[index].id == AccountManager.instance.currentUserId {
                     break
                 }
@@ -220,7 +223,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
                 present(rightsSelectionViewController, animated: true)
             } else {
                 // Invitation selected
-                let index = indexPath.row - (sharedFile.tags.count + sharedFile.users.count)
+                let index = indexPath.row - (sharedFile.teams.count + sharedFile.users.count)
                 selectedInvitationIndex = index
                 let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
                 rightsSelectionViewController.modalPresentationStyle = .fullScreen
@@ -259,14 +262,14 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
             driveFileManager.apiFetcher.updateUserRights(file: file, user: sharedFile.users[index], permission: value) { response, _ in
                 if response?.data != nil {
                     self.sharedFile!.users[index].permission = UserPermission(rawValue: value)
-                    self.tableView.reloadRows(at: [IndexPath(row: index + sharedFile.tags.count, section: 2)], with: .automatic)
+                    self.tableView.reloadRows(at: [IndexPath(row: index + sharedFile.teams.count, section: 2)], with: .automatic)
                 }
             }
         } else if let index = selectedInvitationIndex {
             driveFileManager.apiFetcher.updateInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile.invitations[index]!, permission: value) { response, _ in
                 if response?.data != nil {
                     self.sharedFile?.invitations[index]?.permission = UserPermission(rawValue: value)!
-                    self.tableView.reloadRows(at: [IndexPath(row: index + sharedFile.tags.count + sharedFile.users.count, section: 2)], with: .automatic)
+                    self.tableView.reloadRows(at: [IndexPath(row: index + sharedFile.teams.count + sharedFile.users.count, section: 2)], with: .automatic)
                 }
             }
         }

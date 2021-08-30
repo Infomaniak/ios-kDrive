@@ -28,7 +28,7 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(file.driveId)/file/\(file.id)/"
     }
 
-    static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,tags" }
+    static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams" }
 
     static func createDirectory(driveId: Int, parentId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/folder/\(parentId)?\(with)"
@@ -91,7 +91,7 @@ public enum ApiRoutes {
     }
 
     static func getShareListFor(file: File) -> String {
-        return "\(fileURL(file: file))share?with=invitation,link,tag"
+        return "\(fileURL(file: file))share?with=invitation,link,teams"
     }
 
     static func activateShareLinkFor(file: File) -> String {

@@ -23,13 +23,13 @@ import RealmSwift
 public class DriveResponse: Codable {
     public let drives: DriveList
     public let users: [Int: DriveUser]
-    public let tags: [Tag]
+    public let teams: [Team]
     public let ipsToken: IPSToken
 
     enum CodingKeys: String, CodingKey {
         case drives
         case users
-        case tags
+        case teams
         case ipsToken = "ips_token"
     }
 }

@@ -24,7 +24,7 @@ import RealmSwift
 
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
-    private static let currentDbVersion: UInt64 = 1
+    private static let currentDbVersion: UInt64 = 2
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
     private var fileProviderManagers: [String: NSFileProviderManager] = [:]
@@ -33,12 +33,16 @@ public class DriveInfosManager {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(dbName),
             schemaVersion: DriveInfosManager.currentDbVersion,
-            migrationBlock: { _, oldSchemaVersion in
+            migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {
                     // No migration needed from version 0 to version 1
+                    if oldSchemaVersion < 2 {
+                        // Remove tags
+                        migration.deleteData(forType: Tag.className())
+                    }
                 }
             },
-            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveUser.self, Tag.self])
+            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveUser.self, Team.self, TeamDetail.self])
     }
 
     public func getRealm() -> Realm {
@@ -175,7 +179,7 @@ public class DriveInfosManager {
             realm.delete(realm.objects(Drive.self).filter("objectId IN %@", driveRemovedIds))
             realm.add(driveList, update: .modified)
             realm.add(driveResponse.users.values, update: .modified)
-            realm.add(driveResponse.tags, update: .modified)
+            realm.add(driveResponse.teams, update: .modified)
         }
         return driveRemoved
     }
@@ -230,13 +234,13 @@ public class DriveInfosManager {
         return realm.object(ofType: DriveUser.self, forPrimaryKey: id)?.freeze()
     }
 
-    public func getTags(using realm: Realm? = nil) -> [Tag] {
+    public func getTeams(using realm: Realm? = nil) -> [Team] {
         let realm = realm ?? getRealm()
-        return realm.objects(Tag.self).sorted(byKeyPath: "id", ascending: true).map { $0 }
+        return Array(realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true))
     }
 
-    public func getTag(id: Int, using realm: Realm? = nil) -> Tag? {
+    public func getTeam(id: Int, using realm: Realm? = nil) -> Team? {
         let realm = realm ?? getRealm()
-        return realm.object(ofType: Tag.self, forPrimaryKey: id)?.freeze()
+        return realm.object(ofType: Team.self, forPrimaryKey: id)?.freeze()
     }
 }

@@ -29,9 +29,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>imported the following file</string>
+			<string>uploaded the following file</string>
 			<key>other</key>
-			<string>imported %d new files</string>
+			<string>uploaded %d new files</string>
 		</dict>
 	</dict>
 	<key>fileActivityFileRestore</key>
@@ -224,6 +224,22 @@
 			<string>%d selected</string>
 			<key>other</key>
 			<string>%d selected</string>
+		</dict>
+	</dict>
+	<key>shareUsersCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d user</string>
+			<key>other</key>
+			<string>%d users</string>
 		</dict>
 	</dict>
 	<key>uploadInProgressNumberFile</key>

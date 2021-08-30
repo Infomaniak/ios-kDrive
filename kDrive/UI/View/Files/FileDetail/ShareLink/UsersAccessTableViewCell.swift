@@ -87,24 +87,28 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(tag: Tag, drive: Drive) {
+    func configureWith(team: Team, drive: Drive) {
         notAcceptedView.isHidden = true
         externalUserView.isHidden = true
 
         avatarHeightConstraint.constant = 18
         avatarImage.layer.cornerRadius = 0
         avatarImage.tintColor = .white
-        if tag.isAllDriveUsersTag {
+        if team.isAllUsers {
             titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
             avatarImage.image = KDriveAsset.drive.image
-            avatarView.backgroundColor = UIColor(hex: drive.preferences.color)
+            avatarView.backgroundColor = UIColor(hex: "#4051b5")
         } else {
-            titleLabel.text = tag.name
+            titleLabel.text = team.name
             avatarImage.image = KDriveAsset.tag.image
-            avatarView.backgroundColor = UIColor(hex: tag.colorHex)
+            avatarView.backgroundColor = UIColor(hex: team.colorHex)
         }
-        detailLabel.text = nil
-        rightsLabel.text = tag.right?.title
+        if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id) {
+            detailLabel.text = KDriveStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
+        } else {
+            detailLabel.text = nil
+        }
+        rightsLabel.text = team.right?.title
         rightsLabel.textColor = KDriveAsset.secondaryTextColor.color
         accessoryImageView.isHidden = true
     }
