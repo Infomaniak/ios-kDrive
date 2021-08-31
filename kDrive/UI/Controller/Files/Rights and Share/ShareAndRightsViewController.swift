@@ -222,6 +222,9 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .access:
             shareLinkRights = false
             selectedShareable = shareables[indexPath.row]
+            if let user = selectedShareable as? DriveUser, user.id == driveFileManager.drive.userId {
+                break
+            }
             showRightsSelection(shareLink: false)
         }
     }
