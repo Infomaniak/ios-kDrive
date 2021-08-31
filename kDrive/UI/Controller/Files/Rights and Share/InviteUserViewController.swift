@@ -24,8 +24,8 @@ class InviteUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     var file: File!
+    var sharedFile: SharedFile!
     var driveFileManager: DriveFileManager!
-    var canUseTeam: Bool = false
     var ignoredShareables: [Shareable] = []
     var ignoredEmails: [String] = []
     var emails: [String] = []
@@ -95,7 +95,7 @@ class InviteUserViewController: UIViewController {
 
     func showConflictDialog(conflictList: [FileCheckResult]) {
         let message: NSMutableAttributedString
-        if conflictList.count == 1, let user = shareables.first(where: { $0.id == conflictList[0].userId }) as? DriveUser {
+        if conflictList.count == 1, let user = sharedFile.users.first(where: { $0.id == conflictList[0].userId }) {
             message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictDescription(user.displayName, (user.permission ?? .read).title, newPermission.title), boldText: user.displayName)
         } else {
             message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictManyUserDescription(newPermission.title))
@@ -209,7 +209,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
-            cell.canUseTeam = canUseTeam
+            cell.canUseTeam = sharedFile.canUseTeam
             cell.drive = driveFileManager.drive
             cell.textField.text = savedText
             cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail

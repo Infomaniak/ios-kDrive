@@ -117,7 +117,7 @@ class ShareAndRightsViewController: UIViewController {
         if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
             inviteUserVC.driveFileManager = driveFileManager
             inviteUserVC.file = file
-            inviteUserVC.canUseTeam = sharedFile?.canUseTeam ?? false
+            inviteUserVC.sharedFile = sharedFile
             inviteUserVC.shareables = shareables
             inviteUserVC.emails = emails
             inviteUserVC.ignoredEmails = ignoredEmails + emails
