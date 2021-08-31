@@ -18,6 +18,7 @@
 
 import Foundation
 import RealmSwift
+import UIKit
 
 public class Team: Object, Codable {
     @Persisted(primaryKey: true) public var id: Int
@@ -53,6 +54,19 @@ public class Team: Object, Codable {
             "#795548"
         ]
         return color < colors.count ? colors[color] : "#E91E63"
+    }
+
+    public var icon: UIImage {
+        let size = CGSize(width: 35, height: 35)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            UIColor(hex: colorHex)?.setFill()
+            let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            ctx.cgContext.fill(rect)
+            UIColor.white.setFill()
+            let icon = isAllUsers ? KDriveCoreAsset.drive.image : KDriveCoreAsset.tag.image
+            icon.draw(in: CGRect(x: 8.5, y: 8.5, width: 18, height: 18))
+        }
     }
 
     override public init() {}

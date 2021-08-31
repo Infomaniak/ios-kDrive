@@ -105,8 +105,8 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
                         .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
                         .withRenderingMode(.alwaysOriginal)
                 }
-            } else if shareable is Team {
-                cell.avatarImage.image = KDriveAsset.circleTag.image
+            } else if let team = shareable as? Team {
+                cell.avatarImage.image = team.icon
             }
             cell.removeButtonHandler = { _ in
                 self.delegate?.didDelete(shareable: shareable)

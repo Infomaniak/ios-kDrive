@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19158" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -32,29 +31,14 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="410" height="65"/>
                                                 <color key="backgroundColor" name="backgroundCardView"/>
                                             </view>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aOu-Xi-xhJ">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="test-image" translatesAutoresizingMaskIntoConstraints="NO" id="1RC-eR-FYK">
                                                 <rect key="frame" x="12" y="4" width="35" height="35"/>
-                                                <subviews>
-                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="test-image" translatesAutoresizingMaskIntoConstraints="NO" id="1RC-eR-FYK">
-                                                        <rect key="frame" x="0.0" y="0.0" width="35" height="35"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="width" secondItem="1RC-eR-FYK" secondAttribute="height" multiplier="1:1" id="NPN-y9-I6C"/>
-                                                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="35" id="YKG-6P-kfC"/>
-                                                        </constraints>
-                                                    </imageView>
-                                                </subviews>
-                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="35" id="5pm-qm-mhH"/>
-                                                    <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="1RC-eR-FYK" secondAttribute="bottom" id="GW0-qk-QSJ"/>
-                                                    <constraint firstItem="1RC-eR-FYK" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="aOu-Xi-xhJ" secondAttribute="leading" id="GZJ-ke-X3h"/>
-                                                    <constraint firstItem="1RC-eR-FYK" firstAttribute="centerX" secondItem="aOu-Xi-xhJ" secondAttribute="centerX" id="VPJ-9k-COr"/>
-                                                    <constraint firstItem="1RC-eR-FYK" firstAttribute="centerY" secondItem="aOu-Xi-xhJ" secondAttribute="centerY" id="Yzx-n6-265"/>
-                                                    <constraint firstItem="1RC-eR-FYK" firstAttribute="top" relation="greaterThanOrEqual" secondItem="aOu-Xi-xhJ" secondAttribute="top" id="sBy-8L-qwZ"/>
-                                                    <constraint firstAttribute="width" constant="35" id="ysj-SA-MJT"/>
-                                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="1RC-eR-FYK" secondAttribute="trailing" id="z73-KM-nGd"/>
+                                                    <constraint firstAttribute="width" secondItem="1RC-eR-FYK" secondAttribute="height" multiplier="1:1" id="NPN-y9-I6C"/>
+                                                    <constraint firstAttribute="height" constant="35" id="WkF-VQ-cqf"/>
+                                                    <constraint firstAttribute="width" constant="35" id="pwq-qN-S40"/>
                                                 </constraints>
-                                            </view>
+                                            </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="b6c-UA-ZIN" userLabel="title Stack View">
                                                 <rect key="frame" x="57" y="4" width="313" height="22.5"/>
                                                 <subviews>
@@ -124,28 +108,28 @@
                                             <constraint firstAttribute="trailing" secondItem="l7u-DC-qsi" secondAttribute="trailing" id="02j-YQ-oxl"/>
                                             <constraint firstAttribute="bottom" secondItem="jlU-IB-hep" secondAttribute="bottom" priority="750" constant="4" id="2Y2-OD-ip8"/>
                                             <constraint firstItem="jlU-IB-hep" firstAttribute="top" secondItem="r9c-Fe-ia2" secondAttribute="bottom" id="9HZ-5n-jLz"/>
-                                            <constraint firstItem="aOu-Xi-xhJ" firstAttribute="top" secondItem="b6c-UA-ZIN" secondAttribute="top" id="9gL-th-FMK"/>
                                             <constraint firstItem="SmF-5H-MJ9" firstAttribute="centerY" secondItem="5pO-Kh-gB4" secondAttribute="centerY" id="BUV-Ug-Oc2"/>
                                             <constraint firstItem="jlU-IB-hep" firstAttribute="trailing" secondItem="b6c-UA-ZIN" secondAttribute="trailing" id="CtH-Kd-Sam"/>
                                             <constraint firstItem="l7u-DC-qsi" firstAttribute="leading" secondItem="5pO-Kh-gB4" secondAttribute="leading" id="J9C-Qe-txZ"/>
-                                            <constraint firstItem="b6c-UA-ZIN" firstAttribute="leading" secondItem="aOu-Xi-xhJ" secondAttribute="trailing" constant="10" id="Kv3-7k-O57"/>
+                                            <constraint firstItem="1RC-eR-FYK" firstAttribute="top" secondItem="5pO-Kh-gB4" secondAttribute="top" constant="4" id="LI8-A1-Vyd"/>
+                                            <constraint firstItem="b6c-UA-ZIN" firstAttribute="top" secondItem="1RC-eR-FYK" secondAttribute="top" id="LnE-aL-2fs"/>
                                             <constraint firstItem="jlU-IB-hep" firstAttribute="leading" secondItem="b6c-UA-ZIN" secondAttribute="leading" id="MGJ-M4-8ep"/>
                                             <constraint firstItem="r9c-Fe-ia2" firstAttribute="leading" secondItem="b6c-UA-ZIN" secondAttribute="leading" id="N5U-c4-77b"/>
                                             <constraint firstItem="r9c-Fe-ia2" firstAttribute="trailing" secondItem="b6c-UA-ZIN" secondAttribute="trailing" id="Nq0-xN-twT"/>
                                             <constraint firstAttribute="bottom" secondItem="l7u-DC-qsi" secondAttribute="bottom" id="V5R-fx-ZZ8"/>
-                                            <constraint firstItem="aOu-Xi-xhJ" firstAttribute="leading" secondItem="5pO-Kh-gB4" secondAttribute="leading" constant="12" id="eVN-61-LlG"/>
                                             <constraint firstItem="SmF-5H-MJ9" firstAttribute="leading" secondItem="b6c-UA-ZIN" secondAttribute="trailing" constant="8" id="mdz-jG-2Fu"/>
                                             <constraint firstItem="r9c-Fe-ia2" firstAttribute="top" secondItem="b6c-UA-ZIN" secondAttribute="baseline" constant="4" id="njT-Ob-O0y"/>
                                             <constraint firstItem="l7u-DC-qsi" firstAttribute="top" secondItem="5pO-Kh-gB4" secondAttribute="top" id="oKX-ED-FlB"/>
-                                            <constraint firstItem="aOu-Xi-xhJ" firstAttribute="top" secondItem="5pO-Kh-gB4" secondAttribute="top" constant="4" id="oNs-c6-ciO"/>
+                                            <constraint firstItem="b6c-UA-ZIN" firstAttribute="leading" secondItem="1RC-eR-FYK" secondAttribute="trailing" constant="10" id="wEW-v0-S6V"/>
                                             <constraint firstAttribute="trailing" secondItem="SmF-5H-MJ9" secondAttribute="trailing" constant="20" symbolic="YES" id="yXF-Ex-nYS"/>
+                                            <constraint firstItem="1RC-eR-FYK" firstAttribute="leading" secondItem="5pO-Kh-gB4" secondAttribute="leading" constant="12" id="zrk-f9-q7J"/>
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ye9-Db-pn5">
-                                        <rect key="frame" x="0.0" y="65" width="410" height="31"/>
+                                        <rect key="frame" x="0.0" y="65" width="410" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bgz-By-CxN" customClass="IKLabel" customModule="kDriveCore">
-                                                <rect key="frame" x="12" y="0.0" width="398" height="31"/>
+                                                <rect key="frame" x="12" y="0.0" width="398" height="50"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                 <color key="textColor" name="primaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -165,10 +149,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xEX-gh-6jh">
-                                        <rect key="frame" x="0.0" y="96" width="410" height="50"/>
+                                        <rect key="frame" x="0.0" y="115" width="410" height="31"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rXs-cg-QBY" customClass="IKLabel" customModule="kDriveCore">
-                                                <rect key="frame" x="12" y="0.0" width="398" height="50"/>
+                                                <rect key="frame" x="12" y="0.0" width="398" height="31"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                 <color key="textColor" name="primaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -210,9 +194,7 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
                 <outlet property="accessoryImageView" destination="lcb-XX-FgF" id="kw8-25-qPt"/>
-                <outlet property="avatarHeightConstraint" destination="YKG-6P-kfC" id="ybf-6a-gNI"/>
                 <outlet property="avatarImage" destination="1RC-eR-FYK" id="5vc-4c-g4q"/>
-                <outlet property="avatarView" destination="aOu-Xi-xhJ" id="T3C-lb-54r"/>
                 <outlet property="bottomConstraint" destination="6Y9-yq-xdn" id="awf-kW-J0p"/>
                 <outlet property="contentInsetView" destination="uip-Nl-a4L" id="ZFy-0y-ka7"/>
                 <outlet property="detailLabel" destination="09p-zH-cVq" id="icf-NU-kVE"/>
@@ -231,16 +213,16 @@
             <size key="intrinsicContentSize" width="83" height="17"/>
         </designable>
         <designable name="bgz-By-CxN">
-            <size key="intrinsicContentSize" width="480" height="15.5"/>
+            <size key="intrinsicContentSize" width="132" height="15.5"/>
         </designable>
         <designable name="m83-Ub-BR0">
-            <size key="intrinsicContentSize" width="96" height="17"/>
+            <size key="intrinsicContentSize" width="135.5" height="17"/>
         </designable>
         <designable name="pit-04-5d0">
-            <size key="intrinsicContentSize" width="197.5" height="17"/>
+            <size key="intrinsicContentSize" width="105" height="17"/>
         </designable>
         <designable name="rXs-cg-QBY">
-            <size key="intrinsicContentSize" width="480" height="15.5"/>
+            <size key="intrinsicContentSize" width="104" height="15.5"/>
         </designable>
     </designables>
     <resources>
@@ -258,8 +240,5 @@
         <namedColor name="titleColor">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
     </resources>
 </document>

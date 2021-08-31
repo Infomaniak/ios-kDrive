@@ -24,8 +24,6 @@ import UIKit
 class UsersAccessTableViewCell: InsetTableViewCell {
     @IBOutlet weak var rightsStackView: UIStackView!
     @IBOutlet weak var avatarImage: UIImageView!
-    @IBOutlet weak var avatarHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var avatarView: UIView!
     @IBOutlet weak var detailLabel: UILabel!
     @IBOutlet weak var rightsLabel: UILabel!
     @IBOutlet weak var notAcceptedView: UIView!
@@ -34,8 +32,6 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         accessoryImageView.isHidden = false
-        avatarView.layer.cornerRadius = avatarView.frame.height / 2
-        avatarView.clipsToBounds = true
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true
         avatarImage.image = KDriveAsset.placeholderAvatar.image
@@ -44,8 +40,6 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         avatarImage.image = KDriveAsset.placeholderAvatar.image
-        avatarHeightConstraint.constant = 35
-        avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
     }
 
     func configure(with shareable: Shareable, drive: Drive) {
@@ -101,17 +95,8 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         notAcceptedView.isHidden = true
         externalUserView.isHidden = true
 
-        avatarHeightConstraint.constant = 18
-        avatarImage.layer.cornerRadius = 0
-        avatarImage.tintColor = .white
-        if team.isAllUsers {
-            titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
-            avatarImage.image = KDriveAsset.drive.image
-        } else {
-            titleLabel.text = team.name
-            avatarImage.image = KDriveAsset.tag.image
-        }
-        avatarView.backgroundColor = UIColor(hex: team.colorHex)
+        titleLabel.text = team.isAllUsers ? KDriveStrings.Localizable.allAllDriveUsers : team.name
+        avatarImage.image = team.icon
         if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id) {
             detailLabel.text = KDriveStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
         } else {

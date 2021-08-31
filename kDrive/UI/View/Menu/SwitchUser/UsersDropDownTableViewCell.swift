@@ -22,16 +22,12 @@ import kDriveCore
 import UIKit
 
 class UsersDropDownTableViewCell: DropDownCell {
-    @IBOutlet weak var avatarView: UIView!
-    @IBOutlet weak var avatarHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var avatarImage: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var detailLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        avatarView.layer.cornerRadius = avatarView.frame.height / 2
-        avatarView.clipsToBounds = true
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true
         avatarImage.image = KDriveAsset.placeholderAvatar.image
@@ -40,8 +36,6 @@ class UsersDropDownTableViewCell: DropDownCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         avatarImage.image = KDriveAsset.placeholderAvatar.image
-        avatarHeightConstraint.constant = 35
-        avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
     }
 
     func configure(with mail: String) {
@@ -71,17 +65,8 @@ class UsersDropDownTableViewCell: DropDownCell {
     }
 
     func configureWith(team: Team, drive: Drive) {
-        avatarHeightConstraint.constant = 18
-        avatarImage.layer.cornerRadius = 0
-        avatarImage.tintColor = .white
-        if team.isAllUsers {
-            usernameLabel.text = KDriveStrings.Localizable.allAllDriveUsers
-            avatarImage.image = KDriveAsset.drive.image
-        } else {
-            usernameLabel.text = team.name
-            avatarImage.image = KDriveAsset.tag.image
-        }
-        avatarView.backgroundColor = UIColor(hex: team.colorHex)
+        usernameLabel.text = team.isAllUsers ? KDriveStrings.Localizable.allAllDriveUsers : team.name
+        avatarImage.image = team.icon
         detailLabel.text = KDriveStrings.Localizable.shareUsersCount(team.usersCount(in: drive))
     }
 

@@ -6,7 +6,6 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -29,29 +28,13 @@
                     <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5pO-Kh-gB4">
                         <rect key="frame" x="0.0" y="4" width="466" height="110"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WX7-qB-n5y">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="test-image" translatesAutoresizingMaskIntoConstraints="NO" id="lkT-xx-Dmk">
                                 <rect key="frame" x="12" y="37.5" width="35" height="35"/>
-                                <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="test-image" translatesAutoresizingMaskIntoConstraints="NO" id="lkT-xx-Dmk">
-                                        <rect key="frame" x="0.0" y="0.0" width="35" height="35"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="35" id="RNj-dA-d3g"/>
-                                            <constraint firstAttribute="width" secondItem="lkT-xx-Dmk" secondAttribute="height" multiplier="1:1" id="l0C-HQ-yxg"/>
-                                        </constraints>
-                                    </imageView>
-                                </subviews>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="35" id="2LZ-xL-K2C"/>
-                                    <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="lkT-xx-Dmk" secondAttribute="bottom" id="9AZ-PD-9YR"/>
-                                    <constraint firstItem="lkT-xx-Dmk" firstAttribute="top" relation="greaterThanOrEqual" secondItem="WX7-qB-n5y" secondAttribute="top" id="GDV-jJ-1fW"/>
-                                    <constraint firstItem="lkT-xx-Dmk" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="WX7-qB-n5y" secondAttribute="leading" id="bZx-rj-Jqk"/>
-                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="lkT-xx-Dmk" secondAttribute="trailing" id="dAC-bS-8tD"/>
-                                    <constraint firstAttribute="height" constant="35" id="hMT-z9-SF3"/>
-                                    <constraint firstItem="lkT-xx-Dmk" firstAttribute="centerX" secondItem="WX7-qB-n5y" secondAttribute="centerX" id="jmU-7w-xvi"/>
-                                    <constraint firstItem="lkT-xx-Dmk" firstAttribute="centerY" secondItem="WX7-qB-n5y" secondAttribute="centerY" id="mks-JU-QE8"/>
+                                    <constraint firstAttribute="height" constant="35" id="9wt-bg-CvC"/>
+                                    <constraint firstAttribute="width" constant="35" id="GOL-hK-vbT"/>
                                 </constraints>
-                            </view>
+                            </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="lcl-er-krT">
                                 <rect key="frame" x="57" y="8" width="120" height="94"/>
                                 <subviews>
@@ -81,11 +64,11 @@
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="WX7-qB-n5y" firstAttribute="leading" secondItem="5pO-Kh-gB4" secondAttribute="leading" constant="12" id="54j-h8-HJ7"/>
+                            <constraint firstItem="lkT-xx-Dmk" firstAttribute="centerY" secondItem="5pO-Kh-gB4" secondAttribute="centerY" id="Lo6-4o-oFL"/>
+                            <constraint firstItem="lkT-xx-Dmk" firstAttribute="leading" secondItem="5pO-Kh-gB4" secondAttribute="leading" constant="12" id="Q7r-a8-4Bp"/>
                             <constraint firstAttribute="bottom" secondItem="lcl-er-krT" secondAttribute="bottom" constant="8" id="YEe-fJ-KUq"/>
                             <constraint firstItem="lcl-er-krT" firstAttribute="top" secondItem="5pO-Kh-gB4" secondAttribute="top" constant="8" id="dQM-Vj-4Oe"/>
-                            <constraint firstItem="lcl-er-krT" firstAttribute="leading" secondItem="WX7-qB-n5y" secondAttribute="trailing" constant="10" id="lbV-Yy-ocn"/>
-                            <constraint firstItem="WX7-qB-n5y" firstAttribute="centerY" secondItem="5pO-Kh-gB4" secondAttribute="centerY" id="zug-F9-bw7"/>
+                            <constraint firstItem="lcl-er-krT" firstAttribute="leading" secondItem="lkT-xx-Dmk" secondAttribute="trailing" constant="10" id="qAS-Vu-IlF"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -100,9 +83,7 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
-                <outlet property="avatarHeightConstraint" destination="RNj-dA-d3g" id="ROB-pa-XAV"/>
                 <outlet property="avatarImage" destination="lkT-xx-Dmk" id="bWi-XM-HWd"/>
-                <outlet property="avatarView" destination="WX7-qB-n5y" id="z9m-WV-Hgd"/>
                 <outlet property="detailLabel" destination="09p-zH-cVq" id="icf-NU-kVE"/>
                 <outlet property="optionLabel" destination="TVm-Hr-Lfi" id="r0Z-wZ-VQS"/>
                 <outlet property="usernameLabel" destination="pit-04-5d0" id="eGi-7B-6pU"/>
@@ -129,8 +110,5 @@
         <namedColor name="titleColor">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
     </resources>
 </document>
