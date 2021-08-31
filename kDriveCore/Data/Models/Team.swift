@@ -32,6 +32,7 @@ public class Team: Object, Codable {
     }
 
     public var colorHex: String {
+        guard !isAllUsers else { return "#4051b5" }
         let colors = [
             "#F44336",
             "#E91E63",
@@ -79,7 +80,7 @@ extension Team: Shareable {
     }
 
     public var shareableName: String {
-        return name
+        return isAllUsers ? KDriveCoreStrings.Localizable.allAllDriveUsers : name
     }
 }
 

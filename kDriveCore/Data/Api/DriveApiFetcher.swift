@@ -303,9 +303,9 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func checkUserRights(file: File, users: [Int], tags: [Int], emails: [String], permission: String, completion: @escaping (ApiResponse<[FileCheckResult]>?, Error?) -> Void) {
+    public func checkUserRights(file: File, users: [Int], teams: [Int], emails: [String], permission: String, completion: @escaping (ApiResponse<[FileCheckResult]>?, Error?) -> Void) {
         let url = ApiRoutes.checkUserRights(file: file)
-        let body: [String: Any] = ["user_ids": users, "tag_ids": tags, "emails": emails, "permission": permission]
+        let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission]
 
         authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<[FileCheckResult]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)

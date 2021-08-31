@@ -16,24 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 protocol SelectedUsersDelegate: AnyObject {
-    func didDeleteUser(user: DriveUser)
-    func didDeleteEmail(email: String)
+    func didDelete(shareable: Shareable)
+    func didDelete(email: String)
 }
 
 class InvitedUserTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var invitedCollectionView: UICollectionView!
     @IBOutlet weak var heightConstraint: NSLayoutConstraint!
 
     weak var delegate: SelectedUsersDelegate?
 
-    private var users: [DriveUser] = []
-    private var mails: [String] = []
+    private var shareables: [Shareable] = []
+    private var emails: [String] = []
     private var labels: [String] = []
     private var cellWidth: CGFloat!
 
@@ -43,10 +42,10 @@ class InvitedUserTableViewCell: InsetTableViewCell {
         invitedCollectionView.register(cellView: InvitedUserCollectionViewCell.self)
     }
 
-    func configureWith(users: [DriveUser], mails: [String], tableViewWidth: CGFloat) {
-        self.users = users
-        self.mails = mails
-        labels = users.map(\.displayName) + mails
+    func configureWith(shareables: [Shareable], emails: [String], tableViewWidth: CGFloat) {
+        self.shareables = shareables
+        self.emails = emails
+        labels = shareables.map(\.shareableName) + emails
         cellWidth = tableViewWidth - 48 - 8
 
         invitedCollectionView.reloadData()
@@ -84,35 +83,40 @@ class InvitedUserTableViewCell: InsetTableViewCell {
         }
         return height
     }
-
 }
-// MARK: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
-extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
+// MARK: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
+
+extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return users.count + mails.count
+        return shareables.count + emails.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: InvitedUserCollectionViewCell.self, for: indexPath)
         cell.widthConstraint.constant = sizeForCellWith(text: labels[indexPath.row]).width
-        if indexPath.row < users.count {
-            let user = users[indexPath.row]
-            cell.usernameLabel.text = user.displayName
-            user.getAvatar { image in
-                cell.avatarImage.image = image
-                    .resizeImage(size: CGSize(width: 35, height: 35))
-                    .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
-                    .withRenderingMode(.alwaysOriginal)
+        if indexPath.row < shareables.count {
+            let shareable = shareables[indexPath.row]
+            cell.usernameLabel.text = shareable.shareableName
+            if let user = shareable as? DriveUser {
+                user.getAvatar { image in
+                    cell.avatarImage.image = image
+                        .resizeImage(size: CGSize(width: 35, height: 35))
+                        .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
+                        .withRenderingMode(.alwaysOriginal)
+                }
+            } else if shareable is Team {
+                cell.avatarImage.image = KDriveAsset.circleTag.image
             }
             cell.removeButtonHandler = { _ in
-                self.delegate?.didDeleteUser(user: user)
+                self.delegate?.didDelete(shareable: shareable)
             }
         } else {
-            cell.usernameLabel.text = mails[indexPath.row - users.count]
+            let email = emails[indexPath.row - shareables.count]
+            cell.usernameLabel.text = email
             cell.avatarImage.image = KDriveAsset.circleSend.image
             cell.removeButtonHandler = { _ in
-                self.delegate?.didDeleteEmail(email: self.mails[indexPath.row - self.users.count])
+                self.delegate?.didDelete(email: email)
             }
         }
         return cell
@@ -121,5 +125,4 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return sizeForCellWith(text: labels[indexPath.item])
     }
-
 }

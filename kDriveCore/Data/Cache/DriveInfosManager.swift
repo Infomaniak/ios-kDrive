@@ -42,7 +42,7 @@ public class DriveInfosManager {
                     }
                 }
             },
-            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveUser.self, Team.self, TeamDetail.self])
+            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self])
     }
 
     public func getRealm() -> Realm {
@@ -213,20 +213,14 @@ public class DriveInfosManager {
         return realm.object(ofType: Drive.self, forPrimaryKey: objectId)?.freeze()
     }
 
-    public func getUsers(for driveId: Int, using realm: Realm? = nil) -> [DriveUser] {
+    public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {
         let realm = realm ?? getRealm()
-        let drive = getDrive(id: driveId, userId: AccountManager.instance.currentUserId)
-        let realmUserList = realm.objects(DriveUser.self)
-            .sorted(byKeyPath: "id", ascending: true)
-        var users: [DriveUser] = []
+        let drive = getDrive(id: driveId, userId: userId, using: realm)
+        let realmUserList = realm.objects(DriveUser.self).sorted(byKeyPath: "id", ascending: true)
         if let drive = drive {
-            for user in realmUserList {
-                if drive.users.account.contains(user.id) {
-                    users.append(user)
-                }
-            }
+            return realmUserList.filter { drive.users.account.contains($0.id) }
         }
-        return users
+        return []
     }
 
     public func getUser(id: Int, using realm: Realm? = nil) -> DriveUser? {
@@ -234,9 +228,14 @@ public class DriveInfosManager {
         return realm.object(ofType: DriveUser.self, forPrimaryKey: id)?.freeze()
     }
 
-    public func getTeams(using realm: Realm? = nil) -> [Team] {
+    public func getTeams(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [Team] {
         let realm = realm ?? getRealm()
-        return Array(realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true))
+        let drive = getDrive(id: driveId, userId: userId, using: realm)
+        let realmTeamList = realm.objects(Team.self).sorted(byKeyPath: "id", ascending: true)
+        if let drive = drive {
+            return realmTeamList.filter { drive.teams.account.contains($0.id) }
+        }
+        return []
     }
 
     public func getTeam(id: Int, using realm: Realm? = nil) -> Team? {

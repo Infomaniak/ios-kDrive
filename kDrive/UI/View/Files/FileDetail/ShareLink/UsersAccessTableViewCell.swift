@@ -107,12 +107,11 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         if team.isAllUsers {
             titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
             avatarImage.image = KDriveAsset.drive.image
-            avatarView.backgroundColor = UIColor(hex: "#4051b5")
         } else {
             titleLabel.text = team.name
             avatarImage.image = KDriveAsset.tag.image
-            avatarView.backgroundColor = UIColor(hex: team.colorHex)
         }
+        avatarView.backgroundColor = UIColor(hex: team.colorHex)
         if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id) {
             detailLabel.text = KDriveStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
         } else {

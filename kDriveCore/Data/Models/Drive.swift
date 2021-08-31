@@ -59,6 +59,17 @@ public class DriveUsersCategories: Object, Codable {
     }
 }
 
+public class DriveTeamsCategories: Object, Codable {
+    @Persisted(primaryKey: true) public var objectId: String = ""
+    @Persisted public var account: List<Int>
+    @Persisted public var drive: List<Int>
+
+    enum CodingKeys: String, CodingKey {
+        case account
+        case drive
+    }
+}
+
 public enum DrivePack: String, Codable {
     case solo
     case pro
@@ -125,6 +136,7 @@ public class Drive: Object, Codable {
     @Persisted public var size: Int64 = 0
     @Persisted public var usedSize: Int64 = 0
     @Persisted private var _users: DriveUsersCategories? = DriveUsersCategories()
+    @Persisted private var _teams: DriveTeamsCategories? = DriveTeamsCategories()
     @Persisted public var maintenance = false
     @Persisted public var userId: Int = 0 {
         didSet {
@@ -133,6 +145,7 @@ public class Drive: Object, Codable {
             _preferences?.objectId = objectId
             packFunctionality?.objectId = objectId
             _users?.objectId = objectId
+            _teams?.objectId = objectId
         }
     }
 
@@ -146,6 +159,10 @@ public class Drive: Object, Codable {
 
     public var users: DriveUsersCategories {
         return _users ?? DriveUsersCategories()
+    }
+
+    public var teams: DriveTeamsCategories {
+        return _teams ?? DriveTeamsCategories()
     }
 
     public var isUserAdmin: Bool {
@@ -165,6 +182,7 @@ public class Drive: Object, Codable {
         role = try values.decode(String.self, forKey: .role)
         _preferences = try values.decode(DrivePreferences.self, forKey: ._preferences)
         _users = try values.decode(DriveUsersCategories.self, forKey: ._users)
+        _teams = try values.decode(DriveTeamsCategories.self, forKey: ._teams)
         size = try values.decode(Int64.self, forKey: .size)
         usedSize = try values.decode(Int64.self, forKey: .usedSize)
         canAddUser = try values.decode(Bool.self, forKey: .canAddUser)
@@ -186,6 +204,7 @@ public class Drive: Object, Codable {
         case size
         case usedSize = "used_size"
         case _users = "users"
+        case _teams = "teams"
         case canAddUser = "can_add_user"
         case packFunctionality = "pack_functionality"
         case hasTechnicalRight = "has_technical_right"
