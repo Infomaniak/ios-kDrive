@@ -25,6 +25,7 @@ class InviteUserViewController: UIViewController {
 
     var file: File!
     var driveFileManager: DriveFileManager!
+    var canUseTeam: Bool = false
     var ignoredShareables: [Shareable] = []
     var ignoredEmails: [String] = []
     var emails: [String] = []
@@ -149,7 +150,8 @@ class InviteUserViewController: UIViewController {
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
         coder.encode(file.id, forKey: "FileId")
         coder.encode(emails, forKey: "Emails")
-        // coder.encode(users.map(\.id), forKey: "UserIds")
+        coder.encode(shareables.compactMap { $0 as? DriveUser }.map(\.id), forKey: "UserIds")
+        coder.encode(shareables.compactMap { $0 as? Team }.map(\.id), forKey: "TeamIds")
         coder.encode(newPermission.rawValue, forKey: "NewPermission")
         coder.encode(message, forKey: "Message")
     }
@@ -160,7 +162,8 @@ class InviteUserViewController: UIViewController {
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
         emails = coder.decodeObject(forKey: "Emails") as? [String] ?? []
-        // let userIds = coder.decodeObject(forKey: "UserIds") as? [Int] ?? []
+        let userIds = coder.decodeObject(forKey: "UserIds") as? [Int] ?? []
+        let teamIds = coder.decodeObject(forKey: "TeamIds") as? [Int] ?? []
         newPermission = UserPermission(rawValue: coder.decodeObject(forKey: "NewPermission") as? String ?? "") ?? .read
         message = coder.decodeObject(forKey: "Message") as? String ?? ""
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
@@ -168,8 +171,8 @@ class InviteUserViewController: UIViewController {
         }
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
-        // let realm = DriveInfosManager.instance.getRealm()
-        // users = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
+        let realm = DriveInfosManager.instance.getRealm()
+        shareables = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) } + teamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
         // Update UI
         setTitle()
         reloadInvited()
@@ -206,6 +209,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
+            cell.canUseTeam = canUseTeam
             cell.drive = driveFileManager.drive
             cell.textField.text = savedText
             cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail

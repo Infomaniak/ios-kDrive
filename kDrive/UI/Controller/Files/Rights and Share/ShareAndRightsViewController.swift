@@ -111,6 +111,21 @@ class ShareAndRightsViewController: UIViewController {
         present(rightsSelectionViewController, animated: true)
     }
 
+    private func showInviteView(shareables: [Shareable] = [], emails: [String] = []) {
+        let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
+        inviteUserViewController.modalPresentationStyle = .fullScreen
+        if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
+            inviteUserVC.driveFileManager = driveFileManager
+            inviteUserVC.file = file
+            inviteUserVC.canUseTeam = sharedFile?.canUseTeam ?? false
+            inviteUserVC.shareables = shareables
+            inviteUserVC.emails = emails
+            inviteUserVC.ignoredEmails = ignoredEmails + emails
+            inviteUserVC.ignoredShareables = self.shareables + shareables
+        }
+        present(inviteUserViewController, animated: true)
+    }
+
     @IBAction func closeButtonPressed(_ sender: Any) {
         _ = navigationController?.popViewController(animated: true)
     }
@@ -177,6 +192,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.canUseTeam = sharedFile?.canUseTeam ?? false
             cell.drive = driveFileManager?.drive
             cell.ignoredShareables = shareables
             cell.ignoredEmails = ignoredEmails
@@ -327,28 +343,10 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
 
 extension ShareAndRightsViewController: SearchUserDelegate {
     func didSelect(shareable: Shareable) {
-        let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
-        inviteUserViewController.modalPresentationStyle = .fullScreen
-        if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
-            inviteUserVC.driveFileManager = driveFileManager
-            inviteUserVC.shareables = [shareable]
-            inviteUserVC.file = file
-            inviteUserVC.ignoredEmails = ignoredEmails
-            inviteUserVC.ignoredShareables = shareables + [shareable]
-        }
-        present(inviteUserViewController, animated: true)
+        showInviteView(shareables: [shareable])
     }
 
     func didSelect(email: String) {
-        let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
-        inviteUserViewController.modalPresentationStyle = .fullScreen
-        if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
-            inviteUserVC.driveFileManager = driveFileManager
-            inviteUserVC.emails = [email]
-            inviteUserVC.file = file
-            inviteUserVC.ignoredEmails = ignoredEmails + [email]
-            inviteUserVC.ignoredShareables = shareables
-        }
-        present(inviteUserViewController, animated: true)
+        showInviteView(emails: [email])
     }
 }

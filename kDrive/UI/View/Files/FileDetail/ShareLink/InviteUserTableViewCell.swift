@@ -33,6 +33,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
     weak var delegate: SearchUserDelegate?
     let dropDown = DropDown()
 
+    var canUseTeam = false
     var ignoredEmails: [String] = []
     var ignoredShareables: [Shareable] = [] {
         didSet {
@@ -49,8 +50,11 @@ class InviteUserTableViewCell: InsetTableViewCell {
             guard drive != nil else { return }
             let realm = DriveInfosManager.instance.getRealm()
             let users = DriveInfosManager.instance.getUsers(for: drive.id, userId: drive.userId, using: realm)
-            let teams = DriveInfosManager.instance.getTeams(for: drive.id, userId: drive.userId, using: realm)
-            shareables = teams.sorted() + users.sorted { $0.displayName < $1.displayName }
+            shareables = users.sorted { $0.displayName < $1.displayName }
+            if canUseTeam {
+                let teams = DriveInfosManager.instance.getTeams(for: drive.id, userId: drive.userId, using: realm)
+                shareables = teams.sorted() + shareables
+            }
             results = shareables.filter { shareable in
                 !ignoredShareables.contains { $0.id == shareable.id }
             }
