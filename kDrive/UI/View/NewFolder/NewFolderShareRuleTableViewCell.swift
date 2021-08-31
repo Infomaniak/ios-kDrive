@@ -16,17 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 class NewFolderShareRuleTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var imageStackViewWidth: NSLayoutConstraint!
     @IBOutlet weak var descriptionLabel: UILabel!
     var rights = true
-    var users: [DriveUser] = []
+    var shareables: [Shareable] = []
     var plusUser: Int = 0
 
     override func awakeFromNib() {
@@ -68,12 +67,16 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureParentsRights(folderName: String, users: [DriveUser]) {
+    func configureParentsRights(folderName: String, sharedFile: SharedFile?) {
         rights = true
-        self.users = users
+        if let sharedFile = sharedFile {
+            shareables = sharedFile.teams + sharedFile.users
+        } else {
+            shareables = []
+        }
 
-        if users.count > 3 {
-            plusUser = users.count - 3
+        if shareables.count > 3 {
+            plusUser = shareables.count - 3
         }
         imageStackViewWidth.constant = 30
         accessoryImageView.isHidden = true
@@ -99,10 +102,10 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
         descriptionLabel.text = KDriveStrings.Localizable.createCommonFolderAllUsersDescription(driveName)
     }
-
 }
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
+
 extension NewFolderShareRuleTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -110,7 +113,7 @@ extension NewFolderShareRuleTableViewCell: UICollectionViewDelegate, UICollectio
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if rights {
-            return plusUser == 0 ? users.count : 3
+            return plusUser == 0 ? shareables.count : 3
         }
         return 0
     }
@@ -118,12 +121,12 @@ extension NewFolderShareRuleTableViewCell: UICollectionViewDelegate, UICollectio
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: NewFolderShareRuleUserCollectionViewCell.self, for: indexPath)
         if plusUser == 0 {
-            cell.configureWith(user: users[indexPath.row])
+            cell.configure(with: shareables[indexPath.row])
         } else {
             if indexPath.row == 2 {
                 cell.configureWith(moreValue: plusUser)
             } else {
-                cell.configureWith(user: users[indexPath.row])
+                cell.configure(with: shareables[indexPath.row])
             }
         }
         return cell
@@ -131,6 +134,7 @@ extension NewFolderShareRuleTableViewCell: UICollectionViewDelegate, UICollectio
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
+
 extension NewFolderShareRuleTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 30, height: 30)

@@ -305,7 +305,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             case .someUser:
                 cell.configureSomeUser()
             case .parentsRights:
-                cell.configureParentsRights(folderName: currentDirectory.name, users: sharedFile?.users ?? [])
+                cell.configureParentsRights(folderName: currentDirectory.name, sharedFile: sharedFile)
             }
             return cell
         case .location:

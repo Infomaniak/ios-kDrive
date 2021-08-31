@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var userImage: UIImageView!
     @IBOutlet weak var moreLabel: UILabel!
 
@@ -31,10 +30,14 @@ class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
         moreLabel.isHidden = true
     }
 
-    func configureWith(user: DriveUser) {
-        userImage.image = KDriveAsset.placeholderAvatar.image
-        user.getAvatar { image in
-            self.userImage.image = image
+    func configure(with shareable: Shareable) {
+        if let user = shareable as? DriveUser {
+            userImage.image = KDriveAsset.placeholderAvatar.image
+            user.getAvatar { image in
+                self.userImage.image = image
+            }
+        } else if let team = shareable as? Team {
+            userImage.image = team.icon
         }
     }
 

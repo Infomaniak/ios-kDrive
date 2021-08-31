@@ -16,16 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 protocol FileUsersDelegate: AnyObject {
     func shareButtonTapped()
 }
 
 class FileInformationUsersTableViewCell: UITableViewCell {
-
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var shareButton: ImageButton!
@@ -33,6 +32,14 @@ class FileInformationUsersTableViewCell: UITableViewCell {
     var sharedFile: SharedFile?
     var fallbackUsers = [DriveUser]()
     weak var delegate: FileUsersDelegate?
+
+    var shareables: [Shareable] {
+        if let sharedFile = sharedFile {
+            return sharedFile.teams + sharedFile.users
+        } else {
+            return fallbackUsers
+        }
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -46,28 +53,26 @@ class FileInformationUsersTableViewCell: UITableViewCell {
     @IBAction func shareButtonTapped(_ sender: Any) {
         delegate?.shareButtonTapped()
     }
-
 }
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
-extension FileInformationUsersTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
+extension FileInformationUsersTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return sharedFile?.users.count ?? fallbackUsers.count
+        return shareables.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: FileDetailInformationUserCollectionViewCell.self, for: indexPath)
-        cell.configureWith(moreValue: 0, driveUser: sharedFile?.users[indexPath.row] ?? fallbackUsers[indexPath.row])
+        cell.configureWith(moreValue: 0, shareable: shareables[indexPath.row])
         return cell
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 35, height: 35)
     }
-
 }

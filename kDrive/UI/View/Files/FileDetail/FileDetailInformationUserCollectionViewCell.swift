@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var avatarImage: UIImageView!
     @IBOutlet weak var moreLabel: UILabel!
 
@@ -36,18 +35,22 @@ class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
         avatarImage.image = KDriveAsset.placeholderAvatar.image
     }
 
-    func configureWith(moreValue: Int, driveUser: DriveUser) {
+    func configureWith(moreValue: Int, shareable: Shareable) {
         if moreValue > 0 {
             moreLabel.isHidden = false
             moreLabel.text = "+\(moreValue)"
-            accessibilityLabel = "\(driveUser.displayName) +\(moreValue)"
+            accessibilityLabel = "\(shareable.shareableName) +\(moreValue)"
         } else {
-            accessibilityLabel = driveUser.displayName
+            accessibilityLabel = shareable.shareableName
         }
         isAccessibilityElement = true
 
-        driveUser.getAvatar { image in
-            self.avatarImage.image = image
+        if let user = shareable as? DriveUser {
+            user.getAvatar { image in
+                self.avatarImage.image = image
+            }
+        } else if let team = shareable as? Team {
+            avatarImage.image = team.icon
         }
     }
 }
