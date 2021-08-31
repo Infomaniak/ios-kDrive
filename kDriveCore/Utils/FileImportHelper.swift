@@ -148,7 +148,7 @@ public class FileImportHelper {
         return progress
     }
 
-    public func upload(files: [ImportedFile], in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
+    public func upload(files: [ImportedFile], in directory: File, drive: Drive) throws {
         if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
@@ -156,7 +156,7 @@ public class FileImportHelper {
         for file in files {
             let uploadFile = UploadFile(
                 parentDirectoryId: directory.id,
-                userId: userId,
+                userId: drive.userId,
                 driveId: drive.id,
                 url: file.path,
                 name: file.name
@@ -165,7 +165,7 @@ public class FileImportHelper {
         }
     }
 
-    public func upload(photo: UIImage, name: String, format: PhotoFileFormat, in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
+    public func upload(photo: UIImage, name: String, format: PhotoFileFormat, in directory: File, drive: Drive) throws {
         if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
@@ -190,21 +190,21 @@ public class FileImportHelper {
         guard let data = data else {
             throw ImportError.emptyImageData
         }
-        try upload(data: data, name: name, drive: drive, directory: directory, userId: userId)
+        try upload(data: data, name: name, drive: drive, directory: directory)
     }
 
-    public func upload(videoUrl: URL, name: String, in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
+    public func upload(videoUrl: URL, name: String, in directory: File, drive: Drive) throws {
         if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
 
         let name = name.addingExtension("mov")
         let data = try Data(contentsOf: videoUrl)
-        try upload(data: data, name: name, drive: drive, directory: directory, userId: userId)
+        try upload(data: data, name: name, drive: drive, directory: directory)
     }
 
     @available(iOS 13.0, *)
-    public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive, userId: Int = AccountManager.instance.currentUserId) throws {
+    public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive) throws {
         if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
         }
@@ -226,7 +226,7 @@ public class FileImportHelper {
         guard let data = data else {
             throw ImportError.emptyImageData
         }
-        try upload(data: data, name: name, drive: drive, directory: directory, userId: userId)
+        try upload(data: data, name: name, drive: drive, directory: directory)
     }
 
     public func getDefaultFileName() -> String {
@@ -298,12 +298,12 @@ public class FileImportHelper {
         return progress
     }
 
-    private func upload(data: Data, name: String, drive: Drive, directory: File, userId: Int) throws {
+    private func upload(data: Data, name: String, drive: Drive, directory: File) throws {
         let filepath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
         try data.write(to: filepath)
         let newFile = UploadFile(
             parentDirectoryId: directory.id,
-            userId: userId,
+            userId: drive.userId,
             driveId: drive.id,
             url: filepath,
             name: name
