@@ -48,6 +48,10 @@ public enum FileActivityType: String, Codable {
     case collaborativeFolderCreate = "collaborative_folder_create"
     case collaborativeFolderUpdate = "collaborative_folder_update"
     case collaborativeFolderDelete = "collaborative_folder_delete"
+
+    public static var fileActivities: [FileActivityType] {
+        return [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete]
+    }
 }
 
 public class FileActivity: Object, Codable {
