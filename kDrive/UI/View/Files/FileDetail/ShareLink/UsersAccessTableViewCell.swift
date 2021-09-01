@@ -24,8 +24,6 @@ import UIKit
 class UsersAccessTableViewCell: InsetTableViewCell {
     @IBOutlet weak var rightsStackView: UIStackView!
     @IBOutlet weak var avatarImage: UIImageView!
-    @IBOutlet weak var avatarHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var avatarView: UIView!
     @IBOutlet weak var detailLabel: UILabel!
     @IBOutlet weak var rightsLabel: UILabel!
     @IBOutlet weak var notAcceptedView: UIView!
@@ -34,8 +32,6 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         accessoryImageView.isHidden = false
-        avatarView.layer.cornerRadius = avatarView.frame.height / 2
-        avatarView.clipsToBounds = true
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true
         avatarImage.image = KDriveAsset.placeholderAvatar.image
@@ -44,8 +40,16 @@ class UsersAccessTableViewCell: InsetTableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         avatarImage.image = KDriveAsset.placeholderAvatar.image
-        avatarHeightConstraint.constant = 35
-        avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
+    }
+
+    func configure(with shareable: Shareable, drive: Drive) {
+        if let user = shareable as? DriveUser {
+            configureWith(user: user, blocked: AccountManager.instance.currentUserId == user.id)
+        } else if let invitation = shareable as? Invitation {
+            configureWith(invitation: invitation)
+        } else if let team = shareable as? Team {
+            configureWith(team: team, drive: drive)
+        }
     }
 
     func configureWith(user: DriveUser, blocked: Bool = false) {
@@ -87,25 +91,18 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(tag: Tag, drive: Drive) {
+    func configureWith(team: Team, drive: Drive) {
         notAcceptedView.isHidden = true
         externalUserView.isHidden = true
 
-        avatarHeightConstraint.constant = 18
-        avatarImage.layer.cornerRadius = 0
-        avatarImage.tintColor = .white
-        if tag.isAllDriveUsersTag {
-            titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
-            avatarImage.image = KDriveAsset.drive.image
-            avatarView.backgroundColor = UIColor(hex: drive.preferences.color)
+        titleLabel.text = team.isAllUsers ? KDriveStrings.Localizable.allAllDriveUsers : team.name
+        avatarImage.image = team.icon
+        if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id) {
+            detailLabel.text = KDriveStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
         } else {
-            titleLabel.text = tag.name
-            avatarImage.image = KDriveAsset.tag.image
-            avatarView.backgroundColor = UIColor(hex: tag.colorHex)
+            detailLabel.text = nil
         }
-        detailLabel.text = nil
-        rightsLabel.text = tag.right?.title
-        rightsLabel.textColor = KDriveAsset.secondaryTextColor.color
-        accessoryImageView.isHidden = true
+        rightsLabel.text = team.right?.title
+        rightsLabel.textColor = KDriveAsset.titleColor.color
     }
 }

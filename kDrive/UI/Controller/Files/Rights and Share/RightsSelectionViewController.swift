@@ -1,25 +1,26 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 // swiftlint:disable trailing_closure
-import UIKit
+
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 enum RightsSelectionType {
     case shareLinkSettings
@@ -33,7 +34,7 @@ protocol RightsSelectionDelegate: AnyObject {
 }
 
 extension RightsSelectionDelegate {
-    func didDeleteUserRight() { }
+    func didDeleteUserRight() {}
 }
 
 struct Right {
@@ -44,43 +45,35 @@ struct Right {
 
     static let shareLinkRights = [
         Right(key: "public",
-            title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
-            icon: KDriveAsset.view.image,
-            description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
+              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
+              icon: KDriveAsset.view.image,
+              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
         Right(key: "inherit",
-            title: KDriveStrings.Localizable.shareLinkDriveUsersRightTitle,
-            icon: KDriveAsset.users.image,
-            description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) }),
+              title: KDriveStrings.Localizable.shareLinkDriveUsersRightTitle,
+              icon: KDriveAsset.users.image,
+              description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) }),
         Right(key: "password",
-            title: KDriveStrings.Localizable.shareLinkPasswordRightTitle,
-            icon: KDriveAsset.lock.image,
-            description: { _ in KDriveStrings.Localizable.shareLinkPasswordRightDescription })
+              title: KDriveStrings.Localizable.shareLinkPasswordRightTitle,
+              icon: KDriveAsset.lock.image,
+              description: { _ in KDriveStrings.Localizable.shareLinkPasswordRightDescription })
     ]
     static let onlyOfficeRights = [
         Right(key: "read",
-            title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
-            icon: KDriveAsset.view.image,
-            description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadDescription }),
+              title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
+              icon: KDriveAsset.view.image,
+              description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadDescription }),
         Right(key: "write",
-            title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
-            icon: KDriveAsset.edit.image,
-            description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteDescription })
+              title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
+              icon: KDriveAsset.edit.image,
+              description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteDescription })
     ]
 }
 
 class RightsSelectionViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var closeButton: UIButton!
 
-    enum UserType {
-        case user, invitation, multiUser
-    }
-
-    var userType: UserType = .user
-    var user: DriveUser!
-    var invitation: Invitation!
-    var tag: Tag!
+    var shareable: Shareable?
 
     var rightSelectionType = RightsSelectionType.addUserRights
 
@@ -148,11 +141,11 @@ class RightsSelectionViewController: UIViewController {
 
     @IBAction func closeButtonPressed(_ sender: Any) {
         delegate?.didUpdateRightValue(newValue: rights[tableView.indexPathForSelectedRow?.row ?? 0].key)
-        self.dismiss(animated: true)
+        dismiss(animated: true)
     }
 
     @objc func cancelButtonPressed() {
-        self.dismiss(animated: true)
+        dismiss(animated: true)
     }
 
     class func instantiateInNavigationController() -> TitleSizeAdjustingNavigationController {
@@ -167,8 +160,8 @@ class RightsSelectionViewController: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
-extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSource {
 
+extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return rights.count
     }
@@ -187,17 +180,8 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
                 self.present(floatingPanelViewController, animated: true)
             }
         } else if right.key == "manage" {
-            let id: Int?
-            switch userType {
-            case .user:
-                id = user.id
-            case .invitation:
-                id = invitation.userId
-            case .multiUser:
-                id = nil
-            }
-            if userType != .multiUser && (id == nil || !driveFileManager.drive.users.internalUsers.contains(id!)) {
-                disable = true
+            if let userId = shareable?.userId {
+                disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
         }
         cell.configureCell(right: right, type: rightSelectionType, driveName: driveFileManager.drive.name, disable: disable)
@@ -216,15 +200,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let right = rights[indexPath.row]
         if right.key == "delete" {
-            var deleteUser: String
-            switch userType {
-            case .user:
-                deleteUser = user.displayName
-            case .invitation:
-                deleteUser = invitation.displayName ?? invitation.email
-            case .multiUser:
-                deleteUser = tag.name
-            }
+            let deleteUser = shareable?.shareableName ?? ""
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: attrString, action: KDriveStrings.Localizable.buttonDelete, destructive: true) {
                 self.delegate?.didDeleteUserRight()
@@ -236,5 +212,4 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
             selectedRight = right.key
         }
     }
-
 }

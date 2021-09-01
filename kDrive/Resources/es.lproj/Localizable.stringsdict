@@ -226,6 +226,22 @@
 			<string>%d seleccionados</string>
 		</dict>
 	</dict>
+	<key>shareUsersCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d usuario</string>
+			<key>other</key>
+			<string>%d usuarios</string>
+		</dict>
+	</dict>
 	<key>uploadInProgressNumberFile</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

@@ -21,47 +21,51 @@ import Foundation
 public class SharedFile: NSObject, NSCoding, Codable {
     public var id: Int = 0
     public var path: String
-    public var canUseTag: Bool
+    public var canUseTeam: Bool
     public var users: [DriveUser]
     public var link: ShareLink?
     public var invitations: [Invitation?]
-    public var tags: [Tag?]
+    public var teams: [Team]
+
+    public var shareables: [Shareable] {
+        return teams.sorted() + users + invitations.compactMap { $0 }
+    }
 
     enum CodingKeys: String, CodingKey {
         case id
         case path
-        case canUseTag = "can_use_tag"
+        case canUseTeam = "can_use_team"
         case users
         case link
         case invitations
-        case tags
+        case teams
     }
 
     public func encode(with coder: NSCoder) {
         coder.encode(id, forKey: "Id")
         coder.encode(path, forKey: "Path")
-        coder.encode(canUseTag, forKey: "CanUseTag")
+        coder.encode(canUseTeam, forKey: "CanUseTeam")
         coder.encode(users.map(\.id), forKey: "Users")
         coder.encode(link, forKey: "Link")
         // coder.encode(invitations, forKey: "Invitations")
-        // coder.encode(tags, forKey: "Tags")
+        coder.encode(teams, forKey: "Teams")
     }
 
     public required init?(coder: NSCoder) {
         guard let path = coder.decodeObject(forKey: "Path") as? String,
-              let users = coder.decodeObject(forKey: "Users") as? [Int] /* ,
-               let invitations = coder.decodeObject(forKey: "Invitations") as? [Invitation?],
-               let tags = coder.decodeObject(forKey: "Tags") as? [Tag?] */ else {
+              let users = coder.decodeObject(forKey: "Users") as? [Int],
+              // let invitations = coder.decodeObject(forKey: "Invitations") as? [Invitation?],
+              let teams = coder.decodeObject(forKey: "Teams") as? [Team] else {
             return nil
         }
         self.id = coder.decodeInteger(forKey: "Id")
         self.path = path
-        self.canUseTag = coder.decodeBool(forKey: "CanUseTag")
+        self.canUseTeam = coder.decodeBool(forKey: "CanUseTeam")
         let realm = DriveInfosManager.instance.getRealm()
         self.users = users.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
         self.link = coder.decodeObject(forKey: "Link") as? ShareLink
-        self.invitations = [] // invitations
-        self.tags = [] // tags
+        self.invitations = []
+        self.teams = teams
     }
 }
 
@@ -133,6 +137,21 @@ public class Invitation: Codable {
     }
 }
 
+extension Invitation: Shareable {
+    public var right: UserPermission? {
+        get {
+            return permission
+        }
+        set {
+            permission = newValue ?? .read
+        }
+    }
+
+    public var shareableName: String {
+        return displayName ?? email
+    }
+}
+
 // MARK: - Share with users
 
 public class SharedUsers: Codable {
@@ -143,7 +162,7 @@ public class SharedUsers: Codable {
 public class SharedUsersValid: Codable {
     public var invitations: [Invitation]?
     public var users: [DriveUser]?
-    public var tags: [Tag]?
+    public var teams: [Team]?
 }
 
 public class FileCheckResult: Codable {

@@ -290,18 +290,22 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func addUserRights(file: File, users: [Int], tags: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
+    public func addUserRights(file: File, users: [Int], teams: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
         let url = ApiRoutes.addUserRights(file: file)
-        let body: [String: Any] = ["user_ids": users, "tag_ids": tags, "emails": emails, "permission": permission, "lang": "fr", "message": message]
+        var lang = "en"
+        if let languageCode = Locale.current.languageCode, ["fr", "de", "it", "en", "es"].contains(languageCode) {
+            lang = languageCode
+        }
+        let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission, "lang": lang, "message": message]
 
         authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<SharedUsers>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
         }
     }
 
-    public func checkUserRights(file: File, users: [Int], tags: [Int], emails: [String], permission: String, completion: @escaping (ApiResponse<[FileCheckResult]>?, Error?) -> Void) {
+    public func checkUserRights(file: File, users: [Int], teams: [Int], emails: [String], permission: String, completion: @escaping (ApiResponse<[FileCheckResult]>?, Error?) -> Void) {
         let url = ApiRoutes.checkUserRights(file: file)
-        let body: [String: Any] = ["user_ids": users, "tag_ids": tags, "emails": emails, "permission": permission]
+        let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission]
 
         authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<[FileCheckResult]>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)
@@ -336,6 +340,23 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func deleteInvitationRights(driveId: Int, invitation: Invitation, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.deleteInvitationRights(driveId: driveId, invitation: invitation)
+
+        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
+            self.handleResponse(response: response, completion: completion)
+        }
+    }
+
+    public func updateTeamRights(file: File, team: Team, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+        let url = ApiRoutes.updateTeamRights(file: file, team: team)
+        let body: [String: Any] = ["permission": permission]
+
+        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
+            self.handleResponse(response: response, completion: completion)
+        }
+    }
+
+    public func deleteTeamRights(file: File, team: Team, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+        let url = ApiRoutes.deleteTeamRights(file: file, team: team)
 
         authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
             self.handleResponse(response: response, completion: completion)

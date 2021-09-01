@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import DropDown
 import InfomaniakCore
 import kDriveCore
-import DropDown
+import UIKit
 
 class UsersDropDownTableViewCell: DropDownCell {
-
     @IBOutlet weak var avatarImage: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var detailLabel: UILabel!
@@ -39,10 +38,18 @@ class UsersDropDownTableViewCell: DropDownCell {
         avatarImage.image = KDriveAsset.placeholderAvatar.image
     }
 
-    func configureWith(mail: String) {
+    func configure(with mail: String) {
         usernameLabel.text = mail
         detailLabel.text = KDriveStrings.Localizable.userInviteByEmail
         avatarImage.image = KDriveAsset.circleSend.image
+    }
+
+    func configure(with shareable: Shareable, drive: Drive) {
+        if let user = shareable as? DriveUser {
+            configureWith(user: user)
+        } else if let team = shareable as? Team {
+            configureWith(team: team, drive: drive)
+        }
     }
 
     func configureWith(user: DriveUser) {
@@ -55,6 +62,12 @@ class UsersDropDownTableViewCell: DropDownCell {
                 .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
                 .withRenderingMode(.alwaysOriginal)
         }
+    }
+
+    func configureWith(team: Team, drive: Drive) {
+        usernameLabel.text = team.isAllUsers ? KDriveStrings.Localizable.allAllDriveUsers : team.name
+        avatarImage.image = team.icon
+        detailLabel.text = KDriveStrings.Localizable.shareUsersCount(team.usersCount(in: drive))
     }
 
     func configureWith(account: Account) {

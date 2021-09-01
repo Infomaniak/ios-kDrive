@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import DropDown
 import kDriveCore
 import UIKit
@@ -32,18 +33,15 @@ class ShareAndRightsViewController: UIViewController {
     private let sections = ShareAndRightsSections.allCases
 
     private var shareLinkIsActive = false
-    private var removeUsers: [Int] = []
-    private var removeEmails: [String] = []
-    private var selectedUserIndex: Int?
-    private var selectedTagIndex: Int?
-    private var selectedInvitationIndex: Int?
+    private var ignoredEmails: [String] = []
     private var shareLinkRights = false
     private var initialLoading = true
-
-    var file: File!
-    var sharedFile: SharedFile?
+    private var sharedFile: SharedFile?
+    private var shareables: [Shareable] = []
+    private var selectedShareable: Shareable?
 
     var driveFileManager: DriveFileManager!
+    var file: File!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,20 +68,62 @@ class ShareAndRightsViewController: UIViewController {
         initialLoading = false
     }
 
-    func setTitle() {
+    private func setTitle() {
         guard file != nil else { return }
         title = file.isDirectory ? KDriveStrings.Localizable.fileShareDetailsFolderTitle(file.name) : KDriveStrings.Localizable.fileShareDetailsFileTitle(file.name)
     }
 
-    func updateShareList() {
-        driveFileManager?.apiFetcher.getShareListFor(file: file) { response, _ in
+    private func updateShareList() {
+        driveFileManager?.apiFetcher.getShareListFor(file: file) { response, error in
             if let sharedFile = response?.data {
                 self.sharedFile = sharedFile
-                self.removeUsers = sharedFile.users.map(\.id) + sharedFile.invitations.compactMap { $0?.userId }
-                self.removeEmails = sharedFile.invitations.compactMap { $0?.userId != nil ? nil : $0?.email }
+                self.shareables = sharedFile.shareables
+                self.ignoredEmails = sharedFile.invitations.compactMap { $0?.userId != nil ? nil : $0?.email }
                 self.tableView.reloadData()
+            } else {
+                if let error = response?.error ?? error {
+                    DDLogError("Cannot get shared file: \(error)")
+                } else {
+                    DDLogError("Cannot get shared file (unknown error)")
+                }
             }
         }
+    }
+
+    private func showRightsSelection(shareLink: Bool) {
+        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+        rightsSelectionViewController.modalPresentationStyle = .fullScreen
+        if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
+            rightsSelectionVC.driveFileManager = driveFileManager
+            rightsSelectionVC.delegate = self
+            if shareLink {
+                guard let sharedLink = sharedFile?.link else { return }
+
+                rightsSelectionVC.rightSelectionType = .officeOnly
+                rightsSelectionVC.selectedRight = (sharedLink.canEdit ? UserPermission.write : UserPermission.read).rawValue
+            } else {
+                guard let shareable = selectedShareable else { return }
+
+                rightsSelectionVC.selectedRight = (shareable.right ?? .read).rawValue
+                rightsSelectionVC.shareable = shareable
+            }
+        }
+        present(rightsSelectionViewController, animated: true)
+    }
+
+    private func showInviteView(shareables: [Shareable] = [], emails: [String] = []) {
+        let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
+        inviteUserViewController.modalPresentationStyle = .fullScreen
+        if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
+            inviteUserVC.driveFileManager = driveFileManager
+            inviteUserVC.file = file
+            inviteUserVC.sharedFile = sharedFile
+            inviteUserVC.shareables = shareables
+            inviteUserVC.emails = emails
+            inviteUserVC.ignoredEmails = ignoredEmails + emails
+            inviteUserVC.ignoredShareables = self.shareables + shareables
+        }
+        present(inviteUserViewController, animated: true)
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {
@@ -114,6 +154,7 @@ class ShareAndRightsViewController: UIViewController {
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
         setTitle()
+        updateShareList()
     }
 }
 
@@ -142,11 +183,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite, .link:
             return 1
         case .access:
-            if let sharedFile = sharedFile {
-                return sharedFile.users.count + sharedFile.invitations.count + sharedFile.tags.count
-            } else {
-                return 0
-            }
+            return shareables.count
         }
     }
 
@@ -155,9 +192,10 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.canUseTeam = sharedFile?.canUseTeam ?? false
             cell.drive = driveFileManager?.drive
-            cell.removeUsers = removeUsers
-            cell.removeEmails = removeEmails
+            cell.ignoredShareables = shareables
+            cell.ignoredEmails = ignoredEmails
             cell.delegate = self
             return cell
         case .link:
@@ -169,16 +207,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1, radius: 6)
-            let sharedFile = sharedFile!
-            if indexPath.row < sharedFile.tags.count {
-                cell.configureWith(tag: sharedFile.tags[indexPath.row]!, drive: driveFileManager.drive)
-            } else if indexPath.row < (sharedFile.tags.count + sharedFile.users.count) {
-                let index = indexPath.row - sharedFile.tags.count
-                cell.configureWith(user: sharedFile.users[index], blocked: AccountManager.instance.currentUserId == sharedFile.users[index].id)
-            } else {
-                let index = indexPath.row - (sharedFile.tags.count + sharedFile.users.count)
-                cell.configureWith(invitation: sharedFile.invitations[index]!)
-            }
+            cell.configure(with: shareables[indexPath.row], drive: driveFileManager.drive)
             return cell
         }
     }
@@ -192,47 +221,11 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             break
         case .access:
             shareLinkRights = false
-            selectedUserIndex = nil
-            selectedTagIndex = nil
-            selectedInvitationIndex = nil
-
-            guard let sharedFile = sharedFile else { return }
-
-            if indexPath.row < sharedFile.tags.count {
-                // Tag selected
-                selectedTagIndex = indexPath.row
-            } else if indexPath.row < (sharedFile.tags.count + sharedFile.users.count) {
-                // User selected
-                let index = indexPath.row - sharedFile.tags.count
-                if sharedFile.users[index].id == AccountManager.instance.currentUserId {
-                    break
-                }
-                selectedUserIndex = index
-                let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-                rightsSelectionViewController.modalPresentationStyle = .fullScreen
-                if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                    rightsSelectionVC.driveFileManager = driveFileManager
-                    rightsSelectionVC.delegate = self
-                    rightsSelectionVC.selectedRight = sharedFile.users[index].permission!.rawValue
-                    rightsSelectionVC.user = sharedFile.users[index]
-                    rightsSelectionVC.userType = .user
-                }
-                present(rightsSelectionViewController, animated: true)
-            } else {
-                // Invitation selected
-                let index = indexPath.row - (sharedFile.tags.count + sharedFile.users.count)
-                selectedInvitationIndex = index
-                let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-                rightsSelectionViewController.modalPresentationStyle = .fullScreen
-                if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                    rightsSelectionVC.driveFileManager = driveFileManager
-                    rightsSelectionVC.delegate = self
-                    rightsSelectionVC.selectedRight = sharedFile.invitations[index]!.permission.rawValue
-                    rightsSelectionVC.invitation = sharedFile.invitations[index]!
-                    rightsSelectionVC.userType = .invitation
-                }
-                present(rightsSelectionViewController, animated: true)
+            selectedShareable = shareables[indexPath.row]
+            if let user = selectedShareable as? DriveUser, user.id == driveFileManager.drive.userId {
+                break
             }
+            showRightsSelection(shareLink: false)
         }
     }
 
@@ -253,34 +246,53 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
         guard let sharedFile = sharedFile else { return }
 
         if let sharedLink = sharedFile.link, shareLinkRights {
-            driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == "write", permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
+            driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
             }
-        } else if let index = selectedUserIndex {
-            driveFileManager.apiFetcher.updateUserRights(file: file, user: sharedFile.users[index], permission: value) { response, _ in
+        } else if let user = selectedShareable as? DriveUser {
+            driveFileManager.apiFetcher.updateUserRights(file: file, user: user, permission: value) { response, _ in
                 if response?.data != nil {
-                    self.sharedFile!.users[index].permission = UserPermission(rawValue: value)
-                    self.tableView.reloadRows(at: [IndexPath(row: index + sharedFile.tags.count, section: 2)], with: .automatic)
+                    user.permission = UserPermission(rawValue: value)
+                    if let index = self.shareables.firstIndex(where: { $0.id == user.id }) {
+                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+                    }
                 }
             }
-        } else if let index = selectedInvitationIndex {
-            driveFileManager.apiFetcher.updateInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile.invitations[index]!, permission: value) { response, _ in
+        } else if let invitation = selectedShareable as? Invitation {
+            driveFileManager.apiFetcher.updateInvitationRights(driveId: driveFileManager.drive.id, invitation: invitation, permission: value) { response, _ in
                 if response?.data != nil {
-                    self.sharedFile?.invitations[index]?.permission = UserPermission(rawValue: value)!
-                    self.tableView.reloadRows(at: [IndexPath(row: index + sharedFile.tags.count + sharedFile.users.count, section: 2)], with: .automatic)
+                    invitation.permission = UserPermission(rawValue: value)!
+                    if let index = self.shareables.firstIndex(where: { $0.id == invitation.id }) {
+                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+                    }
+                }
+            }
+        } else if let team = selectedShareable as? Team {
+            driveFileManager.apiFetcher.updateTeamRights(file: file, team: team, permission: value) { response, _ in
+                if response?.data != nil {
+                    team.right = UserPermission(rawValue: value)
+                    if let index = self.shareables.firstIndex(where: { $0.id == team.id }) {
+                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+                    }
                 }
             }
         }
     }
 
     func didDeleteUserRight() {
-        if let index = selectedUserIndex {
-            driveFileManager.apiFetcher.deleteUserRights(file: file, user: sharedFile!.users[index]) { response, _ in
+        if let user = selectedShareable as? DriveUser {
+            driveFileManager.apiFetcher.deleteUserRights(file: file, user: user) { response, _ in
                 if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }
             }
-        } else if let index = selectedInvitationIndex {
-            driveFileManager.apiFetcher.deleteInvitationRights(driveId: driveFileManager.drive.id, invitation: sharedFile!.invitations[index]!) { response, _ in
+        } else if let invitation = selectedShareable as? Invitation {
+            driveFileManager.apiFetcher.deleteInvitationRights(driveId: driveFileManager.drive.id, invitation: invitation) { response, _ in
+                if response?.data != nil {
+                    self.tableView.reloadSections([0, 2], with: .automatic)
+                }
+            }
+        } else if let team = selectedShareable as? Team {
+            driveFileManager.apiFetcher.deleteTeamRights(file: file, team: team) { response, _ in
                 if response?.data != nil {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }
@@ -300,18 +312,7 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
     }
 
     func shareLinkRightsButtonPressed() {
-        guard let sharedLink = sharedFile?.link else { return }
-
-        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-        rightsSelectionViewController.modalPresentationStyle = .fullScreen
-        if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-            rightsSelectionVC.driveFileManager = driveFileManager
-            rightsSelectionVC.delegate = self
-            rightsSelectionVC.rightSelectionType = .officeOnly
-            rightsSelectionVC.selectedRight = sharedLink.canEdit ? "write" : "read"
-        }
-        shareLinkRights = true
-        present(rightsSelectionViewController, animated: true)
+        showRightsSelection(shareLink: true)
     }
 
     func shareLinkSettingsButtonPressed() {
@@ -344,29 +345,11 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
 // MARK: - Search user delegate
 
 extension ShareAndRightsViewController: SearchUserDelegate {
-    func didSelectUser(user: DriveUser) {
-        let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
-        inviteUserViewController.modalPresentationStyle = .fullScreen
-        if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
-            inviteUserVC.driveFileManager = driveFileManager
-            inviteUserVC.users.append(user)
-            inviteUserVC.file = file
-            inviteUserVC.removeEmails = removeEmails
-            inviteUserVC.removeUsers = removeUsers + [user.id]
-        }
-        present(inviteUserViewController, animated: true)
+    func didSelect(shareable: Shareable) {
+        showInviteView(shareables: [shareable])
     }
 
-    func didSelectEmail(email: String) {
-        let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
-        inviteUserViewController.modalPresentationStyle = .fullScreen
-        if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
-            inviteUserVC.driveFileManager = driveFileManager
-            inviteUserVC.emails.append(email)
-            inviteUserVC.file = file
-            inviteUserVC.removeEmails = removeEmails + [email]
-            inviteUserVC.removeUsers = removeUsers
-        }
-        present(inviteUserViewController, animated: true)
+    func didSelect(email: String) {
+        showInviteView(emails: [email])
     }
 }

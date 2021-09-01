@@ -22,8 +22,8 @@ import kDriveCore
 import UIKit
 
 protocol SearchUserDelegate: AnyObject {
-    func didSelectUser(user: DriveUser)
-    func didSelectEmail(email: String)
+    func didSelect(shareable: Shareable)
+    func didSelect(email: String)
 }
 
 class InviteUserTableViewCell: InsetTableViewCell {
@@ -33,23 +33,31 @@ class InviteUserTableViewCell: InsetTableViewCell {
     weak var delegate: SearchUserDelegate?
     let dropDown = DropDown()
 
-    var removeUsers: [Int] = [] {
+    var canUseTeam = false
+    var ignoredEmails: [String] = []
+    var ignoredShareables: [Shareable] = [] {
         didSet {
             filterContent(for: standardize(text: textField.text ?? ""))
         }
     }
-    var removeEmails: [String] = []
 
-    private var users: [DriveUser] = []
-    private var results: [DriveUser] = []
+    private var shareables: [Shareable] = []
+    private var results: [Shareable] = []
     private var email: String?
 
     var drive: Drive! {
         didSet {
             guard drive != nil else { return }
-            users = DriveInfosManager.instance.getUsers(for: drive.id)
-            users.sort { $0.displayName < $1.displayName }
-            results = users.filter { !removeUsers.contains($0.id) }
+            let realm = DriveInfosManager.instance.getRealm()
+            let users = DriveInfosManager.instance.getUsers(for: drive.id, userId: drive.userId, using: realm)
+            shareables = users.sorted { $0.displayName < $1.displayName }
+            if canUseTeam {
+                let teams = DriveInfosManager.instance.getTeams(for: drive.id, userId: drive.userId, using: realm)
+                shareables = teams.sorted() + shareables
+            }
+            results = shareables.filter { shareable in
+                !ignoredShareables.contains { $0.id == shareable.id }
+            }
 
             configureDropDown()
         }
@@ -70,19 +78,19 @@ class InviteUserTableViewCell: InsetTableViewCell {
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
             if let email = self.email {
                 if index == 0 {
-                    cell.configureWith(mail: email)
+                    cell.configure(with: email)
                 } else {
-                    cell.configureWith(user: self.results[index - 1])
+                    cell.configure(with: self.results[index - 1], drive: self.drive)
                 }
             } else {
-                cell.configureWith(user: self.results[index])
+                cell.configure(with: self.results[index], drive: self.drive)
             }
         }
         dropDown.selectionAction = { [unowned self] index, _ in
             selectItem(at: index)
         }
 
-        dropDown.dataSource = results.map(\.displayName)
+        dropDown.dataSource = results.map(\.shareableName)
     }
 
     @IBAction func editingDidChanged(_ sender: UITextField) {
@@ -95,19 +103,23 @@ class InviteUserTableViewCell: InsetTableViewCell {
     private func filterContent(for text: String) {
         if text.isEmpty {
             // If no text, we return all users, except the one explicitly removed
-            results = users.filter { !removeUsers.contains($0.id) }
+            results = shareables.filter { shareable in
+                !ignoredShareables.contains { $0.id == shareable.id }
+            }
         } else {
             // Filter the users based on the text
-            results = users.filter { !removeUsers.contains($0.id) && ($0.displayName.lowercased().contains(text) || $0.email.contains(text)) }
+            results = shareables.filter { shareable in
+                !ignoredShareables.contains { $0.id == shareable.id } && (shareable.shareableName.lowercased().contains(text) || (shareable as? DriveUser)?.email.contains(text) ?? false)
+            }
         }
         dropDown.dataSource.removeAll()
-        if isValidEmail(text) && !removeEmails.contains(text) && !users.contains(where: { $0.email == text }) {
+        if isValidEmail(text) && !ignoredEmails.contains(text) && !shareables.contains(where: { ($0 as? DriveUser)?.email == text }) {
             email = text
             dropDown.dataSource.append(text)
         } else {
             email = nil
         }
-        dropDown.dataSource.append(contentsOf: results.map(\.displayName))
+        dropDown.dataSource.append(contentsOf: results.map(\.shareableName))
     }
 
     private func isValidEmail(_ email: String) -> Bool {
@@ -119,12 +131,12 @@ class InviteUserTableViewCell: InsetTableViewCell {
         textField.text = ""
         if let email = email {
             if index == 0 {
-                delegate?.didSelectEmail(email: email)
+                delegate?.didSelect(email: email)
             } else {
-                delegate?.didSelectUser(user: results[index - 1])
+                delegate?.didSelect(shareable: results[index - 1])
             }
         } else {
-            delegate?.didSelectUser(user: results[index])
+            delegate?.didSelect(shareable: results[index])
         }
     }
 

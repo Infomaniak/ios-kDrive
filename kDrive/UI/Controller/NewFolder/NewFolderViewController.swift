@@ -139,7 +139,7 @@ class NewFolderViewController: UIViewController {
     }
 
     private func canInherit(sharedFile: SharedFile) -> Bool {
-        return sharedFile.users.count > 1 || !sharedFile.tags.isEmpty
+        return sharedFile.users.count > 1 || !sharedFile.teams.isEmpty
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {
@@ -305,7 +305,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             case .someUser:
                 cell.configureSomeUser()
             case .parentsRights:
-                cell.configureParentsRights(folderName: currentDirectory.name, users: sharedFile?.users ?? [])
+                cell.configureParentsRights(folderName: currentDirectory.name, sharedFile: sharedFile)
             }
             return cell
         case .location:

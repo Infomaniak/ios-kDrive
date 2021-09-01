@@ -24,11 +24,12 @@ class InviteUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     var file: File!
+    var sharedFile: SharedFile!
     var driveFileManager: DriveFileManager!
-    var removeUsers: [Int] = []
-    var removeEmails: [String] = []
+    var ignoredShareables: [Shareable] = []
+    var ignoredEmails: [String] = []
     var emails: [String] = []
-    var users: [DriveUser] = []
+    var shareables: [Shareable] = []
 
     private enum InviteUserRows: CaseIterable {
         case invited
@@ -94,8 +95,7 @@ class InviteUserViewController: UIViewController {
 
     func showConflictDialog(conflictList: [FileCheckResult]) {
         let message: NSMutableAttributedString
-        if conflictList.count == 1, let userIndex = users.firstIndex(where: { $0.id == conflictList[0].userId }) {
-            let user = users[userIndex]
+        if conflictList.count == 1, let user = sharedFile.users.first(where: { $0.id == conflictList[0].userId }) {
             message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictDescription(user.displayName, (user.permission ?? .read).title, newPermission.title), boldText: user.displayName)
         } else {
             message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictManyUserDescription(newPermission.title))
@@ -107,9 +107,9 @@ class InviteUserViewController: UIViewController {
     }
 
     func shareAndDismiss() {
-        let usersIds = users.map(\.id)
-        let tags = [Int]()
-        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, tags: tags, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in }
+        let usersIds = shareables.compactMap { $0 as? DriveUser }.map(\.id)
+        let teams = shareables.compactMap { $0 as? Team }.map(\.id)
+        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, teams: teams, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in }
         dismiss(animated: true)
     }
 
@@ -120,7 +120,7 @@ class InviteUserViewController: UIViewController {
             savedText = cell?.textField.text ?? ""
         }
 
-        emptyInvitation = users.isEmpty && emails.isEmpty
+        emptyInvitation = shareables.isEmpty && emails.isEmpty
 
         if emptyInvitation {
             rows = [.addUser, .rights, .message]
@@ -150,7 +150,8 @@ class InviteUserViewController: UIViewController {
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
         coder.encode(file.id, forKey: "FileId")
         coder.encode(emails, forKey: "Emails")
-        coder.encode(users.map(\.id), forKey: "UserIds")
+        coder.encode(shareables.compactMap { $0 as? DriveUser }.map(\.id), forKey: "UserIds")
+        coder.encode(shareables.compactMap { $0 as? Team }.map(\.id), forKey: "TeamIds")
         coder.encode(newPermission.rawValue, forKey: "NewPermission")
         coder.encode(message, forKey: "Message")
     }
@@ -162,6 +163,7 @@ class InviteUserViewController: UIViewController {
         let fileId = coder.decodeInteger(forKey: "FileId")
         emails = coder.decodeObject(forKey: "Emails") as? [String] ?? []
         let userIds = coder.decodeObject(forKey: "UserIds") as? [Int] ?? []
+        let teamIds = coder.decodeObject(forKey: "TeamIds") as? [Int] ?? []
         newPermission = UserPermission(rawValue: coder.decodeObject(forKey: "NewPermission") as? String ?? "") ?? .read
         message = coder.decodeObject(forKey: "Message") as? String ?? ""
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
@@ -170,7 +172,7 @@ class InviteUserViewController: UIViewController {
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
         let realm = DriveInfosManager.instance.getRealm()
-        users = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
+        shareables = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) } + teamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
         // Update UI
         setTitle()
         reloadInvited()
@@ -200,18 +202,19 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .invited:
             let cell = tableView.dequeueReusableCell(type: InvitedUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: false)
-            cell.configureWith(users: users, mails: emails, tableViewWidth: tableView.bounds.width)
+            cell.configureWith(shareables: shareables, emails: emails, tableViewWidth: tableView.bounds.width)
             cell.delegate = self
             cell.selectionStyle = .none
             return cell
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
+            cell.canUseTeam = sharedFile.canUseTeam
             cell.drive = driveFileManager.drive
             cell.textField.text = savedText
             cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail
-            cell.removeUsers = removeUsers
-            cell.removeEmails = removeEmails
+            cell.ignoredShareables = ignoredShareables
+            cell.ignoredEmails = ignoredEmails
             cell.delegate = self
             return cell
         case .rights:
@@ -249,7 +252,6 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
                 rightsSelectionVC.delegate = self
                 rightsSelectionVC.selectedRight = newPermission.rawValue
                 rightsSelectionVC.canDelete = false
-                rightsSelectionVC.userType = .multiUser
             }
             present(rightsSelectionViewController, animated: true)
         default:
@@ -274,15 +276,15 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: - Search user delegate
 
 extension InviteUserViewController: SearchUserDelegate {
-    func didSelectUser(user: DriveUser) {
-        users.append(user)
-        removeUsers.append(user.id)
+    func didSelect(shareable: Shareable) {
+        shareables.append(shareable)
+        ignoredShareables.append(shareable)
         reloadInvited()
     }
 
-    func didSelectEmail(email: String) {
+    func didSelect(email: String) {
         emails.append(email)
-        removeEmails.append(email)
+        ignoredEmails.append(email)
         reloadInvited()
     }
 }
@@ -290,14 +292,15 @@ extension InviteUserViewController: SearchUserDelegate {
 // MARK: - Selected users delegate
 
 extension InviteUserViewController: SelectedUsersDelegate {
-    func didDeleteUser(user: DriveUser) {
-        users.removeAll { $0.id == user.id }
-        removeUsers.removeAll { $0 == user.id }
+    func didDelete(shareable: Shareable) {
+        shareables.removeAll { $0.id == shareable.id }
+        ignoredShareables.removeAll { $0.id == shareable.id }
         reloadInvited()
     }
 
-    func didDeleteEmail(email: String) {
+    func didDelete(email: String) {
         emails.removeAll { $0 == email }
+        ignoredEmails.removeAll { $0 == email }
         reloadInvited()
     }
 }
@@ -315,9 +318,9 @@ extension InviteUserViewController: RightsSelectionDelegate {
 
 extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        let usersIds = users.map(\.id)
-        let tags = [Int]()
-        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, tags: tags, emails: emails, permission: newPermission.rawValue) { response, _ in
+        let usersIds = shareables.compactMap { $0 as? DriveUser }.map(\.id)
+        let teams = shareables.compactMap { $0 as? Team }.map(\.id)
+        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, teams: teams, emails: emails, permission: newPermission.rawValue) { response, _ in
             let conflictList = response?.data?.filter(\.isConflict) ?? []
             if conflictList.isEmpty {
                 self.shareAndDismiss()

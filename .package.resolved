@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
         "state": {
           "branch": null,
-          "revision": "b8e974d8863536e93c1dd3ea65477a65d671847e",
-          "version": "8.5.0"
+          "revision": "38d4f0c634b0b01f02f087943723d801de4544f7",
+          "version": "8.6.1"
         }
       },
       {
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/google/GoogleUtilities.git",
         "state": {
           "branch": null,
-          "revision": "beb713a16b50a4df3162b3f3ecdeffa16b74b773",
-          "version": "7.5.0"
+          "revision": "2e364ff22e952c3bcb202263a9a0d26e46c1b172",
+          "version": "7.5.1"
         }
       },
       {
@@ -204,8 +204,8 @@
         "repositoryURL": "https://github.com/adam-fowler/mqtt-nio",
         "state": {
           "branch": null,
-          "revision": "ea6bc32772ec637ff3461510330187c9bc4e94ca",
-          "version": "2.1.0"
+          "revision": "976a4b6019e1dd365a0da793babadd5cc958ce2b",
+          "version": "2.1.1"
         }
       },
       {
@@ -231,8 +231,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "83a07f6a508c3427058d9e2c466208d0b6a960fa",
-          "version": "10.12.0"
+          "revision": "7a3e25994d4d917efe30fa4496775d3f024b71b6",
+          "version": "10.13.0"
         }
       },
       {
@@ -240,8 +240,8 @@
         "repositoryURL": "https://github.com/realm/realm-core",
         "state": {
           "branch": null,
-          "revision": "e72b3078bfc5c3f69a0b18f7a220be27e28c463f",
-          "version": "11.2.0"
+          "revision": "9a7d09994e85b7eda8e3553b444bcfef6ec3f9ea",
+          "version": "11.3.0"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "9a992ee3de1f8da9f2968fc96b26714834f3105f",
-          "version": "2.31.1"
+          "revision": "94f41c4121a82fae5c7b1cb03e630e9f9e5e20f1",
+          "version": "2.32.1"
         }
       },
       {
@@ -294,8 +294,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "9db7cee4b62c39160a6bd513a47a1ecdcceac18a",
-          "version": "2.14.0"
+          "revision": "4829979d9f5ed9a2f4c6efd9c1ed51d1ab4d0394",
+          "version": "2.14.1"
         }
       },
       {
@@ -303,8 +303,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-transport-services.git",
         "state": {
           "branch": null,
-          "revision": "39587bceccda72780e2a8a8c5e857e42a9df2fa8",
-          "version": "1.11.0"
+          "revision": "9571a61d236c5253b6a255a2d13fac536a1e2625",
+          "version": "1.11.2"
         }
       },
       {
