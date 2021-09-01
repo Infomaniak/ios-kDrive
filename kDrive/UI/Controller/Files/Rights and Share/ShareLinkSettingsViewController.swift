@@ -1,26 +1,25 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class ShareLinkSettingsViewController: UIViewController {
-
     @IBOutlet weak var tableview: UITableView!
     var driveFileManager: DriveFileManager!
 
@@ -171,10 +170,10 @@ class ShareLinkSettingsViewController: UIViewController {
         accessRightValue = shareFile.link!.permission
         // Options
         optionsValue = [
-                .expirationDate: (shareFile.link!.validUntil != nil),
-                .allowDownload: !shareFile.link!.blockDownloads,
-                .blockUsersConsult: shareFile.link!.blockInformation,
-                .blockComments: shareFile.link!.blockComments
+            .expirationDate: shareFile.link!.validUntil != nil,
+            .allowDownload: !shareFile.link!.blockDownloads,
+            .blockUsersConsult: shareFile.link!.blockInformation,
+            .blockComments: shareFile.link!.blockComments
         ]
         expirationDate = shareFile.link!.validUntil != nil ? TimeInterval(shareFile.link!.validUntil!) : nil
     }
@@ -216,11 +215,11 @@ class ShareLinkSettingsViewController: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
-extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataSource {
 
+extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return content.count + 1
-//        return Option.allCases.count + 1
+        // return Option.allCases.count + 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -252,7 +251,8 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [self] _ in
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
+                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { [weak self] _ in
+                    guard let self = self else { return }
                     UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)", from: self)
                 }
                 self.present(floatingPanelViewController, animated: true)
@@ -296,6 +296,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
 }
 
 // MARK: - ShareLinkSettingsDelegate
+
 extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
     func didUpdateExpirationDateSettingValue(for option: Option, newValue value: Bool, date: TimeInterval?) {
         optionsValue[option] = value
@@ -312,6 +313,7 @@ extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
 }
 
 // MARK: - RightsSelectionDelegate
+
 extension ShareLinkSettingsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         accessRightValue = value
@@ -320,14 +322,16 @@ extension ShareLinkSettingsViewController: RightsSelectionDelegate {
 }
 
 // MARK: - AccessRightPasswordDelegate
+
 extension ShareLinkSettingsViewController: AccessRightPasswordDelegate {
     func didUpdatePassword(newPassword: String) {
-        self.password = newPassword
+        password = newPassword
         updateButton()
     }
 }
 
 // MARK: - FooterButtonDelegate
+
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
         driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: shareFile.link!.canEdit, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getValue(for: .allowDownload), blockComments: getValue(for: .blockComments), blockInformation: getValue(for: .blockUsersConsult), isFree: driveFileManager.drive.pack == .free) { response, _ in

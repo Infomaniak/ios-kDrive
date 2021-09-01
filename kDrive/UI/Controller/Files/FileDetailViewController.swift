@@ -517,7 +517,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             case .comments:
                 if file.isOfficeFile {
                     let cell = tableView.dequeueReusableCell(type: InfoTableViewCell.self, for: indexPath)
-                    cell.actionHandler = { _ in
+                    cell.actionHandler = { [weak self] _ in
+                        guard let self = self else { return }
                         let viewController = OnlyOfficeViewController.instantiate(driveFileManager: self.driveFileManager, file: self.file, previewParent: nil)
                         self.present(viewController, animated: true)
                     }

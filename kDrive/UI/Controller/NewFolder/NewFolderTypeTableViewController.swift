@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
+import UIKit
 
 class NewFolderTypeTableViewController: UITableViewController {
-
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
 
@@ -36,7 +35,7 @@ class NewFolderTypeTableViewController: UITableViewController {
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        self.navigationItem.largeTitleDisplayMode = .always
+        navigationItem.largeTitleDisplayMode = .always
 
         title = KDriveStrings.Localizable.newFolderTitle
 
@@ -57,7 +56,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     }
 
     @objc func closeButtonPressed() {
-        self.dismiss(animated: true)
+        dismiss(animated: true)
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -91,10 +90,11 @@ class NewFolderTypeTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if content[indexPath.row] == .dropbox && (driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo) {
             let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
-            (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { _ in
+            (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { [weak self] _ in
+                guard let self = self else { return }
                 UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
             }
-            self.present(floatingPanelViewController, animated: true)
+            present(floatingPanelViewController, animated: true)
             return
         } else {
             performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
@@ -121,5 +121,4 @@ class NewFolderTypeTableViewController: UITableViewController {
     private class func instantiate() -> NewFolderTypeTableViewController {
         return Storyboard.newFolder.instantiateViewController(withIdentifier: "NewFolderTypeTableViewController") as! NewFolderTypeTableViewController
     }
-
 }

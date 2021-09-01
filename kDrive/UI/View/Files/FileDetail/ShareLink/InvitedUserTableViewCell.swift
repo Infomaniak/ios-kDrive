@@ -108,15 +108,15 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
             } else if let team = shareable as? Team {
                 cell.avatarImage.image = team.icon
             }
-            cell.removeButtonHandler = { _ in
-                self.delegate?.didDelete(shareable: shareable)
+            cell.removeButtonHandler = { [weak self] _ in
+                self?.delegate?.didDelete(shareable: shareable)
             }
         } else {
             let email = emails[indexPath.row - shareables.count]
             cell.usernameLabel.text = email
             cell.avatarImage.image = KDriveAsset.circleSend.image
-            cell.removeButtonHandler = { _ in
-                self.delegate?.didDelete(email: email)
+            cell.removeButtonHandler = { [weak self] _ in
+                self?.delegate?.didDelete(email: email)
             }
         }
         return cell

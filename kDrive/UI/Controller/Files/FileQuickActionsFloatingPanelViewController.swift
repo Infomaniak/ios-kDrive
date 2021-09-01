@@ -318,7 +318,8 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         case .convertToDropbox:
             if driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo {
                 let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { _ in
+                (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { [weak self] _ in
+                    guard let self = self else { return }
                     UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
                 }
                 present(floatingPanelViewController, animated: true)

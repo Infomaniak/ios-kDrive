@@ -43,8 +43,8 @@ class SharedDrivesViewController: UIViewController {
     private func showEmptyView() {
         if drives.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
             let background = EmptyTableView.instantiate(type: .noNetwork, button: true)
-            background.actionHandler = { _ in
-                self.tableView.reloadData()
+            background.actionHandler = { [weak self] _ in
+                self?.tableView.reloadData()
             }
             tableView.backgroundView = background
         } else if drives.isEmpty {
