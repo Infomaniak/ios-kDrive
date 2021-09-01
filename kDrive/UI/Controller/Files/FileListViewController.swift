@@ -420,8 +420,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if files.isEmpty {
             background = EmptyTableView.instantiate(type: type, button: false)
             updateEmptyView()
-            background?.actionHandler = { _ in
-                self.forceRefresh()
+            background?.actionHandler = { [weak self] _ in
+                self?.forceRefresh()
             }
             collectionView.backgroundView = background
         } else {

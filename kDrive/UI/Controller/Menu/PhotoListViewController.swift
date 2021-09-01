@@ -216,8 +216,8 @@ class PhotoListViewController: MultipleSelectionViewController {
     func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
         if sections.isEmpty {
             let background = EmptyTableView.instantiate(type: type, button: showButton, setCenteringEnabled: true)
-            background.actionHandler = { _ in
-                self.forceRefresh()
+            background.actionHandler = { [weak self] _ in
+                self?.forceRefresh()
             }
             collectionView.backgroundView = background
         } else {

@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class FilePresenter {
     weak var viewController: UIViewController?
@@ -69,14 +69,14 @@ class FilePresenter {
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {
                     floatingPanelViewController = AccessFileFloatingPanelViewController.instantiatePanel()
-                    (floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.actionHandler = { _ in
-                        (self.floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.rightButton.setLoading(true)
+                    (floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.actionHandler = { [weak self] _ in
+                        (self?.floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.rightButton.setLoading(true)
                         driveFileManager.apiFetcher.requireFileAccess(file: file) { _, error in
                             if error != nil {
                                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRightModification)
                             } else {
-                                self.floatingPanelViewController?.dismiss(animated: true)
-                                self.navigationController?.pushViewController(nextVC, animated: true)
+                                self?.floatingPanelViewController?.dismiss(animated: true)
+                                self?.navigationController?.pushViewController(nextVC, animated: true)
                             }
                         }
                     }

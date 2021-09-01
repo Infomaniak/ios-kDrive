@@ -174,7 +174,8 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
             disable = true
             cell.actionHandler = { [self] _ in
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
+                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { [weak self] _ in
+                    guard let self = self else { return }
                     UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)", from: self)
                 }
                 self.present(floatingPanelViewController, animated: true)
