@@ -240,7 +240,8 @@ let project = Project(name: "kDrive",
                 "kDrive/UI/View/NewFolder/*.xib",
                 "kDrive/**/*.xcassets",
                 "kDrive/**/*.strings",
-                "kDrive/**/*.stringsdict"
+                "kDrive/**/*.stringsdict",
+                "kDrive/**/*.json"
             ],
             entitlements: "kDriveShareExtension/ShareExtension.entitlements",
             actions: [
@@ -336,7 +337,8 @@ let project = Project(name: "kDrive",
                 "kDrive/**/*.xcassets",
                 "kDriveActionExtension/**/*.strings",
                 "kDrive/**/Localizable.strings",
-                "kDrive/**/*.stringsdict"
+                "kDrive/**/*.stringsdict",
+                "kDrive/**/*.json"
             ],
             entitlements: "kDriveActionExtension/ActionExtension.entitlements",
             actions: [
