@@ -66,7 +66,7 @@ class SaveFileViewController: UIViewController {
 
         // Set selected drive and directory to last values
         if selectedDirectory == nil {
-            if let driveFileManager = AccountManager.instance.getDriveFileManager(for: UserDefaults.shared.lastSelectedDrive, userId: AccountManager.instance.currentUserId) {
+            if let driveFileManager = AccountManager.instance.getDriveFileManager(for: UserDefaults.shared.lastSelectedDrive, userId: UserDefaults.shared.lastSelectedUser) {
                 selectedDriveFileManager = driveFileManager
             }
             selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)

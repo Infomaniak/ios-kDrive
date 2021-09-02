@@ -224,6 +224,7 @@ public class UploadQueue {
 
         if file.realm == nil {
             // Save drive and directory
+            UserDefaults.shared.lastSelectedUser = file.userId
             UserDefaults.shared.lastSelectedDrive = file.driveId
             UserDefaults.shared.lastSelectedDirectory = file.parentDirectoryId
         }
