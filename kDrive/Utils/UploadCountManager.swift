@@ -32,8 +32,10 @@ class UploadCountManager {
         self.didUploadCountChange = didUploadCountChange
     }
 
-    func updateUploadCount() {
+    @discardableResult
+    func updateUploadCount() -> Int {
         uploadingFilesCount = UploadQueue.instance.getUploadingFiles(userId: driveFileManager.drive.userId, driveId: driveFileManager.drive.id).count
+        return uploadingFilesCount
     }
 
     private func observeUploads() {

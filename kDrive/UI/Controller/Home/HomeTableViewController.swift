@@ -16,32 +16,35 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
-import InfomaniakCore
-import DifferenceKit
 import CocoaLumberjackSwift
+import DifferenceKit
+import InfomaniakCore
+import kDriveCore
+import UIKit
 
 protocol HomeFileDelegate: AnyObject {
     func didSelect(index: Int, files: [File])
 }
 
 class HomeTableViewController: UITableViewController, SwitchDriveDelegate, SwitchAccountDelegate, HomeFileDelegate, TopScrollable {
-
     private enum HomeSection: Differentiable {
         case top
         case lastModify
         case activityOrPictures
     }
+
     private enum HomeTopRows {
         case offline
         case drive
         case search
         case insufficientStorage
+        case uploadsInProgress
     }
+
     private enum HomeLastModifyRows {
         case lastModify
     }
+
     private enum HomeActivityOrPicturesRows {
         case recentActivity
         case lastPictures
@@ -62,6 +65,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     private var recentActivities: [FileActivity] {
         return recentActivityController?.recentActivities ?? []
     }
+
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var lastPicturesInfo = (page: 1, hasNextPage: true, isLoading: true)
     private var activityOrPicturesIsLoading = true
@@ -73,6 +77,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
     }
 
+    private var uploadCountManager: UploadCountManager!
     private var filesObserver: ObservationToken?
     private var needsContentUpdate = false
     private var showInsufficientStorage = true
@@ -113,6 +118,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.register(cellView: HomeOfflineTableViewCell.self)
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InsufficientStorageTableViewCell.self)
+        tableView.register(cellView: UploadsInProgressTableViewCell.self)
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
@@ -253,6 +259,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             topRows = [.drive, .search]
         }
 
+        if uploadCountManager.updateUploadCount() > 0 {
+            topRows.append(.uploadsInProgress)
+        }
+
         guard driveFileManager != nil && driveFileManager.drive.size > 0 else {
             return
         }
@@ -390,7 +400,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             loadNextLastPictures()
         }
         reload(sections: [.lastModify, .activityOrPictures])
-
     }
 
     func showFooter(_ show: Bool) {
@@ -496,6 +505,12 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                     showInsufficientStorage = false
                 }
                 return cell
+            case .uploadsInProgress:
+                let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.progressView.enableIndeterminate()
+                cell.setUploadCount(uploadCountManager.uploadingFilesCount)
+                return cell
             }
         case .lastModify:
             let cell = tableView.dequeueReusableCell(type: HomeLastModifTableViewCell.self, for: indexPath)
@@ -572,6 +587,9 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             switch topRows[indexPath.row] {
             case .offline, .insufficientStorage:
                 return
+            case .uploadsInProgress:
+                // TODO: Open upload view
+                break
             case .drive:
                 performSegue(withIdentifier: "switchDriveSegue", sender: nil)
                 tableView.deselectRow(at: indexPath, animated: true)
@@ -633,9 +651,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     // MARK: - Switch account delegate
 
-    func didSwitchCurrentAccount(_ newAccount: Account) {
-
-    }
+    func didSwitchCurrentAccount(_ newAccount: Account) {}
 
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         if isViewLoaded {
