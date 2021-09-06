@@ -18,9 +18,8 @@
 
 import Foundation
 
-extension UserDefaults {
-
-    public static let shared = UserDefaults(suiteName: AccountManager.appGroup)!
+public extension UserDefaults {
+    static let shared = UserDefaults(suiteName: AccountManager.appGroup)!
 
     private enum Keys: String {
         case currentDriveId
@@ -40,6 +39,7 @@ extension UserDefaults {
         case newCommentNotificationsEnabled
         case generalNotificationEnabled
         case didDemoSwipe
+        case lastSelectedUser
         case lastSelectedDrive
         case lastSelectedDirectory
         case theme
@@ -53,7 +53,7 @@ extension UserDefaults {
         return key.rawValue
     }
 
-    public var currentDriveId: Int {
+    var currentDriveId: Int {
         get {
             return integer(forKey: key(.currentDriveId))
         }
@@ -62,7 +62,7 @@ extension UserDefaults {
         }
     }
 
-    public var currentDriveUserId: Int {
+    var currentDriveUserId: Int {
         get {
             return integer(forKey: key(.currentDriveUserId))
         }
@@ -71,7 +71,7 @@ extension UserDefaults {
         }
     }
 
-    public var sortType: SortType {
+    var sortType: SortType {
         get {
             return SortType(rawValue: string(forKey: key(.fileSortMode)) ?? "") ?? .nameAZ
         }
@@ -80,7 +80,7 @@ extension UserDefaults {
         }
     }
 
-    public var listStyle: ListStyle {
+    var listStyle: ListStyle {
         get {
             return ListStyle(rawValue: string(forKey: key(.filesListStyle)) ?? "") ?? .list
         }
@@ -89,7 +89,7 @@ extension UserDefaults {
         }
     }
 
-    public var isWifiOnly: Bool {
+    var isWifiOnly: Bool {
         get {
             return bool(forKey: key(.wifiOnly))
         }
@@ -98,7 +98,7 @@ extension UserDefaults {
         }
     }
 
-    public var recentSearches: [String] {
+    var recentSearches: [String] {
         get {
             return stringArray(forKey: key(.recentSearches)) ?? []
         }
@@ -107,7 +107,7 @@ extension UserDefaults {
         }
     }
 
-    public var numberOfConnections: Int {
+    var numberOfConnections: Int {
         get {
             return integer(forKey: key(.numberOfConnection))
         }
@@ -116,7 +116,7 @@ extension UserDefaults {
         }
     }
 
-    public var isAppLockEnabled: Bool {
+    var isAppLockEnabled: Bool {
         get {
             return bool(forKey: key(.appLock))
         }
@@ -125,7 +125,7 @@ extension UserDefaults {
         }
     }
 
-    public var updateLater: Bool {
+    var updateLater: Bool {
         get {
             return bool(forKey: key(.updateLater))
         }
@@ -134,7 +134,7 @@ extension UserDefaults {
         }
     }
 
-    public var isMigrated: Bool {
+    var isMigrated: Bool {
         get {
             return bool(forKey: key(.migrated))
         }
@@ -143,7 +143,7 @@ extension UserDefaults {
         }
     }
 
-    public var wasPhotoSyncEnabledBeforeMigration: Bool {
+    var wasPhotoSyncEnabledBeforeMigration: Bool {
         get {
             return bool(forKey: key(.migrationPhotoSyncEnabled))
         }
@@ -152,7 +152,7 @@ extension UserDefaults {
         }
     }
 
-    public var isNotificationEnabled: Bool {
+    var isNotificationEnabled: Bool {
         get {
             if object(forKey: key(.notificationsEnabled)) == nil {
                 set(true, forKey: key(.notificationsEnabled))
@@ -164,7 +164,7 @@ extension UserDefaults {
         }
     }
 
-    public var importNotificationsEnabled: Bool {
+    var importNotificationsEnabled: Bool {
         get {
             if object(forKey: key(.importNotificationsEnabled)) == nil {
                 set(true, forKey: key(.importNotificationsEnabled))
@@ -176,7 +176,7 @@ extension UserDefaults {
         }
     }
 
-    public var sharingNotificationsEnabled: Bool {
+    var sharingNotificationsEnabled: Bool {
         get {
             if object(forKey: key(.sharingNotificationsEnabled)) == nil {
                 set(true, forKey: key(.sharingNotificationsEnabled))
@@ -188,7 +188,7 @@ extension UserDefaults {
         }
     }
 
-    public var newCommentNotificationsEnabled: Bool {
+    var newCommentNotificationsEnabled: Bool {
         get {
             if object(forKey: key(.newCommentNotificationsEnabled)) == nil {
                 set(true, forKey: key(.newCommentNotificationsEnabled))
@@ -200,7 +200,7 @@ extension UserDefaults {
         }
     }
 
-    public var generalNotificationEnabled: Bool {
+    var generalNotificationEnabled: Bool {
         get {
             if object(forKey: key(.generalNotificationEnabled)) == nil {
                 set(true, forKey: key(.generalNotificationEnabled))
@@ -212,7 +212,7 @@ extension UserDefaults {
         }
     }
 
-    public var didDemoSwipe: Bool {
+    var didDemoSwipe: Bool {
         get {
             return bool(forKey: key(.didDemoSwipe))
         }
@@ -221,7 +221,16 @@ extension UserDefaults {
         }
     }
 
-    public var lastSelectedDrive: Int {
+    var lastSelectedUser: Int {
+        get {
+            return integer(forKey: key(.lastSelectedUser))
+        }
+        set {
+            set(newValue, forKey: key(.lastSelectedUser))
+        }
+    }
+
+    var lastSelectedDrive: Int {
         get {
             return integer(forKey: key(.lastSelectedDrive))
         }
@@ -230,7 +239,7 @@ extension UserDefaults {
         }
     }
 
-    public var lastSelectedDirectory: Int {
+    var lastSelectedDirectory: Int {
         get {
             return integer(forKey: key(.lastSelectedDirectory))
         }
@@ -239,7 +248,7 @@ extension UserDefaults {
         }
     }
 
-    public var theme: Theme {
+    var theme: Theme {
         get {
             guard let theme = object(forKey: key(.theme)) as? String else {
                 setValue(Theme.system.rawValue, forKey: key(.theme))
@@ -252,7 +261,7 @@ extension UserDefaults {
         }
     }
 
-    public var photoSortMode: PhotoSortMode {
+    var photoSortMode: PhotoSortMode {
         get {
             return PhotoSortMode(rawValue: string(forKey: key(.photoSortMode)) ?? "") ?? .month
         }
@@ -261,16 +270,16 @@ extension UserDefaults {
         }
     }
 
-    public var betaInviteDisplayed: Bool {
+    var betaInviteDisplayed: Bool {
         get {
             return bool(forKey: key(.betaInviteDisplayed))
         }
         set {
             set(newValue, forKey: key(.betaInviteDisplayed))
-		}
-	}
+        }
+    }
 
-    public var lastSyncDateOfflineFiles: Int {
+    var lastSyncDateOfflineFiles: Int {
         get {
             return integer(forKey: key(.lastSyncDateOfflineFiles))
         }
@@ -279,7 +288,7 @@ extension UserDefaults {
         }
     }
 
-    public var isFileProviderExtensionEnabled: Bool {
+    var isFileProviderExtensionEnabled: Bool {
         get {
             if object(forKey: key(.fileProviderExtension)) == nil {
                 set(true, forKey: key(.fileProviderExtension))
