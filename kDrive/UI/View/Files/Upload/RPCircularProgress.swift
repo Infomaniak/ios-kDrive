@@ -19,7 +19,6 @@
 import UIKit
 
 open class RPCircularProgress: UIView {
-
     // MARK: - Completion
 
     public typealias CompletionBlock = () -> Void
@@ -27,8 +26,8 @@ open class RPCircularProgress: UIView {
     // MARK: - Public API
 
     /**
-      The color of the empty progress track (gets drawn over)
-    */
+       The color of the empty progress track (gets drawn over)
+     */
     @IBInspectable open var trackTintColor: UIColor {
         get {
             return progressLayer.trackTintColor
@@ -118,7 +117,7 @@ open class RPCircularProgress: UIView {
 
     /**
       Sets how much of the progress bar should be filled during an indeterminate animation, pinned between `0.05` and `0.9`
-     
+
       **Note:** This can be overridden / animated from by using updateProgress(...)
      */
     @IBInspectable open var indeterminateProgress: CGFloat {
@@ -141,7 +140,7 @@ open class RPCircularProgress: UIView {
         return (layer as! ProgressLayer)
     }
 
-    open override class var layerClass: AnyClass {
+    override open class var layerClass: AnyClass {
         return ProgressLayer.self
     }
 
@@ -152,19 +151,19 @@ open class RPCircularProgress: UIView {
 
      - returns: A configured instance of self
      */
-    required public init() {
+    public required init() {
         super.init(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
 
         setupDefaults()
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
         setupDefaults()
     }
 
-    open override func didMoveToWindow() {
+    override open func didMoveToWindow() {
         super.didMoveToWindow()
 
         if let window = window {
@@ -212,7 +211,6 @@ open class RPCircularProgress: UIView {
     open func updateProgress(_ progress: CGFloat, animated: Bool = true, initialDelay: CFTimeInterval = 0, duration: CFTimeInterval? = nil, completion: CompletionBlock? = nil) {
         let pinnedProgress = pin(progress)
         if animated {
-
             // Get duration
             let animationDuration: CFTimeInterval
             if let duration = duration, duration != 0 {
@@ -247,7 +245,6 @@ open class RPCircularProgress: UIView {
 // MARK: - Private API
 
 private extension RPCircularProgress {
-
     // MARK: - Defaults
 
     func setupDefaults() {
@@ -419,7 +416,7 @@ private extension RPCircularProgress {
         }
     }
 
-    struct Defaults {
+    enum Defaults {
         static let trackTintColor = UIColor(white: 1.0, alpha: 0.3)
         static let progressTintColor = UIColor.white
         static let backgroundColor = UIColor.clear
@@ -432,20 +429,18 @@ private extension RPCircularProgress {
         static let indeterminateProgress: CGFloat = 0.3
     }
 
-    struct AnimationKeys {
+    enum AnimationKeys {
         static let indeterminate = "indeterminateAnimation"
         static let progress = "progress"
         static let transformRotation = "transform.rotation"
         static let completionBlock = "completionBlock"
         static let toValue = "toValue"
     }
-
 }
 
 // MARK: - Animation Delegate
 
 extension RPCircularProgress: CAAnimationDelegate {
-
     public func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
         let completedValue = anim.value(forKey: AnimationKeys.toValue)
         if let completedValue = completedValue as? CGFloat {
@@ -456,5 +451,13 @@ extension RPCircularProgress: CAAnimationDelegate {
             block.action()
         }
     }
+}
 
+public extension RPCircularProgress {
+    func setInfomaniakStyle() {
+        trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
+        progressTintColor = KDriveAsset.infomaniakColor.color
+        thicknessRatio = 0.15
+        indeterminateProgress = 0.75
+    }
 }

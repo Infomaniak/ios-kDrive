@@ -181,7 +181,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.navigationBar.isTranslucent = false
         navigationController?.navigationBar.shadowImage = nil
         navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
         navigationController?.navigationBar.barTintColor = nil
@@ -612,8 +611,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             case .offline, .insufficientStorage:
                 return
             case .uploadsInProgress:
-                // TODO: Open upload view
-                break
+                let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
+                navigationController?.pushViewController(uploadViewController, animated: true)
             case .drive:
                 performSegue(withIdentifier: "switchDriveSegue", sender: nil)
                 tableView.deselectRow(at: indexPath, animated: true)
