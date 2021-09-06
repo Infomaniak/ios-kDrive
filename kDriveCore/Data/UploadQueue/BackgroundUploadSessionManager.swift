@@ -110,7 +110,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         backgroundUrlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         backgroundUrlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
         backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 24 * 3 // 3 days before giving up
-        backgroundUrlSessionConfiguration.networkServiceType = .default
+        backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
         managedSessions[identifier] = session
         return session
