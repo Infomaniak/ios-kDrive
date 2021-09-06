@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 class InsufficientStorageTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var progressView: RPCircularProgress!
     @IBOutlet weak var storageLabel: UILabel!
     @IBOutlet weak var storageDescription: UILabel!
@@ -33,10 +32,8 @@ class InsufficientStorageTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        progressView.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
+        progressView.setInfomaniakStyle()
         progressView.progressTintColor = KDriveAsset.binColor.color
-        progressView.thicknessRatio = 0.15
-        progressView.indeterminateProgress = 0.75
     }
 
     func configureCell(with drive: Drive) {

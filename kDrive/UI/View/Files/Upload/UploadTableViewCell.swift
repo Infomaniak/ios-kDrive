@@ -31,10 +31,7 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.isHidden = true
         cardContentView.progressView.isHidden = true
         cardContentView.iconView.isHidden = false
-        cardContentView.progressView.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
-        cardContentView.progressView.progressTintColor = KDriveAsset.infomaniakColor.color
-        cardContentView.progressView.thicknessRatio = 0.15
-        cardContentView.progressView.indeterminateProgress = 0.75
+        cardContentView.progressView.setInfomaniakStyle()
     }
 
     override func prepareForReuse() {

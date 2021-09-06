@@ -1,23 +1,23 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 protocol FilesHeaderViewDelegate: AnyObject {
     func sortButtonPressed()
@@ -30,14 +30,13 @@ protocol FilesHeaderViewDelegate: AnyObject {
 }
 
 extension FilesHeaderViewDelegate {
-    func uploadCardSelected() { }
-    func moveButtonPressed() { }
-    func deleteButtonPressed() { }
-    func menuButtonPressed() { }
+    func uploadCardSelected() {}
+    func moveButtonPressed() {}
+    func deleteButtonPressed() {}
+    func menuButtonPressed() {}
 }
 
 class FilesHeaderView: UICollectionReusableView {
-
     @IBOutlet weak var sortView: UIView!
     @IBOutlet weak var sortButton: UIButton!
     @IBOutlet weak var listOrGridButton: UIButton!
@@ -71,10 +70,7 @@ class FilesHeaderView: UICollectionReusableView {
             offlineView.isHidden = false
         }
         uploadCardView.iconView.isHidden = true
-        uploadCardView.progressView.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
-        uploadCardView.progressView.progressTintColor = KDriveAsset.infomaniakColor.color
-        uploadCardView.progressView.thicknessRatio = 0.15
-        uploadCardView.progressView.indeterminateProgress = 0.75
+        uploadCardView.progressView.setInfomaniakStyle()
         uploadCardView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10)
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
@@ -91,5 +87,4 @@ class FilesHeaderView: UICollectionReusableView {
     @IBAction func gridButtonPressed(_ sender: UIButton) {
         delegate?.gridButtonPressed()
     }
-
 }

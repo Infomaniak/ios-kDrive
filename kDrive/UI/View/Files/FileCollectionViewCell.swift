@@ -16,15 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 protocol FileCellDelegate: AnyObject {
     func didTapMoreButton(_ cell: FileCollectionViewCell)
 }
 
 class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
-
     internal var swipeStartPoint: CGPoint = .zero
     internal var initialTrailingConstraintValue: CGFloat = 0
 
@@ -89,10 +88,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         moreButton.accessibilityLabel = KDriveStrings.Localizable.buttonMenu
-        downloadProgressView?.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
-        downloadProgressView?.progressTintColor = KDriveAsset.infomaniakColor.color
-        downloadProgressView?.thicknessRatio = 0.15
-        downloadProgressView?.indeterminateProgress = 0.75
+        downloadProgressView?.setInfomaniakStyle()
     }
 
     override func prepareForReuse() {
@@ -203,7 +199,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func configureWith(trashedFile: File) {
-        self.file = trashedFile
+        file = trashedFile
         titleLabel.text = trashedFile.name
         favoriteImageView.isHidden = true
         logoImage.image = trashedFile.icon
