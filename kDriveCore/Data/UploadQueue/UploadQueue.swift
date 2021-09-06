@@ -71,7 +71,8 @@ public class UploadQueue {
     private var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
         didChangeProgress: [UUID: (UploadedFileId, Progress) -> Void](),
-        didChangeUploadCount: [UUID: (Int, Int) -> Void]()
+        didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
+        didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
     )
 
     private init() {
@@ -260,9 +261,21 @@ public class UploadQueue {
 
     private func publishUploadCount(withParent parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         realm.refresh()
+        publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId, using: realm)
+        publishUploadCountInDrive(userId: userId, driveId: driveId, using: realm)
+    }
+
+    private func publishUploadCountInParent(parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
-        observations.didChangeUploadCount.values.forEach { closure in
+        observations.didChangeUploadCountInParent.values.forEach { closure in
             closure(parentId, uploadCount)
+        }
+    }
+
+    private func publishUploadCountInDrive(userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        let uploadCount = getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
+        observations.didChangeUploadCountInDrive.values.forEach { closure in
+            closure(driveId, uploadCount)
         }
     }
 
@@ -344,21 +357,40 @@ public extension UploadQueue {
     }
 
     @discardableResult
-    func observeUploadCount<T: AnyObject>(_ observer: T, parentId: Int? = nil, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
+    func observeUploadCount<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         let key = UUID()
-        observations.didChangeUploadCount[key] = { [weak self, weak observer] updatedParentId, count in
+        observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
             guard observer != nil else {
-                self?.observations.didChangeUploadCount.removeValue(forKey: key)
+                self?.observations.didChangeUploadCountInParent.removeValue(forKey: key)
                 return
             }
 
-            if parentId == nil || parentId == updatedParentId {
+            if parentId == updatedParentId {
                 closure(updatedParentId, count)
             }
         }
 
         return ObservationToken { [weak self] in
-            self?.observations.didChangeUploadCount.removeValue(forKey: key)
+            self?.observations.didChangeUploadCountInParent.removeValue(forKey: key)
+        }
+    }
+
+    @discardableResult
+    func observeUploadCount<T: AnyObject>(_ observer: T, driveId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
+        let key = UUID()
+        observations.didChangeUploadCountInDrive[key] = { [weak self, weak observer] updatedDriveId, count in
+            guard observer != nil else {
+                self?.observations.didChangeUploadCountInDrive.removeValue(forKey: key)
+                return
+            }
+
+            if driveId == updatedDriveId {
+                closure(updatedDriveId, count)
+            }
+        }
+
+        return ObservationToken { [weak self] in
+            self?.observations.didChangeUploadCountInDrive.removeValue(forKey: key)
         }
     }
 

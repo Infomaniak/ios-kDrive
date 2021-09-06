@@ -21,28 +21,35 @@ import kDriveCore
 
 class UploadCountManager {
     private let driveFileManager: DriveFileManager
-    private let didUploadCountChange: (Int) -> Void
+    private let didUploadCountChange: () -> Void
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 1, queue: .main)
 
-    private var uploadingFilesCount = 0
+    public var uploadCount = 0
+
     private var uploadsObserver: ObservationToken?
 
-    init(driveFileManager: DriveFileManager, didUploadCountChange: @escaping (Int) -> Void) {
+    init(driveFileManager: DriveFileManager, didUploadCountChange: @escaping () -> Void) {
         self.driveFileManager = driveFileManager
         self.didUploadCountChange = didUploadCountChange
+        updateUploadCount()
+        observeUploads()
     }
 
     @discardableResult
     func updateUploadCount() -> Int {
-        uploadingFilesCount = UploadQueue.instance.getUploadingFiles(userId: driveFileManager.drive.userId, driveId: driveFileManager.drive.id).count
-        return uploadingFilesCount
+        uploadCount = UploadQueue.instance.getUploadingFiles(userId: driveFileManager.drive.userId, driveId: driveFileManager.drive.id).count
+        return uploadCount
     }
 
     private func observeUploads() {
         guard uploadsObserver == nil else { return }
 
-        uploadCountThrottler.handler = didUploadCountChange
-        uploadsObserver = UploadQueue.instance.observeUploadCount(self) { [unowned self] _, uploadCount in
+        uploadCountThrottler.handler = { [unowned self] newUploadCount in
+            uploadCount = newUploadCount
+            didUploadCountChange()
+        }
+
+        uploadsObserver = UploadQueue.instance.observeUploadCount(self, driveId: driveFileManager.drive.id) { [unowned self] _, uploadCount in
             self.uploadCountThrottler.call(uploadCount)
         }
     }

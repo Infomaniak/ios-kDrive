@@ -104,7 +104,11 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         return navigationController?.navigationBar.frame.height ?? 0
     }
 
-    var driveFileManager: DriveFileManager!
+    var driveFileManager: DriveFileManager! {
+        didSet {
+            observeUploadCount()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -244,6 +248,26 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.reloadData()
     }
 
+    private func observeUploadCount() {
+        guard driveFileManager != nil else { return }
+        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
+            guard let self = self else { return }
+            if let index = self.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
+               let cell = self.tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? UploadsInProgressTableViewCell {
+                if self.uploadCountManager.uploadCount > 0 {
+                    // Update cell
+                    cell.setUploadCount(self.uploadCountManager.uploadCount)
+                } else {
+                    // Delete cell
+                    self.reload(sections: [.top])
+                }
+            } else {
+                // Add cell
+                self.reload(sections: [.top])
+            }
+        }
+    }
+
     private func updateSectionList() {
         if lastModifiedFiles.isEmpty && !lastModifyIsLoading {
             sections = [.top, .activityOrPictures]
@@ -259,7 +283,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             topRows = [.drive, .search]
         }
 
-        if uploadCountManager.updateUploadCount() > 0 {
+        if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
             topRows.append(.uploadsInProgress)
         }
 
@@ -509,7 +533,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.progressView.enableIndeterminate()
-                cell.setUploadCount(uploadCountManager.uploadingFilesCount)
+                cell.setUploadCount(uploadCountManager.uploadCount)
                 return cell
             }
         case .lastModify:
