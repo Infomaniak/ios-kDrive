@@ -175,7 +175,8 @@ public enum ApiRoutes {
     }
 
     static func getFileActivitiesFromDate(file: File, date: Int) -> String {
-        return "\(fileURL(file: file))activity?depth=children&with=file,rights,collaborative_folder,favorite,mobile,share_link&from_date=\(date)"
+        let activitiesParam = FileActivityType.fileActivities.map { "&actions[]=\($0.rawValue)" }.joined()
+        return "\(fileURL(file: file))activity?depth=children&with=file,rights,collaborative_folder,favorite,mobile,share_link&from_date=\(date)" + activitiesParam
     }
 
     static func getFilesActivities(driveId: Int, files: [File], from date: Int) -> String {
