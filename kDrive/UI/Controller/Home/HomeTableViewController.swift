@@ -485,15 +485,16 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.configureCell(with: driveFileManager.drive)
                 cell.selectionStyle = .none
-                cell.actionHandler = { [self] _ in
-                    if let url = URL(string: "\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)") {
+                cell.actionHandler = { [weak self] _ in
+                    if let driveFileManager = self?.driveFileManager, let url = URL(string: "\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)") {
                         UIApplication.shared.open(url)
                     }
                 }
-                cell.closeHandler = { [self] _ in
-                    topRows.remove(at: topRows.count - 1)
+                cell.closeHandler = { [weak self] _ in
+                    guard let self = self else { return }
+                    self.topRows.remove(at: self.topRows.count - 1)
                     tableView.deleteRows(at: [indexPath], with: .automatic)
-                    showInsufficientStorage = false
+                    self.showInsufficientStorage = false
                 }
                 return cell
             }

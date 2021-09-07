@@ -293,7 +293,8 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonActiveSync
                 cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
-                cell.switchHandler = { sender in
+                cell.switchHandler = { [weak self] sender in
+                    guard let self = self else { return }
                     if sender.isOn {
                         self.requestAuthorization { status in
                             DispatchQueue.main.async {
@@ -348,9 +349,9 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncPicture
                 cell.valueSwitch.setOn(syncPicturesEnabled, animated: true)
-                cell.switchHandler = { sender in
-                    self.syncPicturesEnabled = sender.isOn
-                    self.updateSaveButtonState()
+                cell.switchHandler = { [weak self] sender in
+                    self?.syncPicturesEnabled = sender.isOn
+                    self?.updateSaveButtonState()
                 }
                 return cell
             case .importVideosSwitch:
@@ -358,9 +359,9 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncVideo
                 cell.valueSwitch.setOn(syncVideosEnabled, animated: true)
-                cell.switchHandler = { sender in
-                    self.syncVideosEnabled = sender.isOn
-                    self.updateSaveButtonState()
+                cell.switchHandler = { [weak self] sender in
+                    self?.syncVideosEnabled = sender.isOn
+                    self?.updateSaveButtonState()
                 }
                 return cell
             case .importScreenshotsSwitch:
@@ -368,9 +369,9 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncScreenshot
                 cell.valueSwitch.setOn(syncScreenshotsEnabled, animated: true)
-                cell.switchHandler = { sender in
-                    self.syncScreenshotsEnabled = sender.isOn
-                    self.updateSaveButtonState()
+                cell.switchHandler = { [weak self] sender in
+                    self?.syncScreenshotsEnabled = sender.isOn
+                    self?.updateSaveButtonState()
                 }
                 return cell
             case .createDatedSubFolders:
@@ -379,9 +380,9 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.titleLabel.text = KDriveStrings.Localizable.createDatedSubFoldersTitle
                 cell.detailsLabel.text = KDriveStrings.Localizable.createDatedSubFoldersDescription
                 cell.valueSwitch.setOn(createDatedSubFolders, animated: true)
-                cell.switchHandler = { sender in
-                    self.createDatedSubFolders = sender.isOn
-                    self.updateSaveButtonState()
+                cell.switchHandler = { [weak self] sender in
+                    self?.createDatedSubFolders = sender.isOn
+                    self?.updateSaveButtonState()
                 }
                 return cell
             case .deleteAssetsAfterImport:
@@ -390,9 +391,9 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.titleLabel.text = KDriveStrings.Localizable.deletePicturesTitle
                 cell.detailsLabel.text = KDriveStrings.Localizable.deletePicturesDescription
                 cell.valueSwitch.setOn(deleteAssetsAfterImport, animated: true)
-                cell.switchHandler = { sender in
-                    self.deleteAssetsAfterImport = sender.isOn
-                    self.updateSaveButtonState()
+                cell.switchHandler = { [weak self] sender in
+                    self?.deleteAssetsAfterImport = sender.isOn
+                    self?.updateSaveButtonState()
                 }
                 return cell
             case .syncMode:

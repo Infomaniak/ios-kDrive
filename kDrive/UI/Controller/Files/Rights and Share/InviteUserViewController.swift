@@ -233,8 +233,8 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.messageTextView.text = message
             }
             cell.selectionStyle = .none
-            cell.textDidChange = { text in
-                self.message = text
+            cell.textDidChange = { [weak self] text in
+                self?.message = text
             }
             return cell
         }

@@ -90,9 +90,9 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveStrings.Localizable.notificationReceiveNotifications
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
-            cell.switchHandler = { [self] sender in
+            cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.isNotificationEnabled = sender.isOn
-                activateNotification(activate: sender.isOn)
+                self?.activateNotification(activate: sender.isOn)
             }
             return cell
         case .general:
@@ -102,10 +102,10 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.generalNotificationEnabled
-            cell.switchHandler = { [self] sender in
+            cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.generalNotificationEnabled = sender.isOn
-                subscriptionTo(topic: Constants.notificationTopicGeneral, subscribe: sender.isOn)
-                updateSwitchViews()
+                self?.subscriptionTo(topic: Constants.notificationTopicGeneral, subscribe: sender.isOn)
+                self?.updateSwitchViews()
             }
             return cell
         case .importFile:
@@ -115,10 +115,10 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
-            cell.switchHandler = { [self] sender in
+            cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.importNotificationsEnabled = sender.isOn
-                subscriptionTo(topic: Constants.notificationTopicUpload, subscribe: sender.isOn)
-                updateSwitchViews()
+                self?.subscriptionTo(topic: Constants.notificationTopicUpload, subscribe: sender.isOn)
+                self?.updateSwitchViews()
             }
             return cell
         case .sharedWithMe:
@@ -128,10 +128,10 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
-            cell.switchHandler = { [self] sender in
+            cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
-                subscriptionTo(topic: Constants.notificationTopicShared, subscribe: sender.isOn)
-                updateSwitchViews()
+                self?.subscriptionTo(topic: Constants.notificationTopicShared, subscribe: sender.isOn)
+                self?.updateSwitchViews()
             }
             return cell
         case .newComments:
@@ -140,10 +140,10 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.titleLabel.text = KDriveStrings.Localizable.notificationCommentChannelName
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
-            cell.switchHandler = { [self] sender in
+            cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
-                subscriptionTo(topic: Constants.notificationTopicComments, subscribe: sender.isOn)
-                updateSwitchViews()
+                self?.subscriptionTo(topic: Constants.notificationTopicComments, subscribe: sender.isOn)
+                self?.updateSwitchViews()
             }
             return cell
         case .notificationMainSetting:

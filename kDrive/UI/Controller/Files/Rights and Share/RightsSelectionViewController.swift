@@ -172,13 +172,13 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         var disable = false
         if right.key == "password" && driveFileManager.drive.pack == .free {
             disable = true
-            cell.actionHandler = { [self] _ in
+            cell.actionHandler = { [weak self] _ in
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { [weak self] _ in
+                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
                     guard let self = self else { return }
-                    UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)", from: self)
+                    UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
                 }
-                self.present(floatingPanelViewController, animated: true)
+                self?.present(floatingPanelViewController, animated: true)
             }
         } else if right.key == "manage" {
             if let userId = shareable?.userId {

@@ -44,8 +44,8 @@ class SavePhotoViewController: SaveFileViewController {
         switch sections[indexPath.section] {
         case .fileType:
             let cell = tableView.dequeueReusableCell(type: ScanTypeTableViewCell.self, for: indexPath)
-            cell.didSelectIndex = { index in
-                self.format = PhotoFileFormat(rawValue: index)!
+            cell.didSelectIndex = { [weak self] index in
+                self?.format = PhotoFileFormat(rawValue: index)!
             }
             cell.configureForPhoto()
             return cell

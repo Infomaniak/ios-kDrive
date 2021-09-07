@@ -43,8 +43,8 @@ class SaveScanViewController: SaveFileViewController {
         switch sections[indexPath.section] {
         case .fileType:
             let cell = tableView.dequeueReusableCell(type: ScanTypeTableViewCell.self, for: indexPath)
-            cell.didSelectIndex = { index in
-                self.scanType = ScanFileFormat(rawValue: index)!
+            cell.didSelectIndex = { [weak self] index in
+                self?.scanType = ScanFileFormat(rawValue: index)!
             }
             cell.configureWith(scan: scan)
             return cell

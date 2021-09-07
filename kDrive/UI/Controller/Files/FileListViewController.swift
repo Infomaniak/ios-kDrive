@@ -983,8 +983,9 @@ extension FileListViewController: FilesHeaderViewDelegate {
                 let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
                 let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
                 selectFolderViewController?.disabledDirectoriesSelection = [selectedItems.first?.parent ?? driveFileManager.getRootFile()]
-                selectFolderViewController?.selectHandler = { [self] selectedFolder in
-                    if currentDirectoryCount?.count != nil && selectAllMode {
+                selectFolderViewController?.selectHandler = { [weak self] selectedFolder in
+                    guard let self = self else { return }
+                    if self.currentDirectoryCount?.count != nil && self.selectAllMode {
                         self.bulkMoveAll(destinationId: selectedFolder.id)
                     } else {
                         self.bulkMoveFiles(Array(self.selectedItems), destinationId: selectedFolder.id)

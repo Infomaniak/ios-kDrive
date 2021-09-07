@@ -516,7 +516,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
             selectFolderViewController?.disabledDirectoriesSelection = [file.parent ?? driveFileManager.getRootFile()]
             selectFolderViewController?.fileToMove = file.id
-            selectFolderViewController?.selectHandler = { selectedFolder in
+            selectFolderViewController?.selectHandler = { [unowned self] selectedFolder in
                 self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { response, _, error in
                     if error != nil {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)

@@ -69,9 +69,9 @@ class SecurityTableViewController: UITableViewController {
         switch tableContent[indexPath.row] {
         case .appLock:
             let appLockSettingsVC = AppLockSettingsViewController.instantiate()
-            appLockSettingsVC.closeActionHandler = {
+            appLockSettingsVC.closeActionHandler = { [weak self] in
                 appLockSettingsVC.dismiss(animated: true)
-                self.tableView.reloadData()
+                self?.tableView.reloadData()
             }
             present(appLockSettingsVC, animated: true)
         default:
