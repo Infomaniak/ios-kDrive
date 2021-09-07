@@ -20,7 +20,6 @@ import FileProvider
 import kDriveCore
 
 class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
-
     private let containerItemIdentifier: NSFileProviderItemIdentifier
     private let isDirectory: Bool
     private let domain: NSFileProviderDomain?
@@ -41,9 +40,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
         self.driveFileManager = driveFileManager
     }
 
-    func invalidate() {
-
-    }
+    func invalidate() {}
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
         if containerItemIdentifier == .workingSet {
@@ -63,7 +60,14 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 return
             }
             let pageIndex = page.isInitialPage ? 1 : page.toInt
-            driveFileManager.getFile(id: fileId, withExtras: !isDirectory, page: pageIndex) { containerFile, childrenFiles, error in
+
+            var forceRefresh = false
+            if let lastResponseAt = driveFileManager.getCachedFile(id: fileId)?.responseAt {
+                let anchorExpireTimestamp = Int(Date(timeIntervalSinceNow: -FileProviderEnumerator.syncAnchorExpireTime).timeIntervalSince1970)
+                forceRefresh = lastResponseAt < anchorExpireTimestamp
+            }
+
+            driveFileManager.getFile(id: fileId, withExtras: !isDirectory, page: pageIndex, forceRefresh: forceRefresh) { containerFile, childrenFiles, error in
                 if let folder = containerFile, let children = childrenFiles {
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
@@ -186,7 +190,6 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             completionHandler(nil)
         }
     }
-
 }
 
 extension NSFileProviderPage {

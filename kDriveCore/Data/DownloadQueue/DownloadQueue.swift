@@ -76,7 +76,7 @@ public class DownloadQueue {
     // MARK: - Public methods
 
     public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        guard !file.isInvalidated && operation(for: file) == nil,
+        guard !file.isInvalidated && !hasOperation(for: file),
               let drive = AccountManager.instance.getDrive(for: userId, driveId: file.driveId),
               let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
             return
@@ -107,7 +107,7 @@ public class DownloadQueue {
     }
 
     public func temporaryDownload(file: File, completion: @escaping (DriveError?) -> Void) -> DownloadOperation? {
-        guard !file.isInvalidated && operationsInQueue[file.id] == nil,
+        guard !file.isInvalidated && !hasOperation(for: file),
               let driveFileManager = AccountManager.instance.currentDriveFileManager else {
             return nil
         }
@@ -140,6 +140,10 @@ public class DownloadQueue {
 
     public func operation(for file: File) -> DownloadOperation? {
         return operationsInQueue[file.id]
+    }
+
+    public func hasOperation(for file: File) -> Bool {
+        return operation(for: file) != nil
     }
 
     // MARK: - Private methods

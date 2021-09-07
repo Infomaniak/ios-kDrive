@@ -21,7 +21,6 @@ import kDriveCore
 
 extension FileProviderExtension {
     override func fetchThumbnails(for itemIdentifiers: [NSFileProviderItemIdentifier], requestedSize size: CGSize, perThumbnailCompletionHandler: @escaping (NSFileProviderItemIdentifier, Data?, Error?) -> Void, completionHandler: @escaping (Error?) -> Void) -> Progress {
-
         let urlSession = URLSession(configuration: URLSessionConfiguration.default)
         let progress = Progress(totalUnitCount: Int64(itemIdentifiers.count))
 
@@ -80,5 +79,4 @@ extension FileProviderExtension {
 
         return progress
     }
-
 }
