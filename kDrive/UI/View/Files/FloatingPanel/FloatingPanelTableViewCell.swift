@@ -32,10 +32,7 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
 
         offlineSwitch.isHidden = true
         progressView.isHidden = true
-        progressView.trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
-        progressView.progressTintColor = KDriveAsset.infomaniakColor.color
-        progressView.thicknessRatio = 0.15
-        progressView.indeterminateProgress = 0.75
+        progressView.setInfomaniakStyle()
     }
 
     override func prepareForReuse() {

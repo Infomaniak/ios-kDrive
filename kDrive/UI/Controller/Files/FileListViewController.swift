@@ -361,7 +361,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.collectionView.performBatchUpdates(nil)
             }
         }
-        uploadsObserver = UploadQueue.instance.observeUploadCountInParent(self, parentId: currentDirectory.id) { [unowned self] _, uploadCount in
+        uploadsObserver = UploadQueue.instance.observeUploadCount(self, parentId: currentDirectory.id) { [unowned self] _, uploadCount in
             self.uploadCountThrottler.call(uploadCount)
         }
     }

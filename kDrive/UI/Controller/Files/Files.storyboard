@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19158" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -44,6 +44,39 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cIe-lL-Jiy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="792.75362318840587" y="101.78571428571428"/>
+        </scene>
+        <!--Importation en cours-->
+        <scene sceneID="naE-ZF-Fiy">
+            <objects>
+                <tableViewController storyboardIdentifier="UploadQueueFoldersViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="uHr-zE-0EB" customClass="UploadQueueFoldersViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="aaj-mp-ccy">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="dc6-2r-WWh">
+                                <rect key="frame" x="0.0" y="44.666666030883789" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="dc6-2r-WWh" id="UJS-Bc-LeK">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="uHr-zE-0EB" id="VlT-u7-Q2C"/>
+                            <outlet property="delegate" destination="uHr-zE-0EB" id="H7t-rl-oGs"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Importation en cours" id="apd-PM-3QP">
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadInProgressTitle"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="XgZ-nL-fqV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1686" y="-579"/>
         </scene>
         <!--Importation en cours-->
         <scene sceneID="VST-BU-uqD">
@@ -557,13 +590,13 @@
     </scenes>
     <designables>
         <designable name="6yn-n6-xrf">
-            <size key="intrinsicContentSize" width="152" height="32"/>
+            <size key="intrinsicContentSize" width="198" height="34"/>
         </designable>
         <designable name="OiI-t5-4G2">
-            <size key="intrinsicContentSize" width="92" height="32"/>
+            <size key="intrinsicContentSize" width="60" height="34"/>
         </designable>
         <designable name="qGi-Yx-e8m">
-            <size key="intrinsicContentSize" width="92" height="32"/>
+            <size key="intrinsicContentSize" width="60" height="34"/>
         </designable>
     </designables>
     <resources>

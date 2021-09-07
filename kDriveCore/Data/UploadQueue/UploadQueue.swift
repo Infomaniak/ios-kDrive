@@ -71,7 +71,8 @@ public class UploadQueue {
     private var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
         didChangeProgress: [UUID: (UploadedFileId, Progress) -> Void](),
-        didChangeUploadCountInParent: [UUID: (Int, Int) -> Void]()
+        didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
+        didChangeUploadCountInDrive: [UUID: (Int, Int) -> Void]()
     )
 
     private init() {
@@ -114,7 +115,11 @@ public class UploadQueue {
     }
 
     public func getUploadingFiles(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
-        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND parentDirectoryId = %d AND userId = %d AND driveId = %d", parentId, userId, driveId)).sorted(byKeyPath: "taskCreationDate")
+        return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter("parentDirectoryId = %d", parentId)
+    }
+
+    public func getUploadingFiles(userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId)).sorted(byKeyPath: "taskCreationDate")
     }
 
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
@@ -257,9 +262,21 @@ public class UploadQueue {
 
     private func publishUploadCount(withParent parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         realm.refresh()
+        publishUploadCountInParent(parentId: parentId, userId: userId, driveId: driveId, using: realm)
+        publishUploadCountInDrive(userId: userId, driveId: driveId, using: realm)
+    }
+
+    private func publishUploadCountInParent(parentId: Int, userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         let uploadCount = getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: realm).count
         observations.didChangeUploadCountInParent.values.forEach { closure in
             closure(parentId, uploadCount)
+        }
+    }
+
+    private func publishUploadCountInDrive(userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
+        let uploadCount = getUploadingFiles(userId: userId, driveId: driveId, using: realm).count
+        observations.didChangeUploadCountInDrive.values.forEach { closure in
+            closure(driveId, uploadCount)
         }
     }
 
@@ -341,7 +358,7 @@ public extension UploadQueue {
     }
 
     @discardableResult
-    func observeUploadCountInParent<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
+    func observeUploadCount<T: AnyObject>(_ observer: T, parentId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
         let key = UUID()
         observations.didChangeUploadCountInParent[key] = { [weak self, weak observer] updatedParentId, count in
             guard observer != nil else {
@@ -356,6 +373,25 @@ public extension UploadQueue {
 
         return ObservationToken { [weak self] in
             self?.observations.didChangeUploadCountInParent.removeValue(forKey: key)
+        }
+    }
+
+    @discardableResult
+    func observeUploadCount<T: AnyObject>(_ observer: T, driveId: Int, using closure: @escaping (Int, Int) -> Void) -> ObservationToken {
+        let key = UUID()
+        observations.didChangeUploadCountInDrive[key] = { [weak self, weak observer] updatedDriveId, count in
+            guard observer != nil else {
+                self?.observations.didChangeUploadCountInDrive.removeValue(forKey: key)
+                return
+            }
+
+            if driveId == updatedDriveId {
+                closure(updatedDriveId, count)
+            }
+        }
+
+        return ObservationToken { [weak self] in
+            self?.observations.didChangeUploadCountInDrive.removeValue(forKey: key)
         }
     }
 

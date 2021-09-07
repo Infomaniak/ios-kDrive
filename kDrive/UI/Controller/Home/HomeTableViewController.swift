@@ -16,32 +16,35 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
-import InfomaniakCore
-import DifferenceKit
 import CocoaLumberjackSwift
+import DifferenceKit
+import InfomaniakCore
+import kDriveCore
+import UIKit
 
 protocol HomeFileDelegate: AnyObject {
     func didSelect(index: Int, files: [File])
 }
 
 class HomeTableViewController: UITableViewController, SwitchDriveDelegate, SwitchAccountDelegate, HomeFileDelegate, TopScrollable {
-
     private enum HomeSection: Differentiable {
         case top
         case lastModify
         case activityOrPictures
     }
+
     private enum HomeTopRows {
         case offline
         case drive
         case search
         case insufficientStorage
+        case uploadsInProgress
     }
+
     private enum HomeLastModifyRows {
         case lastModify
     }
+
     private enum HomeActivityOrPicturesRows {
         case recentActivity
         case lastPictures
@@ -62,6 +65,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     private var recentActivities: [FileActivity] {
         return recentActivityController?.recentActivities ?? []
     }
+
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var lastPicturesInfo = (page: 1, hasNextPage: true, isLoading: true)
     private var activityOrPicturesIsLoading = true
@@ -73,6 +77,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
     }
 
+    private var uploadCountManager: UploadCountManager!
     private var filesObserver: ObservationToken?
     private var needsContentUpdate = false
     private var showInsufficientStorage = true
@@ -99,7 +104,11 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         return navigationController?.navigationBar.frame.height ?? 0
     }
 
-    var driveFileManager: DriveFileManager!
+    var driveFileManager: DriveFileManager! {
+        didSet {
+            observeUploadCount()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -113,6 +122,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.register(cellView: HomeOfflineTableViewCell.self)
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InsufficientStorageTableViewCell.self)
+        tableView.register(cellView: UploadsInProgressTableViewCell.self)
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
@@ -171,7 +181,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.navigationBar.isTranslucent = false
         navigationController?.navigationBar.shadowImage = nil
         navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
         navigationController?.navigationBar.barTintColor = nil
@@ -238,6 +247,26 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.reloadData()
     }
 
+    private func observeUploadCount() {
+        guard driveFileManager != nil else { return }
+        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
+            guard let self = self else { return }
+            if let index = self.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
+               let cell = self.tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? UploadsInProgressTableViewCell {
+                if self.uploadCountManager.uploadCount > 0 {
+                    // Update cell
+                    cell.setUploadCount(self.uploadCountManager.uploadCount)
+                } else {
+                    // Delete cell
+                    self.reload(sections: [.top])
+                }
+            } else {
+                // Add cell
+                self.reload(sections: [.top])
+            }
+        }
+    }
+
     private func updateSectionList() {
         if lastModifiedFiles.isEmpty && !lastModifyIsLoading {
             sections = [.top, .activityOrPictures]
@@ -251,6 +280,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             topRows = [.offline, .drive, .search]
         } else {
             topRows = [.drive, .search]
+        }
+
+        if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
+            topRows.append(.uploadsInProgress)
         }
 
         guard driveFileManager != nil && driveFileManager.drive.size > 0 else {
@@ -390,7 +423,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             loadNextLastPictures()
         }
         reload(sections: [.lastModify, .activityOrPictures])
-
     }
 
     func showFooter(_ show: Bool) {
@@ -497,6 +529,12 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                     self.showInsufficientStorage = false
                 }
                 return cell
+            case .uploadsInProgress:
+                let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.progressView.enableIndeterminate()
+                cell.setUploadCount(uploadCountManager.uploadCount)
+                return cell
             }
         case .lastModify:
             let cell = tableView.dequeueReusableCell(type: HomeLastModifTableViewCell.self, for: indexPath)
@@ -573,6 +611,9 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             switch topRows[indexPath.row] {
             case .offline, .insufficientStorage:
                 return
+            case .uploadsInProgress:
+                let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
+                navigationController?.pushViewController(uploadViewController, animated: true)
             case .drive:
                 performSegue(withIdentifier: "switchDriveSegue", sender: nil)
                 tableView.deselectRow(at: indexPath, animated: true)
@@ -634,9 +675,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     // MARK: - Switch account delegate
 
-    func didSwitchCurrentAccount(_ newAccount: Account) {
-
-    }
+    func didSwitchCurrentAccount(_ newAccount: Account) {}
 
     func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
         if isViewLoaded {
