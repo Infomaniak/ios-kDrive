@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
+import Sentry
 
 public class UploadTokenManager {
     public static let instance = UploadTokenManager()
@@ -129,6 +130,13 @@ public class UploadOperation: Operation {
         if !Constants.isInExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
                 DDLogInfo("[UploadOperation] Background task expired")
+                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+                breadcrumb.message = "Rescheduling file \(self.file.name)"
+                breadcrumb.data = ["File id": self.file.id,
+                                   "File name": self.file.name,
+                                   "File size": self.file.size,
+                                   "File type": self.file.type.rawValue]
+                SentrySDK.addBreadcrumb(crumb: breadcrumb)
                 let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
                 if let sessionId = rescheduledSessionId {
                     self.file.sessionId = sessionId
