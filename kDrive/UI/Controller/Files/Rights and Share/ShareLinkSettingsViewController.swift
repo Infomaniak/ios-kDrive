@@ -249,13 +249,13 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         let option = content[indexPath.row - 1]
         cell.configureWith(option: option, optionValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate)
         if !option.isEnabled(drive: driveFileManager.drive) {
-            cell.actionHandler = { [self] _ in
+            cell.actionHandler = { [weak self] _ in
                 let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { [weak self] _ in
+                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
                     guard let self = self else { return }
-                    UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(driveFileManager.drive.id)", from: self)
+                    UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
                 }
-                self.present(floatingPanelViewController, animated: true)
+                self?.present(floatingPanelViewController, animated: true)
             }
         }
 

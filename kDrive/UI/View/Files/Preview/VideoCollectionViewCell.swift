@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import AVKit
+import kDriveCore
 import Kingfisher
+import UIKit
 
 class VideoCollectionViewCell: PreviewCollectionViewCell {
-
     private class VideoPlayerNavigationController: UINavigationController {
         var disappearCallback: (() -> Void)?
 
@@ -91,8 +90,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
-        navController.disappearCallback = {
-            self.player?.pause()
+        navController.disappearCallback = { [weak self] in
+            self?.player?.pause()
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
@@ -103,5 +102,4 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
             playerViewController.player?.play()
         }
     }
-
 }

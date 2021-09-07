@@ -283,10 +283,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
                 let floatingPanelViewController = SavePhotosFloatingPanelViewController.instantiatePanel(drive: currentDriveFileManager.drive)
                 let savePhotosFloatingPanelViewController = (floatingPanelViewController.contentViewController as? SavePhotosFloatingPanelViewController)
-                savePhotosFloatingPanelViewController?.actionHandler = { [self] _ in
+                savePhotosFloatingPanelViewController?.actionHandler = { [weak self] _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     photoSyncSettingsVC.driveFileManager = currentDriveFileManager
-                    let mainTabViewVC = self.window?.rootViewController as? UITabBarController
+                    let mainTabViewVC = self?.window?.rootViewController as? UITabBarController
                     guard let currentVC = mainTabViewVC?.selectedViewController as? UINavigationController else {
                         return
                     }

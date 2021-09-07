@@ -124,12 +124,12 @@ class MultipleSelectionViewController: UIViewController {
         let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
         let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
         selectFolderViewController?.disabledDirectoriesSelection = [selectedItems.first?.parent ?? driveFileManager.getRootFile()]
-        selectFolderViewController?.selectHandler = { selectedFolder in
+        selectFolderViewController?.selectHandler = { [unowned self] selectedFolder in
             let group = DispatchGroup()
             var success = true
             for file in self.selectedItems {
                 group.enter()
-                self.driveFileManager.moveFile(file: file, newParent: selectedFolder) { _, _, error in
+                driveFileManager.moveFile(file: file, newParent: selectedFolder) { _, _, error in
                     if let error = error {
                         success = false
                         DDLogError("Error while moving file: \(error)")
@@ -229,9 +229,9 @@ class MultipleSelectionViewController: UIViewController {
         selectViewController.files = Array(selectedItems)
         floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
         selectViewController.driveFileManager = driveFileManager
-        selectViewController.reloadAction = {
-            self.selectionMode = false
-            self.getNewChanges()
+        selectViewController.reloadAction = { [unowned self] in
+            selectionMode = false
+            getNewChanges()
         }
         floatingPanelViewController.set(contentViewController: selectViewController)
         floatingPanelViewController.track(scrollView: selectViewController.tableView)
