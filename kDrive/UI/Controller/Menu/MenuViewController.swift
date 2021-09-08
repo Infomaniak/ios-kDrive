@@ -27,15 +27,23 @@ class MenuViewController: UIViewController {
     @IBOutlet weak var userAvatarImageView: UIImageView!
     @IBOutlet weak var userDisplayNameLabel: UILabel!
 
-    var driveFileManager: DriveFileManager!
+    var driveFileManager: DriveFileManager! {
+        didSet {
+            observeUploadCount()
+        }
+    }
+
+    private var uploadCountManager: UploadCountManager!
 
     private struct Section: Equatable {
+        let id: Int
         var actions: [MenuAction]
 
-        static var header = Section(actions: [])
-        static var upgrade = Section(actions: [.store])
-        static var more = Section(actions: [.sharedWithMe, .lastModifications, .images, .offline, .myShares, .trash])
-        static var options = Section(actions: [.switchUser, .parameters, .help, .disconnect])
+        static var header = Section(id: 1, actions: [])
+        static var uploads = Section(id: 2, actions: [])
+        static var upgrade = Section(id: 3, actions: [.store])
+        static var more = Section(id: 4, actions: [.sharedWithMe, .lastModifications, .images, .offline, .myShares, .trash])
+        static var options = Section(id: 5, actions: [.switchUser, .parameters, .help, .disconnect])
     }
 
     private struct MenuAction: Equatable {
@@ -68,6 +76,7 @@ class MenuViewController: UIViewController {
 
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MenuTopTableViewCell.self)
+        tableView.register(cellView: UploadsInProgressTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         currentAccount = AccountManager.instance.currentAccount
@@ -98,12 +107,38 @@ class MenuViewController: UIViewController {
         }
     }
 
+    private func observeUploadCount() {
+        guard driveFileManager != nil else { return }
+        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
+            guard let self = self else { return }
+            if let index = self.sections.firstIndex(where: { $0 == .uploads }),
+               let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell {
+                if self.uploadCountManager.uploadCount > 0 {
+                    // Update cell
+                    cell.setUploadCount(self.uploadCountManager.uploadCount)
+                } else {
+                    // Delete cell
+                    self.updateTableContent()
+                    self.tableView.reloadData()
+                }
+            } else {
+                // Add cell
+                self.updateTableContent()
+                self.tableView.reloadData()
+            }
+        }
+    }
+
     private func updateTableContent() {
         // Show upgrade section if free drive
         if driveFileManager.drive.pack == .free {
             sections = [.header, .upgrade, .more, .options]
         } else {
             sections = [.header, .more, .options]
+        }
+
+        if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
+            sections.insert(.uploads, at: 1)
         }
 
         // Hide shared with me action if no shared with me drive
@@ -141,10 +176,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if sections[section] == .header {
+        let section = sections[section]
+        if section == .header || section == .uploads {
             return 1
         } else {
-            return sections[section].actions.count
+            return section.actions.count
         }
     }
 
@@ -166,6 +202,12 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             cell.configureCell(with: driveFileManager.drive, and: currentAccount)
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
+        } else if section == .uploads {
+            let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.progressView.enableIndeterminate()
+            cell.setUploadCount(uploadCountManager.uploadCount)
+            return cell
         } else {
             let action = section.actions[indexPath.row]
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
@@ -181,7 +223,13 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let section = sections[indexPath.section]
-        guard section != .header else { return }
+        if section == .header {
+            return
+        } else if section == .uploads {
+            let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
+            navigationController?.pushViewController(uploadViewController, animated: true)
+            return
+        }
         let action = section.actions[indexPath.row]
         switch action {
         case .disconnect:
