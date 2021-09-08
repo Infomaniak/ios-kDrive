@@ -383,10 +383,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     final func observeNetwork() {
         guard networkObserver == nil else { return }
         networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
-            // Observer is called on main queue
-            headerView?.offlineView.isHidden = status != .offline
-            collectionView.collectionViewLayout.invalidateLayout()
-            collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+            DispatchQueue.main.async {
+                headerView?.offlineView.isHidden = status != .offline
+                collectionView.collectionViewLayout.invalidateLayout()
+                collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+            }
         }
     }
 

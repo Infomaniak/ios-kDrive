@@ -28,28 +28,35 @@ public class ReachabilityListener {
         case cellular
     }
 
+    private var eventQueue = DispatchQueue(label: "com.infomaniak.drive.network", autoreleaseFrequency: .workItem)
     private var networkMonitor: NWPathMonitor
     private var didChangeNetworkStatus = [UUID: (NetworkStatus) -> Void]()
     public private(set) var currentStatus: NetworkStatus
     public static let instance = ReachabilityListener()
 
-    init() {
+    private init() {
         networkMonitor = NWPathMonitor()
         currentStatus = .undefined
         networkMonitor.pathUpdateHandler = { [weak self] path in
-            guard let self = self, UIApplication.shared.applicationState != .background else {
+            guard let self = self else {
                 return
             }
 
             let newStatus = self.pathToStatus(path)
-            if newStatus != self.currentStatus {
+            var inBackground = false
+            if !Constants.isInExtension {
+                DispatchQueue.main.sync {
+                    inBackground = UIApplication.shared.applicationState == .background
+                }
+            }
+            if newStatus != self.currentStatus && !inBackground {
                 self.currentStatus = newStatus
                 self.didChangeNetworkStatus.values.forEach { closure in
                     closure(self.currentStatus)
                 }
             }
         }
-        networkMonitor.start(queue: .main)
+        networkMonitor.start(queue: eventQueue)
     }
 
     private func pathToStatus(_ path: NWPath) -> NetworkStatus {
