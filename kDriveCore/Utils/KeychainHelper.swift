@@ -120,7 +120,7 @@ public enum KeychainHelper {
                     ]
                     resultCode = SecItemUpdate(queryUpdate as CFDictionary, attributes as CFDictionary)
                     DDLogInfo("Successfully updated token ? \(resultCode == noErr)")
-                    SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfuly updated token"))
+                    SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfully updated token"))
                 }
             }
         } else {
@@ -136,7 +136,7 @@ public enum KeychainHelper {
                 ]
                 resultCode = SecItemAdd(queryAdd as CFDictionary, nil)
                 DDLogInfo("Successfully saved token ? \(resultCode == noErr)")
-                SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfuly saved token"))
+                SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfully saved token"))
             }
         }
         if resultCode != noErr {
@@ -205,7 +205,7 @@ public enum KeychainHelper {
                         }
                     }
                     if let token = values.first {
-                        SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfuly loaded token"))
+                        SentrySDK.addBreadcrumb(crumb: token.generateBreadcrumb(level: .info, message: "Successfully loaded token"))
                     }
                 }
             } else {
