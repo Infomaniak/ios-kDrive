@@ -75,40 +75,38 @@ public class PhotoLibraryUploader {
     }
 
     func getUrlForPHAsset(_ asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
-        autoreleasepool {
-            if asset.mediaType == .video {
-                let request = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { asset, _, _ in
-                    if let assetUrl = (asset as? AVURLAsset)?.url {
-                        let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(assetUrl.lastPathComponent)
-                        do {
-                            try FileManager.default.copyOrReplace(sourceUrl: assetUrl, destinationUrl: importPath)
-                            completion(importPath)
-                        } catch {
-                            completion(nil)
-                        }
-                    } else {
+        if asset.mediaType == .video {
+            let request = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { asset, _, _ in
+                if let assetUrl = (asset as? AVURLAsset)?.url {
+                    let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(assetUrl.lastPathComponent)
+                    do {
+                        try FileManager.default.copyOrReplace(sourceUrl: assetUrl, destinationUrl: importPath)
+                        completion(importPath)
+                    } catch {
                         completion(nil)
                     }
+                } else {
+                    completion(nil)
                 }
-                phRequests.insert(request)
-            } else if asset.mediaType == .image {
-                let request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
-                    if let data = data {
-                        let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-                        do {
-                            try data.write(to: filePath)
-                            completion(filePath)
-                        } catch {
-                            completion(nil)
-                        }
-                    } else {
-                        completion(nil)
-                    }
-                }
-                phRequests.insert(request)
-            } else {
-                completion(nil)
             }
+            phRequests.insert(request)
+        } else if asset.mediaType == .image {
+            let request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
+                if let data = data {
+                    let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+                    do {
+                        try data.write(to: filePath)
+                        completion(filePath)
+                    } catch {
+                        completion(nil)
+                    }
+                } else {
+                    completion(nil)
+                }
+            }
+            phRequests.insert(request)
+        } else {
+            completion(nil)
         }
     }
 
