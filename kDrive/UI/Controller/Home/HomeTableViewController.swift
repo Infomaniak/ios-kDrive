@@ -146,9 +146,11 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         showFooter(!(driveFileManager?.drive.isProOrTeam ?? true))
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
-            self.reload(sections: [.top])
-            if status != .offline {
-                self.reloadData()
+            DispatchQueue.main.async {
+                self.reload(sections: [.top])
+                if status != .offline {
+                    self.reloadData()
+                }
             }
         }
     }

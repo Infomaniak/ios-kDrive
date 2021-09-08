@@ -122,15 +122,17 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         tableView.register(cellView: FloatingPanelCollectionTableViewCell.self)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
-            guard file != nil else { return }
-            file.realm?.refresh()
-            if file.isInvalidated {
-                // File has been removed
-                dismiss(animated: true)
-            } else {
-                setupContent()
-                UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
-                    self.tableView.reloadData()
+            DispatchQueue.main.async {
+                guard file != nil else { return }
+                file.realm?.refresh()
+                if file.isInvalidated {
+                    // File has been removed
+                    dismiss(animated: true)
+                } else {
+                    setupContent()
+                    UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
+                        self.tableView.reloadData()
+                    }
                 }
             }
         }
