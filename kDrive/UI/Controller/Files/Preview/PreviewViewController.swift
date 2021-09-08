@@ -175,7 +175,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
-            present(floatingPanelViewController, animated: true, completion: nil)
+            initialLoading = false
         }
         setInteractiveRecognizer()
     }
@@ -186,14 +186,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if !initialLoading {
-            if floatingPanelViewController.parent == nil {
-                present(floatingPanelViewController, animated: true, completion: nil)
-            } else {
-                floatingPanelViewController.move(to: .tip, animated: true)
-            }
-        }
-        initialLoading = false
+        present(floatingPanelViewController, animated: true, completion: nil)
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -203,7 +196,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: true)
-        // floatingPanelViewController.move(to: .hidden, animated: true)
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
