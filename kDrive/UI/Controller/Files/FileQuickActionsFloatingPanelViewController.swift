@@ -142,7 +142,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate { _ in
             // Reload collection view
-            self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .fade)
+            if self.tableView.numberOfSections > 1 {
+                self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .fade)
+            }
         }
     }
 
