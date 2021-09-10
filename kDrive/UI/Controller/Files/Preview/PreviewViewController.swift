@@ -364,29 +364,37 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
         if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
-            currentDownloadOperation = DownloadQueue.instance.temporaryDownload(file: currentFile) { error in
-                DispatchQueue.main.async { [weak self] in
-                    if self?.view.window != nil {
-                        if let error = error {
-                            if error != .taskCancelled {
-                                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
-                                if let cell = (self?.collectionView.cellForItem(at: indexPath) as? NoPreviewCollectionViewCell) {
-                                    cell.errorDownloading()
+            DownloadQueue.instance.temporaryDownload(
+                file: currentFile,
+                onOperationCreated: { operation in
+                    DispatchQueue.main.async { [weak self] in
+                        self?.currentDownloadOperation = operation
+                        if let progress = self?.currentDownloadOperation?.task?.progress,
+                           let cell = self?.collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
+                            cell.setDownloadProgress(progress)
+                        }
+                    }
+                },
+                completion: { error in
+                    DispatchQueue.main.async { [weak self] in
+                        if self?.view.window != nil {
+                            if let error = error {
+                                if error != .taskCancelled {
+                                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
+                                    if let cell = (self?.collectionView.cellForItem(at: indexPath) as? NoPreviewCollectionViewCell) {
+                                        cell.errorDownloading()
+                                    }
                                 }
+                            } else {
+                                (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
+                                self?.collectionView.endEditing(true)
+                                self?.collectionView.reloadItems(at: [indexPath])
+                                self?.updateNavigationBar()
                             }
-                        } else {
-                            (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
-                            self?.collectionView.endEditing(true)
-                            self?.collectionView.reloadItems(at: [indexPath])
-                            self?.updateNavigationBar()
                         }
                     }
                 }
-            }
-            if let progress = currentDownloadOperation?.task?.progress,
-               let cell = collectionView.cellForItem(at: indexPath) as? DownloadProgressObserver {
-                cell.setDownloadProgress(progress)
-            }
+            )
         }
     }
 

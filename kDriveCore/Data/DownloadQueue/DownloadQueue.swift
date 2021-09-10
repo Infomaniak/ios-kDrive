@@ -55,6 +55,8 @@ public class DownloadQueue {
         return queue
     }()
 
+    private let dispatchQueue = DispatchQueue(label: "com.infomaniak.drive.download-sync", autoreleaseFrequency: .workItem)
+
     private lazy var foregroundSession: URLSession = {
         let urlSessionConfiguration = URLSessionConfiguration.default
         urlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = false
@@ -76,50 +78,62 @@ public class DownloadQueue {
     // MARK: - Public methods
 
     public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        guard !file.isInvalidated && !hasOperation(for: file),
-              let drive = AccountManager.instance.getDrive(for: userId, driveId: file.driveId),
-              let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
-            return
-        }
+        dispatchQueue.async {
+            guard !file.isInvalidated && !self.hasOperation(for: file),
+                  let drive = AccountManager.instance.getDrive(for: userId, driveId: file.driveId),
+                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
+                return
+            }
 
-        let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: bestSession, itemIdentifier: itemIdentifier)
-        operation.completionBlock = { [fileId = file.id] in
-            self.operationsInQueue.removeValue(forKey: fileId)
-            self.publishFileDownloaded(fileId: fileId, error: operation.error)
+            let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.bestSession, itemIdentifier: itemIdentifier)
+            operation.completionBlock = { [fileId = file.id] in
+                self.dispatchQueue.async {
+                    self.operationsInQueue.removeValue(forKey: fileId)
+                    self.publishFileDownloaded(fileId: fileId, error: operation.error)
+                }
+            }
+            self.operationQueue.addOperation(operation)
+            self.operationsInQueue[file.id] = operation
         }
-        operationQueue.addOperation(operation)
-        operationsInQueue[file.id] = operation
     }
 
     public func addToQueue(archiveId: String, driveId: Int, userId: Int = AccountManager.instance.currentUserId) {
-        guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
-              let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
-            return
-        }
+        dispatchQueue.async {
+            guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
+                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
+                return
+            }
 
-        let operation = DownloadArchiveOperation(archiveId: archiveId, driveFileManager: driveFileManager, urlSession: bestSession)
-        operation.completionBlock = {
-            self.archiveOperationsInQueue.removeValue(forKey: archiveId)
-            self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
+            let operation = DownloadArchiveOperation(archiveId: archiveId, driveFileManager: driveFileManager, urlSession: self.bestSession)
+            operation.completionBlock = {
+                self.dispatchQueue.async {
+                    self.archiveOperationsInQueue.removeValue(forKey: archiveId)
+                    self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
+                }
+            }
+            self.operationQueue.addOperation(operation)
+            self.archiveOperationsInQueue[archiveId] = operation
         }
-        operationQueue.addOperation(operation)
-        archiveOperationsInQueue[archiveId] = operation
     }
 
-    public func temporaryDownload(file: File, completion: @escaping (DriveError?) -> Void) -> DownloadOperation? {
-        guard !file.isInvalidated && !hasOperation(for: file),
-              let driveFileManager = AccountManager.instance.currentDriveFileManager else {
-            return nil
-        }
+    public func temporaryDownload(file: File, onOperationCreated: @escaping (DownloadOperation?) -> Void, completion: @escaping (DriveError?) -> Void) {
+        dispatchQueue.async(qos: .userInitiated) {
+            guard !file.isInvalidated && !self.hasOperation(for: file),
+                  let driveFileManager = AccountManager.instance.currentDriveFileManager else {
+                return
+            }
 
-        let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: foregroundSession)
-        operation.completionBlock = { [fileId = file.id] in
-            self.operationsInQueue.removeValue(forKey: fileId)
-            completion(operation.error)
+            let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
+            operation.completionBlock = { [fileId = file.id] in
+                self.dispatchQueue.async {
+                    self.operationsInQueue.removeValue(forKey: fileId)
+                    completion(operation.error)
+                }
+            }
+            operation.start()
+            self.operationsInQueue[file.id] = operation
+            onOperationCreated(operation)
         }
-        operation.start()
-        operationsInQueue[file.id] = operation
-        return operation
     }
 
     public func suspendAllOperations() {
