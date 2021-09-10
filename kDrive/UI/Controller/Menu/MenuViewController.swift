@@ -180,9 +180,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
                         } else {
                             SentrySDK.setUser(nil)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
-                            }
+                            self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
                         }
                         AccountManager.instance.saveAccounts()
                     }
