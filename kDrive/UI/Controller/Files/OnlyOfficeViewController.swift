@@ -177,6 +177,6 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        showErrorMessage(context: ["Error": error])
+        showErrorMessage(context: ["Error": error.localizedDescription])
     }
 }
