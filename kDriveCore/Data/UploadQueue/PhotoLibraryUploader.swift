@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import Photos
 import RealmSwift
+import Sentry
 
 public class PhotoLibraryUploader {
     public static let instance = PhotoLibraryUploader()
@@ -38,15 +39,25 @@ public class PhotoLibraryUploader {
         requestImageOption.deliveryMode = .highQualityFormat
         requestImageOption.isSynchronous = false
         requestImageOption.isNetworkAccessAllowed = true
+        requestImageOption.progressHandler = progressHandler
 
         requestVideoOption.deliveryMode = .highQualityFormat
         requestVideoOption.isNetworkAccessAllowed = true
         requestVideoOption.version = .current
+        requestVideoOption.progressHandler = progressHandler
 
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
 
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
             self.settings = PhotoSyncSettings(value: settings)
+        }
+    }
+
+    private let progressHandler: PHAssetImageProgressHandler = { _, error, _, _ in
+        if let error = error {
+            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+            breadcrumb.message = error.localizedDescription
+            SentrySDK.addBreadcrumb(crumb: breadcrumb)
         }
     }
 
