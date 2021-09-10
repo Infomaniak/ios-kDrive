@@ -102,20 +102,31 @@ public class PhotoLibraryUploader {
             }
             phRequests.insert(request)
         } else if asset.mediaType == .image {
-            let request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
-                if let data = data {
-                    let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-                    do {
-                        try data.write(to: filePath)
-                        completion(filePath)
-                    } catch {
-                        completion(nil)
-                    }
-                } else {
-                    completion(nil)
+            var request: PHImageRequestID
+            if #available(iOS 13, *) {
+                request = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
+                    self.handlePHAssetRequestData(data: data, completion: completion)
+                }
+            } else {
+                request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
+                    self.handlePHAssetRequestData(data: data, completion: completion)
                 }
             }
             phRequests.insert(request)
+        } else {
+            completion(nil)
+        }
+    }
+
+    private func handlePHAssetRequestData(data: Data?, completion: @escaping ((URL?) -> Void)) {
+        if let data = data {
+            let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+            do {
+                try data.write(to: filePath)
+                completion(filePath)
+            } catch {
+                completion(nil)
+            }
         } else {
             completion(nil)
         }
