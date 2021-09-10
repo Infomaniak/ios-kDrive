@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import Photos
 import RealmSwift
+import Sentry
 
 public class PhotoLibraryUploader {
     public static let instance = PhotoLibraryUploader()
@@ -38,15 +39,25 @@ public class PhotoLibraryUploader {
         requestImageOption.deliveryMode = .highQualityFormat
         requestImageOption.isSynchronous = false
         requestImageOption.isNetworkAccessAllowed = true
+        requestImageOption.progressHandler = progressHandler
 
         requestVideoOption.deliveryMode = .highQualityFormat
         requestVideoOption.isNetworkAccessAllowed = true
         requestVideoOption.version = .current
+        requestVideoOption.progressHandler = progressHandler
 
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
 
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
             self.settings = PhotoSyncSettings(value: settings)
+        }
+    }
+
+    private let progressHandler: PHAssetImageProgressHandler = { _, error, _, _ in
+        if let error = error {
+            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+            breadcrumb.message = error.localizedDescription
+            SentrySDK.addBreadcrumb(crumb: breadcrumb)
         }
     }
 
@@ -91,20 +102,31 @@ public class PhotoLibraryUploader {
             }
             phRequests.insert(request)
         } else if asset.mediaType == .image {
-            let request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
-                if let data = data {
-                    let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-                    do {
-                        try data.write(to: filePath)
-                        completion(filePath)
-                    } catch {
-                        completion(nil)
-                    }
-                } else {
-                    completion(nil)
+            var request: PHImageRequestID
+            if #available(iOS 13, *) {
+                request = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
+                    self.handlePHAssetRequestData(data: data, completion: completion)
+                }
+            } else {
+                request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
+                    self.handlePHAssetRequestData(data: data, completion: completion)
                 }
             }
             phRequests.insert(request)
+        } else {
+            completion(nil)
+        }
+    }
+
+    private func handlePHAssetRequestData(data: Data?, completion: @escaping ((URL?) -> Void)) {
+        if let data = data {
+            let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+            do {
+                try data.write(to: filePath)
+                completion(filePath)
+            } catch {
+                completion(nil)
+            }
         } else {
             completion(nil)
         }
