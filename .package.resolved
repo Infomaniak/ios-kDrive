@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
-          "revision": "096c63875a74da985293680662e4aa84d17bb29a",
-          "version": "1.0.16"
+          "revision": "e872406e744f46ccbd0487e93e9330a7b4afe3b2",
+          "version": "1.0.17"
         }
       },
       {
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "1a0c2df04b31ed7aa318354f3583faea24f006fc",
-          "version": "5.15.8"
+          "revision": "d06df9adf50ed8cde5786d935836a5f445f780ba",
+          "version": "6.3.1"
         }
       },
       {
@@ -231,8 +231,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "e7e7f072a1571435049683ca43c51501de2612fd",
-          "version": "10.14.0"
+          "revision": "c619512ed75937ed3425df9343dc592f39bd8a43",
+          "version": "10.15.0"
         }
       },
       {
@@ -240,8 +240,8 @@
         "repositoryURL": "https://github.com/realm/realm-core",
         "state": {
           "branch": null,
-          "revision": "fdb2157346dcdf0c2677b3608d9a4c30315fa7f0",
-          "version": "11.3.1"
+          "revision": "23f60515a00f076a9e3f2dc672fe1ae07601ee90",
+          "version": "11.4.1"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
-          "revision": "946cbb6daccedf40d652a12138f78e96f660e1ad",
-          "version": "6.2.1"
+          "revision": "97bb9a45bc1ea8390528b5fd1ce135c0ab7f174e",
+          "version": "7.2.9"
         }
       },
       {
