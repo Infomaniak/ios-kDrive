@@ -382,7 +382,7 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertNotNil(share.link, "Share link shouldn't be nil")
                         print(share.link!)
                         XCTAssertTrue(share.link!.canEdit, "canEdit should be true")
-                        XCTAssertTrue(share.link!.permission == "password", "Permission should be equal to 'manage'")
+                        XCTAssertTrue(share.link!.permission == "password", "Permission should be equal to 'password'")
                         XCTAssertTrue(share.link!.blockDownloads, "blockDownloads should be true")
                         XCTAssertTrue(!share.link!.blockComments, "blockComments should be false")
                         XCTAssertTrue(!share.link!.blockInformation, "blockInformation should be false")
@@ -404,7 +404,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "manage") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], teams: [], emails: [], message: "Invitation test", permission: UserPermission.manage.rawValue) { response, error in
                 XCTAssertNotNil(response?.data, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
 
@@ -414,7 +414,7 @@ final class DriveApiTests: XCTestCase {
                     let share = shareResponse!.data!
                     let userAdded = share.users.first { user -> Bool in
                         if user.id == Env.inviteUserId {
-                            XCTAssertTrue(user.permission?.rawValue == "manage", "Added user permission should be equal to 'manage'")
+                            XCTAssertTrue(user.permission == .manage, "Added user permission should be equal to 'manage'")
                             return true
                         }
                         return false
@@ -436,7 +436,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            self.currentApiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], permission: "manage") { response, error in
+            self.currentApiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], teams: [], emails: [], permission: UserPermission.manage.rawValue) { response, error in
                 XCTAssertNotNil(response, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 expectation.fulfill()
@@ -454,12 +454,12 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], teams: [], emails: [], message: "Invitation test", permission: UserPermission.read.rawValue) { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let user = response?.data?.valid.users?.first { $0.id == Env.inviteUserId }
                 XCTAssertNotNil(user, "User shouldn't be nil")
                 if let user = user {
-                    self.currentApiFetcher.updateUserRights(file: rootFile, user: user, permission: "manage") { updateResponse, updateError in
+                    self.currentApiFetcher.updateUserRights(file: rootFile, user: user, permission: UserPermission.manage.rawValue) { updateResponse, updateError in
                         XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                         XCTAssertNil(updateError, "There should be no error")
 
@@ -471,7 +471,7 @@ final class DriveApiTests: XCTestCase {
                                 $0.id == Env.inviteUserId
                             }
                             XCTAssertNotNil(updatedUser, "User shouldn't be nil")
-                            XCTAssertTrue(updatedUser?.permission?.rawValue == "manage", "User permission should be equal to 'manage'")
+                            XCTAssertTrue(updatedUser?.permission == .manage, "User permission should be equal to 'manage'")
                             expectation.fulfill()
                         }
                     }
@@ -490,7 +490,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], teams: [], emails: [], message: "Invitation test", permission: UserPermission.read.rawValue) { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let user = response?.data?.valid.users?.first { $0.id == Env.inviteUserId }
                 XCTAssertNotNil(user, "User shouldn't be nil")
@@ -524,11 +524,11 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            self.currentApiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [], teams: [], emails: [Env.inviteMail], message: "Invitation test", permission: UserPermission.read.rawValue) { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let invitation = response?.data?.valid.invitations?.first { $0.email == Env.inviteMail }
                 XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
-                self.currentApiFetcher.updateInvitationRights(driveId: self.currentDrive.id, invitation: invitation!, permission: "write") { updateResponse, updateError in
+                self.currentApiFetcher.updateInvitationRights(driveId: self.currentDrive.id, invitation: invitation!, permission: UserPermission.write.rawValue) { updateResponse, updateError in
                     XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                     XCTAssertNil(updateError, "There should be no error")
 
@@ -541,7 +541,7 @@ final class DriveApiTests: XCTestCase {
                             $0!.email == Env.inviteMail
                         }!
                         XCTAssertNotNil(updatedInvitation, "Invitation shouldn't be nil")
-                        XCTAssertTrue(updatedInvitation?.permission.rawValue == "write", "Invitation permission should be equal to 'manage'")
+                        XCTAssertTrue(updatedInvitation?.permission == .write, "Invitation permission should be equal to 'write'")
                         expectation.fulfill()
                     }
                 }
@@ -559,7 +559,7 @@ final class DriveApiTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            self.currentApiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { response, error in
+            self.currentApiFetcher.addUserRights(file: rootFile, users: [], teams: [], emails: [Env.inviteMail], message: "Invitation test", permission: UserPermission.read.rawValue) { response, error in
                 XCTAssertNil(error, "There should be no error")
                 let invitation = response?.data?.valid.invitations?.first { $0.email == Env.inviteMail }
                 XCTAssertNotNil(invitation, "User shouldn't be nil")
@@ -1265,7 +1265,7 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertNotNil(share.link, "Share link shouldn't be nil")
                         print(share.link!)
                         XCTAssertTrue(share.link!.canEdit, "canEdit should be true")
-                        XCTAssertTrue(share.link!.permission == "password", "Permission should be equal to 'manage'")
+                        XCTAssertTrue(share.link!.permission == "password", "Permission should be equal to 'password'")
                         XCTAssertTrue(share.link!.blockDownloads, "blockDownloads should be true")
                         XCTAssertTrue(!share.link!.blockComments, "blockComments should be false")
                         XCTAssertTrue(!share.link!.blockInformation, "blockInformation should be false")
@@ -1303,12 +1303,12 @@ final class DriveApiTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
 
-            self.currentApiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], permission: "manage") { checkResponse, checkError in
+            self.currentApiFetcher.checkUserRights(file: rootFile, users: [Env.inviteUserId], teams: [], emails: [], permission: UserPermission.manage.rawValue) { checkResponse, checkError in
                 XCTAssertNotNil(checkResponse, "Response shouldn't be nil")
                 XCTAssertNil(checkError, "There should be no error")
                 expectations[0].expectation.fulfill()
 
-                self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], tags: [], emails: [], message: "Invitation test", permission: "manage") { addResponse, addError in
+                self.currentApiFetcher.addUserRights(file: rootFile, users: [Env.inviteUserId], teams: [], emails: [], message: "Invitation test", permission: UserPermission.manage.rawValue) { addResponse, addError in
                     XCTAssertNotNil(addResponse?.data, "Response shouldn't be nil")
                     XCTAssertNil(addError, "There should be no error")
                     self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
@@ -1317,7 +1317,7 @@ final class DriveApiTests: XCTestCase {
                         let share = shareResponse!.data!
                         let userAdded = share.users.first { user -> Bool in
                             if user.id == Env.inviteUserId {
-                                XCTAssertTrue(user.permission?.rawValue == "manage", "Added user permission should be equal to 'manage'")
+                                XCTAssertTrue(user.permission == .manage, "Added user permission should be equal to 'manage'")
                                 return true
                             }
                             return false
@@ -1325,7 +1325,7 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertNotNil(userAdded, "Added user should be in share list")
                         expectations[1].expectation.fulfill()
                         guard let user = userAdded else { return }
-                        self.currentApiFetcher.updateUserRights(file: rootFile, user: user, permission: "manage") { updateResponse, updateError in
+                        self.currentApiFetcher.updateUserRights(file: rootFile, user: user, permission: UserPermission.manage.rawValue) { updateResponse, updateError in
                             XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                             XCTAssertNil(updateError, "There should be no error")
                             self.currentApiFetcher.getShareListFor(file: rootFile) { shareUpdateResponse, shareUpdateError in
@@ -1336,7 +1336,7 @@ final class DriveApiTests: XCTestCase {
                                     $0.id == Env.inviteUserId
                                 }
                                 XCTAssertNotNil(updatedUser, "User shouldn't be nil")
-                                XCTAssertTrue(updatedUser?.permission?.rawValue == "manage", "User permission should be equal to 'manage'")
+                                XCTAssertTrue(updatedUser?.permission == .manage, "User permission should be equal to 'manage'")
                                 expectations[2].expectation.fulfill()
 
                                 guard let user = updatedUser else { return }
@@ -1377,12 +1377,12 @@ final class DriveApiTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
 
-            self.currentApiFetcher.checkUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], permission: "read") { checkResponse, checkError in
+            self.currentApiFetcher.checkUserRights(file: rootFile, users: [], teams: [], emails: [Env.inviteMail], permission: UserPermission.read.rawValue) { checkResponse, checkError in
                 XCTAssertNotNil(checkResponse, "Response shouldn't be nil")
                 XCTAssertNil(checkError, "There should be no error")
                 expectations[0].expectation.fulfill()
 
-                self.currentApiFetcher.addUserRights(file: rootFile, users: [], tags: [], emails: [Env.inviteMail], message: "Invitation test", permission: "read") { addResponse, addError in
+                self.currentApiFetcher.addUserRights(file: rootFile, users: [], teams: [], emails: [Env.inviteMail], message: "Invitation test", permission: UserPermission.read.rawValue) { addResponse, addError in
                     XCTAssertNil(addError, "There should be no error")
                     let invitation = addResponse?.data?.valid.invitations?.first { $0.email == Env.inviteMail }
                     XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
@@ -1392,7 +1392,7 @@ final class DriveApiTests: XCTestCase {
                         let share = shareResponse!.data!
                         let invitationAdded = share.invitations.first { invitation -> Bool in
                             if invitation?.email == Env.inviteMail {
-                                XCTAssertTrue(invitation!.permission.rawValue == "read", "Added invitation permission should be equal to 'read'")
+                                XCTAssertTrue(invitation!.permission == .read, "Added invitation permission should be equal to 'read'")
                                 return true
                             }
                             return false
@@ -1400,7 +1400,7 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertNotNil(invitationAdded, "Added invitation should be in share list")
                         expectations[1].expectation.fulfill()
 
-                        self.currentApiFetcher.updateInvitationRights(driveId: self.currentDrive.id, invitation: invitation!, permission: "write") { updateResponse, updateError in
+                        self.currentApiFetcher.updateInvitationRights(driveId: self.currentDrive.id, invitation: invitation!, permission: UserPermission.write.rawValue) { updateResponse, updateError in
                             XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
                             XCTAssertNil(updateError, "There should be no error")
                             self.currentApiFetcher.getShareListFor(file: rootFile) { shareUpdateResponse, shareUpdateError in
@@ -1412,7 +1412,7 @@ final class DriveApiTests: XCTestCase {
                                     $0!.email == Env.inviteMail
                                 }!
                                 XCTAssertNotNil(updatedInvitation, "Invitation shouldn't be nil")
-                                XCTAssertTrue(updatedInvitation?.permission.rawValue == "write", "Invitation permission should be equal to 'manage'")
+                                XCTAssertTrue(updatedInvitation?.permission == .write, "Invitation permission should be equal to 'write'")
                                 expectations[2].expectation.fulfill()
 
                                 self.currentApiFetcher.deleteInvitationRights(driveId: self.currentDrive.id, invitation: invitation!) { deleteResponse, deleteError in
@@ -1425,6 +1425,72 @@ final class DriveApiTests: XCTestCase {
                                             $0.id == Env.inviteUserId
                                         }
                                         XCTAssertNil(deletedInvitation, "Deleted invitation should be nil")
+                                        expectations[3].expectation.fulfill()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
+    }
+
+    func testTeamRights() {
+        let testName = "Team rights"
+        let expectations = [
+            (name: "Check teams rights", expectation: XCTestExpectation(description: "Check teams rights")),
+            (name: "Add teams rights", expectation: XCTestExpectation(description: "Add teams rights")),
+            (name: "Update teams rights", expectation: XCTestExpectation(description: "Update teams rights")),
+            (name: "Delete teams rights", expectation: XCTestExpectation(description: "Delete teams rights"))
+        ]
+        var rootFile = File()
+
+        currentApiFetcher.createCommonDirectory(driveId: currentDrive.id, name: "UnitTest - \(testName)", forAllUser: false) { response, _ in
+            XCTAssertNotNil(rootFile, "Failed to create UnitTest directory")
+            rootFile = response!.data!
+
+            self.currentApiFetcher.checkUserRights(file: rootFile, users: [], teams: [Env.inviteTeam], emails: [], permission: UserPermission.read.rawValue) { checkResponse, checkError in
+                XCTAssertNotNil(checkResponse, "Response shouldn't be nil")
+                XCTAssertNil(checkError, "There should be no error")
+                expectations[0].expectation.fulfill()
+
+                self.currentApiFetcher.addUserRights(file: rootFile, users: [], teams: [Env.inviteTeam], emails: [], message: "Invitation test", permission: UserPermission.read.rawValue) { addResponse, addError in
+                    XCTAssertNotNil(addResponse?.data, "Response shouldn't be nil")
+                    XCTAssertNil(addError, "There should be no error")
+                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
+                        XCTAssertNotNil(shareResponse?.data, "Response shouldn't be nil")
+                        XCTAssertNil(shareError, "There should be no error")
+                        let share = shareResponse?.data
+                        let teamAdded = share?.teams.first { $0.id == Env.inviteTeam }
+                        XCTAssertNotNil(teamAdded, "Added team should be in share list")
+                        XCTAssertTrue(teamAdded?.right == .read, "Added team permission should be equal to 'read'")
+                        expectations[1].expectation.fulfill()
+                        guard let team = teamAdded else { return }
+                        self.currentApiFetcher.updateTeamRights(file: rootFile, team: team, permission: UserPermission.write.rawValue) { updateResponse, updateError in
+                            XCTAssertNotNil(updateResponse, "Response shouldn't be nil")
+                            XCTAssertNil(updateError, "There should be no error")
+                            self.currentApiFetcher.getShareListFor(file: rootFile) { shareUpdateResponse, shareUpdateError in
+                                XCTAssertNotNil(shareUpdateResponse?.data, "Response shouldn't be nil")
+                                XCTAssertNil(shareUpdateError, "There should be no error")
+                                let share = shareUpdateResponse?.data
+                                XCTAssertNotNil(share?.teams, "Teams shouldn't be nil")
+                                let updatedTeam = share?.teams.first { $0.id == Env.inviteTeam }
+                                XCTAssertNotNil(updatedTeam, "Team shouldn't be nil")
+                                XCTAssertTrue(updatedTeam?.right == .write, "Team permission should be equal to 'write'")
+                                expectations[2].expectation.fulfill()
+                                guard let team = updatedTeam else { return }
+                                self.currentApiFetcher.deleteTeamRights(file: rootFile, team: team) { deleteResponse, deleteError in
+                                    XCTAssertNotNil(deleteResponse, "Response shouldn't be nil")
+                                    XCTAssertNil(deleteError, "There should be no error")
+                                    self.currentApiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
+                                        XCTAssertNotNil(finalResponse?.data, "Response shouldn't be nil")
+                                        XCTAssertNil(finalError, "There should be no error")
+                                        let deletedTeam = finalResponse?.data?.teams.first { $0.id == Env.inviteTeam }
+                                        XCTAssertNil(deletedTeam, "Deleted team should be nil")
                                         expectations[3].expectation.fulfill()
                                     }
                                 }
