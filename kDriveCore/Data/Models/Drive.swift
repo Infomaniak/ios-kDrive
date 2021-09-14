@@ -135,8 +135,10 @@ public class Drive: Object, Codable {
     @Persisted public var sharedWithMe = false
     @Persisted public var size: Int64 = 0
     @Persisted public var usedSize: Int64 = 0
-    @Persisted private var _users: DriveUsersCategories? = DriveUsersCategories()
-    @Persisted private var _teams: DriveTeamsCategories? = DriveTeamsCategories()
+    @Persisted private var _users: DriveUsersCategories?
+    @Persisted private var _teams: DriveTeamsCategories?
+    @Persisted public var categories: List<Category>
+    @Persisted private var _categoryRights: CategoryRights?
     @Persisted public var maintenance = false
     /// Is manager admin.
     @Persisted public var accountAdmin = false
@@ -169,6 +171,10 @@ public class Drive: Object, Codable {
         return _teams ?? DriveTeamsCategories()
     }
 
+    public var categoryRights: CategoryRights {
+        return _categoryRights ?? CategoryRights()
+    }
+
     public var isUserAdmin: Bool {
         return role == "admin"
     }
@@ -187,6 +193,8 @@ public class Drive: Object, Codable {
         _preferences = try values.decode(DrivePreferences.self, forKey: ._preferences)
         _users = try values.decode(DriveUsersCategories.self, forKey: ._users)
         _teams = try values.decode(DriveTeamsCategories.self, forKey: ._teams)
+        categories = try values.decode(List<Category>.self, forKey: .categories)
+        _categoryRights = try values.decode(CategoryRights.self, forKey: ._categoryRights)
         size = try values.decode(Int64.self, forKey: .size)
         usedSize = try values.decode(Int64.self, forKey: .usedSize)
         canAddUser = try values.decode(Bool.self, forKey: .canAddUser)
@@ -211,6 +219,8 @@ public class Drive: Object, Codable {
         case usedSize = "used_size"
         case _users = "users"
         case _teams = "teams"
+        case categories
+        case _categoryRights = "category_rights"
         case canAddUser = "can_add_user"
         case packFunctionality = "pack_functionality"
         case hasTechnicalRight = "has_technical_right"

@@ -35,7 +35,7 @@ public class DriveInfosManager {
             schemaVersion: DriveInfosManager.currentDbVersion,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {
-                    // No migration needed from version 0 to version 1
+                    // No migration needed from 0 to 1 & from 2 to 3
                     if oldSchemaVersion < 2 {
                         // Remove tags
                         migration.deleteData(forType: Tag.className())
@@ -43,7 +43,7 @@ public class DriveInfosManager {
                     // No migration needed from version 2 to version 3
                 }
             },
-            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self])
+            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self, Category.self, CategoryRights.self])
     }
 
     public func getRealm() -> Realm {

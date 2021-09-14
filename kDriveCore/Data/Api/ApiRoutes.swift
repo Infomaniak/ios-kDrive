@@ -21,14 +21,14 @@ import Foundation
 public enum ApiRoutes {
     static let driveApiUrl = "https://drive.infomaniak.com/drive/"
     static let officeApiUrl = "https://drive.infomaniak.com/app/office/"
-    static let with = "with=parent,children,rights,collaborative_folder,favorite,mobile,share_link"
+    static let with = "with=parent,children,rights,collaborative_folder,favorite,mobile,share_link,categories"
     static let shopUrl = "https://shop.infomaniak.com/order/"
 
     static func fileURL(file: File) -> String {
         return "\(driveApiUrl)\(file.driveId)/file/\(file.id)/"
     }
 
-    static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams" }
+    static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
 
     static func createDirectory(driveId: Int, parentId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/folder/\(parentId)?\(with)"
@@ -51,7 +51,7 @@ public enum ApiRoutes {
     }
 
     static func getFileDetail(driveId: Int, fileId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/\(fileId)?with=parent,extras,user,rights,collaborative_folder,share_link,mobile"
+        return "\(driveApiUrl)\(driveId)/file/\(fileId)?with=parent,extras,user,rights,collaborative_folder,share_link,mobile,categories"
     }
 
     static func getMyShared(driveId: Int, sortType: SortType) -> String {

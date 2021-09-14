@@ -163,7 +163,7 @@ public class DriveFileManager {
                     }
                 }
             },
-            objectTypes: [File.self, Rights.self, FileActivity.self])
+            objectTypes: [File.self, Rights.self, FileActivity.self, Category.self])
 
         // Only compact in the background
         if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
@@ -191,7 +191,7 @@ public class DriveFileManager {
         let config = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
             shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self])
+            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self, Category.self, CategoryRights.self])
         do {
             _ = try Realm(configuration: config)
         } catch {
