@@ -45,6 +45,7 @@ class FileDetailViewController: UIViewController {
         case creation
         case added
         case location
+        case categories
         case size
         case sizeAll
 
@@ -53,7 +54,7 @@ class FileDetailViewController: UIViewController {
         ///   - file: File for which to build the array
         ///   - sharedFile: Shared file related to `file`
         /// - Returns: Array of row
-        static func getRows(for file: File, sharedFile: SharedFile?) -> [FileInformationRow] {
+        static func getRows(for file: File, sharedFile: SharedFile?, categoryRights: CategoryRights) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
             if sharedFile != nil || !file.users.isEmpty {
                 rows.append(.users)
@@ -70,6 +71,9 @@ class FileDetailViewController: UIViewController {
             }
             if sharedFile != nil || !file.path.isEmpty {
                 rows.append(.location)
+            }
+            if categoryRights.canReadCategoryOnFile && !file.categories.isEmpty {
+                rows.append(.categories)
             }
             if file.size != 0 {
                 rows.append(.size)
@@ -153,18 +157,20 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: FileInformationOwnerTableViewCell.self)
         tableView.register(cellView: FileInformationCreationTableViewCell.self)
         tableView.register(cellView: FileInformationLocationTableViewCell.self)
+        tableView.register(cellView: FileInformationCategoriesTableViewCell.self)
         tableView.register(cellView: FileInformationSizeTableViewCell.self)
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InfoTableViewCell.self)
 
         tableView.separatorColor = .clear
+        tableView.allowsSelection = false
 
         guard file != nil else { return }
 
-        // Set initial rows
-        fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile)
-
         driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: AccountManager.instance.currentUserId)
+
+        // Set initial rows
+        fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile, categoryRights: driveFileManager.drive.categoryRights)
 
         // Load file informations
         let group = DispatchGroup()
@@ -182,7 +188,7 @@ class FileDetailViewController: UIViewController {
         }
         group.notify(queue: .main) {
             guard self.file != nil else { return }
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 self.reloadTableView()
             }
@@ -392,7 +398,7 @@ class FileDetailViewController: UIViewController {
         }
         driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
             self.sharedFile = response?.data
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
@@ -490,6 +496,11 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                     cell.locationLabel.text = sharedFile?.path ?? file.path
                     cell.delegate = self
+                    return cell
+                case .categories:
+                    let cell = tableView.dequeueReusableCell(type: FileInformationCategoriesTableViewCell.self, for: indexPath)
+                    cell.categories = Array(file.categories)
+                    cell.layoutIfNeeded()
                     return cell
                 case .sizeAll:
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)

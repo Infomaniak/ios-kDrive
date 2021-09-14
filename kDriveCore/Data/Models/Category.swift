@@ -34,6 +34,14 @@ public class Category: Object, Codable {
         return UIColor(hex: _color)
     }
 
+    public var localizedName: String {
+        if isPredefined, let predefinedCategory = PredefinedCategory(rawValue: name) {
+            return predefinedCategory.title
+        } else {
+            return name
+        }
+    }
+
     enum CodingKeys: String, CodingKey {
         case id
         case name
@@ -75,4 +83,55 @@ public enum PredefinedCategory: String {
     case family = "PREDEF_CAT_FAMILY"
     case work = "PREDEF_CAT_WORK"
     case hobbies = "PREDEF_CAT_HOBBIES"
+
+    var title: String {
+        switch self {
+        case .contract:
+            return "Contrat"
+        case .bill:
+            return "Facture"
+        case .receipt:
+            return "Reçu"
+        case .certificate:
+            return "Certificat"
+        case .testimony:
+            return "Attestation"
+        case .warranty:
+            return "Garantie"
+        case .id:
+            return "Papiers d’identité"
+        case .form:
+            return "Formulaire"
+        case .quotation:
+            return "Devis"
+        case .mail:
+            return "Courrier"
+        case .employees:
+            return "Employés"
+        case .provider:
+            return "Prestataire"
+        case .banking:
+            return "Banque"
+        case .realEstate:
+            return "Immobilier"
+        case .taxation:
+            return "Déclarations fiscales"
+        case .legal:
+            return "Légal"
+        case .insurance:
+            return "Assurance"
+        case .transportation:
+            return "Transport"
+        case .phoneAndInternet:
+            return "Téléphone/Internet"
+        case .personal:
+            return "Personnel"
+        case .family:
+            return "Famille"
+        case .work:
+            return "Travail"
+        case .hobbies:
+            return "Loisirs"
+        }
+    }
 }
