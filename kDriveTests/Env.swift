@@ -36,6 +36,9 @@ struct Env {
     // Set the email to invite
     static let inviteMail = "email@example.com"
 
+    // Set the team to invite
+    static let inviteTeam = 0
+
     static let commonDocumentsId = 3
 
 }
