@@ -35,4 +35,5 @@ enum Action: String, Codable {
     case fileMove
     case fileRestore
     case fileTrash
+    case reload
 }

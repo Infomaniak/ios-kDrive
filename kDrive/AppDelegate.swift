@@ -81,6 +81,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         SKPaymentQueue.default().add(StoreObserver.shared)
 
         NotificationCenter.default.addObserver(self, selector: #selector(handleLocateUploadNotification), name: .locateUploadActionTapped, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
 
         return true
     }
@@ -94,10 +95,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // For iOS 10 display notification (sent via APNS)
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(
-            options: authOptions,
-            completionHandler: { _, _ in }
-        )
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
         application.registerForRemoteNotifications()
         Messaging.messaging().delegate = self
 
@@ -354,11 +352,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         if preload {
             DispatchQueue.main.async {
-                if isSwitching {
+                // if isSwitching {
                     rootViewController?.didSwitchCurrentAccount(currentAccount)
-                } else {
+                /* } else {
                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                }
+                } */
             }
             updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         } else {
@@ -377,11 +375,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")
             } else {
-                if isSwitching {
+                // if isSwitching {
                     rootViewController?.didSwitchCurrentAccount(currentAccount)
-                } else {
+                /* } else {
                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                }
+                } */
                 if let drive = switchedDrive,
                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
                    !drive.maintenance {
@@ -600,6 +598,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
            let folder = driveFileManager.getCachedFile(id: parentId) {
             present(file: folder, driveFileManager: driveFileManager)
         }
+    }
+
+    @objc func reloadDrive(_ notification: Notification) {
+        refreshCacheData(preload: false, isSwitching: false)
     }
 
     // MARK: - Account manager delegate

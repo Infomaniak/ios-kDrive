@@ -18,11 +18,7 @@
 
 import Foundation
 
-class ActionNotification: Codable {
-    let uid: String
-    let driveId: Int
-    let fileId: Int?
-    let parentId: Int?
-    let simpleAction: SimpleAction?
-    let action: Action
+public extension Notification.Name {
+    static let locateUploadActionTapped = Notification.Name(rawValue: "kDriveLocateUploadActionTapped")
+    static let reloadDrive = Notification.Name(rawValue: "kDriveReloadDrive")
 }

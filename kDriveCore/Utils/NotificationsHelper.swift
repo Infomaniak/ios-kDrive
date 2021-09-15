@@ -154,7 +154,3 @@ public enum NotificationsHelper {
         }
     }
 }
-
-public extension Notification.Name {
-    static let locateUploadActionTapped = Notification.Name(rawValue: "kDriveLocateUploadActionTapped")
-}

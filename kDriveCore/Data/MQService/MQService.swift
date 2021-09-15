@@ -89,6 +89,8 @@ public class MQService {
                                 for observer in self.actionProgressObservers.values {
                                     observer(message)
                                 }
+                            } else if let notification = try? self.decoder.decode(ActionNotification.self, from: data) {
+                                handleNotification(notification)
                             }
                         }
                     case .failure(let error):
@@ -122,6 +124,12 @@ public class MQService {
 
     private func topic(for token: IPSToken) -> String {
         return "drive/\(token.uuid)"
+    }
+
+    private func handleNotification(_ notification: ActionNotification) {
+        if notification.action == .reload {
+            NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["driveId": notification.driveId as Any])
+        }
     }
 
     private static func generateClientIdentifier() -> String {
