@@ -138,6 +138,10 @@ public class Drive: Object, Codable {
     @Persisted private var _users: DriveUsersCategories? = DriveUsersCategories()
     @Persisted private var _teams: DriveTeamsCategories? = DriveTeamsCategories()
     @Persisted public var maintenance = false
+    /// Is manager admin.
+    @Persisted public var accountAdmin = false
+    /// Was product purchased with in-app purchase.
+    @Persisted public var productIsInApp = false
     @Persisted public var userId: Int = 0 {
         didSet {
             let objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
@@ -190,6 +194,8 @@ public class Drive: Object, Codable {
         hasTechnicalRight = try values.decode(Bool.self, forKey: .hasTechnicalRight)
         canCreateTeamFolder = try values.decode(Bool.self, forKey: .canCreateTeamFolder)
         maintenance = try values.decode(Bool.self, forKey: .maintenance)
+        accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
+        productIsInApp = try values.decode(Bool.self, forKey: .productIsInApp)
     }
 
     override public init() {}
@@ -210,6 +216,8 @@ public class Drive: Object, Codable {
         case hasTechnicalRight = "has_technical_right"
         case canCreateTeamFolder = "can_create_team_folder"
         case maintenance
+        case accountAdmin = "account_admin"
+        case productIsInApp = "product_is_in_app"
     }
 
     public static func == (lhs: Drive, rhs: Drive) -> Bool {
