@@ -183,7 +183,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.rights?.createNewFile ?? true
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.rights?.createNewFile ?? false
         #endif
 
         // Refresh data
