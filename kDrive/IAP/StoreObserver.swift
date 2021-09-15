@@ -63,6 +63,25 @@ class StoreObserver: NSObject {
         SKPaymentQueue.default().restoreCompletedTransactions()
     }
 
+    /// Retrieve the receipt data from the app on the device.
+    func getReceipt() -> String? {
+        // Get the receipt if it's available
+        if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
+           FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
+            do {
+                let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
+
+                return receiptData.base64EncodedString()
+            } catch {
+                DDLogError("Couldn't read receipt data with error: \(error.localizedDescription)")
+            }
+        } else {
+            DDLogError("Cannot find App Store receipt")
+        }
+
+        return nil
+    }
+
     // MARK: - Private methods
 
     override private init() {}
@@ -108,24 +127,6 @@ class StoreObserver: NSObject {
         }
         // Finishes the restored transaction
         SKPaymentQueue.default().finishTransaction(transaction)
-    }
-
-    private func getReceipt() -> String? {
-        // Get the receipt if it's available
-        if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
-           FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
-            do {
-                let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
-
-                return receiptData.base64EncodedString()
-            } catch {
-                DDLogError("Couldn't read receipt data with error: \(error.localizedDescription)")
-            }
-        } else {
-            DDLogError("Cannot find App Store receipt")
-        }
-
-        return nil
     }
 }
 

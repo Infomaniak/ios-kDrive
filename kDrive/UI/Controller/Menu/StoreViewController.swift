@@ -51,7 +51,7 @@ class StoreViewController: UITableViewController {
     }
 
     private enum Row: CaseIterable {
-        case segmentedControl, offers, storage, nextButton
+        case segmentedControl, warning, offers, storage, nextButton
     }
 
     private var rows: [Row] = [.segmentedControl, .offers]
@@ -74,6 +74,7 @@ class StoreViewController: UITableViewController {
 
         // Set up table view
         tableView.register(cellView: StoreControlTableViewCell.self)
+        tableView.register(cellView: StoreWarningTableViewCell.self)
         tableView.register(cellView: StoreOffersTableViewCell.self)
         tableView.register(cellView: StoreStorageTableViewCell.self)
         tableView.register(cellView: StoreNextTableViewCell.self)
@@ -88,6 +89,20 @@ class StoreViewController: UITableViewController {
             let closeButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
             closeButton.accessibilityLabel = KDriveStrings.Localizable.buttonClose
             navigationItem.leftBarButtonItem = closeButton
+        }
+
+        if driveFileManager != nil {
+            if !driveFileManager.drive.accountAdmin {
+                showBlockingMessage(existingIAP: false)
+                return
+            } else if !driveFileManager.drive.productIsInApp && StoreObserver.shared.getReceipt() != nil {
+                // If we already have a receipt but the product isn't an IAP, prevent user to make a new one
+                showBlockingMessage(existingIAP: true)
+                return
+            } else if !driveFileManager.drive.productIsInApp && driveFileManager.drive.pack != .free {
+                // Show a warning message to inform user about billing change
+                rows.insert(.warning, at: 1)
+            }
         }
 
         // Fetch product information
@@ -133,6 +148,20 @@ class StoreViewController: UITableViewController {
         }
     }
 
+    private func showBlockingMessage(existingIAP: Bool) {
+        let title = existingIAP ? KDriveStrings.Localizable.storeExistingIAPTitle : KDriveStrings.Localizable.storeAccessDeniedTitle
+        let message = existingIAP ? KDriveStrings.Localizable.storeExistingIAPDescription : KDriveStrings.Localizable.storeAccessDeniedDescription
+        let alert = AlertTextViewController(title: title, message: message, action: KDriveStrings.Localizable.buttonClose, hasCancelButton: false) {
+            let viewControllersCount = self.navigationController?.viewControllers.count ?? 0
+            if self.presentingViewController != nil && viewControllersCount < 2 {
+                self.dismiss(animated: true)
+            } else {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+        present(alert, animated: true)
+    }
+
     private func showSuccessView() {
         let successViewController = StoreSuccessViewController.instantiate()
         successViewController.modalPresentationStyle = .fullScreen
@@ -155,6 +184,9 @@ class StoreViewController: UITableViewController {
                     self?.selectedPeriod = period
                 }
             }
+            return cell
+        case .warning:
+            let cell = tableView.dequeueReusableCell(type: StoreWarningTableViewCell.self, for: indexPath)
             return cell
         case .offers:
             let cell = tableView.dequeueReusableCell(type: StoreOffersTableViewCell.self, for: indexPath)
