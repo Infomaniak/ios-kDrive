@@ -90,8 +90,9 @@ class MigrationViewController: UIViewController {
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabBarViewController, animated: true)
             if migrationResult?.photoSyncEnabled == true,
                 let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
-                let floatingPanelViewController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController)?.actionHandler = { _ in
+                let driveFloatingPanelController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController
+                floatingPanelViewController?.actionHandler = { _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     photoSyncSettingsVC.driveFileManager = currentDriveFileManager
                     guard let currentVC = mainTabBarViewController.selectedViewController as? UINavigationController else {
@@ -101,7 +102,7 @@ class MigrationViewController: UIViewController {
                     currentVC.setInfomaniakAppearanceNavigationBar()
                     currentVC.pushViewController(photoSyncSettingsVC, animated: true)
                 }
-                mainTabBarViewController.present(floatingPanelViewController, animated: true)
+                mainTabBarViewController.present(driveFloatingPanelController, animated: true)
             }
             MigrationHelper.cleanup()
         } else {

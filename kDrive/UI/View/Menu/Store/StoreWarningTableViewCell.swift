@@ -16,11 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 
 class StoreWarningTableViewCell: UITableViewCell {
+    @IBOutlet weak var view: UIView!
+
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        view.cornerRadius = UIConstants.cornerRadius
     }
 }

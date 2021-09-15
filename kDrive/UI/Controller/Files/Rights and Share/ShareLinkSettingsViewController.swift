@@ -250,14 +250,16 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         cell.configureWith(option: option, optionValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate)
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
-                let floatingPanelViewController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? SecureLinkFloatingPanelViewController)?.actionHandler = { _ in
-                    floatingPanelViewController.dismiss(animated: true) {
-                        guard let self = self else { return }
+                guard let self = self else { return }
+                let driveFloatingPanelController = SecureLinkFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? SecureLinkFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = self.driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.actionHandler = { _ in
+                    driveFloatingPanelController.dismiss(animated: true) {
                         StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
                     }
                 }
-                self?.present(floatingPanelViewController, animated: true)
+                self.present(driveFloatingPanelController, animated: true)
             }
         }
 
