@@ -31,21 +31,23 @@ struct ReceiptInfo: Encodable {
 class StoreRequest {
     static let shared = StoreRequest()
 
-    let url = "https://api.devd257.dev.infomaniak.ch/invoicing/inapp/apple/link_receipt"
-
-    private lazy var parameterEncoder: JSONParameterEncoder = {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        return JSONParameterEncoder(encoder: encoder)
-    }()
+    let url = "https://api.infomaniak.com/invoicing/inapp/apple/link_receipt"
 
     private init() {}
 
     func sendReceipt(body: ReceiptInfo) {
-        AF.request(url, method: .post, parameters: body, encoder: parameterEncoder)
+        AF.request(url, method: .post, parameters: body, encoder: JSONParameterEncoder.convertToSnakeCase)
             .validate()
             .response { response in
                 debugPrint(response)
             }
+    }
+}
+
+extension JSONParameterEncoder {
+    static var convertToSnakeCase: JSONParameterEncoder {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        return JSONParameterEncoder(encoder: encoder)
     }
 }
