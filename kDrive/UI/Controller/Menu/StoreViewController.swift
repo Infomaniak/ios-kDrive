@@ -91,6 +91,10 @@ class StoreViewController: UITableViewController {
             navigationItem.leftBarButtonItem = closeButton
         }
 
+        if #available(iOS 14.0, *) {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonRedeemPromoCode, style: .plain, target: self, action: #selector(redeemButtonPressed))
+        }
+
         if driveFileManager != nil {
             if !driveFileManager.drive.accountAdmin {
                 showBlockingMessage(existingIAP: false)
@@ -117,6 +121,11 @@ class StoreViewController: UITableViewController {
 
     @objc func closeButtonPressed() {
         dismiss(animated: true)
+    }
+
+    @available(iOS 14.0, *)
+    @objc func redeemButtonPressed() {
+        SKPaymentQueue.default().presentCodeRedemptionSheet()
     }
 
     private func fetchProductInformation() {
