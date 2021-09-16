@@ -61,7 +61,7 @@ class StoreViewController: UITableViewController {
     private var items = Item.allItems
     private lazy var selectedPack = driveFileManager.drive.pack
     private var selectedStorage = 1
-    private var selectedPeriod = PeriodTab.monthly {
+    private var selectedPeriod = PeriodTab.yearly {
         didSet { updateOffers() }
     }
 
@@ -178,7 +178,8 @@ class StoreViewController: UITableViewController {
         switch rows[indexPath.row] {
         case .segmentedControl:
             let cell = tableView.dequeueReusableCell(type: StoreControlTableViewCell.self, for: indexPath)
-            cell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title))
+            let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
+            cell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
             cell.onChange = { [weak self] index in
                 if let period = PeriodTab(rawValue: index) {
                     self?.selectedPeriod = period
@@ -250,7 +251,9 @@ class StoreViewController: UITableViewController {
 extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate {
     func selectButtonTapped(item: StoreViewController.Item) {
         guard selectedPack != item.pack else { return }
-        rows = [.segmentedControl, .offers, .nextButton]
+        if !rows.contains(.nextButton) {
+            rows.append(.nextButton)
+        }
         selectedPack = item.pack
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: rows.count - 1, section: 0), at: .bottom, animated: true)

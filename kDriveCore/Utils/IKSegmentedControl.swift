@@ -29,7 +29,7 @@ import UIKit
         setUpControl()
     }
 
-    public override func prepareForInterfaceBuilder() {
+    override public func prepareForInterfaceBuilder() {
         super.prepareForInterfaceBuilder()
         setUpControl()
     }
@@ -48,11 +48,11 @@ import UIKit
         }
     }
 
-    public func setSegments(_ segments: [String]) {
+    public func setSegments(_ segments: [String], selectedSegmentIndex: Int = 0) {
         removeAllSegments()
-        for i in 0..<segments.count {
+        for i in 0 ..< segments.count {
             insertSegment(withTitle: segments[i], at: i, animated: false)
         }
-        selectedSegmentIndex = 0
+        self.selectedSegmentIndex = selectedSegmentIndex
     }
 }
