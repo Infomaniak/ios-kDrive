@@ -20,7 +20,10 @@ import kDriveCore
 import StoreKit
 import UIKit
 
-class StoreViewController: UITableViewController {
+class StoreViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var helpButton: IKRoundButton!
+
     struct Item {
         let pack: DrivePack
         let identifier: String
@@ -79,6 +82,7 @@ class StoreViewController: UITableViewController {
         tableView.register(cellView: StoreOffersTableViewCell.self)
         tableView.register(cellView: StoreStorageTableViewCell.self)
         tableView.register(cellView: StoreNextTableViewCell.self)
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 92, right: 0)
 
         // Set up delegates
         StoreManager.shared.delegate = self
@@ -123,6 +127,11 @@ class StoreViewController: UITableViewController {
 
     @objc func closeButtonPressed() {
         dismiss(animated: true)
+    }
+
+    @IBAction func helpButtonPressed(_ sender: Any) {
+        guard let url = URL(string: "https://faq.infomaniak.com/2631") else { return }
+        UIApplication.shared.open(url)
     }
 
     @available(iOS 14.0, *)
@@ -181,11 +190,11 @@ class StoreViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return driveFileManager == nil ? 1 : rows.count
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch rows[indexPath.row] {
         case .segmentedControl:
             let cell = tableView.dequeueReusableCell(type: StoreControlTableViewCell.self, for: indexPath)
