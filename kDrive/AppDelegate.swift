@@ -355,10 +355,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         if preload {
             DispatchQueue.main.async {
                 // if isSwitching {
-                    rootViewController?.didSwitchCurrentAccount(currentAccount)
+                rootViewController?.didSwitchCurrentAccount(currentAccount)
                 /* } else {
-                    rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                } */
+                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
+                 } */
             }
             updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         } else {
@@ -378,10 +378,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 DDLogError("Error while updating user account: \(error)")
             } else {
                 // if isSwitching {
-                    rootViewController?.didSwitchCurrentAccount(currentAccount)
+                rootViewController?.didSwitchCurrentAccount(currentAccount)
                 /* } else {
-                    rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                } */
+                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
+                 } */
                 if let drive = switchedDrive,
                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
                    !drive.maintenance {

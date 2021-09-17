@@ -128,7 +128,7 @@ public class MQService {
 
     private func handleNotification(_ notification: ActionNotification) {
         if notification.action == .reload {
-            NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["driveId": notification.driveId as Any])
+            NotificationCenter.default.post(name: .reloadDrive, object: nil, userInfo: ["driveId": notification.driveId as Any])
         }
     }
 
