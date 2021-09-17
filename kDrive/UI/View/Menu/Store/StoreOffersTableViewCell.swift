@@ -23,6 +23,7 @@ import UIKit
 class StoreOffersTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
 
+    var purchaseEnabled = true
     var selectedPack: DrivePack!
     var items = [StoreViewController.Item]()
 
@@ -48,7 +49,7 @@ extension StoreOffersTableViewCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
         let item = items[indexPath.row]
-        cell.configure(with: item, currentPack: selectedPack)
+        cell.configure(with: item, currentPack: selectedPack, enabled: purchaseEnabled)
         cell.delegate = cellDelegate
         return cell
     }

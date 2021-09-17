@@ -58,6 +58,7 @@ class StoreViewController: UITableViewController {
 
     var driveFileManager: DriveFileManager!
 
+    private var purchaseEnabled = true
     private var items = Item.allItems
     private lazy var selectedPack = driveFileManager.drive.pack
     private var selectedStorage = 1
@@ -98,14 +99,15 @@ class StoreViewController: UITableViewController {
         if driveFileManager != nil {
             if !driveFileManager.drive.accountAdmin {
                 showBlockingMessage(existingIAP: false)
-                return
+                purchaseEnabled = false
             } else if !driveFileManager.drive.productIsInApp && StoreObserver.shared.getReceipt() != nil {
                 // If we already have a receipt but the product isn't an IAP, prevent user to make a new one
                 showBlockingMessage(existingIAP: true)
-                return
+                purchaseEnabled = false
             } else if !driveFileManager.drive.productIsInApp && driveFileManager.drive.pack != .free {
-                // Show a warning message to inform user about billing change
+                // Show a warning message to inform that they have a different subscription method
                 rows.insert(.warning, at: 1)
+                purchaseEnabled = false
             }
         }
 
@@ -200,6 +202,7 @@ class StoreViewController: UITableViewController {
             return cell
         case .offers:
             let cell = tableView.dequeueReusableCell(type: StoreOffersTableViewCell.self, for: indexPath)
+            cell.purchaseEnabled = purchaseEnabled
             cell.selectedPack = selectedPack
             cell.items = displayedItems
             cell.cellDelegate = self

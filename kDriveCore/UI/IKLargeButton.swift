@@ -44,13 +44,15 @@ import UIKit
         }
     }
 
+    public var disabledBackgroundColor = KDriveCoreAsset.buttonDisabledBackgroundColor.color
+
     public struct Style: RawRepresentable {
         var titleFont: UIFont
         var titleColor: UIColor
         var backgroundColor: UIColor
 
-        static let primaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: .white, backgroundColor: KDriveCoreAsset.infomaniakColor.color, rawValue: "primaryButton")
-        static let secondaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveCoreAsset.titleColor.color, backgroundColor: KDriveCoreAsset.backgroundColor.color, rawValue: "secondaryButton")
+        public static let primaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: .white, backgroundColor: KDriveCoreAsset.infomaniakColor.color, rawValue: "primaryButton")
+        public static let secondaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveCoreAsset.titleColor.color, backgroundColor: KDriveCoreAsset.backgroundColor.color, rawValue: "secondaryButton")
 
         static let allValues = [primaryButton, secondaryButton]
 
@@ -104,8 +106,8 @@ import UIKit
     }
 
     func setBackgroundColor() {
-        tintColor = isEnabled ? style.backgroundColor : KDriveCoreAsset.buttonDisabledBackgroundColor.color
-        backgroundColor = isEnabled ? style.backgroundColor : KDriveCoreAsset.buttonDisabledBackgroundColor.color
+        tintColor = isEnabled ? style.backgroundColor : disabledBackgroundColor
+        backgroundColor = isEnabled ? style.backgroundColor : disabledBackgroundColor
     }
 
     func setElevation() {

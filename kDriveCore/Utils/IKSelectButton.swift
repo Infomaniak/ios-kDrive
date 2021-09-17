@@ -26,12 +26,17 @@ class IKSelectButton: IKLargeButton {
     }
 
     override func setUpButton() {
+        disabledBackgroundColor = KDriveCoreAsset.borderColor.color
+
         super.setUpButton()
 
         setTitle("", for: .selected)
+        setTitle("", for: [.selected, .disabled])
         setImage(KDriveCoreAsset.bigCheck.image, for: .selected)
+        setImage(KDriveCoreAsset.bigCheck.image, for: [.selected, .disabled])
         setTitleColor(style.backgroundColor, for: .normal)
         setTitleColor(style.titleColor, for: .selected)
+        setTitleColor(style.titleColor, for: [.selected, .disabled])
     }
 
     override func setBackgroundColor() {
@@ -40,7 +45,7 @@ class IKSelectButton: IKLargeButton {
             borderWidth = 0
         } else {
             backgroundColor = nil
-            borderColor = isEnabled ? style.backgroundColor : KDriveCoreAsset.buttonDisabledBackgroundColor.color
+            borderColor = isEnabled ? style.backgroundColor : disabledBackgroundColor
             borderWidth = 1
         }
     }

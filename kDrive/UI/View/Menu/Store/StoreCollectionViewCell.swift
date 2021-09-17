@@ -45,7 +45,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
         tableView.register(cellView: StoreFeatureTableViewCell.self)
     }
 
-    func configure(with item: StoreViewController.Item, currentPack: DrivePack) {
+    func configure(with item: StoreViewController.Item, currentPack: DrivePack, enabled: Bool) {
         self.item = item
 
         switch item.pack {
@@ -80,7 +80,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
         }
 
         selectButton.isSelected = currentPack == item.pack
-        selectButton.isEnabled = item.product != nil || currentPack == item.pack
+        selectButton.isEnabled = item.product != nil && enabled
 
         tableView.reloadData()
     }
