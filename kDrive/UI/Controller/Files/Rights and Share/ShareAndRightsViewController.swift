@@ -130,8 +130,11 @@ class ShareAndRightsViewController: UIViewController {
         _ = navigationController?.popViewController(animated: true)
     }
 
-    class func instantiate() -> ShareAndRightsViewController {
-        return Storyboard.files.instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
+    class func instantiate(driveFileManager: DriveFileManager, file: File) -> ShareAndRightsViewController {
+        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ShareAndRightsViewController") as! ShareAndRightsViewController
+        viewController.driveFileManager = driveFileManager
+        viewController.file = file
+        return viewController
     }
 
     // MARK: - State restoration
