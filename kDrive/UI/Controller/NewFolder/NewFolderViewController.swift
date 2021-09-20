@@ -29,7 +29,7 @@ enum FolderType {
 class NewFolderViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    var folderType: FolderType!
+    var folderType = FolderType.folder
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
     var newFolderName: String = ""
@@ -57,6 +57,10 @@ class NewFolderViewController: UIViewController {
             }
             footer.footerButton.isEnabled = enableButton
         }
+    }
+
+    private var permissionSelection: Bool {
+        return currentDirectory?.rights?.share == true
     }
 
     private enum Section: CaseIterable {
@@ -118,10 +122,13 @@ class NewFolderViewController: UIViewController {
     private func setupTableViewRows() {
         switch folderType {
         case .folder:
-            sections = [.header, .permissions]
-            permissionsRows = [.meOnly]
-            if let sharedFile = sharedFile {
-                permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+            sections = [.header]
+            if permissionSelection {
+                sections.append(.permissions)
+                permissionsRows = [.meOnly]
+                if let sharedFile = sharedFile {
+                    permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+                }
             }
         case .commonFolder:
             sections = [.header, .permissions, .location]
@@ -132,8 +139,6 @@ class NewFolderViewController: UIViewController {
             if let sharedFile = sharedFile {
                 permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
             }
-        case .none:
-            break
         }
         tableView.reloadData()
     }
@@ -193,7 +198,7 @@ class NewFolderViewController: UIViewController {
                 }
             }
         }
-        enableButton = activateButton && tableView.indexPathForSelectedRow != nil
+        enableButton = activateButton && (tableView.indexPathForSelectedRow != nil || !permissionSelection)
     }
 }
 
@@ -373,11 +378,15 @@ extension NewFolderViewController: FooterButtonDelegate {
         footer.footerButton.layoutIfNeeded()
         switch folderType {
         case .folder:
-            guard let indexPath = tableView.indexPathForSelectedRow else {
-                return
+            let onlyForMe: Bool
+            let toShare: Bool
+            if let indexPath = tableView.indexPathForSelectedRow {
+                onlyForMe = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .meOnly
+                toShare = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .someUser
+            } else {
+                onlyForMe = false
+                toShare = false
             }
-            let onlyForMe = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .meOnly
-            let toShare = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .someUser
             driveFileManager.createDirectory(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe) { file, error in
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
@@ -408,7 +417,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                     UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
                 }
             }
-        default:
+        case .dropbox:
             let onlyForMe = tableView.indexPathForSelectedRow?.row == 0
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
