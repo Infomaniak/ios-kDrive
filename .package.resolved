@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/SCENEE/FloatingPanel",
         "state": {
           "branch": null,
-          "revision": "b8fcb50874f50bb511173700f87b09344c568c6a",
-          "version": "2.4.0"
+          "revision": "3a0831a3346c99952b064303037e3a2d11594df7",
+          "version": "2.4.1"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
-          "revision": "e872406e744f46ccbd0487e93e9330a7b4afe3b2",
-          "version": "1.0.17"
+          "revision": "1e7570470dd22df678c504cbd261ffdde10707d1",
+          "version": "1.1.0"
         }
       },
       {
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "d06df9adf50ed8cde5786d935836a5f445f780ba",
-          "version": "6.3.1"
+          "revision": "1897586f01041d6ddc025714be156aee2d79509d",
+          "version": "7.0.0-beta.4"
         }
       },
       {
@@ -231,8 +231,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "c619512ed75937ed3425df9343dc592f39bd8a43",
-          "version": "10.15.0"
+          "revision": "4cbe20f31b1bcc20190c724632143b4f9b8ac3e3",
+          "version": "10.15.1"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
-          "revision": "97bb9a45bc1ea8390528b5fd1ce135c0ab7f174e",
-          "version": "7.2.9"
+          "revision": "4abaa663a7916902ae9196a8bf3c4c047caacc17",
+          "version": "7.3.0"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "f2705f9655ede35399b12040e892cf653126de98",
-          "version": "2.32.2"
+          "revision": "fb48bdd8279799f655da5f8b4e0a21430eca6012",
+          "version": "2.32.3"
         }
       },
       {
@@ -294,8 +294,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "2e74773972bd6254c41ceeda827f229bccbf1c0f",
-          "version": "2.15.0"
+          "revision": "77a3bf17884d2c87ba400f4d93b9a6f27b078651",
+          "version": "2.15.1"
         }
       },
       {
@@ -303,8 +303,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-transport-services.git",
         "state": {
           "branch": null,
-          "revision": "9571a61d236c5253b6a255a2d13fac536a1e2625",
-          "version": "1.11.2"
+          "revision": "e7f5278a26442dc46783ba7e063643d524e414a0",
+          "version": "1.11.3"
         }
       },
       {

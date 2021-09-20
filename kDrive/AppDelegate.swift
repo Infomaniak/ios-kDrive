@@ -244,11 +244,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // Set global tint color
         window?.tintColor = KDriveAsset.infomaniakColor.color
         UITabBar.appearance().unselectedItemTintColor = KDriveAsset.iconColor.color
+        // Migration from old UserDefaults
+        if UserDefaults.shared.isFirstLaunch {
+            UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
+        }
 
         if MigrationHelper.canMigrate() && accountManager.accounts.isEmpty {
             window?.rootViewController = MigrationViewController.instantiate()
             window?.makeKeyAndVisible()
-        } else if UserDefaults.isFirstLaunch() || accountManager.accounts.isEmpty {
+        } else if UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty {
             if !(window?.rootViewController?.isKind(of: OnboardingViewController.self) ?? false) {
                 KeychainHelper.deleteAllTokens()
                 window?.rootViewController = OnboardingViewController.instantiate()
@@ -602,7 +606,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        return !(UserDefaults.isFirstLaunch() || accountManager.accounts.isEmpty)
+        return !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
     }
 }
 

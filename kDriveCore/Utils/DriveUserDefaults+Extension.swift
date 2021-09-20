@@ -18,40 +18,36 @@
 
 import Foundation
 
+extension UserDefaults.Keys {
+    static let currentDriveId = UserDefaults.Keys(rawValue: "currentDriveId")
+    static let fileSortMode = UserDefaults.Keys(rawValue: "fileSortMode")
+    static let filesListStyle = UserDefaults.Keys(rawValue: "filesListStyle")
+    static let currentDriveUserId = UserDefaults.Keys(rawValue: "currentDriveUserId")
+    static let wifiOnly = UserDefaults.Keys(rawValue: "wifiOnly")
+    static let recentSearches = UserDefaults.Keys(rawValue: "recentSearches")
+    static let numberOfConnection = UserDefaults.Keys(rawValue: "numberOfConnection")
+    static let appLock = UserDefaults.Keys(rawValue: "appLock")
+    static let updateLater = UserDefaults.Keys(rawValue: "updateLater")
+    static let migrated = UserDefaults.Keys(rawValue: "migrated")
+    static let migrationPhotoSyncEnabled = UserDefaults.Keys(rawValue: "migrationPhotoSyncEnabled")
+    static let notificationsEnabled = UserDefaults.Keys(rawValue: "notificationsEnabled")
+    static let importNotificationsEnabled = UserDefaults.Keys(rawValue: "importNotificationsEnabled")
+    static let sharingNotificationsEnabled = UserDefaults.Keys(rawValue: "sharingNotificationsEnabled")
+    static let newCommentNotificationsEnabled = UserDefaults.Keys(rawValue: "newCommentNotificationsEnabled")
+    static let generalNotificationEnabled = UserDefaults.Keys(rawValue: "generalNotificationEnabled")
+    static let didDemoSwipe = UserDefaults.Keys(rawValue: "didDemoSwipe")
+    static let lastSelectedUser = UserDefaults.Keys(rawValue: "lastSelectedUser")
+    static let lastSelectedDrive = UserDefaults.Keys(rawValue: "lastSelectedDrive")
+    static let lastSelectedDirectory = UserDefaults.Keys(rawValue: "lastSelectedDirectory")
+    static let theme = UserDefaults.Keys(rawValue: "theme")
+    static let photoSortMode = UserDefaults.Keys(rawValue: "photoSortMode")
+    static let betaInviteDisplayed = UserDefaults.Keys(rawValue: "betaInviteDisplayed")
+    static let lastSyncDateOfflineFiles = UserDefaults.Keys(rawValue: "lastSyncDateOfflineFiles")
+    static let fileProviderExtension = UserDefaults.Keys(rawValue: "fileProviderExtension")
+}
+
 public extension UserDefaults {
     static let shared = UserDefaults(suiteName: AccountManager.appGroup)!
-
-    private enum Keys: String {
-        case currentDriveId
-        case fileSortMode
-        case filesListStyle
-        case currentDriveUserId
-        case wifiOnly
-        case recentSearches
-        case numberOfConnection
-        case appLock
-        case updateLater
-        case migrated
-        case migrationPhotoSyncEnabled
-        case notificationsEnabled
-        case importNotificationsEnabled
-        case sharingNotificationsEnabled
-        case newCommentNotificationsEnabled
-        case generalNotificationEnabled
-        case didDemoSwipe
-        case lastSelectedUser
-        case lastSelectedDrive
-        case lastSelectedDirectory
-        case theme
-        case photoSortMode
-        case betaInviteDisplayed
-        case lastSyncDateOfflineFiles
-        case fileProviderExtension
-    }
-
-    private func key(_ key: Keys) -> String {
-        return key.rawValue
-    }
 
     var currentDriveId: Int {
         get {

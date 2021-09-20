@@ -39,11 +39,11 @@ let debugActionExtensionSettings = baseSettings.merging(["SWIFT_ACTIVE_COMPILATI
 let project = Project(name: "kDrive",
     packages: [
             .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.2.2")),
-            .package(url: "https://github.com/Infomaniak/ios-core.git", .upToNextMajor(from: "1.0.1")),
+            .package(url: "https://github.com/Infomaniak/ios-core.git", .upToNextMajor(from: "1.1.0")),
             .package(url: "https://github.com/Infomaniak/ios-login.git", .upToNextMajor(from: "1.4.0")),
             .package(url: "https://github.com/realm/realm-cocoa", .upToNextMajor(from: "10.0.0")),
             .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
-            .package(url: "https://github.com/onevcat/Kingfisher", .upToNextMajor(from: "6.3.1")),
+            .package(url: "https://github.com/onevcat/Kingfisher", .upToNextMajor(from: "7.0.0-beta.4")),
             .package(url: "https://github.com/flowbe/MaterialOutlinedTextField", .upToNextMajor(from: "0.1.0")),
             .package(url: "https://github.com/ProxymanApp/atlantis", .upToNextMajor(from: "1.3.0")),
             .package(url: "https://github.com/gmarm/BetterSegmentedControl.git", .upToNextMajor(from: "2.0.0")),

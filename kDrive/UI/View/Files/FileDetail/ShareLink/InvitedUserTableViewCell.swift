@@ -101,7 +101,7 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
             if let user = shareable as? DriveUser {
                 user.getAvatar { image in
                     cell.avatarImage.image = image
-                        .resizeImage(size: CGSize(width: 35, height: 35))
+                        .resize(size: CGSize(width: 35, height: 35))
                         .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
                         .withRenderingMode(.alwaysOriginal)
                 }

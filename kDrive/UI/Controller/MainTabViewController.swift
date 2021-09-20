@@ -120,12 +120,12 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         let iconSize = 28.0
 
         tabBar.items![4].selectedImage = image
-            .resizeImage(size: CGSize(width: iconSize + 2, height: iconSize + 2))
+            .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
             .maskImageWithRoundedRect(cornerRadius: CGFloat((iconSize + 2) / 2), borderWidth: 1, borderColor: KDriveAsset.infomaniakColor.color)
             .withRenderingMode(.alwaysOriginal)
 
         tabBar.items![4].image = image
-            .resizeImage(size: CGSize(width: iconSize, height: iconSize))
+            .resize(size: CGSize(width: iconSize, height: iconSize))
             .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
             .withRenderingMode(.alwaysOriginal)
     }

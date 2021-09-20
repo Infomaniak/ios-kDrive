@@ -63,7 +63,7 @@ class FileDetailCommentTableViewCell: UITableViewCell {
         self.index = index
         comment.user.getAvatar { image in
             self.userAvatar.image = image
-                .resizeImage(size: CGSize(width: 35, height: 35))
+                .resize(size: CGSize(width: 35, height: 35))
                 .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
                 .withRenderingMode(.alwaysOriginal)
         }

@@ -63,7 +63,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         rightsLabel.textColor = blocked ? KDriveAsset.secondaryTextColor.color : KDriveAsset.titleColor.color
         user.getAvatar { image in
             self.avatarImage.image = image
-                .resizeImage(size: CGSize(width: 35, height: 35))
+                .resize(size: CGSize(width: 35, height: 35))
                 .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
                 .withRenderingMode(.alwaysOriginal)
         }
@@ -81,7 +81,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
             KingfisherManager.shared.retrieveImage(with: url) { result in
                 if let image = try? result.get().image {
                     self.avatarImage.image = image
-                        .resizeImage(size: CGSize(width: 35, height: 35))
+                        .resize(size: CGSize(width: 35, height: 35))
                         .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
                         .withRenderingMode(.alwaysOriginal)
                 }
