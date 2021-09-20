@@ -361,9 +361,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         case .edit:
             OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
         case .favorite:
-            driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { error in
+            driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { [wasFavorited = file.isFavorite] error in
                 if error == nil {
-                    if !self.file.isFavorite {
+                    if !wasFavorited {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
                     }
                     self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
