@@ -735,9 +735,7 @@ extension FileDetailViewController: FileDetailDelegate {
 
 extension FileDetailViewController: FileUsersDelegate {
     func shareButtonTapped() {
-        let shareVC = ShareAndRightsViewController.instantiate()
-        shareVC.driveFileManager = driveFileManager
-        shareVC.file = file
+        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
         navigationController?.pushViewController(shareVC, animated: true)
     }
 }

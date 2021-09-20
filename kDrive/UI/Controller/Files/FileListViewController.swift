@@ -678,8 +678,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             let file = sortedFiles[indexPath.row]
             switch action {
             case .share:
-                let shareVC = ShareAndRightsViewController.instantiate()
-                shareVC.file = file
+                let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
                 navigationController?.pushViewController(shareVC, animated: true)
             case .delete:
                 deleteFiles([file])

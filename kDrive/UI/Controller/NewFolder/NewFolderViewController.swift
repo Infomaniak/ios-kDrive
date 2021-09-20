@@ -382,9 +382,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
                     if toShare {
-                        let shareVC = ShareAndRightsViewController.instantiate()
-                        shareVC.driveFileManager = self.driveFileManager
-                        shareVC.file = createdFile
+                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: createdFile)
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
@@ -400,9 +398,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
                     if !forAllUser {
-                        let shareVC = ShareAndRightsViewController.instantiate()
-                        shareVC.driveFileManager = self.driveFileManager
-                        shareVC.file = createdFile
+                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: createdFile)
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
@@ -421,9 +417,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
                     if !onlyForMe {
-                        let shareVC = ShareAndRightsViewController.instantiate()
-                        shareVC.driveFileManager = self.driveFileManager
-                        shareVC.file = createdFile
+                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: createdFile)
                         self.folderCreated = true
                         self.dropBoxUrl = dropBox?.url
                         self.folderName = createdFile.name
