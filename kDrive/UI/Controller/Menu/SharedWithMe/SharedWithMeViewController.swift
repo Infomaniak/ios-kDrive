@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class SharedWithMeViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "SharedWithMeViewController" }
 
@@ -60,12 +59,4 @@ class SharedWithMeViewController: FileListViewController {
             super.getNewChanges()
         }
     }
-
-    override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
-        super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
-        // Hide delete and move buttons in multiple selection
-        headerView.deleteButton.isHidden = true
-        headerView.moveButton.isHidden = true
-    }
-
 }

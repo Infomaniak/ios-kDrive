@@ -58,25 +58,19 @@ class MultipleSelectionViewController: UIViewController {
     }
 
     func selectAllChildren() {
-        let wasDisabled = selectedItems.isEmpty
         selectedItems = Set(getAllItems())
         for index in 0 ..< selectedItems.count {
             let indexPath = IndexPath(row: index, section: 0)
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredVertically)
         }
-        if wasDisabled {
-            setSelectionButtonsEnabled(true)
-        }
+        updateSelectionButtons()
         updateSelectedCount()
     }
 
     func selectChild(at indexPath: IndexPath) {
-        let wasDisabled = selectedItems.isEmpty
         if let item = getItem(at: indexPath) {
             selectedItems.insert(item)
-            if wasDisabled {
-                setSelectionButtonsEnabled(true)
-            }
+            updateSelectionButtons()
         }
         updateSelectedCount()
     }
@@ -88,7 +82,7 @@ class MultipleSelectionViewController: UIViewController {
             }
         }
         selectedItems.removeAll()
-        setSelectionButtonsEnabled(false)
+        updateSelectionButtons()
     }
 
     func deselectChild(at indexPath: IndexPath) {
@@ -96,9 +90,7 @@ class MultipleSelectionViewController: UIViewController {
            let index = selectedItems.firstIndex(of: selectedItem) {
             selectedItems.remove(at: index)
         }
-        if selectedItems.isEmpty {
-            setSelectionButtonsEnabled(false)
-        }
+        updateSelectionButtons()
         updateSelectedCount()
     }
 
@@ -111,7 +103,14 @@ class MultipleSelectionViewController: UIViewController {
         selectedItems = Set(newChildren.filter { selectedFileId.contains($0.id) })
     }
 
-    func setSelectionButtonsEnabled(_ enabled: Bool) {}
+    final func updateSelectionButtons() {
+        let notEmpty = !selectedItems.isEmpty
+        let canMove = selectedItems.allSatisfy { $0.rights?.move ?? false }
+        let canDelete = selectedItems.allSatisfy { $0.rights?.delete ?? false }
+        setSelectionButtonsEnabled(moveEnabled: notEmpty && canMove, deleteEnabled: notEmpty && canDelete, moreEnabled: notEmpty)
+    }
+
+    func setSelectionButtonsEnabled(moveEnabled: Bool, deleteEnabled: Bool, moreEnabled: Bool) {}
 
     func updateSelectedCount() {}
 

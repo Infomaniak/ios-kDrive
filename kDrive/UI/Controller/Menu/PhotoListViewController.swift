@@ -313,10 +313,10 @@ class PhotoListViewController: MultipleSelectionViewController {
         }
     }
 
-    override func setSelectionButtonsEnabled(_ enabled: Bool) {
-        moveButton.isEnabled = enabled
-        deleteButton.isEnabled = enabled
-        moreButton.isEnabled = enabled
+    override func setSelectionButtonsEnabled(moveEnabled: Bool, deleteEnabled: Bool, moreEnabled: Bool) {
+        moveButton.isEnabled = moveEnabled
+        deleteButton.isEnabled = deleteEnabled
+        moreButton.isEnabled = moreEnabled
     }
 
     override func updateSelectedCount() {

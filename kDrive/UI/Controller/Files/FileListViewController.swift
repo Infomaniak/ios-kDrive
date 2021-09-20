@@ -533,7 +533,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
             navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
-            updateSelectButton()
+            updateSelectAllButton()
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
             generator.impactOccurred()
@@ -572,10 +572,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    override final func setSelectionButtonsEnabled(_ enabled: Bool) {
-        headerView?.selectView.moveButton.isEnabled = enabled
-        headerView?.selectView.deleteButton.isEnabled = enabled
-        headerView?.selectView.moreButton.isEnabled = enabled
+    override final func setSelectionButtonsEnabled(moveEnabled: Bool, deleteEnabled: Bool, moreEnabled: Bool) {
+        headerView?.selectView.moveButton.isEnabled = moveEnabled
+        headerView?.selectView.deleteButton.isEnabled = deleteEnabled
+        headerView?.selectView.moreButton.isEnabled = moreEnabled
     }
 
     override final func updateSelectedCount() {
@@ -585,7 +585,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         } else {
             headerView?.selectView.updateTitle(selectedItems.count)
         }
-        updateSelectButton()
+        updateSelectAllButton()
     }
 
     // MARK: - Collection view data source
@@ -754,24 +754,24 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Bulk actions
 
     @objc override func selectAllChildren() {
-        setSelectionButtonsEnabled(false)
+        updateSelectionButtons()
         selectAllMode = true
         navigationItem.rightBarButtonItem = loadingBarButtonItem
         driveFileManager.apiFetcher.getFileCount(driveId: driveFileManager.drive.id, fileId: currentDirectory.id) { [self] response, _ in
-            setSelectionButtonsEnabled(true)
+            updateSelectionButtons()
             if let fileCount = response?.data {
                 currentDirectoryCount = fileCount
                 setSelectedCells()
                 updateSelectedCount()
             } else {
                 selectAllMode = false
-                updateSelectButton()
+                updateSelectAllButton()
             }
         }
     }
 
     @objc override func deselectAllChildren() {
-        setSelectionButtonsEnabled(false)
+        updateSelectionButtons()
         selectAllMode = false
         if let indexPaths = collectionView.indexPathsForSelectedItems {
             for indexPath in indexPaths {
@@ -782,7 +782,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         updateSelectedCount()
     }
 
-    private func updateSelectButton() {
+    private func updateSelectAllButton() {
         if !configuration.selectAllSupported {
             // Select all not supported, don't show button
             navigationItem.rightBarButtonItem = nil
