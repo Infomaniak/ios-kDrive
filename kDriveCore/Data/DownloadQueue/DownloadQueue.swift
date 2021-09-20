@@ -78,10 +78,11 @@ public class DownloadQueue {
     // MARK: - Public methods
 
     public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        dispatchQueue.async {
-            guard !file.isInvalidated && !self.hasOperation(for: file),
-                  let drive = AccountManager.instance.getDrive(for: userId, driveId: file.driveId),
-                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) else {
+        dispatchQueue.async { [driveId = file.driveId, fileId = file.id] in
+            guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
+                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+                  let file = driveFileManager.getCachedFile(id: fileId),
+                  !self.hasOperation(for: file) else {
                 return
             }
 
@@ -116,10 +117,12 @@ public class DownloadQueue {
         }
     }
 
-    public func temporaryDownload(file: File, onOperationCreated: @escaping (DownloadOperation?) -> Void, completion: @escaping (DriveError?) -> Void) {
-        dispatchQueue.async(qos: .userInitiated) {
-            guard !file.isInvalidated && !self.hasOperation(for: file),
-                  let driveFileManager = AccountManager.instance.currentDriveFileManager else {
+    public func temporaryDownload(file: File, userId: Int = AccountManager.instance.currentUserId, onOperationCreated: @escaping (DownloadOperation?) -> Void, completion: @escaping (DriveError?) -> Void) {
+        dispatchQueue.async(qos: .userInitiated) { [driveId = file.driveId, fileId = file.id] in
+            guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
+                  let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
+                  let file = driveFileManager.getCachedFile(id: fileId),
+                  !self.hasOperation(for: file) else {
                 return
             }
 
