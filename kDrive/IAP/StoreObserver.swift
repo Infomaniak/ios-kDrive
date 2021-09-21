@@ -88,7 +88,7 @@ class StoreObserver: NSObject {
 
     private func handlePurchased(_ transaction: SKPaymentTransaction) {
         purchased.append(transaction)
-        print("Deliver content for \(transaction.payment.productIdentifier)")
+        DDLogInfo("Deliver content for \(transaction.payment.productIdentifier)")
 
         if let receiptString = getReceipt() {
             DispatchQueue.main.async {
@@ -104,7 +104,7 @@ class StoreObserver: NSObject {
 
         if let error = transaction.error {
             message += "\nError: \(error.localizedDescription)"
-            print("Error: \(error.localizedDescription)")
+            DDLogError("[StoreObserver] Transaction error: \(error.localizedDescription)")
         }
 
         // Do not send any notifications when the user cancels the purchase
@@ -120,7 +120,7 @@ class StoreObserver: NSObject {
     private func handleRestored(_ transaction: SKPaymentTransaction) {
         hasRestorablePurchases = true
         restored.append(transaction)
-        print("Restore content for \(transaction.payment.productIdentifier)")
+        DDLogInfo("[StoreObserver] Restore content for \(transaction.payment.productIdentifier)")
 
         DispatchQueue.main.async {
             self.delegate?.storeObserverRestoreDidSucceed()
@@ -156,7 +156,7 @@ extension StoreObserver: SKPaymentTransactionObserver {
     func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction]) {
         // Logs all transactions that have been removed from the payment queue
         for transaction in transactions {
-            print("\(transaction.payment.productIdentifier) was removed from the payment queue.")
+            DDLogInfo("[StoreObserver] \(transaction.payment.productIdentifier) was removed from the payment queue.")
         }
     }
 
@@ -171,7 +171,7 @@ extension StoreObserver: SKPaymentTransactionObserver {
 
     func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         // Called when all restorable transactions have been processed by the payment queue
-        print("All restorable transactions have been processed by the payment queue.")
+        DDLogInfo("[StoreObserver] All restorable transactions have been processed by the payment queue.")
 
         if !hasRestorablePurchases {
             DispatchQueue.main.async {

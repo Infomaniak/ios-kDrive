@@ -17,7 +17,10 @@
  */
 
 import Alamofire
+import CocoaLumberjackSwift
 import Foundation
+import kDriveCore
+import Sentry
 
 struct ReceiptInfo: Encodable {
     let latestReceipt: String
@@ -32,14 +35,29 @@ class StoreRequest {
     static let shared = StoreRequest()
 
     let url = "https://api.infomaniak.com/invoicing/inapp/apple/link_receipt"
+    let jsonDecoder = JSONDecoder()
 
     private init() {}
 
     func sendReceipt(body: ReceiptInfo) {
         AF.request(url, method: .post, parameters: body, encoder: JSONParameterEncoder.convertToSnakeCase)
             .validate()
-            .response { response in
-                debugPrint(response)
+            .responseDecodable(of: ApiResponse<Bool>.self, decoder: jsonDecoder) { response in
+                switch response.result {
+                case .success(let result):
+                    if let data = result.data, data {
+                        DDLogInfo("[StoreRequest] Success")
+                    } else {
+                        DDLogError("[StoreRequest] Server error")
+                        if let error = result.error {
+                            DDLogError("[StoreRequest] \(error)")
+                            // Send server error to Sentry
+                            SentrySDK.capture(error: error)
+                        }
+                    }
+                case .failure(let error):
+                    DDLogError("[StoreRequest] Client error: \(error)")
+                }
             }
     }
 }

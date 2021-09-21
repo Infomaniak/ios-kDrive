@@ -224,7 +224,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            print("Invalid URL")
+            DDLogError("Failed to open URL: Invalid URL")
             return false
         }
 
