@@ -821,7 +821,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    private func bulkObservation(action: BulkActionType, response: ApiResponse<CancelableResponse>?, error: Error?) {
+    public func bulkObservation(action: BulkActionType, response: ApiResponse<CancelableResponse>?, error: Error?) {
         selectionMode = false
         let cancelId = response?.data?.id
         if let error = error {
@@ -832,6 +832,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             case .trash:
                 message = KDriveStrings.Localizable.fileListDeletionStartedSnackbar
             case .move:
+                message = KDriveStrings.Localizable.fileListMoveStartedSnackbar
+            case .copy:
                 message = KDriveStrings.Localizable.fileListMoveStartedSnackbar
             }
             let progressSnack = UIConstants.showSnackBar(message: message, duration: .infinite, action: IKSnackBar.Action(title: KDriveStrings.Localizable.buttonCancel) {
@@ -854,12 +856,16 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                             progressSnack?.message = KDriveStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                         case .move:
                             progressSnack?.message = KDriveStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                        case .copy:
+                            progressSnack?.message = KDriveStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                         }
                     case .done:
                         switch action {
                         case .trash:
                             progressSnack?.message = KDriveStrings.Localizable.fileListDeletionDoneSnackbar
                         case .move:
+                            progressSnack?.message = KDriveStrings.Localizable.fileListMoveDoneSnackbar
+                        case .copy:
                             progressSnack?.message = KDriveStrings.Localizable.fileListMoveDoneSnackbar
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -871,6 +877,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                         case .trash:
                             message = KDriveStrings.Localizable.allTrashActionCancelled
                         case .move:
+                            message = KDriveStrings.Localizable.allFileMoveCancelled
+                        case .copy:
                             message = KDriveStrings.Localizable.allFileMoveCancelled
                         }
                         UIConstants.showSnackBar(message: message)

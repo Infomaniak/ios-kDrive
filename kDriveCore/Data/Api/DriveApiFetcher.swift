@@ -487,6 +487,15 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
+    public func copyFile(file: File, newParent: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
+        let url = ApiRoutes.copyFile(file: file, newParentId: newParent.id)
+
+        authenticatedSession.request(url, method: .post)
+            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
+
     public func moveFile(file: File, newParent: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
         let url = ApiRoutes.moveFile(file: file, newParentId: newParent.id)
 
