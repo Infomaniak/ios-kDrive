@@ -29,8 +29,6 @@ protocol HomeFileDelegate: AnyObject {
 class HomeTableViewController: UITableViewController, SwitchDriveDelegate, SwitchAccountDelegate, HomeFileDelegate, TopScrollable {
     private enum HomeSection: Differentiable {
         case top
-        case lastModify
-        case activityOrPictures
     }
 
     private enum HomeTopRows {
@@ -41,41 +39,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         case uploadsInProgress
     }
 
-    private enum HomeLastModifyRows {
-        case lastModify
-    }
-
-    private enum HomeActivityOrPicturesRows {
-        case recentActivity
-        case lastPictures
-        case emptyActivity
-        case emptyPictures
-        case emptyAll
-    }
-
     private var sections = [HomeSection]()
     private var topRows = [HomeTopRows]()
-    private var lastModifyRows: [HomeLastModifyRows] = [.lastModify]
-    private var activityOrPicturesRowType: HomeActivityOrPicturesRows = .recentActivity
-
-    private var lastModifiedFiles = [File]()
-    private var lastModifyIsLoading = true
-    private var lastPictures = [File]()
-    private var recentActivityController: RecentActivitySharedController?
-    private var recentActivities: [FileActivity] {
-        return recentActivityController?.recentActivities ?? []
-    }
 
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
-    private var lastPicturesInfo = (page: 1, hasNextPage: true, isLoading: true)
-    private var activityOrPicturesIsLoading = true
-    private var shouldLoadMore: Bool {
-        if driveFileManager.drive.isProOrTeam {
-            return recentActivityController?.shouldLoadMore ?? false
-        } else {
-            return false // lastPicturesInfo.hasNextPage && !lastPicturesInfo.isLoading -> infinite scroll is disabled for now
-        }
-    }
 
     private var uploadCountManager: UploadCountManager!
     private var filesObserver: ObservationToken?
@@ -85,20 +52,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     private let updateDelay: TimeInterval = 60 // 1 minute
 
     private var floatingPanelViewController: DriveFloatingPanelController?
-
-    private var footerLoader: UIView = {
-        let indicator = UIActivityIndicatorView(style: .gray)
-        indicator.color = KDriveAsset.loaderDarkerDefaultColor.color
-        indicator.startAnimating()
-        return indicator
-    }()
-
-    private var footerAllImages: UIView = {
-        let button = UIButton(type: .system)
-        button.setTitle(KDriveStrings.Localizable.homeSeeAllImages, for: .normal)
-        button.addTarget(self, action: #selector(showAllImages), for: .touchUpInside)
-        return button
-    }()
 
     private var navbarHeight: CGFloat {
         return navigationController?.navigationBar.frame.height ?? 0
@@ -116,9 +69,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
         tableView.register(cellView: DriveSwitchTableViewCell.self)
         tableView.register(cellView: HomeFileSearchTableViewCell.self)
-        tableView.register(cellView: HomeLastModifTableViewCell.self)
-        tableView.register(cellView: HomeLastPicTableViewCell.self)
-        tableView.register(cellView: RecentActivityTableViewCell.self)
         tableView.register(cellView: HomeOfflineTableViewCell.self)
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InsufficientStorageTableViewCell.self)
@@ -136,21 +86,17 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         tableView.contentInset.bottom = UIConstants.listPaddingBottom
         tableView.scrollIndicatorInsets = UIEdgeInsets(top: navbarHeight, left: 0, bottom: 0, right: 0)
         if let refreshControl = tableView.refreshControl {
-            refreshControl.addTarget(self, action: #selector(reloadData), for: .valueChanged)
             refreshControl.bounds = refreshControl.bounds.offsetBy(dx: 0, dy: -24)
         }
 
         initViewWithCurrentDrive()
 
         // Table view footer
-        showFooter(!(driveFileManager?.drive.isProOrTeam ?? true))
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
             DispatchQueue.main.async {
                 self.reload(sections: [.top])
-                if status != .offline {
-                    self.reloadData()
-                }
+                if status != .offline {}
             }
         }
     }
@@ -171,8 +117,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
-        tableView.isScrollEnabled = !activityOrPicturesIsLoading
 
         updateContentIfNeeded()
 
@@ -209,9 +153,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     func presentedFromTabBar() {
         // Reload data
-        if !needsContentUpdate && Date().timeIntervalSince(lastUpdate) > updateDelay {
-            reloadData()
-        }
+        if !needsContentUpdate && Date().timeIntervalSince(lastUpdate) > updateDelay {}
     }
 
     func updateContentIfNeeded() {
@@ -226,26 +168,9 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             return
         }
 
-        // Load last modified files
-        lastModifiedFiles.removeAll()
-        loadLastModifiedFiles()
-
-        // Load activity/pictures
-        if driveFileManager.drive.isProOrTeam {
-            recentActivityController = RecentActivitySharedController(driveFileManager: AccountManager.instance.getDriveFileManager(for: driveFileManager.drive)!, filePresenter: filePresenter)
-            loadNextRecentActivities()
-        } else {
-            lastPicturesInfo.page = 1
-            lastPicturesInfo.hasNextPage = true
-            lastPictures.removeAll()
-            loadNextLastPictures()
-        }
-
         // Reload table view
         updateSectionList()
         updateTopRows()
-        updateActivityOrPicturesRowType()
-        observeFileUpdated()
         tableView.reloadData()
     }
 
@@ -270,11 +195,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     private func updateSectionList() {
-        if lastModifiedFiles.isEmpty && !lastModifyIsLoading {
-            sections = [.top, .activityOrPictures]
-        } else {
-            sections = [.top, .lastModify, .activityOrPictures]
-        }
+        sections = [.top]
     }
 
     private func updateTopRows() {
@@ -297,36 +218,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
     }
 
-    private func updateActivityOrPicturesRowType() {
-        if driveFileManager.drive.isProOrTeam {
-            if recentActivities.isEmpty && !activityOrPicturesIsLoading {
-                activityOrPicturesRowType = .emptyActivity
-            } else {
-                activityOrPicturesRowType = .recentActivity
-            }
-        } else {
-            if lastPictures.isEmpty && lastModifiedFiles.isEmpty && !lastModifyIsLoading && !activityOrPicturesIsLoading {
-                activityOrPicturesRowType = .emptyAll
-            } else if lastPictures.isEmpty && !activityOrPicturesIsLoading {
-                activityOrPicturesRowType = .emptyPictures
-            } else {
-                activityOrPicturesRowType = .lastPictures
-            }
-        }
-        if view.window != nil {
-            tableView.isScrollEnabled = !activityOrPicturesIsLoading
-        }
-    }
-
-    func observeFileUpdated() {
-        filesObserver?.cancel()
-        filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
-            if lastModifiedFiles.contains(where: { $0.id == file.id }) || lastPictures.contains(where: { $0.id == file.id }) {
-                needsContentUpdate = true
-            }
-        }
-    }
-
     private func reload(sections sectionsToReload: [HomeSection]) {
         // Insert/delete sections
         let oldSections = sections
@@ -343,103 +234,10 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         if sectionsToReload.contains(.top) {
             updateTopRows()
         }
-        if sectionsToReload.contains(.activityOrPictures) {
-            updateActivityOrPicturesRowType()
-        }
 
         // Reload sections
         let indexSet = sectionsToReload.compactMap { sections.firstIndex(of: $0) }
         tableView.reloadSections(IndexSet(indexSet), with: .automatic)
-    }
-
-    func loadLastModifiedFiles() {
-        lastUpdate = Date()
-        lastModifyIsLoading = true
-        driveFileManager.getLastModifiedFiles { [self] files, _ in
-            if let files = files, files.map(\.id) != lastModifiedFiles.map(\.id) {
-                lastModifiedFiles = files
-                lastModifyIsLoading = false
-                reload(sections: [.lastModify])
-            }
-        }
-    }
-
-    func loadNextLastPictures() {
-        showFooter(true)
-        lastUpdate = Date()
-        lastPicturesInfo.isLoading = true
-        activityOrPicturesIsLoading = lastPicturesInfo.page == 1
-        driveFileManager.getLastPictures(page: lastPicturesInfo.page) { files, _ in
-            if let files = files {
-                self.lastPictures += files
-                self.refreshControl?.endRefreshing()
-                // self.showFooter(false)
-                self.activityOrPicturesIsLoading = false
-                self.reload(sections: [.activityOrPictures])
-                self.lastPicturesInfo.page += 1
-                self.lastPicturesInfo.hasNextPage = files.count == DriveApiFetcher.itemPerPage
-                self.lastPicturesInfo.isLoading = false
-            } else {
-                self.refreshControl?.endRefreshing()
-                // self.showFooter(false)
-                self.activityOrPicturesIsLoading = false
-                self.lastPicturesInfo.isLoading = false
-            }
-        }
-    }
-
-    func loadNextRecentActivities() {
-        guard let recentActivityController = recentActivityController else {
-            return
-        }
-
-        showFooter(true)
-        lastUpdate = Date()
-        activityOrPicturesIsLoading = recentActivityController.nextPage == 1
-        recentActivityController.loadNextRecentActivities { error in
-            self.showFooter(false)
-            self.activityOrPicturesIsLoading = false
-            self.refreshControl?.endRefreshing()
-            if let error = error {
-                DDLogError("Error while fetching recent activities: \(error)")
-            } else {
-                self.reload(sections: [.activityOrPictures])
-            }
-        }
-    }
-
-    @objc func reloadData() {
-        guard !activityOrPicturesIsLoading, driveFileManager != nil else {
-            return
-        }
-
-        lastModifiedFiles.removeAll()
-        loadLastModifiedFiles()
-        if driveFileManager.drive.isProOrTeam {
-            recentActivityController?.prepareForReload()
-            loadNextRecentActivities()
-        } else {
-            lastPicturesInfo.page = 1
-            lastPicturesInfo.hasNextPage = true
-            lastPictures.removeAll()
-            loadNextLastPictures()
-        }
-        reload(sections: [.lastModify, .activityOrPictures])
-    }
-
-    func showFooter(_ show: Bool) {
-        let isProOrTeam = driveFileManager?.drive.isProOrTeam ?? true
-        tableView.tableFooterView = isProOrTeam ? footerLoader : footerAllImages
-        tableView.tableFooterView?.isHidden = !show
-        tableView.tableFooterView?.frame.size.height = show ? 44 : 0
-        let inset: CGFloat = isProOrTeam ? 76 : 68
-        tableView.contentInset.bottom = show ? UIConstants.listPaddingBottom + inset : UIConstants.listPaddingBottom
-    }
-
-    @objc func showAllImages() {
-        let photoListViewController = PhotoListViewController.instantiate()
-        photoListViewController.driveFileManager = driveFileManager
-        navigationController?.pushViewController(photoListViewController, animated: true)
     }
 
     // MARK: - Table view data source
@@ -452,15 +250,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         switch sections[section] {
         case .top:
             return 0
-        case .lastModify:
-            return 33
-        case .activityOrPictures:
-            switch activityOrPicturesRowType {
-            case .recentActivity, .lastPictures, .emptyPictures:
-                return 33
-            case .emptyActivity, .emptyAll:
-                return .leastNormalMagnitude
-            }
         }
     }
 
@@ -475,8 +264,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             default:
                 return UITableView.automaticDimension
             }
-        default:
-            return UITableView.automaticDimension
         }
     }
 
@@ -484,15 +271,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         switch sections[section] {
         case .top:
             return topRows.count
-        case .lastModify:
-            return lastModifyRows.count
-        case .activityOrPictures:
-            switch activityOrPicturesRowType {
-            case .recentActivity:
-                return activityOrPicturesIsLoading ? 3 : recentActivities.count
-            default:
-                return 1
-            }
         }
     }
 
@@ -537,52 +315,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 cell.setUploadCount(uploadCountManager.uploadCount)
                 return cell
             }
-        case .lastModify:
-            let cell = tableView.dequeueReusableCell(type: HomeLastModifTableViewCell.self, for: indexPath)
-            if lastModifyIsLoading {
-                cell.configureLoading()
-            } else {
-                cell.configureWith(files: lastModifiedFiles)
-            }
-            cell.delegate = self
-            return cell
-        case .activityOrPictures:
-            switch activityOrPicturesRowType {
-            case .recentActivity:
-                let cell = tableView.dequeueReusableCell(type: RecentActivityTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                if activityOrPicturesIsLoading {
-                    cell.configureLoading()
-                } else {
-                    cell.configureWith(recentActivity: recentActivities[indexPath.row])
-                }
-                cell.layoutIfNeeded()
-                cell.collectionView.reloadData()
-                cell.tableView.reloadData()
-                cell.delegate = recentActivityController
-                return cell
-            case .lastPictures:
-                let cell = tableView.dequeueReusableCell(type: HomeLastPicTableViewCell.self, for: indexPath)
-                if activityOrPicturesIsLoading {
-                    cell.configureLoading()
-                } else {
-                    cell.configureWith(files: lastPictures)
-                    cell.delegate = self
-                }
-                return cell
-            case .emptyActivity:
-                let cell = tableView.dequeueReusableCell(type: EmptyTableViewCell.self, for: indexPath)
-                cell.configureCell(with: .noActivities)
-                return cell
-            case .emptyPictures:
-                let cell = tableView.dequeueReusableCell(type: EmptyTableViewCell.self, for: indexPath)
-                cell.configureCell(with: .noImages)
-                return cell
-            case .emptyAll:
-                let cell = tableView.dequeueReusableCell(type: EmptyTableViewCell.self, for: indexPath)
-                cell.configureCell(with: .noActivitiesSolo)
-                return cell
-            }
         }
     }
 
@@ -592,17 +324,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         switch sections[section] {
         case .top:
             return nil
-        case .lastModify:
-            return HomeTitleView.instantiate(title: KDriveStrings.Localizable.homeLastFilesTitle)
-        case .activityOrPictures:
-            switch activityOrPicturesRowType {
-            case .recentActivity:
-                return HomeTitleView.instantiate(title: KDriveStrings.Localizable.homeLastActivities)
-            case .lastPictures, .emptyPictures:
-                return HomeTitleView.instantiate(title: KDriveStrings.Localizable.homeMyLastPictures)
-            case .emptyActivity, .emptyAll:
-                return nil
-            }
         }
     }
 
@@ -621,8 +342,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             case .search:
                 present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
             }
-        default:
-            return
         }
     }
 
@@ -630,18 +349,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         updateNavbarAppearance()
-
-        // Infinite scroll
-        let scrollPosition = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height - tableView.frame.size.height
-        // isDragging and isDecelerating make sure this is a user scroll
-        if scrollPosition > contentHeight && (scrollView.isDragging || scrollView.isDecelerating) && shouldLoadMore {
-            if driveFileManager.drive.isProOrTeam {
-                loadNextRecentActivities()
-            } else {
-                loadNextLastPictures()
-            }
-        }
     }
 
     private func updateNavbarAppearance() {
@@ -665,10 +372,6 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
 
     func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
         driveFileManager = newDriveFileManager
-        lastModifiedFiles.removeAll()
-        lastPictures.removeAll()
-        recentActivityController?.invalidate()
-        recentActivityController = nil
         tableView.reloadData()
         needsContentUpdate = true
         updateContentIfNeeded()
