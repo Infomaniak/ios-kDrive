@@ -29,38 +29,47 @@ class MenuViewController: UIViewController {
 
     var driveFileManager: DriveFileManager!
 
+    private struct Section: Equatable {
+        var actions: [MenuAction]
+
+        static var header = Section(actions: [])
+        static var upgrade = Section(actions: [.store])
+        static var more = Section(actions: [.sharedWithMe, .lastModifications, .images, .offline, .myShares, .trash])
+        static var options = Section(actions: [.switchUser, .parameters, .help, .disconnect])
+    }
+
     private struct MenuAction: Equatable {
         let name: String
         let image: UIImage
-        let segue: String
+        let segue: String?
 
-        static let sharedWithMeAction = MenuAction(name: KDriveStrings.Localizable.sharedWithMeTitle, image: KDriveAsset.folderSelect2.image, segue: "toDriveListSegue")
-        static let lastModificationAction = MenuAction(name: KDriveStrings.Localizable.lastEditsTitle, image: KDriveAsset.clock.image, segue: "toLastModificationsSegue")
-        static let imagesAction = MenuAction(name: KDriveStrings.Localizable.allPictures, image: KDriveAsset.images.image, segue: "toPhotoListSegue")
-        static let mySharedAction = MenuAction(name: KDriveStrings.Localizable.mySharesTitle, image: KDriveAsset.folderSelect.image, segue: "toMySharedSegue")
-        static let offlineAction = MenuAction(name: KDriveStrings.Localizable.offlineFileTitle, image: KDriveAsset.availableOffline.image, segue: "toOfflineSegue")
-        static let trashAction = MenuAction(name: KDriveStrings.Localizable.trashTitle, image: KDriveAsset.delete.image, segue: "toTrashSegue")
+        static let store = MenuAction(name: KDriveStrings.Localizable.upgradeOfferTitle, image: KDriveAsset.upgradeKdrive.image, segue: "toStoreSegue")
 
-        static let switchUserAction = MenuAction(name: KDriveStrings.Localizable.switchUserTitle, image: KDriveAsset.userSwitch.image, segue: "switchUserSegue")
-        static let parametersAction = MenuAction(name: KDriveStrings.Localizable.settingsTitle, image: KDriveAsset.parameters.image, segue: "toParameterSegue")
-        static let helpAction = MenuAction(name: KDriveStrings.Localizable.supportTitle, image: KDriveAsset.supportLink.image, segue: "help")
-        static let disconnectAction = MenuAction(name: KDriveStrings.Localizable.buttonLogout, image: KDriveAsset.logout.image, segue: "disconnect")
+        static let sharedWithMe = MenuAction(name: KDriveStrings.Localizable.sharedWithMeTitle, image: KDriveAsset.folderSelect2.image, segue: "toDriveListSegue")
+        static let lastModifications = MenuAction(name: KDriveStrings.Localizable.lastEditsTitle, image: KDriveAsset.clock.image, segue: "toLastModificationsSegue")
+        static let images = MenuAction(name: KDriveStrings.Localizable.allPictures, image: KDriveAsset.images.image, segue: "toPhotoListSegue")
+        static let myShares = MenuAction(name: KDriveStrings.Localizable.mySharesTitle, image: KDriveAsset.folderSelect.image, segue: "toMySharedSegue")
+        static let offline = MenuAction(name: KDriveStrings.Localizable.offlineFileTitle, image: KDriveAsset.availableOffline.image, segue: "toOfflineSegue")
+        static let trash = MenuAction(name: KDriveStrings.Localizable.trashTitle, image: KDriveAsset.delete.image, segue: "toTrashSegue")
+
+        static let switchUser = MenuAction(name: KDriveStrings.Localizable.switchUserTitle, image: KDriveAsset.userSwitch.image, segue: "switchUserSegue")
+        static let parameters = MenuAction(name: KDriveStrings.Localizable.settingsTitle, image: KDriveAsset.parameters.image, segue: "toParameterSegue")
+        static let help = MenuAction(name: KDriveStrings.Localizable.supportTitle, image: KDriveAsset.supportLink.image, segue: nil)
+        static let disconnect = MenuAction(name: KDriveStrings.Localizable.buttonLogout, image: KDriveAsset.logout.image, segue: nil)
     }
 
-    private var tableContent: [[MenuAction]] = [
-        [],
-        [.sharedWithMeAction, .lastModificationAction, .imagesAction, .offlineAction, .mySharedAction, .trashAction],
-        [.switchUserAction, .parametersAction, .helpAction, .disconnectAction]
-    ]
+    private var sections: [Section] = []
     private var currentAccount: Account!
 
     private var needsContentUpdate = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MenuTopTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+
         currentAccount = AccountManager.instance.currentAccount
         updateTableContent()
     }
@@ -90,17 +99,20 @@ class MenuViewController: UIViewController {
     }
 
     private func updateTableContent() {
-        guard tableContent.count > 1 else {
-            return
+        // Show upgrade section if free drive
+        if driveFileManager.drive.pack == .free {
+            sections = [.header, .upgrade, .more, .options]
+        } else {
+            sections = [.header, .more, .options]
         }
 
         // Hide shared with me action if no shared with me drive
-        let sharedWithMeInList = tableContent[1].contains { $0 == .sharedWithMeAction }
+        let sharedWithMeInList = Section.more.actions.contains { $0 == .sharedWithMe }
         let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true).isEmpty
         if sharedWithMeInList && !hasSharedWithMe {
-            tableContent[1].removeFirst()
+            Section.more.actions.removeFirst()
         } else if !sharedWithMeInList && hasSharedWithMe {
-            tableContent[1].insert(.sharedWithMeAction, at: 0)
+            Section.more.actions.insert(.sharedWithMe, at: 0)
         }
     }
 
@@ -109,6 +121,8 @@ class MenuViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let navController = segue.destination as? UINavigationController, let switchDriveAccountViewController = navController.topViewController as? SwitchDriveViewController {
             switchDriveAccountViewController.delegate = tabBarController as? MainTabViewController
+        } else if let storeViewController = segue.destination as? StoreViewController {
+            storeViewController.driveFileManager = driveFileManager
         } else if let fileListViewController = segue.destination as? FileListViewController {
             fileListViewController.driveFileManager = driveFileManager
         } else if let photoListViewController = segue.destination as? PhotoListViewController {
@@ -119,18 +133,18 @@ class MenuViewController: UIViewController {
     }
 }
 
-// MARK: - UITableView Delegate
+// MARK: - Table view delegate
 
 extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return tableContent.count
+        return sections.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
+        if sections[section] == .header {
             return 1
         } else {
-            return tableContent[section].count
+            return sections[section].actions.count
         }
     }
 
@@ -145,19 +159,20 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.section == 0 {
+        let section = sections[indexPath.section]
+        if section == .header {
             let cell = tableView.dequeueReusableCell(type: MenuTopTableViewCell.self, for: indexPath)
             cell.selectionStyle = .none
             cell.configureCell(with: driveFileManager.drive, and: currentAccount)
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else {
-            let cellContent = tableContent[indexPath.section][indexPath.row]
+            let action = section.actions[indexPath.row]
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
-            let isLast = indexPath.row == tableContent[indexPath.section].count - 1
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: isLast)
-            cell.titleLabel.text = cellContent.name
-            cell.logoImage.image = cellContent.image
+            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == section.actions.count - 1)
+            cell.titleLabel.text = action.name
+            cell.titleLabel.numberOfLines = 0
+            cell.logoImage.image = action.image
             cell.logoImage.tintColor = KDriveAsset.iconColor.color
             return cell
         }
@@ -165,38 +180,35 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if indexPath.section > 0 {
-            let segue = tableContent[indexPath.section][indexPath.row].segue
-            if !segue.isEmpty {
-                if segue == MenuAction.disconnectAction.segue {
-                    let alert = AlertTextViewController(title: KDriveStrings.Localizable.alertRemoveUserTitle, message: KDriveStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveStrings.Localizable.buttonConfirm, destructive: true) {
-                        if let token = AccountManager.instance.currentAccount.token {
-                            AccountManager.instance.removeTokenAndAccount(token: token)
-                        } else {
-                            AccountManager.instance.removeAccount(toDeleteAccount: AccountManager.instance.currentAccount)
-                        }
-                        if let nextAccount = AccountManager.instance.accounts.first {
-                            AccountManager.instance.switchAccount(newAccount: nextAccount)
-                            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
-                        } else {
-                            SentrySDK.setUser(nil)
-                            self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
-                        }
-                        AccountManager.instance.saveAccounts()
-                    }
-                    present(alert, animated: true)
-                } else if segue == MenuAction.helpAction.segue {
-                    if let url = URL(string: Constants.helpURL) {
-                        UIApplication.shared.open(url)
-                    }
+        let section = sections[indexPath.section]
+        guard section != .header else { return }
+        let action = section.actions[indexPath.row]
+        switch action {
+        case .disconnect:
+            let alert = AlertTextViewController(title: KDriveStrings.Localizable.alertRemoveUserTitle, message: KDriveStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveStrings.Localizable.buttonConfirm, destructive: true) {
+                AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
+                if let nextAccount = AccountManager.instance.accounts.first {
+                    AccountManager.instance.switchAccount(newAccount: nextAccount)
+                    (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
                 } else {
-                    performSegue(withIdentifier: segue, sender: nil)
+                    SentrySDK.setUser(nil)
+                    self.tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
                 }
+                AccountManager.instance.saveAccounts()
+            }
+            present(alert, animated: true)
+        case .help:
+            if let url = URL(string: Constants.helpURL) {
+                UIApplication.shared.open(url)
+            }
+        default:
+            if let segue = action.segue {
+                performSegue(withIdentifier: segue, sender: nil)
             }
         }
     }
 
-    // MARK: Cell Button Action
+    // MARK: - Cell Button Action
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
         performSegue(withIdentifier: "toSwitchDriveSegue", sender: nil)

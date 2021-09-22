@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19158" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="114" id="KGk-i7-Jjw" customClass="StoreNextTableViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="92"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="92"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dv5-aE-zIQ" customClass="IKLargeButton" customModule="kDriveCore">
+                        <rect key="frame" x="24" y="32" width="272" height="60"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="60" id="tcv-U9-g4Z"/>
+                        </constraints>
+                        <state key="normal" title="Suivant"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonNext"/>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="buttonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="r5S-cd-dp3"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="bottom" secondItem="Dv5-aE-zIQ" secondAttribute="bottom" id="0LG-YC-ncn"/>
+                    <constraint firstItem="Dv5-aE-zIQ" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="Ua7-oV-WeD"/>
+                    <constraint firstItem="Dv5-aE-zIQ" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="32" id="bGt-pA-p9r"/>
+                    <constraint firstAttribute="trailing" secondItem="Dv5-aE-zIQ" secondAttribute="trailing" constant="24" id="mop-Bm-Phw"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="button" destination="Dv5-aE-zIQ" id="ttW-uL-jpc"/>
+            </connections>
+            <point key="canvasLocation" x="131.8840579710145" y="101.11607142857143"/>
+        </tableViewCell>
+    </objects>
+    <designables>
+        <designable name="Dv5-aE-zIQ">
+            <size key="intrinsicContentSize" width="51" height="30"/>
+        </designable>
+    </designables>
+</document>

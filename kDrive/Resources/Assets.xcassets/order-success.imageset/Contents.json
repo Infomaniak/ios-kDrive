@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "order-success.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

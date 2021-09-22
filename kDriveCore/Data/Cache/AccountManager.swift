@@ -213,6 +213,7 @@ public class AccountManager: RefreshTokenDelegate {
                         }
                         self.setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
                         self.saveAccounts()
+                        self.mqService.registerForNotifications(with: driveResponse.ipsToken)
                         completion(newAccount, nil)
                     } else {
                         self.removeAccount(toDeleteAccount: newAccount)

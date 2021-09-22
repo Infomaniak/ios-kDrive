@@ -82,9 +82,10 @@ extension SwitchDriveViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let drive = filteredDrives[indexPath.row]
         if drive.maintenance {
-            let maintenanceFloatingPanelViewController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
-            (maintenanceFloatingPanelViewController.contentViewController as? DriveMaintenanceFloatingPanelViewController)?.setTitleLabel(with: drive.name)
-            self.present(maintenanceFloatingPanelViewController, animated: true)
+            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
+            let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DriveMaintenanceFloatingPanelViewController
+            floatingPanelViewController?.setTitleLabel(with: drive.name)
+            self.present(driveFloatingPanelController, animated: true)
         } else {
             AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
             AccountManager.instance.saveAccounts()

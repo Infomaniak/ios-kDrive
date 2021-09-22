@@ -174,9 +174,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 }
             }
             setupContent()
-            UIView.transition(with: tableView,
-                              duration: 0.35,
-                              options: .transitionCrossDissolve) { self.tableView.reloadData() }
+            UIView.transition(with: tableView, duration: 0.35, options: .transitionCrossDissolve) {
+                self.tableView.reloadData()
+            }
         }
     }
 
@@ -321,12 +321,16 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         switch action {
         case .convertToDropbox:
             if driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo {
-                let floatingPanelViewController = DropBoxFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? DropBoxFloatingPanelViewController)?.actionHandler = { [weak self] _ in
-                    guard let self = self else { return }
-                    UIConstants.openUrl("\(ApiRoutes.orderDrive())/\(self.driveFileManager.drive.id)", from: self)
+                let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DropBoxFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = self.driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.actionHandler = { _ in
+                    driveFloatingPanelController.dismiss(animated: true) { [weak self] in
+                        guard let self = self else { return }
+                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    }
                 }
-                present(floatingPanelViewController, animated: true)
+                present(driveFloatingPanelController, animated: true)
                 return
             } else {
                 let viewController = ManageDropBoxViewController.instantiate()

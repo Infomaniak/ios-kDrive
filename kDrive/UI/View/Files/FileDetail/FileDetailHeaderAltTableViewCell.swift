@@ -16,17 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class FileDetailHeaderAltTableViewCell: UITableViewCell {
-
     @IBOutlet weak var fileView: UIView!
     @IBOutlet weak var logoImage: UIImageView!
     @IBOutlet weak var logoContainerView: UIView!
     @IBOutlet weak var fileNameLabel: UILabel!
     @IBOutlet weak var fileDetailLabel: UILabel!
-    @IBOutlet weak var segmentedControl: UISegmentedControl!
+    @IBOutlet weak var segmentedControl: IKSegmentedControl!
 
     weak var delegate: FileDetailDelegate?
 
@@ -36,22 +35,11 @@ class FileDetailHeaderAltTableViewCell: UITableViewCell {
         fileView.cornerRadius = 15
         fileView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
         logoContainerView.cornerRadius = logoContainerView.frame.width / 2
-        var size: CGFloat = 14
-        if UIScreen.main.bounds.width < 390 {
-            size = ceil(size * UIScreen.main.bounds.width / 390)
-        }
-        let font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: size))
-        segmentedControl.setTitleTextAttributes([.foregroundColor: KDriveAsset.disconnectColor.color, .font: font], for: .normal)
-        segmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white, .font: font], for: .selected)
         resetSegmentedControl()
     }
 
     private func resetSegmentedControl() {
-        segmentedControl.removeAllSegments()
-        segmentedControl.insertSegment(withTitle: KDriveStrings.Localizable.fileDetailsInfosTitle, at: 0, animated: false)
-        segmentedControl.insertSegment(withTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle, at: 1, animated: false)
-        segmentedControl.insertSegment(withTitle: KDriveStrings.Localizable.fileDetailsCommentsTitle, at: 2, animated: false)
-        segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.setSegments([KDriveStrings.Localizable.fileDetailsInfosTitle, KDriveStrings.Localizable.fileDetailsActivitiesTitle, KDriveStrings.Localizable.fileDetailsCommentsTitle])
     }
 
     @IBAction func segmentedControlUpdated(_ sender: UISegmentedControl) {
@@ -67,5 +55,4 @@ class FileDetailHeaderAltTableViewCell: UITableViewCell {
             segmentedControl.removeSegment(at: 2, animated: false)
         }
     }
-
 }

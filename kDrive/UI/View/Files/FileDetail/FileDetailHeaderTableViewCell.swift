@@ -16,17 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import UIKit
 
 protocol FileDetailDelegate: AnyObject {
     func didUpdateSegmentedControl(value: Int)
 }
 
 class FileDetailHeaderTableViewCell: UITableViewCell {
-
-    @IBOutlet weak var segmentedControl: UISegmentedControl!
+    @IBOutlet weak var segmentedControl: IKSegmentedControl!
     @IBOutlet weak var fileNameLabel: UILabel!
     @IBOutlet weak var fileDetailLabel: UILabel!
     @IBOutlet weak var fileImage: UIImageView!
@@ -40,22 +39,11 @@ class FileDetailHeaderTableViewCell: UITableViewCell {
 
         fileImageView.cornerRadius = 15
         fileImageView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
-        var size: CGFloat = 14
-        if UIScreen.main.bounds.width < 390 {
-            size = ceil(size * UIScreen.main.bounds.width / 390)
-        }
-        let font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: size))
-        segmentedControl.setTitleTextAttributes([.foregroundColor: KDriveAsset.disconnectColor.color, .font: font], for: .normal)
-        segmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white, .font: font], for: .selected)
         resetSegmentedControl()
     }
 
     private func resetSegmentedControl() {
-        segmentedControl.removeAllSegments()
-        segmentedControl.insertSegment(withTitle: KDriveStrings.Localizable.fileDetailsInfosTitle, at: 0, animated: false)
-        segmentedControl.insertSegment(withTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle, at: 1, animated: false)
-        segmentedControl.insertSegment(withTitle: KDriveStrings.Localizable.fileDetailsCommentsTitle, at: 2, animated: false)
-        segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.setSegments([KDriveStrings.Localizable.fileDetailsInfosTitle, KDriveStrings.Localizable.fileDetailsActivitiesTitle, KDriveStrings.Localizable.fileDetailsCommentsTitle])
     }
 
     @IBAction func segmentedControlUpdated(_ sender: UISegmentedControl) {

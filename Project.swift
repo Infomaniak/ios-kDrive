@@ -73,6 +73,7 @@ let project = Project(name: "kDrive",
                 "kDrive/**/*.stringsdict",
                 "kDrive/**/*.xib",
                 "kDrive/**/*.json",
+                "kDrive/IAP/ProductIds.plist",
                 "kDriveCore/GoogleService-Info.plist"
             ],
             entitlements: "kDrive/Resources/kDrive.entitlements",
@@ -87,7 +88,8 @@ let project = Project(name: "kDrive",
                     .package(product: "FloatingPanel"),
                     .package(product: "BetterSegmentedControl"),
                     .package(product: "Lottie"),
-                    .package(product: "DropDown")
+                    .package(product: "DropDown"),
+                    .sdk(name: "StoreKit.framework", status: .required)
             ],
             settings: Settings(base: baseSettings)),
         Target(name: "kDriveTests",

@@ -24,7 +24,7 @@ import RealmSwift
 
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
-    private static let currentDbVersion: UInt64 = 2
+    private static let currentDbVersion: UInt64 = 3
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
     private var fileProviderManagers: [String: NSFileProviderManager] = [:]
@@ -40,6 +40,7 @@ public class DriveInfosManager {
                         // Remove tags
                         migration.deleteData(forType: Tag.className())
                     }
+                    // No migration needed from version 2 to version 3
                 }
             },
             objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self])

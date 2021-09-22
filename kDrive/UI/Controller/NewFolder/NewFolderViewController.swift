@@ -165,10 +165,11 @@ class NewFolderViewController: UIViewController {
     }
 
     func showDropBoxLink(url: String, fileName: String) {
-        let floatingPanelViewController = ShareFloatingPanelViewController.instantiatePanel()
-        (floatingPanelViewController.contentViewController as? ShareFloatingPanelViewController)?.copyTextField.text = url
-        (floatingPanelViewController.contentViewController as? ShareFloatingPanelViewController)?.titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle(fileName)
-        present(floatingPanelViewController, animated: true)
+        let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
+        let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
+        floatingPanelViewController?.copyTextField.text = url
+        floatingPanelViewController?.titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle(fileName)
+        present(driveFloatingPanelController, animated: true)
     }
 
     private func getSetting(for option: OptionsRow) -> Bool {

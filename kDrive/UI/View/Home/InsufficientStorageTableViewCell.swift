@@ -41,12 +41,12 @@ class InsufficientStorageTableViewCell: InsetTableViewCell {
 
         storageLabel.text = "\(Constants.formatFileSize(drive.usedSize, decimals: 1, unit: false)) / \(Constants.formatFileSize(drive.size))"
 
-        if drive.isProOrTeam {
-            storageDescription.text = KDriveStrings.Localizable.notEnoughStorageDescription2
-            upgradeButton.isHidden = true
-        } else {
+        if drive.accountAdmin {
             storageDescription.text = KDriveStrings.Localizable.notEnoughStorageDescription1
             upgradeButton.isHidden = false
+        } else {
+            storageDescription.text = KDriveStrings.Localizable.notEnoughStorageDescription2
+            upgradeButton.isHidden = true
         }
     }
 

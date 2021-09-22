@@ -21,7 +21,7 @@ import UIKit
 
 class FilePresenter {
     weak var viewController: UIViewController?
-    weak var floatingPanelViewController: DriveFloatingPanelController?
+    weak var driveFloatingPanelController: DriveFloatingPanelController?
 
     var listType: FileListViewController.Type = FileListViewController.self
 
@@ -31,7 +31,7 @@ class FilePresenter {
 
     init(viewController: UIViewController, floatingPanelViewController: DriveFloatingPanelController?) {
         self.viewController = viewController
-        self.floatingPanelViewController = floatingPanelViewController
+        self.driveFloatingPanelController = floatingPanelViewController
     }
 
     func presentParent(of file: File, driveFileManager: DriveFileManager) {
@@ -68,21 +68,22 @@ class FilePresenter {
             nextVC.currentDirectory = file
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {
-                    floatingPanelViewController = AccessFileFloatingPanelViewController.instantiatePanel()
-                    (floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.actionHandler = { [weak self] _ in
-                        (self?.floatingPanelViewController?.contentViewController as? AccessFileFloatingPanelViewController)?.rightButton.setLoading(true)
+                    driveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
+                    let floatingPanelViewController = driveFloatingPanelController?.contentViewController as? AccessFileFloatingPanelViewController
+                    floatingPanelViewController?.actionHandler = { [weak self] _ in
+                        floatingPanelViewController?.rightButton.setLoading(true)
                         driveFileManager.apiFetcher.requireFileAccess(file: file) { _, error in
                             if error != nil {
                                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRightModification)
                             } else {
-                                self?.floatingPanelViewController?.dismiss(animated: true)
+                                self?.driveFloatingPanelController?.dismiss(animated: true)
                                 self?.navigationController?.pushViewController(nextVC, animated: true)
                             }
                         }
                     }
                     presentFloatingPanel()
                 } else {
-                    floatingPanelViewController = NoAccessFloatingPanelViewController.instantiatePanel()
+                    driveFloatingPanelController = NoAccessFloatingPanelViewController.instantiatePanel()
                     presentFloatingPanel()
                 }
             } else {
@@ -102,8 +103,8 @@ class FilePresenter {
     }
 
     private func presentFloatingPanel(animated: Bool = true) {
-        if let floatingPanelViewController = floatingPanelViewController {
-            viewController?.present(floatingPanelViewController, animated: animated)
+        if let driveFloatingPanelController = driveFloatingPanelController {
+            viewController?.present(driveFloatingPanelController, animated: animated)
         }
     }
 }

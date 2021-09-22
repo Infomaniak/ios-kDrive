@@ -77,7 +77,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         }
 
+        // Attach an observer to the payment queue.
+        SKPaymentQueue.default().add(StoreObserver.shared)
+
         NotificationCenter.default.addObserver(self, selector: #selector(handleLocateUploadNotification), name: .locateUploadActionTapped, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
 
         return true
     }
@@ -91,10 +95,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         // For iOS 10 display notification (sent via APNS)
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(
-            options: authOptions,
-            completionHandler: { _, _ in }
-        )
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
         application.registerForRemoteNotifications()
         Messaging.messaging().delegate = self
 
@@ -112,6 +113,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         }
 
         return true
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        // Remove the observer.
+        SKPaymentQueue.default().remove(StoreObserver.shared)
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -216,23 +222,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        if url.isFileURL, let currentDriveFileManager = accountManager.currentDriveFileManager {
-            let filename = url.lastPathComponent
-            let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(filename)
-            do {
-                if FileManager.default.fileExists(atPath: importPath.path) {
-                    try FileManager.default.removeItem(atPath: importPath.path)
-                }
-                try FileManager.default.moveItem(at: url, to: importPath)
-                let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: currentDriveFileManager, file: .init(name: filename, path: importPath, uti: importPath.uti ?? .data))
-                window?.rootViewController?.present(saveNavigationViewController, animated: true)
-                return true
-            } catch {
-                return false
-            }
-        } else {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+              let params = components.queryItems else {
+            DDLogError("Failed to open URL: Invalid URL")
             return false
         }
+
+        if components.path == "store", let userId = params.first(where: { $0.name == "userId" })?.value, let driveId = params.first(where: { $0.name == "driveId" })?.value {
+            if var viewController = window?.rootViewController, let userId = Int(userId), let driveId = Int(driveId), let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
+                // Get presented view controller
+                while let presentedViewController = viewController.presentedViewController {
+                    viewController = presentedViewController
+                }
+                // Show store
+                StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
+            }
+            return true
+        }
+        return false
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -272,22 +279,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
                 if appVersion.showUpdateFloatingPanel() {
                     if !UserDefaults.shared.updateLater || UserDefaults.shared.numberOfConnections % 10 == 0 {
-                        let floatingPanelViewController = UpdateFloatingPanelViewController.instantiatePanel()
-                        (floatingPanelViewController.contentViewController as? UpdateFloatingPanelViewController)?.actionHandler = { _ in
+                        let driveFloatingPanelController = UpdateFloatingPanelViewController.instantiatePanel()
+                        let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UpdateFloatingPanelViewController
+                        floatingPanelViewController?.actionHandler = { _ in
                             if let url = URL(string: "https://apps.apple.com/app/infomaniak-kdrive/id1482778676") {
                                 UserDefaults.shared.updateLater = false
                                 UIApplication.shared.open(url)
                             }
                         }
-                        self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
+                        self.window?.rootViewController?.present(driveFloatingPanelController, animated: true)
                     }
                 }
             }
             if let currentDriveFileManager = accountManager.currentDriveFileManager,
                UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
-                let floatingPanelViewController = SavePhotosFloatingPanelViewController.instantiatePanel(drive: currentDriveFileManager.drive)
-                let savePhotosFloatingPanelViewController = (floatingPanelViewController.contentViewController as? SavePhotosFloatingPanelViewController)
-                savePhotosFloatingPanelViewController?.actionHandler = { [weak self] _ in
+                let driveFloatingPanelController = SavePhotosFloatingPanelViewController.instantiatePanel(drive: currentDriveFileManager.drive)
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? SavePhotosFloatingPanelViewController
+                floatingPanelViewController?.actionHandler = { [weak self] _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
                     photoSyncSettingsVC.driveFileManager = currentDriveFileManager
                     let mainTabViewVC = self?.window?.rootViewController as? UITabBarController
@@ -298,8 +306,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     currentVC.setInfomaniakAppearanceNavigationBar()
                     currentVC.pushViewController(photoSyncSettingsVC, animated: true)
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
+                DispatchQueue.main.async {
+                    self.window?.rootViewController?.present(driveFloatingPanelController, animated: true)
                 }
             }
             if UserDefaults.shared.numberOfConnections == 10 {
@@ -312,16 +320,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 }
             }
             if !UserDefaults.shared.betaInviteDisplayed && !Bundle.main.isRunningInTestFlight {
-                let floatingPanelViewController = BetaInviteFloatingPanelViewController.instantiatePanel()
-                (floatingPanelViewController.contentViewController as? BetaInviteFloatingPanelViewController)?.actionHandler = { _ in
+                let driveFloatingPanelController = BetaInviteFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? BetaInviteFloatingPanelViewController
+                floatingPanelViewController?.actionHandler = { _ in
                     if let url = URL(string: "https://testflight.apple.com/join/qZHSGy5B") {
                         UserDefaults.shared.betaInviteDisplayed = true
                         UIApplication.shared.open(url)
-                        floatingPanelViewController.dismiss(animated: true)
+                        driveFloatingPanelController.dismiss(animated: true)
                     }
                 }
                 DispatchQueue.main.async {
-                    self.window?.rootViewController?.present(floatingPanelViewController, animated: true)
+                    self.window?.rootViewController?.present(driveFloatingPanelController, animated: true)
                 }
             }
             refreshCacheData(preload: false, isSwitching: false)
@@ -345,11 +354,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         if preload {
             DispatchQueue.main.async {
-                if isSwitching {
-                    rootViewController?.didSwitchCurrentAccount(currentAccount)
-                } else {
-                    rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                }
+                // if isSwitching {
+                rootViewController?.didSwitchCurrentAccount(currentAccount)
+                /* } else {
+                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
+                 } */
             }
             updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         } else {
@@ -368,11 +377,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")
             } else {
-                if isSwitching {
-                    rootViewController?.didSwitchCurrentAccount(currentAccount)
-                } else {
-                    rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
-                }
+                // if isSwitching {
+                rootViewController?.didSwitchCurrentAccount(currentAccount)
+                /* } else {
+                     rootViewController?.didUpdateCurrentAccountInformations(currentAccount)
+                 } */
                 if let drive = switchedDrive,
                    let driveFileManager = accountManager.getDriveFileManager(for: drive),
                    !drive.maintenance {
@@ -591,6 +600,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
            let folder = driveFileManager.getCachedFile(id: parentId) {
             present(file: folder, driveFileManager: driveFileManager)
         }
+    }
+
+    @objc func reloadDrive(_ notification: Notification) {
+        refreshCacheData(preload: false, isSwitching: false)
     }
 
     // MARK: - Account manager delegate

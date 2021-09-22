@@ -305,10 +305,11 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
         if convertingFolder {
             driveFileManager.apiFetcher.setupDropBox(directory: folder, password: (password?.isEmpty ?? false) ? nil : password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { response, _ in
                 if let dropBox = response?.data {
-                    let floatingPanelViewController = ShareFloatingPanelViewController.instantiatePanel()
-                    (floatingPanelViewController.contentViewController as? ShareFloatingPanelViewController)?.copyTextField.text = dropBox.url
-                    (floatingPanelViewController.contentViewController as? ShareFloatingPanelViewController)?.titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle(self.folder.name)
-                    self.present(floatingPanelViewController, animated: true)
+                    let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
+                    let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
+                    floatingPanelViewController?.copyTextField.text = dropBox.url
+                    floatingPanelViewController?.titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle(self.folder.name)
+                    self.present(driveFloatingPanelController, animated: true)
                 } else {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 }
