@@ -44,7 +44,7 @@ class ParameterTableViewController: UITableViewController {
             case .wifi:
                 return KDriveStrings.Localizable.settingsOnlyWifiSyncTitle
             case .storage:
-                return "Manage local storage"
+                return KDriveStrings.Localizable.manageStorageTitle
             case .about:
                 return KDriveStrings.Localizable.aboutTitle
             }

@@ -42,15 +42,15 @@ class StorageTableViewController: UITableViewController {
         var directoryTitle: String {
             switch name {
             case "drives":
-                return "Drives & offline files"
+                return KDriveStrings.Localizable.drivesDirectory
             case "Documents":
-                return "Other documents"
+                return KDriveStrings.Localizable.documentsDirectory
             case "import":
-                return "Imports"
+                return KDriveStrings.Localizable.importDirectory
             case "tmp":
-                return "Temporary files"
+                return KDriveStrings.Localizable.tempDirectory
             case "Caches":
-                return "Cache"
+                return KDriveStrings.Localizable.cacheDirectory
             default:
                 return name.capitalized
             }
@@ -71,7 +71,7 @@ class StorageTableViewController: UITableViewController {
         tableView.separatorStyle = .none
         tableView.backgroundColor = KDriveAsset.backgroundColor.color
 
-        title = "Manage local storage"
+        title = KDriveStrings.Localizable.manageStorageTitle
 
         reload()
     }
@@ -172,7 +172,7 @@ class StorageTableViewController: UITableViewController {
         switch section {
         case .header:
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.titleLabel.text = "Total storage used"
+            cell.titleLabel.text = KDriveStrings.Localizable.totalStorageUsedTitle
             cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize))
             cell.selectionStyle = .none
         case .directories:
@@ -200,9 +200,9 @@ class StorageTableViewController: UITableViewController {
         case .header:
             break
         case .directories:
-            sectionHeaderView.titleLabel.text = "Data"
+            sectionHeaderView.titleLabel.text = KDriveStrings.Localizable.directoriesTitle
         case .files:
-            sectionHeaderView.titleLabel.text = "Cached files"
+            sectionHeaderView.titleLabel.text = KDriveStrings.Localizable.cachedFileTitle
         }
         return sectionHeaderView
     }
@@ -217,12 +217,12 @@ class StorageTableViewController: UITableViewController {
         case .directories:
             guard indexPath.row != 0 else { return }
             file = directories[indexPath.row]
-            message = "Do you want to clear the content of “\(file.directoryTitle)”?"
+            message = KDriveStrings.Localizable.modalClearCacheDirectoryDescription(file.directoryTitle)
         case .files:
             file = files[indexPath.row]
-            message = "Do you want to remove the file “\(file.name)” from the local cache? It will not be removed from your kDrive."
+            message = KDriveStrings.Localizable.modalClearCacheFileDescription(file.name)
         }
-        let alertViewController = AlertTextViewController(title: "Clear cache", message: message, action: KDriveStrings.Localizable.buttonClear, destructive: true) {
+        let alertViewController = AlertTextViewController(title: KDriveStrings.Localizable.modalClearCacheTitle, message: message, action: KDriveStrings.Localizable.buttonClear, destructive: true) {
             let isDirectory = file.isDirectory
             do {
                 try self.fileManager.removeItem(atPath: file.path)
