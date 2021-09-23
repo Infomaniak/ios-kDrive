@@ -22,21 +22,60 @@ import UIKit
 class ParameterTableViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
 
-    private enum ParameterOption {
+    private enum ParameterRow: CaseIterable {
         case photos
         case theme
         case notifications
         case security
         case wifi
+        case storage
         case about
+
+        var title: String {
+            switch self {
+            case .photos:
+                return KDriveStrings.Localizable.syncSettingsTitle
+            case .theme:
+                return KDriveStrings.Localizable.themeSettingsTitle
+            case .notifications:
+                return KDriveStrings.Localizable.notificationTitle
+            case .security:
+                return KDriveStrings.Localizable.securityTitle
+            case .wifi:
+                return KDriveStrings.Localizable.settingsOnlyWifiSyncTitle
+            case .storage:
+                return "Manage local storage"
+            case .about:
+                return KDriveStrings.Localizable.aboutTitle
+            }
+        }
+
+        var segue: String? {
+            switch self {
+            case .photos:
+                return "photoSyncSegue"
+            case .theme:
+                return "themeSelectionSegue"
+            case .notifications:
+                return "notificationsSegue"
+            case .security:
+                return "securitySegue"
+            case .wifi, .storage:
+                return nil
+            case .about:
+                return "aboutSegue"
+            }
+        }
     }
 
-    private var tableContent: [ParameterOption] {
+    private var tableContent: [ParameterRow] {
+        var allCases = ParameterRow.allCases
         if #available(iOS 13.0, *) {
-            return [.photos, .theme, .notifications, .security, .wifi, .about]
+            // Do nothing…
         } else {
-            return [.photos, .notifications, .security, .wifi, .about]
+            allCases.removeAll { $0 == .theme }
         }
+        return allCases
     }
 
     override func viewDidLoad() {
@@ -72,29 +111,19 @@ class ParameterTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch tableContent[indexPath.row] {
-        case .photos:
+        let row = tableContent[indexPath.row]
+        switch row {
+        case .photos, .theme, .notifications:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true)
-            cell.titleLabel.text = KDriveStrings.Localizable.syncSettingsTitle
-            cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
-            return cell
-        case .theme:
-            let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.themeSettingsTitle
-            cell.valueLabel.text = UserDefaults.shared.theme.title
-            return cell
-        case .notifications:
-            let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.notificationTitle
-            cell.valueLabel.text = getNotificationText()
-            return cell
-        case .security:
-            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.securityTitle
+            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
+            cell.titleLabel.text = row.title
+            if row == .photos {
+                cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+            } else if row == .theme {
+                cell.valueLabel.text = UserDefaults.shared.theme.title
+            } else if row == .notifications {
+                cell.valueLabel.text = getNotificationText()
+            }
             return cell
         case .wifi:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
@@ -104,28 +133,20 @@ class ParameterTableViewController: UITableViewController {
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell
-        case .about:
+        case .security, .storage, .about:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isLast: true)
-            cell.titleLabel.text = KDriveStrings.Localizable.aboutTitle
+            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
+            cell.titleLabel.text = row.title
             return cell
         }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        switch tableContent[indexPath.row] {
-        case .photos:
-            performSegue(withIdentifier: "photoSyncSegue", sender: nil)
-        case .notifications:
-            performSegue(withIdentifier: "notificationsSegue", sender: nil)
-        case .security:
-            performSegue(withIdentifier: "securitySegue", sender: nil)
-        case .about:
-            performSegue(withIdentifier: "aboutSegue", sender: nil)
-        case .theme:
-            performSegue(withIdentifier: "themeSelectionSegue", sender: nil)
-        default:
-            break
+        let row = tableContent[indexPath.row]
+        if let segueIdentifier = row.segue {
+            performSegue(withIdentifier: segueIdentifier, sender: self)
+        } else if row == .storage {
+            navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
         }
     }
 
