@@ -140,6 +140,10 @@ public class AccountManager: RefreshTokenDelegate {
         }
     }
 
+    private func clearDriveFileManagers() {
+        driveFileManagers.removeAll()
+    }
+
     public func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher {
         if let apiFetcher = apiFetchers[userId] {
             return apiFetcher
@@ -237,6 +241,7 @@ public class AccountManager: RefreshTokenDelegate {
                     if let driveResponse = response?.data,
                        !driveResponse.drives.main.isEmpty {
                         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
+                        self.clearDriveFileManagers()
                         var switchedDrive: Drive?
                         for driveRemoved in driveRemovedList {
                             if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.userId == user.id && PhotoLibraryUploader.instance.settings?.driveId == driveRemoved.id {
