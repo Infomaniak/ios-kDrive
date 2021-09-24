@@ -16,12 +16,31 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Foundation
 import kDriveCore
-import UIKit
 
-class HomeRecentFilesSelectorCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var selector: IKSegmentedControl!
-    override func awakeFromNib() {
-        super.awakeFromNib()
+class RecentFilesController {
+    let driveFileManager: DriveFileManager
+    weak var homeViewController: HomeViewController?
+
+    var listStyle: ListStyle = .list
+    var displayedFiles = [File]()
+    var fetchedFiles: [File]?
+    var page = 1
+    var loading = false
+    var moreComing = false
+
+    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.driveFileManager = driveFileManager
+        self.homeViewController = homeViewController
+        loadFiles()
+    }
+
+    func loadFiles(forceRefresh: Bool = false) {
+        guard !loading || moreComing else {
+            return
+        }
+
+        loading = true
     }
 }

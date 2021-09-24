@@ -68,6 +68,8 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         }
     }
 
+    private var recentFilesController: RecentFilesController?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         topRows = getTopRows()
@@ -78,8 +80,12 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
         collectionView.register(cellView: UploadsInProgressCollectionViewCell.self)
+        collectionView.register(cellView: FileCollectionViewCell.self)
+        collectionView.register(cellView: FileGridCollectionViewCell.self)
+
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
+        collectionView.delegate = self
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
             DispatchQueue.main.async {
@@ -87,6 +93,8 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
                 if status != .offline {}
             }
         }
+
+        recentFilesController = LastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
     }
 
     private func getTopRows() -> [HomeTopRow] {
@@ -134,18 +142,21 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
     func reload() {
         let source: [ArraySection<HomeSection, AnyDifferentiable>] = [
             ArraySection(model: .top, elements: topRows.map { AnyDifferentiable($0) }),
-            ArraySection(model: .recentFiles, elements: [])
+            ArraySection(model: .recentFiles, elements: recentFilesController?.displayedFiles.map { AnyDifferentiable($0) } ?? [])
         ]
 
         let updatedTopRows = getTopRows()
+        let updatedFiles = recentFilesController?.fetchedFiles ?? []
         let target: [ArraySection<HomeSection, AnyDifferentiable>] = [
             ArraySection(model: .top, elements: updatedTopRows.map { AnyDifferentiable($0) }),
-            ArraySection(model: .recentFiles, elements: [])
+            ArraySection(model: .recentFiles, elements: updatedFiles.map { AnyDifferentiable($0) })
         ]
         let changeset = StagedChangeset(source: source, target: target)
 
         collectionView.reload(using: changeset) { _ in
             self.topRows = updatedTopRows
+            self.recentFilesController?.displayedFiles = updatedFiles
+            self.recentFilesController?.fetchedFiles = nil
         }
     }
 
@@ -174,8 +185,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
     private func generateRecentFilesLayout() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         return NSCollectionLayoutSection(group: group)
     }
 }
@@ -186,7 +196,7 @@ extension HomeViewController: UICollectionViewDataSource {
         case .top:
             return topRows.count
         case .recentFiles:
-            return 0
+            return recentFilesController?.displayedFiles.count ?? 0
         }
     }
 
@@ -241,7 +251,31 @@ extension HomeViewController: UICollectionViewDataSource {
                 return cell
             }
         case .recentFiles:
-            return UICollectionViewCell()
+            let cellType: UICollectionViewCell.Type
+            switch recentFilesController!.listStyle {
+            case .list:
+                cellType = FileCollectionViewCell.self
+            case .grid:
+                cellType = FileGridCollectionViewCell.self
+            }
+            let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
+
+            let displayedFiles = recentFilesController!.displayedFiles
+            let file = displayedFiles[indexPath.row]
+            cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == displayedFiles.count - 1)
+            cell.configureWith(file: file, selectionMode: false)
+
+            return cell
+        }
+    }
+}
+
+extension HomeViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if HomeSection.allCases[indexPath.section] == .recentFiles {
+            if indexPath.row >= (recentFilesController?.displayedFiles.count ?? 0) - 10 {
+                recentFilesController?.loadFiles()
+            }
         }
     }
 }

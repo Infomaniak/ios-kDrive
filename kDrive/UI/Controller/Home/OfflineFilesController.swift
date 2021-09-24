@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDriveCore
-import UIKit
+import Foundation
 
-class HomeRecentFilesSelectorCollectionViewCell: UICollectionViewCell {
-    @IBOutlet weak var selector: IKSegmentedControl!
-    override func awakeFromNib() {
-        super.awakeFromNib()
+class OfflineFilesController: RecentFilesController {
+    override func loadFiles(forceRefresh: Bool = false) {
+        fetchedFiles = driveFileManager.getAvailableOfflineFiles()
+        homeViewController?.reload()
     }
 }

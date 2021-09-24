@@ -17,11 +17,12 @@
                 <rect key="frame" x="0.0" y="0.0" width="304" height="50"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
-                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="zGN-Tv-sFf">
+                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="zGN-Tv-sFf" customClass="IKSegmentedControl" customModule="kDriveCore">
                         <rect key="frame" x="24" y="8" width="256" height="35"/>
                         <segments>
-                            <segment title="First"/>
-                            <segment title="Second"/>
+                            <segment title="Activité"/>
+                            <segment title="Hors ligne"/>
+                            <segment title="Images"/>
                         </segments>
                     </segmentedControl>
                 </subviews>
@@ -34,7 +35,15 @@
                 <constraint firstAttribute="bottom" secondItem="zGN-Tv-sFf" secondAttribute="bottom" constant="8" id="k6y-rv-xDb"/>
             </constraints>
             <size key="customSize" width="304" height="50"/>
+            <connections>
+                <outlet property="selector" destination="zGN-Tv-sFf" id="6gc-1a-nUY"/>
+            </connections>
             <point key="canvasLocation" x="315.94202898550725" y="91.741071428571431"/>
         </collectionViewCell>
     </objects>
+    <designables>
+        <designable name="zGN-Tv-sFf">
+            <size key="intrinsicContentSize" width="245" height="31"/>
+        </designable>
+    </designables>
 </document>

@@ -76,7 +76,7 @@ class MenuViewController: UIViewController {
 
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: MenuTopTableViewCell.self)
-        tableView.register(cellView: UploadsInProgressTableViewCell.self)
+        //tableView.register(cellView: UploadsInProgressTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         currentAccount = AccountManager.instance.currentAccount
@@ -125,7 +125,7 @@ class MenuViewController: UIViewController {
                 // Add cell
                 self.updateTableContent()
                 self.tableView.reloadData()
-            }
+            }*/
         }
     }
 
@@ -203,10 +203,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
             return cell
         } else if section == .uploads {
-            let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
+            let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
+            /*let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.progressView.enableIndeterminate()
-            cell.setUploadCount(uploadCountManager.uploadCount)
+            cell.setUploadCount(uploadCountManager.uploadCount)*/
             return cell
         } else {
             let action = section.actions[indexPath.row]
