@@ -603,7 +603,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     @objc func reloadDrive(_ notification: Notification) {
-        refreshCacheData(preload: false, isSwitching: false)
+        DispatchQueue.main.async {
+            self.refreshCacheData(preload: false, isSwitching: false)
+        }
     }
 
     // MARK: - Account manager delegate

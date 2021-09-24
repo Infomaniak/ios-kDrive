@@ -25,6 +25,7 @@ protocol StoreObserverDelegate: AnyObject {
     func storeObserverRestoreDidSucceed()
     func storeObserverPurchaseDidSucceed(transaction: SKPaymentTransaction, receiptString: String)
     func storeObserverDidReceiveMessage(_ message: String)
+    func storeObserverPaymentCancelled()
 }
 
 class StoreObserver: NSObject {
@@ -108,7 +109,11 @@ class StoreObserver: NSObject {
         }
 
         // Do not send any notifications when the user cancels the purchase
-        if (transaction.error as? SKError)?.code != .paymentCancelled {
+        if (transaction.error as? SKError)?.code == .paymentCancelled {
+            DispatchQueue.main.async {
+                self.delegate?.storeObserverPaymentCancelled()
+            }
+        } else {
             DispatchQueue.main.async {
                 self.delegate?.storeObserverDidReceiveMessage(message)
             }
