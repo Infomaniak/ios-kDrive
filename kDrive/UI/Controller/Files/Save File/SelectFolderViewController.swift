@@ -68,22 +68,24 @@ class SelectFolderViewController: FileListViewController {
         }
     }
 
-    static func instantiateInNavigationController(driveFileManager: DriveFileManager, startDirectory: File? = nil, fileToMove: Int? = nil, disabledDirectoriesSelection: [File] = [], delegate: SelectFolderDelegate? = nil) -> TitleSizeAdjustingNavigationController {
+    static func instantiateInNavigationController(driveFileManager: DriveFileManager, startDirectory: File? = nil, fileToMove: Int? = nil, disabledDirectoriesSelection: [File] = [], delegate: SelectFolderDelegate? = nil, selectHandler: ((File) -> Void)? = nil) -> TitleSizeAdjustingNavigationController {
         var viewControllers = [SelectFolderViewController]()
         if startDirectory == nil {
             let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
-            selectFolderViewController.delegate = delegate
-            selectFolderViewController.fileToMove = fileToMove
             selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
+            selectFolderViewController.fileToMove = fileToMove
+            selectFolderViewController.delegate = delegate
+            selectFolderViewController.selectHandler = selectHandler
             viewControllers.append(selectFolderViewController)
         } else {
             var directory = startDirectory
             while directory != nil {
                 let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
-                selectFolderViewController.delegate = delegate
-                selectFolderViewController.currentDirectory = directory
-                selectFolderViewController.fileToMove = fileToMove
                 selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
+                selectFolderViewController.fileToMove = fileToMove
+                selectFolderViewController.currentDirectory = directory
+                selectFolderViewController.delegate = delegate
+                selectFolderViewController.selectHandler = selectHandler
                 viewControllers.append(selectFolderViewController)
                 directory = directory?.parent
             }

@@ -306,9 +306,8 @@ extension SaveFileViewController: UITableViewDelegate {
             navigationController?.pushViewController(selectDriveViewController, animated: true)
         case .directorySelection:
             guard let driveFileManager = selectedDriveFileManager else { return }
-            let selectFolderViewController = SelectFolderViewController.instantiate(driveFileManager: driveFileManager)
-            selectFolderViewController.delegate = self
-            navigationController?.pushViewController(selectFolderViewController, animated: true)
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, delegate: self)
+            present(selectFolderNavigationController, animated: true)
         default:
             break
         }
@@ -325,6 +324,7 @@ extension SaveFileViewController: SelectFolderDelegate {
             selectedDirectory = folder
         }
         updateButton()
+        tableView.reloadData()
     }
 }
 
