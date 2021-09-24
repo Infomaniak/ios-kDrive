@@ -45,7 +45,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         case recentFiles
     }
 
-    private enum HomeTopRows {
+    private enum HomeTopRow: Differentiable {
         case offline
         case drive
         case search
@@ -58,7 +58,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         case recentFiles
     }
 
-    private var topRows = [HomeTopRows]()
+    private var topRows = [HomeTopRow]()
 
     private var showInsufficientStorage = true
     private var uploadCountManager: UploadCountManager!
@@ -70,7 +70,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateTopRows()
+        topRows = getTopRows()
 
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
         collectionView.register(cellView: WrapperCollectionViewCell.self)
@@ -80,13 +80,21 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         collectionView.register(cellView: UploadsInProgressCollectionViewCell.self)
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
+
+        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
+            DispatchQueue.main.async {
+                self.reload()
+                if status != .offline {}
+            }
+        }
     }
 
-    private func updateTopRows() {
+    private func getTopRows() -> [HomeTopRow] {
+        var topRows: [HomeTopRow]
         if ReachabilityListener.instance.currentStatus == .offline {
             topRows = [.offline, .drive, .search]
         } else {
-            topRows = [.uploadsInProgress, .insufficientStorage, .drive, .search, .recentFilesSelector]
+            topRows = [.drive, .search, .recentFilesSelector]
         }
 
         if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
@@ -94,12 +102,13 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         }
 
         guard driveFileManager != nil && driveFileManager.drive.size > 0 else {
-            return
+            return topRows
         }
         let storagePercentage = Double(driveFileManager.drive.usedSize) / Double(driveFileManager.drive.size) * 100
         if (storagePercentage > UIConstants.insufficientStorageMinimumPercentage) && showInsufficientStorage {
             topRows.append(.insufficientStorage)
         }
+        return topRows
     }
 
     private func observeUploadCount() {
@@ -113,12 +122,30 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
                     cell.setUploadCount(self.uploadCountManager.uploadCount)
                 } else {
                     // Delete cell
-                    // self.reload(sections: [.top])
+                    self.reload()
                 }
             } else {
                 // Add cell
-                // self.reload(sections: [.top])
+                self.reload()
             }
+        }
+    }
+
+    func reload() {
+        let source: [ArraySection<HomeSection, AnyDifferentiable>] = [
+            ArraySection(model: .top, elements: topRows.map { AnyDifferentiable($0) }),
+            ArraySection(model: .recentFiles, elements: [])
+        ]
+
+        let updatedTopRows = getTopRows()
+        let target: [ArraySection<HomeSection, AnyDifferentiable>] = [
+            ArraySection(model: .top, elements: updatedTopRows.map { AnyDifferentiable($0) }),
+            ArraySection(model: .recentFiles, elements: [])
+        ]
+        let changeset = StagedChangeset(source: source, target: target)
+
+        collectionView.reload(using: changeset) { _ in
+            self.topRows = updatedTopRows
         }
     }
 
