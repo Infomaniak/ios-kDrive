@@ -81,11 +81,15 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionActions: [FloatingPanelAction] {
-        return [offline, favorite, download].map { $0.reset() }
+        return [offline, favorite, download, duplicate].map { $0.reset() }
     }
 
     static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
         return [download].map { $0.reset() }
+    }
+
+    static var multipleSelectionBulkActions: [FloatingPanelAction] {
+        return [download, duplicate].map { $0.reset() }
     }
 
     public static func == (lhs: FloatingPanelAction, rhs: FloatingPanelAction) -> Bool {

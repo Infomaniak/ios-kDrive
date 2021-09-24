@@ -146,6 +146,10 @@ public enum ApiRoutes {
         return "\(fileURL(file: file))copy?\(with)"
     }
 
+    static func copyFile(file: File, newParentId: Int) -> String {
+        return "\(fileURL(file: file))copy/\(newParentId)"
+    }
+
     static func moveFile(file: File, newParentId: Int) -> String {
         return "\(fileURL(file: file))move/\(newParentId)"
     }

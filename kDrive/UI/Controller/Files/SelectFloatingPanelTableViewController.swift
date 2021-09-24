@@ -36,8 +36,10 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
     }
 
     lazy var actions: [FloatingPanelAction] = {
-        if sharedWithMe || files.count > Constants.bulkActionThreshold {
+        if sharedWithMe {
             return FloatingPanelAction.multipleSelectionSharedWithMeActions
+        } else if files.count > Constants.bulkActionThreshold {
+            return FloatingPanelAction.multipleSelectionBulkActions
         } else {
             return FloatingPanelAction.multipleSelectionActions
         }
@@ -184,6 +186,32 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     }
                 }
             }
+        case .duplicate:
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [unowned self, fileIds = files.map(\.id)] selectedFolder in
+                if self.files.count > Constants.bulkActionThreshold {
+                    addAction = false // Prevents the snackbar to be displayed
+                    let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedFolder.id)
+                    self.driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
+                        let tabBarController = presentingViewController as? MainTabViewController
+                        let navigationController = tabBarController?.selectedViewController as? UINavigationController
+                        (navigationController?.topViewController as? FileListViewController)?.bulkObservation(action: .copy, response: response, error: error)
+                    }
+                } else {
+                    for file in self.files {
+                        group.enter()
+                        self.driveFileManager.apiFetcher.copyFile(file: file, newParent: selectedFolder) { _, error in
+                            if error != nil {
+                                success = false
+                            }
+                            group.leave()
+                        }
+                    }
+                }
+                group.leave()
+            }
+            group.enter()
+            present(selectFolderNavigationController, animated: true)
+            tableView.reloadRows(at: [indexPath], with: .fade)
         default:
             break
         }
@@ -194,6 +222,8 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.count))
                 } else if action == .favorite && addAction {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
+                } else if action == .duplicate && addAction {
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
                 }
             } else {
                 if self.downloadError != .taskCancelled {

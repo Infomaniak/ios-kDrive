@@ -106,7 +106,13 @@ class MultipleSelectionViewController: UIViewController {
     final func updateSelectionButtons() {
         let notEmpty = !selectedItems.isEmpty
         let canMove = selectedItems.allSatisfy { $0.rights?.move ?? false }
-        let canDelete = selectedItems.allSatisfy { $0.rights?.delete ?? false }
+        let isInTrash: Bool
+        #if ISEXTENSION
+        isInTrash = false
+        #else
+        isInTrash = self is TrashViewController
+        #endif
+        let canDelete = isInTrash || selectedItems.allSatisfy { $0.rights?.delete ?? false }
         setSelectionButtonsEnabled(moveEnabled: notEmpty && canMove, deleteEnabled: notEmpty && canDelete, moreEnabled: notEmpty)
     }
 
@@ -223,7 +229,7 @@ class MultipleSelectionViewController: UIViewController {
         let selectViewController = SelectFloatingPanelTableViewController()
         floatingPanelViewController.isRemovalInteractionEnabled = true
         selectViewController.files = Array(selectedItems)
-        floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
+        floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 260)
         selectViewController.driveFileManager = driveFileManager
         selectViewController.reloadAction = { [unowned self] in
             selectionMode = false

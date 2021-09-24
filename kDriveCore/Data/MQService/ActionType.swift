@@ -21,6 +21,7 @@ import Foundation
 public enum BulkActionType: String, Codable {
     case trash
     case move
+    case copy
 }
 
 enum SimpleAction: String, Codable {
