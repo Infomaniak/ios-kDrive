@@ -186,6 +186,13 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         present(alert, animated: true)
     }
 
+    private func setNextButtonLoading(_ loading: Bool) {
+        if let index = rows.firstIndex(of: .nextButton),
+           let cell = tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? StoreNextTableViewCell {
+            cell.button.setLoading(loading)
+        }
+    }
+
     private func showSuccessView() {
         let successViewController = StoreSuccessViewController.instantiate()
         successViewController.modalPresentationStyle = .fullScreen
@@ -289,10 +296,11 @@ extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNex
         selectedStorage = newValue
     }
 
-    func nextButtonTapped() {
+    func nextButtonTapped(_ button: IKLargeButton) {
         if let product = displayedItems.first(where: { $0.pack == selectedPack })?.product {
             // Attempt to purchase the tapped product
             StoreObserver.shared.buy(product, userId: AccountManager.instance.currentUserId, driveId: driveFileManager.drive.id)
+            button.setLoading(true)
         }
     }
 }
@@ -329,11 +337,14 @@ extension StoreViewController: StoreObserverDelegate {
         showSuccessView()
     }
 
-    func storeObserverRestoreDidSucceed() {
-        // TODO: Do something
-    }
+    func storeObserverRestoreDidSucceed() {}
 
     func storeObserverDidReceiveMessage(_ message: String) {
         UIConstants.showSnackBar(message: message)
+        setNextButtonLoading(false)
+    }
+
+    func storeObserverPaymentCancelled() {
+        setNextButtonLoading(false)
     }
 }

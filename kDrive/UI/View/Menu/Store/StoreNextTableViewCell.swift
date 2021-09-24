@@ -20,7 +20,7 @@ import kDriveCore
 import UIKit
 
 protocol StoreNextCellDelegate: AnyObject {
-    func nextButtonTapped()
+    func nextButtonTapped(_ button: IKLargeButton)
 }
 
 class StoreNextTableViewCell: UITableViewCell {
@@ -29,6 +29,6 @@ class StoreNextTableViewCell: UITableViewCell {
     weak var delegate: StoreNextCellDelegate?
 
     @IBAction func buttonTapped(_ sender: IKLargeButton) {
-        delegate?.nextButtonTapped()
+        delegate?.nextButtonTapped(sender)
     }
 }
