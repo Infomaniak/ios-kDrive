@@ -1,3 +1,4 @@
+//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2021 Infomaniak Network SA
@@ -16,21 +17,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
-import kDriveCore
 import UIKit
 
-class UploadsInProgressTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var progressView: RPCircularProgress!
-    @IBOutlet weak var subtitleLabel: IKLabel!
+class HomeRecentFilesSelectorCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-
-        progressView.setInfomaniakStyle()
+        // Initialization code
     }
 
-    func setUploadCount(_ count: Int) {
-        subtitleLabel.text = KDriveStrings.Localizable.uploadInProgressNumberFile(count)
-    }
 }

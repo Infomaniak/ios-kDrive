@@ -16,30 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class DriveSwitchTableViewCell: InsetTableViewCell {
-    struct Style {
-        let height: CGFloat
-        static let home = Style(height: 91)
-        static let selectDrive = Style(height: 75)
-        static let switchDrive = Style(height: 72)
-    }
-
-    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var driveImageView: UIImageView!
-    @IBOutlet weak var selectDriveImageView: UIImageView!
-    var style: Style = .home {
-        didSet {
-            heightConstraint.constant = style.height
-        }
-    }
-
-    func configureWith(drive: Drive) {
-        titleLabel.text = drive.name
-        driveImageView.tintColor = UIColor(hex: drive.preferences.color)
+class HomeFileSearchCollectionViewCell: InsetCollectionViewCell {
+    override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = UIConstants.cornerRadius) {
+        super.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast, elevation: elevation, radius: radius)
+        bottomConstraint?.constant = 2
         accessibilityTraits = .button
     }
 }

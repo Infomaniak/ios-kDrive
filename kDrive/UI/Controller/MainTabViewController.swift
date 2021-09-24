@@ -185,7 +185,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
 extension MainTabViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        if let homeViewController = (viewController as? UINavigationController)?.topViewController as? HomeTableViewController {
+        if let homeViewController = (viewController as? UINavigationController)?.topViewController as? HomeViewController {
             homeViewController.presentedFromTabBar()
         }
 

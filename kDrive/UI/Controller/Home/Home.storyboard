@@ -1,64 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="iMt-sa-khV">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="TuV-Pj-cAB">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Home Table View Controller-->
-        <scene sceneID="Feb-K5-dfc">
+        <!--Home View Controller-->
+        <scene sceneID="6r9-KD-KHC">
             <objects>
-                <tableViewController storyboardIdentifier="HomeTableViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="fCM-CW-jfK" customClass="HomeTableViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="reD-qD-7DS">
+                <viewController id="m9V-uO-eWP" customClass="HomeViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Des-JG-TKw">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Fzu-WB-v1W">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="CaA-h9-jne">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells/>
+                            </collectionView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="hy0-GM-aa2"/>
                         <color key="backgroundColor" name="backgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="fCM-CW-jfK" id="rj6-Wg-sYQ"/>
-                            <outlet property="delegate" destination="fCM-CW-jfK" id="RRs-8y-PiO"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" id="fX3-r1-U3u">
-                        <barButtonItem key="backBarButtonItem" title=" " id="mZu-JL-nDO"/>
-                    </navigationItem>
-                    <nil key="simulatedTopBarMetrics"/>
-                    <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="s0K-R9-Xcv">
-                        <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </refreshControl>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="Fzu-WB-v1W" secondAttribute="bottom" id="3Zb-Ug-rht"/>
+                            <constraint firstItem="Fzu-WB-v1W" firstAttribute="top" secondItem="Des-JG-TKw" secondAttribute="top" id="Now-3a-dSx"/>
+                            <constraint firstItem="Fzu-WB-v1W" firstAttribute="trailing" secondItem="Des-JG-TKw" secondAttribute="trailing" id="fKm-Bq-V7p"/>
+                            <constraint firstItem="Fzu-WB-v1W" firstAttribute="leading" secondItem="Des-JG-TKw" secondAttribute="leading" id="rSY-9z-4M6"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="nIe-KJ-HML"/>
                     <connections>
-                        <segue destination="Gku-Kw-V1T" kind="presentation" identifier="switchDriveSegue" modalPresentationStyle="overFullScreen" modalTransitionStyle="crossDissolve" id="dV9-4E-dIC"/>
+                        <outlet property="collectionView" destination="Fzu-WB-v1W" id="kzr-X2-Y18"/>
                     </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="brL-a9-YOQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="TIR-lh-A4M" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1273.913043478261" y="146.65178571428569"/>
-        </scene>
-        <!--Title Size Adjusting Navigation Controller-->
-        <scene sceneID="KcT-Wb-dPZ">
-            <objects>
-                <navigationController storyboardIdentifier="HomeVC" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="iMt-sa-khV" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="" image="house" selectedImage="house-fill" id="siB-Vw-bM9">
-                        <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
-                    </tabBarItem>
-                    <toolbarItems/>
-                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="bkz-6d-drj">
-                        <rect key="frame" x="0.0" y="44" width="414" height="96"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="fCM-CW-jfK" kind="relationship" relationship="rootViewController" id="lOQ-CB-mSn"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="9aD-iK-BGD" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="363.768115942029" y="146.65178571428569"/>
+            <point key="canvasLocation" x="1275" y="-484"/>
         </scene>
         <!--Switch Drive View Controller-->
         <scene sceneID="HuN-o7-mu7">
@@ -115,6 +102,28 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="oa4-p3-19a" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2083" y="-484"/>
+        </scene>
+        <!--Title Size Adjusting Navigation Controller-->
+        <scene sceneID="wFc-Ct-V9A">
+            <objects>
+                <navigationController storyboardIdentifier="HomeVC" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="TuV-Pj-cAB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="" image="house" selectedImage="house-fill" id="YAE-aq-h2X">
+                        <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
+                    </tabBarItem>
+                    <toolbarItems/>
+                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="wRs-gO-jx3">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="m9V-uO-eWP" kind="relationship" relationship="rootViewController" id="WRA-Qy-oGE"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="rQs-Ax-FUt" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="365" y="-484"/>
         </scene>
     </scenes>
     <resources>

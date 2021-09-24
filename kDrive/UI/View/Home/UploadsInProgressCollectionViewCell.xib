@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="UploadsInProgressCollectionViewCell" id="gTV-IL-0wX" customClass="UploadsInProgressCollectionViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="318" height="87"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="318" height="87"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8Z8-Bc-c8A">
+                        <rect key="frame" x="24" y="0.0" width="270" height="87"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X7e-vv-XyW" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
+                                <rect key="frame" x="16" y="31.5" width="24" height="24"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="cgt-qF-8GG"/>
+                                    <constraint firstAttribute="width" constant="24" id="iKj-Mn-SPs"/>
+                                </constraints>
+                            </view>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="CWR-rD-Jj1">
+                                <rect key="frame" x="48" y="16" width="186" height="55"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Importation en cours" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yN9-3b-CVb" customClass="IKLabel" customModule="kDriveCore">
+                                        <rect key="frame" x="0.0" y="0.0" width="186" height="32.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadInProgressTitle"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" ambiguous="YES" text="2649 fichiers restants" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EwI-Yc-0kD" customClass="IKLabel" customModule="kDriveCore">
+                                        <rect key="frame" x="0.0" y="40.5" width="186" height="14.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="Tjn-i4-dbL">
+                                <rect key="frame" x="242" y="37.5" width="12" height="12"/>
+                                <color key="tintColor" name="primaryTextColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="12" id="VfB-5j-tcF"/>
+                                    <constraint firstAttribute="width" constant="12" id="hym-fQ-fZI"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" name="backgroundCardViewColor"/>
+                        <constraints>
+                            <constraint firstItem="CWR-rD-Jj1" firstAttribute="centerY" secondItem="8Z8-Bc-c8A" secondAttribute="centerY" id="5LB-dg-RZh"/>
+                            <constraint firstItem="X7e-vv-XyW" firstAttribute="centerY" secondItem="8Z8-Bc-c8A" secondAttribute="centerY" id="CMM-nJ-d3B"/>
+                            <constraint firstAttribute="trailing" secondItem="Tjn-i4-dbL" secondAttribute="trailing" constant="16" id="Rrl-tk-CpF"/>
+                            <constraint firstItem="CWR-rD-Jj1" firstAttribute="top" secondItem="8Z8-Bc-c8A" secondAttribute="top" constant="16" id="WgO-m7-cls"/>
+                            <constraint firstItem="CWR-rD-Jj1" firstAttribute="centerY" secondItem="8Z8-Bc-c8A" secondAttribute="centerY" id="YuU-Y3-N2Y"/>
+                            <constraint firstItem="Tjn-i4-dbL" firstAttribute="centerY" secondItem="8Z8-Bc-c8A" secondAttribute="centerY" id="dhf-WM-yrw"/>
+                            <constraint firstItem="Tjn-i4-dbL" firstAttribute="leading" secondItem="CWR-rD-Jj1" secondAttribute="trailing" constant="8" id="e1P-1y-ywW"/>
+                            <constraint firstItem="X7e-vv-XyW" firstAttribute="centerY" secondItem="8Z8-Bc-c8A" secondAttribute="centerY" id="jRg-WU-ble"/>
+                            <constraint firstItem="X7e-vv-XyW" firstAttribute="leading" secondItem="8Z8-Bc-c8A" secondAttribute="leading" constant="16" id="pLj-IX-2fj"/>
+                            <constraint firstAttribute="bottom" secondItem="CWR-rD-Jj1" secondAttribute="bottom" constant="16" id="t0C-NT-msP"/>
+                            <constraint firstItem="CWR-rD-Jj1" firstAttribute="leading" secondItem="X7e-vv-XyW" secondAttribute="trailing" constant="8" id="w6m-2X-51A"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="8Z8-Bc-c8A" secondAttribute="bottom" id="ERh-gO-gxw"/>
+                <constraint firstItem="8Z8-Bc-c8A" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="24" id="MTC-h2-Qsr"/>
+                <constraint firstItem="8Z8-Bc-c8A" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="Mn2-5N-h0u"/>
+                <constraint firstAttribute="trailing" secondItem="8Z8-Bc-c8A" secondAttribute="trailing" constant="24" id="Mox-OG-gE2"/>
+            </constraints>
+            <size key="customSize" width="318" height="87"/>
+            <connections>
+                <outlet property="bottomConstraint" destination="ERh-gO-gxw" id="fym-pO-lLW"/>
+                <outlet property="contentInsetView" destination="8Z8-Bc-c8A" id="MBN-Dz-YPp"/>
+                <outlet property="progressView" destination="X7e-vv-XyW" id="iBT-PB-W4Z"/>
+                <outlet property="subtitleLabel" destination="EwI-Yc-0kD" id="5XZ-1B-m6v"/>
+                <outlet property="topConstraint" destination="Mn2-5N-h0u" id="ujp-3A-0Xt"/>
+            </connections>
+            <point key="canvasLocation" x="331.8840579710145" y="104.12946428571428"/>
+        </collectionViewCell>
+    </objects>
+    <designables>
+        <designable name="EwI-Yc-0kD">
+            <size key="intrinsicContentSize" width="125" height="14.5"/>
+        </designable>
+        <designable name="yN9-3b-CVb">
+            <size key="intrinsicContentSize" width="144.5" height="17"/>
+        </designable>
+    </designables>
+    <resources>
+        <image name="chevron-right" width="24" height="24"/>
+        <namedColor name="backgroundCardViewColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="primaryTextColor">
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

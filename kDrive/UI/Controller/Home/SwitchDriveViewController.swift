@@ -106,10 +106,6 @@ extension SwitchDriveViewController: UITableViewDelegate {
 // MARK: - UITableViewDataSource
 extension SwitchDriveViewController: UITableViewDataSource {
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 72
-    }
-
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return filteredDrives.count
     }
@@ -117,6 +113,7 @@ extension SwitchDriveViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+        cell.style = .switchDrive
         let drive = filteredDrives[indexPath.row]
         cell.configureWith(drive: drive)
 

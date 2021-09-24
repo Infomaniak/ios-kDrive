@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="InsufficientStorageCollectionViewCell" id="gTV-IL-0wX" customClass="InsufficientStorageCollectionViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="344" height="195"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="344" height="195"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IaI-wJ-wCn">
+                        <rect key="frame" x="24" y="0.0" width="296" height="195"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3jU-IF-jGA" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
+                                <rect key="frame" x="24" y="24" width="28" height="28"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="28" id="EaT-hh-pGD"/>
+                                    <constraint firstAttribute="width" constant="28" id="SlA-F9-NIX"/>
+                                </constraints>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1.9 / 2 To" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gsM-Ac-mz2" customClass="IKLabel" customModule="kDriveCore">
+                                <rect key="frame" x="60" y="27.5" width="73.5" height="21.5"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                <color key="textColor" name="titleColor"/>
+                                <nil key="highlightedColor"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
+                                </userDefinedRuntimeAttributes>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="utilisés" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WSJ-do-7xO" customClass="IKLabel" customModule="kDriveCore">
+                                <rect key="frame" x="137.5" y="31" width="154.5" height="17"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <color key="textColor" name="titleColor"/>
+                                <nil key="highlightedColor"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notEnoughStorageUsed"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
+                                </userDefinedRuntimeAttributes>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="idg-4N-q2p">
+                                <rect key="frame" x="24" y="60" width="248" height="119"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L’espace de stockage de votre kDrive est presque plein. Faites évoluer votre offre et débloquez de nouvelles fonctionnalités." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vnE-yx-RHy" customClass="IKLabel" customModule="kDriveCore">
+                                        <rect key="frame" x="0.0" y="0.0" width="200.5" height="17"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <color key="textColor" name="primaryTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notEnoughStorageDescription1"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2qe-le-aiX" customClass="IKButton" customModule="kDriveCore">
+                                        <rect key="frame" x="0.0" y="25" width="132" height="94"/>
+                                        <color key="backgroundColor" name="backgroundCardViewColor"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <state key="normal" title="Faire évoluer mon offre">
+                                            <color key="titleColor" name="infomaniakColor"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                                <real key="value" value="18"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonUpgradeOffer"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="action"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="upgradeButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="dLJ-AV-2Pa"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a7j-pf-fSH">
+                                <rect key="frame" x="257" y="24" width="15" height="15"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="15" id="Efd-x1-54d"/>
+                                    <constraint firstAttribute="height" constant="15" id="PRV-SW-1ZP"/>
+                                </constraints>
+                                <color key="tintColor" name="primaryTextColor"/>
+                                <state key="normal" image="close"/>
+                                <connections>
+                                    <action selector="closeButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="Gbe-XG-Tqu"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="idg-4N-q2p" firstAttribute="top" secondItem="3jU-IF-jGA" secondAttribute="bottom" constant="8" id="1eQ-TD-2E6"/>
+                            <constraint firstAttribute="bottom" secondItem="idg-4N-q2p" secondAttribute="bottom" constant="16" id="4nl-Z8-GwW"/>
+                            <constraint firstItem="WSJ-do-7xO" firstAttribute="leading" secondItem="gsM-Ac-mz2" secondAttribute="trailing" constant="4" id="60F-LQ-hRW"/>
+                            <constraint firstItem="3jU-IF-jGA" firstAttribute="leading" secondItem="IaI-wJ-wCn" secondAttribute="leading" constant="24" id="7h3-1s-DuW"/>
+                            <constraint firstItem="3jU-IF-jGA" firstAttribute="top" secondItem="IaI-wJ-wCn" secondAttribute="top" constant="24" id="BpB-qB-iy1"/>
+                            <constraint firstAttribute="trailing" secondItem="idg-4N-q2p" secondAttribute="trailing" constant="24" id="GFi-NU-AKC"/>
+                            <constraint firstItem="idg-4N-q2p" firstAttribute="leading" secondItem="IaI-wJ-wCn" secondAttribute="leading" constant="24" id="bD7-gu-AaB"/>
+                            <constraint firstAttribute="trailing" secondItem="a7j-pf-fSH" secondAttribute="trailing" constant="24" id="e8W-yN-E1n"/>
+                            <constraint firstItem="WSJ-do-7xO" firstAttribute="bottom" secondItem="gsM-Ac-mz2" secondAttribute="bottom" constant="-1" id="isH-sM-bgZ"/>
+                            <constraint firstItem="a7j-pf-fSH" firstAttribute="top" secondItem="IaI-wJ-wCn" secondAttribute="top" constant="24" id="lgE-bb-ASP"/>
+                            <constraint firstItem="gsM-Ac-mz2" firstAttribute="centerY" secondItem="3jU-IF-jGA" secondAttribute="centerY" id="vEq-AC-zds"/>
+                            <constraint firstItem="gsM-Ac-mz2" firstAttribute="leading" secondItem="3jU-IF-jGA" secondAttribute="trailing" constant="8" id="wfd-vD-zgJ"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="IaI-wJ-wCn" secondAttribute="bottom" id="1FO-sF-L4f"/>
+                <constraint firstItem="IaI-wJ-wCn" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="24" id="GYJ-De-kib"/>
+                <constraint firstItem="IaI-wJ-wCn" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="c6M-7V-XAH"/>
+                <constraint firstAttribute="trailing" secondItem="IaI-wJ-wCn" secondAttribute="trailing" constant="24" id="rej-SB-3lB"/>
+            </constraints>
+            <size key="customSize" width="344" height="195"/>
+            <connections>
+                <outlet property="bottomConstraint" destination="1FO-sF-L4f" id="kKp-8u-Vro"/>
+                <outlet property="contentInsetView" destination="IaI-wJ-wCn" id="gp7-Ah-TbV"/>
+                <outlet property="progressView" destination="3jU-IF-jGA" id="mqk-5A-dVF"/>
+                <outlet property="storageDescription" destination="vnE-yx-RHy" id="RJs-5X-EPd"/>
+                <outlet property="storageLabel" destination="gsM-Ac-mz2" id="q83-Sz-yBw"/>
+                <outlet property="topConstraint" destination="c6M-7V-XAH" id="eFn-Tn-JcJ"/>
+                <outlet property="upgradeButton" destination="2qe-le-aiX" id="bKH-nw-6nb"/>
+            </connections>
+            <point key="canvasLocation" x="350.72463768115944" y="140.29017857142856"/>
+        </collectionViewCell>
+    </objects>
+    <designables>
+        <designable name="2qe-le-aiX">
+            <size key="intrinsicContentSize" width="132" height="29"/>
+        </designable>
+        <designable name="WSJ-do-7xO">
+            <size key="intrinsicContentSize" width="154.5" height="17"/>
+        </designable>
+        <designable name="gsM-Ac-mz2">
+            <size key="intrinsicContentSize" width="73.5" height="21.5"/>
+        </designable>
+        <designable name="vnE-yx-RHy">
+            <size key="intrinsicContentSize" width="200.5" height="17"/>
+        </designable>
+    </designables>
+    <resources>
+        <image name="close" width="24" height="24"/>
+        <namedColor name="backgroundCardViewColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="infomaniakColor">
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="primaryTextColor">
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="titleColor">
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

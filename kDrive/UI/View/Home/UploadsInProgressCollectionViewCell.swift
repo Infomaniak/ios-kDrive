@@ -17,12 +17,19 @@
  */
 
 import UIKit
-import InfomaniakCore
+import kDriveCore
 
-class HomeOfflineTableViewCell: InsetTableViewCell {
+class UploadsInProgressCollectionViewCell: InsetCollectionViewCell {
+    @IBOutlet weak var progressView: RPCircularProgress!
+    @IBOutlet weak var subtitleLabel: IKLabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+
+        progressView.setInfomaniakStyle()
+    }
+
+    func setUploadCount(_ count: Int) {
+        subtitleLabel.text = KDriveStrings.Localizable.uploadInProgressNumberFile(count)
     }
 }

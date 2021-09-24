@@ -132,6 +132,7 @@ extension SelectDriveViewController: UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
             let drive = driveList[indexPath.row]
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.style = .selectDrive
             cell.configureWith(drive: drive)
             cell.selectDriveImageView.image = nil
             return cell

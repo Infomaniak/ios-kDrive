@@ -21,7 +21,7 @@ import DifferenceKit
 import InfomaniakCore
 import kDriveCore
 import UIKit
-
+/*
 protocol HomeFileDelegate: AnyObject {
     func didSelect(index: Int, files: [File])
 }
@@ -29,6 +29,7 @@ protocol HomeFileDelegate: AnyObject {
 class HomeTableViewController: UITableViewController, SwitchDriveDelegate, SwitchAccountDelegate, HomeFileDelegate, TopScrollable {
     private enum HomeSection: Differentiable {
         case top
+        case recentFiles
     }
 
     private enum HomeTopRows {
@@ -37,6 +38,11 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         case search
         case insufficientStorage
         case uploadsInProgress
+        case recentFilesSelector
+    }
+
+    private enum RecentFileRows {
+        case recentFiles
     }
 
     private var sections = [HomeSection]()
@@ -63,16 +69,14 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
     }
 
+    private var offlineFilesController: HomeOfflineFilesController!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.largeTitleDisplayMode = .never
 
         tableView.register(cellView: DriveSwitchTableViewCell.self)
-        tableView.register(cellView: HomeFileSearchTableViewCell.self)
-        tableView.register(cellView: HomeOfflineTableViewCell.self)
         tableView.register(cellView: EmptyTableViewCell.self)
-        tableView.register(cellView: InsufficientStorageTableViewCell.self)
-        tableView.register(cellView: UploadsInProgressTableViewCell.self)
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
@@ -195,14 +199,14 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     }
 
     private func updateSectionList() {
-        sections = [.top]
+        sections = [.top, .recentFiles]
     }
 
     private func updateTopRows() {
         if ReachabilityListener.instance.currentStatus == .offline {
             topRows = [.offline, .drive, .search]
         } else {
-            topRows = [.drive, .search]
+            topRows = [.drive, .search, .recentFilesSelector]
         }
 
         if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
@@ -250,6 +254,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         switch sections[section] {
         case .top:
             return 0
+        case .recentFiles:
+            return 33
         }
     }
 
@@ -264,6 +270,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             default:
                 return UITableView.automaticDimension
             }
+        default:
+            return UITableView.automaticDimension
         }
     }
 
@@ -271,6 +279,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         switch sections[section] {
         case .top:
             return topRows.count
+        case .recentFiles:
+            return 1
         }
     }
 
@@ -279,7 +289,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         case .top:
             switch topRows[indexPath.row] {
             case .offline:
-                let cell = tableView.dequeueReusableCell(type: HomeOfflineTableViewCell.self, for: indexPath)
+                let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.selectionStyle = .none
                 return cell
@@ -289,32 +299,22 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
                 cell.configureWith(drive: driveFileManager.drive)
                 return cell
             case .search:
-                let cell = tableView.dequeueReusableCell(type: HomeFileSearchTableViewCell.self, for: indexPath)
+                let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 return cell
             case .insufficientStorage:
-                let cell = tableView.dequeueReusableCell(type: InsufficientStorageTableViewCell.self, for: indexPath)
+                let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                cell.configureCell(with: driveFileManager.drive)
-                cell.selectionStyle = .none
-                cell.actionHandler = { [weak self] _ in
-                    guard let self = self else { return }
-                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
-                }
-                cell.closeHandler = { [weak self] _ in
-                    guard let self = self else { return }
-                    self.topRows.remove(at: self.topRows.count - 1)
-                    tableView.deleteRows(at: [indexPath], with: .automatic)
-                    self.showInsufficientStorage = false
-                }
                 return cell
             case .uploadsInProgress:
-                let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
+                let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                cell.progressView.enableIndeterminate()
-                cell.setUploadCount(uploadCountManager.uploadCount)
                 return cell
+            case .recentFilesSelector:
+                return UITableViewCell()
             }
+        case .recentFiles:
+            return UITableViewCell()
         }
     }
 
@@ -324,6 +324,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         switch sections[section] {
         case .top:
             return nil
+        case .recentFiles:
+            return HomeTitleView.instantiate(title: KDriveStrings.Localizable.homeLastActivities)
         }
     }
 
@@ -331,7 +333,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         switch sections[indexPath.section] {
         case .top:
             switch topRows[indexPath.row] {
-            case .offline, .insufficientStorage:
+            case .offline, .insufficientStorage, .recentFilesSelector:
                 return
             case .uploadsInProgress:
                 let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
@@ -342,6 +344,8 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
             case .search:
                 present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
             }
+        case .recentFiles:
+            return
         }
     }
 
@@ -409,3 +413,4 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
         }
     }
 }
+*/
