@@ -187,11 +187,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
             }
         case .duplicate:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
-            selectFolderViewController?.disabledDirectoriesSelection = files.compactMap(\.parent)
-            // selectFolderViewController?.fileToMove = file.id
-            selectFolderViewController?.selectHandler = { [unowned self, fileIds = files.map(\.id)] selectedFolder in
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [unowned self, fileIds = files.map(\.id)] selectedFolder in
                 if self.files.count > Constants.bulkActionThreshold {
                     addAction = false // Prevents the snackbar to be displayed
                     let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedFolder.id)
