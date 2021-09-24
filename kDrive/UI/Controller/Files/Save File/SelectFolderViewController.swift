@@ -68,9 +68,32 @@ class SelectFolderViewController: FileListViewController {
         }
     }
 
-    static func instantiateInNavigationController(driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
-        let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
-        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: selectFolderViewController)
+    static func instantiateInNavigationController(driveFileManager: DriveFileManager, startDirectory: File? = nil, fileToMove: Int? = nil, disabledDirectoriesSelection: [File] = [], delegate: SelectFolderDelegate? = nil, selectHandler: ((File) -> Void)? = nil) -> TitleSizeAdjustingNavigationController {
+        var viewControllers = [SelectFolderViewController]()
+        if startDirectory == nil {
+            let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
+            selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
+            selectFolderViewController.fileToMove = fileToMove
+            selectFolderViewController.delegate = delegate
+            selectFolderViewController.selectHandler = selectHandler
+            selectFolderViewController.navigationItem.backButtonTitle = ""
+            viewControllers.append(selectFolderViewController)
+        } else {
+            var directory = startDirectory
+            while directory != nil {
+                let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
+                selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
+                selectFolderViewController.fileToMove = fileToMove
+                selectFolderViewController.currentDirectory = directory
+                selectFolderViewController.delegate = delegate
+                selectFolderViewController.selectHandler = selectHandler
+                selectFolderViewController.navigationItem.backButtonTitle = ""
+                viewControllers.append(selectFolderViewController)
+                directory = directory?.parent
+            }
+        }
+        let navigationController = TitleSizeAdjustingNavigationController()
+        navigationController.setViewControllers(viewControllers.reversed(), animated: false)
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }

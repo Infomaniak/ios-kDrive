@@ -323,7 +323,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             if driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DropBoxFloatingPanelViewController
-                floatingPanelViewController?.rightButton.isEnabled = self.driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
                 floatingPanelViewController?.actionHandler = { _ in
                     driveFloatingPanelController.dismiss(animated: true) { [weak self] in
                         guard let self = self else { return }
@@ -520,11 +520,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
             present(alert, animated: true)
         case .move:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-            let selectFolderViewController = selectFolderNavigationController.topViewController as? SelectFolderViewController
-            selectFolderViewController?.disabledDirectoriesSelection = [file.parent ?? driveFileManager.getRootFile()]
-            selectFolderViewController?.fileToMove = file.id
-            selectFolderViewController?.selectHandler = { [unowned self] selectedFolder in
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent, fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getRootFile()]) { [unowned self] selectedFolder in
                 self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { response, _, error in
                     if error != nil {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
