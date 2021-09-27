@@ -75,14 +75,13 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         topRows = getTopRows()
 
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
-        collectionView.register(cellView: WrapperCollectionViewCell.self)
+        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
         collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
         collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
         collectionView.register(cellView: UploadsInProgressCollectionViewCell.self)
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
-
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
