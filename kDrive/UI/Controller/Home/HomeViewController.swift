@@ -266,6 +266,25 @@ extension HomeViewController: UICollectionViewDataSource {
 }
 
 extension HomeViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        switch HomeSection.allCases[indexPath.section] {
+        case .top:
+            switch topRows[indexPath.row] {
+            case .offline, .insufficientStorage, .recentFilesSelector:
+                return
+            case .uploadsInProgress:
+                let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
+                navigationController?.pushViewController(uploadViewController, animated: true)
+            case .drive:
+                performSegue(withIdentifier: "switchDriveSegue", sender: nil)
+            case .search:
+                present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
+            }
+        case .recentFiles:
+            break
+        }
+    }
+
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if HomeSection.allCases[indexPath.section] == .recentFiles {
             if indexPath.row >= (recentFilesController?.displayedFiles.count ?? 0) - 10 {
