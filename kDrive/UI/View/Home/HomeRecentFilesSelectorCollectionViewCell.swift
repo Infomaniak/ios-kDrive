@@ -21,7 +21,14 @@ import UIKit
 
 class HomeRecentFilesSelectorCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var selector: IKSegmentedControl!
+
+    var valueChangeHandler: ((IKSegmentedControl) -> Void)?
+
     override func awakeFromNib() {
         super.awakeFromNib()
+    }
+
+    @IBAction func selectorValueChanged(_ sender: IKSegmentedControl) {
+        valueChangeHandler?(sender)
     }
 }

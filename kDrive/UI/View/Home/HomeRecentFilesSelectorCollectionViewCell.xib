@@ -24,6 +24,9 @@
                             <segment title="Hors ligne"/>
                             <segment title="Images"/>
                         </segments>
+                        <connections>
+                            <action selector="selectorValueChanged:" destination="gTV-IL-0wX" eventType="valueChanged" id="IsV-6F-L8g"/>
+                        </connections>
                     </segmentedControl>
                 </subviews>
             </view>
