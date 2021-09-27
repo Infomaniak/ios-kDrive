@@ -19,11 +19,11 @@
 import Foundation
 import kDriveCore
 
-class LastModificationsController: RecentFilesController {
+class HomePhotoListController: HomeRecentFilesController {
     override func loadFiles(forceRefresh: Bool = false) {
         super.loadFiles(forceRefresh: forceRefresh)
 
-        driveFileManager.getLastModifiedFiles(page: page) { response, _ in
+        driveFileManager.getLastPictures(page: page) { response, _ in
             if let files = response {
                 self.fetchedFiles = []
                 self.fetchedFiles?.append(contentsOf: self.displayedFiles)

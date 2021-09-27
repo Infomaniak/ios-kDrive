@@ -68,7 +68,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         }
     }
 
-    private var recentFilesController: RecentFilesController?
+    private var recentFilesController: HomeRecentFilesController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,6 +85,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
             DispatchQueue.main.async {
@@ -93,7 +94,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
             }
         }
 
-        recentFilesController = LastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
+        recentFilesController = HomePhotoListController(driveFileManager: driveFileManager, homeViewController: self)
     }
 
     private func getTopRows() -> [HomeTopRow] {
@@ -185,6 +186,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+        group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
         return NSCollectionLayoutSection(group: group)
     }
 }

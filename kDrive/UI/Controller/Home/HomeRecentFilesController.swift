@@ -19,7 +19,7 @@
 import Foundation
 import kDriveCore
 
-class RecentFilesController {
+class HomeRecentFilesController {
     let driveFileManager: DriveFileManager
     weak var homeViewController: HomeViewController?
 
@@ -33,6 +33,7 @@ class RecentFilesController {
     init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.driveFileManager = driveFileManager
         self.homeViewController = homeViewController
+        homeViewController.reload()
         loadFiles()
     }
 

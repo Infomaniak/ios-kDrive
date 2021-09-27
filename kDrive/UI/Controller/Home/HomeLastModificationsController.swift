@@ -17,10 +17,24 @@
  */
 
 import Foundation
+import kDriveCore
 
-class OfflineFilesController: RecentFilesController {
+class HomeLastModificationsController: HomeRecentFilesController {
     override func loadFiles(forceRefresh: Bool = false) {
-        fetchedFiles = driveFileManager.getAvailableOfflineFiles()
-        homeViewController?.reload()
+        super.loadFiles(forceRefresh: forceRefresh)
+
+        driveFileManager.getLastModifiedFiles(page: page) { response, _ in
+            if let files = response {
+                self.fetchedFiles = []
+                self.fetchedFiles?.append(contentsOf: self.displayedFiles)
+                self.fetchedFiles?.append(contentsOf: files)
+                DispatchQueue.main.async {
+                    self.homeViewController?.reload()
+                }
+                self.page += 1
+                self.moreComing = files.count == DriveApiFetcher.itemPerPage
+            }
+            self.loading = false
+        }
     }
 }

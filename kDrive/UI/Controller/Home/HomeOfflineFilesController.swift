@@ -1,4 +1,3 @@
-//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2021 Infomaniak Network SA
@@ -18,3 +17,10 @@
  */
 
 import Foundation
+
+class HomeOfflineFilesController: HomeRecentFilesController {
+    override func loadFiles(forceRefresh: Bool = false) {
+        fetchedFiles = driveFileManager.getAvailableOfflineFiles()
+        homeViewController?.reload()
+    }
+}
