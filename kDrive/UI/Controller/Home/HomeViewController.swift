@@ -124,16 +124,12 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
             guard let self = self else { return }
             if let index = self.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
-               let cell = self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? UploadsInProgressCollectionViewCell {
-                if self.uploadCountManager.uploadCount > 0 {
-                    // Update cell
-                    cell.setUploadCount(self.uploadCountManager.uploadCount)
-                } else {
-                    // Delete cell
-                    self.reload()
-                }
+               let cell = self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? UploadsInProgressCollectionViewCell,
+               self.uploadCountManager.uploadCount > 0 {
+                // Update cell
+                cell.setUploadCount(self.uploadCountManager.uploadCount)
             } else {
-                // Add cell
+                // Delete / Add cell
                 self.reload()
             }
         }
@@ -229,10 +225,8 @@ extension HomeViewController: UICollectionViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.configureCell(with: driveFileManager.drive)
                 cell.actionHandler = { [weak self] _ in
-                    cell.actionHandler = { [weak self] _ in
-                        guard let self = self else { return }
-                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
-                    }
+                    guard let self = self else { return }
+                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self = self else { return }

@@ -22,15 +22,16 @@ import UIKit
 class WrapperCollectionViewCell: UICollectionViewCell {
     func initWith<CellClass: UITableViewCell>(cell: CellClass.Type) -> CellClass {
         let cellView = Bundle.main.loadNibNamed(String(describing: cell), owner: nil, options: nil)![0] as! CellClass
-        contentView.addSubview(cellView)
+        let cellContentView = cellView.contentView
+        contentView.addSubview(cellContentView)
 
-        cellView.translatesAutoresizingMaskIntoConstraints = false
-        let top = NSLayoutConstraint(item: cellView, attribute: .top, relatedBy: .equal, toItem: contentView, attribute: .top, multiplier: 1, constant: 0)
-        let bottom = NSLayoutConstraint(item: cellView, attribute: .bottom, relatedBy: .equal, toItem: contentView, attribute: .bottom, multiplier: 1, constant: 0)
-        let left = NSLayoutConstraint(item: cellView, attribute: .left, relatedBy: .equal, toItem: contentView, attribute: .left, multiplier: 1, constant: 0)
-        let right = NSLayoutConstraint(item: cellView, attribute: .right, relatedBy: .equal, toItem: contentView, attribute: .right, multiplier: 1, constant: 0)
+        cellContentView.translatesAutoresizingMaskIntoConstraints = false
+        let top = NSLayoutConstraint(item: cellContentView, attribute: .top, relatedBy: .equal, toItem: contentView, attribute: .top, multiplier: 1, constant: 0)
+        let bottom = NSLayoutConstraint(item: cellContentView, attribute: .bottom, relatedBy: .equal, toItem: contentView, attribute: .bottom, multiplier: 1, constant: 0)
+        let left = NSLayoutConstraint(item: cellContentView, attribute: .left, relatedBy: .equal, toItem: contentView, attribute: .left, multiplier: 1, constant: 0)
+        let right = NSLayoutConstraint(item: cellContentView, attribute: .right, relatedBy: .equal, toItem: contentView, attribute: .right, multiplier: 1, constant: 0)
 
-        let height = NSLayoutConstraint(item: contentView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: cellView.frame.height)
+        let height = NSLayoutConstraint(item: contentView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: cellContentView.frame.height)
 
         NSLayoutConstraint.activate([top, bottom, left, right, height])
         return cellView

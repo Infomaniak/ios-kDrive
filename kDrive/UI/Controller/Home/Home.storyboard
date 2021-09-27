@@ -41,6 +41,7 @@
                     <navigationItem key="navigationItem" id="nIe-KJ-HML"/>
                     <connections>
                         <outlet property="collectionView" destination="Fzu-WB-v1W" id="kzr-X2-Y18"/>
+                        <segue destination="Gku-Kw-V1T" kind="presentation" identifier="switchDriveSegue" modalPresentationStyle="overFullScreen" modalTransitionStyle="crossDissolve" id="MNu-4a-wzw"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="TIR-lh-A4M" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
