@@ -79,7 +79,7 @@ public class MQService {
             }
             currentToken = token
             do {
-                _ = try client.subscribe(to: [MQTTSubscribeInfo(topicFilter: topic(for: token), qos: .exactlyOnce)]).wait()
+                _ = try client.subscribe(to: [MQTTSubscribeInfo(topicFilter: topic(for: token), qos: .atMostOnce)]).wait()
                 client.addPublishListener(named: "Drive notifications listener") { result in
                     switch result {
                     case .success(let message):
