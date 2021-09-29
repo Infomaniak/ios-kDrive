@@ -845,7 +845,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                     }
                 }
             })
-            AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
+            AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { [weak self] actionProgress in
                 DispatchQueue.main.async {
                     switch actionProgress.progress.message {
                     case .starting:
@@ -859,6 +859,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                         case .copy:
                             progressSnack?.message = KDriveStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                         }
+                        self?.notifyObserversForCurrentDirectory()
                     case .done:
                         switch action {
                         case .trash:
@@ -871,6 +872,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             progressSnack?.dismiss()
                         }
+                        self?.notifyObserversForCurrentDirectory()
                     case .canceled:
                         let message: String
                         switch action {
@@ -882,10 +884,15 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                             message = KDriveStrings.Localizable.allFileDuplicateCancelled
                         }
                         UIConstants.showSnackBar(message: message)
+                        self?.notifyObserversForCurrentDirectory()
                     }
                 }
             }
         }
+    }
+
+    private func notifyObserversForCurrentDirectory() {
+        driveFileManager.notifyObserversWith(file: currentDirectory)
     }
 }
 
