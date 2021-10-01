@@ -44,13 +44,13 @@ class UploadCountManager {
     private func observeUploads() {
         guard uploadsObserver == nil else { return }
 
-        uploadCountThrottler.handler = { [unowned self] newUploadCount in
-            uploadCount = newUploadCount
-            didUploadCountChange()
+        uploadCountThrottler.handler = { [weak self] newUploadCount in
+            self?.uploadCount = newUploadCount
+            self?.didUploadCountChange()
         }
 
-        uploadsObserver = UploadQueue.instance.observeUploadCount(self, driveId: driveFileManager.drive.id) { [unowned self] _, uploadCount in
-            self.uploadCountThrottler.call(uploadCount)
+        uploadsObserver = UploadQueue.instance.observeUploadCount(self, driveId: driveFileManager.drive.id) { [weak self] _, uploadCount in
+            self?.uploadCountThrottler.call(uploadCount)
         }
     }
 }
