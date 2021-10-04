@@ -252,7 +252,7 @@ class HomeTableViewController: UITableViewController, SwitchDriveDelegate, Switc
     private func observeUploadCount() {
         guard driveFileManager != nil else { return }
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self = self else { return }
+            guard let self = self, self.isViewLoaded else { return }
             if let index = self.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
                let cell = self.tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? UploadsInProgressTableViewCell {
                 if self.uploadCountManager.uploadCount > 0 {
