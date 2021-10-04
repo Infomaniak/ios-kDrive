@@ -110,7 +110,7 @@ class MenuViewController: UIViewController {
     private func observeUploadCount() {
         guard driveFileManager != nil else { return }
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self = self else { return }
+            guard let self = self, self.isViewLoaded else { return }
             if let index = self.sections.firstIndex(where: { $0 == .uploads }),
                let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: index)) as? UploadsInProgressTableViewCell {
                 if self.uploadCountManager.uploadCount > 0 {
