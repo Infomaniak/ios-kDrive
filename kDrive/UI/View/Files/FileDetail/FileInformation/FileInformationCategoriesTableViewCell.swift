@@ -20,14 +20,12 @@ import kDriveCore
 import UIKit
 
 class FileInformationCategoriesTableViewCell: UITableViewCell {
+    @IBOutlet weak var label: IKLabel!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var collectionViewBottomConstraint: NSLayoutConstraint!
 
-    var categories = [kDriveCore.Category]() {
-        didSet {
-            collectionView.reloadData()
-        }
-    }
+    var categories = [kDriveCore.Category]()
 
     private var contentSizeObservation: NSKeyValueObservation?
 
@@ -43,6 +41,19 @@ class FileInformationCategoriesTableViewCell: UITableViewCell {
 
     deinit {
         contentSizeObservation?.invalidate()
+    }
+
+    func configure(with categories: [kDriveCore.Category]) {
+        if categories.isEmpty {
+            label.text = "Ajouter des catégories"
+            collectionViewBottomConstraint.constant = 0
+        } else {
+            label.text = "Gérer les catégories"
+            collectionViewBottomConstraint.constant = 16
+        }
+        self.categories = categories
+        collectionView.reloadData()
+        layoutIfNeeded()
     }
 }
 

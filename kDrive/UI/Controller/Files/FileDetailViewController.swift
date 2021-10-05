@@ -41,11 +41,11 @@ class FileDetailViewController: UIViewController {
     private enum FileInformationRow {
         case users
         case share
+        case categories
         case owner
         case creation
         case added
         case location
-        case categories
         case size
         case sizeAll
 
@@ -62,6 +62,9 @@ class FileDetailViewController: UIViewController {
             if file.rights?.share ?? false {
                 rows.append(.share)
             }
+            if categoryRights.canReadCategoryOnFile {
+                rows.append(.categories)
+            }
             rows.append(.owner)
             if file.fileCreatedAtDate != nil {
                 rows.append(.creation)
@@ -71,9 +74,6 @@ class FileDetailViewController: UIViewController {
             }
             if sharedFile != nil || !file.path.isEmpty {
                 rows.append(.location)
-            }
-            if categoryRights.canReadCategoryOnFile && !file.categories.isEmpty {
-                rows.append(.categories)
             }
             if file.size != 0 {
                 rows.append(.size)
@@ -163,7 +163,6 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: InfoTableViewCell.self)
 
         tableView.separatorColor = .clear
-        tableView.allowsSelection = false
 
         guard file != nil else { return }
 
@@ -467,6 +466,10 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     cell.delegate = self
                     cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
                     return cell
+                case .categories:
+                    let cell = tableView.dequeueReusableCell(type: FileInformationCategoriesTableViewCell.self, for: indexPath)
+                    cell.configure(with: Array(file.categories))
+                    return cell
                 case .owner:
                     let cell = tableView.dequeueReusableCell(type: FileInformationOwnerTableViewCell.self, for: indexPath)
                     cell.configureWith(file: file)
@@ -496,11 +499,6 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                     cell.locationLabel.text = sharedFile?.path ?? file.path
                     cell.delegate = self
-                    return cell
-                case .categories:
-                    let cell = tableView.dequeueReusableCell(type: FileInformationCategoriesTableViewCell.self, for: indexPath)
-                    cell.categories = Array(file.categories)
-                    cell.layoutIfNeeded()
                     return cell
                 case .sizeAll:
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)
@@ -549,6 +547,14 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     // MARK: - Table view delegate
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .categories {
+            let manageCategoriesViewController = ManageCategoriesViewController.instantiate(file: file, driveFileManager: driveFileManager)
+            navigationController?.pushViewController(manageCategoriesViewController, animated: true)
+        }
+    }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         guard currentTab == .comments && !comments.isEmpty else {

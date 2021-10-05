@@ -29,6 +29,7 @@ public class Category: Object, Codable {
     @Persisted public var createdAt: Date
     public var isGeneratedByIA: Bool?
     public var IACategoryUserValidation: String?
+    public var isSelected = false
 
     public var color: UIColor? {
         return UIColor(hex: _color)
