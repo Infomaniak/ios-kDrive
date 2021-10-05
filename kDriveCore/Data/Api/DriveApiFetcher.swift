@@ -89,9 +89,19 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     @discardableResult
-    private func makeRequest<T: Decodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoding: ParameterEncoding = URLEncoding.default, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
+    private func makeRequest<T: Decodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoding: ParameterEncoding = JSONEncoding.default, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
         return authenticatedSession
             .request(convertible, method: method, parameters: parameters, encoding: encoding, headers: headers, interceptor: interceptor, requestModifier: requestModifier)
+            .validate()
+            .responseDecodable(of: T.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
+
+    @discardableResult
+    private func makeRequest<T: Decodable, Parameters: Encodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoder: ParameterEncoder = JSONParameterEncoder.convertToSnakeCase, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
+        return authenticatedSession
+            .request(convertible, method: method, parameters: parameters, encoder: encoder, headers: headers, interceptor: interceptor, requestModifier: requestModifier)
             .validate()
             .responseDecodable(of: T.self, decoder: ApiFetcher.decoder) { response in
                 self.handleResponse(response: response, completion: completion)
@@ -106,7 +116,7 @@ public class DriveApiFetcher: ApiFetcher {
             "share": false
         ]
 
-        makeRequest(url, method: .post, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func createCommonDirectory(driveId: Int, name: String, forAllUser: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -116,7 +126,7 @@ public class DriveApiFetcher: ApiFetcher {
             "for_all_user": forAllUser
         ]
 
-        makeRequest(url, method: .post, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func createOfficeFile(driveId: Int, parentDirectory: File, name: String, type: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -126,7 +136,7 @@ public class DriveApiFetcher: ApiFetcher {
             "type": type
         ]
 
-        makeRequest(url, method: .post, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func setupDropBox(directory: File,
@@ -151,7 +161,7 @@ public class DriveApiFetcher: ApiFetcher {
             body.updateValue(Int(validUntil), forKey: "valid_until")
         }
 
-        makeRequest(url, method: .post, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func getDropBoxSettings(directory: File, completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
@@ -182,7 +192,7 @@ public class DriveApiFetcher: ApiFetcher {
             body["password"] = password
         }
 
-        makeRequest(url, method: .put, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func disableDropBox(directory: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
@@ -250,7 +260,7 @@ public class DriveApiFetcher: ApiFetcher {
             body.updateValue(password!, forKey: "password")
         }
 
-        makeRequest(url, method: .put, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func addUserRights(file: File, users: [Int], teams: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
@@ -389,14 +399,14 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.renameFile(file: file)
         let body: [String: Any] = ["name": newName]
 
-        makeRequest(url, method: .post, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func duplicateFile(file: File, duplicateName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.duplicateFile(file: file)
         let body: [String: Any] = ["name": duplicateName]
 
-        makeRequest(url, method: .post, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func copyFile(file: File, newParent: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -572,7 +582,7 @@ public class DriveApiFetcher: ApiFetcher {
         let url = ApiRoutes.downloadArchiveLink(driveId: driveId)
         let body: [String: Any] = ["file_ids": files.map(\.id)]
 
-        makeRequest(url, method: .post, parameters: body, encoding: JSONEncoding.default, completion: completion)
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 }
 
