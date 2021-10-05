@@ -55,83 +55,45 @@ public class Category: Object, Codable {
 }
 
 public enum PredefinedCategory: String {
-    // Document types
-
-    case contract = "PREDEF_CAT_CONTRACT"
-    case bill = "PREDEF_CAT_BILL"
-    case receipt = "PREDEF_CAT_RECEIPT"
-    case certificate = "PREDEF_CAT_CERTIFICAT"
-    case testimony = "PREDEF_CAT_TESTIMONY"
-    case warranty = "PREDEF_CAT_WARRANTY"
-    case id = "PREDEF_CAT_ID"
-    case form = "PREDEF_CAT_FORM"
-    case quotation = "PREDEF_CAT_QUOTATION"
-    case mail = "PREDEF_CAT_MAIL"
-
-    // Themes
-
-    case employees = "PREDEF_CAT_EMPLOYEES"
-    case provider = "PREDEF_CAT_PROVIDER"
     case banking = "PREDEF_CAT_BANKING"
-    case realEstate = "PREDEF_CAT_REAL_ESTATE"
-    case taxation = "PREDEF_CAT_TAXATION"
-    case legal = "PREDEF_CAT_LEGAL"
-    case insurance = "PREDEF_CAT_INSURANCE"
-    case transportation = "PREDEF_CAT_TRANSPORTATION"
-    case phoneAndInternet = "PREDEF_CAT_PHONE_INTERNET"
-    case personal = "PREDEF_CAT_PERSONAL"
-    case family = "PREDEF_CAT_FAMILY"
-    case work = "PREDEF_CAT_WORK"
+    case bill = "PREDEF_CAT_BILL"
+    case contract = "PREDEF_CAT_CONTRACT"
+    case form = "PREDEF_CAT_FORM"
     case hobbies = "PREDEF_CAT_HOBBIES"
+    case id = "PREDEF_CAT_ID"
+    case insurance = "PREDEF_CAT_INSURANCE"
+    case quotation = "PREDEF_CAT_QUOTATION"
+    case taxation = "PREDEF_CAT_TAXATION"
+    case transportation = "PREDEF_CAT_TRANSPORTATION"
+    case warranty = "PREDEF_CAT_WARRANTY"
+    case work = "PREDEF_CAT_WORK"
 
     var title: String {
         switch self {
-        case .contract:
-            return "Contrat"
-        case .bill:
-            return "Facture"
-        case .receipt:
-            return "Reçu"
-        case .certificate:
-            return "Certificat"
-        case .testimony:
-            return "Attestation"
-        case .warranty:
-            return "Garantie"
-        case .id:
-            return "Papiers d’identité"
-        case .form:
-            return "Formulaire"
-        case .quotation:
-            return "Devis"
-        case .mail:
-            return "Courrier"
-        case .employees:
-            return "Employés"
-        case .provider:
-            return "Prestataire"
         case .banking:
             return "Banque"
-        case .realEstate:
-            return "Immobilier"
-        case .taxation:
-            return "Déclarations fiscales"
-        case .legal:
-            return "Légal"
-        case .insurance:
-            return "Assurance"
-        case .transportation:
-            return "Transport"
-        case .phoneAndInternet:
-            return "Téléphone/Internet"
-        case .personal:
-            return "Personnel"
-        case .family:
-            return "Famille"
-        case .work:
-            return "Travail"
+        case .bill:
+            return "Facture"
+        case .contract:
+            return "Contrat"
+        case .form:
+            return "Formulaire"
         case .hobbies:
             return "Loisirs"
+        case .id:
+            return "Papiers d’identité"
+        case .insurance:
+            return "Assurance"
+        case .quotation:
+            return "Devis"
+        case .taxation:
+            return "Impôts"
+        case .transportation:
+            return "Transport"
+        case .warranty:
+            return "Garantie"
+        case .work:
+            return "Travail"
         }
     }
 }
