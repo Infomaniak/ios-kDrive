@@ -24,7 +24,7 @@ import RealmSwift
 
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
-    private static let currentDbVersion: UInt64 = 3
+    private static let currentDbVersion: UInt64 = 4
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
     private var fileProviderManagers: [String: NSFileProviderManager] = [:]

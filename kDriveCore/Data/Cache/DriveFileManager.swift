@@ -140,29 +140,7 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            schemaVersion: 1,
-            migrationBlock: { migration, oldSchemaVersion in
-                if oldSchemaVersion < 1 {
-                    // Migration to version 1: migrating rights
-                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
-                        newObject?["show"] = oldObject?["show"] ?? false
-                        newObject?["read"] = oldObject?["read"] ?? false
-                        newObject?["write"] = oldObject?["write"] ?? false
-                        newObject?["share"] = oldObject?["share"] ?? false
-                        newObject?["leave"] = oldObject?["leave"] ?? false
-                        newObject?["delete"] = oldObject?["delete"] ?? false
-                        newObject?["rename"] = oldObject?["rename"] ?? false
-                        newObject?["move"] = oldObject?["move"] ?? false
-                        newObject?["createNewFolder"] = oldObject?["createNewFolder"] ?? false
-                        newObject?["createNewFile"] = oldObject?["createNewFile"] ?? false
-                        newObject?["uploadNewFile"] = oldObject?["uploadNewFile"] ?? false
-                        newObject?["moveInto"] = oldObject?["moveInto"] ?? false
-                        newObject?["canBecomeCollab"] = oldObject?["canBecomeCollab"] ?? false
-                        newObject?["canBecomeLink"] = oldObject?["canBecomeLink"] ?? false
-                        newObject?["canFavorite"] = oldObject?["canFavorite"] ?? false
-                    }
-                }
-            },
+            deleteRealmIfMigrationNeeded: true,
             objectTypes: [File.self, Rights.self, FileActivity.self, Category.self])
 
         // Only compact in the background
