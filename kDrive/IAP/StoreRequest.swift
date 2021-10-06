@@ -61,11 +61,3 @@ class StoreRequest {
             }
     }
 }
-
-extension JSONParameterEncoder {
-    static var convertToSnakeCase: JSONParameterEncoder {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        return JSONParameterEncoder(encoder: encoder)
-    }
-}

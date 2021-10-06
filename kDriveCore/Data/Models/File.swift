@@ -123,29 +123,33 @@ public enum SortType: String {
         public let apiValue: String
         public let order: String
         public let translation: String
-        public let realmKeyPath: String
+        public let realmKeyPath: PartialKeyPath<File>
+
+        public var sortDescriptor: RealmSwift.SortDescriptor {
+            return SortDescriptor(keyPath: realmKeyPath, ascending: order == "asc")
+        }
     }
 
     public var value: SortTypeValue {
         switch self {
         case .nameAZ:
-            return SortTypeValue(apiValue: "files.path", order: "asc", translation: KDriveCoreStrings.Localizable.sortNameAZ, realmKeyPath: "nameNaturalSorting")
+            return SortTypeValue(apiValue: "files.path", order: "asc", translation: KDriveCoreStrings.Localizable.sortNameAZ, realmKeyPath: \.nameNaturalSorting)
         case .nameZA:
-            return SortTypeValue(apiValue: "files.path", order: "desc", translation: KDriveCoreStrings.Localizable.sortNameZA, realmKeyPath: "nameNaturalSorting")
+            return SortTypeValue(apiValue: "files.path", order: "desc", translation: KDriveCoreStrings.Localizable.sortNameZA, realmKeyPath: \.nameNaturalSorting)
         case .older:
-            return SortTypeValue(apiValue: "last_modified_at", order: "asc", translation: KDriveCoreStrings.Localizable.sortOlder, realmKeyPath: "lastModifiedAt")
+            return SortTypeValue(apiValue: "last_modified_at", order: "asc", translation: KDriveCoreStrings.Localizable.sortOlder, realmKeyPath: \.lastModifiedAt)
         case .newer:
-            return SortTypeValue(apiValue: "last_modified_at", order: "desc", translation: KDriveCoreStrings.Localizable.sortRecent, realmKeyPath: "lastModifiedAt")
+            return SortTypeValue(apiValue: "last_modified_at", order: "desc", translation: KDriveCoreStrings.Localizable.sortRecent, realmKeyPath: \.lastModifiedAt)
         case .biggest:
-            return SortTypeValue(apiValue: "files.size", order: "desc", translation: KDriveCoreStrings.Localizable.sortBigger, realmKeyPath: "size")
+            return SortTypeValue(apiValue: "files.size", order: "desc", translation: KDriveCoreStrings.Localizable.sortBigger, realmKeyPath: \.size)
         case .smallest:
-            return SortTypeValue(apiValue: "files.size", order: "asc", translation: KDriveCoreStrings.Localizable.sortSmaller, realmKeyPath: "size")
+            return SortTypeValue(apiValue: "files.size", order: "asc", translation: KDriveCoreStrings.Localizable.sortSmaller, realmKeyPath: \.size)
         case .ext:
-            return SortTypeValue(apiValue: "files", order: "asc", translation: KDriveCoreStrings.Localizable.sortExtension, realmKeyPath: "name")
+            return SortTypeValue(apiValue: "files", order: "asc", translation: KDriveCoreStrings.Localizable.sortExtension, realmKeyPath: \.name)
         case .olderDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveCoreStrings.Localizable.sortOlder, realmKeyPath: "deletedAt")
+            return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveCoreStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
         case .newerDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveCoreStrings.Localizable.sortRecent, realmKeyPath: "deletedAt")
+            return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveCoreStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
         }
     }
 }
@@ -162,7 +166,7 @@ public class File: Object, Codable {
     @Persisted private var createdAt: Int = 0
     @Persisted private var fileCreatedAt: Int = 0
     @Persisted public var deletedBy: Int = 0
-    @Persisted private var deletedAt: Int = 0
+    @Persisted public var deletedAt: Int = 0
     @Persisted public var driveId: Int = 0
     @Persisted public var hasThumbnail = false
     @Persisted public var hasVersion = false
@@ -181,7 +185,7 @@ public class File: Object, Codable {
     @Persisted public var type: String = ""
     @Persisted public var users: List<Int>
     @Persisted public var responseAt: Int = 0
-    @Persisted private var rawVisibility: String = ""
+    @Persisted public var rawVisibility: String = ""
     @Persisted public var onlyOffice = false
     @Persisted public var onlyOfficeConvertExtension: String?
     @Persisted public var fullyDownloaded = false

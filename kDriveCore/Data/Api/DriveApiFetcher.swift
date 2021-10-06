@@ -88,6 +88,26 @@ public class DriveApiFetcher: ApiFetcher {
         return "&page=\(page)&per_page=\(DriveApiFetcher.itemPerPage)"
     }
 
+    @discardableResult
+    private func makeRequest<T: Decodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoding: ParameterEncoding = JSONEncoding.default, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
+        return authenticatedSession
+            .request(convertible, method: method, parameters: parameters, encoding: encoding, headers: headers, interceptor: interceptor, requestModifier: requestModifier)
+            .validate()
+            .responseDecodable(of: T.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
+
+    @discardableResult
+    private func makeRequest<T: Decodable, Parameters: Encodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoder: ParameterEncoder = JSONParameterEncoder.convertToSnakeCase, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
+        return authenticatedSession
+            .request(convertible, method: method, parameters: parameters, encoder: encoder, headers: headers, interceptor: interceptor, requestModifier: requestModifier)
+            .validate()
+            .responseDecodable(of: T.self, decoder: ApiFetcher.decoder) { response in
+                self.handleResponse(response: response, completion: completion)
+            }
+    }
+
     public func createDirectory(parentDirectory: File, name: String, onlyForMe: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.createDirectory(driveId: parentDirectory.driveId, parentId: parentDirectory.id)
         let body: [String: Any] = [
@@ -96,11 +116,7 @@ public class DriveApiFetcher: ApiFetcher {
             "share": false
         ]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func createCommonDirectory(driveId: Int, name: String, forAllUser: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -110,11 +126,7 @@ public class DriveApiFetcher: ApiFetcher {
             "for_all_user": forAllUser
         ]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func createOfficeFile(driveId: Int, parentDirectory: File, name: String, type: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -124,11 +136,7 @@ public class DriveApiFetcher: ApiFetcher {
             "type": type
         ]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func setupDropBox(directory: File,
@@ -153,19 +161,13 @@ public class DriveApiFetcher: ApiFetcher {
             body.updateValue(Int(validUntil), forKey: "valid_until")
         }
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .responseDecodable(of: ApiResponse<DropBox>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func getDropBoxSettings(directory: File, completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
 
-        authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<DropBox>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func updateDropBox(directory: File,
@@ -190,46 +192,31 @@ public class DriveApiFetcher: ApiFetcher {
             body["password"] = password
         }
 
-        authenticatedSession.request(url, method: .put, parameters: body, encoding: JSONEncoding.default)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func disableDropBox(directory: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.setupDropBox(directory: directory)
 
-        authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func getFileListForDirectory(driveId: Int, parentId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFileListForDirectory(driveId: driveId, parentId: parentId, sortType: sortType))\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get)
-            .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getFavoriteFiles(driveId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFavoriteFiles(driveId: driveId, sortType: sortType))\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getMyShared(driveId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getMyShared(driveId: driveId, sortType: sortType))\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getLastModifiedFiles(driveId: Int, page: Int? = nil, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
@@ -238,37 +225,25 @@ public class DriveApiFetcher: ApiFetcher {
             url += pagination(page: page)
         }
 
-        authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getLastPictures(driveId: Int, page: Int = 1, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
         let url = ApiRoutes.getLastPictures(driveId: driveId) + pagination(page: page)
 
-        authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getShareListFor(file: File, completion: @escaping (ApiResponse<SharedFile>?, Error?) -> Void) {
         let url = ApiRoutes.getShareListFor(file: file)
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<SharedFile>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func activateShareLinkFor(file: File, completion: @escaping (ApiResponse<ShareLink>?, Error?) -> Void) {
         let url = ApiRoutes.activateShareLinkFor(file: file)
 
-        authenticatedSession.request(url, method: .post)
-            .validate()
-            .responseDecodable(of: ApiResponse<ShareLink>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, completion: completion)
     }
 
     // swiftlint:disable function_parameter_count
@@ -285,9 +260,7 @@ public class DriveApiFetcher: ApiFetcher {
             body.updateValue(password!, forKey: "password")
         }
 
-        authenticatedSession.request(url, method: .put, parameters: body, encoding: JSONEncoding.default).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func addUserRights(file: File, users: [Int], teams: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
@@ -298,193 +271,142 @@ public class DriveApiFetcher: ApiFetcher {
         }
         let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission, "lang": lang, "message": message]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<SharedUsers>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func checkUserRights(file: File, users: [Int], teams: [Int], emails: [String], permission: String, completion: @escaping (ApiResponse<[FileCheckResult]>?, Error?) -> Void) {
         let url = ApiRoutes.checkUserRights(file: file)
         let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<[FileCheckResult]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func updateUserRights(file: File, user: DriveUser, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateUserRights(file: file, user: user)
         let body: [String: Any] = ["permission": permission]
 
-        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func deleteUserRights(file: File, user: DriveUser, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateUserRights(file: file, user: user)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func updateInvitationRights(driveId: Int, invitation: Invitation, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateInvitationRights(driveId: driveId, invitation: invitation)
         let body: [String: Any] = ["permission": permission]
 
-        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func deleteInvitationRights(driveId: Int, invitation: Invitation, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.deleteInvitationRights(driveId: driveId, invitation: invitation)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func updateTeamRights(file: File, team: Team, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateTeamRights(file: file, team: team)
         let body: [String: Any] = ["permission": permission]
 
-        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func deleteTeamRights(file: File, team: Team, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.deleteTeamRights(file: file, team: team)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func removeShareLinkFor(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.removeShareLinkFor(file: file)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func getFileDetail(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.getFileDetail(driveId: driveId, fileId: fileId)
 
-        authenticatedSession.request(url, method: .get)
-            .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getFileDetailActivity(file: File, page: Int, completion: @escaping (ApiResponse<[FileDetailActivity]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=user,mobile\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[FileDetailActivity]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getFileDetailComment(file: File, page: Int, completion: @escaping (ApiResponse<[Comment]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getFileDetailComment(file: file))?with=like,response\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<[Comment]>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func addCommentTo(file: File, comment: String, completion: @escaping (ApiResponse<Comment>?, Error?) -> Void) {
         let url = ApiRoutes.getFileDetailComment(file: file)
         let body: [String: Any] = ["body": comment]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<Comment>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func likeComment(file: File, liked: Bool, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = liked ? ApiRoutes.unlikeComment(file: file, comment: comment) : ApiRoutes.likeComment(file: file, comment: comment)
 
-        authenticatedSession.request(url, method: .post).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .post, completion: completion)
     }
 
     public func deleteComment(file: File, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.getComment(file: file, comment: comment)
 
-        authenticatedSession.request(url, method: .delete).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func editComment(file: File, text: String, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.getComment(file: file, comment: comment)
         let body: [String: Any] = ["body": text]
 
-        authenticatedSession.request(url, method: .put, parameters: body).responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func answerComment(file: File, text: String, comment: Comment, completion: @escaping (ApiResponse<Comment>?, Error?) -> Void) {
         let url = ApiRoutes.getComment(file: file, comment: comment)
         let body: [String: Any] = ["body": text]
 
-        authenticatedSession.request(url, method: .post, parameters: body).responseDecodable(of: ApiResponse<Comment>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func deleteFile(file: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
         let url = ApiRoutes.deleteFile(file: file)
 
-        authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func deleteAllFilesDefinitely(driveId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.deleteAllFilesDefinitely(driveId: driveId)
 
-        authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func deleteFileDefinitely(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.deleteFileDefinitely(file: file)
 
-        authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func renameFile(file: File, newName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.renameFile(file: file)
         let body: [String: Any] = ["name": newName]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func duplicateFile(file: File, duplicateName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.duplicateFile(file: file)
         let body: [String: Any] = ["name": duplicateName]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func copyFile(file: File, newParent: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -499,55 +421,37 @@ public class DriveApiFetcher: ApiFetcher {
     public func moveFile(file: File, newParent: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
         let url = ApiRoutes.moveFile(file: file, newParentId: newParent.id)
 
-        authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, completion: completion)
     }
 
     public func getRecentActivity(driveId: Int, page: Int = 1, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
         let url = ApiRoutes.getRecentActivity(driveId: driveId) + pagination(page: page)
 
-        authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[FileActivity]>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getFileActivitiesFromDate(file: File, date: Int, page: Int, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
         let url = ApiRoutes.getFileActivitiesFromDate(file: file, date: date) + pagination(page: page)
 
-        authenticatedSession.request(url, method: .get)
-            .validate()
-            .responseDecodable(of: ApiResponse<[FileActivity]>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (ApiResponse<FilesActivities>?, Error?) -> Void) {
         let url = ApiRoutes.getFilesActivities(driveId: driveId, files: files, from: date)
 
-        authenticatedSession.request(url, method: .get).responseDecodable(of: ApiResponse<FilesActivities>.self, decoder: ApiFetcher.decoder) { response in
-            self.handleResponse(response: response, completion: completion)
-        }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func postFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.favorite(file: file)
 
-        authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, completion: completion)
     }
 
     public func deleteFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.favorite(file: file)
 
-        authenticatedSession.request(url, method: .delete)
-            .responseDecodable(of: ApiResponse<Bool>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
@@ -597,41 +501,26 @@ public class DriveApiFetcher: ApiFetcher {
     public func getTrashedFiles(driveId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getTrashFiles(driveId: driveId, sortType: sortType))\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getChildrenTrashedFiles(driveId: Int, fileId: Int?, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = "\(ApiRoutes.getTrashFiles(driveId: driveId, fileId: fileId, sortType: sortType))\(pagination(page: page))"
 
-        authenticatedSession.request(url, method: .get)
-            .validate()
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func restoreTrashedFile(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.restoreTrashedFile(file: file)
 
-        authenticatedSession.request(url, method: .post)
-            .validate()
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, completion: completion)
     }
 
     public func restoreTrashedFile(file: File, in folderId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.restoreTrashedFile(file: file)
         let body: [String: Any] = ["destination_directory_id": folderId as Any]
 
-        authenticatedSession.request(url, method: .post, parameters: body)
-            .validate()
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     @discardableResult
@@ -647,38 +536,26 @@ public class DriveApiFetcher: ApiFetcher {
             url = encodedUrl
         }
 
-        return authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<[File]>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        return makeRequest(url, method: .get, completion: completion)
     }
 
     public func requireFileAccess(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.requireFileAccess(file: file)
 
-        authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, completion: completion)
     }
 
     public func cancelAction(driveId: Int, cancelId: String, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.cancelAction(driveId: driveId)
         let body: [String: Any] = ["cancel_id": cancelId]
 
-        authenticatedSession.request(url, method: .post, parameters: body)
-            .responseDecodable(of: ApiResponse<EmptyResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
     public func convertFile(file: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.convertFile(file: file)
 
-        authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, completion: completion)
     }
 
     public func bulkAction(driveId: Int, action: BulkAction, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
@@ -698,21 +575,14 @@ public class DriveApiFetcher: ApiFetcher {
     public func getFileCount(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<FileCount>?, Error?) -> Void) {
         let url = ApiRoutes.fileCount(driveId: driveId, fileId: fileId)
 
-        authenticatedSession.request(url, method: .get)
-            .responseDecodable(of: ApiResponse<FileCount>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getDownloadArchiveLink(driveId: Int, for files: [File], completion: @escaping (ApiResponse<DownloadArchiveResponse>?, Error?) -> Void) {
         let url = ApiRoutes.downloadArchiveLink(driveId: driveId)
         let body: [String: Any] = ["file_ids": files.map(\.id)]
 
-        authenticatedSession.request(url, method: .post, parameters: body, encoding: JSONEncoding.default)
-            .validate()
-            .responseDecodable(of: ApiResponse<DownloadArchiveResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+        makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 }
 
