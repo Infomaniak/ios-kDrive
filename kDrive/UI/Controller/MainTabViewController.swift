@@ -231,10 +231,11 @@ extension MainTabViewController: SwitchAccountDelegate, SwitchDriveDelegate {
             manager.signalEnumerator(for: .rootContainer) { _ in }
         }
         for viewController in viewControllers ?? [] {
-            if viewController.isViewLoaded {
-                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
+            guard let switchDriveDelegate = (viewController as? UINavigationController)?.viewControllers.first as? UIViewController & SwitchDriveDelegate else { continue }
+            if switchDriveDelegate.isViewLoaded {
+                switchDriveDelegate.didSwitchDriveFileManager(newDriveFileManager: driveFileManager)
             } else {
-                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+                switchDriveDelegate.driveFileManager = driveFileManager
             }
         }
     }
