@@ -83,7 +83,7 @@ public class Throttler<T> {
                             return params
                         }
                         guard let p = p else { return }
-                        self.lastExecutionTime = currentTime
+                        self.lastExecutionTime = Date().timeIntervalSinceReferenceDate
                         self.handler?(p)
                     }
                 }
