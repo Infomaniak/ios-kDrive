@@ -406,7 +406,7 @@ public class DriveFileManager {
                 if page == 1 {
                     if let parent = realm.object(ofType: File.self, forPrimaryKey: mySharedRoot.id) {
                         var allFiles = [File]()
-                        let searchResult = parent.children.sorted(byKeyPath: sortType.value.realmKeyPath, ascending: sortType.value.order == "asc")
+                        let searchResult = parent.children.sorted(by: [sortType.value.sortDescriptor])
                         for child in searchResult.freeze() { allFiles.append(child.freeze()) }
 
                         mySharedRoot.fullyDownloaded = true
@@ -421,31 +421,19 @@ public class DriveFileManager {
     public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
         let offlineFiles = getRealm().objects(File.self)
             .filter(NSPredicate(format: "isAvailableOffline = true"))
-            .sorted(byKeyPath: sortType.value.realmKeyPath, ascending: sortType.value.order == "asc").freeze()
+            .sorted(by: [sortType.value.sortDescriptor]).freeze()
 
         return offlineFiles.map { $0.freeze() }
     }
 
     public func getLocalSortedDirectoryFiles(directory: File, sortType: SortType) -> [File] {
-        let children = directory.freeze().children.sorted(byKeyPath: sortType.value.realmKeyPath, ascending: sortType.value.order == "asc")
+        let children = directory.children.sorted(by: [
+            SortDescriptor(keyPath: \File.type, ascending: true),
+            SortDescriptor(keyPath: \File.rawVisibility, ascending: false),
+            sortType.value.sortDescriptor
+        ])
 
-        let teamSpaces = children.filter(NSPredicate(format: "rawVisibility = %@", VisibilityType.isTeamSpace.rawValue))
-        let sharedSpaces = children.filter(NSPredicate(format: "rawVisibility = %@", VisibilityType.isSharedSpace.rawValue))
-        let dirs = children.filter(
-            NSPredicate(format: "rawVisibility != %@ AND rawVisibility != %@ AND type = %@",
-                        VisibilityType.isTeamSpace.rawValue,
-                        VisibilityType.isSharedSpace.rawValue,
-                        "dir")
-        )
-        let files = children.filter(NSPredicate(format: "type = %@", "file"))
-
-        var allFiles = [File]()
-        for child in teamSpaces { allFiles.append(child.freeze()) }
-        for child in sharedSpaces { allFiles.append(child.freeze()) }
-        for child in dirs { allFiles.append(child.freeze()) }
-        for child in files { allFiles.append(child.freeze()) }
-
-        return allFiles
+        return Array(children.freeze())
     }
 
     @discardableResult
@@ -503,7 +491,7 @@ public class DriveFileManager {
         var allFiles = [File]()
 
         if query != nil || fileType != nil {
-            searchResults = searchResults.sorted(byKeyPath: sortType.value.realmKeyPath, ascending: sortType.value.order == "asc")
+            searchResults = searchResults.sorted(by: [sortType.value.sortDescriptor])
             for child in searchResults.freeze() { allFiles.append(child.freeze()) }
         }
 
