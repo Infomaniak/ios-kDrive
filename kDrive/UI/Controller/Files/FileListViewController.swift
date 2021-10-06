@@ -754,16 +754,16 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Bulk actions
 
     @objc override func selectAllChildren() {
-        updateSelectionButtons()
+        updateSelectionButtons(selectAll: true)
         selectAllMode = true
         navigationItem.rightBarButtonItem = loadingBarButtonItem
         driveFileManager.apiFetcher.getFileCount(driveId: driveFileManager.drive.id, fileId: currentDirectory.id) { [self] response, _ in
-            updateSelectionButtons()
             if let fileCount = response?.data {
                 currentDirectoryCount = fileCount
                 setSelectedCells()
                 updateSelectedCount()
             } else {
+                updateSelectionButtons()
                 selectAllMode = false
                 updateSelectAllButton()
             }
@@ -771,7 +771,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     @objc override func deselectAllChildren() {
-        updateSelectionButtons()
         selectAllMode = false
         if let indexPaths = collectionView.indexPathsForSelectedItems {
             for indexPath in indexPaths {
@@ -779,6 +778,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         }
         selectedItems.removeAll()
+        updateSelectionButtons()
         updateSelectedCount()
     }
 

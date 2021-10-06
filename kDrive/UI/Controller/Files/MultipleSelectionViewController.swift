@@ -103,8 +103,8 @@ class MultipleSelectionViewController: UIViewController {
         selectedItems = Set(newChildren.filter { selectedFileId.contains($0.id) })
     }
 
-    final func updateSelectionButtons() {
-        let notEmpty = !selectedItems.isEmpty
+    final func updateSelectionButtons(selectAll: Bool = false) {
+        let notEmpty = !selectedItems.isEmpty || selectAll
         let canMove = selectedItems.allSatisfy { $0.rights?.move ?? false }
         let isInTrash: Bool
         #if ISEXTENSION
