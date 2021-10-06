@@ -539,6 +539,39 @@ public class DriveApiFetcher: ApiFetcher {
         return makeRequest(url, method: .get, completion: completion)
     }
 
+    public func addCategory(file: File, category: Category, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.addCategory(file: file)
+        let body = ["id": category.id]
+
+        makeRequest(url, method: .post, parameters: body, completion: completion)
+    }
+
+    public func removeCategory(file: File, category: Category, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.removeCategory(file: file, categoryId: category.id)
+
+        makeRequest(url, method: .delete, completion: completion)
+    }
+
+    public func createCategory(driveId: Int, name: String, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
+        let url = ApiRoutes.createCategory(driveId: driveId)
+        let body = ["name": name, "color": color]
+
+        makeRequest(url, method: .post, parameters: body, completion: completion)
+    }
+
+    public func editCategory(driveId: Int, id: Int, name: String, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
+        let url = ApiRoutes.editCategory(driveId: driveId, categoryId: id)
+        let body = ["name": name, "color": color]
+
+        makeRequest(url, method: .patch, parameters: body, completion: completion)
+    }
+
+    public func deleteCategory(driveId: Int, id: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.editCategory(driveId: driveId, categoryId: id)
+
+        makeRequest(url, method: .delete, completion: completion)
+    }
+
     public func requireFileAccess(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
         let url = ApiRoutes.requireFileAccess(file: file)
 

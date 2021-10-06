@@ -29,6 +29,7 @@ public class Category: Object, Codable {
     @Persisted public var createdAt: Date
     public var isGeneratedByIA: Bool?
     public var IACategoryUserValidation: String?
+    public var userId: Int?
     public var isSelected = false
 
     public var color: UIColor? {
@@ -52,6 +53,7 @@ public class Category: Object, Codable {
         case createdAt = "created_at"
         case isGeneratedByIA = "is_generated_by_ia"
         case IACategoryUserValidation = "ia_category_user_validation"
+        case userId = "user_id"
     }
 }
 

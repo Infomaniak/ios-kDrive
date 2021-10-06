@@ -98,13 +98,27 @@ class ManageCategoriesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
         category.isSelected = true
-        // TODO: Update on server
+        driveFileManager.apiFetcher.addCategory(file: file, category: category) { response, _ in
+            if response?.data == nil {
+                // Error
+                category.isSelected = false
+                tableView.deselectRow(at: indexPath, animated: true)
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+            }
+        }
     }
 
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
         category.isSelected = false
-        // TODO: Update on server
+        driveFileManager.apiFetcher.removeCategory(file: file, category: category) { response, _ in
+            if response?.data == nil {
+                // Error
+                category.isSelected = true
+                tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+            }
+        }
     }
 }
 
