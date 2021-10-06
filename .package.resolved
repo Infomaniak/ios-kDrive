@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/Alamofire/Alamofire.git",
         "state": {
           "branch": null,
-          "revision": "f96b619bcb2383b43d898402283924b80e2c4bae",
-          "version": "5.4.3"
+          "revision": "d120af1e8638c7da36c8481fd61a66c0c08dc4fc",
+          "version": "5.4.4"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
         "state": {
           "branch": null,
-          "revision": "2f972249c520cbf87ac8856f176ebc994cb1c9a6",
-          "version": "8.7.0"
+          "revision": "81b568348ab4e113dd8bcef5a83c5dd431741ae4",
+          "version": "8.8.1"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/SCENEE/FloatingPanel",
         "state": {
           "branch": null,
-          "revision": "3a0831a3346c99952b064303037e3a2d11594df7",
-          "version": "2.4.1"
+          "revision": "29beea0ff9b8744da4ba618907f48c0439995d00",
+          "version": "2.5.0"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/google/GoogleAppMeasurement.git",
         "state": {
           "branch": null,
-          "revision": "4901bde146b0269da35470d261f741f0e910d8df",
-          "version": "8.7.0"
+          "revision": "06add56b27b88ae5180e92d4ee21a1199ee888a1",
+          "version": "8.8.0"
         }
       },
       {
@@ -141,7 +141,7 @@
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
-          "revision": "1e7570470dd22df678c504cbd261ffdde10707d1",
+          "revision": "a1cb5c22e8e7cb8bbef3a427d4fc2cf992ad44e2",
           "version": "1.1.0"
         }
       },
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "1897586f01041d6ddc025714be156aee2d79509d",
-          "version": "7.0.0-beta.4"
+          "revision": "8c65ddf756c633d01d9ae01092bf72f0c66dfc60",
+          "version": "7.0.0"
         }
       },
       {
@@ -231,8 +231,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "4cbe20f31b1bcc20190c724632143b4f9b8ac3e3",
-          "version": "10.15.1"
+          "revision": "052f92ef8dd411616cfcfae8dd82888dcd4ecf45",
+          "version": "10.16.0"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
-          "revision": "4abaa663a7916902ae9196a8bf3c4c047caacc17",
-          "version": "7.3.0"
+          "revision": "ea5bae4bfb10cd9c5afda6898702489756df313d",
+          "version": "7.4.2"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "fb48bdd8279799f655da5f8b4e0a21430eca6012",
-          "version": "2.32.3"
+          "revision": "6aa9347d9bc5bbfe6a84983aec955c17ffea96ef",
+          "version": "2.33.0"
         }
       },
       {
@@ -294,8 +294,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "77a3bf17884d2c87ba400f4d93b9a6f27b078651",
-          "version": "2.15.1"
+          "revision": "5e68c1ded15619bb281b273fa8c2d8fd7f7b2b7d",
+          "version": "2.16.1"
         }
       },
       {
@@ -312,8 +312,8 @@
         "repositoryURL": "https://github.com/apple/swift-protobuf.git",
         "state": {
           "branch": null,
-          "revision": "1f62db409f2c9b0223a3f68567b4a01333aae778",
-          "version": "1.17.0"
+          "revision": "7e2c5f3cbbeea68e004915e3a8961e20bd11d824",
+          "version": "1.18.0"
         }
       },
       {
