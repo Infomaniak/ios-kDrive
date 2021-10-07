@@ -192,6 +192,14 @@ class FileDetailViewController: UIViewController {
                 self.reloadTableView()
             }
         }
+
+        // Observe file changes
+        driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
+            DispatchQueue.main.async { [weak self] in
+                self?.file = newFile
+                self?.reloadTableView()
+            }
+        }
     }
 
     override func viewDidLayoutSubviews() {

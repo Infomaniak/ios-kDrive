@@ -842,9 +842,8 @@ public class DriveFileManager {
                         realm.add(newCategory, update: .modified)
                         file.categories.append(newCategory)
                     }
+                    self.notifyObserversWith(file: file)
                 }
-
-                self.notifyObserversWith(file: file)
                 completion(nil)
             }
         }
@@ -862,8 +861,8 @@ public class DriveFileManager {
                             file.categories.remove(at: index)
                         }
                     }
+                    self.notifyObserversWith(file: file)
                 }
-                self.notifyObserversWith(file: file)
                 completion(nil)
             }
         }
