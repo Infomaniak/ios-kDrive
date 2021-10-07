@@ -30,4 +30,5 @@ opt_in_rules:
  - unneeded_parentheses_in_closure_argument
  - unused_import
 excluded:
+ - .tuist-bin/*
  - Derived/Sources/*
