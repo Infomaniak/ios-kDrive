@@ -23,8 +23,8 @@ import UIKit
 class ManageCategoriesViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
-    /// We can manually disable creation.
-    var canCreateCategory = true
+    /// Disable category edition (can just add/remove).
+    var canEdit = true
 
     lazy var categories = Array(driveFileManager.drive.categories)
     var filteredCategories = [kDriveCore.Category]()
@@ -45,6 +45,8 @@ class ManageCategoriesViewController: UITableViewController {
         tableView.register(cellView: CategoryTableViewCell.self)
         tableView.keyboardDismissMode = .onDrag
 
+        title = canEdit ? "Gérer les catégories" : "Ajouter des catégories"
+
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
@@ -61,7 +63,7 @@ class ManageCategoriesViewController: UITableViewController {
             navigationItem.leftBarButtonItem = closeButton
         }
 
-        if !driveFileManager.drive.categoryRights.canCreateCategory || !canCreateCategory {
+        if !driveFileManager.drive.categoryRights.canCreateCategory || !canEdit {
             navigationItem.rightBarButtonItem = nil
         }
 
@@ -111,7 +113,7 @@ class ManageCategoriesViewController: UITableViewController {
         let count = isFiltering ? filteredCategories.count : categories.count
 
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == count - 1)
-        cell.configure(with: category, showMoreButton: driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights.canDeleteCategory)
+        cell.configure(with: category, showMoreButton: canEdit && (driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights.canDeleteCategory))
 
         return cell
     }
