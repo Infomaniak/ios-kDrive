@@ -33,7 +33,7 @@ class EditCategoryViewController: UITableViewController {
             footer.footerButton.isEnabled = !name.trimmingCharacters(in: .whitespaces).isEmpty
         }
     }
-    var color = ""
+    var color = "#1abc9c"
 
     private let rows: [Row] = [.name, .color]
 
@@ -54,6 +54,12 @@ class EditCategoryViewController: UITableViewController {
         title = create ? "Créer une catégorie" : "Modifier une catégorie"
 
         hideKeyboardWhenTappedAround()
+    }
+
+    static func instantiate(driveFileManager: DriveFileManager) -> EditCategoryViewController {
+        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 
     // MARK: - Table view data source

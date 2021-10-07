@@ -114,6 +114,7 @@ class ManageCategoriesViewController: UITableViewController {
 
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == count - 1)
         cell.configure(with: category, showMoreButton: canEdit && (driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights.canDeleteCategory))
+        cell.delegate = self
 
         return cell
     }
@@ -157,11 +158,36 @@ class ManageCategoriesViewController: UITableViewController {
     }
 }
 
+// MARK: - Search results updating
+
 extension ManageCategoriesViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         if let searchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces) {
             filteredCategories = Array(categories).filter { $0.localizedName.range(of: searchText, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
             tableView.reloadData()
         }
+    }
+}
+
+// MARK: - Category cell delegate
+
+extension ManageCategoriesViewController: CategoryCellDelegate {
+    func didTapMoreButton(_ cell: CategoryTableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else {
+            return
+        }
+
+        let floatingPanelViewController = DriveFloatingPanelController()
+        let manageCategoryViewController = ManageCategoryFloatingPanelViewController()
+        manageCategoryViewController.presentingParent = self
+        manageCategoryViewController.driveFileManager = driveFileManager
+        manageCategoryViewController.category = categories[indexPath.row]
+
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = manageCategoryViewController
+
+        floatingPanelViewController.set(contentViewController: manageCategoryViewController)
+        floatingPanelViewController.track(scrollView: manageCategoryViewController.tableView)
+        present(floatingPanelViewController, animated: true)
     }
 }

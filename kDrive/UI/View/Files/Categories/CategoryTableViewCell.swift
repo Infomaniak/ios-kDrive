@@ -20,10 +20,16 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
+protocol CategoryCellDelegate: AnyObject {
+    func didTapMoreButton(_ cell: CategoryTableViewCell)
+}
+
 class CategoryTableViewCell: InsetTableViewCell {
     @IBOutlet weak var circleImageView: UIImageView!
     @IBOutlet weak var label: IKLabel!
     @IBOutlet weak var moreButton: UIButton!
+
+    weak var delegate: CategoryCellDelegate?
 
     private var category: kDriveCore.Category!
 
@@ -63,5 +69,7 @@ class CategoryTableViewCell: InsetTableViewCell {
         }
     }
 
-    @IBAction func menuButtonPressed(_ sender: UIButton) {}
+    @IBAction func menuButtonPressed(_ sender: UIButton) {
+        delegate?.didTapMoreButton(self)
+    }
 }
