@@ -23,6 +23,7 @@ import UIKit
 class CategoryTableViewCell: InsetTableViewCell {
     @IBOutlet weak var circleImageView: UIImageView!
     @IBOutlet weak var label: IKLabel!
+    @IBOutlet weak var moreButton: UIButton!
 
     private var category: kDriveCore.Category!
 
@@ -41,9 +42,10 @@ class CategoryTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configure(with category: kDriveCore.Category) {
+    func configure(with category: kDriveCore.Category, showMoreButton: Bool) {
         self.category = category
         label.text = category.localizedName
+        moreButton.isHidden = !showMoreButton
         generateIcon(for: category, selected: isSelected)
     }
 

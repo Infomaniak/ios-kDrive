@@ -24,7 +24,7 @@ public class Category: Object, Codable {
     @Persisted(primaryKey: true) public var id: Int
     @Persisted public var name: String
     @Persisted public var isPredefined: Bool
-    @Persisted private var _color: String
+    @Persisted public var colorHex: String
     @Persisted public var createdBy: Int
     @Persisted public var createdAt: Date
     public var isGeneratedByIA: Bool?
@@ -33,7 +33,7 @@ public class Category: Object, Codable {
     public var isSelected = false
 
     public var color: UIColor? {
-        return UIColor(hex: _color)
+        return UIColor(hex: colorHex)
     }
 
     public var localizedName: String {
@@ -48,7 +48,7 @@ public class Category: Object, Codable {
         case id
         case name
         case isPredefined = "is_predefined"
-        case _color = "color"
+        case colorHex = "color"
         case createdBy = "created_by"
         case createdAt = "created_at"
         case isGeneratedByIA = "is_generated_by_ia"

@@ -852,7 +852,7 @@ public class DriveFileManager {
     public func removeCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
         apiFetcher.removeCategory(file: file, category: category) { [fileId = file.id] response, error in
             if response?.data == nil {
-                completion(response?.error ?? error ?? DriveError.unknownError)
+                completion(error ?? DriveError.unknownError)
             } else {
                 let realm = self.getRealm()
                 if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
@@ -864,6 +864,26 @@ public class DriveFileManager {
                     self.notifyObserversWith(file: file)
                 }
                 completion(nil)
+            }
+        }
+    }
+
+    public func createCategory(name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
+        apiFetcher.createCategory(driveId: drive.id, name: name, color: color) { response, error in
+            if let category = response?.data {
+                completion(.success(category))
+            } else {
+                completion(.failure(error ?? DriveError.unknownError))
+            }
+        }
+    }
+
+    public func editCategory(id: Int, name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
+        apiFetcher.editCategory(driveId: drive.id, id: id, name: name, color: color) { response, error in
+            if let category = response?.data {
+                completion(.success(category))
+            } else {
+                completion(.failure(error ?? DriveError.unknownError))
             }
         }
     }

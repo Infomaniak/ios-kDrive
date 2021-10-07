@@ -23,6 +23,8 @@ import UIKit
 class ManageCategoriesViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
+    /// We can manually disable creation.
+    var canCreateCategory = true
 
     lazy var categories = Array(driveFileManager.drive.categories)
     var filteredCategories = [kDriveCore.Category]()
@@ -57,6 +59,10 @@ class ManageCategoriesViewController: UITableViewController {
             let closeButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
             closeButton.accessibilityLabel = KDriveStrings.Localizable.buttonClose
             navigationItem.leftBarButtonItem = closeButton
+        }
+
+        if !driveFileManager.drive.categoryRights.canCreateCategory || !canCreateCategory {
+            navigationItem.rightBarButtonItem = nil
         }
 
         definesPresentationContext = true
@@ -105,7 +111,7 @@ class ManageCategoriesViewController: UITableViewController {
         let count = isFiltering ? filteredCategories.count : categories.count
 
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == count - 1)
-        cell.configure(with: category)
+        cell.configure(with: category, showMoreButton: driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights.canDeleteCategory)
 
         return cell
     }
@@ -128,10 +134,22 @@ class ManageCategoriesViewController: UITableViewController {
         let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
         category.isSelected = false
         driveFileManager.removeCategory(file: file, category: category) { error in
-            if error != nil {
+            if let error = error {
                 category.isSelected = true
                 tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBar(message: error.localizedDescription)
+            }
+        }
+    }
+
+    // MARK: - Navigation
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "createCategory" {
+            let viewController = segue.destination as? EditCategoryViewController
+            viewController?.driveFileManager = driveFileManager
+            if let searchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces) {
+                viewController?.name = searchText
             }
         }
     }
