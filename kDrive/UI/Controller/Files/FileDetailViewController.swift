@@ -468,6 +468,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCategoriesTableViewCell.self, for: indexPath)
+                    cell.selectionStyle = driveFileManager.drive.categoryRights.canPutCategoryOnFile ? .default : .none
                     cell.configure(with: Array(file.categories))
                     return cell
                 case .owner:
@@ -550,7 +551,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if currentTab == .informations && fileInformationRows[indexPath.row] == .categories {
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && driveFileManager.drive.categoryRights.canPutCategoryOnFile {
             let manageCategoriesViewController = ManageCategoriesViewController.instantiate(file: file, driveFileManager: driveFileManager)
             navigationController?.pushViewController(manageCategoriesViewController, animated: true)
         }

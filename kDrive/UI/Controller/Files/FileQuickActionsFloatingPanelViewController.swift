@@ -46,31 +46,32 @@ public class FloatingPanelAction: Equatable {
 
     static let openWith = FloatingPanelAction(id: 0, name: KDriveStrings.Localizable.buttonOpenWith, image: KDriveAsset.openWith.image)
     static let edit = FloatingPanelAction(id: 1, name: KDriveStrings.Localizable.buttonEdit, image: KDriveAsset.editDocument.image)
-    static let favorite = FloatingPanelAction(id: 2, name: KDriveStrings.Localizable.buttonAddFavorites, reverseName: KDriveStrings.Localizable.buttonRemoveFavorites, image: KDriveAsset.favorite.image)
-    static let convertToDropbox = FloatingPanelAction(id: 3, name: KDriveStrings.Localizable.buttonConvertToDropBox, image: KDriveAsset.folderDropBox1.image)
-    static let manageDropbox = FloatingPanelAction(id: 4, name: KDriveStrings.Localizable.buttonManageDropBox, image: KDriveAsset.folderDropBox1.image)
-    static let seeFolder = FloatingPanelAction(id: 5, name: KDriveStrings.Localizable.buttonSeeFolder, image: KDriveAsset.folderFill.image)
-    static let offline = FloatingPanelAction(id: 6, name: KDriveStrings.Localizable.buttonAvailableOffline, image: KDriveAsset.availableOffline.image)
-    static let download = FloatingPanelAction(id: 7, name: KDriveStrings.Localizable.buttonDownload, image: KDriveAsset.download.image)
-    static let move = FloatingPanelAction(id: 8, name: KDriveStrings.Localizable.buttonMoveTo, image: KDriveAsset.folderSelect.image)
-    static let duplicate = FloatingPanelAction(id: 9, name: KDriveStrings.Localizable.buttonDuplicate, image: KDriveAsset.duplicate.image)
-    static let rename = FloatingPanelAction(id: 10, name: KDriveStrings.Localizable.buttonRename, image: KDriveAsset.edit.image)
-    static let delete = FloatingPanelAction(id: 11, name: KDriveStrings.Localizable.modalMoveTrashTitle, image: KDriveAsset.delete.image, tintColor: KDriveAsset.binColor.color)
-    static let leaveShare = FloatingPanelAction(id: 12, name: KDriveStrings.Localizable.buttonLeaveShare, image: KDriveAsset.linkBroken.image)
+    static let manageCategories = FloatingPanelAction(id: 2, name: "Gérer les catégories", image: KDriveAsset.tag.image)
+    static let favorite = FloatingPanelAction(id: 3, name: KDriveStrings.Localizable.buttonAddFavorites, reverseName: KDriveStrings.Localizable.buttonRemoveFavorites, image: KDriveAsset.favorite.image)
+    static let convertToDropbox = FloatingPanelAction(id: 4, name: KDriveStrings.Localizable.buttonConvertToDropBox, image: KDriveAsset.folderDropBox1.image)
+    static let manageDropbox = FloatingPanelAction(id: 5, name: KDriveStrings.Localizable.buttonManageDropBox, image: KDriveAsset.folderDropBox1.image)
+    static let seeFolder = FloatingPanelAction(id: 6, name: KDriveStrings.Localizable.buttonSeeFolder, image: KDriveAsset.folderFill.image)
+    static let offline = FloatingPanelAction(id: 7, name: KDriveStrings.Localizable.buttonAvailableOffline, image: KDriveAsset.availableOffline.image)
+    static let download = FloatingPanelAction(id: 8, name: KDriveStrings.Localizable.buttonDownload, image: KDriveAsset.download.image)
+    static let move = FloatingPanelAction(id: 9, name: KDriveStrings.Localizable.buttonMoveTo, image: KDriveAsset.folderSelect.image)
+    static let duplicate = FloatingPanelAction(id: 10, name: KDriveStrings.Localizable.buttonDuplicate, image: KDriveAsset.duplicate.image)
+    static let rename = FloatingPanelAction(id: 11, name: KDriveStrings.Localizable.buttonRename, image: KDriveAsset.edit.image)
+    static let delete = FloatingPanelAction(id: 12, name: KDriveStrings.Localizable.modalMoveTrashTitle, image: KDriveAsset.delete.image, tintColor: KDriveAsset.binColor.color)
+    static let leaveShare = FloatingPanelAction(id: 13, name: KDriveStrings.Localizable.buttonLeaveShare, image: KDriveAsset.linkBroken.image)
 
     static var listActions: [FloatingPanelAction] {
-        return [openWith, edit, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
     static var folderListActions: [FloatingPanelAction] {
-        return [favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [manageCategories, favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
-    static let informations = FloatingPanelAction(id: 13, name: KDriveStrings.Localizable.fileDetailsInfosTitle, image: KDriveAsset.info.image)
-    static let add = FloatingPanelAction(id: 14, name: KDriveStrings.Localizable.buttonAdd, image: KDriveAsset.add.image)
-    static let sendCopy = FloatingPanelAction(id: 15, name: KDriveStrings.Localizable.buttonSendCopy, image: KDriveAsset.exportIos.image)
-    static let shareAndRights = FloatingPanelAction(id: 16, name: KDriveStrings.Localizable.buttonFileRights, image: KDriveAsset.share.image)
-    static let shareLink = FloatingPanelAction(id: 17, name: KDriveStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveStrings.Localizable.buttonCopyPublicLink, image: KDriveAsset.link.image)
+    static let informations = FloatingPanelAction(id: 14, name: KDriveStrings.Localizable.fileDetailsInfosTitle, image: KDriveAsset.info.image)
+    static let add = FloatingPanelAction(id: 15, name: KDriveStrings.Localizable.buttonAdd, image: KDriveAsset.add.image)
+    static let sendCopy = FloatingPanelAction(id: 16, name: KDriveStrings.Localizable.buttonSendCopy, image: KDriveAsset.exportIos.image)
+    static let shareAndRights = FloatingPanelAction(id: 17, name: KDriveStrings.Localizable.buttonFileRights, image: KDriveAsset.share.image)
+    static let shareLink = FloatingPanelAction(id: 18, name: KDriveStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveStrings.Localizable.buttonCopyPublicLink, image: KDriveAsset.link.image)
 
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
@@ -212,6 +213,8 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 return file.rights?.write ?? false
             case .edit:
                 return file.isOfficeFile && (file.rights?.write ?? false)
+            case .manageCategories:
+                return driveFileManager.drive.categoryRights.canPutCategoryOnFile
             case .favorite:
                 return (file.rights?.canFavorite ?? false) && !sharedWithMe
             case .convertToDropbox:
@@ -368,6 +371,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             }
         case .edit:
             OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
+        case .manageCategories:
+            let manageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
+            present(manageCategoriesViewController, animated: true)
         case .favorite:
             driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { [wasFavorited = file.isFavorite] error in
                 if error == nil {

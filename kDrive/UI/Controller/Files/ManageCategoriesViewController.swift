@@ -51,6 +51,14 @@ class ManageCategoriesViewController: UITableViewController {
         }
 
         navigationItem.searchController = searchController
+        let viewControllersCount = navigationController?.viewControllers.count ?? 0
+        if presentingViewController != nil && viewControllersCount < 2 {
+            // Show cancel button
+            let closeButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+            closeButton.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+            navigationItem.leftBarButtonItem = closeButton
+        }
+
         definesPresentationContext = true
 
         // Select categories
@@ -61,11 +69,20 @@ class ManageCategoriesViewController: UITableViewController {
         }
     }
 
+    @objc func closeButtonPressed() {
+        dismiss(animated: true)
+    }
+
     static func instantiate(file: File, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
         viewController.file = file
         viewController.driveFileManager = driveFileManager
         return viewController
+    }
+
+    static func instantiateInNavigationController(file: File, driveFileManager: DriveFileManager) -> UINavigationController {
+        let viewController = instantiate(file: file, driveFileManager: driveFileManager)
+        return UINavigationController(rootViewController: viewController)
     }
 
     // MARK: - Table view data source
@@ -98,11 +115,10 @@ class ManageCategoriesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
         category.isSelected = true
-        driveFileManager.apiFetcher.addCategory(file: file, category: category) { response, _ in
-            if response?.data == nil {
-                // Error
-                category.isSelected = false
-                tableView.deselectRow(at: indexPath, animated: true)
+        driveFileManager.addCategory(file: file, category: category) { error in
+            if error != nil {
+                category.isSelected = true
+                tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
             }
         }
@@ -111,9 +127,8 @@ class ManageCategoriesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
         category.isSelected = false
-        driveFileManager.apiFetcher.removeCategory(file: file, category: category) { response, _ in
-            if response?.data == nil {
-                // Error
+        driveFileManager.removeCategory(file: file, category: category) { error in
+            if error != nil {
                 category.isSelected = true
                 tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
@@ -124,8 +139,8 @@ class ManageCategoriesViewController: UITableViewController {
 
 extension ManageCategoriesViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        if let searchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces).lowercased() {
-            filteredCategories = Array(categories).filter { $0.localizedName.lowercased().contains(searchText) }
+        if let searchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces) {
+            filteredCategories = Array(categories).filter { $0.localizedName.range(of: searchText, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
             tableView.reloadData()
         }
     }

@@ -830,6 +830,45 @@ public class DriveFileManager {
         return result
     }
 
+    public func addCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
+        apiFetcher.addCategory(file: file, category: category) { [fileId = file.id] response, error in
+            if response?.data == nil {
+                completion(response?.error ?? error ?? DriveError.unknownError)
+            } else {
+                let realm = self.getRealm()
+                if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
+                    try? realm.write {
+                        let newCategory = Category(value: category)
+                        realm.add(newCategory, update: .modified)
+                        file.categories.append(newCategory)
+                    }
+                }
+
+                self.notifyObserversWith(file: file)
+                completion(nil)
+            }
+        }
+    }
+
+    public func removeCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
+        apiFetcher.removeCategory(file: file, category: category) { [fileId = file.id] response, error in
+            if response?.data == nil {
+                completion(response?.error ?? error ?? DriveError.unknownError)
+            } else {
+                let realm = self.getRealm()
+                if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
+                    if let index = file.categories.firstIndex(where: { $0.id == category.id }) {
+                        try? realm.write {
+                            file.categories.remove(at: index)
+                        }
+                    }
+                }
+                self.notifyObserversWith(file: file)
+                completion(nil)
+            }
+        }
+    }
+
     public func setFavoriteFile(file: File, favorite: Bool, completion: @escaping (Error?) -> Void) {
         let fileId = file.id
         if favorite {
