@@ -297,7 +297,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? SavePhotosFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { [weak self] _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
-                    photoSyncSettingsVC.driveFileManager = currentDriveFileManager
                     let mainTabViewVC = self?.window?.rootViewController as? UITabBarController
                     guard let currentVC = mainTabViewVC?.selectedViewController as? UINavigationController else {
                         return
