@@ -45,7 +45,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
-    var downloadObservationToken: ObservationToken?
+    var downloadProgressObserver: ObservationToken?
+    var downloadObserver: ObservationToken?
     weak var delegate: FileCellDelegate?
 
     override var isSelected: Bool {
@@ -104,7 +105,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         availableOfflineImageView?.isHidden = true
         downloadProgressView?.isHidden = true
         downloadProgressView?.updateProgress(0, animated: false)
-        downloadObservationToken?.cancel()
+        downloadProgressObserver?.cancel()
+        downloadObserver?.cancel()
     }
 
     func initStyle(isFirst: Bool, isLast: Bool) {
@@ -170,12 +172,19 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
         availableOfflineImageView?.isHidden = !file.isAvailableOffline || !FileManager.default.fileExists(atPath: file.localUrl.path)
         availableOfflineImageView?.accessibilityLabel = KDriveStrings.Localizable.offlineFileTitle
-        downloadObservationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { fileId, progress in
+        downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { fileId, progress in
             if fileId == file.id {
                 DispatchQueue.main.async { [weak self] in
                     self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
                     self?.downloadProgressView?.updateProgress(CGFloat(progress))
                     self?.availableOfflineImageView?.isHidden = !file.isAvailableOffline || progress < 1
+                }
+            }
+        }
+        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { fileId, _ in
+            if fileId == file.id {
+                DispatchQueue.main.async { [weak self] in
+                    self?.downloadProgressView?.isHidden = true
                 }
             }
         }
