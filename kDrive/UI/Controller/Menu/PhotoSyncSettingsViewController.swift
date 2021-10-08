@@ -82,6 +82,7 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
@@ -89,7 +90,6 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
 
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
 
@@ -185,6 +185,9 @@ class PhotoSyncSettingsViewController: UIViewController {
             // Insert sections
             tableView.insertSections(IndexSet(previousCount ..< newCount), with: .fade)
         }
+        // Scroll to bottom
+        let lastSection = sections.count - 1
+        tableView.scrollToRow(at: IndexPath(row: tableView(tableView, numberOfRowsInSection: lastSection) - 1, section: lastSection), at: .middle, animated: true)
     }
 
     func updateSaveButtonState() {
