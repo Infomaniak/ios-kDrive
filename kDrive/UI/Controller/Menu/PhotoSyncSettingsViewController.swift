@@ -24,7 +24,6 @@ import UIKit
 
 class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var saveButton: UIButton!
 
     private enum PhotoSyncSection {
         case syncSwitch
@@ -94,6 +93,10 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
 
+        let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
+        view.delegate = self
+        tableView.tableFooterView = view
+
         photoSyncEnabled = PhotoLibraryUploader.instance.isSyncEnabled
         currentSyncSettings = PhotoLibraryUploader.instance.settings ?? PhotoSyncSettings()
 
@@ -135,6 +138,22 @@ class PhotoSyncSettingsViewController: UIViewController {
         super.viewWillDisappear(animated)
 
         navigationController?.navigationBar.isTranslucent = true
+    }
+
+    // Hack to have auto layout working in table view footer
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard let footerView = tableView.tableFooterView else {
+            return
+        }
+
+        let width = tableView.bounds.size.width
+        let size = footerView.systemLayoutSizeFitting(CGSize(width: width, height: UIView.layoutFittingCompressedSize.height))
+
+        if footerView.frame.size.height != size.height {
+            footerView.frame.size.height = size.height
+            tableView.tableFooterView = footerView
+        }
     }
 
     func updateSectionList() {
@@ -184,23 +203,12 @@ class PhotoSyncSettingsViewController: UIViewController {
                 currentSyncSettings.deleteAssetsAfterImport != deleteAssetsAfterImport ||
                 currentSyncSettings.syncMode != syncMode
         }
-        saveButton.isHidden = !isEdited
 
+        let footer = tableView.tableFooterView as? FooterButtonView
         if (driveFileManager == nil || selectedDirectory == nil) && photoSyncEnabled {
-            saveButton.isEnabled = false
+            footer?.footerButton.isEnabled = false
         } else {
-            saveButton.isEnabled = isEdited
-        }
-    }
-
-    @IBAction func saveButtonPressed(_ sender: UIButton) {
-        DispatchQueue.global(qos: .utility).async {
-            let realm = DriveFileManager.constants.uploadsRealm
-            self.saveSettings(using: realm)
-            DispatchQueue.main.async {
-                self.navigationController?.popViewController(animated: true)
-            }
-            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+            footer?.footerButton.isEnabled = isEdited
         }
     }
 
@@ -466,5 +474,20 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
         selectedDirectory = folder
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .fade)
+    }
+}
+
+// MARK: - Footer button delegate
+
+extension PhotoSyncSettingsViewController: FooterButtonDelegate {
+    func didClickOnButton() {
+        DispatchQueue.global(qos: .utility).async {
+            let realm = DriveFileManager.constants.uploadsRealm
+            self.saveSettings(using: realm)
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+        }
     }
 }
