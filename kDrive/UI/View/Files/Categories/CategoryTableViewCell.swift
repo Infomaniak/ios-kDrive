@@ -25,6 +25,7 @@ protocol CategoryCellDelegate: AnyObject {
 }
 
 class CategoryTableViewCell: InsetTableViewCell {
+    @IBOutlet weak var borderView: UIView!
     @IBOutlet weak var circleImageView: UIImageView!
     @IBOutlet weak var label: IKLabel!
     @IBOutlet weak var moreButton: UIButton!
@@ -36,8 +37,18 @@ class CategoryTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
+        borderView.isHidden = true
         circleImageView.layer.cornerRadius = circleImageView.frame.height / 2
         circleImageView.clipsToBounds = true
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        category = nil
+        selectionStyle = .none
+        borderView.isHidden = true
+        label.style = .subtitle2
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -53,6 +64,15 @@ class CategoryTableViewCell: InsetTableViewCell {
         label.text = category.localizedName
         moreButton.isHidden = !showMoreButton
         generateIcon(for: category, selected: isSelected)
+    }
+
+    func configureCreateCell(name: String) {
+        circleImageView.image = KDriveAsset.add.image
+        label.style = .body1
+        label.attributedText = NSMutableAttributedString(string: "Créer \(name)", boldText: name)
+        moreButton.isHidden = true
+        selectionStyle = .default
+        borderView.isHidden = false
     }
 
     private func generateIcon(for category: kDriveCore.Category, selected: Bool) {

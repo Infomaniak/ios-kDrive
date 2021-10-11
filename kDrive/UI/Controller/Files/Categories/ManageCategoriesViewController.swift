@@ -37,6 +37,16 @@ class ManageCategoriesViewController: UITableViewController {
         return searchController.isActive && !isSearchBarEmpty
     }
 
+    private var searchText: String? {
+        return searchController.searchBar.text?.trimmingCharacters(in: .whitespaces)
+    }
+
+    private var dummyCategory: kDriveCore.Category = {
+        let category = kDriveCore.Category()
+        category.id = -1
+        return category
+    }()
+
     private let searchController = UISearchController(searchResultsController: nil)
 
     override func viewDidLoad() {
@@ -87,7 +97,15 @@ class ManageCategoriesViewController: UITableViewController {
                 category.isSelected = true
             }
         }
-        tableView.reloadData()
+        if searchController.isActive {
+            updateSearchResults(for: searchController)
+        } else {
+            tableView.reloadData()
+        }
+    }
+
+    private func category(at indexPath: IndexPath) -> kDriveCore.Category {
+        return isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
     }
 
     static func instantiate(file: File, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
@@ -109,7 +127,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
+        let category = category(at: indexPath)
         if category.isSelected {
             tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
         }
@@ -118,11 +136,15 @@ class ManageCategoriesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: CategoryTableViewCell.self, for: indexPath)
 
-        let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
-        let count = isFiltering ? filteredCategories.count : categories.count
+        let category = category(at: indexPath)
+        let count = self.tableView(tableView, numberOfRowsInSection: indexPath.section)
 
         cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == count - 1)
-        cell.configure(with: category, showMoreButton: canEdit && (driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights.canDeleteCategory))
+        if category == dummyCategory {
+            cell.configureCreateCell(name: searchText ?? "")
+        } else {
+            cell.configure(with: category, showMoreButton: canEdit && (driveFileManager.drive.categoryRights.canEditCategory || driveFileManager.drive.categoryRights.canDeleteCategory))
+        }
         cell.delegate = self
 
         return cell
@@ -131,7 +153,17 @@ class ManageCategoriesViewController: UITableViewController {
     // MARK: - Table view delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
+        let category = category(at: indexPath)
+
+        if category == dummyCategory {
+            let editCategoryViewController = EditCategoryViewController.instantiate(driveFileManager: driveFileManager)
+            if let searchText = searchText {
+                editCategoryViewController.name = searchText
+            }
+            navigationController?.pushViewController(editCategoryViewController, animated: true)
+            return
+        }
+
         category.isSelected = true
         driveFileManager.addCategory(file: file, category: category) { error in
             if error != nil {
@@ -143,7 +175,8 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-        let category = isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
+        let category = category(at: indexPath)
+        guard category != dummyCategory else { return }
         category.isSelected = false
         driveFileManager.removeCategory(file: file, category: category) { error in
             if let error = error {
@@ -160,7 +193,7 @@ class ManageCategoriesViewController: UITableViewController {
         if segue.identifier == "createCategory" {
             let viewController = segue.destination as? EditCategoryViewController
             viewController?.driveFileManager = driveFileManager
-            if let searchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces) {
+            if let searchText = searchText {
                 viewController?.name = searchText
             }
         }
@@ -171,8 +204,12 @@ class ManageCategoriesViewController: UITableViewController {
 
 extension ManageCategoriesViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        if let searchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces) {
-            filteredCategories = Array(categories).filter { $0.localizedName.range(of: searchText, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
+        if let searchText = searchText {
+            filteredCategories = categories.filter { $0.localizedName.range(of: searchText, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
+            // Append dummy category to show creation cell if the category doesn't exist yet
+            if canEdit && !categories.contains(where: { $0.localizedName.caseInsensitiveCompare(searchText) == .orderedSame }) {
+                filteredCategories.append(dummyCategory)
+            }
             tableView.reloadData()
         }
     }
@@ -190,7 +227,7 @@ extension ManageCategoriesViewController: CategoryCellDelegate {
         let manageCategoryViewController = ManageCategoryFloatingPanelViewController()
         manageCategoryViewController.presentingParent = self
         manageCategoryViewController.driveFileManager = driveFileManager
-        manageCategoryViewController.category = categories[indexPath.row]
+        manageCategoryViewController.category = category(at: indexPath)
 
         floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = manageCategoryViewController
