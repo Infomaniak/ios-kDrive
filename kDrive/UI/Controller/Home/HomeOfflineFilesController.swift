@@ -19,8 +19,20 @@
 import Foundation
 
 class HomeOfflineFilesController: HomeRecentFilesController {
-    override func loadFiles(forceRefresh: Bool = false) {
-        fetchedFiles = driveFileManager.getAvailableOfflineFiles()
-        homeViewController?.reload()
+    override var emptyCellType: EmptyTableView.EmptyTableViewType {
+        return .noOffline
+    }
+
+    override func loadNextPage(forceRefresh: Bool = false) {
+        guard !loading && moreComing else {
+            return
+        }
+
+        moreComing = false
+        let files = driveFileManager.getAvailableOfflineFiles()
+        self.empty = files.isEmpty
+        DispatchQueue.main.async {
+            self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
+        }
     }
 }

@@ -242,6 +242,20 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         logoImage.tintColor = KDriveCoreAsset.secondaryTextColor.color
         titleLabel.text = recentSearch
     }
+    
+    func configureLoading() {
+        titleLabel.text = " "
+        let titleLayer = CALayer()
+        titleLayer.anchorPoint = .zero
+        titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 15)
+        titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        titleLabel.layer.addSublayer(titleLayer)
+        favoriteImageView.isHidden = true
+        logoImage.image = nil
+        logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        moreButton.isHidden = true
+        checkmarkImage.isHidden = true
+    }
 
     @IBAction func moreButtonTap(_ sender: Any) {
         delegate?.didTapMoreButton(self)

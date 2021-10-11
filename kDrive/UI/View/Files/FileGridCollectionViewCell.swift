@@ -93,7 +93,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         }
     }
 
-    func configureLoading() {
+    override func configureLoading() {
         titleLabel.text = " "
         let titleLayer = CALayer()
         titleLayer.anchorPoint = .zero

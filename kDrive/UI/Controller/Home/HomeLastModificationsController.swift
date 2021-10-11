@@ -20,16 +20,19 @@ import Foundation
 import kDriveCore
 
 class HomeLastModificationsController: HomeRecentFilesController {
-    override func loadFiles(forceRefresh: Bool = false) {
-        super.loadFiles(forceRefresh: forceRefresh)
+    override var emptyCellType: EmptyTableView.EmptyTableViewType {
+        return .noActivities
+    }
+    override func loadNextPage(forceRefresh: Bool = false) {
+        guard !loading && moreComing else {
+            return
+        }
 
         driveFileManager.getLastModifiedFiles(page: page) { response, _ in
             if let files = response {
-                self.fetchedFiles = []
-                self.fetchedFiles?.append(contentsOf: self.displayedFiles)
-                self.fetchedFiles?.append(contentsOf: files)
+                self.empty = self.page == 1 && files.isEmpty
                 DispatchQueue.main.async {
-                    self.homeViewController?.reload()
+                    self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
                 }
                 self.page += 1
                 self.moreComing = files.count == DriveApiFetcher.itemPerPage

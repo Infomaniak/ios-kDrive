@@ -18,4 +18,18 @@
 
 import UIKit
 
-class HomeOfflineCollectionViewCell: InsetCollectionViewCell {}
+class HomeEmptyFilesCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var stackView: UIStackView!
+    var emptyView: EmptyTableView!
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        stackView.removeArrangedSubview(emptyView)
+        emptyView.removeFromSuperview()
+    }
+
+    func configureCell(with type: EmptyTableView.EmptyTableViewType) {
+        emptyView = EmptyTableView.instantiate(type: type, setCenteringEnabled: false)
+        stackView.addArrangedSubview(emptyView)
+    }
+}

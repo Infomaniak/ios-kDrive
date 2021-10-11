@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="HomeEmptyFilesCollectionViewCell" id="gTV-IL-0wX" customClass="HomeEmptyFilesCollectionViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="246" height="307"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="246" height="307"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="e9q-Ls-vfP">
+                        <rect key="frame" x="0.0" y="0.0" width="246" height="307"/>
+                    </stackView>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="e9q-Ls-vfP" secondAttribute="trailing" id="Dzc-Wv-8Uu"/>
+                <constraint firstItem="e9q-Ls-vfP" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="ePu-5i-97I"/>
+                <constraint firstAttribute="bottom" secondItem="e9q-Ls-vfP" secondAttribute="bottom" id="meb-VG-kRS"/>
+                <constraint firstItem="e9q-Ls-vfP" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="xn2-Aa-pmz"/>
+            </constraints>
+            <size key="customSize" width="246" height="307"/>
+            <connections>
+                <outlet property="stackView" destination="e9q-Ls-vfP" id="gTo-ME-0jy"/>
+            </connections>
+            <point key="canvasLocation" x="273.91304347826087" y="185.82589285714286"/>
+        </collectionViewCell>
+    </objects>
+</document>
