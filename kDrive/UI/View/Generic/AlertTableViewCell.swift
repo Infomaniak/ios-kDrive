@@ -19,11 +19,29 @@
 import kDriveCore
 import UIKit
 
-class StoreWarningTableViewCell: UITableViewCell {
+class AlertTableViewCell: UITableViewCell {
     @IBOutlet weak var view: UIView!
+    @IBOutlet weak var iconImageView: UIImageView!
+    @IBOutlet weak var messageLabel: IKLabel!
+
+    enum Style {
+        case info, warning
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
         view.cornerRadius = UIConstants.cornerRadius
+    }
+
+    func configure(with style: Style, message: String) {
+        switch style {
+        case .info:
+            iconImageView.image = KDriveAsset.info.image
+            iconImageView.tintColor = KDriveAsset.infomaniakColor.color
+        case .warning:
+            iconImageView.image = KDriveAsset.warning.image
+            iconImageView.tintColor = KDriveAsset.warningColor.color
+        }
+        messageLabel.text = message
     }
 }

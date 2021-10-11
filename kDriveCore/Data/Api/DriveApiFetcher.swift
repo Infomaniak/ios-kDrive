@@ -559,9 +559,12 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
-    public func editCategory(driveId: Int, id: Int, name: String, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
+    public func editCategory(driveId: Int, id: Int, name: String?, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
         let url = ApiRoutes.editCategory(driveId: driveId, categoryId: id)
-        let body = ["name": name, "color": color]
+        var body = ["color": color]
+        if let name = name {
+            body["name"] = name
+        }
 
         makeRequest(url, method: .patch, parameters: body, completion: completion)
     }

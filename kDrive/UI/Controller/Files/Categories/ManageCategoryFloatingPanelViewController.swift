@@ -85,7 +85,7 @@ class ManageCategoryFloatingPanelViewController: UITableViewController {
         switch action {
         case .edit:
             let editCategoryViewController = EditCategoryViewController.instantiate(driveFileManager: driveFileManager)
-            editCategoryViewController.category = category
+            editCategoryViewController.category = Category(value: category!)
             presentingParent?.navigationController?.pushViewController(editCategoryViewController, animated: true)
             dismiss(animated: true)
         case .delete:

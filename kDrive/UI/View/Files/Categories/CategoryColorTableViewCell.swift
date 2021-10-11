@@ -26,7 +26,6 @@ class CategoryColorTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
 
-    var selectedColor: String?
     weak var delegate: CategoryColorDelegate?
 
     private let colors = [
@@ -73,18 +72,16 @@ class CategoryColorTableViewCell: UITableViewCell {
         collectionView.register(cellView: CategoryColorCollectionViewCell.self)
         collectionView.dataSource = self
         collectionView.delegate = self
-        let selectedColorIndex: Int
-        if let selectedColor = selectedColor {
-            selectedColorIndex = colors.firstIndex { $0.hex == selectedColor } ?? 0
-        } else {
-            selectedColorIndex = 0
-        }
-        collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 0), animated: true, scrollPosition: .init(rawValue: 0))
         // Observe content size to adjust table view cell height (need to call `cell.layoutIfNeeded()`)
         contentSizeObservation = collectionView.observe(\.contentSize) { [weak self] collectionView, _ in
             self?.collectionViewHeightConstraint.constant = collectionView.contentSize.height
             self?.layoutIfNeeded()
         }
+    }
+
+    func selectColor(_ color: String) {
+        let selectedColorIndex = colors.firstIndex { $0.hex == color } ?? 0
+        collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 0), animated: true, scrollPosition: .init(rawValue: 0))
     }
 
     deinit {

@@ -887,7 +887,7 @@ public class DriveFileManager {
         }
     }
 
-    public func editCategory(id: Int, name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
+    public func editCategory(id: Int, name: String?, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
         apiFetcher.editCategory(driveId: drive.id, id: id, name: name, color: color) { response, error in
             if let category = response?.data {
                 // Update category

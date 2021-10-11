@@ -30,12 +30,13 @@ class EditCategoryViewController: UITableViewController {
             guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
                 return
             }
-            footer.footerButton.isEnabled = !name.trimmingCharacters(in: .whitespaces).isEmpty
+            footer.footerButton.isEnabled = saveButtonEnabled
         }
     }
+
     var color = "#1abc9c"
 
-    private let rows: [Row] = [.name, .color]
+    private var rows: [Row] = [.name, .color]
 
     private enum Row: CaseIterable {
         case editInfo, name, color
@@ -45,13 +46,30 @@ class EditCategoryViewController: UITableViewController {
         return category == nil
     }
 
+    private var saveButtonEnabled: Bool {
+        if !create && category?.isPredefined == true {
+            return true
+        } else {
+            return !name.trimmingCharacters(in: .whitespaces).isEmpty
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.register(cellView: AlertTableViewCell.self)
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: CategoryColorTableViewCell.self)
 
         title = create ? "Créer une catégorie" : "Modifier une catégorie"
+
+        if !create {
+            rows.insert(.editInfo, at: 0)
+            // Remove name edition for predefined categories
+            if category?.isPredefined == true, let index = rows.firstIndex(of: .name) {
+                rows.remove(at: index)
+            }
+        }
 
         hideKeyboardWhenTappedAround()
     }
@@ -71,7 +89,8 @@ class EditCategoryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch rows[indexPath.row] {
         case .editInfo:
-            let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
+            let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
+            cell.configure(with: .info, message: "La modification sera visible par tous les utilisateurs du kDrive ayant accès aux catégories.")
             return cell
         case .name:
             let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
@@ -91,7 +110,7 @@ class EditCategoryViewController: UITableViewController {
         case .color:
             let cell = tableView.dequeueReusableCell(type: CategoryColorTableViewCell.self, for: indexPath)
             cell.delegate = self
-            cell.selectedColor = category?.colorHex
+            cell.selectColor(category?.colorHex ?? color)
             cell.layoutIfNeeded()
             return cell
         }
@@ -99,7 +118,7 @@ class EditCategoryViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
-        view.footerButton.isEnabled = !name.trimmingCharacters(in: .whitespaces).isEmpty
+        view.footerButton.isEnabled = saveButtonEnabled
         view.delegate = self
         return view
     }
@@ -123,7 +142,7 @@ extension EditCategoryViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
         if let category = category {
             // Edit category
-            driveFileManager.editCategory(id: category.id, name: category.name, color: category.colorHex) { [weak self] result in
+            driveFileManager.editCategory(id: category.id, name: category.isPredefined ? nil : category.name, color: category.colorHex) { [weak self] result in
                 switch result {
                 case .success:
                     self?.navigationController?.popViewController(animated: true)
