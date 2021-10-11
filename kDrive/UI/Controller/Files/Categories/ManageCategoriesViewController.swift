@@ -26,7 +26,7 @@ class ManageCategoriesViewController: UITableViewController {
     /// Disable category edition (can just add/remove).
     var canEdit = true
 
-    lazy var categories = Array(driveFileManager.drive.categories)
+    var categories = [kDriveCore.Category]()
     var filteredCategories = [kDriveCore.Category]()
 
     private var isSearchBarEmpty: Bool {
@@ -68,13 +68,6 @@ class ManageCategoriesViewController: UITableViewController {
         }
 
         definesPresentationContext = true
-
-        // Select categories
-        for category in file.categories {
-            if let category = categories.first(where: { $0.id == category.id }) {
-                category.isSelected = true
-            }
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -88,6 +81,12 @@ class ManageCategoriesViewController: UITableViewController {
 
     func reloadCategories() {
         categories = Array(driveFileManager.drive.categories)
+        // Select categories
+        for category in file.categories {
+            if let category = categories.first(where: { $0.id == category.id }) {
+                category.isSelected = true
+            }
+        }
         tableView.reloadData()
     }
 
