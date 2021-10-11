@@ -130,7 +130,7 @@ class ManageCategoryFloatingPanelViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 1 {
-            return 122
+            return 98
         } else {
             return UITableView.automaticDimension
         }
@@ -141,6 +141,7 @@ class ManageCategoryFloatingPanelViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(type: CategoryTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
             cell.configure(with: category, showMoreButton: false)
+            cell.leadingConstraint.constant = 0
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(type: CategoryFloatingPanelCollectionTableViewCell.self, for: indexPath)
@@ -159,6 +160,6 @@ extension ManageCategoryFloatingPanelViewController: CategoryActionDelegate {
 
 extension ManageCategoryFloatingPanelViewController: FloatingPanelControllerDelegate {
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-        return PlusButtonFloatingPanelLayout(height: min(196 + view.safeAreaInsets.bottom, UIScreen.main.bounds.size.height - 48))
+        return PlusButtonFloatingPanelLayout(height: min(169, UIScreen.main.bounds.size.height - 48))
     }
 }

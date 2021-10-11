@@ -29,7 +29,8 @@ class CategoryTableViewCell: InsetTableViewCell {
     @IBOutlet weak var circleImageView: UIImageView!
     @IBOutlet weak var label: IKLabel!
     @IBOutlet weak var moreButton: UIButton!
-
+    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
+    
     weak var delegate: CategoryCellDelegate?
 
     private var category: kDriveCore.Category!

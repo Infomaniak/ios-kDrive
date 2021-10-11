@@ -89,6 +89,7 @@
                 <outlet property="circleImageView" destination="ky8-tr-b17" id="BBh-Tg-XBY"/>
                 <outlet property="contentInsetView" destination="Iv0-8n-79v" id="iQu-87-Hty"/>
                 <outlet property="label" destination="6xP-Y6-8yg" id="G4c-Sb-hg6"/>
+                <outlet property="leadingConstraint" destination="wpc-4V-hMx" id="fUM-SR-IVk"/>
                 <outlet property="moreButton" destination="DCC-Ha-u9v" id="iXK-QA-1Hw"/>
                 <outlet property="topConstraint" destination="oGU-2C-V52" id="oez-Ca-qi2"/>
             </connections>
