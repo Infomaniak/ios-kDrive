@@ -92,12 +92,24 @@ class ManageCategoryFloatingPanelViewController: UITableViewController {
             let attrString = NSMutableAttributedString(string: "Souhaitez-vous supprimer définitivement la catégorie \(category.name) pour tous les utilisateurs du kDrive ?", boldText: category.name)
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: attrString, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: true) {
                 let group = DispatchGroup()
+                var success = false
                 group.enter()
-                // TODO: Delete
-                group.leave()
+                self.driveFileManager.deleteCategory(id: self.category.id) { error in
+                    if error == nil {
+                        success = true
+                    }
+                    group.leave()
+                }
                 _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
-                    self.dismiss(animated: true)
+                    if success {
+                        // Dismiss panel
+                        (self.presentingParent as? ManageCategoriesViewController)?.reloadCategories()
+                        self.presentingParent?.dismiss(animated: true)
+                        UIConstants.showSnackBar(message: "Catégorie supprimée avec succès")
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete)
+                    }
                 }
             }
             present(alert, animated: true)

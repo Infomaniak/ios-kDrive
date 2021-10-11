@@ -77,8 +77,18 @@ class ManageCategoriesViewController: UITableViewController {
         }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        reloadCategories()
+    }
+
     @objc func closeButtonPressed() {
         dismiss(animated: true)
+    }
+
+    func reloadCategories() {
+        categories = Array(driveFileManager.drive.categories)
+        tableView.reloadData()
     }
 
     static func instantiate(file: File, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {

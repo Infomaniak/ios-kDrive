@@ -871,6 +871,15 @@ public class DriveFileManager {
     public func createCategory(name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
         apiFetcher.createCategory(driveId: drive.id, name: name, color: color) { response, error in
             if let category = response?.data {
+                // Add category to drive
+                let realm = DriveInfosManager.instance.getRealm()
+                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
+                try? realm.write {
+                    drive?.categories.append(category)
+                }
+                if let drive = drive {
+                    self.drive = drive.freeze()
+                }
                 completion(.success(category))
             } else {
                 completion(.failure(error ?? DriveError.unknownError))
@@ -881,9 +890,37 @@ public class DriveFileManager {
     public func editCategory(id: Int, name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
         apiFetcher.editCategory(driveId: drive.id, id: id, name: name, color: color) { response, error in
             if let category = response?.data {
+                // Update category
+                let realm = DriveInfosManager.instance.getRealm()
+                try? realm.write {
+                    realm.add(category, update: .modified)
+                }
                 completion(.success(category))
             } else {
                 completion(.failure(error ?? DriveError.unknownError))
+            }
+        }
+    }
+
+    public func deleteCategory(id: Int, completion: @escaping (Error?) -> Void) {
+        apiFetcher.deleteCategory(driveId: drive.id, id: id) { response, error in
+            if response?.data == nil {
+                completion(error ?? DriveError.unknownError)
+            } else {
+                // Delete category from drive
+                let realm = DriveInfosManager.instance.getRealm()
+                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
+                try? realm.write {
+                    if let drive = drive, let index = drive.categories.firstIndex(where: { $0.id == id }) {
+                        let category = drive.categories[index]
+                        drive.categories.remove(at: index)
+                        realm.delete(category)
+                    }
+                }
+                if let drive = drive {
+                    self.drive = drive.freeze()
+                }
+                completion(nil)
             }
         }
     }

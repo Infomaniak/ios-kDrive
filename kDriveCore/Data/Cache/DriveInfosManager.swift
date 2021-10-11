@@ -209,9 +209,10 @@ public class DriveInfosManager {
         return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId), using: realm)
     }
 
-    public func getDrive(objectId: String, using realm: Realm? = nil) -> Drive? {
+    public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm? = nil) -> Drive? {
         let realm = realm ?? getRealm()
-        return realm.object(ofType: Drive.self, forPrimaryKey: objectId)?.freeze()
+        let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId)
+        return freeze ? drive?.freeze() : drive
     }
 
     public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {
