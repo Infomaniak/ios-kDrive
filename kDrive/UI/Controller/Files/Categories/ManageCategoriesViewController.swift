@@ -108,6 +108,11 @@ class ManageCategoriesViewController: UITableViewController {
         return isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
     }
 
+    private func showEmptyViewIfNeeded() {
+        let isEmpty = (isFiltering ? filteredCategories : categories).isEmpty
+        tableView.backgroundView = isEmpty ? EmptyTableView.instantiate(type: .noCategories) : nil
+    }
+
     static func instantiate(file: File, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
         viewController.file = file
@@ -211,6 +216,7 @@ extension ManageCategoriesViewController: UISearchResultsUpdating {
                 filteredCategories.append(dummyCategory)
             }
             tableView.reloadData()
+            showEmptyViewIfNeeded()
         }
     }
 }
