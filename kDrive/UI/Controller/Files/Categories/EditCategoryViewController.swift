@@ -74,6 +74,13 @@ class EditCategoryViewController: UITableViewController {
         hideKeyboardWhenTappedAround()
     }
 
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate { _ in
+            self.tableView.reloadData()
+        }
+    }
+
     static func instantiate(driveFileManager: DriveFileManager) -> EditCategoryViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
         viewController.driveFileManager = driveFileManager
