@@ -58,7 +58,7 @@
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="tag" translatesAutoresizingMaskIntoConstraints="NO" id="d2m-Ud-Nzf">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="categories" translatesAutoresizingMaskIntoConstraints="NO" id="d2m-Ud-Nzf">
                                 <rect key="frame" x="0.0" y="-2.5" width="20" height="20"/>
                                 <color key="tintColor" name="secondaryTextColor"/>
                                 <constraints>
@@ -109,8 +109,8 @@
         </designable>
     </designables>
     <resources>
+        <image name="categories" width="24" height="24"/>
         <image name="chevron-right" width="24" height="24"/>
-        <image name="tag" width="24" height="24"/>
         <namedColor name="backgroundColor">
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

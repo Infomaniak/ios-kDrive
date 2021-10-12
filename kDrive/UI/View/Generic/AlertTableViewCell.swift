@@ -36,7 +36,7 @@ class AlertTableViewCell: UITableViewCell {
     func configure(with style: Style, message: String) {
         switch style {
         case .info:
-            iconImageView.image = KDriveAsset.info.image
+            iconImageView.image = KDriveAsset.infoFilled.image
             iconImageView.tintColor = KDriveAsset.infomaniakColor.color
         case .warning:
             iconImageView.image = KDriveAsset.warning.image

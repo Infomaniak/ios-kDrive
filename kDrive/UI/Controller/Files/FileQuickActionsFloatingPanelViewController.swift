@@ -46,7 +46,7 @@ public class FloatingPanelAction: Equatable {
 
     static let openWith = FloatingPanelAction(id: 0, name: KDriveStrings.Localizable.buttonOpenWith, image: KDriveAsset.openWith.image)
     static let edit = FloatingPanelAction(id: 1, name: KDriveStrings.Localizable.buttonEdit, image: KDriveAsset.editDocument.image)
-    static let manageCategories = FloatingPanelAction(id: 2, name: "Gérer les catégories", image: KDriveAsset.tag.image)
+    static let manageCategories = FloatingPanelAction(id: 2, name: "Gérer les catégories", image: KDriveAsset.categories.image)
     static let favorite = FloatingPanelAction(id: 3, name: KDriveStrings.Localizable.buttonAddFavorites, reverseName: KDriveStrings.Localizable.buttonRemoveFavorites, image: KDriveAsset.favorite.image)
     static let convertToDropbox = FloatingPanelAction(id: 4, name: KDriveStrings.Localizable.buttonConvertToDropBox, image: KDriveAsset.folderDropBox1.image)
     static let manageDropbox = FloatingPanelAction(id: 5, name: KDriveStrings.Localizable.buttonManageDropBox, image: KDriveAsset.folderDropBox1.image)

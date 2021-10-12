@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "EN-categories.svg",
+      "idiom" : "universal"
+    },
+    {
+      "filename" : "FR-categories.svg",
+      "idiom" : "universal",
+      "locale" : "fr"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "localizable" : true,
+    "preserves-vector-representation" : true
+  }
+}
