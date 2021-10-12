@@ -54,4 +54,18 @@ class LocationTableViewCell: InsetTableViewCell {
         }
     }
 
+    func configure(with filterType: FilterType, filters: Filters) {
+        switch filterType {
+        case .date:
+            titleLabel.text = "Sélectionner une date"
+            logoImage.image = KDriveAsset.calendar.image
+        case .type:
+            titleLabel.text = "Sélectionner un type de fichier"
+            logoImage.image = filters.fileType?.icon ?? KDriveAsset.fileDefault.image
+        case .categories:
+            titleLabel.text = ""
+            logoImage.image = KDriveAsset.categories.image
+        }
+        logoImage.tintColor = KDriveAsset.secondaryTextColor.color
+    }
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -42,7 +42,18 @@
                             <constraint firstItem="nQW-zP-jCE" firstAttribute="top" secondItem="Sy2-R0-Z47" secondAttribute="top" id="uOS-AF-L6P"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="bHj-0S-6hg"/>
+                    <navigationItem key="navigationItem" id="bHj-0S-6hg">
+                        <barButtonItem key="leftBarButtonItem" style="plain" systemItem="stop" id="6do-hS-jQm">
+                            <connections>
+                                <action selector="closeButtonPressed" destination="DMC-wj-wr8" id="MOV-f7-dTL"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" image="filter" style="plain" id="YvK-Wa-M6p">
+                            <connections>
+                                <segue destination="Ia5-bK-Gtx" kind="presentation" identifier="filterSegue" id="KMm-AN-Flc"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="nQW-zP-jCE" id="S12-8U-QZR"/>
                     </connections>
@@ -51,8 +62,53 @@
             </objects>
             <point key="canvasLocation" x="656.52173913043487" y="50.892857142857139"/>
         </scene>
+        <!--Filtres-->
+        <scene sceneID="xkb-7t-o8S">
+            <objects>
+                <tableViewController id="J5q-yn-jYo" customClass="SearchFiltersViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="rQn-3w-wf1">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <connections>
+                            <outlet property="dataSource" destination="J5q-yn-jYo" id="xSd-g1-7Hs"/>
+                            <outlet property="delegate" destination="J5q-yn-jYo" id="DNS-Kt-mbH"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Filtres" id="CHQ-vg-ClB">
+                        <barButtonItem key="backBarButtonItem" title=" " id="N6X-Uz-MzA"/>
+                        <barButtonItem key="leftBarButtonItem" style="plain" systemItem="stop" id="N3C-dt-S4u">
+                            <connections>
+                                <action selector="closeButtonPressed:" destination="J5q-yn-jYo" id="g40-7e-LFr"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="MKT-rP-Mih" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2389.8550724637685" y="50.892857142857139"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="xR9-1G-T5w">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Ia5-bK-Gtx" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" largeTitles="YES" id="kJl-1N-gTN">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="108"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="J5q-yn-jYo" kind="relationship" relationship="rootViewController" id="fyd-Dl-JEn"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="GRd-u7-taF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1479.7101449275362" y="50.892857142857139"/>
+        </scene>
     </scenes>
     <resources>
+        <image name="filter" width="24" height="24"/>
         <namedColor name="backgroundColor">
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

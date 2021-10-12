@@ -157,7 +157,7 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: FileInformationOwnerTableViewCell.self)
         tableView.register(cellView: FileInformationCreationTableViewCell.self)
         tableView.register(cellView: FileInformationLocationTableViewCell.self)
-        tableView.register(cellView: FileInformationCategoriesTableViewCell.self)
+        tableView.register(cellView: ManageCategoriesTableViewCell.self)
         tableView.register(cellView: FileInformationSizeTableViewCell.self)
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InfoTableViewCell.self)
@@ -475,8 +475,9 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
                     return cell
                 case .categories:
-                    let cell = tableView.dequeueReusableCell(type: FileInformationCategoriesTableViewCell.self, for: indexPath)
+                    let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
                     cell.selectionStyle = driveFileManager.drive.categoryRights.canPutCategoryOnFile ? .default : .none
+                    cell.initWithoutInsets()
                     cell.configure(with: Array(file.categories))
                     return cell
                 case .owner:

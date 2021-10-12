@@ -16,10 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class FileInformationCategoriesTableViewCell: UITableViewCell {
+class ManageCategoriesTableViewCell: InsetTableViewCell {
+    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet weak var trailingConstraint: NSLayoutConstraint!
+    @IBOutlet var viewCenterConstraint: NSLayoutConstraint!
+    @IBOutlet var contentViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var label: IKLabel!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
@@ -47,17 +52,27 @@ class FileInformationCategoriesTableViewCell: UITableViewCell {
         if categories.isEmpty {
             label.text = "Ajouter des catégories"
             collectionViewBottomConstraint.constant = 0
+            viewCenterConstraint.isActive = true
+            contentViewHeightConstraint.isActive = true
         } else {
             label.text = "Gérer les catégories"
             collectionViewBottomConstraint.constant = 16
+            viewCenterConstraint.isActive = false
+            contentViewHeightConstraint.isActive = false
         }
         self.categories = categories
         collectionView.reloadData()
         layoutIfNeeded()
     }
+
+    func initWithoutInsets() {
+        initWithPositionAndShadow()
+        leadingConstraint.constant = 0
+        trailingConstraint.constant = 0
+    }
 }
 
-extension FileInformationCategoriesTableViewCell: UICollectionViewDataSource {
+extension ManageCategoriesTableViewCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return categories.count
     }

@@ -106,7 +106,6 @@ class SearchViewController: FileListViewController {
         searchController.searchBar.placeholder = KDriveStrings.Localizable.searchViewHint
 
         navigationItem.searchController = searchController
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         definesPresentationContext = true
@@ -129,12 +128,15 @@ class SearchViewController: FileListViewController {
             return
         }
 
-        currentRequest = driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { file, children, error in
+        currentRequest = driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { [currentSearchText] file, children, error in
             guard self.isDisplayingSearchResults else {
                 completion(.failure(DriveError.searchCancelled), false, false)
                 return
             }
 
+            if let currentSearchText = currentSearchText {
+                self.addToRecentSearch(currentSearchText)
+            }
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, false)
             } else {
@@ -169,7 +171,7 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Actions
 
-    @objc func closeButtonPressed() {
+    @IBAction func closeButtonPressed() {
         searchController.dismiss(animated: true)
         dismiss(animated: true)
     }
@@ -290,6 +292,16 @@ class SearchViewController: FileListViewController {
 
     override func removeFileTypeButtonPressed() {
         selectedFileType = nil
+    }
+
+    // MARK: - Navigation
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "filterSegue" {
+            let navigationController = segue.destination as? UINavigationController
+            let searchFiltersViewController = navigationController?.topViewController as? SearchFiltersViewController
+            searchFiltersViewController?.driveFileManager = driveFileManager
+        }
     }
 }
 

@@ -20,14 +20,22 @@ import kDriveCore
 import RealmSwift
 import UIKit
 
+protocol ManageCategoriesDelegate: AnyObject {
+    func didSelect(category: kDriveCore.Category)
+    func didDeselect(category: kDriveCore.Category)
+}
+
 class ManageCategoriesViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
-    var file: File!
+    var file: File?
     /// Disable category edition (can just add/remove).
     var canEdit = true
+    var selectedCategories = [kDriveCore.Category]()
 
-    var categories = [kDriveCore.Category]()
-    var filteredCategories = [kDriveCore.Category]()
+    weak var delegate: ManageCategoriesDelegate?
+
+    private var categories = [kDriveCore.Category]()
+    private var filteredCategories = [kDriveCore.Category]()
 
     private var isSearchBarEmpty: Bool {
         return searchController.searchBar.text?.isEmpty ?? true
@@ -55,7 +63,7 @@ class ManageCategoriesViewController: UITableViewController {
         tableView.register(cellView: CategoryTableViewCell.self)
         tableView.keyboardDismissMode = .onDrag
 
-        title = canEdit ? "Gérer les catégories" : "Ajouter des catégories"
+        title = file != nil ? "Gérer les catégories" : "Ajouter des catégories"
 
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.obscuresBackgroundDuringPresentation = false
@@ -92,7 +100,13 @@ class ManageCategoriesViewController: UITableViewController {
     func reloadCategories() {
         categories = Array(driveFileManager.drive.categories)
         // Select categories
-        for category in file.categories {
+        let selectedCategories: [kDriveCore.Category]
+        if let file = file {
+            selectedCategories = Array(file.categories)
+        } else {
+            selectedCategories = self.selectedCategories
+        }
+        for category in selectedCategories {
             if let category = categories.first(where: { $0.id == category.id }) {
                 category.isSelected = true
             }
@@ -113,14 +127,14 @@ class ManageCategoriesViewController: UITableViewController {
         tableView.backgroundView = isEmpty ? EmptyTableView.instantiate(type: .noCategories) : nil
     }
 
-    static func instantiate(file: File, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
+    static func instantiate(file: File? = nil, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
         viewController.file = file
         viewController.driveFileManager = driveFileManager
         return viewController
     }
 
-    static func instantiateInNavigationController(file: File, driveFileManager: DriveFileManager) -> UINavigationController {
+    static func instantiateInNavigationController(file: File? = nil, driveFileManager: DriveFileManager) -> UINavigationController {
         let viewController = instantiate(file: file, driveFileManager: driveFileManager)
         return UINavigationController(rootViewController: viewController)
     }
@@ -170,26 +184,32 @@ class ManageCategoriesViewController: UITableViewController {
         }
 
         category.isSelected = true
-        driveFileManager.addCategory(file: file, category: category) { error in
-            if error != nil {
-                category.isSelected = true
-                tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+        if let file = file {
+            driveFileManager.addCategory(file: file, category: category) { error in
+                if error != nil {
+                    category.isSelected = true
+                    tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                }
             }
         }
+        delegate?.didSelect(category: category)
     }
 
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         let category = category(at: indexPath)
         guard category != dummyCategory else { return }
         category.isSelected = false
-        driveFileManager.removeCategory(file: file, category: category) { error in
-            if let error = error {
-                category.isSelected = true
-                tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
-                UIConstants.showSnackBar(message: error.localizedDescription)
+        if let file = file {
+            driveFileManager.removeCategory(file: file, category: category) { error in
+                if let error = error {
+                    category.isSelected = true
+                    tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                }
             }
         }
+        delegate?.didDeselect(category: category)
     }
 
     // MARK: - Navigation

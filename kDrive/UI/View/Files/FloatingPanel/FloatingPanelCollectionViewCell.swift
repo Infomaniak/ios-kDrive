@@ -69,6 +69,7 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
         }
     }
 
+    #if !ISEXTENSION
     func configureDownload(with file: File, action: FloatingPanelAction, progress: CGFloat?) {
         observationToken?.cancel()
         if progress == nil {
@@ -90,4 +91,5 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
             }
         }
     }
+    #endif
 }
