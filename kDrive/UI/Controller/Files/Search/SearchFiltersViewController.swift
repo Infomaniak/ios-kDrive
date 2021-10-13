@@ -19,6 +19,10 @@
 import kDriveCore
 import UIKit
 
+protocol SearchFiltersDelegate: AnyObject {
+    func didUpdateFilters(_ filters: Filters)
+}
+
 enum FilterType: CaseIterable {
     case date, type, categories
 
@@ -32,26 +36,6 @@ enum FilterType: CaseIterable {
             return "Catégories"
         }
     }
-}
-
-struct Filters {
-    var date: DateInterval?
-    var fileType: ConvertedType?
-    var categories: Set<kDriveCore.Category> = []
-
-    var hasFilters: Bool {
-        return date != nil || fileType != nil || !categories.isEmpty
-    }
-
-    mutating func clearFilters() {
-        date = nil
-        fileType = nil
-        categories.removeAll()
-    }
-}
-
-protocol SearchFiltersDelegate: AnyObject {
-    func didUpdateFilters(_ filters: Filters)
 }
 
 class SearchFiltersViewController: UITableViewController {

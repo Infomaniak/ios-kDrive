@@ -26,7 +26,7 @@ extension SwipeCellAction {
     static let delete = SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image)
 }
 
-class FileListViewController: MultipleSelectionViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource {
+class FileListViewController: MultipleSelectionViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
@@ -894,6 +894,87 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     private func notifyObserversForCurrentDirectory() {
         driveFileManager.notifyObserversWith(file: currentDirectory)
     }
+
+    // MARK: - Files header view delegate
+
+    func sortButtonPressed() {
+        let floatingPanelViewController = DriveFloatingPanelController()
+        let sortOptionsViewController = FloatingPanelSortOptionTableViewController()
+
+        sortOptionsViewController.sortType = sortType
+        sortOptionsViewController.trashSort = trashSort
+        sortOptionsViewController.delegate = self
+
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = sortOptionsViewController
+
+        floatingPanelViewController.set(contentViewController: sortOptionsViewController)
+        floatingPanelViewController.track(scrollView: sortOptionsViewController.tableView)
+        present(floatingPanelViewController, animated: true)
+    }
+
+    func gridButtonPressed() {
+        // Toggle grid/list
+        if listStyle == .grid {
+            listStyle = .list
+        } else {
+            listStyle = .grid
+        }
+        FileListOptions.instance.currentStyle = listStyle
+        // Collection view will be reloaded via the observer
+    }
+
+    #if !ISEXTENSION
+        func uploadCardSelected() {
+            let uploadViewController = UploadQueueViewController.instantiate()
+            uploadViewController.currentDirectory = currentDirectory
+            navigationController?.pushViewController(uploadViewController, animated: true)
+        }
+
+        func moveButtonPressed() {
+            if selectedItems.count > Constants.bulkActionThreshold {
+                let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: currentDirectory, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getRootFile()]) { [weak self] selectedFolder in
+                    guard let self = self else { return }
+                    if self.currentDirectoryCount?.count != nil && self.selectAllMode {
+                        self.bulkMoveAll(destinationId: selectedFolder.id)
+                    } else {
+                        self.bulkMoveFiles(Array(self.selectedItems), destinationId: selectedFolder.id)
+                    }
+                }
+                present(selectFolderNavigationController, animated: true)
+            } else {
+                moveSelectedItems()
+            }
+        }
+
+        func deleteButtonPressed() {
+            if selectedItems.count > Constants.bulkActionThreshold {
+                let message: NSMutableAttributedString
+                let alert: AlertTextViewController
+                if let count = currentDirectoryCount?.count,
+                   selectAllMode {
+                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(count))
+                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
+                        self.bulkDeleteAll()
+                    }
+                } else {
+                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedItems.count))
+                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
+                        self.bulkDeleteFiles(Array(self.selectedItems))
+                    }
+                }
+                present(alert, animated: true)
+            } else {
+                deleteSelectedItems()
+            }
+        }
+
+        func menuButtonPressed() {
+            showMenuForSelection()
+        }
+    #endif
+
+    func removeFilterButtonPressed(_ filter: Filterable) {}
 }
 
 // MARK: - Collection view delegate flow layout
@@ -954,89 +1035,6 @@ extension FileListViewController: FileCellDelegate {
             showQuickActionsPanel(file: sortedFiles[indexPath.row])
         #endif
     }
-}
-
-// MARK: - Files header view delegate
-
-extension FileListViewController: FilesHeaderViewDelegate {
-    func sortButtonPressed() {
-        let floatingPanelViewController = DriveFloatingPanelController()
-        let sortOptionsViewController = FloatingPanelSortOptionTableViewController()
-
-        sortOptionsViewController.sortType = sortType
-        sortOptionsViewController.trashSort = trashSort
-        sortOptionsViewController.delegate = self
-
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = sortOptionsViewController
-
-        floatingPanelViewController.set(contentViewController: sortOptionsViewController)
-        floatingPanelViewController.track(scrollView: sortOptionsViewController.tableView)
-        present(floatingPanelViewController, animated: true)
-    }
-
-    func gridButtonPressed() {
-        // Toggle grid/list
-        if listStyle == .grid {
-            listStyle = .list
-        } else {
-            listStyle = .grid
-        }
-        FileListOptions.instance.currentStyle = listStyle
-        // Collection view will be reloaded via the observer
-    }
-
-    #if !ISEXTENSION
-        func uploadCardSelected() {
-            let uploadViewController = UploadQueueViewController.instantiate()
-            uploadViewController.currentDirectory = currentDirectory
-            navigationController?.pushViewController(uploadViewController, animated: true)
-        }
-
-        func moveButtonPressed() {
-            if selectedItems.count > Constants.bulkActionThreshold {
-                let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: currentDirectory, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getRootFile()]) { [weak self] selectedFolder in
-                    guard let self = self else { return }
-                    if self.currentDirectoryCount?.count != nil && self.selectAllMode {
-                        self.bulkMoveAll(destinationId: selectedFolder.id)
-                    } else {
-                        self.bulkMoveFiles(Array(self.selectedItems), destinationId: selectedFolder.id)
-                    }
-                }
-                present(selectFolderNavigationController, animated: true)
-            } else {
-                moveSelectedItems()
-            }
-        }
-
-        @objc func deleteButtonPressed() {
-            if selectedItems.count > Constants.bulkActionThreshold {
-                let message: NSMutableAttributedString
-                let alert: AlertTextViewController
-                if let count = currentDirectoryCount?.count,
-                   selectAllMode {
-                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(count))
-                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
-                        self.bulkDeleteAll()
-                    }
-                } else {
-                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedItems.count))
-                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
-                        self.bulkDeleteFiles(Array(self.selectedItems))
-                    }
-                }
-                present(alert, animated: true)
-            } else {
-                deleteSelectedItems()
-            }
-        }
-
-        @objc func menuButtonPressed() {
-            showMenuForSelection()
-        }
-    #endif
-
-    @objc func removeFileTypeButtonPressed() {}
 }
 
 // MARK: - Sort options delegate

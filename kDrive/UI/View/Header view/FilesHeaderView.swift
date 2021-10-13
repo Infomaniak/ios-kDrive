@@ -23,7 +23,7 @@ protocol FilesHeaderViewDelegate: AnyObject {
     func sortButtonPressed()
     func gridButtonPressed()
     func uploadCardSelected()
-    func removeFileTypeButtonPressed()
+    func removeFilterButtonPressed(_ filter: Filterable)
     func moveButtonPressed()
     func deleteButtonPressed()
     func menuButtonPressed()
@@ -42,7 +42,7 @@ class FilesHeaderView: UICollectionReusableView {
     @IBOutlet weak var listOrGridButton: UIButton!
     @IBOutlet weak var uploadCardView: UploadCardView!
     @IBOutlet weak var selectView: SelectView!
-    @IBOutlet weak var fileTypeFilterView: FilterFileTypeView!
+    @IBOutlet weak var filterView: FilterView!
     @IBOutlet weak var offlineView: UIView!
     @IBOutlet weak var activityListView: UIView!
     @IBOutlet weak var activityAvatar: UIImageView!
@@ -53,7 +53,7 @@ class FilesHeaderView: UICollectionReusableView {
     weak var delegate: FilesHeaderViewDelegate? {
         didSet {
             selectView.delegate = delegate
-            fileTypeFilterView.delegate = delegate
+            filterView.delegate = delegate
         }
     }
 

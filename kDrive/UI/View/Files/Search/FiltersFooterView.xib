@@ -57,10 +57,10 @@
     </objects>
     <designables>
         <designable name="dzQ-KU-Urf">
-            <size key="intrinsicContentSize" width="126" height="32"/>
+            <size key="intrinsicContentSize" width="112" height="29"/>
         </designable>
         <designable name="fyT-KU-cLg">
-            <size key="intrinsicContentSize" width="145" height="32"/>
+            <size key="intrinsicContentSize" width="129" height="29"/>
         </designable>
     </designables>
 </document>

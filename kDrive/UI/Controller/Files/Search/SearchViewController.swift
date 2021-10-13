@@ -116,13 +116,12 @@ class SearchViewController: FileListViewController {
     override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
         super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
         // Set up filter header view
-        /* if let selectedFileType = selectedFileType {
-             headerView.fileTypeFilterView.isHidden = false
-             headerView.fileTypeFilterView.fileTypeIconImageView.image = selectedFileType.icon
-             headerView.fileTypeFilterView.fileTypeLabel.text = selectedFileType.name
-         } else {
-             headerView.fileTypeFilterView.isHidden = true
-         } */
+        if filters.hasFilters {
+            headerView.filterView.isHidden = false
+            headerView.filterView.configure(with: filters)
+        } else {
+            headerView.filterView.isHidden = true
+        }
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager, filters: Filters = Filters()) -> UINavigationController {
@@ -246,8 +245,14 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Files header view delegate
 
-    override func removeFileTypeButtonPressed() {
-        // selectedFileType = nil
+    override func removeFilterButtonPressed(_ filter: Filterable) {
+        if filter is DateInterval {
+            filters.date = nil
+        } else if filter is ConvertedType {
+            filters.fileType = nil
+        } else if let category = filter as? kDriveCore.Category {
+            filters.categories.remove(category)
+        }
     }
 
     // MARK: - Navigation
