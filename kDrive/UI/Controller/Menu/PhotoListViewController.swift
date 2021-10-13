@@ -132,7 +132,7 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager, fileType: .imagesRow), animated: true)
+        present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager, filters: Filters(fileType: .image)), animated: true)
     }
 
     @IBAction func sortButtonPressed(_ sender: UIBarButtonItem) {
@@ -142,7 +142,7 @@ class PhotoListViewController: MultipleSelectionViewController {
         sortViewController.selectedSortMode = sortMode
         sortViewController.delegate = self
 
-        // sortViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = sortViewController
 
         floatingPanelViewController.set(contentViewController: sortViewController)

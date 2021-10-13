@@ -34,23 +34,33 @@ enum FilterType: CaseIterable {
     }
 }
 
-class Filters {
+struct Filters {
     var date: DateInterval?
     var fileType: ConvertedType?
     var categories: Set<kDriveCore.Category> = []
 
-    init(date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: Set<kDriveCore.Category> = []) {
-        self.date = date
-        self.fileType = fileType
-        self.categories = categories
+    var hasFilters: Bool {
+        return date != nil || fileType != nil || !categories.isEmpty
     }
+
+    mutating func clearFilters() {
+        date = nil
+        fileType = nil
+        categories.removeAll()
+    }
+}
+
+protocol SearchFiltersDelegate: AnyObject {
+    func didUpdateFilters(_ filters: Filters)
 }
 
 class SearchFiltersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
+    var filters = Filters()
+
+    weak var delegate: SearchFiltersDelegate?
 
     private let filterTypes = FilterType.allCases
-    private let filters = Filters()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -107,6 +117,22 @@ class SearchFiltersViewController: UITableViewController {
         return HomeTitleView.instantiate(title: filterType.title)
     }
 
+    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        if section == tableView.numberOfSections - 1 {
+            return UITableView.automaticDimension
+        }
+        return 0
+    }
+
+    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        if section == tableView.numberOfSections - 1 {
+            let footerView = FiltersFooterView.instantiate()
+            footerView.delegate = self
+            return footerView
+        }
+        return nil
+    }
+
     // MARK: - Table view delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -126,6 +152,8 @@ class SearchFiltersViewController: UITableViewController {
     }
 }
 
+// MARK: - Manage categories delegate
+
 extension SearchFiltersViewController: ManageCategoriesDelegate {
     func didSelect(category: kDriveCore.Category) {
         filters.categories.insert(category)
@@ -139,5 +167,20 @@ extension SearchFiltersViewController: ManageCategoriesDelegate {
         if let index = filterTypes.firstIndex(of: .categories) {
             tableView.reloadSections([index], with: .automatic)
         }
+    }
+}
+
+// MARK: - Footer delegate
+
+extension SearchFiltersViewController: FiltersFooterDelegate {
+    func clearButtonPressed() {
+        filters.clearFilters()
+        tableView.reloadData()
+        delegate?.didUpdateFilters(filters)
+    }
+
+    func applyButtonPressed() {
+        delegate?.didUpdateFilters(filters)
+        dismiss(animated: true)
     }
 }

@@ -43,12 +43,12 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="bHj-0S-6hg">
-                        <barButtonItem key="leftBarButtonItem" style="plain" systemItem="stop" id="6do-hS-jQm">
+                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="6do-hS-jQm">
                             <connections>
                                 <action selector="closeButtonPressed" destination="DMC-wj-wr8" id="MOV-f7-dTL"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="filter" style="plain" id="YvK-Wa-M6p">
+                        <barButtonItem key="rightBarButtonItem" image="filter" id="YvK-Wa-M6p">
                             <connections>
                                 <segue destination="Ia5-bK-Gtx" kind="presentation" identifier="filterSegue" id="KMm-AN-Flc"/>
                             </connections>

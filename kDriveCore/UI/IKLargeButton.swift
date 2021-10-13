@@ -53,8 +53,9 @@ import UIKit
 
         public static let primaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: .white, backgroundColor: KDriveCoreAsset.infomaniakColor.color, rawValue: "primaryButton")
         public static let secondaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveCoreAsset.titleColor.color, backgroundColor: KDriveCoreAsset.backgroundColor.color, rawValue: "secondaryButton")
+        public static let whiteButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveCoreAsset.titleColor.color, backgroundColor: KDriveCoreAsset.backgroundCardViewColor.color, rawValue: "whiteButton")
 
-        static let allValues = [primaryButton, secondaryButton]
+        static let allValues = [primaryButton, secondaryButton, whiteButton]
 
         public var rawValue: String
 
