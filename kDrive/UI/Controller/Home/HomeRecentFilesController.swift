@@ -29,6 +29,10 @@ class HomeRecentFilesController {
         return .noActivities
     }
 
+    var cellType: UICollectionViewCell.Type {
+        return FileGridCollectionViewCell.self
+    }
+
     var listStyle: ListStyle = .list
     var page = 1
     var empty = false
@@ -61,8 +65,9 @@ class HomeRecentFilesController {
     func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
         switch style {
         case .list:
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(60))
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(200))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
             group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
             return NSCollectionLayoutSection(group: group)
@@ -72,19 +77,8 @@ class HomeRecentFilesController {
             item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalWidth(1 / 3))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 2)
-            group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+            group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24 - 8, bottom: 0, trailing: 24 - 8)
             return NSCollectionLayoutSection(group: group)
         }
-    }
-
-    func getCell(for style: ListStyle) -> UICollectionViewCell.Type {
-        let cellType: UICollectionViewCell.Type
-        switch style {
-        case .list:
-            cellType = FileCollectionViewCell.self
-        case .grid:
-            cellType = FileGridCollectionViewCell.self
-        }
-        return cellType
     }
 }

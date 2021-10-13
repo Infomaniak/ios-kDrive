@@ -195,7 +195,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
                 if self.recentFilesController.empty {
                     return self.recentFilesController.getEmptyLayout()
                 } else {
-                    return self.recentFilesController.getLayout(for: .grid)
+                    return self.recentFilesController.getLayout(for: .list)
                 }
             }
         }
@@ -344,7 +344,7 @@ extension HomeViewController: UICollectionViewDataSource {
                 recentFilesController?.configureEmptyCell(cell)
                 return cell
             } else {
-                let cellType = recentFilesController.getCell(for: .grid)
+                let cellType = recentFilesController.cellType
                 let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
 
                 if viewModel.isLoading && indexPath.row > viewModel.recentFiles.count - 1 {
