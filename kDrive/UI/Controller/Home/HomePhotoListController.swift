@@ -28,17 +28,19 @@ class HomePhotoListController: HomeRecentFilesController {
         guard !loading && moreComing else {
             return
         }
+        loading = true
 
         driveFileManager.getLastPictures(page: page) { response, _ in
+            self.loading = false
             if let files = response {
                 self.empty = self.page == 1 && files.isEmpty
+                self.moreComing = files.count == DriveApiFetcher.itemPerPage
+                self.page += 1
+
                 DispatchQueue.main.async {
                     self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
                 }
-                self.page += 1
-                self.moreComing = files.count == DriveApiFetcher.itemPerPage
             }
-            self.loading = false
         }
     }
 }

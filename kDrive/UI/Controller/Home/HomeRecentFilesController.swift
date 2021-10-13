@@ -22,13 +22,13 @@ import kDriveCore
 import UIKit
 
 class HomeRecentFilesController {
-
     let driveFileManager: DriveFileManager
     weak var homeViewController: HomeViewController?
 
     var emptyCellType: EmptyTableView.EmptyTableViewType {
         return .noActivities
     }
+
     var listStyle: ListStyle = .list
     var page = 1
     var empty = false
@@ -39,7 +39,7 @@ class HomeRecentFilesController {
         self.driveFileManager = driveFileManager
         self.homeViewController = homeViewController
     }
-    
+
     func cancelLoading() {
         homeViewController = nil
     }

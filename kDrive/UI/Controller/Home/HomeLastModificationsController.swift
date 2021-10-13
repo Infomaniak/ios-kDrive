@@ -23,21 +23,24 @@ class HomeLastModificationsController: HomeRecentFilesController {
     override var emptyCellType: EmptyTableView.EmptyTableViewType {
         return .noActivities
     }
+
     override func loadNextPage(forceRefresh: Bool = false) {
         guard !loading && moreComing else {
             return
         }
+        loading = true
 
         driveFileManager.getLastModifiedFiles(page: page) { response, _ in
+            self.loading = false
             if let files = response {
                 self.empty = self.page == 1 && files.isEmpty
+                self.moreComing = files.count == DriveApiFetcher.itemPerPage
+                self.page += 1
+
                 DispatchQueue.main.async {
                     self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
                 }
-                self.page += 1
-                self.moreComing = files.count == DriveApiFetcher.itemPerPage
             }
-            self.loading = false
         }
     }
 }

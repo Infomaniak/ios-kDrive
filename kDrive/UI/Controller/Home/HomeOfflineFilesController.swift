@@ -29,6 +29,7 @@ class HomeOfflineFilesController: HomeRecentFilesController {
         }
 
         moreComing = false
+        loading = false
         let files = driveFileManager.getAvailableOfflineFiles()
         self.empty = files.isEmpty
         DispatchQueue.main.async {
