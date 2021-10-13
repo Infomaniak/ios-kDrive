@@ -24,19 +24,70 @@ protocol Filterable {
     var icon: UIImage { get }
 }
 
-extension DateInterval: Filterable {
+enum DateOption: Filterable, Selectable, Equatable, CaseIterable {
+    static var allCases: [DateOption] = [.today, .yesterday, .last7days, .custom(DateInterval(start: Date(), duration: 0))]
+
+    case today
+    case yesterday
+    case last7days
+    case custom(DateInterval)
+
     var localizedName: String {
-        return "" // TODO: name
+        switch self {
+        case .today:
+            return KDriveStrings.Localizable.allToday
+        case .yesterday:
+            return KDriveStrings.Localizable.allYesterday
+        case .last7days, .custom:
+            let dateIntervalFormatter = DateIntervalFormatter()
+            dateIntervalFormatter.dateStyle = .long
+            dateIntervalFormatter.timeStyle = .none
+            return dateIntervalFormatter.string(from: dateInterval) ?? ""
+        }
     }
 
     var icon: UIImage {
         return KDriveAsset.calendar.image
     }
+
+    var title: String {
+        switch self {
+        case .today:
+            return KDriveStrings.Localizable.allToday
+        case .yesterday:
+            return KDriveStrings.Localizable.allYesterday
+        case .last7days:
+            return "Les 7 derniers jours"
+        case .custom:
+            return KDriveStrings.Localizable.notificationCustom
+        }
+    }
+
+    var dateInterval: DateInterval {
+        switch self {
+        case .today:
+            let todayStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: Date())!
+            let todayEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date())!
+            return DateInterval(start: todayStart, end: todayEnd)
+        case .yesterday:
+            let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+            let yesterdayStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: oneDayAgo)!
+            let yesterdayEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: oneDayAgo)!
+            return DateInterval(start: yesterdayStart, end: yesterdayEnd)
+        case .last7days:
+            let sevenDaysAgo = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())!
+            let sevenDaysStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: sevenDaysAgo)!
+            let sevenDaysEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date())!
+            return DateInterval(start: sevenDaysStart, end: sevenDaysEnd)
+        case .custom(let dateInterval):
+            return dateInterval
+        }
+    }
 }
 
 extension ConvertedType: Filterable {
     var localizedName: String {
-        return rawValue // TODO: name
+        return title
     }
 }
 
@@ -53,7 +104,7 @@ extension kDriveCore.Category: Filterable {
 }
 
 struct Filters {
-    var date: DateInterval?
+    var date: DateOption?
     var fileType: ConvertedType?
     var categories: Set<kDriveCore.Category> = []
 

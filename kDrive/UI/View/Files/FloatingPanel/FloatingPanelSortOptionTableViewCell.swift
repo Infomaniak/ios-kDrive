@@ -20,7 +20,8 @@ import UIKit
 import InfomaniakCore
 
 class FloatingPanelSortOptionTableViewCell: InsetTableViewCell {
-
+    @IBOutlet weak var iconImageView: UIImageView!
+    
     var isHeader = false {
         didSet { setUpView() }
     }
@@ -45,6 +46,7 @@ class FloatingPanelSortOptionTableViewCell: InsetTableViewCell {
     private func setUpView() {
         accessoryImageView.isHidden = !isSelected
         separator?.isHidden = !isHeader
+        iconImageView.isHidden = true
         setAccessibility()
     }
 

@@ -55,6 +55,33 @@ public enum ConvertedType: String, CaseIterable {
         }
     }
 
+    public var title: String {
+        switch self {
+        case .archive:
+            return KDriveCoreStrings.Localizable.allArchive
+        case .audio:
+            return KDriveCoreStrings.Localizable.allAudio
+        case .code:
+            return KDriveCoreStrings.Localizable.allCode
+        case .folder:
+            return KDriveCoreStrings.Localizable.allFolder
+        case .image:
+            return KDriveCoreStrings.Localizable.allPictures
+        case .pdf:
+            return KDriveCoreStrings.Localizable.allPdf
+        case .presentation:
+            return KDriveCoreStrings.Localizable.allOfficePoints
+        case .spreadsheet:
+            return KDriveCoreStrings.Localizable.allOfficeGrids
+        case .text:
+            return KDriveCoreStrings.Localizable.allOfficeDocs
+        case .unknown, .font:
+            return ""
+        case .video:
+            return KDriveCoreStrings.Localizable.allVideo
+        }
+    }
+
     public var uti: UTI {
         switch self {
         case .archive:

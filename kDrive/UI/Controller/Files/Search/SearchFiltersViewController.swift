@@ -38,6 +38,8 @@ enum FilterType: CaseIterable {
     }
 }
 
+extension ConvertedType: IconSelectable {}
+
 class SearchFiltersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
     var filters = Filters()
@@ -57,6 +59,12 @@ class SearchFiltersViewController: UITableViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
+    private func reloadSection(_ filterType: FilterType) {
+        if let index = filterTypes.firstIndex(of: filterType) {
+            tableView.reloadSections([index], with: .none)
+        }
     }
 
     // MARK: - Actions
@@ -123,9 +131,15 @@ class SearchFiltersViewController: UITableViewController {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
         case .date:
-            break
+            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: DateOption.allCases, selectedOption: filters.date, headerTitle: "Date de modification", delegate: self)
+            tableView.deselectRow(at: indexPath, animated: true)
+            present(floatingPanelController, animated: true)
         case .type:
-            break
+            var fileTypes = ConvertedType.allCases
+            fileTypes.removeAll { $0 == .font || $0 == .unknown }
+            let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: "Type de fichier", delegate: self)
+            tableView.deselectRow(at: indexPath, animated: true)
+            present(floatingPanelController, animated: true)
         case .categories:
             let manageCategoriesViewController = ManageCategoriesViewController.instantiate(driveFileManager: driveFileManager)
             manageCategoriesViewController.canEdit = false
@@ -136,21 +150,31 @@ class SearchFiltersViewController: UITableViewController {
     }
 }
 
+// MARK: - Select delegate
+
+extension SearchFiltersViewController: SelectDelegate {
+    func didSelect(option: Selectable) {
+        if let dateOption = option as? DateOption {
+            filters.date = dateOption
+            reloadSection(.date)
+        } else if let fileType = option as? ConvertedType {
+            filters.fileType = fileType
+            reloadSection(.type)
+        }
+    }
+}
+
 // MARK: - Manage categories delegate
 
 extension SearchFiltersViewController: ManageCategoriesDelegate {
     func didSelect(category: kDriveCore.Category) {
         filters.categories.insert(category)
-        if let index = filterTypes.firstIndex(of: .categories) {
-            tableView.reloadSections([index], with: .automatic)
-        }
+        reloadSection(.categories)
     }
 
     func didDeselect(category: kDriveCore.Category) {
         filters.categories.remove(category)
-        if let index = filterTypes.firstIndex(of: .categories) {
-            tableView.reloadSections([index], with: .automatic)
-        }
+        reloadSection(.categories)
     }
 }
 

@@ -246,7 +246,7 @@ class SearchViewController: FileListViewController {
     // MARK: - Files header view delegate
 
     override func removeFilterButtonPressed(_ filter: Filterable) {
-        if filter is DateInterval {
+        if filter is DateOption {
             filters.date = nil
         } else if filter is ConvertedType {
             filters.fileType = nil
