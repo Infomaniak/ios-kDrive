@@ -168,7 +168,11 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
     }
 
     func reloadTopRows() {
-        let newViewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: viewModel.showInsufficientStorage, recentFiles: viewModel.recentFiles, recentFilesEmpty: viewModel.recentFilesEmpty, isLoading: viewModel.isLoading)
+        let newViewModel = HomeViewModel(topRows: getTopRows(),
+                                         showInsufficientStorage: viewModel.showInsufficientStorage,
+                                         recentFiles: viewModel.recentFiles,
+                                         recentFilesEmpty: viewModel.recentFilesEmpty,
+                                         isLoading: viewModel.isLoading)
         reload(newViewModel: newViewModel)
     }
 
@@ -179,14 +183,21 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         } else {
             newFiles.append(contentsOf: fetchedFiles)
         }
-        let newViewModel = HomeViewModel(topRows: viewModel.topRows, showInsufficientStorage: viewModel.showInsufficientStorage, recentFiles: newFiles, recentFilesEmpty: isEmpty, isLoading: false)
+        let newViewModel = HomeViewModel(topRows: viewModel.topRows,
+                                         showInsufficientStorage: viewModel.showInsufficientStorage,
+                                         recentFiles: newFiles,
+                                         recentFilesEmpty: isEmpty,
+                                         isLoading: false)
         reload(newViewModel: newViewModel)
     }
 
     func reload(newViewModel: HomeViewModel) {
-        let changeset = StagedChangeset(source: viewModel.stagedChangeSet, target: newViewModel.stagedChangeSet)
-        collectionView.reload(using: changeset) { _ in
-            viewModel = newViewModel
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let changeset = StagedChangeset(source: self.viewModel.stagedChangeSet, target: newViewModel.stagedChangeSet)
+            self.collectionView.reload(using: changeset) { _ in
+                self.viewModel = newViewModel
+            }
         }
     }
 
@@ -350,7 +361,7 @@ extension HomeViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if HomeSection.allCases[indexPath.section] == .recentFiles {
-            if indexPath.row >= viewModel.recentFiles.count - 10 {
+            if indexPath.row >= viewModel.recentFiles.count - 10 && !recentFilesController.loading && recentFilesController.moreComing {
                 reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                    showInsufficientStorage: viewModel.showInsufficientStorage,
                                                    recentFiles: viewModel.recentFiles,

@@ -242,7 +242,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         logoImage.tintColor = KDriveCoreAsset.secondaryTextColor.color
         titleLabel.text = recentSearch
     }
-    
+
     func configureLoading() {
         titleLabel.text = " "
         let titleLayer = CALayer()
