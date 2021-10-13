@@ -524,13 +524,20 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     @discardableResult
-    public func searchFiles(driveId: Int, query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) -> DataRequest {
+    public func searchFiles(driveId: Int, query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) -> DataRequest {
         var url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
         if let query = query {
             url += "&query=\(query)"
         }
+        if let date = date {
+            url += "&modified_at=custom&from=\(Int(date.start.timeIntervalSince1970))&until=\(Int(date.end.timeIntervalSince1970))"
+        }
         if let fileType = fileType {
             url += "&converted_type=\(fileType)"
+        }
+        if !categories.isEmpty {
+            let separator = belongToAllCategories ? "&" : "|"
+            url += "&category=" + categories.map { "\($0.id)" }.joined(separator: separator)
         }
         if let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
             url = encodedUrl

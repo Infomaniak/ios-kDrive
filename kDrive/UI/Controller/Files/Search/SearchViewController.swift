@@ -92,7 +92,7 @@ class SearchViewController: FileListViewController {
             return
         }
 
-        currentRequest = driveFileManager.searchFile(query: currentSearchText, fileType: filters.fileType?.rawValue, page: page, sortType: sortType) { [currentSearchText] file, children, error in
+        currentRequest = driveFileManager.searchFile(query: currentSearchText, date: filters.date?.dateInterval, fileType: filters.fileType?.rawValue, categories: Array(filters.categories), belongToAllCategories: true, page: page, sortType: sortType) { [currentSearchText] file, children, error in
             guard self.isDisplayingSearchResults else {
                 completion(.failure(DriveError.searchCancelled), false, false)
                 return

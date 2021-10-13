@@ -415,11 +415,11 @@ public class DriveFileManager {
     }
 
     @discardableResult
-    public func searchFile(query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) -> DataRequest? {
+    public func searchFile(query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) -> DataRequest? {
         if ReachabilityListener.instance.currentStatus == .offline {
-            searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
+            searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType, completion: completion)
         } else {
-            return apiFetcher.searchFiles(driveId: drive.id, query: query, fileType: fileType, page: page, sortType: sortType) { [self] response, error in
+            return apiFetcher.searchFiles(driveId: drive.id, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType) { [self] response, error in
                 if let files = response?.data {
                     self.backgroundQueue.async { [self] in
                         autoreleasepool {
@@ -445,7 +445,7 @@ public class DriveFileManager {
                     if error?.asAFError?.isExplicitlyCancelledError ?? false {
                         completion(nil, nil, DriveError.searchCancelled)
                     } else {
-                        searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
+                        searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType, completion: completion)
                     }
                 }
             }
@@ -453,11 +453,14 @@ public class DriveFileManager {
         return nil
     }
 
-    private func searchOffline(query: String? = nil, fileType: String? = nil, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
+    private func searchOffline(query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
         let realm = getRealm()
         var searchResults = realm.objects(File.self)
         if let query = query, !query.isBlank {
             searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS[cd] %@", query))
+        }
+        if let date = date {
+            searchResults = searchResults.filter(NSPredicate(format: "lastModifiedAt >= %d && lastModifiedAt <= %d", date.start.timeIntervalSince1970, date.end.timeIntervalSince1970))
         }
         if let fileType = fileType {
             if fileType == ConvertedType.folder.rawValue {
