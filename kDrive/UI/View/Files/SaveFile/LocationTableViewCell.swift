@@ -59,13 +59,15 @@ class LocationTableViewCell: InsetTableViewCell {
         case .date:
             titleLabel.text = filters.date?.localizedName ?? "Sélectionner une date"
             logoImage.image = KDriveAsset.calendar.image
+            logoImage.tintColor = KDriveAsset.secondaryTextColor.color
         case .type:
             titleLabel.text = filters.fileType?.title ?? "Sélectionner un type de fichier"
             logoImage.image = filters.fileType?.icon ?? KDriveAsset.fileDefault.image
+            logoImage.tintColor = KDriveAsset.infomaniakColor.color
         case .categories:
             titleLabel.text = ""
             logoImage.image = KDriveAsset.categories.image
+            logoImage.tintColor = KDriveAsset.secondaryTextColor.color
         }
-        logoImage.tintColor = KDriveAsset.secondaryTextColor.color
     }
 }
