@@ -131,7 +131,14 @@ class SearchFiltersViewController: UITableViewController {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
         case .date:
-            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: DateOption.allCases, selectedOption: filters.date, headerTitle: "Date de modification", delegate: self)
+            let customDateOption: DateOption
+            if let option = filters.date, case .custom = option {
+                customDateOption = option
+            } else {
+                customDateOption = .custom(DateInterval(start: Date(), duration: 0))
+            }
+            let allCases: [DateOption] = [.today, .yesterday, .last7days, customDateOption]
+            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: allCases, selectedOption: filters.date, headerTitle: "Date de modification", delegate: self)
             tableView.deselectRow(at: indexPath, animated: true)
             present(floatingPanelController, animated: true)
         case .type:
@@ -155,8 +162,18 @@ class SearchFiltersViewController: UITableViewController {
 extension SearchFiltersViewController: SelectDelegate {
     func didSelect(option: Selectable) {
         if let dateOption = option as? DateOption {
-            filters.date = dateOption
-            reloadSection(.date)
+            if case .custom = dateOption {
+                let startDate = Calendar.current.date(from: DateComponents(year: 2000, month: 01, day: 01))!
+                let endDate = Date()
+                let floatingPanelController = DateRangePickerViewController.instantiatePanel(visibleDateRange: startDate ... endDate) { [weak self] dateInterval in
+                    self?.filters.date = .custom(dateInterval)
+                    self?.reloadSection(.date)
+                }
+                present(floatingPanelController, animated: true)
+            } else {
+                filters.date = dateOption
+                reloadSection(.date)
+            }
         } else if let fileType = option as? ConvertedType {
             filters.fileType = fileType
             reloadSection(.type)

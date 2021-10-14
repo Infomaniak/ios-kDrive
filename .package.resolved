@@ -137,6 +137,15 @@
         }
       },
       {
+        "package": "HorizonCalendar",
+        "repositoryURL": "https://github.com/airbnb/HorizonCalendar.git",
+        "state": {
+          "branch": null,
+          "revision": "43b107e73aa5cd4a7ad1578f43dab44756b1393c",
+          "version": "1.10.0"
+        }
+      },
+      {
         "package": "InfomaniakCore",
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {

@@ -24,9 +24,7 @@ protocol Filterable {
     var icon: UIImage { get }
 }
 
-enum DateOption: Filterable, Selectable, Equatable, CaseIterable {
-    static var allCases: [DateOption] = [.today, .yesterday, .last7days, .custom(DateInterval(start: Date(), duration: 0))]
-
+enum DateOption: Filterable, Selectable, Equatable {
     case today
     case yesterday
     case last7days
