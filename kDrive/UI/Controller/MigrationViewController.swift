@@ -94,7 +94,6 @@ class MigrationViewController: UIViewController {
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
                     let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
-                    photoSyncSettingsVC.driveFileManager = currentDriveFileManager
                     guard let currentVC = mainTabBarViewController.selectedViewController as? UINavigationController else {
                         return
                     }

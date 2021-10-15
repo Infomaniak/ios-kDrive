@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -11,14 +11,14 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="FooterButtonView" customModule="kDrive" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="586" height="191"/>
+            <rect key="frame" x="0.0" y="0.0" width="586" height="124"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uGW-5f-Soj">
-                    <rect key="frame" x="0.0" y="0.0" width="586" height="157"/>
+                    <rect key="frame" x="0.0" y="0.0" width="586" height="124"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nd9-ZE-U9H" customClass="IKLargeButton" customModule="kDriveCore">
-                            <rect key="frame" x="24" y="32" width="538" height="60"/>
+                            <rect key="frame" x="24" y="32" width="530" height="60"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="60" id="I2w-RA-odE"/>
                             </constraints>
@@ -31,32 +31,32 @@
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
-                        <constraint firstItem="nd9-ZE-U9H" firstAttribute="leading" secondItem="uGW-5f-Soj" secondAttribute="leading" constant="24" id="4rP-af-3UL"/>
-                        <constraint firstItem="nd9-ZE-U9H" firstAttribute="top" secondItem="uGW-5f-Soj" secondAttribute="top" constant="32" id="RAy-LA-ZpX"/>
-                        <constraint firstAttribute="trailing" secondItem="nd9-ZE-U9H" secondAttribute="trailing" constant="24" id="e3m-kQ-RqG"/>
-                        <constraint firstAttribute="bottom" secondItem="nd9-ZE-U9H" secondAttribute="bottom" priority="999" constant="32" id="sYT-5m-9cb"/>
+                        <constraint firstAttribute="trailing" secondItem="nd9-ZE-U9H" secondAttribute="trailing" constant="32" id="9Xz-XT-yAP"/>
+                        <constraint firstAttribute="bottom" secondItem="nd9-ZE-U9H" secondAttribute="bottom" constant="32" id="Qo5-wn-pXk"/>
+                        <constraint firstItem="nd9-ZE-U9H" firstAttribute="leading" secondItem="uGW-5f-Soj" secondAttribute="leading" constant="24" id="Xpo-qy-yUg"/>
+                        <constraint firstItem="nd9-ZE-U9H" firstAttribute="top" secondItem="uGW-5f-Soj" secondAttribute="top" constant="32" id="hhl-wM-jGc"/>
                     </constraints>
                 </view>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
-                <constraint firstItem="uGW-5f-Soj" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="Rhz-KK-PM3"/>
-                <constraint firstItem="uGW-5f-Soj" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="SiK-l2-hsA"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="uGW-5f-Soj" secondAttribute="trailing" id="UDW-dQ-zmA"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="uGW-5f-Soj" secondAttribute="bottom" id="Udm-n8-3Eh"/>
+                <constraint firstItem="uGW-5f-Soj" firstAttribute="bottom" secondItem="iN0-l3-epB" secondAttribute="bottom" id="YaY-Rx-gcU"/>
+                <constraint firstItem="uGW-5f-Soj" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="b27-O7-JIG"/>
+                <constraint firstItem="uGW-5f-Soj" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="n8k-0I-lp6"/>
+                <constraint firstItem="uGW-5f-Soj" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="nly-2w-MRa"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
                 <outlet property="background" destination="uGW-5f-Soj" id="Njf-oZ-euc"/>
                 <outlet property="footerButton" destination="nd9-ZE-U9H" id="0IS-59-Mor"/>
             </connections>
-            <point key="canvasLocation" x="-295.6521739130435" y="132.25446428571428"/>
+            <point key="canvasLocation" x="-295.6521739130435" y="127.56696428571428"/>
         </view>
     </objects>
     <designables>
         <designable name="nd9-ZE-U9H">
-            <size key="intrinsicContentSize" width="56" height="34"/>
+            <size key="intrinsicContentSize" width="50" height="32"/>
         </designable>
     </designables>
 </document>

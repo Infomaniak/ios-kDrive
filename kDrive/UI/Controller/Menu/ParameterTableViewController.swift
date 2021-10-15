@@ -167,12 +167,4 @@ class ParameterTableViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
     }
-
-    // MARK: - Navigation
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let photoSyncSettingsViewController = segue.destination as? PhotoSyncSettingsViewController {
-            photoSyncSettingsViewController.driveFileManager = driveFileManager
-        }
-    }
 }

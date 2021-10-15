@@ -24,7 +24,6 @@ import UIKit
 
 class PhotoSyncSettingsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var saveButton: UIButton!
 
     private enum PhotoSyncSection {
         case syncSwitch
@@ -43,12 +42,12 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     private enum PhotoSyncSettingsRows: CaseIterable {
+        case syncMode
         case importPicturesSwitch
         case importVideosSwitch
         case importScreenshotsSwitch
         case createDatedSubFolders
         case deleteAssetsAfterImport
-        case syncMode
     }
 
     private enum PhotoSyncDeniedRows: CaseIterable {
@@ -68,15 +67,22 @@ class PhotoSyncSettingsViewController: UIViewController {
     private var syncScreenshotsEnabled: Bool!
     private var createDatedSubFolders: Bool!
     private var deleteAssetsAfterImport: Bool!
-    private var currentUserId: Int!
-    private var currentDriveId: Int!
     private var syncMode: PhotoSyncMode = .new
-    private var selectedDirectory: File?
+    private var selectedDirectory: File? {
+        didSet {
+            if oldValue == nil || selectedDirectory == nil {
+                DispatchQueue.main.async {
+                    self.updateSections()
+                }
+            }
+        }
+    }
 
-    var driveFileManager: DriveFileManager!
+    private var driveFileManager: DriveFileManager?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
@@ -84,9 +90,12 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
 
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
+
+        let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
+        view.delegate = self
+        tableView.tableFooterView = view
 
         photoSyncEnabled = PhotoLibraryUploader.instance.isSyncEnabled
         currentSyncSettings = PhotoLibraryUploader.instance.settings ?? PhotoSyncSettings()
@@ -96,21 +105,21 @@ class PhotoSyncSettingsViewController: UIViewController {
         syncScreenshotsEnabled = currentSyncSettings.syncScreenshotsEnabled
         createDatedSubFolders = currentSyncSettings.createDatedSubFolders
         deleteAssetsAfterImport = currentSyncSettings.deleteAssetsAfterImport
-        let savedCurrentId = currentSyncSettings.userId
-        currentUserId = savedCurrentId == -1 ? AccountManager.instance.currentUserId : savedCurrentId
-        let savedCurrentDrive = currentSyncSettings.driveId
-        currentDriveId = savedCurrentDrive == -1 ? driveFileManager?.drive.id : savedCurrentDrive
+        let savedCurrentUserId = currentSyncSettings.userId
+        let savedCurrentDriveId = currentSyncSettings.driveId
+        if savedCurrentUserId != -1 && savedCurrentDriveId != -1 {
+            driveFileManager = AccountManager.instance.getDriveFileManager(for: savedCurrentDriveId, userId: savedCurrentUserId)
+        }
         syncMode = currentSyncSettings.syncMode
         updateSaveButtonState()
         updateSectionList()
-        if currentSyncSettings.parentDirectoryId != -1,
-           let driveFileManager = AccountManager.instance.getDriveFileManager(for: currentDriveId, userId: currentUserId) {
+        if currentSyncSettings.parentDirectoryId != -1 {
             // We should always have the folder in cache but just in case we don't...
-            if let photoSyncDirectory = driveFileManager.getCachedFile(id: currentSyncSettings.parentDirectoryId) {
+            if let photoSyncDirectory = driveFileManager?.getCachedFile(id: currentSyncSettings.parentDirectoryId) {
                 selectedDirectory = photoSyncDirectory
                 updateSaveButtonState()
             } else {
-                driveFileManager.getFile(id: currentSyncSettings.parentDirectoryId) { file, _, _ in
+                driveFileManager?.getFile(id: currentSyncSettings.parentDirectoryId) { file, _, _ in
                     self.selectedDirectory = file?.freeze()
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .none)
                 }
@@ -131,20 +140,54 @@ class PhotoSyncSettingsViewController: UIViewController {
         navigationController?.navigationBar.isTranslucent = true
     }
 
+    // Hack to have auto layout working in table view footer
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard let footerView = tableView.tableFooterView else {
+            return
+        }
+
+        let width = tableView.bounds.size.width
+        let size = footerView.systemLayoutSizeFitting(CGSize(width: width, height: UIView.layoutFittingCompressedSize.height))
+
+        if footerView.frame.size.height != size.height {
+            footerView.frame.size.height = size.height
+            tableView.tableFooterView = footerView
+        }
+    }
+
     func updateSectionList() {
+        sections = [.syncSwitch]
         if photoSyncEnabled {
-            sections = [.syncSwitch, .syncLocation, .syncSettings]
+            sections.append(.syncLocation)
+            if driveFileManager != nil && selectedDirectory != nil {
+                sections.append(.syncSettings)
+            }
         } else {
             var limited = false
             if #available(iOS 14, *) {
                 limited = PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited
             }
             if limited || PHPhotoLibrary.authorizationStatus() == .denied {
-                sections = [.syncSwitch, .syncDenied]
-            } else {
-                sections = [.syncSwitch]
+                sections.append(.syncDenied)
             }
         }
+    }
+
+    func updateSections() {
+        let previousCount = sections.count
+        updateSectionList()
+        let newCount = sections.count
+        if newCount - previousCount < 0 {
+            // Delete sections
+            tableView.deleteSections(IndexSet(newCount ..< previousCount), with: .fade)
+        } else {
+            // Insert sections
+            tableView.insertSections(IndexSet(previousCount ..< newCount), with: .fade)
+        }
+        // Scroll to bottom
+        let lastSection = sections.count - 1
+        tableView.scrollToRow(at: IndexPath(row: tableView(tableView, numberOfRowsInSection: lastSection) - 1, section: lastSection), at: .middle, animated: true)
     }
 
     func updateSaveButtonState() {
@@ -153,8 +196,8 @@ class PhotoSyncSettingsViewController: UIViewController {
             isEdited = true
         } else if PhotoLibraryUploader.instance.isSyncEnabled == photoSyncEnabled && photoSyncEnabled {
             isEdited = PhotoLibraryUploader.instance.isSyncEnabled != photoSyncEnabled ||
-                currentSyncSettings.driveId != currentDriveId ||
-                currentSyncSettings.userId != currentUserId ||
+                currentSyncSettings.driveId != driveFileManager?.drive.id ||
+                currentSyncSettings.userId != driveFileManager?.drive.userId ||
                 currentSyncSettings.parentDirectoryId != selectedDirectory?.id ||
                 currentSyncSettings.syncPicturesEnabled != syncPicturesEnabled ||
                 currentSyncSettings.syncVideosEnabled != syncVideosEnabled ||
@@ -163,27 +206,17 @@ class PhotoSyncSettingsViewController: UIViewController {
                 currentSyncSettings.deleteAssetsAfterImport != deleteAssetsAfterImport ||
                 currentSyncSettings.syncMode != syncMode
         }
-        saveButton.isHidden = !isEdited
 
-        if selectedDirectory == nil && photoSyncEnabled {
-            saveButton.isEnabled = false
+        let footer = tableView.tableFooterView as? FooterButtonView
+        if (driveFileManager == nil || selectedDirectory == nil) && photoSyncEnabled {
+            footer?.footerButton.isEnabled = false
         } else {
-            saveButton.isEnabled = isEdited
-        }
-    }
-
-    @IBAction func saveButtonPressed(_ sender: UIButton) {
-        DispatchQueue.global(qos: .utility).async {
-            let realm = DriveFileManager.constants.uploadsRealm
-            self.saveSettings(using: realm)
-            DispatchQueue.main.async {
-                self.navigationController?.popViewController(animated: true)
-            }
-            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+            footer?.footerButton.isEnabled = isEdited
         }
     }
 
     func saveSettings(using realm: Realm) {
+        guard let driveFileManager = driveFileManager, let selectedDirectory = selectedDirectory else { return }
         if photoSyncEnabled {
             let lastSyncDate: Date
             if syncMode == .new {
@@ -192,9 +225,9 @@ class PhotoSyncSettingsViewController: UIViewController {
                 lastSyncDate = Date(timeIntervalSince1970: 0)
             }
 
-            let newSettings = PhotoSyncSettings(userId: currentUserId,
-                                                driveId: currentDriveId,
-                                                parentDirectoryId: selectedDirectory!.id,
+            let newSettings = PhotoSyncSettings(userId: driveFileManager.drive.userId,
+                                                driveId: driveFileManager.drive.id,
+                                                parentDirectoryId: selectedDirectory.id,
                                                 lastSync: lastSyncDate,
                                                 syncMode: syncMode,
                                                 syncPictures: syncPicturesEnabled,
@@ -222,27 +255,6 @@ class PhotoSyncSettingsViewController: UIViewController {
 
     class func instantiate() -> PhotoSyncSettingsViewController {
         return Storyboard.menu.instantiateViewController(withIdentifier: "PhotoSyncSettingsViewController") as! PhotoSyncSettingsViewController
-    }
-
-    // MARK: - State restoration
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
-
-        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
-
-        let driveId = coder.decodeInteger(forKey: "DriveId")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
-            return
-        }
-        self.driveFileManager = driveFileManager
-        if currentDriveId == nil {
-            currentDriveId = driveFileManager.drive.id
-        }
     }
 }
 
@@ -290,7 +302,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             switch switchSyncRows[indexPath.row] {
             case .syncSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == switchSyncRows.count - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonActiveSync
                 cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -298,32 +310,21 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                     if sender.isOn {
                         self.requestAuthorization { status in
                             DispatchQueue.main.async {
-                                self.currentUserId = AccountManager.instance.currentUserId
-                                self.currentDriveId = self.driveFileManager.drive.id
+                                self.driveFileManager = AccountManager.instance.currentDriveFileManager
                                 if status == .authorized {
                                     self.photoSyncEnabled = true
                                 } else {
                                     sender.setOn(false, animated: true)
                                     self.photoSyncEnabled = false
                                 }
-                                let previousCount = self.sections.count
-                                self.updateSectionList()
-                                let newCount = self.sections.count
-                                if previousCount != newCount {
-                                    if newCount == 3 {
-                                        tableView.insertSections([1, 2], with: .fade)
-                                    } else {
-                                        tableView.insertSections([1], with: .fade)
-                                    }
-                                }
+                                self.updateSections()
                                 self.updateSaveButtonState()
                             }
                         }
                     } else {
                         self.photoSyncEnabled = false
+                        self.updateSections()
                         self.updateSaveButtonState()
-                        self.updateSectionList()
-                        tableView.deleteSections([1, 2], with: .fade)
                     }
                 }
                 return cell
@@ -332,13 +333,13 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             switch locationRows[indexPath.row] {
             case .driveSelection:
                 let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-                cell.configure(with: AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId))
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == locationRows.count - 1)
+                cell.configure(with: driveFileManager?.drive)
                 return cell
             case .folderSelection:
                 let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-                cell.configure(with: selectedDirectory, drive: AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId)!)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == locationRows.count - 1)
+                cell.configure(with: selectedDirectory, drive: driveFileManager!.drive)
 
                 return cell
             }
@@ -346,7 +347,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             switch settingsRows[indexPath.row] {
             case .importPicturesSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncPicture
                 cell.valueSwitch.setOn(syncPicturesEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -356,7 +357,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 return cell
             case .importVideosSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncVideo
                 cell.valueSwitch.setOn(syncVideosEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -366,7 +367,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 return cell
             case .importScreenshotsSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncScreenshot
                 cell.valueSwitch.setOn(syncScreenshotsEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -376,7 +377,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 return cell
             case .createDatedSubFolders:
                 let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow()
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveStrings.Localizable.createDatedSubFoldersTitle
                 cell.detailsLabel.text = KDriveStrings.Localizable.createDatedSubFoldersDescription
                 cell.valueSwitch.setOn(createDatedSubFolders, animated: true)
@@ -387,7 +388,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 return cell
             case .deleteAssetsAfterImport:
                 let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow()
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveStrings.Localizable.deletePicturesTitle
                 cell.detailsLabel.text = KDriveStrings.Localizable.deletePicturesDescription
                 cell.valueSwitch.setOn(deleteAssetsAfterImport, animated: true)
@@ -398,7 +399,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 return cell
             case .syncMode:
                 let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveStrings.Localizable.syncSettingsButtonSaveDate
                 cell.valueLabel.text = syncMode == .new ? KDriveStrings.Localizable.syncSettingsSaveDateNowValue : KDriveStrings.Localizable.syncSettingsSaveDateAllPictureValue
                 return cell
@@ -422,16 +423,16 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
             let row = locationRows[indexPath.row]
             if row == .driveSelection {
                 let selectDriveViewController = SelectDriveViewController.instantiate()
-                if let selectedDrive = AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId) {
+                if let selectedDrive = driveFileManager?.drive {
                     selectDriveViewController.selectedDrive = selectedDrive
                     selectDriveViewController.delegate = self
                     navigationController?.pushViewController(selectDriveViewController, animated: true)
                 }
             } else if row == .folderSelection {
-                let drive = AccountManager.instance.getDrive(for: currentUserId, driveId: currentDriveId)!
-                let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)!
-                let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, disabledDirectoriesSelection: [driveFileManager.getRootFile()], delegate: self)
-                navigationController?.present(selectFolderNavigationController, animated: true)
+                if let driveFileManager = driveFileManager {
+                    let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, disabledDirectoriesSelection: [driveFileManager.getRootFile()], delegate: self)
+                    navigationController?.present(selectFolderNavigationController, animated: true)
+                }
             }
 
         } else if section == .syncSettings {
@@ -462,9 +463,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
 
 extension PhotoSyncSettingsViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
-        currentUserId = drive.userId
-        currentDriveId = drive.id
-        driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)!
+        driveFileManager = AccountManager.instance.getDriveFileManager(for: drive)
         selectedDirectory = nil
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 0, section: 1), IndexPath(row: 1, section: 1)], with: .fade)
@@ -478,5 +477,20 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
         selectedDirectory = folder
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .fade)
+    }
+}
+
+// MARK: - Footer button delegate
+
+extension PhotoSyncSettingsViewController: FooterButtonDelegate {
+    func didClickOnButton() {
+        DispatchQueue.global(qos: .utility).async {
+            let realm = DriveFileManager.constants.uploadsRealm
+            self.saveSettings(using: realm)
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
+        }
     }
 }
