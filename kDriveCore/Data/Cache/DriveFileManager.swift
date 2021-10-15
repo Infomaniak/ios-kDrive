@@ -455,12 +455,12 @@ public class DriveFileManager {
 
     private func searchOffline(query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
         let realm = getRealm()
-        var searchResults = realm.objects(File.self)
+        var searchResults = realm.objects(File.self).filter("id > 0")
         if let query = query, !query.isBlank {
             searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS[cd] %@", query))
         }
         if let date = date {
-            searchResults = searchResults.filter(NSPredicate(format: "lastModifiedAt >= %d && lastModifiedAt <= %d", date.start.timeIntervalSince1970, date.end.timeIntervalSince1970))
+            searchResults = searchResults.filter(NSPredicate(format: "lastModifiedAt >= %d && lastModifiedAt <= %d", Int(date.start.timeIntervalSince1970), Int(date.end.timeIntervalSince1970)))
         }
         if let fileType = fileType {
             if fileType == ConvertedType.folder.rawValue {
@@ -468,6 +468,16 @@ public class DriveFileManager {
             } else {
                 searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType))
             }
+        }
+        if !categories.isEmpty {
+            let predicate: NSPredicate
+            if belongToAllCategories {
+                let predicates = categories.map { NSPredicate(format: "ANY categories.id = %d", $0.id) }
+                predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+            } else {
+                predicate = NSPredicate(format: "ANY categories.id IN %@", categories.map(\.id))
+            }
+            searchResults = searchResults.filter(predicate)
         }
         var allFiles = [File]()
 
