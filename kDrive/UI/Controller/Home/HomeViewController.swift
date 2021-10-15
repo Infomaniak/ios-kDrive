@@ -33,6 +33,46 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         let recentFilesEmpty: Bool
         let isLoading: Bool
 
+        init(topRows: [HomeViewController.HomeTopRow], showInsufficientStorage: Bool, recentFiles: [File], recentFilesEmpty: Bool, isLoading: Bool) {
+            self.topRows = topRows
+            self.showInsufficientStorage = showInsufficientStorage
+            self.recentFiles = recentFiles
+            self.recentFilesEmpty = recentFilesEmpty
+            self.isLoading = isLoading
+        }
+
+        init(changeSet: [ArraySection<HomeSection, AnyDifferentiable>]) {
+            var topRows = [HomeTopRow]()
+            var showInsufficientStorage = false
+            var recentFiles = [File]()
+            var recentFilesEmpty = false
+            var isLoading = false
+
+            for section in changeSet {
+                if section.model == .top {
+                    topRows = section.elements.compactMap { $0.base as? HomeTopRow }
+                    showInsufficientStorage = topRows.contains(.insufficientStorage)
+                } else if section.model == .recentFiles {
+                    for element in section.elements {
+                        if let recentFileRow = element.base as? RecentFileRow {
+                            if recentFileRow == .empty {
+                                recentFilesEmpty = true
+                            } else if recentFileRow == .loading {
+                                isLoading = true
+                            }
+                        } else if let recentFileRow = element.base as? File {
+                            recentFiles.append(recentFileRow)
+                        } else {
+                            fatalError("Invalid HomeViewController model")
+                        }
+                    }
+                } else {
+                    fatalError("Invalid HomeViewController model")
+                }
+            }
+            self.init(topRows: topRows, showInsufficientStorage: showInsufficientStorage, recentFiles: recentFiles, recentFilesEmpty: recentFilesEmpty, isLoading: isLoading)
+        }
+
         var stagedChangeSet: [ArraySection<HomeSection, AnyDifferentiable>] {
             var sections = [
                 ArraySection(model: HomeSection.top, elements: topRows.map { AnyDifferentiable($0) })
@@ -179,8 +219,8 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
 
     private func reload(newViewModel: HomeViewModel) {
         let changeset = StagedChangeset(source: viewModel.stagedChangeSet, target: newViewModel.stagedChangeSet)
-        collectionView.reload(using: changeset) { _ in
-            self.viewModel = newViewModel
+        collectionView.reload(using: changeset) { data in
+            self.viewModel = HomeViewModel(changeSet: data)
         }
     }
 
