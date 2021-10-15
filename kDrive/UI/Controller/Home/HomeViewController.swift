@@ -234,7 +234,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
                 if self.recentFilesController.empty {
                     return self.recentFilesController.getEmptyLayout()
                 } else {
-                    return self.recentFilesController.getLayout(for: .list)
+                    return self.recentFilesController.getLayout(for: UserDefaults.shared.homeListStyle)
                 }
             }
         }
@@ -373,6 +373,11 @@ extension HomeViewController: UICollectionViewDataSource {
                     default:
                         break
                     }
+                    for view in self.collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
+                        if let headerView = view as? HomeRecentFilesHeaderView {
+                            headerView.titleLabel.text = self.recentFilesController.title
+                        }
+                    }
                     self.recentFilesController.loadNextPage()
                 }
                 return cell
@@ -404,6 +409,15 @@ extension HomeViewController: UICollectionViewDataSource {
         if kind == UICollectionView.elementKindSectionHeader {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecentFilesHeaderView", for: indexPath) as! HomeRecentFilesHeaderView
             headerView.titleLabel.text = recentFilesController.title
+            headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
+            headerView.actionHandler = { button in
+                UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
+                button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
+                collectionView.performBatchUpdates {
+                    collectionView.reloadSections([1])
+                } completion: { _ in
+                }
+            }
             return headerView
         } else {
             return UICollectionReusableView()

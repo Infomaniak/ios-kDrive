@@ -20,6 +20,9 @@
                     <color key="tintColor" name="primaryTextColor"/>
                     <inset key="imageEdgeInsets" minX="4" minY="4" maxX="4" maxY="4"/>
                     <state key="normal" image="list"/>
+                    <connections>
+                        <action selector="didPressSwitchLayout:" destination="U6b-Vx-4bR" eventType="touchUpInside" id="14H-bk-0Og"/>
+                    </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8gW-N4-qaK" customClass="IKLabel" customModule="kDriveCore">
                     <rect key="frame" x="0.0" y="0.0" width="46" height="50"/>
@@ -42,6 +45,7 @@
                 <constraint firstItem="F1t-4r-UDd" firstAttribute="centerY" secondItem="U6b-Vx-4bR" secondAttribute="centerY" id="mKF-Yx-8Nk"/>
             </constraints>
             <connections>
+                <outlet property="switchLayoutButton" destination="F1t-4r-UDd" id="rzE-Ed-58z"/>
                 <outlet property="titleLabel" destination="8gW-N4-qaK" id="Xgw-mP-v9j"/>
             </connections>
             <point key="canvasLocation" x="118.84057971014494" y="-14.0625"/>
