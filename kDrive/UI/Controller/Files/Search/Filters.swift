@@ -105,6 +105,7 @@ struct Filters {
     var date: DateOption?
     var fileType: ConvertedType?
     var categories: Set<kDriveCore.Category> = []
+    var belongToAllCategories = true
 
     var hasFilters: Bool {
         return date != nil || fileType != nil || !categories.isEmpty

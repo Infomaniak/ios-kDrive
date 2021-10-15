@@ -51,8 +51,14 @@ class SearchFiltersViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        clearsSelectionOnViewWillAppear = false
+
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: ManageCategoriesTableViewCell.self)
+        tableView.register(cellView: SelectTableViewCell.self)
+
+        let index = filters.belongToAllCategories ? 1 : 2
+        tableView.selectRow(at: IndexPath(row: index, section: 2), animated: false, scrollPosition: .none)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -80,7 +86,12 @@ class SearchFiltersViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        switch filterTypes[section] {
+        case .categories:
+            return 3
+        default:
+            return 1
+        }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -95,12 +106,26 @@ class SearchFiltersViewController: UITableViewController {
 
             return cell
         case .categories:
-            let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
+            if indexPath.row == 0 {
+                let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
 
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.configure(with: Array(filters.categories))
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                cell.configure(with: Array(filters.categories))
 
-            return cell
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(type: SelectTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                switch indexPath.row {
+                case 1:
+                    cell.label.text = "Les résultats doivent appartenir à toutes les catégories sélectionnées"
+                case 2:
+                    cell.label.text = "Les résultats doivent appartenir à une des catégories sélectionnées"
+                default:
+                    cell.label.text = ""
+                }
+                return cell
+            }
         }
     }
 
@@ -127,7 +152,7 @@ class SearchFiltersViewController: UITableViewController {
 
     // MARK: - Table view delegate
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
         case .date:
@@ -139,20 +164,37 @@ class SearchFiltersViewController: UITableViewController {
             }
             let allCases: [DateOption] = [.today, .yesterday, .last7days, customDateOption]
             let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: allCases, selectedOption: filters.date, headerTitle: "Date de modification", delegate: self)
-            tableView.deselectRow(at: indexPath, animated: true)
             present(floatingPanelController, animated: true)
+            return nil
         case .type:
             var fileTypes = ConvertedType.allCases
             fileTypes.removeAll { $0 == .font || $0 == .unknown }
             let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: "Type de fichier", delegate: self)
-            tableView.deselectRow(at: indexPath, animated: true)
             present(floatingPanelController, animated: true)
+            return nil
         case .categories:
-            let manageCategoriesViewController = ManageCategoriesViewController.instantiate(driveFileManager: driveFileManager)
-            manageCategoriesViewController.canEdit = false
-            manageCategoriesViewController.selectedCategories = Array(filters.categories)
-            manageCategoriesViewController.delegate = self
-            navigationController?.pushViewController(manageCategoriesViewController, animated: true)
+            if indexPath.row == 0 {
+                let manageCategoriesViewController = ManageCategoriesViewController.instantiate(driveFileManager: driveFileManager)
+                manageCategoriesViewController.canEdit = false
+                manageCategoriesViewController.selectedCategories = Array(filters.categories)
+                manageCategoriesViewController.delegate = self
+                navigationController?.pushViewController(manageCategoriesViewController, animated: true)
+                return nil
+            } else {
+                return indexPath
+            }
+        }
+    }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let filterType = filterTypes[indexPath.section]
+        switch filterType {
+        case .date, .type:
+            break
+        case .categories:
+            if indexPath.row > 0 {
+                filters.belongToAllCategories = indexPath.row == 1
+            }
         }
     }
 }
