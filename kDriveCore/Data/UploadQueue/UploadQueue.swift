@@ -99,11 +99,17 @@ public class UploadQueue {
     }
 
     public func addToQueueFromRealm() {
-        dispatchQueue.async {
-            // self.compactRealmIfNeeded()
-            autoreleasepool {
-                let uploadingFiles = self.realm.objects(UploadFile.self).filter("uploadDate = nil AND sessionUrl = \"\" AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
-                uploadingFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
+        foregroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
+            self.dispatchQueue.async {
+                let uploadingFiles = self.realm.objects(UploadFile.self).filter("uploadDate = nil AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
+                autoreleasepool {
+                    uploadingFiles.forEach { uploadFile in
+                        // If the upload file has a session URL but it's foreground and doesn't exist anymore (e.g. app was killed), we add it again
+                        if uploadFile.sessionUrl.isEmpty || (!uploadFile.sessionUrl.isEmpty && uploadFile.sessionId == self.foregroundSession.identifier && !uploadTasks.contains(where: { $0.originalRequest?.url?.absoluteString == uploadFile.sessionUrl })) {
+                            self.addToQueue(file: uploadFile, using: self.realm)
+                        }
+                    }
+                }
             }
         }
     }
