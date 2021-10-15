@@ -17,27 +17,25 @@
  */
 
 import UIKit
-import Lottie
 
-class BetaInviteFloatingPanelViewController: InformationFloatingPanelViewController {
-
+class CategoryFloatingPanelViewController: InformationFloatingPanelViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        imageView.image = KDriveAsset.logoKdriveBeta.image
-        imageViewHeightConstraint.constant = 70
+        imageView.image = KDriveAsset.illuCategories.image
+        imageViewHeightConstraint.constant = 190
         animationView.isHidden = true
-        titleLabel.text = KDriveStrings.Localizable.betaTestTitle
-        descriptionLabel.text = KDriveStrings.Localizable.betaTestDescription
+        titleLabel.text = "Nouveau : simplifiez votre classement avec les catégories !"
+        descriptionLabel.text = "kDrive permet maintenant de classer vos documents avec des catégories personnalisées. La recherche vous permet ensuite de retrouver les fichiers selon les catégories de votre choix."
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
-        leftButton.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
-        rightButton.setTitle(KDriveStrings.Localizable.buttonBetaTest, for: .normal)
+        leftButton.isHidden = true
+        rightButton.setTitle(KDriveStrings.Localizable.buttonClose, for: .normal)
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
         let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
-        object_setClass(contentViewController, BetaInviteFloatingPanelViewController.self)
+        object_setClass(contentViewController, CategoryFloatingPanelViewController.self)
         return contentViewController
     }
 }

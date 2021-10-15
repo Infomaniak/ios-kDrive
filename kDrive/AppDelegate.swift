@@ -272,43 +272,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             window?.makeKeyAndVisible()
         } else {
             UserDefaults.shared.numberOfConnections += 1
-            var appVersion = AppVersion()
-            appVersion.loadVersionData { [self] version in
-                appVersion.version = version.version
-                appVersion.currentVersionReleaseDate = version.currentVersionReleaseDate
-
-                if appVersion.showUpdateFloatingPanel() {
-                    if !UserDefaults.shared.updateLater || UserDefaults.shared.numberOfConnections % 10 == 0 {
-                        let driveFloatingPanelController = UpdateFloatingPanelViewController.instantiatePanel()
-                        let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UpdateFloatingPanelViewController
-                        floatingPanelViewController?.actionHandler = { _ in
-                            if let url = URL(string: "https://apps.apple.com/app/infomaniak-kdrive/id1482778676") {
-                                UserDefaults.shared.updateLater = false
-                                UIApplication.shared.open(url)
-                            }
-                        }
-                        self.window?.rootViewController?.present(driveFloatingPanelController, animated: true)
-                    }
-                }
+            // Show launch floating panel
+            let launchPanelsController = LaunchPanelsController()
+            if let viewController = window?.rootViewController {
+                launchPanelsController.pickAndDisplayPanel(viewController: viewController)
             }
-            if let currentDriveFileManager = accountManager.currentDriveFileManager,
-               UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled {
-                let driveFloatingPanelController = SavePhotosFloatingPanelViewController.instantiatePanel(drive: currentDriveFileManager.drive)
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? SavePhotosFloatingPanelViewController
-                floatingPanelViewController?.actionHandler = { [weak self] _ in
-                    let photoSyncSettingsVC = PhotoSyncSettingsViewController.instantiate()
-                    let mainTabViewVC = self?.window?.rootViewController as? UITabBarController
-                    guard let currentVC = mainTabViewVC?.selectedViewController as? UINavigationController else {
-                        return
-                    }
-                    currentVC.dismiss(animated: true)
-                    currentVC.setInfomaniakAppearanceNavigationBar()
-                    currentVC.pushViewController(photoSyncSettingsVC, animated: true)
-                }
-                DispatchQueue.main.async {
-                    self.window?.rootViewController?.present(driveFloatingPanelController, animated: true)
-                }
-            }
+            // Request App Store review
             if UserDefaults.shared.numberOfConnections == 10 {
                 if #available(iOS 14.0, *) {
                     if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
@@ -318,20 +287,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     SKStoreReviewController.requestReview()
                 }
             }
-            if !UserDefaults.shared.betaInviteDisplayed && !Bundle.main.isRunningInTestFlight {
-                let driveFloatingPanelController = BetaInviteFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? BetaInviteFloatingPanelViewController
-                floatingPanelViewController?.actionHandler = { _ in
-                    if let url = URL(string: "https://testflight.apple.com/join/qZHSGy5B") {
-                        UserDefaults.shared.betaInviteDisplayed = true
-                        UIApplication.shared.open(url)
-                        driveFloatingPanelController.dismiss(animated: true)
-                    }
-                }
-                DispatchQueue.main.async {
-                    self.window?.rootViewController?.present(driveFloatingPanelController, animated: true)
-                }
-            }
+            // Refresh data
             refreshCacheData(preload: false, isSwitching: false)
             uploadEditedFiles()
             // Ask to remove uploaded pictures

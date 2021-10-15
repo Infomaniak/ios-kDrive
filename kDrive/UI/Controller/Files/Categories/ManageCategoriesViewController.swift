@@ -94,6 +94,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     @objc func closeButtonPressed() {
+        searchController.dismiss(animated: true)
         dismiss(animated: true)
     }
 
