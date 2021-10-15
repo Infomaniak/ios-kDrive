@@ -20,8 +20,8 @@ import Foundation
 import kDriveCore
 
 class HomeLastModificationsController: HomeRecentFilesController {
-    override var emptyCellType: EmptyTableView.EmptyTableViewType {
-        return .noActivities
+    convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, cellType: FileGridCollectionViewCell.self, emptyCellType: .noActivities, title: KDriveStrings.Localizable.lastEditsTitle, listStyleEnabled: true)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {

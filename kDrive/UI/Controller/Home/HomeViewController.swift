@@ -86,6 +86,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         super.viewDidLoad()
         viewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: false, recentFiles: [], recentFilesEmpty: false, isLoading: false)
 
+        collectionView.register(UINib(nibName: "HomeRecentFilesHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeRecentFilesHeaderView")
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
         collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
@@ -177,11 +178,9 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
     }
 
     private func reload(newViewModel: HomeViewModel) {
-        DispatchQueue.main.async { [self] in
-            let changeset = StagedChangeset(source: viewModel.stagedChangeSet, target: newViewModel.stagedChangeSet)
-            collectionView.reload(using: changeset) { _ in
-                self.viewModel = newViewModel
-            }
+        let changeset = StagedChangeset(source: viewModel.stagedChangeSet, target: newViewModel.stagedChangeSet)
+        collectionView.reload(using: changeset) { _ in
+            self.viewModel = newViewModel
         }
     }
 
@@ -358,6 +357,16 @@ extension HomeViewController: UICollectionViewDataSource {
 
                 return cell
             }
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionHeader {
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecentFilesHeaderView", for: indexPath) as! HomeRecentFilesHeaderView
+            headerView.titleLabel.text = recentFilesController.title
+            return headerView
+        } else {
+            return UICollectionReusableView()
         }
     }
 }

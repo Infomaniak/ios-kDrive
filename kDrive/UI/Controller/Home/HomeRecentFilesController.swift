@@ -25,13 +25,9 @@ class HomeRecentFilesController {
     let driveFileManager: DriveFileManager
     weak var homeViewController: HomeViewController?
 
-    var emptyCellType: EmptyTableView.EmptyTableViewType {
-        return .noActivities
-    }
-
-    var cellType: UICollectionViewCell.Type {
-        return FileGridCollectionViewCell.self
-    }
+    let title: String
+    let emptyCellType: EmptyTableView.EmptyTableViewType
+    let cellType: UICollectionViewCell.Type
 
     var listStyle: ListStyle = .list
     var page = 1
@@ -39,7 +35,11 @@ class HomeRecentFilesController {
     var loading = false
     var moreComing = true
 
-    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController, cellType: UICollectionViewCell.Type, emptyCellType: EmptyTableView.EmptyTableViewType, title: String, listStyleEnabled: Bool) {
+        self.title = title
+        self.cellType = cellType
+        self.emptyCellType = emptyCellType
+
         self.driveFileManager = driveFileManager
         self.homeViewController = homeViewController
     }
@@ -63,6 +63,11 @@ class HomeRecentFilesController {
     }
 
     func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(70))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+
+        var section: NSCollectionLayoutSection
         switch style {
         case .list:
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(200))
@@ -70,7 +75,7 @@ class HomeRecentFilesController {
             item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
             group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
-            return NSCollectionLayoutSection(group: group)
+            section = NSCollectionLayoutSection(group: group)
         case .grid:
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -78,7 +83,9 @@ class HomeRecentFilesController {
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalWidth(1 / 3))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 2)
             group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24 - 8, bottom: 0, trailing: 24 - 8)
-            return NSCollectionLayoutSection(group: group)
+            section = NSCollectionLayoutSection(group: group)
         }
+        section.boundarySupplementaryItems = [header]
+        return section
     }
 }

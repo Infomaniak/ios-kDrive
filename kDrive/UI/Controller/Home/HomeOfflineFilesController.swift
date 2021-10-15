@@ -17,10 +17,11 @@
  */
 
 import Foundation
+import kDriveCore
 
 class HomeOfflineFilesController: HomeRecentFilesController {
-    override var emptyCellType: EmptyTableView.EmptyTableViewType {
-        return .noOffline
+    convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, cellType: FileGridCollectionViewCell.self, emptyCellType: .noOffline, title: KDriveStrings.Localizable.offlineFileTitle, listStyleEnabled: true)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {

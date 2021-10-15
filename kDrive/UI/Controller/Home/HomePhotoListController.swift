@@ -20,8 +20,8 @@ import Foundation
 import kDriveCore
 
 class HomePhotoListController: HomeRecentFilesController {
-    override var emptyCellType: EmptyTableView.EmptyTableViewType {
-        return .noImages
+    convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, cellType: FileGridCollectionViewCell.self, emptyCellType: .noImages, title: KDriveStrings.Localizable.allPictures, listStyleEnabled: false)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
