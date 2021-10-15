@@ -24,6 +24,7 @@
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="categoryColorTitle"/>
                         </userDefinedRuntimeAttributes>
                     </label>
                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="Fdf-s5-ajr">
@@ -59,4 +60,9 @@
             <point key="canvasLocation" x="131.8840579710145" y="119.86607142857142"/>
         </tableViewCell>
     </objects>
+    <designables>
+        <designable name="YW2-5c-Hd2">
+            <size key="intrinsicContentSize" width="123" height="17"/>
+        </designable>
+    </designables>
 </document>

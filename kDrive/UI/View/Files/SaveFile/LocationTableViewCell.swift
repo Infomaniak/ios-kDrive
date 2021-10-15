@@ -57,11 +57,11 @@ class LocationTableViewCell: InsetTableViewCell {
     func configure(with filterType: FilterType, filters: Filters) {
         switch filterType {
         case .date:
-            titleLabel.text = filters.date?.localizedName ?? "Sélectionner une date"
+            titleLabel.text = filters.date?.localizedName ?? KDriveStrings.Localizable.searchFiltersSelectDate
             logoImage.image = KDriveAsset.calendar.image
             logoImage.tintColor = KDriveAsset.secondaryTextColor.color
         case .type:
-            titleLabel.text = filters.fileType?.title ?? "Sélectionner un type de fichier"
+            titleLabel.text = filters.fileType?.title ?? KDriveStrings.Localizable.searchFiltersSelectType
             logoImage.image = filters.fileType?.icon ?? KDriveAsset.fileDefault.image
             logoImage.tintColor = KDriveAsset.infomaniakColor.color
         case .categories:

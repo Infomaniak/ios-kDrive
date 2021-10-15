@@ -82,6 +82,9 @@
                                 <action selector="closeButtonPressed:" destination="J5q-yn-jYo" id="g40-7e-LFr"/>
                             </connections>
                         </barButtonItem>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="filtersTitle"/>
+                        </userDefinedRuntimeAttributes>
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MKT-rP-Mih" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

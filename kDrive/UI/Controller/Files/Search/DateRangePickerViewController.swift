@@ -189,7 +189,7 @@ class DateRangePickerViewController: UIViewController {
                 headerLabel.text = dateIntervalFormatter.string(from: interval)
             }
         case .none:
-            headerLabel.text = "Sélectionner une date"
+            headerLabel.text = KDriveStrings.Localizable.searchFiltersSelectDate
         }
     }
 

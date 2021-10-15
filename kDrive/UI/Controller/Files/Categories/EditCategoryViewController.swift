@@ -61,7 +61,7 @@ class EditCategoryViewController: UITableViewController {
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: CategoryColorTableViewCell.self)
 
-        title = create ? "Créer une catégorie" : "Modifier une catégorie"
+        title = create ? KDriveStrings.Localizable.createCategoryTitle : KDriveStrings.Localizable.editCategoryTitle
 
         if !create {
             rows.insert(.editInfo, at: 0)
@@ -97,11 +97,11 @@ class EditCategoryViewController: UITableViewController {
         switch rows[indexPath.row] {
         case .editInfo:
             let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
-            cell.configure(with: .info, message: "La modification sera visible par tous les utilisateurs du kDrive ayant accès aux catégories.")
+            cell.configure(with: .info, message: KDriveStrings.Localizable.editCategoryInfoDescription)
             return cell
         case .name:
             let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
-            cell.textField.setHint("Nom de la catégorie")
+            cell.textField.setHint(KDriveStrings.Localizable.categoryNameField)
             cell.textField.text = category?.name ?? name
             cell.textDidChange = { [unowned self] text in
                 if let text = text {

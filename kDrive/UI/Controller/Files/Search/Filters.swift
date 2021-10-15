@@ -55,7 +55,7 @@ enum DateOption: Filterable, Selectable, Equatable {
         case .yesterday:
             return KDriveStrings.Localizable.allYesterday
         case .last7days:
-            return "Les 7 derniers jours"
+            return KDriveStrings.Localizable.allLast7Days
         case .custom:
             return KDriveStrings.Localizable.notificationCustom
         }

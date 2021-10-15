@@ -29,11 +29,11 @@ enum FilterType: CaseIterable {
     var title: String {
         switch self {
         case .date:
-            return "Date de modification"
+            return KDriveStrings.Localizable.modificationDateFilterTitle
         case .type:
-            return "Type de fichier"
+            return KDriveStrings.Localizable.fileTypeFilterTitle
         case .categories:
-            return "Catégories"
+            return KDriveStrings.Localizable.categoriesFilterTitle
         }
     }
 }
@@ -118,9 +118,9 @@ class SearchFiltersViewController: UITableViewController {
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 switch indexPath.row {
                 case 1:
-                    cell.label.text = "Les résultats doivent appartenir à toutes les catégories sélectionnées"
+                    cell.label.text = KDriveStrings.Localizable.belongToAllCategoriesFilterDescription
                 case 2:
-                    cell.label.text = "Les résultats doivent appartenir à une des catégories sélectionnées"
+                    cell.label.text = KDriveStrings.Localizable.belongToOneCategoryFilterDescription
                 default:
                     cell.label.text = ""
                 }
@@ -163,13 +163,13 @@ class SearchFiltersViewController: UITableViewController {
                 customDateOption = .custom(DateInterval(start: Date(), duration: 0))
             }
             let allCases: [DateOption] = [.today, .yesterday, .last7days, customDateOption]
-            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: allCases, selectedOption: filters.date, headerTitle: "Date de modification", delegate: self)
+            let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: allCases, selectedOption: filters.date, headerTitle: filterType.title, delegate: self)
             present(floatingPanelController, animated: true)
             return nil
         case .type:
             var fileTypes = ConvertedType.allCases
             fileTypes.removeAll { $0 == .font || $0 == .unknown }
-            let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: "Type de fichier", delegate: self)
+            let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: filterType.title, delegate: self)
             present(floatingPanelController, animated: true)
             return nil
         case .categories:

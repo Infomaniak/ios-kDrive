@@ -30,7 +30,7 @@ class CategoryTableViewCell: InsetTableViewCell {
     @IBOutlet weak var label: IKLabel!
     @IBOutlet weak var moreButton: UIButton!
     @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
-    
+
     weak var delegate: CategoryCellDelegate?
 
     private var category: kDriveCore.Category!
@@ -70,7 +70,7 @@ class CategoryTableViewCell: InsetTableViewCell {
     func configureCreateCell(name: String) {
         circleImageView.image = KDriveAsset.add.image
         label.style = .body1
-        label.attributedText = NSMutableAttributedString(string: "Créer \(name)", boldText: name)
+        label.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.manageCategoriesCreateTitle(name), boldText: name)
         moreButton.isHidden = true
         selectionStyle = .default
         borderView.isHidden = false

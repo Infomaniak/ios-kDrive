@@ -63,7 +63,7 @@ class ManageCategoriesViewController: UITableViewController {
         tableView.register(cellView: CategoryTableViewCell.self)
         tableView.keyboardDismissMode = .onDrag
 
-        title = file != nil ? "Gérer les catégories" : "Ajouter des catégories"
+        title = file != nil ? KDriveStrings.Localizable.manageCategoriesTitle : KDriveStrings.Localizable.addCategoriesTitle
 
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.obscuresBackgroundDuringPresentation = false

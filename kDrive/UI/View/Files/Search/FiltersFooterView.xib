@@ -21,6 +21,9 @@
                     </constraints>
                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                     <state key="normal" title="Appliquer les filtres"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonApplyFilters"/>
+                    </userDefinedRuntimeAttributes>
                     <connections>
                         <action selector="applyButtonPressed:" destination="iN0-l3-epB" eventType="touchUpInside" id="2VB-5p-881"/>
                     </connections>
@@ -34,6 +37,7 @@
                     <state key="normal" title="Effacer les filtres"/>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="whiteButton"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonClearFilters"/>
                     </userDefinedRuntimeAttributes>
                     <connections>
                         <action selector="clearButtonPressed:" destination="iN0-l3-epB" eventType="touchUpInside" id="CNP-YB-QTe"/>
@@ -57,10 +61,10 @@
     </objects>
     <designables>
         <designable name="dzQ-KU-Urf">
-            <size key="intrinsicContentSize" width="112" height="29"/>
+            <size key="intrinsicContentSize" width="116" height="30"/>
         </designable>
         <designable name="fyT-KU-cLg">
-            <size key="intrinsicContentSize" width="129" height="29"/>
+            <size key="intrinsicContentSize" width="133" height="30"/>
         </designable>
     </designables>
 </document>

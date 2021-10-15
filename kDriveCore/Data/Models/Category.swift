@@ -74,29 +74,29 @@ public enum PredefinedCategory: String {
     var title: String {
         switch self {
         case .banking:
-            return "Banque"
+            return KDriveCoreStrings.Localizable.categoryBanking
         case .bill:
-            return "Facture"
+            return KDriveCoreStrings.Localizable.categoryBill
         case .contract:
-            return "Contrat"
+            return KDriveCoreStrings.Localizable.categoryContract
         case .form:
-            return "Formulaire"
+            return KDriveCoreStrings.Localizable.categoryForm
         case .hobbies:
-            return "Loisirs"
+            return KDriveCoreStrings.Localizable.categoryHobbies
         case .id:
-            return "Papiers d’identité"
+            return KDriveCoreStrings.Localizable.categoryID
         case .insurance:
-            return "Assurance"
+            return KDriveCoreStrings.Localizable.categoryInsurance
         case .quotation:
-            return "Devis"
+            return KDriveCoreStrings.Localizable.categoryQuotation
         case .taxation:
-            return "Impôts"
+            return KDriveCoreStrings.Localizable.categoryTaxation
         case .transportation:
-            return "Transport"
+            return KDriveCoreStrings.Localizable.categoryTransportation
         case .warranty:
-            return "Garantie"
+            return KDriveCoreStrings.Localizable.categoryWarranty
         case .work:
-            return "Travail"
+            return KDriveCoreStrings.Localizable.categoryWork
         }
     }
 }

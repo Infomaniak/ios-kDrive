@@ -50,12 +50,12 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
 
     func configure(with categories: [kDriveCore.Category]) {
         if categories.isEmpty {
-            label.text = "Ajouter des catégories"
+            label.text = KDriveStrings.Localizable.addCategoriesTitle
             collectionViewBottomConstraint.constant = 0
             viewCenterConstraint.isActive = true
             contentViewHeightConstraint.isActive = true
         } else {
-            label.text = "Gérer les catégories"
+            label.text = KDriveStrings.Localizable.manageCategoriesTitle
             collectionViewBottomConstraint.constant = 16
             viewCenterConstraint.isActive = false
             contentViewHeightConstraint.isActive = false
