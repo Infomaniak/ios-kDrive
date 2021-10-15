@@ -25,8 +25,8 @@ class CategoryFloatingPanelViewController: InformationFloatingPanelViewControlle
         imageView.image = KDriveAsset.illuCategories.image
         imageViewHeightConstraint.constant = 190
         animationView.isHidden = true
-        titleLabel.text = "Nouveau : simplifiez votre classement avec les catégories !"
-        descriptionLabel.text = "kDrive permet maintenant de classer vos documents avec des catégories personnalisées. La recherche vous permet ensuite de retrouver les fichiers selon les catégories de votre choix."
+        titleLabel.text = KDriveStrings.Localizable.categoriesPanelTitle
+        descriptionLabel.text = KDriveStrings.Localizable.categoriesPanelDescription
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
         leftButton.isHidden = true
