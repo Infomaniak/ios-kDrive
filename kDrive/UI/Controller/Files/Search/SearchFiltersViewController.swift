@@ -69,7 +69,11 @@ class SearchFiltersViewController: UITableViewController {
 
     private func reloadSection(_ filterType: FilterType) {
         if let index = filterTypes.firstIndex(of: filterType) {
+            let selectedIndexPath = tableView.indexPathForSelectedRow
             tableView.reloadSections([index], with: .none)
+            if let selectedIndexPath = selectedIndexPath {
+                tableView.selectRow(at: selectedIndexPath, animated: false, scrollPosition: .none)
+            }
         }
     }
 
