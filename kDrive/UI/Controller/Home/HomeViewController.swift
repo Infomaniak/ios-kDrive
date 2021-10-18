@@ -293,6 +293,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
     private func generateTopSectionLayout() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.edgeSpacing = NSCollectionLayoutEdgeSpacing(leading: .fixed(0), top: .fixed(16), trailing: .fixed(0), bottom: .fixed(16))
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
 
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(70))

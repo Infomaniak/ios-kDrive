@@ -25,7 +25,7 @@
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8gW-N4-qaK" customClass="IKLabel" customModule="kDriveCore">
-                    <rect key="frame" x="0.0" y="0.0" width="46" height="50"/>
+                    <rect key="frame" x="0.0" y="16" width="36" height="18"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                     <color key="textColor" name="actionColor"/>
@@ -39,9 +39,9 @@
             <constraints>
                 <constraint firstItem="F1t-4r-UDd" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8gW-N4-qaK" secondAttribute="trailing" constant="8" id="4Cb-gw-Ga9"/>
                 <constraint firstAttribute="trailing" secondItem="F1t-4r-UDd" secondAttribute="trailing" id="4e9-K6-bhZ"/>
-                <constraint firstItem="8gW-N4-qaK" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" id="7z3-Cp-pWz"/>
+                <constraint firstItem="8gW-N4-qaK" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="16" id="7z3-Cp-pWz"/>
                 <constraint firstItem="8gW-N4-qaK" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" id="CWv-bb-xeA"/>
-                <constraint firstAttribute="bottom" secondItem="8gW-N4-qaK" secondAttribute="bottom" id="VcV-s4-6c4"/>
+                <constraint firstAttribute="bottom" secondItem="8gW-N4-qaK" secondAttribute="bottom" constant="16" id="VcV-s4-6c4"/>
                 <constraint firstItem="F1t-4r-UDd" firstAttribute="centerY" secondItem="U6b-Vx-4bR" secondAttribute="centerY" id="mKF-Yx-8Nk"/>
             </constraints>
             <connections>
@@ -53,7 +53,7 @@
     </objects>
     <designables>
         <designable name="8gW-N4-qaK">
-            <size key="intrinsicContentSize" width="46" height="21.5"/>
+            <size key="intrinsicContentSize" width="36" height="17"/>
         </designable>
     </designables>
     <resources>
