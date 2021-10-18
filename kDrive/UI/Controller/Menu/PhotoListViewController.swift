@@ -22,6 +22,8 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
+extension PhotoSortMode: Selectable {}
+
 class PhotoListViewController: MultipleSelectionViewController {
     @IBOutlet weak var headerView: UIView!
     @IBOutlet weak var headerImageView: UIImageView!
@@ -136,17 +138,7 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     @IBAction func sortButtonPressed(_ sender: UIBarButtonItem) {
-        let floatingPanelViewController = DriveFloatingPanelController()
-        let sortViewController = FloatingPanelPhotoSortViewController()
-
-        sortViewController.selectedSortMode = sortMode
-        sortViewController.delegate = self
-
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = sortViewController
-
-        floatingPanelViewController.set(contentViewController: sortViewController)
-        floatingPanelViewController.track(scrollView: sortViewController.tableView)
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>.instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode, headerTitle: KDriveStrings.Localizable.sortTitle, delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 
@@ -482,8 +474,9 @@ extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
 
 // MARK: - Photo sort delegate
 
-extension PhotoListViewController: PhotoSortDelegate {
-    func didSelect(sortMode: PhotoSortMode) {
-        self.sortMode = sortMode
+extension PhotoListViewController: SelectDelegate {
+    func didSelect(option: Selectable) {
+        guard let mode = option as? PhotoSortMode else { return }
+        sortMode = mode
     }
 }

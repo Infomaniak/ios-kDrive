@@ -26,6 +26,12 @@ extension SwipeCellAction {
     static let delete = SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image)
 }
 
+extension SortType: Selectable {
+    var title: String {
+        return value.translation
+    }
+}
+
 class FileListViewController: MultipleSelectionViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
@@ -898,18 +904,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Files header view delegate
 
     func sortButtonPressed() {
-        let floatingPanelViewController = DriveFloatingPanelController()
-        let sortOptionsViewController = FloatingPanelSortOptionTableViewController()
-
-        sortOptionsViewController.sortType = sortType
-        sortOptionsViewController.trashSort = trashSort
-        sortOptionsViewController.delegate = self
-
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = sortOptionsViewController
-
-        floatingPanelViewController.set(contentViewController: sortOptionsViewController)
-        floatingPanelViewController.track(scrollView: sortOptionsViewController.tableView)
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: trashSort ? [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest] : [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest], selectedOption: sortType, headerTitle: KDriveStrings.Localizable.sortTitle, delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 
@@ -1039,8 +1034,9 @@ extension FileListViewController: FileCellDelegate {
 
 // MARK: - Sort options delegate
 
-extension FileListViewController: SortOptionsDelegate {
-    func didClickOnSortingOption(type: SortType) {
+extension FileListViewController: SelectDelegate {
+    func didSelect(option: Selectable) {
+        guard let type = option as? SortType else { return }
         sortType = type
         if !trashSort {
             FileListOptions.instance.currentSortType = sortType
