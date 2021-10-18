@@ -99,7 +99,7 @@ class EmptyTableView: UIView {
         case .noComments:
             view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
         case .noCategories:
-            view = self.instantiate(logo: KDriveAsset.categories.image, message: "Aucune catégorie")
+            view = self.instantiate(logo: KDriveAsset.categories.image, message: KDriveStrings.Localizable.manageCategoriesNoCategory)
         }
 
         if !setCenteringEnabled {
