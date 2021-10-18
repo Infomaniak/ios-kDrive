@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "8c65ddf756c633d01d9ae01092bf72f0c66dfc60",
-          "version": "7.0.0"
+          "revision": "318e319998bf555c3e914d5c3adb6da05af86a32",
+          "version": "7.1.1"
         }
       },
       {
@@ -240,8 +240,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "052f92ef8dd411616cfcfae8dd82888dcd4ecf45",
-          "version": "10.16.0"
+          "revision": "7ca0ce1dd58553d5be1ec9cc7283b068c256979d",
+          "version": "10.17.0"
         }
       },
       {
