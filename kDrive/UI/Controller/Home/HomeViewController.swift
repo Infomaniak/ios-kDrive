@@ -97,7 +97,6 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
 
     internal enum HomeTopRow: Equatable, Hashable, Differentiable {
         case offline
-        case drive(Int)
         case search
         case insufficientStorage
         case uploadsInProgress
@@ -117,6 +116,10 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         }
     }
 
+    private var navbarHeight: CGFloat {
+        return navigationController?.navigationBar.frame.height ?? 0
+    }
+
     private var floatingPanelViewController: DriveFloatingPanelController?
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var recentFilesController: HomeRecentFilesController!
@@ -127,6 +130,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         viewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: false, recentFiles: [], recentFilesEmpty: false, isLoading: false)
 
         collectionView.register(UINib(nibName: "HomeRecentFilesHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeRecentFilesHeaderView")
+        collectionView.register(UINib(nibName: "HomeLargeTitleHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeLargeTitleHeaderView")
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
         collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
@@ -141,11 +145,12 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: navbarHeight, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
+        collectionView.scrollIndicatorInsets = UIEdgeInsets(top: navbarHeight, left: 0, bottom: 0, right: 0)
 
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
             DispatchQueue.main.async {
-                self.reloadTopRows()
+                self?.reloadTopRows()
                 if status != .offline {}
             }
         }
@@ -153,12 +158,38 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         recentFilesController?.loadNextPage()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isTranslucent = true
+        navigationController?.navigationBar.shadowImage = UIImage()
+        navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
+        navigationController?.navigationBar.barTintColor = KDriveAsset.backgroundColor.color
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: KDriveAsset.titleColor.color]
+        updateNavbarAppearance()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateNavbarAppearance()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.navigationBar.shadowImage = nil
+        navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
+        navigationController?.navigationBar.barTintColor = nil
+        navigationController?.navigationBar.titleTextAttributes = nil
+        navigationController?.navigationBar.alpha = 1
+        navigationController?.navigationBar.isUserInteractionEnabled = true
+        navigationController?.navigationBar.layoutIfNeeded()
+    }
+
     private func getTopRows() -> [HomeTopRow] {
         var topRows: [HomeTopRow]
         if ReachabilityListener.instance.currentStatus == .offline {
-            topRows = [.offline, .drive(driveFileManager.drive.id), .search]
+            topRows = [.offline, .search]
         } else {
-            topRows = [.drive(driveFileManager.drive.id), .search, .recentFilesSelector]
+            topRows = [.search, .recentFilesSelector]
         }
 
         if uploadCountManager != nil && uploadCountManager.uploadCount > 0 {
@@ -224,6 +255,24 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         }
     }
 
+    private func updateNavbarAppearance() {
+        let scrollOffset = collectionView.contentOffset.y
+        guard let navigationBar = navigationController?.navigationBar else {
+            return
+        }
+
+        if UIApplication.shared.statusBarOrientation.isPortrait {
+            navigationItem.title = driveFileManager?.drive.name ?? ""
+            navigationBar.alpha = min(1, max(0, (scrollOffset + collectionView.contentInset.top) / navbarHeight))
+            navigationBar.isUserInteractionEnabled = navigationBar.alpha > 0.5
+        } else {
+            navigationBar.isUserInteractionEnabled = false
+            navigationItem.title = ""
+            navigationBar.alpha = 0
+        }
+        navigationBar.layoutIfNeeded()
+    }
+
     private func createLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout { [weak self] section, _ in
             guard let self = self else { return nil }
@@ -245,7 +294,14 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-        return NSCollectionLayoutSection(group: group)
+
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(70))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.boundarySupplementaryItems = [header]
+        return section
     }
 
     func presentedFromTabBar() {}
@@ -254,6 +310,8 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
 
     func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
         driveFileManager = newDriveFileManager
+        let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeLargeTitleHeaderView } as? HomeLargeTitleHeaderView
+        driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
         let viewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: false, recentFiles: [], recentFilesEmpty: false, isLoading: true)
         reload(newViewModel: viewModel)
         DispatchQueue.main.async { [weak self] in
@@ -318,13 +376,6 @@ extension HomeViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: HomeOfflineCollectionViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 return cell
-            case .drive:
-                let cell = collectionView.dequeueReusableCell(type: WrapperCollectionViewCell.self, for: indexPath)
-                let tableCell = cell.initWith(cell: DriveSwitchTableViewCell.self)
-                tableCell.style = .home
-                tableCell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                tableCell.configureWith(drive: driveFileManager.drive)
-                return cell
             case .search:
                 let cell = collectionView.dequeueReusableCell(type: HomeFileSearchCollectionViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
@@ -373,11 +424,10 @@ extension HomeViewController: UICollectionViewDataSource {
                     default:
                         break
                     }
-                    for view in self.collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
-                        if let headerView = view as? HomeRecentFilesHeaderView {
-                            headerView.titleLabel.text = self.recentFilesController.title
-                        }
-                    }
+
+                    let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeRecentFilesHeaderView } as? HomeRecentFilesHeaderView
+                    headerView?.titleLabel.text = self.recentFilesController.title
+
                     self.recentFilesController.loadNextPage()
                 }
                 return cell
@@ -407,18 +457,28 @@ extension HomeViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
-            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecentFilesHeaderView", for: indexPath) as! HomeRecentFilesHeaderView
-            headerView.titleLabel.text = recentFilesController.title
-            headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
-            headerView.actionHandler = { button in
-                UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
-                button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
-                collectionView.performBatchUpdates {
-                    collectionView.reloadSections([1])
-                } completion: { _ in
+            switch HomeSection.allCases[indexPath.section] {
+            case .top:
+                let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeLargeTitleHeaderView", for: indexPath) as! HomeLargeTitleHeaderView
+                driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
+                driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
+                    self?.performSegue(withIdentifier: "switchDriveSegue", sender: nil)
                 }
+                return driveHeaderView
+            case .recentFiles:
+                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecentFilesHeaderView", for: indexPath) as! HomeRecentFilesHeaderView
+                headerView.titleLabel.text = recentFilesController.title
+                headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
+                headerView.actionHandler = { button in
+                    UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
+                    button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
+                    collectionView.performBatchUpdates {
+                        collectionView.reloadSections([1])
+                    } completion: { _ in
+                    }
+                }
+                return headerView
             }
-            return headerView
         } else {
             return UICollectionReusableView()
         }
@@ -428,6 +488,10 @@ extension HomeViewController: UICollectionViewDataSource {
 // MARK: - UICollectionViewDelegate
 
 extension HomeViewController: UICollectionViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        updateNavbarAppearance()
+    }
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
@@ -437,8 +501,6 @@ extension HomeViewController: UICollectionViewDelegate {
             case .uploadsInProgress:
                 let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
                 navigationController?.pushViewController(uploadViewController, animated: true)
-            case .drive:
-                performSegue(withIdentifier: "switchDriveSegue", sender: nil)
             case .search:
                 present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
             }

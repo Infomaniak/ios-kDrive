@@ -55,18 +55,24 @@ class HomeRecentFilesController {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
-        return NSCollectionLayoutSection(group: group)
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.boundarySupplementaryItems = [getHeaderLayout()]
+        return section
     }
 
     func configureEmptyCell(_ cell: HomeEmptyFilesCollectionViewCell) {
         cell.configureCell(with: emptyCellType)
     }
 
-    func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
+    func getHeaderLayout() -> NSCollectionLayoutBoundarySupplementaryItem {
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(70))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+        return header
+    }
 
+    func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
         var section: NSCollectionLayoutSection
         switch style {
         case .list:
@@ -85,7 +91,7 @@ class HomeRecentFilesController {
             group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24 - 8, bottom: 0, trailing: 24 - 8)
             section = NSCollectionLayoutSection(group: group)
         }
-        section.boundarySupplementaryItems = [header]
+        section.boundarySupplementaryItems = [getHeaderLayout()]
         return section
     }
 }
