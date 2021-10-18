@@ -33,7 +33,6 @@ public class PhotoLibraryUploader {
     private let requestVideoOption = PHVideoRequestOptions()
     private let dateFormatter = DateFormatter()
     private var exportSessions = Set<AVAssetExportSession>()
-    private var phRequests = Set<PHImageRequestID>()
 
     private init() {
         requestImageOption.deliveryMode = .highQualityFormat
@@ -100,7 +99,6 @@ public class PhotoLibraryUploader {
                     completion(nil)
                 }
             }
-            phRequests.insert(request)
         } else if asset.mediaType == .image {
             var request: PHImageRequestID
             if #available(iOS 13, *) {
@@ -112,7 +110,6 @@ public class PhotoLibraryUploader {
                     self.handlePHAssetRequestData(data: data, completion: completion)
                 }
             }
-            phRequests.insert(request)
         } else {
             completion(nil)
         }
@@ -142,17 +139,6 @@ public class PhotoLibraryUploader {
         }
         getUrlLock.wait()
         return url
-    }
-
-    func cancelAllRequests() {
-        for session in exportSessions {
-            session.cancelExport()
-        }
-        exportSessions.removeAll()
-        for request in phRequests {
-            PHImageManager.default().cancelImageRequest(request)
-        }
-        phRequests.removeAll()
     }
 
     public func addNewPicturesToUploadQueue(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
