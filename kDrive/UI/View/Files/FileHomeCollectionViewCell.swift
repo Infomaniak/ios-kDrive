@@ -16,17 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
-class FileGridCollectionViewCell: FileCollectionViewCell {
-    @IBOutlet weak var _checkmarkImage: UIImageView!
-    @IBOutlet weak var largeIconImageView: UIImageView!
-    @IBOutlet weak var iconImageView: UIImageView!
-    @IBOutlet var stackViewCenterConstraint: NSLayoutConstraint?
+class FileHomeCollectionViewCell: FileGridCollectionViewCell {
+    @IBOutlet weak var timeStackView: UIStackView!
+    @IBOutlet weak var timeLabel: IKLabel!
 
     override var checkmarkImage: UIImageView? {
-        return _checkmarkImage
+        return nil
     }
 
     override func awakeFromNib() {
@@ -43,14 +41,15 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         super.prepareForReuse()
         titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         titleLabel.textAlignment = .natural
-        stackViewCenterConstraint?.isActive = false
         largeIconImageView.isHidden = true
         logoImage.isHidden = false
         logoImage.backgroundColor = nil
         iconImageView.backgroundColor = nil
+        timeLabel.text = ""
+        timeStackView.isHidden = false
     }
 
-    override func initStyle(isFirst: Bool, isLast: Bool) { }
+    override func initStyle(isFirst: Bool, isLast: Bool) {}
 
     override func configureWith(file: File, selectionMode: Bool = false) {
         super.configureWith(file: file, selectionMode: selectionMode)
@@ -69,7 +68,6 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
             moreButton.cornerRadius = moreButton.frame.width / 2
         }
         logoImage.contentMode = .scaleAspectFill
-        stackViewCenterConstraint?.isActive = file.isDirectory
         titleLabel.textAlignment = file.isDirectory ? .center : .natural
         checkmarkImage?.isHidden = !selectionMode
         iconImageView.image = file.icon
@@ -79,6 +77,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
                 self.largeIconImageView.image = image
             }
         }
+        timeLabel.text = Constants.formatDate(file.lastModifiedDate, style: .datetime, relative: true)
     }
 
     override func setThumbnailFor(file: File) {
@@ -94,13 +93,13 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
     }
 
     override func configureLoading() {
+        timeStackView.isHidden = true
         titleLabel.text = " "
         let titleLayer = CALayer()
         titleLayer.anchorPoint = .zero
         titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 15)
         titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
         titleLabel.layer.addSublayer(titleLayer)
-        favoriteImageView?.isHidden = true
         logoImage.image = nil
         logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
         largeIconImageView.isHidden = true
@@ -110,5 +109,4 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         moreButton.isHidden = true
         checkmarkImage?.isHidden = true
     }
-
 }

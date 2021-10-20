@@ -21,7 +21,7 @@ import kDriveCore
 
 class HomeLastModificationsController: HomeRecentFilesController {
     convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, cellType: FileGridCollectionViewCell.self, emptyCellType: .noActivities, title: KDriveStrings.Localizable.lastEditsTitle, listStyleEnabled: true)
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noActivities, title: KDriveStrings.Localizable.lastEditsTitle, listStyleEnabled: true)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {

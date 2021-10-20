@@ -34,7 +34,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var logoImage: UIImageView!
     @IBOutlet weak var accessoryImage: UIImageView?
     @IBOutlet weak var moreButton: UIButton!
-    @IBOutlet weak var favoriteImageView: UIImageView!
+    @IBOutlet weak var favoriteImageView: UIImageView?
     @IBOutlet weak var availableOfflineImageView: UIImageView!
     @IBOutlet weak var centerTitleConstraint: NSLayoutConstraint!
     @IBOutlet weak var innerViewTrailingConstraint: NSLayoutConstraint!
@@ -61,7 +61,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
     }
 
-    var checkmarkImage: UIImageView {
+    var checkmarkImage: UIImageView? {
         return logoImage
     }
 
@@ -161,8 +161,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         self.selectionMode = selectionMode
 
         titleLabel.text = file.name
-        favoriteImageView.isHidden = !file.isFavorite
-        favoriteImageView.accessibilityLabel = KDriveStrings.Localizable.favoritesTitle
+        favoriteImageView?.isHidden = !file.isFavorite
+        favoriteImageView?.accessibilityLabel = KDriveStrings.Localizable.favoritesTitle
         logoImage.image = file.icon
         moreButton.isHidden = selectionMode
         if !selectionMode || checkmarkImage != logoImage {
@@ -210,7 +210,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     func configureWith(trashedFile: File) {
         file = trashedFile
         titleLabel.text = trashedFile.name
-        favoriteImageView.isHidden = true
+        favoriteImageView?.isHidden = true
         logoImage.image = trashedFile.icon
 
         let formattedDate = Constants.formatFileLastModifiedDate(trashedFile.lastModifiedDate)
@@ -230,13 +230,13 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     private func configureForSelection() {
         guard selectionMode else { return }
         accessoryImage?.isHidden = true
-        checkmarkImage.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+        checkmarkImage?.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
     }
 
     func configureWith(recentSearch: String) {
         centerTitleConstraint.isActive = true
         detailsStackView?.isHidden = true
-        favoriteImageView.isHidden = true
+        favoriteImageView?.isHidden = true
         accessoryImage?.isHidden = true
         logoImage.image = KDriveCoreAsset.clock.image
         logoImage.tintColor = KDriveCoreAsset.secondaryTextColor.color
@@ -250,11 +250,11 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 15)
         titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
         titleLabel.layer.addSublayer(titleLayer)
-        favoriteImageView.isHidden = true
+        favoriteImageView?.isHidden = true
         logoImage.image = nil
         logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
         moreButton.isHidden = true
-        checkmarkImage.isHidden = true
+        checkmarkImage?.isHidden = true
     }
 
     @IBAction func moreButtonTap(_ sender: Any) {

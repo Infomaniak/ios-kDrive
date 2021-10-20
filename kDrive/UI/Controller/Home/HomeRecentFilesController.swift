@@ -27,7 +27,8 @@ class HomeRecentFilesController {
 
     let title: String
     let emptyCellType: EmptyTableView.EmptyTableViewType
-    let cellType: UICollectionViewCell.Type
+    let listCellType: UICollectionViewCell.Type
+    let gridCellType: UICollectionViewCell.Type
 
     var listStyle: ListStyle = .list
     var page = 1
@@ -35,9 +36,10 @@ class HomeRecentFilesController {
     var loading = false
     var moreComing = true
 
-    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController, cellType: UICollectionViewCell.Type, emptyCellType: EmptyTableView.EmptyTableViewType, title: String, listStyleEnabled: Bool) {
+    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController, listCellType: UICollectionViewCell.Type, gridCellType: UICollectionViewCell.Type, emptyCellType: EmptyTableView.EmptyTableViewType, title: String, listStyleEnabled: Bool) {
         self.title = title
-        self.cellType = cellType
+        self.listCellType = listCellType
+        self.gridCellType = gridCellType
         self.emptyCellType = emptyCellType
 
         self.driveFileManager = driveFileManager

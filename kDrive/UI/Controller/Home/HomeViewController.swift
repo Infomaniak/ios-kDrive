@@ -121,6 +121,8 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
     }
 
     private var floatingPanelViewController: DriveFloatingPanelController?
+    private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
+
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var recentFilesController: HomeRecentFilesController!
     private var viewModel: HomeViewModel!
@@ -140,6 +142,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.register(cellView: HomeEmptyFilesCollectionViewCell.self)
+        collectionView.register(cellView: FileHomeCollectionViewCell.self)
 
         recentFilesController = HomeLastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
         collectionView.collectionViewLayout = createLayout()
@@ -439,7 +442,7 @@ extension HomeViewController: UICollectionViewDataSource {
                 recentFilesController?.configureEmptyCell(cell)
                 return cell
             } else {
-                let cellType = recentFilesController.cellType
+                let cellType = UserDefaults.shared.homeListStyle == .list ? recentFilesController.listCellType : recentFilesController.gridCellType
                 let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
 
                 if viewModel.isLoading && indexPath.row > viewModel.recentFiles.count - 1 {
@@ -447,6 +450,7 @@ extension HomeViewController: UICollectionViewDataSource {
                     cell.configureLoading()
                 } else {
                     let file = viewModel.recentFiles[indexPath.row]
+                    cell.delegate = self
                     cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == viewModel.recentFiles.count - 1)
                     cell.configureWith(file: file, selectionMode: false)
                 }
@@ -522,6 +526,34 @@ extension HomeViewController: UICollectionViewDelegate {
                                                    isLoading: true))
                 recentFilesController?.loadNextPage()
             }
+        }
+    }
+}
+
+// MARK: - FileCellDelegate
+
+extension HomeViewController: FileCellDelegate {
+    @objc func didTapMoreButton(_ cell: FileCollectionViewCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else {
+            return
+        }
+        showQuickActionsPanel(file: viewModel.recentFiles[indexPath.row])
+    }
+
+    private func showQuickActionsPanel(file: File) {
+        if fileInformationsViewController == nil {
+            fileInformationsViewController = FileQuickActionsFloatingPanelViewController()
+            fileInformationsViewController.presentingParent = self
+            fileInformationsViewController.normalFolderHierarchy = true
+            floatingPanelViewController = DriveFloatingPanelController()
+            floatingPanelViewController?.isRemovalInteractionEnabled = true
+            floatingPanelViewController?.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
+            floatingPanelViewController?.set(contentViewController: fileInformationsViewController)
+            floatingPanelViewController?.track(scrollView: fileInformationsViewController.tableView)
+        }
+        fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
+        if let floatingPanelViewController = floatingPanelViewController {
+            present(floatingPanelViewController, animated: true)
         }
     }
 }

@@ -21,7 +21,7 @@ import kDriveCore
 
 class HomePhotoListController: HomeRecentFilesController {
     convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, cellType: FileGridCollectionViewCell.self, emptyCellType: .noImages, title: KDriveStrings.Localizable.allPictures, listStyleEnabled: false)
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: FileGridCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noImages, title: KDriveStrings.Localizable.allPictures, listStyleEnabled: false)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {

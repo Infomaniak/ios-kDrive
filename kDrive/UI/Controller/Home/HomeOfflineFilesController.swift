@@ -21,7 +21,7 @@ import kDriveCore
 
 class HomeOfflineFilesController: HomeRecentFilesController {
     convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, cellType: FileGridCollectionViewCell.self, emptyCellType: .noOffline, title: KDriveStrings.Localizable.offlineFileTitle, listStyleEnabled: true)
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noOffline, title: KDriveStrings.Localizable.offlineFileTitle, listStyleEnabled: true)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
