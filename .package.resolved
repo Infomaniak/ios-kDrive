@@ -29,15 +29,6 @@
         }
       },
       {
-        "package": "BetterSegmentedControl",
-        "repositoryURL": "https://github.com/gmarm/BetterSegmentedControl.git",
-        "state": {
-          "branch": null,
-          "revision": "a2b2116761f71320cee7e69b4249863f0f372c71",
-          "version": "2.0.1"
-        }
-      },
-      {
         "package": "BoringSSL-GRPC",
         "repositoryURL": "https://github.com/firebase/boringssl-SwiftPM.git",
         "state": {
@@ -152,6 +143,15 @@
           "branch": null,
           "revision": "c09dfba59bffa8c370ec00a2aa0aa4235dfad4a3",
           "version": "1.10.1"
+        }
+      },
+      {
+        "package": "IBPCollectionViewCompositionalLayout",
+        "repositoryURL": "https://github.com/kishikawakatsumi/IBPCollectionViewCompositionalLayout.git",
+        "state": {
+          "branch": null,
+          "revision": "bb5b8a20892eba40906f45b2b5e4266358b9501b",
+          "version": "0.6.9"
         }
       },
       {

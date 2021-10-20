@@ -304,7 +304,8 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.categoryPanelDisplayed))
-	}
+        }
+    }
 
     var homeListStyle: ListStyle {
         get {
