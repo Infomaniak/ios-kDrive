@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import InfomaniakCore
 import UIKit
 
 class HomeFileSearchCollectionViewCell: InsetCollectionViewCell {

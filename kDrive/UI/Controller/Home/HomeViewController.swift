@@ -129,10 +129,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         super.viewDidLoad()
         viewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: false, recentFiles: [], recentFilesEmpty: false, isLoading: false)
 
-        collectionView.register(UINib(nibName: "HomeRecentFilesHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeRecentFilesHeaderView")
-        collectionView.register(UINib(nibName: "HomeLargeTitleHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeLargeTitleHeaderView")
+        collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
+        collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
-        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
         collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
         collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
@@ -472,14 +471,14 @@ extension HomeViewController {
         if kind == UICollectionView.elementKindSectionHeader {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
-                let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeLargeTitleHeaderView", for: indexPath) as! HomeLargeTitleHeaderView
+                let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeLargeTitleHeaderView.self, for: indexPath)
                 driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     self?.performSegue(withIdentifier: "switchDriveSegue", sender: nil)
                 }
                 return driveHeaderView
             case .recentFiles:
-                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecentFilesHeaderView", for: indexPath) as! HomeRecentFilesHeaderView
+                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeRecentFilesHeaderView.self, for: indexPath)
                 headerView.titleLabel.text = recentFilesController.title
                 headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
                 headerView.actionHandler = { button in
