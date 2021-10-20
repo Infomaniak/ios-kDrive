@@ -21,7 +21,7 @@ import kDriveCore
 
 class HomePhotoListController: HomeRecentFilesController {
     convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: FileGridCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noImages, title: KDriveStrings.Localizable.allPictures, listStyleEnabled: false)
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self, emptyCellType: .noImages, title: KDriveStrings.Localizable.allPictures, listStyleEnabled: false)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
@@ -42,5 +42,19 @@ class HomePhotoListController: HomeRecentFilesController {
                 }
             }
         }
+    }
+
+    override func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
+        var section: NSCollectionLayoutSection
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalWidth(1 / 3))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 3)
+        group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+        section = NSCollectionLayoutSection(group: group)
+
+        section.boundarySupplementaryItems = [getHeaderLayout()]
+        return section
     }
 }

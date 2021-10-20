@@ -25,7 +25,7 @@
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8gW-N4-qaK" customClass="IKLabel" customModule="kDriveCore">
-                    <rect key="frame" x="0.0" y="16" width="36" height="18"/>
+                    <rect key="frame" x="0.0" y="16" width="46" height="18"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                     <color key="textColor" name="actionColor"/>
@@ -53,7 +53,7 @@
     </objects>
     <designables>
         <designable name="8gW-N4-qaK">
-            <size key="intrinsicContentSize" width="36" height="17"/>
+            <size key="intrinsicContentSize" width="46" height="21.5"/>
         </designable>
     </designables>
     <resources>

@@ -143,6 +143,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.register(cellView: HomeEmptyFilesCollectionViewCell.self)
         collectionView.register(cellView: FileHomeCollectionViewCell.self)
+        collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
 
         recentFilesController = HomeLastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
         collectionView.collectionViewLayout = createLayout()
@@ -299,7 +300,7 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
         item.edgeSpacing = NSCollectionLayoutEdgeSpacing(leading: .fixed(0), top: .fixed(16), trailing: .fixed(0), bottom: .fixed(16))
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(70))
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(40))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
 
@@ -413,11 +414,6 @@ extension HomeViewController: UICollectionViewDataSource {
                 cell.valueChangeHandler = { [weak self] selector in
                     guard let self = self else { return }
                     self.recentFilesController.cancelLoading()
-                    self.reload(newViewModel: HomeViewModel(topRows: self.viewModel.topRows,
-                                                            showInsufficientStorage: self.viewModel.showInsufficientStorage,
-                                                            recentFiles: [],
-                                                            recentFilesEmpty: false,
-                                                            isLoading: true))
                     switch selector.selectedSegmentIndex {
                     case 0:
                         self.recentFilesController = HomeLastModificationsController(driveFileManager: self.driveFileManager, homeViewController: self)
@@ -428,6 +424,11 @@ extension HomeViewController: UICollectionViewDataSource {
                     default:
                         break
                     }
+                    self.reload(newViewModel: HomeViewModel(topRows: self.viewModel.topRows,
+                                                            showInsufficientStorage: self.viewModel.showInsufficientStorage,
+                                                            recentFiles: [],
+                                                            recentFilesEmpty: false,
+                                                            isLoading: true))
 
                     let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeRecentFilesHeaderView } as? HomeRecentFilesHeaderView
                     headerView?.titleLabel.text = self.recentFilesController.title
@@ -443,19 +444,28 @@ extension HomeViewController: UICollectionViewDataSource {
                 return cell
             } else {
                 let cellType = UserDefaults.shared.homeListStyle == .list ? recentFilesController.listCellType : recentFilesController.gridCellType
-                let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
-
-                if viewModel.isLoading && indexPath.row > viewModel.recentFiles.count - 1 {
-                    cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == viewModel.recentFiles.count - 1 + HomeViewController.loadingCellCount)
-                    cell.configureLoading()
+                if let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as? FileCollectionViewCell {
+                    if viewModel.isLoading && indexPath.row > viewModel.recentFiles.count - 1 {
+                        cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == viewModel.recentFiles.count - 1 + HomeViewController.loadingCellCount)
+                        cell.configureLoading()
+                    } else {
+                        let file = viewModel.recentFiles[indexPath.row]
+                        cell.delegate = self
+                        cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == viewModel.recentFiles.count - 1)
+                        cell.configureWith(file: file, selectionMode: false)
+                    }
+                    return cell
+                } else if let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as? HomeLastPicCollectionViewCell {
+                    if viewModel.isLoading && indexPath.row > viewModel.recentFiles.count - 1 {
+                        cell.configureLoading()
+                    } else {
+                        let file = viewModel.recentFiles[indexPath.row]
+                        cell.configureWith(file: file)
+                    }
+                    return cell
                 } else {
-                    let file = viewModel.recentFiles[indexPath.row]
-                    cell.delegate = self
-                    cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == viewModel.recentFiles.count - 1)
-                    cell.configureWith(file: file, selectionMode: false)
+                    fatalError("Unsupported cell type")
                 }
-
-                return cell
             }
         }
     }
