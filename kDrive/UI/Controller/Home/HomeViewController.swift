@@ -135,12 +135,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.register(cellView: HomeFileSearchCollectionViewCell.self)
         collectionView.register(cellView: HomeOfflineCollectionViewCell.self)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
-        collectionView.register(cellView: UploadsInProgressCollectionViewCell.self)
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.register(cellView: HomeEmptyFilesCollectionViewCell.self)
         collectionView.register(cellView: FileHomeCollectionViewCell.self)
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
+        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
 
         recentFilesController = HomeLastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
         collectionView.collectionViewLayout = createLayout()
@@ -212,7 +212,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
             guard let self = self else { return }
             if let index = self.viewModel.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
-               let cell = self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? UploadsInProgressCollectionViewCell,
+               let cell = (self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? WrapperCollectionViewCell)?.subviews.first as? UploadsInProgressTableViewCell,
                self.uploadCountManager.uploadCount > 0 {
                 // Update cell
                 cell.setUploadCount(self.uploadCountManager.uploadCount)
@@ -401,10 +401,11 @@ extension HomeViewController {
                 }
                 return cell
             case .uploadsInProgress:
-                let cell = collectionView.dequeueReusableCell(type: UploadsInProgressCollectionViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                cell.progressView.enableIndeterminate()
-                cell.setUploadCount(uploadCountManager.uploadCount)
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+                let tableCell = cell.initWith(cell: UploadsInProgressTableViewCell.self)
+                tableCell.initWithPositionAndShadow(isFirst: true, isLast: true)
+                tableCell.progressView.enableIndeterminate()
+                tableCell.setUploadCount(uploadCountManager.uploadCount)
                 return cell
             case .recentFilesSelector:
                 let cell = collectionView.dequeueReusableCell(type: HomeRecentFilesSelectorCollectionViewCell.self, for: indexPath)

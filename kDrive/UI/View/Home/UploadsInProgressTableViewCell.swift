@@ -20,7 +20,7 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class UploadsInProgressCollectionViewCell: InsetCollectionViewCell {
+class UploadsInProgressTableViewCell: InsetTableViewCell {
     @IBOutlet weak var progressView: RPCircularProgress!
     @IBOutlet weak var subtitleLabel: IKLabel!
 
