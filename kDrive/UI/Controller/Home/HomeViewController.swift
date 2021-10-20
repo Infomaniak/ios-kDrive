@@ -21,10 +21,8 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable {
-    @IBOutlet var collectionView: UICollectionView!
-
-    static let loadingCellCount = 10
+class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable {
+    static let loadingCellCount = 12
 
     struct HomeViewModel {
         let topRows: [HomeTopRow]
@@ -353,8 +351,8 @@ class HomeViewController: UIViewController, SwitchDriveDelegate, SwitchAccountDe
 
 // MARK: - UICollectionViewDataSource
 
-extension HomeViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+extension HomeViewController {
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch HomeSection.allCases[section] {
         case .top:
             return viewModel.topRows.count
@@ -369,11 +367,11 @@ extension HomeViewController: UICollectionViewDataSource {
         }
     }
 
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return HomeSection.allCases.count
     }
 
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
             switch viewModel.topRows[indexPath.row] {
@@ -470,7 +468,7 @@ extension HomeViewController: UICollectionViewDataSource {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
@@ -502,12 +500,12 @@ extension HomeViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegate
 
-extension HomeViewController: UICollectionViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+extension HomeViewController {
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         updateNavbarAppearance()
     }
 
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch HomeSection.allCases[indexPath.section] {
         case .top:
             switch viewModel.topRows[indexPath.row] {
@@ -526,7 +524,7 @@ extension HomeViewController: UICollectionViewDelegate {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if HomeSection.allCases[indexPath.section] == .recentFiles {
             if indexPath.row >= viewModel.recentFiles.count - 10 && !recentFilesController.loading && recentFilesController.moreComing {
                 reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,

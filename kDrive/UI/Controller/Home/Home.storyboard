@@ -10,43 +10,33 @@
     </dependencies>
     <scenes>
         <!--Home View Controller-->
-        <scene sceneID="6r9-KD-KHC">
+        <scene sceneID="4HF-8c-2k6">
             <objects>
-                <viewController id="m9V-uO-eWP" customClass="HomeViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Des-JG-TKw">
+                <collectionViewController storyboardIdentifier="HomeViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="RSY-8S-k6V" customClass="HomeViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="nFG-fh-ZM9">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Fzu-WB-v1W">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="CaA-h9-jne">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                            </collectionView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="hy0-GM-aa2"/>
                         <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstAttribute="bottom" secondItem="Fzu-WB-v1W" secondAttribute="bottom" id="3Zb-Ug-rht"/>
-                            <constraint firstItem="Fzu-WB-v1W" firstAttribute="top" secondItem="Des-JG-TKw" secondAttribute="top" id="Now-3a-dSx"/>
-                            <constraint firstItem="Fzu-WB-v1W" firstAttribute="trailing" secondItem="Des-JG-TKw" secondAttribute="trailing" id="fKm-Bq-V7p"/>
-                            <constraint firstItem="Fzu-WB-v1W" firstAttribute="leading" secondItem="Des-JG-TKw" secondAttribute="leading" id="rSY-9z-4M6"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" id="nIe-KJ-HML"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="8MB-7O-q5N">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="RSY-8S-k6V" id="7mN-mA-C04"/>
+                            <outlet property="delegate" destination="RSY-8S-k6V" id="kvv-sl-mlK"/>
+                        </connections>
+                    </collectionView>
+                    <navigationItem key="navigationItem" id="dK0-aK-Jff"/>
                     <connections>
-                        <outlet property="collectionView" destination="Fzu-WB-v1W" id="kzr-X2-Y18"/>
-                        <segue destination="Gku-Kw-V1T" kind="presentation" identifier="switchDriveSegue" modalPresentationStyle="overFullScreen" modalTransitionStyle="crossDissolve" id="MNu-4a-wzw"/>
+                        <segue destination="Gku-Kw-V1T" kind="presentation" identifier="switchDriveSegue" modalPresentationStyle="overFullScreen" modalTransitionStyle="crossDissolve" id="2Uj-OV-9sy"/>
                     </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="TIR-lh-A4M" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="kfB-Zk-yJq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1275" y="-484"/>
+            <point key="canvasLocation" x="1190" y="-484"/>
         </scene>
         <!--Switch Drive View Controller-->
         <scene sceneID="HuN-o7-mu7">
@@ -119,7 +109,7 @@
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
-                        <segue destination="m9V-uO-eWP" kind="relationship" relationship="rootViewController" id="WRA-Qy-oGE"/>
+                        <segue destination="RSY-8S-k6V" kind="relationship" relationship="rootViewController" id="FBE-cB-ZdQ"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rQs-Ax-FUt" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
