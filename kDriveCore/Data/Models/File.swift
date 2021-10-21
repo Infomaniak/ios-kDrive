@@ -441,7 +441,7 @@ public class File: Object, Codable {
         rawVisibility = (try values.decodeIfPresent(String.self, forKey: .rawVisibility)) ?? ""
         onlyOffice = try values.decodeIfPresent(Bool.self, forKey: .onlyOffice) ?? false
         onlyOfficeConvertExtension = try values.decodeIfPresent(String.self, forKey: .onlyOfficeConvertExtension)
-        categories = try values.decode(List<FileCategory>.self, forKey: .categories)
+        categories = try values.decodeIfPresent(List<FileCategory>.self, forKey: .categories) ?? List<FileCategory>()
         children = try values.decodeIfPresent(List<File>.self, forKey: .children) ?? List<File>()
 
         // extras
