@@ -525,22 +525,30 @@ public class DriveApiFetcher: ApiFetcher {
 
     @discardableResult
     public func searchFiles(driveId: Int, query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) -> DataRequest {
-        var url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
-        if let query = query {
-            url += "&query=\(query)"
+        let url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
+        var queryItems = [URLQueryItem]()
+        if let query = query, !query.isBlank {
+            queryItems.append(URLQueryItem(name: "query", value: query))
         }
         if let date = date {
-            url += "&modified_at=custom&from=\(Int(date.start.timeIntervalSince1970))&until=\(Int(date.end.timeIntervalSince1970))"
+            queryItems += [
+                URLQueryItem(name: "modified_at", value: "custom"),
+                URLQueryItem(name: "from", value: "\(Int(date.start.timeIntervalSince1970))"),
+                URLQueryItem(name: "until", value: "\(Int(date.end.timeIntervalSince1970))")
+            ]
         }
         if let fileType = fileType {
-            url += "&converted_type=\(fileType)"
+            queryItems.append(URLQueryItem(name: "converted_type", value: fileType))
         }
         if !categories.isEmpty {
             let separator = belongToAllCategories ? "&" : "|"
-            url += "&category=" + categories.map { "\($0.id)" }.joined(separator: separator)
+            queryItems.append(URLQueryItem(name: "category", value: categories.map { "\($0.id)" }.joined(separator: separator)))
         }
-        if let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            url = encodedUrl
+
+        var urlComponents = URLComponents(string: url)
+        urlComponents?.queryItems?.append(contentsOf: queryItems)
+        guard let url = urlComponents?.url else {
+            fatalError("Search URL invalid")
         }
 
         return makeRequest(url, method: .get, completion: completion)

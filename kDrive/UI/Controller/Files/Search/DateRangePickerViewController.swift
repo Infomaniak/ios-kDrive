@@ -29,7 +29,8 @@ extension Day {
 extension DayRange {
     var dateInterval: DateInterval? {
         if let startDate = lowerBound.date,
-           let endDate = upperBound.date {
+           let upperDate = upperBound.date,
+           let endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: upperDate) {
             return DateInterval(start: startDate, end: endDate)
         }
         return nil
@@ -156,8 +157,9 @@ class DateRangePickerViewController: UIViewController {
     @objc func saveButtonPressed() {
         switch calendarSelection {
         case .singleDay(let day):
-            if let date = day.date {
-                didSelectRange?(DateInterval(start: date, end: date))
+            if let startDate = day.date,
+               let endDate = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: startDate) {
+                didSelectRange?(DateInterval(start: startDate, end: endDate))
             }
             dismiss(animated: true)
         case .dayRange(let range):

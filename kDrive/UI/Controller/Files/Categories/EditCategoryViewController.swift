@@ -41,9 +41,9 @@ class EditCategoryViewController: UITableViewController {
 
     private var saveButtonEnabled: Bool {
         if let category = category {
-            return category.isPredefined || !category.name.trimmingCharacters(in: .whitespaces).isEmpty
+            return category.isPredefined || !category.name.isBlank
         } else {
-            return !name.trimmingCharacters(in: .whitespaces).isEmpty
+            return !name.isBlank
         }
     }
 
