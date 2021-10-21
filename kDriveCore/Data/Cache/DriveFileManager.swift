@@ -141,7 +141,7 @@ public class DriveFileManager {
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
             deleteRealmIfMigrationNeeded: true,
-            objectTypes: [File.self, Rights.self, FileActivity.self, Category.self])
+            objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self])
 
         // Only compact in the background
         if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
@@ -844,15 +844,14 @@ public class DriveFileManager {
     }
 
     public func addCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
-        apiFetcher.addCategory(file: file, category: category) { [fileId = file.id] response, error in
+        apiFetcher.addCategory(file: file, category: category) { [fileId = file.id, categoryId = category.id] response, error in
             if response?.data == nil {
                 completion(response?.error ?? error ?? DriveError.unknownError)
             } else {
                 let realm = self.getRealm()
                 if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
                     try? realm.write {
-                        let newCategory = Category(value: category)
-                        realm.add(newCategory, update: .modified)
+                        let newCategory = FileCategory(id: categoryId, userId: self.drive.userId)
                         file.categories.append(newCategory)
                     }
                     self.notifyObserversWith(file: file)
@@ -863,13 +862,13 @@ public class DriveFileManager {
     }
 
     public func removeCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
-        apiFetcher.removeCategory(file: file, category: category) { [fileId = file.id] response, error in
+        apiFetcher.removeCategory(file: file, category: category) { [fileId = file.id, categoryId = category.id] response, error in
             if response?.data == nil {
                 completion(error ?? DriveError.unknownError)
             } else {
                 let realm = self.getRealm()
                 if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
-                    if let index = file.categories.firstIndex(where: { $0.id == category.id }) {
+                    if let index = file.categories.firstIndex(where: { $0.id == categoryId }) {
                         try? realm.write {
                             file.categories.remove(at: index)
                         }
@@ -884,6 +883,7 @@ public class DriveFileManager {
     public func createCategory(name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
         apiFetcher.createCategory(driveId: drive.id, name: name, color: color) { response, error in
             if let category = response?.data {
+                category.driveId = self.drive.id
                 // Add category to drive
                 let realm = DriveInfosManager.instance.getRealm()
                 let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
@@ -903,6 +903,7 @@ public class DriveFileManager {
     public func editCategory(id: Int, name: String?, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
         apiFetcher.editCategory(driveId: drive.id, id: id, name: name, color: color) { response, error in
             if let category = response?.data {
+                category.driveId = self.drive.id
                 // Update category
                 let realm = DriveInfosManager.instance.getRealm()
                 try? realm.write {
@@ -939,10 +940,9 @@ public class DriveFileManager {
                 }
                 // Delete category from files
                 let realm = self.getRealm()
-                if let category = realm.object(ofType: Category.self, forPrimaryKey: id) {
-                    try? realm.write {
-                        realm.delete(category)
-                    }
+                let categories = realm.objects(FileCategory.self).filter("id = %d", id)
+                try? realm.write {
+                    realm.delete(categories)
                 }
                 completion(nil)
             }

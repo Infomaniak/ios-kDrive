@@ -21,15 +21,19 @@ import RealmSwift
 import UIKit
 
 public class Category: Object, Codable {
-    @Persisted(primaryKey: true) public var id: Int
+    @Persisted(primaryKey: true) public var objectId: String = ""
+    @Persisted public var id: Int
     @Persisted public var name: String
     @Persisted public var isPredefined: Bool
     @Persisted public var colorHex: String
     @Persisted public var createdBy: Int
     @Persisted public var createdAt: Date
-    public var isGeneratedByIA: Bool?
-    public var IACategoryUserValidation: String?
-    public var userId: Int?
+    @Persisted public var driveId: Int = 0 {
+        didSet {
+            objectId = "\(driveId)_\(id)"
+        }
+    }
+
     public var isSelected = false
 
     public var color: UIColor? {
@@ -51,9 +55,6 @@ public class Category: Object, Codable {
         case colorHex = "color"
         case createdBy = "created_by"
         case createdAt = "created_at"
-        case isGeneratedByIA = "is_generated_by_ia"
-        case IACategoryUserValidation = "ia_category_user_validation"
-        case userId = "user_id"
     }
 }
 

@@ -101,11 +101,18 @@ class ManageCategoriesViewController: UITableViewController {
     func reloadCategories() {
         categories = Array(driveFileManager.drive.categories)
         // Select categories
-        let selectedCategories: [kDriveCore.Category]
         if let file = file {
-            selectedCategories = Array(file.categories)
+            for category in file.categories {
+                if let category = categories.first(where: { $0.id == category.id }) {
+                    category.isSelected = true
+                }
+            }
         } else {
-            selectedCategories = self.selectedCategories
+            for category in selectedCategories {
+                if let category = categories.first(where: { $0.id == category.id }) {
+                    category.isSelected = true
+                }
+            }
         }
         for category in selectedCategories {
             if let category = categories.first(where: { $0.id == category.id }) {

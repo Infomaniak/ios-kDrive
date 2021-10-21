@@ -187,7 +187,7 @@ public class File: Object, Codable {
     @Persisted public var name: String = ""
     @Persisted public var nameNaturalSorting: String = ""
     @Persisted(originProperty: "children") private var parentLink: LinkingObjects<File>
-    @Persisted public var categories: List<Category>
+    @Persisted public var categories: List<FileCategory>
     @Persisted public var children: List<File>
     @Persisted public var canUseTag = false
     @Persisted public var createdBy: Int = 0
@@ -441,7 +441,7 @@ public class File: Object, Codable {
         rawVisibility = (try values.decodeIfPresent(String.self, forKey: .rawVisibility)) ?? ""
         onlyOffice = try values.decodeIfPresent(Bool.self, forKey: .onlyOffice) ?? false
         onlyOfficeConvertExtension = try values.decodeIfPresent(String.self, forKey: .onlyOfficeConvertExtension)
-        categories = try values.decodeIfPresent(List<Category>.self, forKey: .categories) ?? List<Category>()
+        categories = try values.decode(List<FileCategory>.self, forKey: .categories)
         children = try values.decodeIfPresent(List<File>.self, forKey: .children) ?? List<File>()
 
         // extras

@@ -470,7 +470,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
                     cell.selectionStyle = driveFileManager.drive.categoryRights.canPutCategoryOnFile ? .default : .none
                     cell.initWithoutInsets()
-                    cell.configure(with: Array(file.categories))
+                    let categories = driveFileManager.drive.categories.filter(NSPredicate(format: "id IN %@", file.categories.map(\.id)))
+                    cell.configure(with: Array(categories))
                     return cell
                 case .owner:
                     let cell = tableView.dequeueReusableCell(type: FileInformationOwnerTableViewCell.self, for: indexPath)

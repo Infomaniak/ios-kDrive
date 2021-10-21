@@ -53,6 +53,7 @@ public class DriveInfosManager {
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
         drive.userId = userId
+        drive.categories.forEach { $0.driveId = drive.id }
         drive.sharedWithMe = sharedWithMe
     }
 
