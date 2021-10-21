@@ -26,6 +26,6 @@ class CategoryCollectionViewCell: UICollectionViewCell {
     func configure(with category: kDriveCore.Category) {
         chipView.backgroundColor = category.color
         categoryLabel.text = category.localizedName
-        chipView.cornerRadius = chipView.bounds.height / 2
+        chipView.cornerRadius = min(chipView.bounds.height, chipView.bounds.width) / 2
     }
 }

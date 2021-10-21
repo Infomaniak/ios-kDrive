@@ -25,14 +25,7 @@ class EditCategoryViewController: UITableViewController {
     var category: kDriveCore.Category?
     /// The file to add the category to after creating it.
     var fileToAdd: File?
-    var name = "" {
-        didSet {
-            guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
-                return
-            }
-            footer.footerButton.isEnabled = saveButtonEnabled
-        }
-    }
+    var name = ""
 
     var color = "#1abc9c"
 
@@ -47,8 +40,8 @@ class EditCategoryViewController: UITableViewController {
     }
 
     private var saveButtonEnabled: Bool {
-        if !create && category?.isPredefined == true {
-            return true
+        if let category = category {
+            return category.isPredefined || !category.name.trimmingCharacters(in: .whitespaces).isEmpty
         } else {
             return !name.trimmingCharacters(in: .whitespaces).isEmpty
         }
@@ -110,6 +103,11 @@ class EditCategoryViewController: UITableViewController {
                     } else {
                         self.category?.name = text
                     }
+                    // Update save button
+                    guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
+                        return
+                    }
+                    footer.footerButton.isEnabled = saveButtonEnabled
                 }
             }
             cell.textField.becomeFirstResponder()
@@ -121,6 +119,10 @@ class EditCategoryViewController: UITableViewController {
             cell.layoutIfNeeded()
             return cell
         }
+    }
+
+    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return UITableView.automaticDimension
     }
 
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {

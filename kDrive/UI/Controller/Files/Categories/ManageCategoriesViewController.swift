@@ -112,6 +112,13 @@ class ManageCategoriesViewController: UITableViewController {
                 category.isSelected = true
             }
         }
+        categories.sort {
+            if $0.isSelected == $1.isSelected {
+                return $0.localizedName.compare($1.localizedName, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedAscending
+            } else {
+                return $0.isSelected
+            }
+        }
         if searchController.isActive {
             updateSearchResults(for: searchController)
         } else {
