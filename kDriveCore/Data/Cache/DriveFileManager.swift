@@ -908,6 +908,10 @@ public class DriveFileManager {
                 try? realm.write {
                     realm.add(category, update: .modified)
                 }
+                // Update drive
+                if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, using: realm) {
+                    self.drive = drive
+                }
                 completion(.success(category))
             } else {
                 completion(.failure(error ?? DriveError.unknownError))
@@ -921,17 +925,24 @@ public class DriveFileManager {
                 completion(error ?? DriveError.unknownError)
             } else {
                 // Delete category from drive
-                let realm = DriveInfosManager.instance.getRealm()
-                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
-                try? realm.write {
+                let realmDrive = DriveInfosManager.instance.getRealm()
+                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realmDrive)
+                try? realmDrive.write {
                     if let drive = drive, let index = drive.categories.firstIndex(where: { $0.id == id }) {
                         let category = drive.categories[index]
                         drive.categories.remove(at: index)
-                        realm.delete(category)
+                        realmDrive.delete(category)
                     }
                 }
                 if let drive = drive {
                     self.drive = drive.freeze()
+                }
+                // Delete category from files
+                let realm = self.getRealm()
+                if let category = realm.object(ofType: Category.self, forPrimaryKey: id) {
+                    try? realm.write {
+                        realm.delete(category)
+                    }
                 }
                 completion(nil)
             }

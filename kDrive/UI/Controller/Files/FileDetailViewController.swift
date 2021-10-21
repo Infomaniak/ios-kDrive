@@ -124,6 +124,11 @@ class FileDetailViewController: UIViewController {
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
+        // Reload file information
+        if !initialLoading {
+            loadFileInformation()
+        }
+        initialLoading = false
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -172,6 +177,23 @@ class FileDetailViewController: UIViewController {
         fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile, categoryRights: driveFileManager.drive.categoryRights)
 
         // Load file informations
+        loadFileInformation()
+
+        // Observe file changes
+        driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
+            DispatchQueue.main.async { [weak self] in
+                self?.file = newFile
+                self?.reloadTableView()
+            }
+        }
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        tableView.contentInset.bottom = tableView.safeAreaInsets.bottom
+    }
+
+    private func loadFileInformation() {
         let group = DispatchGroup()
         group.enter()
         driveFileManager.getFile(id: file.id, withExtras: true) { file, _, _ in
@@ -188,38 +210,8 @@ class FileDetailViewController: UIViewController {
         group.notify(queue: .main) {
             guard self.file != nil else { return }
             self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
-            if self.currentTab == .informations {
-                self.reloadTableView()
-            }
+            self.reloadTableView()
         }
-
-        // Observe file changes
-        driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
-            DispatchQueue.main.async { [weak self] in
-                self?.file = newFile
-                self?.reloadTableView()
-            }
-        }
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        tableView.contentInset.bottom = tableView.safeAreaInsets.bottom
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if !initialLoading {
-            driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
-                if let data = response?.data {
-                    self.sharedFile = data
-                    if self.currentTab == .informations {
-                        self.reloadTableView()
-                    }
-                }
-            }
-        }
-        initialLoading = false
     }
 
     private func reloadTableView(animation: UITableView.RowAnimation = .none) {
