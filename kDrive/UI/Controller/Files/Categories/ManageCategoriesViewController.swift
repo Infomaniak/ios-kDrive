@@ -86,6 +86,23 @@ class ManageCategoriesViewController: UITableViewController {
         }
 
         definesPresentationContext = true
+
+        if let file = file {
+            // Observe file changes
+            driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
+                DispatchQueue.main.async { [weak self] in
+                    guard !newFile.isInvalidated else {
+                        if self?.presentingViewController != nil && viewControllersCount < 2 {
+                            self?.closeButtonPressed()
+                        } else {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                        return
+                    }
+                    self?.file = newFile
+                }
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
