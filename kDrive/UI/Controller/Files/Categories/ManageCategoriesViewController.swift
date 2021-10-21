@@ -116,7 +116,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     func reloadCategories() {
-        categories = Array(driveFileManager.drive.categories)
+        categories = Array(driveFileManager.drive.categories.sorted(by: \.userUsageCount, ascending: false))
         // Select categories
         if let file = file {
             for category in file.categories {
@@ -134,13 +134,6 @@ class ManageCategoriesViewController: UITableViewController {
         for category in selectedCategories {
             if let category = categories.first(where: { $0.id == category.id }) {
                 category.isSelected = true
-            }
-        }
-        categories.sort {
-            if $0.isSelected == $1.isSelected {
-                return $0.localizedName.compare($1.localizedName, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedAscending
-            } else {
-                return $0.isSelected
             }
         }
         if searchController.isActive {
