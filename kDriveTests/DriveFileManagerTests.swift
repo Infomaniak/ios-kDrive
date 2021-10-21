@@ -17,16 +17,15 @@
  */
 
 import Foundation
-import XCTest
-import InfomaniakLogin
 import InfomaniakCore
+import InfomaniakLogin
 import kDriveCore
 import RealmSwift
+import XCTest
 
 @testable import kDrive
 
 final class DriveFileManagerTests: XCTestCase {
-
     static let defaultTimeout = 10.0
     static var driveFileManager: DriveFileManager!
 
@@ -38,6 +37,7 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     // MARK: - Tests setup
+
     func setUpTest(testName: String, completion: @escaping (File) -> Void) {
         getRootDirectory { rootFile in
             self.createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootFile) { file in
@@ -54,6 +54,7 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     // MARK: - Helping methods
+
     func getRootDirectory(completion: @escaping (File) -> Void) {
         DriveFileManagerTests.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
             XCTAssertNotNil(file, "Failed to get root directory")
@@ -77,7 +78,7 @@ final class DriveFileManagerTests: XCTestCase {
         }
     }
 
-// MARK: - Test methods
+    // MARK: - Test methods
 
     func testGetRootFile() {
         let testName = "Get root file"
@@ -134,7 +135,7 @@ final class DriveFileManagerTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, officeFile in
             rootFile = root
-            DriveFileManagerTests.driveFileManager.searchFile(query: officeFile.name, fileType: nil, page: 1, sortType: .nameAZ) { root, fileList, _ in
+            DriveFileManagerTests.driveFileManager.searchFile(query: officeFile.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ) { root, fileList, _ in
                 XCTAssertNotNil(root, "Root shouldn't be nil")
                 XCTAssertNotNil(fileList, "Files list shouldn't be nil")
                 let searchedFile = fileList!.contains { $0.id == officeFile.id }
@@ -321,11 +322,10 @@ final class DriveFileManagerTests: XCTestCase {
             let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: rootFile.id)
             XCTAssertNotNil(cached, "Cached root shouldn't be nil")
             expectation.fulfill()
-
         }
 
         wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        self.tearDownTest(directory: rootFile)
+        tearDownTest(directory: rootFile)
     }
 
     func testCreateDropBox() {
@@ -371,5 +371,4 @@ final class DriveFileManagerTests: XCTestCase {
         wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
-
 }
