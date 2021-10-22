@@ -53,6 +53,7 @@ class ManageCategoryFloatingPanelViewController: UITableViewController {
         tableView.register(cellView: CategoryFloatingPanelCollectionTableViewCell.self)
         tableView.separatorStyle = .none
         tableView.allowsSelection = false
+        tableView.alwaysBounceVertical = false
         tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
 
         setupContent()
@@ -160,6 +161,6 @@ extension ManageCategoryFloatingPanelViewController: CategoryActionDelegate {
 
 extension ManageCategoryFloatingPanelViewController: FloatingPanelControllerDelegate {
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-        return PlusButtonFloatingPanelLayout(height: min(169, UIScreen.main.bounds.size.height - 48))
+        return PlusButtonFloatingPanelLayout(height: min(170, UIScreen.main.bounds.size.height - 48))
     }
 }
