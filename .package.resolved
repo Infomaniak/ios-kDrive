@@ -74,6 +74,15 @@
         }
       },
       {
+        "package": "DTFoundation",
+        "repositoryURL": "https://github.com/Cocoanetics/DTFoundation.git",
+        "state": {
+          "branch": null,
+          "revision": "76062513434421cb6c8a1ae1d4f8368a7ebc2da3",
+          "version": "1.7.18"
+        }
+      },
+      {
         "package": "Firebase",
         "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
         "state": {
@@ -170,6 +179,15 @@
           "branch": null,
           "revision": "318e319998bf555c3e914d5c3adb6da05af86a32",
           "version": "7.1.1"
+        }
+      },
+      {
+        "package": "Kvitto",
+        "repositoryURL": "https://github.com/Cocoanetics/Kvitto",
+        "state": {
+          "branch": null,
+          "revision": "88888674d772ddcf19671159ed0022cb0bc37be2",
+          "version": "1.0.6"
         }
       },
       {

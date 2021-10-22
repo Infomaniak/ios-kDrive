@@ -17,8 +17,10 @@
  */
 
 import CocoaLumberjackSwift
+import DTFoundation
 import Foundation
 import kDriveCore
+import Kvitto
 import StoreKit
 
 protocol StoreObserverDelegate: AnyObject {
@@ -47,6 +49,15 @@ class StoreObserver: NSObject {
 
     weak var delegate: StoreObserverDelegate?
 
+    var hasInAppPurchaseReceipts: Bool {
+        if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
+           let receipt = Receipt(contentsOfURL: appStoreReceiptURL),
+           let inAppPurchaseReceipts = receipt.inAppPurchaseReceipts {
+            return !inAppPurchaseReceipts.isEmpty
+        }
+        return false
+    }
+
     // MARK: - Public methods
 
     /// Create and add a payment request to the payment queue.
@@ -65,7 +76,7 @@ class StoreObserver: NSObject {
     }
 
     /// Retrieve the receipt data from the app on the device.
-    func getReceipt() -> String? {
+    private func getReceipt() -> String? {
         // Get the receipt if it's available
         if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
            FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
