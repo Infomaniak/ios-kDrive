@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -58,7 +58,7 @@
                             <rect key="frame" x="0.0" y="0.0" width="272" height="44"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ug6-Jg-W6r" customClass="IKLabel" customModule="kDriveCore">
-                                    <rect key="frame" x="0.0" y="13.5" width="132" height="17"/>
+                                    <rect key="frame" x="0.0" y="12.5" width="132" height="19.5"/>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -124,67 +124,33 @@
                                 <outlet property="titleLabel" destination="Ug6-Jg-W6r" id="dGT-sM-YZQ"/>
                             </connections>
                         </view>
-                        <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rqf-ue-Zdn" customClass="FilterFileTypeView" customModule="kDrive" customModuleProvider="target">
+                        <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rqf-ue-Zdn" customClass="FilterView" customModule="kDrive" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="272" height="45"/>
                             <subviews>
-                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B1K-xA-pKn">
-                                    <rect key="frame" x="0.0" y="0.0" width="120" height="45"/>
-                                    <subviews>
-                                        <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="5yn-rD-wNf">
-                                            <rect key="frame" x="16" y="12.5" width="88" height="20"/>
-                                            <subviews>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file-default" translatesAutoresizingMaskIntoConstraints="NO" id="Zt8-cp-B6g">
-                                                    <rect key="frame" x="0.0" y="0.0" width="20" height="20"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" secondItem="Zt8-cp-B6g" secondAttribute="height" multiplier="1:1" id="do4-TL-8pX"/>
-                                                        <constraint firstAttribute="height" constant="20" id="iKR-Iu-iBO"/>
-                                                    </constraints>
-                                                </imageView>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dl2-72-lEj" customClass="IKLabel" customModule="kDriveCore">
-                                                    <rect key="frame" x="28" y="1.5" width="36" height="17"/>
-                                                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                                    <color key="textColor" name="titleColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                    <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
-                                                    </userDefinedRuntimeAttributes>
-                                                </label>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B0X-WW-G8f">
-                                                    <rect key="frame" x="72" y="2" width="16" height="16"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="16" id="LDf-tE-gQj"/>
-                                                        <constraint firstAttribute="width" secondItem="B0X-WW-G8f" secondAttribute="height" multiplier="1:1" id="reK-7v-Vu1"/>
-                                                    </constraints>
-                                                    <color key="tintColor" name="primaryTextColor"/>
-                                                    <state key="normal" image="remove"/>
-                                                    <connections>
-                                                        <action selector="removeFileTypeButtonPressed:" destination="rqf-ue-Zdn" eventType="touchUpInside" id="oNL-ZI-1A2"/>
-                                                    </connections>
-                                                </button>
-                                            </subviews>
-                                        </stackView>
-                                    </subviews>
-                                    <color key="backgroundColor" name="backgroundCardViewColor"/>
+                                <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="t6S-yz-hdt">
+                                    <rect key="frame" x="0.0" y="0.0" width="272" height="45"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
-                                        <constraint firstItem="5yn-rD-wNf" firstAttribute="centerY" secondItem="B1K-xA-pKn" secondAttribute="centerY" id="8Ib-Ed-udR"/>
-                                        <constraint firstAttribute="height" constant="45" id="9Zz-LA-jVT"/>
-                                        <constraint firstItem="5yn-rD-wNf" firstAttribute="leading" secondItem="B1K-xA-pKn" secondAttribute="leading" constant="16" id="MtC-kM-WTK"/>
-                                        <constraint firstAttribute="trailing" secondItem="5yn-rD-wNf" secondAttribute="trailing" constant="16" id="enQ-KR-wuT"/>
+                                        <constraint firstAttribute="height" constant="45" id="LKN-L0-YL5"/>
                                     </constraints>
-                                </view>
+                                    <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="3LO-N5-djm">
+                                        <size key="itemSize" width="128" height="45"/>
+                                        <size key="estimatedItemSize" width="128" height="45"/>
+                                        <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                        <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                        <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                    </collectionViewFlowLayout>
+                                </collectionView>
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
-                                <constraint firstItem="B1K-xA-pKn" firstAttribute="top" secondItem="rqf-ue-Zdn" secondAttribute="top" id="2se-tu-1Hg"/>
-                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="B1K-xA-pKn" secondAttribute="trailing" id="Ok9-r9-hiV"/>
-                                <constraint firstItem="B1K-xA-pKn" firstAttribute="leading" secondItem="rqf-ue-Zdn" secondAttribute="leading" id="oqg-bY-dLc"/>
-                                <constraint firstAttribute="bottom" secondItem="B1K-xA-pKn" secondAttribute="bottom" id="vP4-J0-KQg"/>
+                                <constraint firstAttribute="trailing" secondItem="t6S-yz-hdt" secondAttribute="trailing" id="1yd-ZK-e7H"/>
+                                <constraint firstItem="t6S-yz-hdt" firstAttribute="leading" secondItem="rqf-ue-Zdn" secondAttribute="leading" id="9cY-tq-Iog"/>
+                                <constraint firstAttribute="bottom" secondItem="t6S-yz-hdt" secondAttribute="bottom" id="h0y-nu-DsE"/>
+                                <constraint firstItem="t6S-yz-hdt" firstAttribute="top" secondItem="rqf-ue-Zdn" secondAttribute="top" id="sgn-OX-ILp"/>
                             </constraints>
                             <connections>
-                                <outlet property="contentView" destination="B1K-xA-pKn" id="dnl-9b-FhB"/>
-                                <outlet property="fileTypeIconImageView" destination="Zt8-cp-B6g" id="bUl-YD-VXB"/>
-                                <outlet property="fileTypeLabel" destination="dl2-72-lEj" id="M6v-m6-ulH"/>
-                                <outlet property="fileTypeRemoveButton" destination="B0X-WW-G8f" id="I0R-9K-jbE"/>
+                                <outlet property="collectionView" destination="t6S-yz-hdt" id="WFa-Vt-Vqo"/>
                             </connections>
                         </view>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bvI-A7-USF" customClass="UploadCardView" customModule="kDrive" customModuleProvider="target">
@@ -357,7 +323,7 @@
                 <outlet property="activityLabel" destination="ATr-sQ-1YC" id="PbY-91-QQR"/>
                 <outlet property="activityListView" destination="ZS5-h5-V8H" id="ch7-Cz-4uR"/>
                 <outlet property="deleteButton" destination="mSq-v0-iqP" id="Esh-LL-vK2"/>
-                <outlet property="fileTypeFilterView" destination="rqf-ue-Zdn" id="M0R-8D-yWt"/>
+                <outlet property="filterView" destination="rqf-ue-Zdn" id="Cho-G7-C6L"/>
                 <outlet property="listOrGridButton" destination="Mhu-wK-ohw" id="sjM-LQ-jwD"/>
                 <outlet property="moveButton" destination="VbJ-2M-JT8" id="F85-cd-yvl"/>
                 <outlet property="offlineView" destination="ycy-fJ-CPK" id="Xt5-lX-ucd"/>
@@ -377,16 +343,13 @@
             <size key="intrinsicContentSize" width="31" height="14.5"/>
         </designable>
         <designable name="Ug6-Jg-W6r">
-            <size key="intrinsicContentSize" width="104.5" height="17"/>
+            <size key="intrinsicContentSize" width="123" height="19.5"/>
         </designable>
         <designable name="YIY-ah-68A">
             <size key="intrinsicContentSize" width="36" height="17"/>
         </designable>
         <designable name="bAx-uw-yHB">
             <size key="intrinsicContentSize" width="51" height="24"/>
-        </designable>
-        <designable name="dl2-72-lEj">
-            <size key="intrinsicContentSize" width="36" height="17"/>
         </designable>
         <designable name="uYH-Mq-qZt">
             <size key="intrinsicContentSize" width="31" height="14.5"/>
@@ -396,13 +359,11 @@
         <image name="chevron-down" width="24" height="24"/>
         <image name="chevron-right" width="24" height="24"/>
         <image name="delete" width="24" height="24"/>
-        <image name="file-default" width="24" height="24"/>
         <image name="folder-select" width="24" height="24"/>
         <image name="list" width="24" height="24"/>
         <image name="menu" width="24" height="24"/>
         <image name="offline" width="24" height="24"/>
         <image name="placeholder_avatar" width="512" height="512"/>
-        <image name="remove" width="24" height="24"/>
         <namedColor name="actionColor">
             <color red="0.33333333333333331" green="0.40392156862745099" blue="0.44705882352941179" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

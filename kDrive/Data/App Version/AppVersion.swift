@@ -1,20 +1,20 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 
@@ -23,7 +23,6 @@ struct Response: Codable {
 }
 
 struct AppVersion: Codable {
-
     var version: String?
     var currentVersionReleaseDate: String?
 
@@ -33,7 +32,6 @@ struct AppVersion: Codable {
     }
 
     func loadVersionData(handler: @escaping (_ resultList: AppVersion) -> Void) {
-
         guard let url = URL(string: "https://itunes.apple.com/lookup?bundleId=com.infomaniak.drive") else {
             return
         }
@@ -58,9 +56,8 @@ struct AppVersion: Codable {
     }
 
     func showUpdateFloatingPanel() -> Bool {
-
         // Check and store the current App Store version.
-        guard let currentAppStoreVersion = self.version else {
+        guard let currentAppStoreVersion = version else {
             return false
         }
         // Check if the App Store version is newer than the currently installed version.
@@ -76,11 +73,17 @@ struct AppVersion: Codable {
         }
 
         // Check if application has been released for 1 day.
-        guard daysSinceRelease >= 1 else {
-            return false
-        }
-
-        return true
+        return daysSinceRelease >= 1
     }
 
+    static func showUpdateFloatingPanel() -> Bool {
+        var showUpdateFloatingPanel = false
+        let group = DispatchGroup()
+        group.enter()
+        AppVersion().loadVersionData { appVersion in
+            showUpdateFloatingPanel = appVersion.showUpdateFloatingPanel()
+            group.leave()
+        }
+        return showUpdateFloatingPanel
+    }
 }

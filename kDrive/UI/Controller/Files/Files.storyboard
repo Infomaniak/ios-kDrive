@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19158" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IDg-cP-myB">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -185,6 +185,7 @@
                         <outlet property="commentButton" destination="6yn-n6-xrf" id="4uL-vA-EZG"/>
                         <outlet property="tableView" destination="PDX-En-MzT" id="u7I-AL-gy8"/>
                         <segue destination="c84-xf-u0q" kind="show" identifier="toShareLinkSettingsSegue" id="Wg0-JF-5ui"/>
+                        <segue destination="1T1-ZU-t6a" kind="show" identifier="toManageCategoriesSegue" id="0Ck-kY-Sh4"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ce5-at-xMr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -223,6 +224,75 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NB5-vl-xdU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1734" y="865"/>
+        </scene>
+        <!--Gérer les catégories-->
+        <scene sceneID="zJK-Lt-WLk">
+            <objects>
+                <tableViewController storyboardIdentifier="ManageCategoriesViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="1T1-ZU-t6a" customClass="ManageCategoriesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" allowsMultipleSelection="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" id="zar-Ox-jwP">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="gEL-IS-CiQ">
+                                <rect key="frame" x="0.0" y="49" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="gEL-IS-CiQ" id="8gr-7c-4Ed">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="1T1-ZU-t6a" id="OBZ-fI-eyb"/>
+                            <outlet property="delegate" destination="1T1-ZU-t6a" id="2Vz-ji-gUv"/>
+                        </connections>
+                    </tableView>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="Gérer les catégories" largeTitleDisplayMode="never" id="QCT-zO-BPw">
+                        <barButtonItem key="backBarButtonItem" title=" " id="ykU-tK-MNV"/>
+                        <barButtonItem key="rightBarButtonItem" image="add" style="plain" id="X6o-db-xKo">
+                            <connections>
+                                <segue destination="PRb-bx-VPS" kind="show" identifier="createCategory" id="fVU-FL-9Kf"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hbD-Yv-NP4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3546" y="865"/>
+        </scene>
+        <!--Créer une catégorie-->
+        <scene sceneID="Rph-IY-9AO">
+            <objects>
+                <tableViewController storyboardIdentifier="EditCategoryViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="PRb-bx-VPS" customClass="EditCategoryViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" id="c1A-G2-eFE">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="LCx-b3-L86">
+                                <rect key="frame" x="0.0" y="49" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="LCx-b3-L86" id="7My-Yq-FyC">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="PRb-bx-VPS" id="yau-oI-HmZ"/>
+                            <outlet property="delegate" destination="PRb-bx-VPS" id="GEO-vt-H2h"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Créer une catégorie" id="DGU-n7-MDg">
+                        <barButtonItem key="backBarButtonItem" title=" " id="5Xn-go-63g"/>
+                    </navigationItem>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dvR-Wy-EhA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4492" y="865"/>
         </scene>
         <!--File Detail Comment Popover-->
         <scene sceneID="qH8-Qv-hvL">
@@ -590,16 +660,17 @@
     </scenes>
     <designables>
         <designable name="6yn-n6-xrf">
-            <size key="intrinsicContentSize" width="198" height="34"/>
+            <size key="intrinsicContentSize" width="152" height="32"/>
         </designable>
         <designable name="OiI-t5-4G2">
-            <size key="intrinsicContentSize" width="60" height="34"/>
+            <size key="intrinsicContentSize" width="92" height="32"/>
         </designable>
         <designable name="qGi-Yx-e8m">
-            <size key="intrinsicContentSize" width="60" height="34"/>
+            <size key="intrinsicContentSize" width="92" height="32"/>
         </designable>
     </designables>
     <resources>
+        <image name="add" width="24" height="24"/>
         <image name="close" width="24" height="24"/>
         <image name="folder" width="24" height="24"/>
         <image name="folder-fill" width="24" height="24"/>

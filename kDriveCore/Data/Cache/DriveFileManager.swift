@@ -140,7 +140,7 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            schemaVersion: 1,
+            schemaVersion: 2,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < 1 {
                     // Migration to version 1: migrating rights
@@ -163,7 +163,7 @@ public class DriveFileManager {
                     }
                 }
             },
-            objectTypes: [File.self, Rights.self, FileActivity.self])
+            objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self])
 
         // Only compact in the background
         if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
@@ -191,7 +191,7 @@ public class DriveFileManager {
         let config = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent("/DrivesInfos.realm"),
             shouldCompactOnLaunch: compactingCondition,
-            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self])
+            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self, Category.self, CategoryRights.self])
         do {
             _ = try Realm(configuration: config)
         } catch {
@@ -268,9 +268,9 @@ public class DriveFileManager {
                                 file.responseAt = response?.responseAt ?? 0
 
                                 let localRealm = getRealm()
-                                keepCacheAttributesForFile(newFile: file, keepStandard: false, keepExtras: true, keepRights: false, using: localRealm)
+                                keepCacheAttributesForFile(newFile: file, keepStandard: false, keepExtras: true, keepRights: false, keepCategories: false, using: localRealm)
                                 for child in file.children {
-                                    keepCacheAttributesForFile(newFile: child, keepStandard: true, keepExtras: true, keepRights: false, using: localRealm)
+                                    keepCacheAttributesForFile(newFile: child, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: false, using: localRealm)
                                 }
 
                                 if file.children.count < DriveApiFetcher.itemPerPage {
@@ -309,7 +309,7 @@ public class DriveFileManager {
             } else {
                 apiFetcher.getFileDetail(driveId: drive.id, fileId: id) { [self] response, error in
                     if let file = response?.data {
-                        keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: false, keepRights: false, using: realm)
+                        keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: false, keepRights: false, keepCategories: false, using: realm)
 
                         try? realm.safeWrite {
                             realm.add(file, update: .modified)
@@ -336,7 +336,7 @@ public class DriveFileManager {
                     autoreleasepool {
                         let localRealm = getRealm()
                         for favorite in favorites {
-                            keepCacheAttributesForFile(newFile: favorite, keepStandard: true, keepExtras: true, keepRights: false, using: localRealm)
+                            keepCacheAttributesForFile(newFile: favorite, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: false, using: localRealm)
                         }
 
                         let favoritesRoot = DriveFileManager.favoriteRootFile
@@ -377,7 +377,7 @@ public class DriveFileManager {
                     autoreleasepool {
                         let localRealm = getRealm()
                         for sharedFile in sharedFiles {
-                            keepCacheAttributesForFile(newFile: sharedFile, keepStandard: true, keepExtras: true, keepRights: false, using: localRealm)
+                            keepCacheAttributesForFile(newFile: sharedFile, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: false, using: localRealm)
                         }
 
                         if sharedFiles.count < DriveApiFetcher.itemPerPage {
@@ -437,11 +437,11 @@ public class DriveFileManager {
     }
 
     @discardableResult
-    public func searchFile(query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) -> DataRequest? {
+    public func searchFile(query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) -> DataRequest? {
         if ReachabilityListener.instance.currentStatus == .offline {
-            searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
+            searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType, completion: completion)
         } else {
-            return apiFetcher.searchFiles(driveId: drive.id, query: query, fileType: fileType, page: page, sortType: sortType) { [self] response, error in
+            return apiFetcher.searchFiles(driveId: drive.id, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType) { [self] response, error in
                 if let files = response?.data {
                     self.backgroundQueue.async { [self] in
                         autoreleasepool {
@@ -451,7 +451,7 @@ public class DriveFileManager {
                                 searchRoot.fullyDownloaded = true
                             }
                             for file in files {
-                                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: false, using: realm)
                             }
 
                             setLocalFiles(files, root: searchRoot) {
@@ -467,7 +467,7 @@ public class DriveFileManager {
                     if error?.asAFError?.isExplicitlyCancelledError ?? false {
                         completion(nil, nil, DriveError.searchCancelled)
                     } else {
-                        searchOffline(query: query, fileType: fileType, sortType: sortType, completion: completion)
+                        searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType, completion: completion)
                     }
                 }
             }
@@ -475,11 +475,14 @@ public class DriveFileManager {
         return nil
     }
 
-    private func searchOffline(query: String? = nil, fileType: String? = nil, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
+    private func searchOffline(query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
         let realm = getRealm()
-        var searchResults = realm.objects(File.self)
+        var searchResults = realm.objects(File.self).filter("id > 0")
         if let query = query, !query.isBlank {
             searchResults = searchResults.filter(NSPredicate(format: "name CONTAINS[cd] %@", query))
+        }
+        if let date = date {
+            searchResults = searchResults.filter(NSPredicate(format: "lastModifiedAt >= %d && lastModifiedAt <= %d", Int(date.start.timeIntervalSince1970), Int(date.end.timeIntervalSince1970)))
         }
         if let fileType = fileType {
             if fileType == ConvertedType.folder.rawValue {
@@ -487,6 +490,16 @@ public class DriveFileManager {
             } else {
                 searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType))
             }
+        }
+        if !categories.isEmpty {
+            let predicate: NSPredicate
+            if belongToAllCategories {
+                let predicates = categories.map { NSPredicate(format: "ANY categories.id = %d", $0.id) }
+                predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+            } else {
+                predicate = NSPredicate(format: "ANY categories.id IN %@", categories.map(\.id))
+            }
+            searchResults = searchResults.filter(predicate)
         }
         var allFiles = [File]()
 
@@ -590,7 +603,7 @@ public class DriveFileManager {
                 let safeActivity = FileActivity(value: activity)
                 if let file = activity.file {
                     let safeFile = File(value: file)
-                    keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
+                    keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true, keepCategories: true, using: realm)
                     homeRootFile.children.append(safeFile)
                     safeActivity.file = safeFile
                     if let rights = file.rights {
@@ -613,7 +626,6 @@ public class DriveFileManager {
         backgroundQueue.async { [self] in
             let realm = getRealm()
             for file in files {
-                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
                 root.children.append(file)
                 if let rights = file.rights {
                     file.rights = Rights(value: rights)
@@ -635,7 +647,7 @@ public class DriveFileManager {
                     autoreleasepool {
                         let realm = getRealm()
                         for file in files {
-                            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: false, using: realm)
                         }
 
                         setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile) {
@@ -659,7 +671,7 @@ public class DriveFileManager {
                     autoreleasepool {
                         let realm = getRealm()
                         for file in files {
-                            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: false, using: realm)
                         }
 
                         setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile) {
@@ -770,7 +782,7 @@ public class DriveFileManager {
                        let renamedFile = activity.file {
                         try? renameCachedFile(updatedFile: renamedFile, oldFile: oldFile)
                         // If the file is a folder we have to copy the old attributes which are not returned by the API
-                        keepCacheAttributesForFile(newFile: renamedFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                        keepCacheAttributesForFile(newFile: renamedFile, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: true, using: realm)
 
                         realm.add(renamedFile, update: .modified)
                         if !file.children.contains(renamedFile) {
@@ -794,7 +806,7 @@ public class DriveFileManager {
                     }
                 case .fileMoveIn, .fileRestore, .fileCreate:
                     if let newFile = activity.file {
-                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: true, using: realm)
                         realm.add(newFile, update: .modified)
                         // If was already had a local parent, remove it
                         if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
@@ -811,7 +823,7 @@ public class DriveFileManager {
                     }
                 case .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete:
                     if let newFile = activity.file {
-                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, keepCategories: true, using: realm)
                         realm.add(newFile, update: .modified)
                         updatedFiles.append(newFile)
                         pagedActions[fileId] = .fileUpdate
@@ -850,6 +862,112 @@ public class DriveFileManager {
             result.append(files[i])
         }
         return result
+    }
+
+    public func addCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
+        apiFetcher.addCategory(file: file, category: category) { [fileId = file.id, categoryId = category.id] response, error in
+            if response?.data == nil {
+                completion(response?.error ?? error ?? DriveError.unknownError)
+            } else {
+                let realm = self.getRealm()
+                if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
+                    try? realm.write {
+                        let newCategory = FileCategory(id: categoryId, userId: self.drive.userId)
+                        file.categories.append(newCategory)
+                    }
+                    self.notifyObserversWith(file: file)
+                }
+                completion(nil)
+            }
+        }
+    }
+
+    public func removeCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
+        apiFetcher.removeCategory(file: file, category: category) { [fileId = file.id, categoryId = category.id] response, error in
+            if response?.data == nil {
+                completion(error ?? DriveError.unknownError)
+            } else {
+                let realm = self.getRealm()
+                if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
+                    if let index = file.categories.firstIndex(where: { $0.id == categoryId }) {
+                        try? realm.write {
+                            file.categories.remove(at: index)
+                        }
+                    }
+                    self.notifyObserversWith(file: file)
+                }
+                completion(nil)
+            }
+        }
+    }
+
+    public func createCategory(name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
+        apiFetcher.createCategory(driveId: drive.id, name: name, color: color) { response, error in
+            if let category = response?.data {
+                category.driveId = self.drive.id
+                // Add category to drive
+                let realm = DriveInfosManager.instance.getRealm()
+                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
+                try? realm.write {
+                    drive?.categories.append(category)
+                }
+                if let drive = drive {
+                    self.drive = drive.freeze()
+                }
+                completion(.success(category))
+            } else {
+                completion(.failure(error ?? DriveError.unknownError))
+            }
+        }
+    }
+
+    public func editCategory(id: Int, name: String?, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
+        apiFetcher.editCategory(driveId: drive.id, id: id, name: name, color: color) { response, error in
+            if let category = response?.data {
+                category.driveId = self.drive.id
+                // Update category
+                let realm = DriveInfosManager.instance.getRealm()
+                try? realm.write {
+                    realm.add(category, update: .modified)
+                }
+                // Update drive
+                if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, using: realm) {
+                    self.drive = drive
+                }
+                completion(.success(category))
+            } else {
+                completion(.failure(error ?? DriveError.unknownError))
+            }
+        }
+    }
+
+    public func deleteCategory(id: Int, completion: @escaping (Error?) -> Void) {
+        apiFetcher.deleteCategory(driveId: drive.id, id: id) { response, error in
+            if response?.data == nil {
+                completion(error ?? DriveError.unknownError)
+            } else {
+                // Delete category from drive
+                let realmDrive = DriveInfosManager.instance.getRealm()
+                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realmDrive)
+                try? realmDrive.write {
+                    if let drive = drive, let index = drive.categories.firstIndex(where: { $0.id == id }) {
+                        let category = drive.categories[index]
+                        drive.categories.remove(at: index)
+                        realmDrive.delete(category)
+                    }
+                }
+                if let drive = drive {
+                    self.drive = drive.freeze()
+                }
+                // Delete category from files
+                let realm = self.getRealm()
+                let categories = realm.objects(FileCategory.self).filter("id = %d", id)
+                try? realm.write {
+                    realm.delete(categories)
+                }
+                completion(nil)
+            }
+        }
     }
 
     public func setFavoriteFile(file: File, favorite: Bool, completion: @escaping (Error?) -> Void) {
@@ -1196,7 +1314,7 @@ public class DriveFileManager {
         }
     }
 
-    private func keepCacheAttributesForFile(newFile: File, keepStandard: Bool, keepExtras: Bool, keepRights: Bool, using realm: Realm? = nil) {
+    private func keepCacheAttributesForFile(newFile: File, keepStandard: Bool, keepExtras: Bool, keepRights: Bool, keepCategories: Bool, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
         if let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id) {
             newFile.isAvailableOffline = savedChild.isAvailableOffline
@@ -1216,6 +1334,9 @@ public class DriveFileManager {
             }
             if keepRights {
                 newFile.rights = savedChild.rights
+            }
+            if keepCategories {
+                newFile.categories = savedChild.categories
             }
         }
     }

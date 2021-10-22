@@ -24,7 +24,7 @@ import RealmSwift
 
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
-    private static let currentDbVersion: UInt64 = 3
+    private static let currentDbVersion: UInt64 = 4
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
     private var fileProviderManagers: [String: NSFileProviderManager] = [:]
@@ -35,7 +35,7 @@ public class DriveInfosManager {
             schemaVersion: DriveInfosManager.currentDbVersion,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < DriveInfosManager.currentDbVersion {
-                    // No migration needed from version 0 to version 1
+                    // No migration needed from 0 to 1 & from 2 to 3
                     if oldSchemaVersion < 2 {
                         // Remove tags
                         migration.deleteData(forType: Tag.className())
@@ -43,7 +43,7 @@ public class DriveInfosManager {
                     // No migration needed from version 2 to version 3
                 }
             },
-            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self])
+            objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self, Category.self, CategoryRights.self])
     }
 
     public func getRealm() -> Realm {
@@ -53,6 +53,7 @@ public class DriveInfosManager {
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
         drive.userId = userId
+        drive.categories.forEach { $0.driveId = drive.id }
         drive.sharedWithMe = sharedWithMe
     }
 
@@ -209,9 +210,10 @@ public class DriveInfosManager {
         return getDrive(objectId: DriveInfosManager.getObjectId(driveId: id, userId: userId), using: realm)
     }
 
-    public func getDrive(objectId: String, using realm: Realm? = nil) -> Drive? {
+    public func getDrive(objectId: String, freeze: Bool = true, using realm: Realm? = nil) -> Drive? {
         let realm = realm ?? getRealm()
-        return realm.object(ofType: Drive.self, forPrimaryKey: objectId)?.freeze()
+        let drive = realm.object(ofType: Drive.self, forPrimaryKey: objectId)
+        return freeze ? drive?.freeze() : drive
     }
 
     public func getUsers(for driveId: Int, userId: Int, using realm: Realm? = nil) -> [DriveUser] {

@@ -35,11 +35,6 @@ class BetaInviteFloatingPanelViewController: InformationFloatingPanelViewControl
         rightButton.setTitle(KDriveStrings.Localizable.buttonBetaTest, for: .normal)
     }
 
-    override func leftButtonPressed(_ sender: UIButton) {
-        super.leftButtonPressed(sender)
-        UserDefaults.shared.betaInviteDisplayed = true
-    }
-
     override class func instantiate() -> InformationFloatingPanelViewController {
         let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
         object_setClass(contentViewController, BetaInviteFloatingPanelViewController.self)

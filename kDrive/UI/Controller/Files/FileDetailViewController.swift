@@ -41,6 +41,7 @@ class FileDetailViewController: UIViewController {
     private enum FileInformationRow {
         case users
         case share
+        case categories
         case owner
         case creation
         case added
@@ -53,13 +54,16 @@ class FileDetailViewController: UIViewController {
         ///   - file: File for which to build the array
         ///   - sharedFile: Shared file related to `file`
         /// - Returns: Array of row
-        static func getRows(for file: File, sharedFile: SharedFile?) -> [FileInformationRow] {
+        static func getRows(for file: File, sharedFile: SharedFile?, categoryRights: CategoryRights) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
             if sharedFile != nil || !file.users.isEmpty {
                 rows.append(.users)
             }
             if file.rights?.share ?? false {
                 rows.append(.share)
+            }
+            if categoryRights.canReadCategoryOnFile {
+                rows.append(.categories)
             }
             rows.append(.owner)
             if file.fileCreatedAtDate != nil {
@@ -120,6 +124,11 @@ class FileDetailViewController: UIViewController {
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
+        // Reload file information
+        if !initialLoading {
+            loadFileInformation()
+        }
+        initialLoading = false
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -153,6 +162,7 @@ class FileDetailViewController: UIViewController {
         tableView.register(cellView: FileInformationOwnerTableViewCell.self)
         tableView.register(cellView: FileInformationCreationTableViewCell.self)
         tableView.register(cellView: FileInformationLocationTableViewCell.self)
+        tableView.register(cellView: ManageCategoriesTableViewCell.self)
         tableView.register(cellView: FileInformationSizeTableViewCell.self)
         tableView.register(cellView: EmptyTableViewCell.self)
         tableView.register(cellView: InfoTableViewCell.self)
@@ -161,12 +171,29 @@ class FileDetailViewController: UIViewController {
 
         guard file != nil else { return }
 
-        // Set initial rows
-        fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile)
-
         driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: AccountManager.instance.currentUserId)
 
+        // Set initial rows
+        fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile, categoryRights: driveFileManager.drive.categoryRights)
+
         // Load file informations
+        loadFileInformation()
+
+        // Observe file changes
+        driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
+            DispatchQueue.main.async { [weak self] in
+                self?.file = newFile
+                self?.reloadTableView()
+            }
+        }
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        tableView.contentInset.bottom = tableView.safeAreaInsets.bottom
+    }
+
+    private func loadFileInformation() {
         let group = DispatchGroup()
         group.enter()
         driveFileManager.getFile(id: file.id, withExtras: true) { file, _, _ in
@@ -182,31 +209,9 @@ class FileDetailViewController: UIViewController {
         }
         group.notify(queue: .main) {
             guard self.file != nil else { return }
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
-            if self.currentTab == .informations {
-                self.reloadTableView()
-            }
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
+            self.reloadTableView()
         }
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        tableView.contentInset.bottom = tableView.safeAreaInsets.bottom
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if !initialLoading {
-            driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
-                if let data = response?.data {
-                    self.sharedFile = data
-                    if self.currentTab == .informations {
-                        self.reloadTableView()
-                    }
-                }
-            }
-        }
-        initialLoading = false
     }
 
     private func reloadTableView(animation: UITableView.RowAnimation = .none) {
@@ -392,7 +397,7 @@ class FileDetailViewController: UIViewController {
         }
         driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
             self.sharedFile = response?.data
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile)
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
@@ -460,6 +465,13 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
                     cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
+                    return cell
+                case .categories:
+                    let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
+                    cell.selectionStyle = driveFileManager.drive.categoryRights.canPutCategoryOnFile ? .default : .none
+                    cell.initWithoutInsets()
+                    let categories = driveFileManager.drive.categories.filter(NSPredicate(format: "id IN %@", file.categories.map(\.id)))
+                    cell.configure(with: Array(categories))
                     return cell
                 case .owner:
                     let cell = tableView.dequeueReusableCell(type: FileInformationOwnerTableViewCell.self, for: indexPath)
@@ -538,6 +550,14 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     // MARK: - Table view delegate
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && driveFileManager.drive.categoryRights.canPutCategoryOnFile {
+            let manageCategoriesViewController = ManageCategoriesViewController.instantiate(file: file, driveFileManager: driveFileManager)
+            navigationController?.pushViewController(manageCategoriesViewController, animated: true)
+        }
+    }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         guard currentTab == .comments && !comments.isEmpty else {

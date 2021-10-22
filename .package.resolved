@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/google/GoogleDataTransport.git",
         "state": {
           "branch": null,
-          "revision": "7fb27ea49414b9c5483503cd06baa821c8654d1e",
-          "version": "9.1.1"
+          "revision": "15ccdfd25ac55b9239b82809531ff26605e7556e",
+          "version": "9.1.2"
         }
       },
       {
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/google/GoogleUtilities.git",
         "state": {
           "branch": null,
-          "revision": "616fac2626b6b2d1424d79a6f786b4e2ed1cfb49",
-          "version": "7.5.2"
+          "revision": "797005ad8a1f0614063933e2fa010a5d13cb09d0",
+          "version": "7.6.0"
         }
       },
       {
@@ -137,12 +137,21 @@
         }
       },
       {
+        "package": "HorizonCalendar",
+        "repositoryURL": "https://github.com/airbnb/HorizonCalendar.git",
+        "state": {
+          "branch": null,
+          "revision": "c09dfba59bffa8c370ec00a2aa0aa4235dfad4a3",
+          "version": "1.10.1"
+        }
+      },
+      {
         "package": "InfomaniakCore",
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {
           "branch": null,
-          "revision": "a1cb5c22e8e7cb8bbef3a427d4fc2cf992ad44e2",
-          "version": "1.1.0"
+          "revision": "93fba501cf579e42fb1aaec91ae364aa4dbb88bf",
+          "version": "1.1.1"
         }
       },
       {
@@ -159,8 +168,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "8c65ddf756c633d01d9ae01092bf72f0c66dfc60",
-          "version": "7.0.0"
+          "revision": "318e319998bf555c3e914d5c3adb6da05af86a32",
+          "version": "7.1.1"
         }
       },
       {
@@ -231,8 +240,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "052f92ef8dd411616cfcfae8dd82888dcd4ecf45",
-          "version": "10.16.0"
+          "revision": "7ca0ce1dd58553d5be1ec9cc7283b068c256979d",
+          "version": "10.17.0"
         }
       },
       {
@@ -249,8 +258,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
-          "revision": "ea5bae4bfb10cd9c5afda6898702489756df313d",
-          "version": "7.4.2"
+          "revision": "3429d2236a9eebf551f82e513daa1cddd60050f7",
+          "version": "7.4.7"
         }
       },
       {

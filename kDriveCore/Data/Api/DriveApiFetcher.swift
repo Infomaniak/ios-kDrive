@@ -524,19 +524,70 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     @discardableResult
-    public func searchFiles(driveId: Int, query: String? = nil, fileType: String? = nil, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) -> DataRequest {
-        var url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
-        if let query = query {
-            url += "&query=\(query)"
+    public func searchFiles(driveId: Int, query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) -> DataRequest {
+        let url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
+        var queryItems = [URLQueryItem]()
+        if let query = query, !query.isBlank {
+            queryItems.append(URLQueryItem(name: "query", value: query))
+        }
+        if let date = date {
+            queryItems += [
+                URLQueryItem(name: "modified_at", value: "custom"),
+                URLQueryItem(name: "from", value: "\(Int(date.start.timeIntervalSince1970))"),
+                URLQueryItem(name: "until", value: "\(Int(date.end.timeIntervalSince1970))")
+            ]
         }
         if let fileType = fileType {
-            url += "&converted_type=\(fileType)"
+            queryItems.append(URLQueryItem(name: "converted_type", value: fileType))
         }
-        if let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            url = encodedUrl
+        if !categories.isEmpty {
+            let separator = belongToAllCategories ? "&" : "|"
+            queryItems.append(URLQueryItem(name: "category", value: categories.map { "\($0.id)" }.joined(separator: separator)))
+        }
+
+        var urlComponents = URLComponents(string: url)
+        urlComponents?.queryItems?.append(contentsOf: queryItems)
+        guard let url = urlComponents?.url else {
+            fatalError("Search URL invalid")
         }
 
         return makeRequest(url, method: .get, completion: completion)
+    }
+
+    public func addCategory(file: File, category: Category, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.addCategory(file: file)
+        let body = ["id": category.id]
+
+        makeRequest(url, method: .post, parameters: body, completion: completion)
+    }
+
+    public func removeCategory(file: File, category: Category, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.removeCategory(file: file, categoryId: category.id)
+
+        makeRequest(url, method: .delete, completion: completion)
+    }
+
+    public func createCategory(driveId: Int, name: String, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
+        let url = ApiRoutes.createCategory(driveId: driveId)
+        let body = ["name": name, "color": color]
+
+        makeRequest(url, method: .post, parameters: body, completion: completion)
+    }
+
+    public func editCategory(driveId: Int, id: Int, name: String?, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
+        let url = ApiRoutes.editCategory(driveId: driveId, categoryId: id)
+        var body = ["color": color]
+        if let name = name {
+            body["name"] = name
+        }
+
+        makeRequest(url, method: .patch, parameters: body, completion: completion)
+    }
+
+    public func deleteCategory(driveId: Int, id: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
+        let url = ApiRoutes.editCategory(driveId: driveId, categoryId: id)
+
+        makeRequest(url, method: .delete, completion: completion)
     }
 
     public func requireFileAccess(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {

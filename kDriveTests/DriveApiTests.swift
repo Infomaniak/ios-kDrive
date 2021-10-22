@@ -1149,7 +1149,7 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            self.currentApiFetcher.searchFiles(driveId: self.currentDrive.id, query: "officeFile") { response, error in
+            self.currentApiFetcher.searchFiles(driveId: self.currentDrive.id, query: "officeFile", categories: [], belongToAllCategories: true) { response, error in
                 XCTAssertNotNil(response, "Response shouldn't be nil")
                 XCTAssertNil(error, "There should be no error")
                 let fileFound = response?.data?.first {

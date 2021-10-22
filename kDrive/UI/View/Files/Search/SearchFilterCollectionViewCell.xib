@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="Hes-WQ-GRt" customClass="SearchFilterCollectionViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="120" height="45"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="DCT-r3-wcE">
+                <rect key="frame" x="0.0" y="0.0" width="120" height="45"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file-default" translatesAutoresizingMaskIntoConstraints="NO" id="SvM-uu-YA6">
+                        <rect key="frame" x="16" y="12.5" width="20" height="20"/>
+                        <color key="tintColor" name="secondaryTextColor"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="20" id="ClR-ie-Exx"/>
+                            <constraint firstAttribute="height" constant="20" id="fcM-6k-50t"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7iq-qO-qOo" customClass="IKLabel" customModule="kDriveCore">
+                        <rect key="frame" x="44" y="14" width="36" height="17"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                        </userDefinedRuntimeAttributes>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0SL-mF-wuO">
+                        <rect key="frame" x="88" y="14.5" width="16" height="16"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="16" id="AfZ-To-gbT"/>
+                            <constraint firstAttribute="width" constant="16" id="jtF-E3-cqO"/>
+                        </constraints>
+                        <color key="tintColor" name="primaryTextColor"/>
+                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                        <state key="normal" image="remove"/>
+                        <connections>
+                            <action selector="removeButtonPressed:" destination="Hes-WQ-GRt" eventType="touchUpInside" id="IDm-Du-yX5"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <color key="backgroundColor" name="backgroundCardView"/>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="0SL-mF-wuO" secondAttribute="trailing" constant="16" id="2E8-10-ELs"/>
+                    <constraint firstItem="0SL-mF-wuO" firstAttribute="leading" secondItem="7iq-qO-qOo" secondAttribute="trailing" constant="8" symbolic="YES" id="GWT-ES-ayI"/>
+                    <constraint firstItem="SvM-uu-YA6" firstAttribute="centerY" secondItem="DCT-r3-wcE" secondAttribute="centerY" id="KMr-mz-YPx"/>
+                    <constraint firstItem="0SL-mF-wuO" firstAttribute="centerY" secondItem="DCT-r3-wcE" secondAttribute="centerY" id="MSF-m2-lvg"/>
+                    <constraint firstItem="SvM-uu-YA6" firstAttribute="leading" secondItem="DCT-r3-wcE" secondAttribute="leading" constant="16" id="XWE-0N-2ks"/>
+                    <constraint firstItem="7iq-qO-qOo" firstAttribute="centerY" secondItem="DCT-r3-wcE" secondAttribute="centerY" id="shA-Ss-HfB"/>
+                    <constraint firstItem="7iq-qO-qOo" firstAttribute="leading" secondItem="SvM-uu-YA6" secondAttribute="trailing" constant="8" id="xkJ-Sp-9ut"/>
+                </constraints>
+            </collectionViewCellContentView>
+            <size key="customSize" width="217" height="47"/>
+            <connections>
+                <outlet property="iconImageView" destination="SvM-uu-YA6" id="RGn-JA-IPZ"/>
+                <outlet property="removeButton" destination="0SL-mF-wuO" id="eDW-HI-cCN"/>
+                <outlet property="titleLabel" destination="7iq-qO-qOo" id="Jqt-SD-McJ"/>
+            </connections>
+            <point key="canvasLocation" x="-241.30434782608697" y="35.15625"/>
+        </collectionViewCell>
+    </objects>
+    <designables>
+        <designable name="7iq-qO-qOo">
+            <size key="intrinsicContentSize" width="36" height="17"/>
+        </designable>
+    </designables>
+    <resources>
+        <image name="file-default" width="24" height="24"/>
+        <image name="remove" width="24" height="24"/>
+        <namedColor name="backgroundCardView">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="primaryTextColor">
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="secondaryTextColor">
+            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

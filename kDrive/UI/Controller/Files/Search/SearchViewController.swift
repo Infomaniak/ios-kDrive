@@ -20,41 +20,6 @@ import Alamofire
 import kDriveCore
 import UIKit
 
-public struct FileTypeRow: RawRepresentable {
-    public typealias RawValue = String
-
-    public var rawValue: String
-    let name: String
-    let icon: UIImage
-    let type: String
-
-    public init?(rawValue: String) {
-        if let type = FileTypeRow.allValues.first(where: { $0.rawValue == rawValue }) {
-            self = type
-        } else {
-            return nil
-        }
-    }
-
-    init(rawValue: String, name: String, icon: UIImage, type: String) {
-        self.rawValue = rawValue
-        self.name = name
-        self.icon = icon
-        self.type = type
-    }
-
-    static let imagesRow = FileTypeRow(rawValue: "images", name: KDriveStrings.Localizable.allPictures, icon: KDriveAsset.fileImage.image, type: ConvertedType.image.rawValue)
-    static let videosRow = FileTypeRow(rawValue: "videos", name: KDriveStrings.Localizable.allVideo, icon: KDriveAsset.fileVideo.image, type: ConvertedType.video.rawValue)
-    static let audioRow = FileTypeRow(rawValue: "audio", name: KDriveStrings.Localizable.allAudio, icon: KDriveAsset.fileAudio.image, type: ConvertedType.audio.rawValue)
-    static let pdfRow = FileTypeRow(rawValue: "pdf", name: KDriveStrings.Localizable.allPdf, icon: KDriveAsset.filePdf.image, type: ConvertedType.pdf.rawValue)
-    static let docsRow = FileTypeRow(rawValue: "docs", name: KDriveStrings.Localizable.allOfficeDocs, icon: KDriveAsset.fileText.image, type: ConvertedType.text.rawValue)
-    static let pointsRow = FileTypeRow(rawValue: "points", name: KDriveStrings.Localizable.allOfficePoints, icon: KDriveAsset.filePresentation.image, type: ConvertedType.presentation.rawValue)
-    static let gridsRow = FileTypeRow(rawValue: "grid", name: KDriveStrings.Localizable.allOfficeGrids, icon: KDriveAsset.fileSheets.image, type: ConvertedType.spreadsheet.rawValue)
-    static let folderRow = FileTypeRow(rawValue: "folder", name: KDriveStrings.Localizable.allFolder, icon: KDriveAsset.folderFilled.image, type: ConvertedType.folder.rawValue)
-    static let dropboxRow = FileTypeRow(rawValue: "dropbox", name: KDriveStrings.Localizable.dropBoxTitle, icon: KDriveAsset.folderDropBox.image, type: "")
-    static let allValues = [imagesRow, videosRow, audioRow, pdfRow, docsRow, pointsRow, gridsRow, folderRow, dropboxRow]
-}
-
 class SearchViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.search }
     override class var storyboardIdentifier: String { "SearchViewController" }
@@ -65,7 +30,6 @@ class SearchViewController: FileListViewController {
     private let maxRecentSearch = 5
     private let searchHeaderIdentifier = "BasicTitleCollectionReusableView"
     private let sectionTitles = [KDriveStrings.Localizable.searchLastTitle, KDriveStrings.Localizable.searchFilterTitle]
-    private let fileTypeRows: [FileTypeRow] = FileTypeRow.allValues
 
     // MARK: - Properties
 
@@ -74,12 +38,12 @@ class SearchViewController: FileListViewController {
         didSet { updateList() }
     }
 
-    private var selectedFileType: FileTypeRow? {
+    private var filters = Filters() {
         didSet { updateList() }
     }
 
     private var isDisplayingSearchResults: Bool {
-        (currentSearchText ?? "").count >= minSearchCount || selectedFileType != nil
+        (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
     }
 
     private var recentSearches = UserDefaults.shared.recentSearches
@@ -106,7 +70,6 @@ class SearchViewController: FileListViewController {
         searchController.searchBar.placeholder = KDriveStrings.Localizable.searchViewHint
 
         navigationItem.searchController = searchController
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         definesPresentationContext = true
@@ -129,12 +92,15 @@ class SearchViewController: FileListViewController {
             return
         }
 
-        currentRequest = driveFileManager.searchFile(query: currentSearchText, fileType: selectedFileType?.type, page: page, sortType: sortType) { file, children, error in
+        currentRequest = driveFileManager.searchFile(query: currentSearchText, date: filters.date?.dateInterval, fileType: filters.fileType?.rawValue, categories: Array(filters.categories), belongToAllCategories: filters.belongToAllCategories, page: page, sortType: sortType) { [currentSearchText] file, children, error in
             guard self.isDisplayingSearchResults else {
                 completion(.failure(DriveError.searchCancelled), false, false)
                 return
             }
 
+            if let currentSearchText = currentSearchText {
+                self.addToRecentSearch(currentSearchText)
+            }
             if let fetchedCurrentDirectory = file, let fetchedChildren = children {
                 completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, false)
             } else {
@@ -150,18 +116,17 @@ class SearchViewController: FileListViewController {
     override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
         super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
         // Set up filter header view
-        if let selectedFileType = selectedFileType {
-            headerView.fileTypeFilterView.isHidden = false
-            headerView.fileTypeFilterView.fileTypeIconImageView.image = selectedFileType.icon
-            headerView.fileTypeFilterView.fileTypeLabel.text = selectedFileType.name
+        if filters.hasFilters {
+            headerView.filterView.isHidden = false
+            headerView.filterView.configure(with: filters)
         } else {
-            headerView.fileTypeFilterView.isHidden = true
+            headerView.filterView.isHidden = true
         }
     }
 
-    static func instantiateInNavigationController(driveFileManager: DriveFileManager, fileType: FileTypeRow? = nil) -> UINavigationController {
+    static func instantiateInNavigationController(driveFileManager: DriveFileManager, filters: Filters = Filters()) -> UINavigationController {
         let searchViewController = instantiate(driveFileManager: driveFileManager)
-        searchViewController.selectedFileType = fileType
+        searchViewController.filters = filters
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.modalPresentationStyle = .fullScreen
         return navigationController
@@ -169,7 +134,7 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Actions
 
-    @objc func closeButtonPressed() {
+    @IBAction func closeButtonPressed() {
         searchController.dismiss(animated: true)
         dismiss(animated: true)
     }
@@ -193,6 +158,7 @@ class SearchViewController: FileListViewController {
         collectionView.refreshControl = isDisplayingSearchResults ? refreshControl : nil
         collectionViewLayout?.sectionHeadersPinToVisibleBounds = isDisplayingSearchResults
         sortedFiles = []
+        collectionView.backgroundView = nil
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadData()
         currentRequest?.cancel()
@@ -206,7 +172,7 @@ class SearchViewController: FileListViewController {
     // MARK: - Collection view data source
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return isDisplayingSearchResults ? 1 : 2
+        return 1
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -216,8 +182,6 @@ class SearchViewController: FileListViewController {
             switch section {
             case 0:
                 return recentSearches.count
-            case 1:
-                return fileTypeRows.count
             default:
                 return 0
             }
@@ -241,13 +205,8 @@ class SearchViewController: FileListViewController {
             let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
             cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == self.collectionView(collectionView, numberOfItemsInSection: indexPath.section) - 1)
             cell.moreButton.isHidden = true
-            if indexPath.section == 0 {
-                let recentSearch = recentSearches[indexPath.row]
-                cell.configureWith(recentSearch: recentSearch)
-            } else {
-                let fileType = fileTypeRows[indexPath.row]
-                cell.configureWith(fileType: fileType)
-            }
+            let recentSearch = recentSearches[indexPath.row]
+            cell.configureWith(recentSearch: recentSearch)
 
             return cell
         }
@@ -263,8 +222,6 @@ class SearchViewController: FileListViewController {
             case 0:
                 currentSearchText = recentSearches[indexPath.row]
                 searchController.searchBar.text = currentSearchText
-            case 1:
-                selectedFileType = fileTypeRows[indexPath.row]
             default:
                 break
             }
@@ -288,8 +245,26 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Files header view delegate
 
-    override func removeFileTypeButtonPressed() {
-        selectedFileType = nil
+    override func removeFilterButtonPressed(_ filter: Filterable) {
+        if filter is DateOption {
+            filters.date = nil
+        } else if filter is ConvertedType {
+            filters.fileType = nil
+        } else if let category = filter as? kDriveCore.Category {
+            filters.categories.remove(category)
+        }
+    }
+
+    // MARK: - Navigation
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "filterSegue" {
+            let navigationController = segue.destination as? UINavigationController
+            let searchFiltersViewController = navigationController?.topViewController as? SearchFiltersViewController
+            searchFiltersViewController?.driveFileManager = driveFileManager
+            searchFiltersViewController?.filters = filters
+            searchFiltersViewController?.delegate = self
+        }
     }
 }
 
@@ -298,5 +273,13 @@ class SearchViewController: FileListViewController {
 extension SearchViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         currentSearchText = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces)
+    }
+}
+
+// MARK: - Search filters delegate
+
+extension SearchViewController: SearchFiltersDelegate {
+    func didUpdateFilters(_ filters: Filters) {
+        self.filters = filters
     }
 }

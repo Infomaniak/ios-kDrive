@@ -19,11 +19,13 @@
 import kDriveCore
 import UIKit
 
-class StoreWarningTableViewCell: UITableViewCell {
-    @IBOutlet weak var view: UIView!
+class CategoryCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var chipView: UIView!
+    @IBOutlet weak var categoryLabel: IKLabel!
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        view.cornerRadius = UIConstants.cornerRadius
+    func configure(with category: kDriveCore.Category) {
+        chipView.backgroundColor = category.color
+        categoryLabel.text = category.localizedName
+        chipView.cornerRadius = min(chipView.bounds.height, chipView.bounds.width) / 2
     }
 }

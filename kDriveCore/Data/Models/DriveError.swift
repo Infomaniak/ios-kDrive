@@ -90,11 +90,12 @@ public struct DriveError: Error, Equatable {
     public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveCoreStrings.Localizable.errorConflict)
     public static let maintenance = DriveError(type: .serverError, code: "product_maintenance", localizedString: KDriveCoreStrings.Localizable.driveMaintenanceDescription)
     public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveCoreStrings.Localizable.errorFileLocked)
-    public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: "You must add at least one file that you have permission to download")
+    public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveCoreStrings.Localizable.errorDownloadPermission)
+    public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveCoreStrings.Localizable.errorCategoryAlreadyExists)
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
-    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission]
+    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()

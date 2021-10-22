@@ -55,6 +55,33 @@ public enum ConvertedType: String, CaseIterable {
         }
     }
 
+    public var title: String {
+        switch self {
+        case .archive:
+            return KDriveCoreStrings.Localizable.allArchive
+        case .audio:
+            return KDriveCoreStrings.Localizable.allAudio
+        case .code:
+            return KDriveCoreStrings.Localizable.allCode
+        case .folder:
+            return KDriveCoreStrings.Localizable.allFolder
+        case .image:
+            return KDriveCoreStrings.Localizable.allPictures
+        case .pdf:
+            return KDriveCoreStrings.Localizable.allPdf
+        case .presentation:
+            return KDriveCoreStrings.Localizable.allOfficePoints
+        case .spreadsheet:
+            return KDriveCoreStrings.Localizable.allOfficeGrids
+        case .text:
+            return KDriveCoreStrings.Localizable.allOfficeDocs
+        case .unknown, .font:
+            return ""
+        case .video:
+            return KDriveCoreStrings.Localizable.allVideo
+        }
+    }
+
     public var uti: UTI {
         switch self {
         case .archive:
@@ -160,6 +187,7 @@ public class File: Object, Codable {
     @Persisted public var name: String = ""
     @Persisted public var nameNaturalSorting: String = ""
     @Persisted(originProperty: "children") private var parentLink: LinkingObjects<File>
+    @Persisted public var categories: List<FileCategory>
     @Persisted public var children: List<File>
     @Persisted public var canUseTag = false
     @Persisted public var createdBy: Int = 0
@@ -413,6 +441,7 @@ public class File: Object, Codable {
         rawVisibility = (try values.decodeIfPresent(String.self, forKey: .rawVisibility)) ?? ""
         onlyOffice = try values.decodeIfPresent(Bool.self, forKey: .onlyOffice) ?? false
         onlyOfficeConvertExtension = try values.decodeIfPresent(String.self, forKey: .onlyOfficeConvertExtension)
+        categories = try values.decodeIfPresent(List<FileCategory>.self, forKey: .categories) ?? List<FileCategory>()
         children = try values.decodeIfPresent(List<File>.self, forKey: .children) ?? List<File>()
 
         // extras
@@ -444,6 +473,7 @@ public class File: Object, Codable {
         case parentId = "parent_id"
         case name
         case nameNaturalSorting = "name_natural_sorting"
+        case categories
         case children
         case canUseTag = "can_use_tag"
         case createdBy = "created_by"

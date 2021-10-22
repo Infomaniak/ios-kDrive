@@ -33,6 +33,7 @@ class EmptyTableView: UIView {
         case noActivitiesSolo
         case noImages
         case noComments
+        case noCategories
     }
 
     @IBOutlet weak var bottomToButtonConstraint: NSLayoutConstraint!
@@ -97,6 +98,8 @@ class EmptyTableView: UIView {
             view = self.instantiate(logo: KDriveAsset.images.image, message: KDriveStrings.Localizable.homeNoPictures)
         case .noComments:
             view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
+        case .noCategories:
+            view = self.instantiate(logo: KDriveAsset.categories.image, message: KDriveStrings.Localizable.manageCategoriesNoCategory)
         }
 
         if !setCenteringEnabled {

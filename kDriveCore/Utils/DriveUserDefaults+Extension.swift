@@ -44,6 +44,7 @@ extension UserDefaults.Keys {
     static let betaInviteDisplayed = UserDefaults.Keys(rawValue: "betaInviteDisplayed")
     static let lastSyncDateOfflineFiles = UserDefaults.Keys(rawValue: "lastSyncDateOfflineFiles")
     static let fileProviderExtension = UserDefaults.Keys(rawValue: "fileProviderExtension")
+    static let categoryPanelDisplayed = UserDefaults.Keys(rawValue: "categoryPanelDisplayed")
 }
 
 public extension UserDefaults {
@@ -293,6 +294,15 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.fileProviderExtension))
+        }
+    }
+
+    var categoryPanelDisplayed: Bool {
+        get {
+            return bool(forKey: key(.categoryPanelDisplayed))
+        }
+        set {
+            set(newValue, forKey: key(.categoryPanelDisplayed))
         }
     }
 }

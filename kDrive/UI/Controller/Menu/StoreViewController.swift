@@ -78,7 +78,7 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
 
         // Set up table view
         tableView.register(cellView: StoreControlTableViewCell.self)
-        tableView.register(cellView: StoreWarningTableViewCell.self)
+        tableView.register(cellView: AlertTableViewCell.self)
         tableView.register(cellView: StoreOffersTableViewCell.self)
         tableView.register(cellView: StoreStorageTableViewCell.self)
         tableView.register(cellView: StoreNextTableViewCell.self)
@@ -218,7 +218,8 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
             }
             return cell
         case .warning:
-            let cell = tableView.dequeueReusableCell(type: StoreWarningTableViewCell.self, for: indexPath)
+            let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
+            cell.configure(with: .warning, message: KDriveStrings.Localizable.storeBillingWarningDescription)
             return cell
         case .offers:
             let cell = tableView.dequeueReusableCell(type: StoreOffersTableViewCell.self, for: indexPath)

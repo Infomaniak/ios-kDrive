@@ -233,15 +233,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         checkmarkImage.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
     }
 
-    func configureWith(fileType: FileTypeRow) {
-        centerTitleConstraint.isActive = true
-        detailsStackView?.isHidden = true
-        favoriteImageView.isHidden = true
-        accessoryImage?.isHidden = true
-        logoImage.image = fileType.icon
-        titleLabel.text = fileType.name
-    }
-
     func configureWith(recentSearch: String) {
         centerTitleConstraint.isActive = true
         detailsStackView?.isHidden = true
