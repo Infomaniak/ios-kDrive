@@ -28,7 +28,7 @@ public class Category: Object, Codable {
     @Persisted public var colorHex: String
     @Persisted public var createdBy: Int
     @Persisted public var createdAt: Date
-    @Persisted public var userUsageCount: Int
+    @Persisted public var userUsageCount: Int?
     @Persisted public var driveId: Int = 0 {
         didSet {
             objectId = "\(driveId)_\(id)"
