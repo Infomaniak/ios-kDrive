@@ -142,7 +142,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
 
-        recentFilesController = HomeLastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -156,7 +155,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             }
         }
 
-        recentFilesController?.loadNextPage()
+        setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -256,6 +255,31 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }
     }
 
+    private func setSelectedHomeIndex(_ index: Int) {
+        UserDefaults.shared.selectedHomeIndex = index
+        recentFilesController?.cancelLoading()
+        switch index {
+        case 0:
+            recentFilesController = HomeLastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
+        case 1:
+            recentFilesController = HomeOfflineFilesController(driveFileManager: driveFileManager, homeViewController: self)
+        case 2:
+            recentFilesController = HomePhotoListController(driveFileManager: driveFileManager, homeViewController: self)
+        default:
+            break
+        }
+        reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
+                                           showInsufficientStorage: viewModel.showInsufficientStorage,
+                                           recentFiles: [],
+                                           recentFilesEmpty: false,
+                                           isLoading: true))
+
+        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeRecentFilesHeaderView } as? HomeRecentFilesHeaderView
+        headerView?.titleLabel.text = recentFilesController.title
+
+        recentFilesController.loadNextPage()
+    }
+
     private func updateNavbarAppearance() {
         let scrollOffset = collectionView.contentOffset.y
         guard let navigationBar = navigationController?.navigationBar else {
@@ -281,10 +305,14 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             case .top:
                 return self.generateTopSectionLayout()
             case .recentFiles:
-                if self.recentFilesController.empty {
-                    return self.recentFilesController.getEmptyLayout()
+                if let recentFilesController = self.recentFilesController {
+                    if recentFilesController.empty {
+                        return recentFilesController.getEmptyLayout()
+                    } else {
+                        return recentFilesController.getLayout(for: UserDefaults.shared.homeListStyle)
+                    }
                 } else {
-                    return self.recentFilesController.getLayout(for: UserDefaults.shared.homeListStyle)
+                    return nil
                 }
             }
         }
@@ -318,8 +346,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         reload(newViewModel: viewModel)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.recentFilesController = HomeLastModificationsController(driveFileManager: self.driveFileManager, homeViewController: self)
-            self.recentFilesController.loadNextPage()
+            self.setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
         }
     }
 
@@ -409,29 +436,10 @@ extension HomeViewController {
                 return cell
             case .recentFilesSelector:
                 let cell = collectionView.dequeueReusableCell(type: HomeRecentFilesSelectorCollectionViewCell.self, for: indexPath)
+                cell.selector.selectedSegmentIndex = UserDefaults.shared.selectedHomeIndex
                 cell.valueChangeHandler = { [weak self] selector in
                     guard let self = self else { return }
-                    self.recentFilesController.cancelLoading()
-                    switch selector.selectedSegmentIndex {
-                    case 0:
-                        self.recentFilesController = HomeLastModificationsController(driveFileManager: self.driveFileManager, homeViewController: self)
-                    case 1:
-                        self.recentFilesController = HomeOfflineFilesController(driveFileManager: self.driveFileManager, homeViewController: self)
-                    case 2:
-                        self.recentFilesController = HomePhotoListController(driveFileManager: self.driveFileManager, homeViewController: self)
-                    default:
-                        break
-                    }
-                    self.reload(newViewModel: HomeViewModel(topRows: self.viewModel.topRows,
-                                                            showInsufficientStorage: self.viewModel.showInsufficientStorage,
-                                                            recentFiles: [],
-                                                            recentFilesEmpty: false,
-                                                            isLoading: true))
-
-                    let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeRecentFilesHeaderView } as? HomeRecentFilesHeaderView
-                    headerView?.titleLabel.text = self.recentFilesController.title
-
-                    self.recentFilesController.loadNextPage()
+                    self.setSelectedHomeIndex(selector.selectedSegmentIndex)
                 }
                 return cell
             }
@@ -518,7 +526,7 @@ extension HomeViewController {
                 present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
             }
         case .recentFiles:
-            if !(viewModel.isLoading && indexPath.row > viewModel.recentFiles.count - 1) {
+            if !(viewModel.isLoading && indexPath.row > viewModel.recentFiles.count - 1) && !viewModel.recentFilesEmpty {
                 filePresenter.present(driveFileManager: driveFileManager, file: viewModel.recentFiles[indexPath.row], files: viewModel.recentFiles, normalFolderHierarchy: false)
             }
         }
