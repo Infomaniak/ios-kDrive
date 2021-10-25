@@ -155,7 +155,7 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         if !driveFileManager.drive.accountAdmin {
             showBlockingMessage(existingIAP: false)
             purchaseEnabled = false
-        } else if !driveFileManager.drive.productIsInApp && StoreObserver.shared.getReceipt() != nil {
+        } else if !driveFileManager.drive.productIsInApp && StoreObserver.shared.hasInAppPurchaseReceipts {
             // If we already have a receipt but the product isn't an IAP, prevent user to make a new one
             showBlockingMessage(existingIAP: true)
             purchaseEnabled = false
