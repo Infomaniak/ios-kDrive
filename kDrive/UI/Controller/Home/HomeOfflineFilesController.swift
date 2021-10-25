@@ -20,8 +20,12 @@ import Foundation
 import kDriveCore
 
 class HomeOfflineFilesController: HomeRecentFilesController {
-    convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noOffline, title: KDriveStrings.Localizable.offlineFileTitle, listStyleEnabled: true)
+    required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.init(driveFileManager: driveFileManager,
+                  homeViewController: homeViewController,
+                  listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noOffline,
+                  title: KDriveStrings.Localizable.offlineFileTitle, selectorTitle: KDriveStrings.Localizable.offlineFileTitle,
+                  listStyleEnabled: true)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
@@ -36,5 +40,9 @@ class HomeOfflineFilesController: HomeRecentFilesController {
         DispatchQueue.main.async {
             self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
         }
+    }
+
+    override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {
+        return Self(driveFileManager: driveFileManager, homeViewController: homeViewController)
     }
 }

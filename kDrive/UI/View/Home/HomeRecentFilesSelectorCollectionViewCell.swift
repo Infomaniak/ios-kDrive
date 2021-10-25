@@ -24,8 +24,8 @@ class HomeRecentFilesSelectorCollectionViewCell: UICollectionViewCell {
 
     var valueChangeHandler: ((IKSegmentedControl) -> Void)?
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
+    func setRecentFilesControllerTitles(_ titles: [String]) {
+        selector.setSegments(titles)
     }
 
     @IBAction func selectorValueChanged(_ sender: IKSegmentedControl) {

@@ -153,6 +153,13 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var recentFilesController: HomeRecentFilesController!
     private var viewModel: HomeViewModel!
+    private var recentFilesControllers: [HomeRecentFilesController.Type] {
+        if driveFileManager.drive.isProOrTeam {
+            return [HomeRecentActivitiesController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
+        } else {
+            return [HomeLastModificationsController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -304,16 +311,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     private func setSelectedHomeIndex(_ index: Int) {
         UserDefaults.shared.selectedHomeIndex = index
         recentFilesController?.cancelLoading()
-        switch index {
-        case 0:
-            recentFilesController = HomeLastModificationsController(driveFileManager: driveFileManager, homeViewController: self)
-        case 1:
-            recentFilesController = HomeOfflineFilesController(driveFileManager: driveFileManager, homeViewController: self)
-        case 2:
-            recentFilesController = HomePhotoListController(driveFileManager: driveFileManager, homeViewController: self)
-        default:
-            break
-        }
+
+        recentFilesController = recentFilesControllers[index].initInstance(driveFileManager: driveFileManager, homeViewController: self)
+
         reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                            showInsufficientStorage: viewModel.showInsufficientStorage,
                                            recentFiles: .file([]),
@@ -482,6 +482,8 @@ extension HomeViewController {
                 return cell
             case .recentFilesSelector:
                 let cell = collectionView.dequeueReusableCell(type: HomeRecentFilesSelectorCollectionViewCell.self, for: indexPath)
+                let controllers = recentFilesControllers.map { $0.initInstance(driveFileManager: driveFileManager, homeViewController: self) }
+                cell.setRecentFilesControllerTitles(controllers.map(\.selectorTitle))
                 cell.selector.selectedSegmentIndex = UserDefaults.shared.selectedHomeIndex
                 cell.valueChangeHandler = { [weak self] selector in
                     guard let self = self else { return }

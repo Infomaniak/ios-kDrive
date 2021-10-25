@@ -22,8 +22,12 @@ import kDriveCore
 class HomeRecentActivitiesController: HomeRecentFilesController {
     private let mergeFileCreateDelay = 43_200 // 12h
 
-    convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: RecentActivityCollectionViewCell.self, gridCellType: RecentActivityCollectionViewCell.self, emptyCellType: .noActivities, title: KDriveStrings.Localizable.lastEditsTitle, listStyleEnabled: false)
+    required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.init(driveFileManager: driveFileManager,
+                  homeViewController: homeViewController,
+                  listCellType: RecentActivityCollectionViewCell.self, gridCellType: RecentActivityCollectionViewCell.self, emptyCellType: .noActivities,
+                  title: KDriveStrings.Localizable.lastEditsTitle, selectorTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle,
+                  listStyleEnabled: false)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
@@ -113,5 +117,9 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         section.interGroupSpacing = 16
         section.boundarySupplementaryItems = [getHeaderLayout()]
         return section
+    }
+
+    override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {
+        return Self(driveFileManager: driveFileManager, homeViewController: homeViewController)
     }
 }

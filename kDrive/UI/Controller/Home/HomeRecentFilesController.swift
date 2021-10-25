@@ -25,6 +25,7 @@ class HomeRecentFilesController {
     let driveFileManager: DriveFileManager
     weak var homeViewController: HomeViewController?
 
+    let selectorTitle: String
     let title: String
     let emptyCellType: EmptyTableView.EmptyTableViewType
     let listCellType: UICollectionViewCell.Type
@@ -37,8 +38,9 @@ class HomeRecentFilesController {
     var loading = false
     var moreComing = true
 
-    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController, listCellType: UICollectionViewCell.Type, gridCellType: UICollectionViewCell.Type, emptyCellType: EmptyTableView.EmptyTableViewType, title: String, listStyleEnabled: Bool) {
+    init(driveFileManager: DriveFileManager, homeViewController: HomeViewController, listCellType: UICollectionViewCell.Type, gridCellType: UICollectionViewCell.Type, emptyCellType: EmptyTableView.EmptyTableViewType, title: String, selectorTitle: String, listStyleEnabled: Bool) {
         self.title = title
+        self.selectorTitle = selectorTitle
         self.listCellType = listCellType
         self.gridCellType = gridCellType
         self.emptyCellType = emptyCellType
@@ -97,5 +99,9 @@ class HomeRecentFilesController {
         }
         section.boundarySupplementaryItems = [getHeaderLayout()]
         return section
+    }
+
+    class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {
+        fatalError("initInstance must me overriden")
     }
 }

@@ -20,8 +20,12 @@ import Foundation
 import kDriveCore
 
 class HomeLastModificationsController: HomeRecentFilesController {
-    convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noActivities, title: KDriveStrings.Localizable.lastEditsTitle, listStyleEnabled: true)
+    required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.init(driveFileManager: driveFileManager,
+                  homeViewController: homeViewController,
+                  listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noActivitiesSolo,
+                  title: KDriveStrings.Localizable.lastEditsTitle, selectorTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle,
+                  listStyleEnabled: true)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
@@ -42,5 +46,9 @@ class HomeLastModificationsController: HomeRecentFilesController {
                 }
             }
         }
+    }
+
+    override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {
+        return Self(driveFileManager: driveFileManager, homeViewController: homeViewController)
     }
 }

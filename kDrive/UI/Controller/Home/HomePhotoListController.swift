@@ -20,8 +20,11 @@ import Foundation
 import kDriveCore
 
 class HomePhotoListController: HomeRecentFilesController {
-    convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
-        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController, listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self, emptyCellType: .noImages, title: KDriveStrings.Localizable.allPictures, listStyleEnabled: false)
+    required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
+        self.init(driveFileManager: driveFileManager, homeViewController: homeViewController,
+                  listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self, emptyCellType: .noImages,
+                  title: KDriveStrings.Localizable.allPictures, selectorTitle: KDriveStrings.Localizable.allPictures,
+                  listStyleEnabled: false)
     }
 
     override func loadNextPage(forceRefresh: Bool = false) {
@@ -56,5 +59,9 @@ class HomePhotoListController: HomeRecentFilesController {
 
         section.boundarySupplementaryItems = [getHeaderLayout()]
         return section
+    }
+
+    override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {
+        return Self(driveFileManager: driveFileManager, homeViewController: homeViewController)
     }
 }
