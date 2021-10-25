@@ -57,6 +57,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             var topRows = [HomeTopRow]()
             var showInsufficientStorage = false
             var recentFiles = [File]()
+            var recentActivities = [FileActivity]()
             var recentFilesEmpty = false
             var isLoading = false
 
@@ -74,6 +75,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                             }
                         } else if let recentFileRow = element.base as? File {
                             recentFiles.append(recentFileRow)
+                        } else if let recentActivityRow = element.base as? FileActivity {
+                            recentActivities.append(recentActivityRow)
                         } else {
                             fatalError("Invalid HomeViewController model")
                         }
@@ -82,7 +85,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                     fatalError("Invalid HomeViewController model")
                 }
             }
-            self.init(topRows: topRows, showInsufficientStorage: showInsufficientStorage, recentFiles: .file(recentFiles), recentFilesEmpty: recentFilesEmpty, isLoading: isLoading)
+
+            if recentFiles.isEmpty {
+                self.init(topRows: topRows, showInsufficientStorage: showInsufficientStorage, recentFiles: .fileActivity(recentActivities), recentFilesEmpty: recentFilesEmpty, isLoading: isLoading)
+            } else {
+                self.init(topRows: topRows, showInsufficientStorage: showInsufficientStorage, recentFiles: .file(recentFiles), recentFilesEmpty: recentFilesEmpty, isLoading: isLoading)
+            }
         }
 
         var stagedChangeSet: [ArraySection<HomeSection, AnyDifferentiable>] {
@@ -270,6 +278,22 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         reload(newViewModel: newViewModel)
     }
 
+    func reloadWith(fetchedActivities: [FileActivity], isEmpty: Bool) {
+        var newActivities = [FileActivity]()
+        if !isEmpty {
+            if case .fileActivity(let activities) = viewModel.recentFiles {
+                newActivities = activities
+            }
+            newActivities.append(contentsOf: fetchedActivities)
+        }
+        let newViewModel = HomeViewModel(topRows: viewModel.topRows,
+                                         showInsufficientStorage: viewModel.showInsufficientStorage,
+                                         recentFiles: .fileActivity(newActivities),
+                                         recentFilesEmpty: isEmpty,
+                                         isLoading: false)
+        reload(newViewModel: newViewModel)
+    }
+
     private func reload(newViewModel: HomeViewModel) {
         let changeset = StagedChangeset(source: viewModel.stagedChangeSet, target: newViewModel.stagedChangeSet)
         collectionView.reload(using: changeset) { data in
@@ -298,7 +322,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
         let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeRecentFilesHeaderView } as? HomeRecentFilesHeaderView
         headerView?.titleLabel.text = recentFilesController.title
-
+        headerView?.switchLayoutButton.isHidden = !recentFilesController.listStyleEnabled
         recentFilesController.loadNextPage()
     }
 
@@ -474,13 +498,11 @@ extension HomeViewController {
                 let cellType = UserDefaults.shared.homeListStyle == .list ? recentFilesController.listCellType : recentFilesController.gridCellType
                 if let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as? FileCollectionViewCell {
                     if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
-                        cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == viewModel.recentFilesCount - 1 + HomeViewController.loadingCellCount)
                         cell.configureLoading()
                     } else {
                         if case .file(let files) = viewModel.recentFiles {
                             let file = files[indexPath.row]
                             cell.delegate = self
-                            cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == viewModel.recentFilesCount - 1)
                             cell.configureWith(file: file, selectionMode: false)
                         }
                     }
@@ -492,6 +514,17 @@ extension HomeViewController {
                         if case .file(let files) = viewModel.recentFiles {
                             let file = files[indexPath.row]
                             cell.configureWith(file: file)
+                        }
+                    }
+                    return cell
+                } else if let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as? RecentActivityCollectionViewCell {
+                    cell.initWithPositionAndShadow()
+                    if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
+                        cell.configureLoading()
+                    } else {
+                        if case .fileActivity(let activities) = viewModel.recentFiles {
+                            let activity = activities[indexPath.row]
+                            cell.configureWith(recentActivity: activity)
                         }
                     }
                     return cell
@@ -516,6 +549,7 @@ extension HomeViewController {
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeRecentFilesHeaderView.self, for: indexPath)
                 headerView.titleLabel.text = recentFilesController.title
                 headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
+                headerView.switchLayoutButton.isHidden = !recentFilesController.listStyleEnabled
                 headerView.actionHandler = { button in
                     UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
                     button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)

@@ -32,8 +32,8 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
 
     weak var delegate: RecentActivityDelegate?
 
-    var activity: FileActivity?
-    var activities: [FileActivity] {
+    private var activity: FileActivity?
+    private var activities: [FileActivity] {
         if let activity = activity {
             return [activity] + activity.mergedFileActivities
         } else {
@@ -41,8 +41,8 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         }
     }
 
-    var isLoading = false
-    let bottomViewCellHeight: CGFloat = 26
+    private var isLoading = false
+    private let bottomViewCellHeight: CGFloat = 26
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -63,20 +63,9 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         detailLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
     }
 
-    //TODO: do something for this
-    /*override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-        super.setHighlighted(highlighted, animated: animated)
-        if isLoading {
-            contentInsetView.backgroundColor = KDriveAsset.loaderDefaultColor.color
-        }
+    override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 6) {
+        contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: radius)
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-        if isLoading {
-            contentInsetView.backgroundColor = KDriveAsset.loaderDefaultColor.color
-        }
-    }*/
 
     func configureLoading() {
         isLoading = true

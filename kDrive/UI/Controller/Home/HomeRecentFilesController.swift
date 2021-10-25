@@ -31,6 +31,7 @@ class HomeRecentFilesController {
     let gridCellType: UICollectionViewCell.Type
 
     var listStyle: ListStyle = .list
+    var listStyleEnabled: Bool
     var page = 1
     var empty = false
     var loading = false
@@ -41,6 +42,7 @@ class HomeRecentFilesController {
         self.listCellType = listCellType
         self.gridCellType = gridCellType
         self.emptyCellType = emptyCellType
+        self.listStyleEnabled = listStyleEnabled
 
         self.driveFileManager = driveFileManager
         self.homeViewController = homeViewController
