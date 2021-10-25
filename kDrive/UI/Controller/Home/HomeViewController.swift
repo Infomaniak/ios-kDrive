@@ -140,6 +140,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.register(cellView: HomeEmptyFilesCollectionViewCell.self)
         collectionView.register(cellView: FileHomeCollectionViewCell.self)
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
+        collectionView.register(cellView: RecentActivityCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
 
         collectionView.collectionViewLayout = createLayout()
