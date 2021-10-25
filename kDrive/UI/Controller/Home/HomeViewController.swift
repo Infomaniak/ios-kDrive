@@ -148,10 +148,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.contentInset = UIEdgeInsets(top: navbarHeight, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: navbarHeight, left: 0, bottom: 0, right: 0)
 
-        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.reloadTopRows()
-                if status != .offline {}
             }
         }
 
@@ -187,7 +186,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     private func getTopRows() -> [HomeTopRow] {
         var topRows: [HomeTopRow]
         if ReachabilityListener.instance.currentStatus == .offline {
-            topRows = [.offline, .search]
+            topRows = [.offline, .search, .recentFilesSelector]
         } else {
             topRows = [.search, .recentFilesSelector]
         }
