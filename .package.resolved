@@ -147,11 +147,11 @@
       },
       {
         "package": "IBPCollectionViewCompositionalLayout",
-        "repositoryURL": "https://github.com/kishikawakatsumi/IBPCollectionViewCompositionalLayout.git",
+        "repositoryURL": "https://github.com/PhilippeWeidmann/IBPCollectionViewCompositionalLayout.git",
         "state": {
-          "branch": null,
-          "revision": "bb5b8a20892eba40906f45b2b5e4266358b9501b",
-          "version": "0.6.9"
+          "branch": "master",
+          "revision": "900e7d65df9f8c816302cf045e49ceb6d26c5e9a",
+          "version": null
         }
       },
       {

@@ -58,7 +58,7 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "8.0.0")),
             .package(url: "https://github.com/airbnb/HorizonCalendar.git", .upToNextMajor(from: "1.0.0")),
             .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
-            .package(url: "https://github.com/kishikawakatsumi/IBPCollectionViewCompositionalLayout.git", .upToNextMajor(from: "0.6.0"))
+            .package(url: "https://github.com/PhilippeWeidmann/IBPCollectionViewCompositionalLayout.git", .branch("master"))
     ],
     targets: [
         Target(name: "kDrive",
