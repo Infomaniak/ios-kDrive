@@ -19,6 +19,7 @@
 import InfomaniakCore
 import RealmSwift
 import UIKit
+import DifferenceKit
 
 public enum FileActivityType: String, Codable {
     case fileAccess = "file_access"
@@ -108,6 +109,12 @@ public class FileActivity: Object, Codable {
         case fileId = "file_id"
         case pathNew = "new_path"
         case oldPath = "old_path"
+    }
+}
+
+extension FileActivity: ContentIdentifiable, ContentEquatable {
+    public func isContentEqual(to source: FileActivity) -> Bool {
+        return fileId == source.fileId
     }
 }
 
