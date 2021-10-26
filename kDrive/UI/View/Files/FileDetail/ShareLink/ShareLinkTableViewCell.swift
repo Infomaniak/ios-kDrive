@@ -29,6 +29,8 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
 
 class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var shareLinkSwitch: UISwitch!
+    @IBOutlet weak var shareLinkTitleLabel: IKLabel!
+    @IBOutlet weak var shareIconImageView: UIImageView!
     @IBOutlet weak var shareLinkStackView: UIStackView!
     @IBOutlet weak var activeLabel: UILabel!
     @IBOutlet weak var copyTextField: UITextField!
