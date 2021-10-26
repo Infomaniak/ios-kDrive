@@ -43,19 +43,30 @@ struct Right {
     var icon: UIImage
     var description: (String) -> String
 
+//    static let shareLinkRights = [
+//        Right(key: "public",
+//              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
+//              icon: KDriveAsset.view.image,
+//              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
+//        Right(key: "inherit",
+//              title: KDriveStrings.Localizable.shareLinkDriveUsersRightTitle,
+//              icon: KDriveAsset.users.image,
+//              description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) }),
+//        Right(key: "password",
+//              title: KDriveStrings.Localizable.shareLinkPasswordRightTitle,
+//              icon: KDriveAsset.lock.image,
+//              description: { _ in KDriveStrings.Localizable.shareLinkPasswordRightDescription })
+//    ]
+    
     static let shareLinkRights = [
+        Right(key: "restricted",
+              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
+              icon: KDriveAsset.lock.image,
+              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
         Right(key: "public",
               title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
-              icon: KDriveAsset.view.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
-        Right(key: "inherit",
-              title: KDriveStrings.Localizable.shareLinkDriveUsersRightTitle,
-              icon: KDriveAsset.users.image,
+              icon: KDriveAsset.unlock.image,
               description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) }),
-        Right(key: "password",
-              title: KDriveStrings.Localizable.shareLinkPasswordRightTitle,
-              icon: KDriveAsset.lock.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkPasswordRightDescription })
     ]
     static let onlyOfficeRights = [
         Right(key: "read",

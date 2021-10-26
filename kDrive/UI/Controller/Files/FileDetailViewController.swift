@@ -541,6 +541,16 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .share {
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+            rightsSelectionViewController.modalPresentationStyle = .fullScreen
+            if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
+                rightsSelectionVC.driveFileManager = driveFileManager
+//                rightsSelectionVC.selectedRight = accessRightValue
+                rightsSelectionVC.rightSelectionType = .shareLinkSettings
+                rightsSelectionVC.delegate = self
+            }
+            present(rightsSelectionViewController, animated: true)        }
         if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && driveFileManager.drive.categoryRights.canPutCategoryOnFile {
             let manageCategoriesViewController = ManageCategoriesViewController.instantiate(file: file, driveFileManager: driveFileManager)
             navigationController?.pushViewController(manageCategoriesViewController, animated: true)
