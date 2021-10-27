@@ -43,6 +43,7 @@ struct Right {
     var icon: UIImage
     var description: (String) -> String
 
+    // LN: To delete
 //    static let shareLinkRights = [
 //        Right(key: "public",
 //              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
@@ -57,16 +58,16 @@ struct Right {
 //              icon: KDriveAsset.lock.image,
 //              description: { _ in KDriveStrings.Localizable.shareLinkPasswordRightDescription })
 //    ]
-    
+
     static let shareLinkRights = [
         Right(key: "restricted",
-              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
+              title: "Restreint", // KDriveStrings.Localizable.shareLinkPublicRightTitle, // LN: To change
               icon: KDriveAsset.lock.image,
               description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
         Right(key: "public",
               title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
               icon: KDriveAsset.unlock.image,
-              description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) }),
+              description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) })
     ]
     static let onlyOfficeRights = [
         Right(key: "read",

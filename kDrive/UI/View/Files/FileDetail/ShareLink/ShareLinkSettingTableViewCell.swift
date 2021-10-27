@@ -19,10 +19,12 @@
 import UIKit
 import kDriveCore
 import InfomaniakCore
+import MaterialOutlinedTextField
 
 protocol ShareLinkSettingsDelegate: AnyObject {
     func didUpdateSettingValue(for option: ShareLinkSettingsViewController.Option, newValue value: Bool)
     func didUpdateExpirationDateSettingValue(for option: ShareLinkSettingsViewController.Option, newValue value: Bool, date: TimeInterval?)
+    func didUpdatePasswordSettingValue(for option: ShareLinkSettingsViewController.Option, newValue value: Bool, date: TimeInterval?)
 }
 
 class ShareLinkSettingTableViewCell: InsetTableViewCell {
@@ -30,6 +32,8 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     @IBOutlet weak var settingSwitch: UISwitch!
     @IBOutlet weak var settingDetail: UILabel!
     @IBOutlet weak var dateTextField: UITextField!
+    @IBOutlet weak var passwordTextFiled: MaterialOutlinedTextField!
+    @IBOutlet weak var pickersView: UIStackView!
     @IBOutlet weak var compactDatePicker: UIDatePicker!
     @IBOutlet weak var updateButton: UIButton!
 
@@ -43,6 +47,8 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         dateTextField.isHidden = true
+        passwordTextFiled.isHidden = true
+        pickersView.isHidden = true
         compactDatePicker.isHidden = true
         updateButton.isHidden = true
 
@@ -100,6 +106,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
             self.expirationDate = expirationTime != nil ? Date(timeIntervalSince1970: expirationTime!) : nil
             if #available(iOS 13.4, *) {
                 compactDatePicker.isHidden = !optionValue
+                pickersView.isHidden = !optionValue
                 if let date = expirationDate {
                     compactDatePicker.date = date
                 }

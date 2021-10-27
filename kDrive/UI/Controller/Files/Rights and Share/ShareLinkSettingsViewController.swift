@@ -24,14 +24,16 @@ class ShareLinkSettingsViewController: UIViewController {
     var driveFileManager: DriveFileManager!
 
     enum Option: CaseIterable {
-        case expirationDate, allowDownload, blockUsersConsult, blockComments
+        case addPassword, expirationDate, allowDownload, blockUsersConsult, blockComments
 
         var title: String {
             switch self {
-            case .expirationDate:
-                return KDriveStrings.Localizable.allAddExpirationDateTitle
+            case .addPassword:
+                return KDriveStrings.Localizable.shareLinkPasswordRightTitle
             case .allowDownload:
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadTitle
+            case .expirationDate:
+                return KDriveStrings.Localizable.allAddExpirationDateTitle
             case .blockUsersConsult:
                 return KDriveStrings.Localizable.shareLinkSettingsBlockUsersConsultTitle
             case .blockComments:
@@ -41,10 +43,12 @@ class ShareLinkSettingsViewController: UIViewController {
 
         var description: String {
             switch self {
-            case .expirationDate:
-                return KDriveStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
+            case .addPassword:
+                return KDriveStrings.Localizable.shareLinkPasswordRightDescription
             case .allowDownload:
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
+            case .expirationDate:
+                return KDriveStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
             case .blockUsersConsult:
                 return KDriveStrings.Localizable.shareLinkSettingsBlockUsersConsultDescription
             case .blockComments:
@@ -54,6 +58,8 @@ class ShareLinkSettingsViewController: UIViewController {
 
         func isEnabled(drive: Drive) -> Bool {
             if self == .expirationDate && drive.pack == .free {
+                return false
+            } else if self == .addPassword && drive.pack == .free {
                 return false
             } else {
                 return true
@@ -67,7 +73,7 @@ class ShareLinkSettingsViewController: UIViewController {
     private var optionsValue = [Option: Bool]()
     var accessRightValue: String!
     var expirationDate: TimeInterval?
-    var content: [Option] = [.expirationDate, .allowDownload]
+    var content: [Option] = [.addPassword, .allowDownload, .expirationDate]
     var password: String?
     var enableButton = true {
         didSet {
@@ -126,6 +132,7 @@ class ShareLinkSettingsViewController: UIViewController {
         if (optionsValue[.expirationDate] ?? false) && expirationDate == nil {
             enableButton = false
         } else {
+            // LN: To remove
             if accessRightValue == "password" && password?.count ?? 0 < 1 {
                 enableButton = false
             } else {
@@ -164,8 +171,9 @@ class ShareLinkSettingsViewController: UIViewController {
         accessRightValue = shareFile.link!.permission
         // Options
         optionsValue = [
-            .expirationDate: shareFile.link!.validUntil != nil,
+            .addPassword: true, // LN: to change
             .allowDownload: !shareFile.link!.blockDownloads,
+            .expirationDate: shareFile.link!.validUntil != nil,
             .blockUsersConsult: shareFile.link!.blockInformation,
             .blockComments: shareFile.link!.blockComments
         ]
@@ -301,7 +309,7 @@ extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
         expirationDate = date
         updateButton()
         if let index = Option.allCases.firstIndex(of: option) {
-            tableview.reloadRows(at: [IndexPath(row: index + 1, section: 0)], with: .automatic)
+            tableview.reloadRows(at: [IndexPath(row: index + 2, section: 0)], with: .automatic)
         }
     }
 
