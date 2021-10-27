@@ -62,10 +62,11 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             var isLoading = false
 
             for section in changeSet {
-                if section.model == .top {
+                switch section.model {
+                case .top:
                     topRows = section.elements.compactMap { $0.base as? HomeTopRow }
                     showInsufficientStorage = topRows.contains(.insufficientStorage)
-                } else if section.model == .recentFiles {
+                case .recentFiles:
                     for element in section.elements {
                         if let recentFileRow = element.base as? RecentFileRow {
                             if recentFileRow == .empty {
@@ -81,8 +82,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                             fatalError("Invalid HomeViewController model")
                         }
                     }
-                } else {
-                    fatalError("Invalid HomeViewController model")
                 }
             }
 
@@ -122,7 +121,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         case recentFiles
     }
 
-    internal enum HomeTopRow: Equatable, Hashable, Differentiable {
+    internal enum HomeTopRow: Differentiable {
         case offline
         case search
         case insufficientStorage
@@ -152,7 +151,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     private var recentFilesController: HomeRecentFilesController!
-    private var viewModel: HomeViewModel!
+    private lazy var viewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: false, recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
     private var recentFilesControllers: [HomeRecentFilesController.Type] {
         if driveFileManager.drive.isProOrTeam {
             return [HomeRecentActivitiesController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
@@ -163,8 +162,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: false, recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
-
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(cellView: HomeRecentFilesSelectorCollectionViewCell.self)
@@ -320,7 +317,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                                            recentFilesEmpty: false,
                                            isLoading: true))
 
-        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeRecentFilesHeaderView } as? HomeRecentFilesHeaderView
+        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
         headerView?.titleLabel.text = recentFilesController.title
         headerView?.switchLayoutButton.isHidden = !recentFilesController.listStyleEnabled
         recentFilesController.loadNextPage()
@@ -386,8 +383,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
         driveFileManager = newDriveFileManager
-        let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first { $0 is HomeLargeTitleHeaderView } as? HomeLargeTitleHeaderView
+        let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeLargeTitleHeaderView }.first
         driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
+
         let viewModel = HomeViewModel(topRows: getTopRows(), showInsufficientStorage: false, recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
         reload(newViewModel: viewModel)
         DispatchQueue.main.async { [weak self] in
