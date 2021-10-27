@@ -1052,6 +1052,7 @@ extension FileListViewController: SelectDelegate {
 #if !ISEXTENSION
     extension FileListViewController: SwitchDriveDelegate {
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
+            let isDifferentDrive = newDriveFileManager.drive.id != driveFileManager.drive.id
             driveFileManager = newDriveFileManager
             currentDirectory = driveFileManager.getRootFile()
             setTitle()
@@ -1064,7 +1065,9 @@ extension FileListViewController: SelectDelegate {
             sortedFiles = []
             collectionView.reloadData()
             reloadData()
-            navigationController?.popToRootViewController(animated: false)
+            if isDifferentDrive {
+                navigationController?.popToRootViewController(animated: false)
+            }
         }
     }
 #endif
