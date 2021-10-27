@@ -28,18 +28,8 @@ class HomeOfflineFilesController: HomeRecentFilesController {
                   listStyleEnabled: true)
     }
 
-    override func loadNextPage(forceRefresh: Bool = false) {
-        guard !loading && moreComing else {
-            return
-        }
-
-        moreComing = false
-        loading = false
-        let files = driveFileManager.getAvailableOfflineFiles()
-        self.empty = files.isEmpty
-        DispatchQueue.main.async {
-            self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
-        }
+    override func getFiles(completion: @escaping ([File]?) -> Void) {
+        completion(driveFileManager.getAvailableOfflineFiles())
     }
 
     override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {

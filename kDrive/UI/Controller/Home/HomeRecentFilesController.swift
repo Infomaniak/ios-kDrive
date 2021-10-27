@@ -54,7 +54,26 @@ class HomeRecentFilesController {
         homeViewController = nil
     }
 
-    func loadNextPage(forceRefresh: Bool = false) {}
+    func getFiles(completion: @escaping ([File]?) -> Void) {}
+
+    func loadNextPage(forceRefresh: Bool = false) {
+        guard !loading && moreComing else {
+            return
+        }
+        loading = true
+        getFiles { files in
+            self.loading = false
+            if let files = files {
+                self.empty = self.page == 1 && files.isEmpty
+                self.moreComing = files.count == DriveApiFetcher.itemPerPage
+                self.page += 1
+
+                DispatchQueue.main.async {
+                    self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
+                }
+            }
+        }
+    }
 
     func getEmptyLayout() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))

@@ -27,23 +27,9 @@ class HomePhotoListController: HomeRecentFilesController {
                   listStyleEnabled: false)
     }
 
-    override func loadNextPage(forceRefresh: Bool = false) {
-        guard !loading && moreComing else {
-            return
-        }
-        loading = true
-
-        driveFileManager.getLastPictures(page: page) { response, _ in
-            self.loading = false
-            if let files = response {
-                self.empty = self.page == 1 && files.isEmpty
-                self.moreComing = files.count == DriveApiFetcher.itemPerPage
-                self.page += 1
-
-                DispatchQueue.main.async {
-                    self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
-                }
-            }
+    override func getFiles(completion: @escaping ([File]?) -> Void) {
+        driveFileManager.getLastPictures(page: page) { fetchedFiles, _ in
+            completion(fetchedFiles)
         }
     }
 
