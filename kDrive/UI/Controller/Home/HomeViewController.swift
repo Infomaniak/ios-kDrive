@@ -88,7 +88,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             }
         }
 
-        var stagedChangeSet: [ArraySection<HomeSection, AnyDifferentiable>] {
+        lazy var changeSet: [ArraySection<HomeSection, AnyDifferentiable>] = {
             var sections = [
                 ArraySection(model: HomeSection.top, elements: topRows.map { AnyDifferentiable($0) })
             ]
@@ -109,7 +109,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                 sections.append(ArraySection(model: HomeSection.recentFiles, elements: anyRecentFiles))
             }
             return sections
-        }
+        }()
     }
 
     internal enum HomeSection: Differentiable, CaseIterable {
@@ -293,7 +293,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func reload(newViewModel: HomeViewModel) {
-        let changeset = StagedChangeset(source: viewModel.stagedChangeSet, target: newViewModel.stagedChangeSet)
+        var newViewModel = newViewModel
+        let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
         collectionView.reload(using: changeset) { data in
             self.viewModel = HomeViewModel(changeSet: data)
         }
@@ -417,22 +418,11 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
 extension HomeViewController {
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch HomeSection.allCases[section] {
-        case .top:
-            return viewModel.topRows.count
-        case .recentFiles:
-            if viewModel.recentFilesEmpty {
-                return 1
-            } else if viewModel.isLoading {
-                return viewModel.recentFilesCount + HomeViewController.loadingCellCount
-            } else {
-                return viewModel.recentFilesCount
-            }
-        }
+        return viewModel.changeSet[section].elements.count
     }
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return HomeSection.allCases.count
+        return viewModel.changeSet.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
