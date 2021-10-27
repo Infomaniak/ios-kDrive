@@ -157,6 +157,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             return [HomeLastModificationsController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
         }
     }
+    private var refreshControl = UIRefreshControl()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -179,11 +180,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.delegate = self
         collectionView.contentInset = UIEdgeInsets(top: navbarHeight, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: navbarHeight, left: 0, bottom: 0, right: 0)
+        collectionView.refreshControl = refreshControl
+
+        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            DispatchQueue.main.async {
                 self?.reloadTopRows()
-            }
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
@@ -264,6 +266,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadWith(fetchedFiles: [File], isEmpty: Bool) {
+        refreshControl.endRefreshing()
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: .file(fetchedFiles),
                                          recentFilesEmpty: isEmpty,
@@ -272,6 +275,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadWith(fetchedActivities: [FileActivity], isEmpty: Bool) {
+        refreshControl.endRefreshing()
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: .fileActivity(fetchedActivities),
                                          recentFilesEmpty: isEmpty,
@@ -284,6 +288,17 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
         collectionView.reload(using: changeset) { data in
             self.viewModel = HomeViewModel(changeSet: data)
+        }
+    }
+
+    @objc func forceRefresh() {
+        currentRecentFilesController?.invalidated = true
+        recentFilesControllersCache.removeAll()
+        let viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
+        reload(newViewModel: viewModel)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
         }
     }
 
