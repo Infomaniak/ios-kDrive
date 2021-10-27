@@ -96,20 +96,9 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         return resultActivities
     }
 
-    private func loadLocalRecentActivities(completion: @escaping () -> Void) {
-        DispatchQueue.global(qos: .utility).async {
-            let activities = self.driveFileManager.getLocalRecentActivities()
-            // self.recentActivities = self.mergeAndClean(activities: activities)
-            DispatchQueue.main.async {
-                completion()
-            }
-        }
-    }
-
     override func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(200))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
 

@@ -59,12 +59,13 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         super.prepareForReuse()
         isLoading = false
         activity = nil
+        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         detailLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
     }
 
     override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 6) {
-        contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: radius)
+        contentInsetView.cornerRadius = radius
     }
 
     func configureLoading() {
@@ -85,6 +86,9 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         timeLabel.text = nil
         avatarImage.image = KDriveAsset.placeholderAvatar.image
         tableViewHeight.constant = bottomViewCellHeight
+        collectionView.reloadData()
+        tableView.reloadData()
+        contentInsetView.backgroundColor = KDriveAsset.loaderDefaultColor.color
     }
 
     func configureWith(recentActivity: FileActivity) {
