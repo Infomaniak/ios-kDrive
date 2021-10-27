@@ -146,7 +146,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
 
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
-    private var recentFilesController: HomeRecentFilesController!
+    private var currentRecentFilesController: HomeRecentFilesController!
+    private var recentFilesControllersCache = [String: HomeRecentFilesController]()
     private lazy var viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
     private var showInsufficientStorage = true
     private var recentFilesControllers: [HomeRecentFilesController.Type] {
@@ -263,30 +264,16 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadWith(fetchedFiles: [File], isEmpty: Bool) {
-        var newFiles = [File]()
-        if !isEmpty {
-            if case .file(let files) = viewModel.recentFiles {
-                newFiles = files
-            }
-            newFiles.append(contentsOf: fetchedFiles)
-        }
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
-                                         recentFiles: .file(newFiles),
+                                         recentFiles: .file(fetchedFiles),
                                          recentFilesEmpty: isEmpty,
                                          isLoading: false)
         reload(newViewModel: newViewModel)
     }
 
     func reloadWith(fetchedActivities: [FileActivity], isEmpty: Bool) {
-        var newActivities = [FileActivity]()
-        if !isEmpty {
-            if case .fileActivity(let activities) = viewModel.recentFiles {
-                newActivities = activities
-            }
-            newActivities.append(contentsOf: fetchedActivities)
-        }
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
-                                         recentFiles: .fileActivity(newActivities),
+                                         recentFiles: .fileActivity(fetchedActivities),
                                          recentFilesEmpty: isEmpty,
                                          isLoading: false)
         reload(newViewModel: newViewModel)
@@ -300,11 +287,22 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }
     }
 
+    private func getCachedRecentFilesController(for index: Int) -> HomeRecentFilesController {
+        let controllerName = String(describing: recentFilesControllers[index])
+        if let controller = recentFilesControllersCache[controllerName] {
+            return controller
+        } else {
+            let controller = recentFilesControllers[index].initInstance(driveFileManager: driveFileManager, homeViewController: self)
+            recentFilesControllersCache[controllerName] = controller
+            return controller
+        }
+    }
+
     private func setSelectedHomeIndex(_ index: Int) {
         UserDefaults.shared.selectedHomeIndex = index
-        recentFilesController?.cancelLoading()
+        currentRecentFilesController?.invalidated = true
 
-        recentFilesController = recentFilesControllers[index].initInstance(driveFileManager: driveFileManager, homeViewController: self)
+        currentRecentFilesController = getCachedRecentFilesController(for: index)
 
         reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                            recentFiles: .file([]),
@@ -312,9 +310,13 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                                            isLoading: true))
 
         let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
-        headerView?.titleLabel.text = recentFilesController.title
-        headerView?.switchLayoutButton.isHidden = !recentFilesController.listStyleEnabled
-        recentFilesController.loadNextPage()
+        headerView?.titleLabel.text = currentRecentFilesController.title
+        headerView?.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
+        if currentRecentFilesController.page == 1 {
+            currentRecentFilesController.loadNextPage()
+        } else {
+            currentRecentFilesController.restoreCachedPages()
+        }
     }
 
     private func updateNavbarAppearance() {
@@ -342,7 +344,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             case .top:
                 return self.generateTopSectionLayout()
             case .recentFiles:
-                if let recentFilesController = self.recentFilesController {
+                if let recentFilesController = self.currentRecentFilesController {
                     if recentFilesController.empty {
                         return recentFilesController.getEmptyLayout()
                     } else {
@@ -377,6 +379,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
         driveFileManager = newDriveFileManager
+        recentFilesControllersCache.removeAll()
         let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeLargeTitleHeaderView }.first
         driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
 
@@ -476,10 +479,10 @@ extension HomeViewController {
         case .recentFiles:
             if viewModel.recentFilesEmpty {
                 let cell = collectionView.dequeueReusableCell(type: HomeEmptyFilesCollectionViewCell.self, for: indexPath)
-                recentFilesController?.configureEmptyCell(cell)
+                currentRecentFilesController?.configureEmptyCell(cell)
                 return cell
             } else {
-                let cellType = UserDefaults.shared.homeListStyle == .list ? recentFilesController.listCellType : recentFilesController.gridCellType
+                let cellType = UserDefaults.shared.homeListStyle == .list ? currentRecentFilesController.listCellType : currentRecentFilesController.gridCellType
                 if let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as? FileCollectionViewCell {
                     if viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1 {
                         cell.configureLoading()
@@ -531,9 +534,9 @@ extension HomeViewController {
                 return driveHeaderView
             case .recentFiles:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeRecentFilesHeaderView.self, for: indexPath)
-                headerView.titleLabel.text = recentFilesController.title
+                headerView.titleLabel.text = currentRecentFilesController.title
                 headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
-                headerView.switchLayoutButton.isHidden = !recentFilesController.listStyleEnabled
+                headerView.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
                 headerView.actionHandler = { button in
                     UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
                     button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
@@ -584,12 +587,12 @@ extension HomeViewController {
 
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if HomeSection.allCases[indexPath.section] == .recentFiles {
-            if indexPath.row >= viewModel.recentFilesCount - 10 && !recentFilesController.loading && recentFilesController.moreComing {
+            if indexPath.row >= viewModel.recentFilesCount - 10 && !currentRecentFilesController.loading && currentRecentFilesController.moreComing {
                 reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                    recentFiles: viewModel.recentFiles,
                                                    recentFilesEmpty: false,
                                                    isLoading: true))
-                recentFilesController?.loadNextPage()
+                currentRecentFilesController?.loadNextPage()
             }
         }
     }

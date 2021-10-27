@@ -37,6 +37,9 @@ class HomeRecentFilesController {
     var empty = false
     var loading = false
     var moreComing = true
+    var invalidated = false
+
+    private var files = [File]()
 
     init(driveFileManager: DriveFileManager, homeViewController: HomeViewController, listCellType: UICollectionViewCell.Type, gridCellType: UICollectionViewCell.Type, emptyCellType: EmptyTableView.EmptyTableViewType, title: String, selectorTitle: String, listStyleEnabled: Bool) {
         self.title = title
@@ -50,23 +53,31 @@ class HomeRecentFilesController {
         self.homeViewController = homeViewController
     }
 
-    func cancelLoading() {
-        homeViewController = nil
-    }
-
     func getFiles(completion: @escaping ([File]?) -> Void) {}
+
+    func restoreCachedPages() {
+        DispatchQueue.main.async {
+            self.homeViewController?.reloadWith(fetchedFiles: self.files, isEmpty: self.empty)
+        }
+    }
 
     func loadNextPage(forceRefresh: Bool = false) {
         guard !loading && moreComing else {
             return
         }
+        invalidated = false
         loading = true
         getFiles { files in
             self.loading = false
             if let files = files {
-                self.empty = self.page == 1 && files.isEmpty
+                self.files.append(contentsOf: files)
+                self.empty = files.isEmpty
                 self.moreComing = files.count == DriveApiFetcher.itemPerPage
                 self.page += 1
+
+                guard !self.invalidated else {
+                    return
+                }
 
                 DispatchQueue.main.async {
                     self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)

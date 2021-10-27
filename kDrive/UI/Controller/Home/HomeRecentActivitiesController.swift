@@ -22,6 +22,8 @@ import kDriveCore
 class HomeRecentActivitiesController: HomeRecentFilesController {
     private let mergeFileCreateDelay = 43_200 // 12h
 
+    private var mergedActivities = [FileActivity]()
+
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager,
                   homeViewController: homeViewController,
@@ -30,10 +32,17 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                   listStyleEnabled: false)
     }
 
+    override func restoreCachedPages() {
+        DispatchQueue.main.async {
+            self.homeViewController?.reloadWith(fetchedActivities: self.mergedActivities, isEmpty: self.empty)
+        }
+    }
+
     override func loadNextPage(forceRefresh: Bool = false) {
         guard !loading && moreComing else {
             return
         }
+        invalidated = false
         loading = true
 
         driveFileManager.apiFetcher.getRecentActivity(driveId: driveFileManager.drive.id, page: page) { response, _ in
@@ -45,8 +54,13 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
 
                 DispatchQueue.global(qos: .utility).async {
                     let mergedActivities = self.mergeAndClean(activities: activities)
+                    self.mergedActivities.append(contentsOf: mergedActivities)
+
+                    guard !self.invalidated else {
+                        return
+                    }
                     DispatchQueue.main.async {
-                        self.homeViewController?.reloadWith(fetchedActivities: mergedActivities, isEmpty: self.empty)
+                        self.homeViewController?.reloadWith(fetchedActivities: self.mergedActivities, isEmpty: self.empty)
                     }
                 }
                 // Update cache
@@ -56,12 +70,15 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
             } else {
                 DispatchQueue.global(qos: .utility).async {
                     let activities = self.driveFileManager.getLocalRecentActivities()
-                    let mergedActivities = self.mergeAndClean(activities: activities)
+                    self.mergedActivities = self.mergeAndClean(activities: activities)
 
-                    self.empty = mergedActivities.isEmpty
+                    self.empty = self.mergedActivities.isEmpty
                     self.moreComing = false
+                    guard !self.invalidated else {
+                        return
+                    }
                     DispatchQueue.main.async {
-                        self.homeViewController?.reloadWith(fetchedActivities: mergedActivities, isEmpty: self.empty)
+                        self.homeViewController?.reloadWith(fetchedActivities: self.mergedActivities, isEmpty: self.empty)
                     }
                 }
             }
