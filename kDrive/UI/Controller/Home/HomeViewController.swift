@@ -512,6 +512,7 @@ extension HomeViewController {
                         if case .fileActivity(let activities) = viewModel.recentFiles {
                             let activity = activities[indexPath.row]
                             cell.configureWith(recentActivity: activity)
+                            cell.delegate = self
                         }
                     }
                     return cell
@@ -577,8 +578,7 @@ extension HomeViewController {
                 switch viewModel.recentFiles {
                 case .file(let files):
                     filePresenter.present(driveFileManager: driveFileManager, file: files[indexPath.row], files: files, normalFolderHierarchy: false)
-                case .fileActivity(let activities):
-                    // TODO: handle file activities
+                case .fileActivity:
                     break
                 }
             }
@@ -625,6 +625,25 @@ extension HomeViewController: FileCellDelegate {
         fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
         if let floatingPanelViewController = floatingPanelViewController {
             present(floatingPanelViewController, animated: true)
+        }
+    }
+}
+
+// MARK: - RecentActivityDelegate
+
+extension HomeViewController: RecentActivityDelegate {
+    func didSelectActivity(index: Int, activities: [FileActivity]) {
+        let activity = activities[index]
+        guard let file = activity.file else {
+            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorPreviewDeleted)
+            return
+        }
+
+        if activities.count > 3 && index > 1 {
+            let nextVC = RecentActivityFilesViewController.instantiate(activities: activities, driveFileManager: driveFileManager)
+            filePresenter.navigationController?.pushViewController(nextVC, animated: true)
+        } else {
+            filePresenter.present(driveFileManager: driveFileManager, file: file, files: activities.compactMap(\.file), normalFolderHierarchy: false)
         }
     }
 }
