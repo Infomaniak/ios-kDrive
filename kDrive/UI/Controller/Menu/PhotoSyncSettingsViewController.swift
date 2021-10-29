@@ -412,16 +412,6 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
                     self.newSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
-
-                    if self.newSyncSettings.syncMode == .all {
-                        if #available(iOS 13.0, *) { } else {
-                            // DispatchQueue because we need to present this view after dismissing the previous one
-                            DispatchQueue.main.async {
-                                let alertController = AlertTextViewController(title: KDriveStrings.Localizable.ios12LimitationPhotoSyncTitle, message: KDriveStrings.Localizable.ios12LimitationPhotoSyncDescription, action: KDriveStrings.Localizable.buttonClose, hasCancelButton: false, handler: nil)
-                                self.present(alertController, animated: true)
-                            }
-                        }
-                    }
                 }
                 present(alert, animated: true)
             }

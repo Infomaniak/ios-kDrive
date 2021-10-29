@@ -57,11 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             SentrySDK.capture(error: error)
         }
 
-        if #available(iOS 13.0, *) {
-            registerBackgroundTasks()
-        } else {
-            UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplication.backgroundFetchIntervalMinimum)
-        }
+        registerBackgroundTasks()
 
         NotificationsHelper.askForPermissions()
         NotificationsHelper.registerCategories()
@@ -130,7 +126,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         DDLogError("Unable to register for remote notifications: \(error.localizedDescription)")
     }
 
-    @available(iOS 13.0, *)
     private func registerBackgroundTasks() {
         var registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
             self.scheduleBackgroundRefresh()
@@ -175,7 +170,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         }
     }
 
-    @available(iOS 13.0, *)
     private func scheduleBackgroundRefresh() {
         let backgroundRefreshRequest = BGAppRefreshTaskRequest(identifier: Constants.backgroundRefreshIdentifier)
         backgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
@@ -193,15 +187,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        if #available(iOS 13.0, *) {
-            /* To debug background tasks:
-              Launch ->
-              e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
-              Force early termination ->
-              e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
-             */
-            scheduleBackgroundRefresh()
-        }
+        /* To debug background tasks:
+          Launch ->
+          e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
+          Force early termination ->
+          e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
+         */
+        scheduleBackgroundRefresh()
         if UserDefaults.shared.isAppLockEnabled && !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             AppLockHelper.shared.setTime()
         }
