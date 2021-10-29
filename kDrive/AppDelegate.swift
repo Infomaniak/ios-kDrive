@@ -71,9 +71,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             UIView.setAnimationsEnabled(false)
         }
 
-        if #available(iOS 13.0, *) {
-            window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
-        }
+        window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
 
         // Attach an observer to the payment queue.
         SKPaymentQueue.default().add(StoreObserver.shared)
