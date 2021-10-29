@@ -156,7 +156,7 @@ public enum NotificationsHelper {
                 return
             }
 
-            let isInBackground = true // Constants.isInExtension || UIApplication.shared.applicationState != .active
+            let isInBackground = Constants.isInExtension || UIApplication.shared.applicationState != .active
 
             if isInBackground {
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
