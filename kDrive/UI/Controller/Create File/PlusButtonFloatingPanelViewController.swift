@@ -1,31 +1,30 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
+import AVFoundation
 import FloatingPanel
+import kDriveCore
+import PhotosUI
+import UIKit
 import Vision
 import VisionKit
-import PhotosUI
-import AVFoundation
-import kDriveCore
 
 class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
-
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
 
@@ -55,7 +54,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
     var contentHeight: CGFloat {
         return content.reduce(CGFloat(100)) { last, section in
-            return last + CGFloat(60 * section.count)
+            last + CGFloat(60 * section.count)
         }
     }
 
@@ -69,17 +68,15 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
         // Hide unavailable actions
         #if !DEBUG
-            if #available(iOS 13.0, *), VNDocumentCameraViewController.isSupported {
-                // Action is available: do nothing
-            } else {
-                content[1].removeAll { $0 == .scanAction }
-            }
-            if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-                content[1].removeAll { $0 == .takePictureAction }
-            }
-            if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-                content[1].removeAll { $0 == .importMediaAction }
-            }
+        if !VNDocumentCameraViewController.isSupported {
+            content[1].removeAll { $0 == .scanAction }
+        }
+        if !UIImagePickerController.isSourceTypeAvailable(.camera) {
+            content[1].removeAll { $0 == .takePictureAction }
+        }
+        if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+            content[1].removeAll { $0 == .importMediaAction }
+        }
         #endif
     }
 
@@ -151,7 +148,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
             let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: currentDirectory, driveFileManager: driveFileManager)
             mainTabViewController.present(newFolderViewController, animated: true)
         case .scanAction:
-            if #available(iOS 13.0, *), VNDocumentCameraViewController.isSupported {
+            if VNDocumentCameraViewController.isSupported {
                 let scanDoc = VNDocumentCameraViewController()
                 let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
                 navigationViewController.modalPresentationStyle = .fullScreen
@@ -210,7 +207,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         return PlusButtonFloatingPanelLayout(height: min(contentHeight + view.safeAreaInsets.bottom, UIScreen.main.bounds.size.height - 48))
     }
 
-    open override func accessibilityPerformEscape() -> Bool {
+    override open func accessibilityPerformEscape() -> Bool {
         dismiss(animated: true)
         return true
     }
@@ -219,5 +216,4 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         // Remove the panel when it's pushed one third down
         return location.y > fpc.backdropView.frame.height * 1 / 3
     }
-
 }

@@ -22,7 +22,6 @@ import Vision
 import PDFKit
 import kDriveCore
 
-@available(iOS 13.0, *)
 class SaveScanViewController: SaveFileViewController {
 
     var scan: VNDocumentCameraScan!

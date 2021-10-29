@@ -43,7 +43,6 @@ class ScanTypeTableViewCell: UITableViewCell {
         }
     }
 
-    @available(iOS 13.0, *)
     func configureWith(scan: VNDocumentCameraScan) {
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.isEnabled = scan.pageCount == 1

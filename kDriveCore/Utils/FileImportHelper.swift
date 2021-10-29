@@ -203,7 +203,6 @@ public class FileImportHelper {
         try upload(data: data, name: name, drive: drive, directory: directory)
     }
 
-    @available(iOS 13.0, *)
     public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive) throws {
         if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
             throw ImportError.accessDenied
