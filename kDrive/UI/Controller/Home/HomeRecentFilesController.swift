@@ -22,6 +22,9 @@ import kDriveCore
 import UIKit
 
 class HomeRecentFilesController {
+    static let updateDelay: TimeInterval = 60 // 1 minute
+    private var lastUpdate = Date()
+
     let driveFileManager: DriveFileManager
     weak var homeViewController: HomeViewController?
 
@@ -38,6 +41,7 @@ class HomeRecentFilesController {
     var loading = false
     var moreComing = true
     var invalidated = false
+    var forceRefresh = false
 
     private var files = [File]()
 
@@ -56,12 +60,32 @@ class HomeRecentFilesController {
     func getFiles(completion: @escaping ([File]?) -> Void) {}
 
     func restoreCachedPages() {
-        DispatchQueue.main.async {
-            self.homeViewController?.reloadWith(fetchedFiles: self.files, isEmpty: self.empty)
+        invalidated = true
+        homeViewController?.reloadWith(fetchedFiles: files, isEmpty: empty)
+        refreshIfNeeded()
+    }
+
+    func refreshIfNeeded() {
+        if Date().timeIntervalSince(lastUpdate) > HomeRecentFilesController.updateDelay {
+            lastUpdate = Date()
+            forceRefresh = true
+            loadNextPage()
         }
     }
 
-    func loadNextPage(forceRefresh: Bool = false) {
+    func resetController() {
+        forceRefresh = false
+        files = []
+        page = 1
+        loading = false
+        moreComing = true
+    }
+
+    func loadNextPage() {
+        if forceRefresh {
+            resetController()
+        }
+
         guard !loading && moreComing else {
             return
         }

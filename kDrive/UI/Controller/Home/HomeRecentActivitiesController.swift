@@ -38,7 +38,12 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         }
     }
 
-    override func loadNextPage(forceRefresh: Bool = false) {
+    override func loadNextPage() {
+        if forceRefresh {
+            resetController()
+            mergedActivities = []
+        }
+
         guard !loading && moreComing else {
             return
         }

@@ -22,7 +22,7 @@ import kDriveCore
 import UIKit
 
 class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable {
-    static let loadingCellCount = 12
+    private static let loadingCellCount = 12
 
     enum HomeFileType {
         case file([File])
@@ -144,12 +144,10 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private var floatingPanelViewController: DriveFloatingPanelController?
     private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
-
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
+
     private var currentRecentFilesController: HomeRecentFilesController!
     private var recentFilesControllersCache = [String: HomeRecentFilesController]()
-    private lazy var viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
-    private var showInsufficientStorage = true
     private var recentFilesControllers: [HomeRecentFilesController.Type] {
         if driveFileManager.drive.isProOrTeam {
             return [HomeRecentActivitiesController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
@@ -157,6 +155,11 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             return [HomeLastModificationsController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
         }
     }
+
+    private lazy var viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
+    private var showInsufficientStorage = true
+    private var lastUpdate = Date()
+
     private var refreshControl = UIRefreshControl()
 
     override func viewDidLoad() {
@@ -185,7 +188,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-                self?.reloadTopRows()
+            self?.reloadTopRows()
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
@@ -319,15 +322,15 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
         currentRecentFilesController = getCachedRecentFilesController(for: index)
 
-        reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
-                                           recentFiles: .file([]),
-                                           recentFilesEmpty: false,
-                                           isLoading: true))
-
         let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
         headerView?.titleLabel.text = currentRecentFilesController.title
         headerView?.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
+
         if currentRecentFilesController.page == 1 {
+            reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
+                                               recentFiles: .file([]),
+                                               recentFilesEmpty: false,
+                                               isLoading: true))
             currentRecentFilesController.loadNextPage()
         } else {
             currentRecentFilesController.restoreCachedPages()
@@ -388,7 +391,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         return section
     }
 
-    func presentedFromTabBar() {}
+    func presentedFromTabBar() {
+        currentRecentFilesController.refreshIfNeeded()
+    }
 
     // MARK: - Switch drive delegate
 
