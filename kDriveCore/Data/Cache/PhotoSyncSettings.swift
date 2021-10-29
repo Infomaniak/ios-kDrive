@@ -22,10 +22,18 @@ import RealmSwift
 @objc public enum PhotoSyncMode: Int, RealmEnum {
     case new = 0
     case all = 1
+
+    public var title: String {
+        switch self {
+        case .new:
+            return KDriveCoreStrings.Localizable.syncSettingsSaveDateNowValue
+        case .all:
+            return KDriveCoreStrings.Localizable.syncSettingsSaveDateAllPictureValue
+        }
+    }
 }
 
 public class PhotoSyncSettings: Object {
-
     @objc public dynamic var userId: Int = -1
     @objc public dynamic var driveId: Int = -1
     @objc public dynamic var parentDirectoryId: Int = -1
@@ -50,11 +58,21 @@ public class PhotoSyncSettings: Object {
         self.deleteAssetsAfterImport = deleteAssetsAfterImport
     }
 
-    public override init() {
+    override public init() {}
 
+    override public class func primaryKey() -> String? {
+        return "userId"
     }
 
-    public override class func primaryKey() -> String? {
-        return "userId"
+    public func isContentEqual(to settings: PhotoSyncSettings) -> Bool {
+        return userId == settings.userId &&
+            driveId == settings.driveId &&
+            parentDirectoryId == settings.parentDirectoryId &&
+            syncPicturesEnabled == settings.syncPicturesEnabled &&
+            syncVideosEnabled == settings.syncVideosEnabled &&
+            syncScreenshotsEnabled == settings.syncScreenshotsEnabled &&
+            createDatedSubFolders == settings.createDatedSubFolders &&
+            deleteAssetsAfterImport == settings.deleteAssetsAfterImport &&
+            syncMode == settings.syncMode
     }
 }
