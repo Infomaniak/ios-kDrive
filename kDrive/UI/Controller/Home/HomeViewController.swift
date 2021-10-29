@@ -341,6 +341,10 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                                                isLoading: true))
             currentRecentFilesController.loadNextPage()
         } else {
+            reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
+                                               recentFiles: .file([]),
+                                               recentFilesEmpty: false,
+                                               isLoading: false))
             currentRecentFilesController.restoreCachedPages()
         }
     }
