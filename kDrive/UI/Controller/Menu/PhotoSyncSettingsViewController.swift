@@ -193,8 +193,8 @@ class PhotoSyncSettingsViewController: UIViewController {
     }
 
     func saveSettings(using realm: Realm) {
-        guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
         if photoSyncEnabled {
+            guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
             switch newSyncSettings.syncMode {
             case .new:
                 newSyncSettings.lastSync = Date(timeIntervalSinceNow: 0)
