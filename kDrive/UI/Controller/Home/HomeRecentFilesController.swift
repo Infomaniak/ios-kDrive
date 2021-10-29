@@ -73,6 +73,14 @@ class HomeRecentFilesController {
         }
     }
 
+    func refreshIfNeeded(with file: File) {
+        if files.contains(file) {
+            lastUpdate = Date()
+            forceRefresh = true
+            loadNextPage()
+        }
+    }
+
     func resetController() {
         forceRefresh = false
         files = []

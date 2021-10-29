@@ -135,6 +135,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     var driveFileManager: DriveFileManager! {
         didSet {
             observeUploadCount()
+            observeFileUpdated()
         }
     }
 
@@ -158,7 +159,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private lazy var viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
     private var showInsufficientStorage = true
-    private var lastUpdate = Date()
+    private var filesObserver: ObservationToken?
 
     private var refreshControl = UIRefreshControl()
 
@@ -220,6 +221,29 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         navigationController?.navigationBar.layoutIfNeeded()
     }
 
+    func observeFileUpdated() {
+        filesObserver?.cancel()
+        filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
+            currentRecentFilesController?.refreshIfNeeded(with: file)
+        }
+    }
+
+    private func observeUploadCount() {
+        guard driveFileManager != nil else { return }
+        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
+            guard let self = self else { return }
+            if let index = self.viewModel.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
+               let cell = (self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? WrapperCollectionViewCell)?.subviews.first as? UploadsInProgressTableViewCell,
+               self.uploadCountManager.uploadCount > 0 {
+                // Update cell
+                cell.setUploadCount(self.uploadCountManager.uploadCount)
+            } else {
+                // Delete / Add cell
+                self.reloadTopRows()
+            }
+        }
+    }
+
     private func getTopRows() -> [HomeTopRow] {
         var topRows: [HomeTopRow]
         if ReachabilityListener.instance.currentStatus == .offline {
@@ -240,22 +264,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             topRows.append(.insufficientStorage)
         }
         return topRows
-    }
-
-    private func observeUploadCount() {
-        guard driveFileManager != nil else { return }
-        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
-            guard let self = self else { return }
-            if let index = self.viewModel.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
-               let cell = (self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? WrapperCollectionViewCell)?.subviews.first as? UploadsInProgressTableViewCell,
-               self.uploadCountManager.uploadCount > 0 {
-                // Update cell
-                cell.setUploadCount(self.uploadCountManager.uploadCount)
-            } else {
-                // Delete / Add cell
-                self.reloadTopRows()
-            }
-        }
     }
 
     func reloadTopRows() {
