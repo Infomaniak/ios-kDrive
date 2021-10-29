@@ -184,16 +184,6 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if #available(iOS 13.0, *) {
-        } else {
-            // Fix for iOS 12
-            if let cell = cell as? MenuTableViewCell {
-                cell.logoImage.tintColor = KDriveAsset.iconColor.color
-            }
-        }
-    }
-
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let section = sections[indexPath.section]
         if section == .header {
