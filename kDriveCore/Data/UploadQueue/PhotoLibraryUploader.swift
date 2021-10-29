@@ -86,7 +86,7 @@ public class PhotoLibraryUploader {
 
     func getUrlForPHAsset(_ asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
         if asset.mediaType == .video {
-            let request = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { asset, _, _ in
+            _ = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { asset, _, _ in
                 if let assetUrl = (asset as? AVURLAsset)?.url {
                     let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(assetUrl.lastPathComponent)
                     do {
@@ -100,13 +100,12 @@ public class PhotoLibraryUploader {
                 }
             }
         } else if asset.mediaType == .image {
-            var request: PHImageRequestID
             if #available(iOS 13, *) {
-                request = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
+                _ = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
                     self.handlePHAssetRequestData(data: data, completion: completion)
                 }
             } else {
-                request = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
+                _ = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
                     self.handlePHAssetRequestData(data: data, completion: completion)
                 }
             }
@@ -174,6 +173,8 @@ public class PhotoLibraryUploader {
 
     private func addImageAssetsToUploadQueue(assets: PHFetchResult<PHAsset>, initial: Bool, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
         autoreleasepool {
+            var burstIdentifier: String?
+            var burstCount = 0
             realm.beginWrite()
             assets.enumerateObjects { [self] asset, idx, stop in
                 guard let settings = settings else {
@@ -192,6 +193,14 @@ public class PhotoLibraryUploader {
                 }
                 if let creationDate = asset.creationDate {
                     correctName = dateFormatter.string(from: creationDate)
+                    // Add a number to differentiate burst photos
+                    if burstIdentifier != nil && burstIdentifier == asset.burstIdentifier {
+                        burstCount += 1
+                        correctName += "_\(burstCount)"
+                    } else {
+                        burstCount = 0
+                    }
+                    burstIdentifier = asset.burstIdentifier
                 }
                 correctName += "." + fileExtension.lowercased()
 

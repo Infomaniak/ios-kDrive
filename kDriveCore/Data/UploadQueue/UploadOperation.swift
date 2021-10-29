@@ -306,6 +306,7 @@ public class UploadOperation: Operation {
                 UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)
                 if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.parentDirectoryId == file.parentDirectoryId {
                     PhotoLibraryUploader.instance.disableSync()
+                    NotificationsHelper.sendPhotoSyncErrorNotification()
                 }
             }
         }
