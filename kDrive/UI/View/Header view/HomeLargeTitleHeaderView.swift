@@ -22,14 +22,6 @@ import UIKit
 class HomeLargeTitleHeaderView: UICollectionReusableView {
     @IBOutlet weak var titleButton: IKButton!
     var titleButtonPressedHandler: ((UIButton) -> Void)?
-    override func awakeFromNib() {
-        super.awakeFromNib()
-
-        let layoutDirection = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute)
-        titleButton.semanticContentAttribute = layoutDirection == .rightToLeft ? .forceLeftToRight : .forceRightToLeft
-        titleButton.imageView?.contentMode = .scaleAspectFit
-        titleButton.titleLabel?.adjustsFontSizeToFitWidth = true
-    }
 
     @IBAction func titleButtonPressed(_ sender: UIButton) {
         titleButtonPressedHandler?(sender)
