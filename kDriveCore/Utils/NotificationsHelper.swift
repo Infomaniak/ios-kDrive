@@ -21,15 +21,25 @@ import Foundation
 import UserNotifications
 
 public enum NotificationsHelper {
-    public static let uploadCategoryId = "com.kdrive.notification.upload"
-    private static let uploadQueueCountNotificationId = "uploadQueueCount"
-    private static let uploadDoneNotificationId = "uploadDone"
-    private static let uploadPausedNotificationId = "uploadPaused"
-    private static let disconnectedNotificationId = "accountDisconnected"
-    public static let previousUploadCountKey = "previousUploadCountKey"
-    public static let parentIdKey = "parentIdKey"
-    public static let generalCategoryId = "com.kdrive.notification.general"
-    private static let migrateNotificationId = "migrate"
+    public struct CategoryIdentifier {
+        public static let general = "com.kdrive.notification.general"
+        public static let upload = "com.kdrive.notification.upload"
+        public static let photoSyncError = "com.kdrive.notification.syncError"
+    }
+
+    public struct UserInfoKey {
+        public static let previousUploadCount = "previousUploadCountKey"
+        public static let parentId = "parentIdKey"
+    }
+
+    private struct NotificationIdentifier {
+        static let uploadQueueCount = "uploadQueueCount"
+        static let uploadDone = "uploadDone"
+        static let uploadPaused = "uploadPaused"
+        static let disconnected = "accountDisconnected"
+        static let migrate = "migrate"
+        static let photoSyncError = "photoSyncError"
+    }
 
     public static var isNotificationEnabled: Bool {
         return UserDefaults.shared.isNotificationEnabled
@@ -57,87 +67,96 @@ public enum NotificationsHelper {
     }
 
     public static func registerCategories() {
-        let uploadCategory = UNNotificationCategory(identifier: uploadCategoryId, actions: [], intentIdentifiers: [], options: [])
-        let migrateCategory = UNNotificationCategory(identifier: generalCategoryId, actions: [], intentIdentifiers: [], options: [])
+        let uploadCategory = UNNotificationCategory(identifier: CategoryIdentifier.upload, actions: [], intentIdentifiers: [], options: [])
+        let migrateCategory = UNNotificationCategory(identifier: CategoryIdentifier.general, actions: [], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories(Set([uploadCategory, migrateCategory]))
     }
 
     public static func sendUploadError(filename: String, parentId: Int, error: DriveError) {
         let content = UNMutableNotificationContent()
-        content.categoryIdentifier = uploadCategoryId
+        content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
 
         content.title = KDriveCoreStrings.Localizable.errorUpload
         content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
-        content.userInfo[parentIdKey] = parentId
+        content.userInfo[UserInfoKey.parentId] = parentId
 
         sendImmediately(notification: content, id: UUID().uuidString)
     }
 
     public static func sendUploadDoneNotification(filename: String, parentId: Int) {
         let content = UNMutableNotificationContent()
-        content.categoryIdentifier = uploadCategoryId
+        content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
 
         UNUserNotificationCenter.current().getDeliveredNotifications { _ in
             content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
             content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
-            content.userInfo[parentIdKey] = parentId
+            content.userInfo[UserInfoKey.parentId] = parentId
             let action = IKSnackBar.Action(title: KDriveCoreStrings.Localizable.locateButton) {
                 NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId])
             }
-            sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
+            sendImmediately(notification: content, id: NotificationIdentifier.uploadDone, action: action)
         }
     }
 
     public static func sendUploadDoneNotification(uploadCount: Int, parentId: Int?) {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [uploadDoneNotificationId])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationIdentifier.uploadDone])
         let content = UNMutableNotificationContent()
-        content.categoryIdentifier = uploadCategoryId
+        content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
         content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
         content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
-        content.userInfo[parentIdKey] = parentId
+        content.userInfo[UserInfoKey.parentId] = parentId
         let action = IKSnackBar.Action(title: KDriveCoreStrings.Localizable.locateButton) {
             NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId as Any])
         }
-        sendImmediately(notification: content, id: uploadDoneNotificationId, action: action)
+        sendImmediately(notification: content, id: NotificationIdentifier.uploadDone, action: action)
     }
 
     public static func sendPausedUploadQueueNotification() {
         let content = UNMutableNotificationContent()
         content.title = KDriveCoreStrings.Localizable.uploadPausedTitle
         content.body = KDriveCoreStrings.Localizable.uploadPausedDescription
-        content.categoryIdentifier = uploadCategoryId
+        content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
-        sendImmediately(notification: content, id: uploadPausedNotificationId)
+        sendImmediately(notification: content, id: NotificationIdentifier.uploadPaused)
     }
 
     public static func sendDisconnectedNotification() {
         let content = UNMutableNotificationContent()
         content.title = KDriveCoreStrings.Localizable.errorGeneric
         content.body = KDriveCoreStrings.Localizable.refreshTokenError
-        content.categoryIdentifier = generalCategoryId
+        content.categoryIdentifier = CategoryIdentifier.general
         content.sound = .default
-        sendImmediately(notification: content, id: disconnectedNotificationId)
+        sendImmediately(notification: content, id: NotificationIdentifier.disconnected)
     }
 
     public static func sendMigrateNotification() {
         let content = UNMutableNotificationContent()
         content.title = KDriveCoreStrings.Localizable.migrateNotificationTitle
         content.body = KDriveCoreStrings.Localizable.migrateNotificationDescription
-        content.categoryIdentifier = generalCategoryId
+        content.categoryIdentifier = CategoryIdentifier.general
         content.sound = .default
-        sendImmediately(notification: content, id: migrateNotificationId)
+        sendImmediately(notification: content, id: NotificationIdentifier.migrate)
+    }
+
+    public static func sendPhotoSyncErrorNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = KDriveCoreStrings.Localizable.errorGeneric
+        content.body = KDriveCoreStrings.Localizable.uploadFolderNotFoundSyncDisabledError
+        content.categoryIdentifier = CategoryIdentifier.photoSyncError
+        content.sound = .default
+        sendImmediately(notification: content, id: NotificationIdentifier.photoSyncError)
     }
 
     private static func sendImmediately(notification: UNMutableNotificationContent, id: String, action: IKSnackBar.Action? = nil) {
         DispatchQueue.main.async {
-            if notification.categoryIdentifier == uploadCategoryId && !NotificationsHelper.importNotificationsEnabled {
+            if notification.categoryIdentifier == CategoryIdentifier.upload && !NotificationsHelper.importNotificationsEnabled {
                 return
             }
 
-            let isInBackground = Constants.isInExtension || UIApplication.shared.applicationState != .active
+            let isInBackground = true // Constants.isInExtension || UIApplication.shared.applicationState != .active
 
             if isInBackground {
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)

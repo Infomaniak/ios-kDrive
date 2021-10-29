@@ -598,9 +598,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         case is UNPushNotificationTrigger:
             processPushNotification(response.notification)
         default:
-            if response.notification.request.content.categoryIdentifier == NotificationsHelper.uploadCategoryId {
+            if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
                 // Upload notification
-                let parentId = userInfo[NotificationsHelper.parentIdKey] as? Int
+                let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
 
                 switch response.actionIdentifier {
                 case UNNotificationDefaultActionIdentifier:
@@ -613,6 +613,24 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 default:
                     break
                 }
+            } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.photoSyncError {
+                // Show photo sync settings
+                guard let rootViewController = window?.rootViewController as? MainTabViewController else {
+                    return
+                }
+
+                // Dismiss all view controllers presented
+                rootViewController.dismiss(animated: false)
+                // Select Menu tab
+                rootViewController.selectedIndex = 4
+
+                guard let navController = rootViewController.selectedViewController as? UINavigationController else {
+                    return
+                }
+
+                let photoSyncSettingsViewController = PhotoSyncSettingsViewController.instantiate()
+                navController.popToRootViewController(animated: false)
+                navController.pushViewController(photoSyncSettingsViewController, animated: true)
             } else {
                 // Handle other notification types...
             }
