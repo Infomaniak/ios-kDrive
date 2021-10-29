@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19158" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19141"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -91,6 +91,7 @@
                 <outlet property="bottomConstraint" destination="b3L-GJ-LSF" id="Y7h-fG-fCo"/>
                 <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
                 <outlet property="driveImageView" destination="oLE-1b-2WR" id="jmS-2f-b6s"/>
+                <outlet property="heightConstraint" destination="oQb-Ww-YMD" id="zIX-0q-ndj"/>
                 <outlet property="selectDriveImageView" destination="kZU-CD-ye1" id="YGy-0r-9UG"/>
                 <outlet property="separator" destination="BSA-Kc-s9g" id="Aqp-OR-DH2"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>

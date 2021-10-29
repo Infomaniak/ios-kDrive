@@ -16,30 +16,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class DriveSwitchTableViewCell: InsetTableViewCell {
-    struct Style {
-        let height: CGFloat
-        static let home = Style(height: 91)
-        static let selectDrive = Style(height: 75)
-        static let switchDrive = Style(height: 72)
+class HomeRecentFilesSelectorCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var selector: IKSegmentedControl!
+
+    var valueChangeHandler: ((IKSegmentedControl) -> Void)?
+
+    func setRecentFilesControllerTitles(_ titles: [String]) {
+        selector.setSegments(titles)
     }
 
-    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var driveImageView: UIImageView!
-    @IBOutlet weak var selectDriveImageView: UIImageView!
-    var style: Style = .home {
-        didSet {
-            heightConstraint.constant = style.height
-        }
-    }
-
-    func configureWith(drive: Drive) {
-        titleLabel.text = drive.name
-        driveImageView.tintColor = UIColor(hex: drive.preferences.color)
-        accessibilityTraits = .button
+    @IBAction func selectorValueChanged(_ sender: IKSegmentedControl) {
+        valueChangeHandler?(sender)
     }
 }

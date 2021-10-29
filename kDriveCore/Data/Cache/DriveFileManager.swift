@@ -659,7 +659,13 @@ public class DriveFileManager {
                     }
                 }
             } else {
-                completion(nil, error)
+                DispatchQueue.main.async { [weak self] in
+                    if let files = self?.getCachedFile(id: DriveFileManager.lastModificationsRootFile.id, freeze: true)?.children {
+                        completion(Array(files), error)
+                    } else {
+                        completion(nil, error)
+                    }
+                }
             }
         }
     }
@@ -683,7 +689,13 @@ public class DriveFileManager {
                     }
                 }
             } else {
-                completion(nil, error)
+                DispatchQueue.main.async { [weak self] in
+                    if let files = self?.getCachedFile(id: DriveFileManager.lastPicturesRootFile.id, freeze: true)?.children {
+                        completion(Array(files), error)
+                    } else {
+                        completion(nil, error)
+                    }
+                }
             }
         }
     }

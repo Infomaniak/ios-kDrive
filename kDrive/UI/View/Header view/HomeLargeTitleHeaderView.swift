@@ -16,14 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class HomeFileSearchTableViewCell: InsetTableViewCell {
-    override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = UIConstants.cornerRadius) {
-        super.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast, elevation: elevation, radius: radius)
-        bottomConstraint?.constant = 2
-        accessibilityTraits = .button
+class HomeLargeTitleHeaderView: UICollectionReusableView {
+    @IBOutlet weak var titleButton: IKButton!
+    var titleButtonPressedHandler: ((UIButton) -> Void)?
+
+    @IBAction func titleButtonPressed(_ sender: UIButton) {
+        titleButtonPressedHandler?(sender)
     }
 }

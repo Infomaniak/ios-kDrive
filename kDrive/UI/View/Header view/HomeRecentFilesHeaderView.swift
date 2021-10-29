@@ -16,13 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
-import InfomaniakCore
 
-class HomeOfflineTableViewCell: InsetTableViewCell {
+class HomeRecentFilesHeaderView: UICollectionReusableView {
+    @IBOutlet weak var switchLayoutButton: UIButton!
+    @IBOutlet weak var titleLabel: IKLabel!
+    var actionHandler: ((UIButton) -> Void)?
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    @IBAction func didPressSwitchLayout(_ sender: UIButton) {
+        actionHandler?(sender)
     }
 }

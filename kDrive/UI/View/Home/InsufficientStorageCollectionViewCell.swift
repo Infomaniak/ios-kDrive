@@ -20,7 +20,7 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class InsufficientStorageTableViewCell: InsetTableViewCell {
+class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
     @IBOutlet weak var progressView: RPCircularProgress!
     @IBOutlet weak var storageLabel: UILabel!
     @IBOutlet weak var storageDescription: UILabel!

@@ -37,6 +37,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     private var accountManager: AccountManager!
     private var uploadQueue: UploadQueue!
     private var reachabilityListener: ReachabilityListener!
+    private static let currentStateVersion = 1
+    private static let appStateVersionKey = "appStateVersionKey"
 
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
@@ -572,11 +574,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     // MARK: - State restoration
 
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        coder.encode(AppDelegate.currentStateVersion, forKey: AppDelegate.appStateVersionKey)
         return true
     }
 
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        return !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
+        let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
+        return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
     }
 }
 

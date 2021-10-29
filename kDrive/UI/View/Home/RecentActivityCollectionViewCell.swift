@@ -16,101 +16,198 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import InfomaniakCore
 import kDriveCore
+import UIKit
 
-class RecentActivityCollectionViewCell: UICollectionViewCell {
+class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    @IBOutlet weak var avatarImage: UIImageView!
+    @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet weak var titleLabel: IKLabel!
+    @IBOutlet weak var detailLabel: UILabel!
+    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var collectionViewFlowLayout: UICollectionViewFlowLayout!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
 
-    @IBOutlet weak var contentInsetView: UIView!
-    @IBOutlet weak var previewImage: UIImageView!
-    @IBOutlet weak var moreLabel: UILabel!
-    @IBOutlet weak var darkLayer: UIView!
-    @IBOutlet weak var noPreviewView: UIView!
-    @IBOutlet weak var logoContainerView: UIView!
-    @IBOutlet weak var logoImage: UIImageView!
+    weak var delegate: RecentActivityDelegate?
+
+    private var activity: FileActivity?
+    private var activities: [FileActivity] {
+        if let activity = activity {
+            return [activity] + activity.mergedFileActivities
+        } else {
+            return []
+        }
+    }
+
+    private var isLoading = false
+    private let bottomViewCellHeight: CGFloat = 26
 
     override func awakeFromNib() {
         super.awakeFromNib()
-
-        moreLabel.isHidden = true
-        darkLayer.isHidden = true
-        noPreviewView.isHidden = true
-        logoContainerView.cornerRadius = logoContainerView.frame.width / 2
+        collectionView.register(cellView: RecentActivityPreviewCollectionViewCell.self)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        tableView.register(cellView: RecentActivityBottomTableViewCell.self)
+        tableView.delegate = self
+        tableView.dataSource = self
+        avatarImage.cornerRadius = avatarImage.frame.width / 2
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        moreLabel.isHidden = true
-        darkLayer.isHidden = true
+        isLoading = false
+        activity = nil
+        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        detailLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
     }
 
-    override var isHighlighted: Bool {
-        didSet {
-            setHighlighting()
-        }
-    }
-
-    func setHighlighting() {
-        let hasDarkLayer = !moreLabel.isHidden
-        if isHighlighted {
-            darkLayer.alpha = hasDarkLayer ? 0.6 : 0.4
-            darkLayer.isHidden = false
-        } else {
-            darkLayer.isHidden = !hasDarkLayer
-            darkLayer.alpha = 0.5
-        }
-    }
-
-    func configureWithPreview(file: File, more: Int?) {
-        previewImage.isHidden = false
-        noPreviewView.isHidden = true
-        previewImage.image = nil
-        previewImage.backgroundColor = KDriveAsset.backgroundColor.color
-        let fileId = file.id
-        file.getThumbnail { image, _ in
-            if fileId == file.id {
-                self.previewImage.image = image
-                self.previewImage.backgroundColor = nil
-            }
-        }
-        if let count = more {
-            setMoreLabel(count: count)
-            accessibilityLabel = "\(file.name) +\(count)"
-        } else {
-            accessibilityLabel = file.name
-        }
-        isAccessibilityElement = true
-    }
-
-    func configureWithoutPreview(file: File?, more: Int?) {
-        previewImage.isHidden = true
-        noPreviewView.isHidden = false
-        logoImage.image = file?.icon ?? KDriveCoreAsset.fileDefault.image
-        logoImage.tintColor = KDriveAsset.infomaniakColor.color
-        accessibilityLabel = file?.name
-        if let count = more {
-            setMoreLabel(count: count)
-            if let name = file?.name {
-                accessibilityLabel = "\(name) +\(count)"
-            } else {
-                accessibilityLabel = "+\(count)"
-            }
-        } else {
-            accessibilityLabel = file?.name
-        }
-        isAccessibilityElement = true
-    }
-
-    private func setMoreLabel(count: Int) {
-        darkLayer.isHidden = false
-        moreLabel.isHidden = false
-        moreLabel.text = "+\(count)"
+    override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 6) {
+        contentInsetView.cornerRadius = radius
     }
 
     func configureLoading() {
-        previewImage.isHidden = false
-        noPreviewView.isHidden = true
-        previewImage.image = nil
-        previewImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        isLoading = true
+        activity = nil
+        titleLabel.text = " "
+        let titleLayer = CALayer()
+        titleLayer.anchorPoint = .zero
+        titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 10)
+        titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        titleLabel.layer.addSublayer(titleLayer)
+        detailLabel.text = " "
+        let detailLayer = CALayer()
+        detailLayer.anchorPoint = .zero
+        detailLayer.bounds = CGRect(x: 0, y: 0, width: 80, height: 10)
+        detailLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        detailLabel.layer.addSublayer(detailLayer)
+        timeLabel.text = nil
+        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        tableViewHeight.constant = bottomViewCellHeight
+        collectionView.reloadData()
+        tableView.reloadData()
+        contentInsetView.backgroundColor = KDriveAsset.loaderDefaultColor.color
     }
+
+    func configureWith(recentActivity: FileActivity) {
+        activity = recentActivity
+        // activity?.file = recentActivity.file?.freeze()
+        let count = activities.count
+        let isDirectory = activity?.file?.isDirectory ?? false
+        switch recentActivity.action {
+        case .fileCreate:
+            detailLabel.text = isDirectory ? KDriveStrings.Localizable.fileActivityFolderCreate(count) : KDriveStrings.Localizable.fileActivityFileCreate(count)
+        case .fileTrash:
+            detailLabel.text = isDirectory ? KDriveStrings.Localizable.fileActivityFolderTrash(count) : KDriveStrings.Localizable.fileActivityFileTrash(count)
+        case .fileUpdate:
+            detailLabel.text = KDriveStrings.Localizable.fileActivityFileUpdate(count)
+        case .commentCreate:
+            detailLabel.text = KDriveStrings.Localizable.fileActivityCommentCreate(count)
+        case .fileRestore:
+            detailLabel.text = isDirectory ? KDriveStrings.Localizable.fileActivityFolderRestore(count) : KDriveStrings.Localizable.fileActivityFileRestore(count)
+        default:
+            detailLabel.text = KDriveStrings.Localizable.fileActivityUnknown(count)
+        }
+
+        tableViewHeight.constant = CGFloat(min(activities.count, 3)) * bottomViewCellHeight
+
+        avatarImage.image = KDriveAsset.placeholderAvatar.image
+
+        if let user = activity?.user {
+            titleLabel.text = user.displayName
+            timeLabel.text = Constants.formatTimestamp(TimeInterval(activity?.createdAt ?? 0), relative: true)
+
+            user.getAvatar { image in
+                self.avatarImage.image = image.withRenderingMode(.alwaysOriginal)
+            }
+        }
+        collectionView.reloadData()
+        tableView.reloadData()
+    }
+
+    @IBAction func bottomViewTap() {
+        delegate?.didSelectActivity(index: 0, activities: [activity].compactMap { $0 })
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        collectionViewFlowLayout.invalidateLayout()
+    }
+
+    // MARK: - Collection view data source
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return isLoading ? 3 : min(activities.count, 3)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(type: RecentActivityPreviewCollectionViewCell.self, for: indexPath)
+        if isLoading {
+            cell.configureLoading()
+        } else {
+            let activity = activities[indexPath.item]
+            let more = indexPath.item == 2 && activities.count > 3 ? activities.count - 2 : nil
+            if let file = activity.file, file.hasThumbnail && (file.convertedType == .image || file.convertedType == .video) {
+                cell.configureWithPreview(file: file, more: more)
+            } else {
+                cell.configureWithoutPreview(file: activity.file, more: more)
+            }
+        }
+        return cell
+    }
+
+    // MARK: - Collection view delegate
+
+    func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
+        return !isLoading
+    }
+
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        return !isLoading
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        delegate?.didSelectActivity(index: indexPath.row, activities: activities)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let height = collectionView.frame.height
+        let itemQuantity = CGFloat(isLoading ? 3 : min(activities.count, 3))
+        let width = (collectionView.frame.width - collectionViewFlowLayout.minimumInteritemSpacing * (itemQuantity - 1)) / itemQuantity
+        return CGSize(width: width, height: height)
+    }
+}
+
+// MARK: - Table view delegate & Data Source
+
+extension RecentActivityCollectionViewCell: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return isLoading ? 1 : min(activities.count, 3)
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: RecentActivityBottomTableViewCell.self, for: indexPath)
+        if isLoading {
+            cell.configureLoading()
+        } else {
+            let more = indexPath.item == 2 && activities.count > 3 ? activities.count - 2 : nil
+            cell.configureWith(recentActivity: activities[indexPath.row], more: more)
+        }
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !isLoading else { return }
+        delegate?.didSelectActivity(index: indexPath.row, activities: activities)
+    }
+}
+
+protocol RecentActivityDelegate: AnyObject {
+    func didSelectActivity(index: Int, activities: [FileActivity])
 }

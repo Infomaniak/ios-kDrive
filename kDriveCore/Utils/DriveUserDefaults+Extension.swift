@@ -45,6 +45,8 @@ extension UserDefaults.Keys {
     static let lastSyncDateOfflineFiles = UserDefaults.Keys(rawValue: "lastSyncDateOfflineFiles")
     static let fileProviderExtension = UserDefaults.Keys(rawValue: "fileProviderExtension")
     static let categoryPanelDisplayed = UserDefaults.Keys(rawValue: "categoryPanelDisplayed")
+    static let homeListStyle = UserDefaults.Keys(rawValue: "homeListStyle")
+    static let selectedHomeIndex = UserDefaults.Keys(rawValue: "selectedHomeIndex")
 }
 
 public extension UserDefaults {
@@ -303,6 +305,24 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.categoryPanelDisplayed))
+        }
+    }
+
+    var homeListStyle: ListStyle {
+        get {
+            return ListStyle(rawValue: string(forKey: key(.homeListStyle)) ?? "") ?? .list
+        }
+        set {
+            set(newValue.rawValue, forKey: key(.homeListStyle))
+        }
+    }
+
+    var selectedHomeIndex: Int {
+        get {
+            return integer(forKey: key(.selectedHomeIndex))
+        }
+        set {
+            set(newValue, forKey: key(.selectedHomeIndex))
         }
     }
 }
