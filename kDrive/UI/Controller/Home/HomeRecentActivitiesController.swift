@@ -34,7 +34,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
 
     override func restoreCachedPages() {
         DispatchQueue.main.async {
-            self.homeViewController?.reloadWith(fetchedActivities: self.mergedActivities, isEmpty: self.empty)
+            self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
         }
     }
 
@@ -65,7 +65,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                         return
                     }
                     DispatchQueue.main.async {
-                        self.homeViewController?.reloadWith(fetchedActivities: self.mergedActivities, isEmpty: self.empty)
+                        self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
                     }
                 }
                 // Update cache
@@ -83,7 +83,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                         return
                     }
                     DispatchQueue.main.async {
-                        self.homeViewController?.reloadWith(fetchedActivities: self.mergedActivities, isEmpty: self.empty)
+                        self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
                     }
                 }
             }

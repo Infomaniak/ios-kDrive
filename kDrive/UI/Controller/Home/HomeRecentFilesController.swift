@@ -61,7 +61,7 @@ class HomeRecentFilesController {
 
     func restoreCachedPages() {
         invalidated = true
-        homeViewController?.reloadWith(fetchedFiles: files, isEmpty: empty)
+        homeViewController?.reloadWith(fetchedFiles: .file(files), isEmpty: empty)
         refreshIfNeeded()
     }
 
@@ -112,7 +112,7 @@ class HomeRecentFilesController {
                 }
 
                 DispatchQueue.main.async {
-                    self.homeViewController?.reloadWith(fetchedFiles: files, isEmpty: self.empty)
+                    self.homeViewController?.reloadWith(fetchedFiles: .file(files), isEmpty: self.empty)
                 }
             }
         }
