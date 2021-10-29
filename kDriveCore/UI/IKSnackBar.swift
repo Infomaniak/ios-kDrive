@@ -37,12 +37,8 @@ class IKRootViewController: UIViewController {
 
 class IKWindow: UIWindow {
     init(with rootVC: UIViewController) {
-        if #available(iOS 13.0, *) {
-            if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-                super.init(windowScene: scene)
-            } else {
-                super.init(frame: UIScreen.main.bounds)
-            }
+        if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+            super.init(windowScene: scene)
         } else {
             super.init(frame: UIScreen.main.bounds)
         }
@@ -117,9 +113,7 @@ public class IKWindowProvider {
     }
 
     private func displayRollbackWindow() {
-        if #available(iOS 13.0, *) {
-            entryWindow?.windowScene = nil
-        }
+        entryWindow?.windowScene = nil
         entryWindow = nil
         if let mainRollbackWindow = mainRollbackWindow {
             mainRollbackWindow.makeKeyAndVisible()

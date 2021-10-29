@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import WebKit
 import kDriveCore
 import Sentry
+import UIKit
+import WebKit
 
 class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
-
     var driveFileManager: DriveFileManager!
     var file: File!
     weak var previewParent: PreviewViewController?
@@ -83,10 +82,9 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.scrollView.isScrollEnabled = false
         webView.navigationDelegate = self
-        if #available(iOS 13.0, *) {
-            // Force mobile mode for better usage on iPadOS
-            webView.configuration.defaultWebpagePreferences.preferredContentMode = .mobile
-        }
+        // Force mobile mode for better usage on iPadOS
+        webView.configuration.defaultWebpagePreferences.preferredContentMode = .mobile
+
         progressObserver = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, value in
             guard let newValue = value.newValue else {
                 return

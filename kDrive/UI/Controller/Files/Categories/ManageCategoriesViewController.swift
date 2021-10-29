@@ -68,9 +68,7 @@ class ManageCategoriesViewController: UITableViewController {
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
-        if #available(iOS 13.0, *) {
-            searchController.searchBar.searchTextField.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-        }
+        searchController.searchBar.searchTextField.backgroundColor = KDriveAsset.backgroundCardViewColor.color
 
         navigationItem.searchController = searchController
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
