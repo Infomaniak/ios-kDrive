@@ -414,6 +414,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         if isDifferentDrive {
             recentFilesControllersCache.removeAll()
             let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeLargeTitleHeaderView }.first
+            driveHeaderView?.isEnabled = AccountManager.instance.drives.count > 1
             driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
 
             showInsufficientStorage = true
@@ -561,6 +562,7 @@ extension HomeViewController {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
                 let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeLargeTitleHeaderView.self, for: indexPath)
+                driveHeaderView.isEnabled = AccountManager.instance.drives.count > 1
                 driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     self?.performSegue(withIdentifier: "switchDriveSegue", sender: nil)

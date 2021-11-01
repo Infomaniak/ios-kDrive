@@ -53,6 +53,7 @@
                 <constraint firstItem="pOl-G4-wgF" firstAttribute="top" secondItem="VXr-Tz-HHm" secondAttribute="top" id="nUS-RA-tUL"/>
             </constraints>
             <connections>
+                <outlet property="chevronButton" destination="aWr-uO-KB8" id="OyX-55-R3I"/>
                 <outlet property="titleButton" destination="NKR-TM-U8a" id="tfP-wx-Pdm"/>
             </connections>
             <point key="canvasLocation" x="255.07246376811597" y="105.80357142857143"/>
