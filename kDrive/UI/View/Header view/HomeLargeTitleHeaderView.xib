@@ -16,10 +16,10 @@
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="pOl-G4-wgF">
-                    <rect key="frame" x="0.0" y="44" width="86" height="48"/>
+                    <rect key="frame" x="0.0" y="47" width="86" height="45"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NKR-TM-U8a" customClass="IKButton" customModule="kDriveCore">
-                            <rect key="frame" x="0.0" y="1" width="62" height="46"/>
+                            <rect key="frame" x="0.0" y="0.0" width="62" height="45"/>
                             <inset key="imageEdgeInsets" minX="10" minY="12" maxX="10" maxY="12"/>
                             <state key="normal" title="Nom"/>
                             <userDefinedRuntimeAttributes>
@@ -30,7 +30,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aWr-uO-KB8">
-                            <rect key="frame" x="70" y="16" width="16" height="16"/>
+                            <rect key="frame" x="70" y="14.5" width="16" height="16"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="16" id="OjG-bM-85a"/>
                                 <constraint firstAttribute="width" constant="16" id="YCL-dB-aoo"/>
@@ -50,7 +50,7 @@
                 <constraint firstItem="VXr-Tz-HHm" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="pOl-G4-wgF" secondAttribute="trailing" id="8qt-QZ-UD4"/>
                 <constraint firstItem="pOl-G4-wgF" firstAttribute="leading" secondItem="VXr-Tz-HHm" secondAttribute="leading" id="l83-oL-9ta"/>
                 <constraint firstAttribute="bottom" secondItem="pOl-G4-wgF" secondAttribute="bottom" id="laQ-Uv-Nqm"/>
-                <constraint firstItem="pOl-G4-wgF" firstAttribute="top" secondItem="VXr-Tz-HHm" secondAttribute="top" id="nUS-RA-tUL"/>
+                <constraint firstItem="pOl-G4-wgF" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="47" id="nUS-RA-tUL"/>
             </constraints>
             <connections>
                 <outlet property="chevronButton" destination="aWr-uO-KB8" id="OyX-55-R3I"/>

@@ -182,8 +182,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.contentInset = UIEdgeInsets(top: navbarHeight, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
-        collectionView.scrollIndicatorInsets = UIEdgeInsets(top: navbarHeight, left: 0, bottom: 0, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
@@ -386,7 +385,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         item.edgeSpacing = NSCollectionLayoutEdgeSpacing(leading: .fixed(0), top: .fixed(16), trailing: .fixed(0), bottom: .fixed(16))
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(40))
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(40))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
 
