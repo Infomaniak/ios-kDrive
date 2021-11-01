@@ -277,22 +277,26 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadWith(fetchedFiles: HomeFileType, isEmpty: Bool) {
-        refreshControl.endRefreshing()
-        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
-        headerView?.switchLayoutButton.isEnabled = !isEmpty
+        DispatchQueue.main.async { [self] in
+            refreshControl.endRefreshing()
+            let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
+            headerView?.switchLayoutButton.isEnabled = !isEmpty
 
-        let newViewModel = HomeViewModel(topRows: viewModel.topRows,
-                                         recentFiles: fetchedFiles,
-                                         recentFilesEmpty: isEmpty,
-                                         isLoading: false)
-        reload(newViewModel: newViewModel)
+            let newViewModel = HomeViewModel(topRows: viewModel.topRows,
+                                             recentFiles: fetchedFiles,
+                                             recentFilesEmpty: isEmpty,
+                                             isLoading: false)
+            reload(newViewModel: newViewModel)
+        }
     }
 
     private func reload(newViewModel: HomeViewModel) {
-        var newViewModel = newViewModel
-        let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
-        collectionView.reload(using: changeset) { data in
-            self.viewModel = HomeViewModel(changeSet: data)
+        DispatchQueue.main.async { [self] in
+            var newViewModel = newViewModel
+            let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
+            collectionView.reload(using: changeset) { data in
+                self.viewModel = HomeViewModel(changeSet: data)
+            }
         }
     }
 

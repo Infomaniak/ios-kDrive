@@ -64,9 +64,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                     guard !self.invalidated else {
                         return
                     }
-                    DispatchQueue.main.async {
-                        self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
-                    }
+                    self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
                 }
                 // Update cache
                 if self.page == 1 {
@@ -82,9 +80,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                     guard !self.invalidated else {
                         return
                     }
-                    DispatchQueue.main.async {
-                        self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
-                    }
+                    self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
                 }
             }
         }

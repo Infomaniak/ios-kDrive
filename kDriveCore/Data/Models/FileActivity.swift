@@ -114,7 +114,7 @@ public class FileActivity: Object, Codable {
 
 extension FileActivity: ContentIdentifiable, ContentEquatable {
     public func isContentEqual(to source: FileActivity) -> Bool {
-        return fileId == source.fileId && mergedFileActivities.isContentEqual(to: source.mergedFileActivities)
+        return id == source.id && mergedFileActivities.isContentEqual(to: source.mergedFileActivities)
     }
 }
 

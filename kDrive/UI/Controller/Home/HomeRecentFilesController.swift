@@ -110,10 +110,7 @@ class HomeRecentFilesController {
                 guard !self.invalidated else {
                     return
                 }
-
-                DispatchQueue.main.async {
-                    self.homeViewController?.reloadWith(fetchedFiles: .file(files), isEmpty: self.empty)
-                }
+                self.homeViewController?.reloadWith(fetchedFiles: .file(files), isEmpty: self.empty)
             }
         }
     }
