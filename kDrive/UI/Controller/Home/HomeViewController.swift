@@ -267,13 +267,11 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadTopRows() {
-        DispatchQueue.main.async { [self] in
-            let newViewModel = HomeViewModel(topRows: getTopRows(),
-                                             recentFiles: viewModel.recentFiles,
-                                             recentFilesEmpty: viewModel.recentFilesEmpty,
-                                             isLoading: viewModel.isLoading)
-            reload(newViewModel: newViewModel)
-        }
+        let newViewModel = HomeViewModel(topRows: getTopRows(),
+                                         recentFiles: viewModel.recentFiles,
+                                         recentFilesEmpty: viewModel.recentFilesEmpty,
+                                         isLoading: viewModel.isLoading)
+        reload(newViewModel: newViewModel)
     }
 
     func reloadWith(fetchedFiles: HomeFileType, isEmpty: Bool) {
@@ -281,13 +279,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             refreshControl.endRefreshing()
             let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
             headerView?.switchLayoutButton.isEnabled = !isEmpty
-
-            let newViewModel = HomeViewModel(topRows: viewModel.topRows,
-                                             recentFiles: fetchedFiles,
-                                             recentFilesEmpty: isEmpty,
-                                             isLoading: false)
-            reload(newViewModel: newViewModel)
         }
+        let newViewModel = HomeViewModel(topRows: viewModel.topRows,
+                                         recentFiles: fetchedFiles,
+                                         recentFilesEmpty: isEmpty,
+                                         isLoading: false)
+        reload(newViewModel: newViewModel)
     }
 
     private func reload(newViewModel: HomeViewModel) {
@@ -305,10 +302,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         recentFilesControllersCache.removeAll()
         let viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
         reload(newViewModel: viewModel)
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
-        }
+        setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
     }
 
     private func getCachedRecentFilesController(for index: Int) -> HomeRecentFilesController {
