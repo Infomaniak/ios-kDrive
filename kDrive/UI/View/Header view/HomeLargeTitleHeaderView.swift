@@ -20,8 +20,16 @@ import kDriveCore
 import UIKit
 
 class HomeLargeTitleHeaderView: UICollectionReusableView {
+    @IBOutlet weak var chevronButton: UIButton!
     @IBOutlet weak var titleButton: IKButton!
     var titleButtonPressedHandler: ((UIButton) -> Void)?
+
+    var isEnabled = true {
+        didSet {
+            chevronButton.isHidden = !isEnabled
+            titleButton.isUserInteractionEnabled = isEnabled
+        }
+    }
 
     @IBAction func titleButtonPressed(_ sender: UIButton) {
         titleButtonPressedHandler?(sender)

@@ -182,8 +182,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.contentInset = UIEdgeInsets(top: navbarHeight, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
-        collectionView.scrollIndicatorInsets = UIEdgeInsets(top: navbarHeight, left: 0, bottom: 0, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
@@ -267,20 +266,19 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadTopRows() {
-        DispatchQueue.main.async { [self] in
-            let newViewModel = HomeViewModel(topRows: getTopRows(),
-                                             recentFiles: viewModel.recentFiles,
-                                             recentFilesEmpty: viewModel.recentFilesEmpty,
-                                             isLoading: viewModel.isLoading)
-            reload(newViewModel: newViewModel)
-        }
+        let newViewModel = HomeViewModel(topRows: getTopRows(),
+                                         recentFiles: viewModel.recentFiles,
+                                         recentFilesEmpty: viewModel.recentFilesEmpty,
+                                         isLoading: viewModel.isLoading)
+        reload(newViewModel: newViewModel)
     }
 
     func reloadWith(fetchedFiles: HomeFileType, isEmpty: Bool) {
-        refreshControl.endRefreshing()
-        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
-        headerView?.switchLayoutButton.isEnabled = !isEmpty
-
+        DispatchQueue.main.async { [self] in
+            refreshControl.endRefreshing()
+            let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
+            headerView?.switchLayoutButton.isEnabled = !isEmpty
+        }
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
                                          recentFilesEmpty: isEmpty,
@@ -289,10 +287,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func reload(newViewModel: HomeViewModel) {
-        var newViewModel = newViewModel
-        let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
-        collectionView.reload(using: changeset) { data in
-            self.viewModel = HomeViewModel(changeSet: data)
+        DispatchQueue.main.async { [self] in
+            var newViewModel = newViewModel
+            let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
+            collectionView.reload(using: changeset) { data in
+                self.viewModel = HomeViewModel(changeSet: data)
+            }
         }
     }
 
@@ -301,10 +301,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         recentFilesControllersCache.removeAll()
         let viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: true)
         reload(newViewModel: viewModel)
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
-        }
+        setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
     }
 
     private func getCachedRecentFilesController(for index: Int) -> HomeRecentFilesController {
@@ -388,7 +385,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         item.edgeSpacing = NSCollectionLayoutEdgeSpacing(leading: .fixed(0), top: .fixed(16), trailing: .fixed(0), bottom: .fixed(16))
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(40))
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(40))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
 
@@ -410,6 +407,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         if isDifferentDrive {
             recentFilesControllersCache.removeAll()
             let driveHeaderView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeLargeTitleHeaderView }.first
+            driveHeaderView?.isEnabled = AccountManager.instance.drives.count > 1
             driveHeaderView?.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
 
             showInsufficientStorage = true
@@ -557,6 +555,7 @@ extension HomeViewController {
             switch HomeSection.allCases[indexPath.section] {
             case .top:
                 let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeLargeTitleHeaderView.self, for: indexPath)
+                driveHeaderView.isEnabled = AccountManager.instance.drives.count > 1
                 driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     self?.performSegue(withIdentifier: "switchDriveSegue", sender: nil)
