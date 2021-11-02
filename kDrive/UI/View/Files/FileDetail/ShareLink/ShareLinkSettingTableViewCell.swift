@@ -24,7 +24,8 @@ import MaterialOutlinedTextField
 protocol ShareLinkSettingsDelegate: AnyObject {
     func didUpdateSettingValue(for option: ShareLinkSettingsViewController.Option, newValue value: Bool)
     func didUpdateExpirationDateSettingValue(for option: ShareLinkSettingsViewController.Option, newValue value: Bool, date: TimeInterval?)
-    func didUpdatePasswordSettingValue(for option: ShareLinkSettingsViewController.Option, newValue value: Bool, date: TimeInterval?)
+    func didUpdatePasswordSettingValue(for option: ShareLinkSettingsViewController.Option, newValue value: Bool)
+    func didUpdatePassword(newPassword: String)
 }
 
 class ShareLinkSettingTableViewCell: InsetTableViewCell {
@@ -33,6 +34,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     @IBOutlet weak var settingDetail: UILabel!
     @IBOutlet weak var dateTextField: UITextField!
     @IBOutlet weak var passwordTextFiled: MaterialOutlinedTextField!
+    @IBOutlet weak var newPasswordButton: IKButton!
     @IBOutlet weak var pickersView: UIStackView!
     @IBOutlet weak var compactDatePicker: UIDatePicker!
     @IBOutlet weak var updateButton: UIButton!
@@ -44,6 +46,8 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     var actionHandler: ((UIButton) -> Void)?
 
+    var showPassword = false
+
     override func awakeFromNib() {
         super.awakeFromNib()
         dateTextField.isHidden = true
@@ -51,6 +55,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         pickersView.isHidden = true
         compactDatePicker.isHidden = true
         updateButton.isHidden = true
+        newPasswordButton.isHidden = true
 
         datePickerView.datePickerMode = UIDatePicker.Mode.date
         let toolBar = UIToolbar()
@@ -62,6 +67,28 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: nil, action: nil)
         toolBar.setItems([spaceButton, doneButton], animated: false)
         toolBar.isUserInteractionEnabled = true
+
+        passwordTextFiled.delegate = self
+        passwordTextFiled.setInfomaniakColors()
+        passwordTextFiled.isAccessibilityElement = true
+
+        passwordTextFiled.setHint(KDriveStrings.Localizable.allPasswordHint)
+        passwordTextFiled.isSecureTextEntry = !showPassword
+        passwordTextFiled.keyboardType = .default
+        passwordTextFiled.autocorrectionType = .no
+        passwordTextFiled.autocapitalizationType = .none
+
+        let overlayButton = UIButton(type: .custom)
+        let viewImage = KDriveAsset.view.image
+        overlayButton.setImage(viewImage, for: .normal)
+        overlayButton.tintColor = KDriveAsset.iconColor.color
+        overlayButton.addTarget(self, action: #selector(displayPassword), for: .touchUpInside)
+        overlayButton.sizeToFit()
+        overlayButton.accessibilityLabel = KDriveStrings.Localizable.buttonTogglePassword
+        let rightView = UIView(frame: CGRect(x: 0, y: 0, width: overlayButton.frame.width + 10, height: overlayButton.frame.height))
+        rightView.addSubview(overlayButton)
+        passwordTextFiled.rightView = rightView
+        passwordTextFiled.rightViewMode = .always
 
         dateTextField.inputView = datePickerView
         dateTextField.inputAccessoryView = toolBar
@@ -93,7 +120,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         delegate?.didUpdateExpirationDateSettingValue(for: .expirationDate, newValue: settingSwitch.isOn, date: expirationDate?.timeIntervalSince1970)
     }
 
-    func configureWith(option: ShareLinkSettingsViewController.Option, optionValue: Bool, drive: Drive, expirationTime: TimeInterval? = nil) {
+    func configureWith(option: ShareLinkSettingsViewController.Option, optionValue: Bool, drive: Drive, expirationTime: TimeInterval? = nil, newPassword: Bool = false) {
         self.option = option
 
         titleLabel.text = option.title
@@ -101,6 +128,9 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         settingSwitch.isOn = optionValue
         settingSwitch.isEnabled = option.isEnabled(drive: drive)
         updateButton.isHidden = option.isEnabled(drive: drive)
+        passwordTextFiled.isHidden = true
+        newPasswordButton.isHidden = true
+        pickersView.isHidden = true
 
         if option == .expirationDate {
             self.expirationDate = expirationTime != nil ? Date(timeIntervalSince1970: expirationTime!) : nil
@@ -117,6 +147,13 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
                 }
             }
         }
+        if option == .addPassword {
+            if newPassword {
+                newPasswordButton.isHidden = !optionValue
+            } else {
+                passwordTextFiled.isHidden = !optionValue
+            }
+        }
     }
 
     @IBAction func switchValueChanged(_ sender: UISwitch) {
@@ -127,6 +164,8 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         if option == .expirationDate {
             let date = sender.isOn ? expirationDate : nil
             delegate?.didUpdateExpirationDateSettingValue(for: option, newValue: sender.isOn, date: date?.timeIntervalSince1970)
+        } else if option == .addPassword {
+            delegate?.didUpdatePasswordSettingValue(for: option, newValue: sender.isOn)
         } else {
             delegate?.didUpdateSettingValue(for: option, newValue: sender.isOn)
         }
@@ -134,5 +173,33 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     @IBAction func updateButtonPressed(_ sender: UIButton) {
         actionHandler?(sender)
+    }
+
+    @IBAction func textFieldUpdated(_ sender: MaterialOutlinedTextField) {
+        passwordTextFiled.borderColor = KDriveAsset.infomaniakColor.color
+        delegate?.didUpdatePassword(newPassword: passwordTextFiled.text ?? "")
+    }
+
+    @IBAction func newPasswordButtonPressed(_ sender: IKButton) {
+        // LN: To change
+        delegate?.didUpdatePassword(newPassword: passwordTextFiled.text ?? "")
+        newPasswordButton.isHidden = true
+        passwordTextFiled.isHidden = false
+    }
+
+    @objc func displayPassword() {
+        showPassword.toggle()
+        passwordTextFiled.isSecureTextEntry = !showPassword
+    }
+}
+
+extension ShareLinkSettingTableViewCell: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        passwordTextFiled.borderColor = KDriveAsset.infomaniakColor.color
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        passwordTextFiled.endEditing(true)
+        return true
     }
 }

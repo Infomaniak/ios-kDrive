@@ -43,31 +43,15 @@ struct Right {
     var icon: UIImage
     var description: (String) -> String
 
-    // LN: To delete
-//    static let shareLinkRights = [
-//        Right(key: "public",
-//              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
-//              icon: KDriveAsset.view.image,
-//              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
-//        Right(key: "inherit",
-//              title: KDriveStrings.Localizable.shareLinkDriveUsersRightTitle,
-//              icon: KDriveAsset.users.image,
-//              description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) }),
-//        Right(key: "password",
-//              title: KDriveStrings.Localizable.shareLinkPasswordRightTitle,
-//              icon: KDriveAsset.lock.image,
-//              description: { _ in KDriveStrings.Localizable.shareLinkPasswordRightDescription })
-//    ]
-
     static let shareLinkRights = [
         Right(key: "restricted",
-              title: "Restreint", // KDriveStrings.Localizable.shareLinkPublicRightTitle, // LN: To change
+              title: KDriveStrings.Localizable.shareLinkRestrictedRightTitle,
               icon: KDriveAsset.lock.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
+              description: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightDescription }),
         Right(key: "public",
               title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
               icon: KDriveAsset.unlock.image,
-              description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) })
+              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription })
     ]
     static let onlyOfficeRights = [
         Right(key: "read",
@@ -182,6 +166,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         let cell = tableView.dequeueReusableCell(type: RightsSelectionTableViewCell.self, for: indexPath)
         let right = rights[indexPath.row]
         var disable = false
+        // LN: To remove
         if right.key == "password" && driveFileManager.drive.pack == .free {
             disable = true
             cell.actionHandler = { [weak self] _ in

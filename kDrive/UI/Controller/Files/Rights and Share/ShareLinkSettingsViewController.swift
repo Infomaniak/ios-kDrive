@@ -67,7 +67,7 @@ class ShareLinkSettingsViewController: UIViewController {
         }
     }
 
-    let accessRights = Right.shareLinkRights
+    let accessRights = Right.onlyOfficeRights // LN: TO change Right.shareLinkRights
     var file: File!
     var shareFile: SharedFile!
     private var optionsValue = [Option: Bool]()
@@ -131,13 +131,16 @@ class ShareLinkSettingsViewController: UIViewController {
     func updateButton() {
         if (optionsValue[.expirationDate] ?? false) && expirationDate == nil {
             enableButton = false
-        } else {
+        } else if (optionsValue[.addPassword] ?? false) && password?.count ?? 0 < 1 {
+            enableButton = false
             // LN: To remove
-            if accessRightValue == "password" && password?.count ?? 0 < 1 {
-                enableButton = false
-            } else {
-                enableButton = true
-            }
+//            if accessRightValue == "password" && password?.count ?? 0 < 1 {
+//                enableButton = false
+//            } else {
+//                enableButton = true
+//            }
+        } else {
+            enableButton = true
         }
     }
 
@@ -171,7 +174,7 @@ class ShareLinkSettingsViewController: UIViewController {
         accessRightValue = shareFile.link!.permission
         // Options
         optionsValue = [
-            .addPassword: true, // LN: to change
+            .addPassword: shareFile.link!.permission == "password",
             .allowDownload: !shareFile.link!.blockDownloads,
             .expirationDate: shareFile.link!.validUntil != nil,
             .blockUsersConsult: shareFile.link!.blockInformation,
@@ -230,18 +233,11 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             let cell = tableview.dequeueReusableCell(type: ShareLinkAccessRightTableViewCell.self, for: indexPath)
             cell.accessRightLabel.text = nil
             cell.accessRightImage.image = nil
-            cell.delegate = self
+//            cell.delegate = self
             if let right = accessRights.first(where: { $0.key == accessRightValue }) {
                 cell.accessRightView.accessibilityLabel = right.title
                 cell.accessRightLabel.text = right.title
                 cell.accessRightImage.image = right.icon
-                if accessRightValue == "password" {
-                    if shareFile.link?.permission == "password" {
-                        cell.buttonNewPassword.isHidden = false
-                    } else {
-                        cell.textField.isHidden = false
-                    }
-                }
             }
             return cell
         }
@@ -249,7 +245,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         let cell = tableview.dequeueReusableCell(type: ShareLinkSettingTableViewCell.self, for: indexPath)
         cell.delegate = self
         let option = content[indexPath.row - 1]
-        cell.configureWith(option: option, optionValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate)
+        cell.configureWith(option: option, optionValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate, newPassword: shareFile.link?.permission == "password")
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
                 guard let self = self else { return }
@@ -293,7 +289,8 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
                 rightsSelectionVC.selectedRight = accessRightValue
-                rightsSelectionVC.rightSelectionType = .shareLinkSettings
+                rightsSelectionVC.rightSelectionType = .addUserRights
+                rightsSelectionVC.canDelete = false
                 rightsSelectionVC.delegate = self
             }
             present(rightsSelectionViewController, animated: true)
@@ -304,6 +301,19 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
 // MARK: - ShareLinkSettingsDelegate
 
 extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
+    func didUpdatePasswordSettingValue(for option: Option, newValue value: Bool) {
+        optionsValue[option] = value
+        if value {
+            accessRightValue = "password"
+        } else {
+            accessRightValue = "public"
+        }
+        updateButton()
+        if let index = Option.allCases.firstIndex(of: option) {
+            tableview.reloadRows(at: [IndexPath(row: index + 1, section: 0)], with: .automatic)
+        }
+    }
+
     func didUpdateExpirationDateSettingValue(for option: Option, newValue value: Bool, date: TimeInterval?) {
         optionsValue[option] = value
         expirationDate = date
@@ -316,6 +326,11 @@ extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
     func didUpdateSettingValue(for option: Option, newValue value: Bool) {
         optionsValue[option] = value
     }
+
+    func didUpdatePassword(newPassword: String) {
+        password = newPassword
+        updateButton()
+    }
 }
 
 // MARK: - RightsSelectionDelegate
@@ -323,15 +338,6 @@ extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
 extension ShareLinkSettingsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         accessRightValue = value
-        updateButton()
-    }
-}
-
-// MARK: - AccessRightPasswordDelegate
-
-extension ShareLinkSettingsViewController: AccessRightPasswordDelegate {
-    func didUpdatePassword(newPassword: String) {
-        password = newPassword
         updateButton()
     }
 }

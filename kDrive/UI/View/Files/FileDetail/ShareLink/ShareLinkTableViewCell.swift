@@ -32,7 +32,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var shareLinkTitleLabel: IKLabel!
     @IBOutlet weak var shareIconImageView: UIImageView!
     @IBOutlet weak var shareLinkStackView: UIStackView!
-    @IBOutlet weak var activeLabel: UILabel!
+    @IBOutlet weak var activeLabel: UILabel! // LN: change name
     @IBOutlet weak var copyTextField: UITextField!
     @IBOutlet weak var copyButton: ImageButton!
     @IBOutlet weak var shareLinkRightsView: UIView!
@@ -86,8 +86,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
         layoutIfNeeded()
         if let link = sharedFile?.link {
-            shareLinkSwitch.isOn = true
-            activeLabel.text = KDriveStrings.Localizable.allActivated
+            shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
+            activeLabel.text = KDriveStrings.Localizable.shareLinkPublicRightDescription
             shareLinkStackView.isHidden = false
             copyTextField.text = link.url
             shareLinkRightsView.isHidden = !isOfficeFile
@@ -96,8 +96,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             rightsLabel.text = right.title
             shareLinkRightsView.accessibilityLabel = right.title
         } else {
-            shareLinkSwitch.isOn = false
-            activeLabel.text = KDriveStrings.Localizable.allDisabled
+            shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
+            activeLabel.text = KDriveStrings.Localizable.shareLinkRestrictedRightDescription
             shareLinkStackView.isHidden = true
         }
         shareLinkSwitch.isEnabled = enabled

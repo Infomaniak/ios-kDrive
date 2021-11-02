@@ -796,6 +796,7 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
         present(ac, animated: true)
     }
 
+    // LN: To remove? 
     func shareLinkSwitchToggled(isOn: Bool) {
         if isOn {
             driveFileManager.activateShareLink(for: file) { _, shareLink, _ in
@@ -838,10 +839,29 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
 
 extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
-        guard let sharedLink = sharedFile?.link else {
-            return
-        }
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == "write", permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
+        if let sharedLink = sharedFile?.link {
+            sharedLink.permission = value
+            if value == "restricted" {
+                driveFileManager.removeShareLink(for: file) { file, _ in
+                    if file != nil {
+                        self.sharedFile?.link = nil
+                        self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
+                    }
+                }
+            } else {
+                driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == "write", permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
+                }
+            }
+        } else {
+            if value == "public" {
+                driveFileManager.activateShareLink(for: file) { _, shareLink, _ in
+                    if let link = shareLink {
+                        self.sharedFile?.link = link
+                        self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
+                        return
+                    }
+                }
+            }
         }
     }
 }
