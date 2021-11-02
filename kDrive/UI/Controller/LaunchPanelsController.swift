@@ -42,6 +42,9 @@ struct LaunchPanel: Comparable {
 }
 
 class LaunchPanelsController {
+    private static let appStoreLink = "https://apps.apple.com/app/infomaniak-kdrive/id1482778676"
+    private static let testFlightInviteLink = "https://testflight.apple.com/join/qZHSGy5B"
+
     private var panels: [LaunchPanel] = [
         // Update available
         LaunchPanel(
@@ -49,7 +52,9 @@ class LaunchPanelsController {
                 let driveFloatingPanelController = UpdateFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UpdateFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
-                    if let url = URL(string: "https://apps.apple.com/app/infomaniak-kdrive/id1482778676") {
+                    // If app was downloaded in TestFlight, open TestFlight. Else, open App Store
+                    let link = Bundle.main.isRunningInTestFlight ? testFlightInviteLink : appStoreLink
+                    if let url = URL(string: link) {
                         UserDefaults.shared.updateLater = false
                         UIApplication.shared.open(url)
                     }
@@ -102,7 +107,7 @@ class LaunchPanelsController {
                 let driveFloatingPanelController = BetaInviteFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? BetaInviteFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
-                    if let url = URL(string: "https://testflight.apple.com/join/qZHSGy5B") {
+                    if let url = URL(string: testFlightInviteLink) {
                         UIApplication.shared.open(url)
                         driveFloatingPanelController.dismiss(animated: true)
                     }
