@@ -146,12 +146,13 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func observeFileUpdated() {
-        driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
-            if currentFile.id == file.id {
-                currentFile = file
+        driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
+            if self?.currentFile.id == file.id {
+                self?.currentFile = file
                 DispatchQueue.main.async {
-                    collectionView.endEditing(true)
-                    collectionView.reloadItems(at: [currentIndex])
+                    guard let self = self else { return }
+                    self.collectionView.endEditing(true)
+                    self.collectionView.reloadItems(at: [self.currentIndex])
                 }
             }
         }

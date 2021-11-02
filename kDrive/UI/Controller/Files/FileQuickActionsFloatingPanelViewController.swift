@@ -667,16 +667,17 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         downloadAction = action
         tableView.reloadRows(at: [indexPath], with: .fade)
         downloadObserver?.cancel()
-        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
+        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, error in
             action.isLoading = false
-            downloadAction = nil
+            self?.downloadAction = nil
             DispatchQueue.main.async {
                 if error == nil {
                     completion()
                 } else if error != .taskCancelled && error != .taskRescheduled {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
                 }
-                refreshFileAndRows(oldFile: file, rows: [indexPath])
+                guard let self = self else { return }
+                self.refreshFileAndRows(oldFile: self.file, rows: [indexPath])
             }
         }
         DownloadQueue.instance.addToQueue(file: file)
