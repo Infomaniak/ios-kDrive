@@ -196,6 +196,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationItem.largeTitleDisplayMode = .never
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.navigationBar.shadowImage = UIImage()
         navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
