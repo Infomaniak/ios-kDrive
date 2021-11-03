@@ -196,6 +196,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationItem.largeTitleDisplayMode = .never
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.navigationBar.shadowImage = UIImage()
         navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
@@ -221,6 +222,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func observeFileUpdated() {
+        guard driveFileManager != nil else { return }
         filesObserver?.cancel()
         filesObserver = driveFileManager.observeFileUpdated(self, fileId: nil) { [unowned self] file in
             currentRecentFilesController?.refreshIfNeeded(with: file)

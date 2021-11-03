@@ -33,13 +33,7 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
     weak var delegate: RecentActivityDelegate?
 
     private var activity: FileActivity?
-    private var activities: [FileActivity] {
-        if let activity = activity {
-            return [activity] + activity.mergedFileActivities
-        } else {
-            return []
-        }
-    }
+    private var activities = [FileActivity]()
 
     private var isLoading = false
     private let bottomViewCellHeight: CGFloat = 26
@@ -93,7 +87,7 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
 
     func configureWith(recentActivity: FileActivity) {
         activity = recentActivity
-        // activity?.file = recentActivity.file?.freeze()
+        activities = [recentActivity] + recentActivity.mergedFileActivities
         let count = activities.count
         let isDirectory = activity?.file?.isDirectory ?? false
         switch recentActivity.action {
