@@ -41,28 +41,33 @@ struct Right {
     var key: String
     var title: String
     var icon: UIImage
-    var description: (String) -> String
+    var fileDescription: (String) -> String
+    var folderDescription: (String) -> String
 
     static let shareLinkRights = [
         Right(key: "restricted",
               title: KDriveStrings.Localizable.shareLinkRestrictedRightTitle,
               icon: KDriveAsset.lock.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightDescription }),
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightDescription },
+              folderDescription: { _ in ""}),
         Right(key: "public",
               title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
               icon: KDriveAsset.unlock.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription })
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription },
+              folderDescription: { _ in "" })
     ]
 
     static let onlyOfficeRights = [
         Right(key: "read",
               title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
               icon: KDriveAsset.view.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadDescription }),
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadDescription },
+              folderDescription: { _ in "" }),
         Right(key: "write",
               title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
               icon: KDriveAsset.edit.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteDescription })
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteDescription },
+              folderDescription: { _ in "" })
     ]
 }
 
@@ -79,6 +84,8 @@ class RightsSelectionViewController: UIViewController {
 
     weak var delegate: RightsSelectionDelegate?
 
+    var isFolder = false
+    
     var canDelete = true
 
     var driveFileManager: DriveFileManager!
@@ -121,7 +128,7 @@ class RightsSelectionViewController: UIViewController {
                 }
             }
             let userPermissions = UserPermission.allCases.filter { $0 != .delete || canDelete } // Remove delete permission is `canDelete` is false
-            rights = userPermissions.map { Right(key: $0.rawValue, title: $0.title, icon: $0.icon, description: getUserRightDescription($0)) }
+            rights = userPermissions.map { Right(key: $0.rawValue, title: $0.title, icon: $0.icon, fileDescription: getUserRightDescription($0), folderDescription: { _ in "" }) }
         case .officeOnly:
             rights = Right.onlyOfficeRights
         }
@@ -187,7 +194,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
         }
-        cell.configureCell(right: right, type: rightSelectionType, driveName: driveFileManager.drive.name, disable: disable)
+        cell.configureCell(right: right, type: rightSelectionType, driveName: driveFileManager.drive.name, disable: disable, isFolder: isFolder)
 
         return cell
     }

@@ -350,7 +350,8 @@ extension ShareLinkSettingsViewController: RightsSelectionDelegate {
 
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: editRightValue == Right.onlyOfficeRights[1].key, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getValue(for: .allowDownload), blockComments: getValue(for: .blockComments), blockInformation: getValue(for: .blockUsersConsult), isFree: driveFileManager.drive.pack == .free) { response, _ in
+        let canEdit = editRightValue == Right.onlyOfficeRights[1].key
+        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: canEdit, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getValue(for: .allowDownload), blockComments: !canEdit, blockInformation: getValue(for: .blockUsersConsult), isFree: driveFileManager.drive.pack == .free) { response, _ in
             if response?.data == true {
                 self.navigationController?.popViewController(animated: true)
             }
