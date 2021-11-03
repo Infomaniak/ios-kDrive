@@ -53,6 +53,7 @@ struct Right {
               icon: KDriveAsset.unlock.image,
               description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription })
     ]
+
     static let onlyOfficeRights = [
         Right(key: "read",
               title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,

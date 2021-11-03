@@ -26,13 +26,13 @@
                                 <rect key="frame" x="16" y="16" width="517" height="146"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9G9-wN-sCa">
-                                        <rect key="frame" x="0.0" y="0.0" width="517" height="43"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="517" height="111"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="754" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="ZSx-2r-Qvo">
-                                                <rect key="frame" x="0.0" y="0.0" width="517" height="17"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="517" height="24"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="lock" translatesAutoresizingMaskIntoConstraints="NO" id="CK7-c2-fMN">
-                                                        <rect key="frame" x="0.0" y="0.0" width="20" height="17"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="20" height="24"/>
                                                         <color key="tintColor" name="actionColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="20" id="3cx-dc-xhf"/>
@@ -40,7 +40,7 @@
                                                         </constraints>
                                                     </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="752" text="Lien de partage" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0dO-5m-k3M" customClass="IKLabel" customModule="kDriveCore">
-                                                        <rect key="frame" x="25" y="0.0" width="477" height="17"/>
+                                                        <rect key="frame" x="25" y="0.0" width="477" height="24"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <color key="textColor" name="titleColor"/>
                                                         <nil key="highlightedColor"/>
@@ -50,7 +50,7 @@
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="5JS-W7-FAq">
-                                                        <rect key="frame" x="507" y="7" width="10" height="10"/>
+                                                        <rect key="frame" x="507" y="14" width="10" height="10"/>
                                                         <color key="tintColor" name="iconColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="10" id="QDb-EF-Vi8"/>
@@ -67,7 +67,7 @@
                                                 </connections>
                                             </switch>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activé" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mgb-o7-K8K" customClass="IKLabel" customModule="kDriveCore">
-                                                <rect key="frame" x="0.0" y="27" width="517" height="16"/>
+                                                <rect key="frame" x="0.0" y="34" width="517" height="77"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <color key="textColor" name="primaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -97,7 +97,7 @@
                                         </variation>
                                     </view>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="dJW-Ri-FCD">
-                                        <rect key="frame" x="0.0" y="54" width="517" height="92"/>
+                                        <rect key="frame" x="0.0" y="122" width="517" height="24"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="gcj-bA-dGz">
                                                 <rect key="frame" x="0.0" y="0.0" width="506" height="36"/>
@@ -176,7 +176,7 @@
                                                 </constraints>
                                             </view>
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iI1-2w-83G">
-                                                <rect key="frame" x="0.0" y="68" width="517" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="517" height="24"/>
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I4m-zt-myD" customClass="IKButton" customModule="kDriveCore">
                                                         <rect key="frame" x="0.0" y="0.0" width="493" height="24"/>
@@ -217,6 +217,7 @@
                                         <variation key="default">
                                             <mask key="subviews">
                                                 <exclude reference="gcj-bA-dGz"/>
+                                                <exclude reference="IJg-dj-3lY"/>
                                             </mask>
                                         </variation>
                                     </stackView>

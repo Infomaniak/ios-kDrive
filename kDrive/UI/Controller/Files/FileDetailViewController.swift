@@ -546,7 +546,11 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
-//                rightsSelectionVC.selectedRight = accessRightValue
+                if let sharedFile = sharedFile, let sharedFileLink = sharedFile.link {
+                    rightsSelectionVC.selectedRight = Right.shareLinkRights[1].key
+                } else {
+                    rightsSelectionVC.selectedRight = Right.shareLinkRights[0].key
+                }
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
                 rightsSelectionVC.delegate = self
             }

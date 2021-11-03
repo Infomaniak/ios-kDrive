@@ -90,7 +90,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             activeLabel.text = KDriveStrings.Localizable.shareLinkPublicRightDescription
             shareLinkStackView.isHidden = false
             copyTextField.text = link.url
-            shareLinkRightsView.isHidden = !isOfficeFile
+//            shareLinkRightsView.isHidden = !isOfficeFile
             let right = Right.onlyOfficeRights[link.canEdit ? 1 : 0]
             rightsIconImageView.image = right.icon
             rightsLabel.text = right.title
