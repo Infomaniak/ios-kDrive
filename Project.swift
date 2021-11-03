@@ -58,7 +58,6 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "8.0.0")),
             .package(url: "https://github.com/airbnb/HorizonCalendar.git", .upToNextMajor(from: "1.0.0")),
             .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
-            .package(url: "https://github.com/PhilippeWeidmann/IBPCollectionViewCompositionalLayout.git", .branch("master"))
     ],
     targets: [
         Target(name: "kDrive",
@@ -92,7 +91,6 @@ let project = Project(name: "kDrive",
                     .package(product: "DropDown"),
                     .package(product: "HorizonCalendar"),
                     .package(product: "Kvitto"),
-                    .package(product: "IBPCollectionViewCompositionalLayout"),
                     .sdk(name: "StoreKit.framework", status: .required)
             ],
             settings: Settings(base: baseSettings)),

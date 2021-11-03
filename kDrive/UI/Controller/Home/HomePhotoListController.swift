@@ -18,6 +18,7 @@
 
 import Foundation
 import kDriveCore
+import UIKit
 
 class HomePhotoListController: HomeRecentFilesController {
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
