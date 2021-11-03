@@ -38,8 +38,10 @@ class MainTabBar: UITabBar {
 
     var centerButton: IKRoundButton!
 
-    var tabBarHeight: CGFloat {
-        return frame.height - safeAreaInsets.bottom
+    private let extraHeight: CGFloat = 7
+    private let offsetY: CGFloat = -3
+    private var tabBarHeight: CGFloat {
+        return frame.height - safeAreaInsets.bottom + extraHeight
     }
 
     private var shapeLayer: CALayer?
@@ -105,6 +107,7 @@ class MainTabBar: UITabBar {
                     startAngle: CGFloat(90 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180),
                     clockwise: true)
         path.close()
+        path.apply(CGAffineTransform(translationX: 0, y: offsetY))
         return path.cgPath
     }
 
@@ -131,7 +134,7 @@ class MainTabBar: UITabBar {
     }
 
     private func setupMiddleButton() {
-        let originY = tabBarHeight * -18 / 60
+        let originY = tabBarHeight * -18 / 60 + offsetY
         if centerButton?.superview != nil {
             centerButton.removeFromSuperview()
         }
@@ -151,7 +154,6 @@ class MainTabBar: UITabBar {
     @objc func centerButtonAction(sender: UIButton) {
         tabDelegate?.plusButtonPressed()
     }
-
 }
 
 extension CGFloat {
