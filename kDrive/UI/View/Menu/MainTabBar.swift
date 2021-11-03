@@ -85,11 +85,25 @@ class MainTabBar: UITabBar {
         let centerWidth = frame.width / 2
 
         path.move(to: CGPoint(x: 45, y: 0))
-        path.addArc(withCenter: CGPoint(x: centerWidth - (buttonRadius + buttonMargin + 3), y: 3), radius: 3, startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180), clockwise: true)
-        path.addArc(withCenter: CGPoint(x: centerWidth, y: 10), radius: buttonRadius + buttonMargin, startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180), clockwise: false)
-        path.addArc(withCenter: CGPoint(x: centerWidth + (buttonRadius + buttonMargin + 3), y: 3), radius: 3, startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180), clockwise: true)
-        path.addArc(withCenter: CGPoint(x: frame.width - 40, y: tabBarHeight / 2), radius: tabBarHeight / 2, startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(90 * Double.pi / 180), clockwise: true)
-        path.addArc(withCenter: CGPoint(x: 40, y: tabBarHeight / 2), radius: tabBarHeight / 2, startAngle: CGFloat(90 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180), clockwise: true)
+        path.addArc(withCenter: CGPoint(x: centerWidth - (buttonRadius + buttonMargin + 3), y: 3),
+                    radius: 3,
+                    startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180),
+                    clockwise: true)
+        path.addArc(withCenter: CGPoint(x: centerWidth, y: 10),
+                    radius: buttonRadius + buttonMargin + 10 > tabBarHeight ? tabBarHeight - 10 : buttonRadius + buttonMargin,
+                    startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180),
+                    clockwise: false)
+        path.addArc(withCenter: CGPoint(x: centerWidth + (buttonRadius + buttonMargin + 3), y: 3),
+                    radius: 3,
+                    startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180),
+                    clockwise: true)
+        path.addArc(withCenter: CGPoint(x: frame.width - 40, y: tabBarHeight / 2),
+                    radius: tabBarHeight / 2,
+                    startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(90 * Double.pi / 180),
+                    clockwise: true)
+        path.addArc(withCenter: CGPoint(x: 40, y: tabBarHeight / 2), radius: tabBarHeight / 2,
+                    startAngle: CGFloat(90 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180),
+                    clockwise: true)
         path.close()
         return path.cgPath
     }
@@ -124,6 +138,7 @@ class MainTabBar: UITabBar {
         centerButton = IKRoundButton(frame: CGRect(x: (bounds.width / 2) - (tabBarHeight / 2), y: originY, width: tabBarHeight, height: tabBarHeight))
         centerButton.setTitle("", for: .normal)
         centerButton.setImage(KDriveAsset.plus.image, for: .normal)
+        centerButton.imageEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         centerButton.accessibilityLabel = KDriveStrings.Localizable.buttonAdd
         // Shadow
         centerButton.layer.shadowPath = UIBezierPath(ovalIn: centerButton.bounds).cgPath
@@ -137,11 +152,6 @@ class MainTabBar: UITabBar {
         tabDelegate?.plusButtonPressed()
     }
 
-    override open func sizeThatFits(_ size: CGSize) -> CGSize {
-        var sizeThatFits = super.sizeThatFits(size)
-        sizeThatFits.height = 55 + (UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0)
-        return sizeThatFits
-    }
 }
 
 extension CGFloat {
