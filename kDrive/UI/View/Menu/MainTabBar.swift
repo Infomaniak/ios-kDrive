@@ -40,12 +40,7 @@ class MainTabBar: UITabBar {
     var centerButton: IKRoundButton!
 
     var tabBarHeight: CGFloat {
-        for subview in self.subviews {
-            if !subview.isKind(of: UIButton.self) {
-                return subview.frame.height + 2
-            }
-        }
-        return 55
+        return frame.height - safeAreaInsets.bottom
     }
 
     private var shapeLayer: CALayer?
