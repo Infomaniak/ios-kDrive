@@ -29,7 +29,7 @@
                             <outlet property="delegate" destination="RSY-8S-k6V" id="kvv-sl-mlK"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" id="dK0-aK-Jff"/>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="dK0-aK-Jff"/>
                     <connections>
                         <segue destination="Gku-Kw-V1T" kind="presentation" identifier="switchDriveSegue" modalPresentationStyle="overFullScreen" modalTransitionStyle="crossDissolve" id="2Uj-OV-9sy"/>
                     </connections>
