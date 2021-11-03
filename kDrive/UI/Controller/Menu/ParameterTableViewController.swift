@@ -69,13 +69,7 @@ class ParameterTableViewController: UITableViewController {
     }
 
     private var tableContent: [ParameterRow] {
-        var allCases = ParameterRow.allCases
-        if #available(iOS 13.0, *) {
-            // Do nothing…
-        } else {
-            allCases.removeAll { $0 == .theme }
-        }
-        return allCases
+        return ParameterRow.allCases
     }
 
     override func viewDidLoad() {

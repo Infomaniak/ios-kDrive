@@ -18,6 +18,7 @@
 
 import Foundation
 import kDriveCore
+import UIKit
 
 class HomeRecentActivitiesController: HomeRecentFilesController {
     private let mergeFileCreateDelay = 43_200 // 12h

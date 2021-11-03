@@ -43,9 +43,7 @@ import UIKit
         setTitleTextAttributes([.foregroundColor: KDriveCoreAsset.disconnectColor.color, .font: font], for: .normal)
         setTitleTextAttributes([.foregroundColor: UIColor.white, .font: font], for: .selected)
         backgroundColor = KDriveCoreAsset.backgroundColor.color
-        if #available(iOS 13.0, *) {
-            selectedSegmentTintColor = KDriveCoreAsset.infomaniakColor.color
-        }
+        selectedSegmentTintColor = KDriveCoreAsset.infomaniakColor.color
     }
 
     public func setSegments(_ segments: [String], selectedSegmentIndex: Int = 0) {

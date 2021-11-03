@@ -146,15 +146,6 @@
         }
       },
       {
-        "package": "IBPCollectionViewCompositionalLayout",
-        "repositoryURL": "https://github.com/PhilippeWeidmann/IBPCollectionViewCompositionalLayout.git",
-        "state": {
-          "branch": "master",
-          "revision": "900e7d65df9f8c816302cf045e49ceb6d26c5e9a",
-          "version": null
-        }
-      },
-      {
         "package": "InfomaniakCore",
         "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
         "state": {

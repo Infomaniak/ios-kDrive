@@ -19,7 +19,6 @@
 import UIKit
 import kDriveCore
 
-@available(iOS 13.0, *)
 class SelectThemeTableViewController: UITableViewController {
 
     private var tableContent: [Theme] = Theme.allCases

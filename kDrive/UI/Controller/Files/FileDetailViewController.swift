@@ -91,39 +91,27 @@ class FileDetailViewController: UIViewController {
     private var oldSections = 2
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        if #available(iOS 13.0, *) {
-            if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.hasThumbnail {
-                return .default
-            } else {
-                return .lightContent
-            }
+        if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.hasThumbnail {
+            return .default
         } else {
-            if (tableView != nil && tableView.contentOffset.y > 200) || !file.hasThumbnail {
-                return .default
-            } else {
-                return .lightContent
-            }
+            return .lightContent
         }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.tintColor = tableView.contentOffset.y == 0 && UIDevice.current.orientation.isPortrait && file.hasThumbnail ? .white : nil
-        if #available(iOS 13.0, *) {
-            let navigationBarAppearanceStandard = UINavigationBarAppearance()
-            navigationBarAppearanceStandard.configureWithTransparentBackground()
-            navigationBarAppearanceStandard.backgroundColor = KDriveAsset.backgroundColor.color
-            navigationItem.standardAppearance = navigationBarAppearanceStandard
-            navigationItem.compactAppearance = navigationBarAppearanceStandard
+        let navigationBarAppearanceStandard = UINavigationBarAppearance()
+        navigationBarAppearanceStandard.configureWithTransparentBackground()
+        navigationBarAppearanceStandard.backgroundColor = KDriveAsset.backgroundColor.color
+        navigationItem.standardAppearance = navigationBarAppearanceStandard
+        navigationItem.compactAppearance = navigationBarAppearanceStandard
 
-            let navigationBarAppearanceLarge = UINavigationBarAppearance()
-            navigationBarAppearanceLarge.configureWithTransparentBackground()
-            navigationBarAppearanceLarge.backgroundColor = .clear
-            navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
-        }
-        navigationController?.navigationBar.isTranslucent = true
-        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-        navigationController?.navigationBar.shadowImage = UIImage()
+        let navigationBarAppearanceLarge = UINavigationBarAppearance()
+        navigationBarAppearanceLarge.configureWithTransparentBackground()
+        navigationBarAppearanceLarge.backgroundColor = .clear
+        navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
+
         // Reload file information
         if !initialLoading {
             loadFileInformation()
@@ -668,33 +656,17 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 extension FileDetailViewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         setNeedsStatusBarAppearanceUpdate()
-        if #available(iOS 13.0, *) {
-            if UIDevice.current.orientation.isPortrait {
-                if scrollView.contentOffset.y > 0 {
-                    title = file.name
-                    navigationController?.navigationBar.tintColor = nil
-                } else {
-                    title = ""
-                    navigationController?.navigationBar.tintColor = file.hasThumbnail ? .white : nil
-                }
-            } else {
-                title = scrollView.contentOffset.y > 200 ? file.name : ""
-                navigationController?.navigationBar.tintColor = nil
-            }
-        } else {
-            if scrollView.contentOffset.y > 200 {
+        if UIDevice.current.orientation.isPortrait {
+            if scrollView.contentOffset.y > 0 {
                 title = file.name
                 navigationController?.navigationBar.tintColor = nil
-                navigationController?.navigationBar.isTranslucent = false
-                navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
-                navigationController?.navigationBar.shadowImage = nil
             } else {
                 title = ""
                 navigationController?.navigationBar.tintColor = file.hasThumbnail ? .white : nil
-                navigationController?.navigationBar.isTranslucent = true
-                navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-                navigationController?.navigationBar.shadowImage = UIImage()
             }
+        } else {
+            title = scrollView.contentOffset.y > 200 ? file.name : ""
+            navigationController?.navigationBar.tintColor = nil
         }
 
         // Infinite scroll

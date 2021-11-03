@@ -81,13 +81,11 @@ public enum Constants {
     }
 
     public static func formatFileLastModifiedRelativeDate(_ lastModified: Date) -> String {
-        if #available(iOS 13.0, *) {
+        if Date().timeIntervalSince(lastModified) < 3_600 * 24 * 7 {
             let relativeDateFormatter = RelativeDateTimeFormatter()
-            if Date().timeIntervalSince(lastModified) < 3_600 * 24 * 7 {
-                let timeInterval = lastModified.timeIntervalSinceNow < -1 ? lastModified.timeIntervalSinceNow : -1
-                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
-                return KDriveCoreStrings.Localizable.allLastModifiedFileRelativeTime(relativeTime)
-            }
+            let timeInterval = lastModified.timeIntervalSinceNow < -1 ? lastModified.timeIntervalSinceNow : -1
+            let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
+            return KDriveCoreStrings.Localizable.allLastModifiedFileRelativeTime(relativeTime)
         }
         return formatFileLastModifiedDate(lastModified)
     }
@@ -98,13 +96,11 @@ public enum Constants {
     }
 
     public static func formatFileDeletionRelativeDate(_ deletionDate: Date) -> String {
-        if #available(iOS 13.0, *) {
+        if Date().timeIntervalSince(deletionDate) < 3_600 * 24 * 7 {
             let relativeDateFormatter = RelativeDateTimeFormatter()
-            if Date().timeIntervalSince(deletionDate) < 3_600 * 24 * 7 {
-                let timeInterval = deletionDate.timeIntervalSinceNow < -1 ? deletionDate.timeIntervalSinceNow : -1
-                let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
-                return KDriveCoreStrings.Localizable.allDeletedFileRelativeTime(relativeTime)
-            }
+            let timeInterval = deletionDate.timeIntervalSinceNow < -1 ? deletionDate.timeIntervalSinceNow : -1
+            let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
+            return KDriveCoreStrings.Localizable.allDeletedFileRelativeTime(relativeTime)
         }
         return formatFileDeletionDate(deletionDate)
     }

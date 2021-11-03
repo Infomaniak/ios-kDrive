@@ -636,15 +636,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if #available(iOS 13.0, *) {
-        } else {
-            // Fix for iOS 12
-            if let cell = cell as? FileGridCollectionViewCell {
-                let file = sortedFiles[indexPath.row]
-                cell.moreButton.tintColor = file.isDirectory || !file.hasThumbnail ? KDriveAsset.iconColor.color : .white
-            }
-        }
-
         if selectAllMode {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }

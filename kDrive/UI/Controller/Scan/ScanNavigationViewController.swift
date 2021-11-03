@@ -35,7 +35,6 @@ class ScanNavigationViewController: UINavigationController {
 
 // MARK: - VNDocumentCameraViewControllerDelegate
 
-@available(iOS 13.0, *)
 extension ScanNavigationViewController: VNDocumentCameraViewControllerDelegate {
     func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
         guard scan.pageCount >= 1 else {

@@ -161,23 +161,15 @@ class PhotoListViewController: MultipleSelectionViewController {
         let largeTitleTextAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
         let titleStyle = TextStyle.header3
         let titleTextAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white, .font: titleStyle.font]
-        if #available(iOS 13.0, *) {
-            let navbarAppearance = UINavigationBarAppearance()
-            navbarAppearance.configureWithTransparentBackground()
-            navbarAppearance.shadowImage = UIImage()
-            navbarAppearance.titleTextAttributes = titleTextAttributes
-            navbarAppearance.largeTitleTextAttributes = largeTitleTextAttributes
+        let navbarAppearance = UINavigationBarAppearance()
+        navbarAppearance.configureWithTransparentBackground()
+        navbarAppearance.shadowImage = UIImage()
+        navbarAppearance.titleTextAttributes = titleTextAttributes
+        navbarAppearance.largeTitleTextAttributes = largeTitleTextAttributes
 
-            navigationController?.navigationBar.standardAppearance = navbarAppearance
-            navigationController?.navigationBar.compactAppearance = navbarAppearance
-            navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
-        } else {
-            navigationController?.navigationBar.isTranslucent = true
-            navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-            navigationController?.navigationBar.shadowImage = UIImage()
-            navigationController?.navigationBar.titleTextAttributes = titleTextAttributes
-            navigationController?.navigationBar.largeTitleTextAttributes = largeTitleTextAttributes
-        }
+        navigationController?.navigationBar.standardAppearance = navbarAppearance
+        navigationController?.navigationBar.compactAppearance = navbarAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
     }
 
     func forceRefresh() {

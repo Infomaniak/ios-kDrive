@@ -137,21 +137,15 @@ class ShareLinkSettingsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        if #available(iOS 13.0, *) {
-            let navigationBarAppearanceStandard = UINavigationBarAppearance()
-            navigationBarAppearanceStandard.configureWithTransparentBackground()
-            navigationBarAppearanceStandard.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-            navigationItem.standardAppearance = navigationBarAppearanceStandard
+        let navigationBarAppearanceStandard = UINavigationBarAppearance()
+        navigationBarAppearanceStandard.configureWithTransparentBackground()
+        navigationBarAppearanceStandard.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        navigationItem.standardAppearance = navigationBarAppearanceStandard
 
-            let navigationBarAppearanceLarge = UINavigationBarAppearance()
-            navigationBarAppearanceLarge.configureWithTransparentBackground()
-            navigationBarAppearanceLarge.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-            navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
-        } else {
-            navigationController?.navigationBar.isTranslucent = false
-            navigationController?.navigationBar.barTintColor = KDriveAsset.backgroundCardViewColor.color
-            navigationController?.navigationBar.shadowImage = UIImage()
-        }
+        let navigationBarAppearanceLarge = UINavigationBarAppearance()
+        navigationBarAppearanceLarge.configureWithTransparentBackground()
+        navigationBarAppearanceLarge.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
     }
 
     override func viewDidAppear(_ animated: Bool) {
