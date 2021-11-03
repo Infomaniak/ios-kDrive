@@ -16,10 +16,10 @@
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="pOl-G4-wgF">
-                    <rect key="frame" x="0.0" y="47" width="86" height="45"/>
+                    <rect key="frame" x="0.0" y="47" width="57" height="45"/>
                     <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NKR-TM-U8a" customClass="IKButton" customModule="kDriveCore">
-                            <rect key="frame" x="0.0" y="0.0" width="62" height="45"/>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NKR-TM-U8a" customClass="IKButton" customModule="kDriveCore">
+                            <rect key="frame" x="0.0" y="7.5" width="33" height="30"/>
                             <inset key="imageEdgeInsets" minX="10" minY="12" maxX="10" maxY="12"/>
                             <state key="normal" title="Nom"/>
                             <userDefinedRuntimeAttributes>
@@ -30,7 +30,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aWr-uO-KB8">
-                            <rect key="frame" x="70" y="14.5" width="16" height="16"/>
+                            <rect key="frame" x="41" y="14.5" width="16" height="16"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="16" id="OjG-bM-85a"/>
                                 <constraint firstAttribute="width" constant="16" id="YCL-dB-aoo"/>
@@ -61,7 +61,7 @@
     </objects>
     <designables>
         <designable name="NKR-TM-U8a">
-            <size key="intrinsicContentSize" width="62" height="46"/>
+            <size key="intrinsicContentSize" width="33" height="30"/>
         </designable>
     </designables>
     <resources>
