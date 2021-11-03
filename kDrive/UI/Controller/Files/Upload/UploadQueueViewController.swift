@@ -41,7 +41,7 @@ class UploadQueueViewController: UIViewController {
         cancelButton.accessibilityLabel = KDriveStrings.Localizable.buttonCancel
 
         reloadData(reloadTableView: false)
-        UploadQueue.instance.observeFileUploaded(self) { [unowned self] uploadedFile, _ in
+        UploadQueue.instance.observeFileUploaded(self) { uploadedFile, _ in
             DispatchQueue.main.async { [weak self, uploadedFileId = uploadedFile.id] in
                 guard let self = self,
                       let index = self.uploadingFiles.firstIndex(where: { $0.id == uploadedFileId }),
@@ -54,7 +54,7 @@ class UploadQueueViewController: UIViewController {
                 self.reloadData(with: newUploadingFiles)
             }
         }
-        UploadQueue.instance.observeFileUploadProgress(self) { [unowned self] fileId, progress in
+        UploadQueue.instance.observeFileUploadProgress(self) { fileId, progress in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.progressForFileId[fileId] = CGFloat(progress)
@@ -64,9 +64,9 @@ class UploadQueueViewController: UIViewController {
             }
         }
 
-        ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] _ in
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
+        ReachabilityListener.instance.observeNetworkChange(self) { _ in
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
             }
         }
     }

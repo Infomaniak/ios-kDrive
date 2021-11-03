@@ -388,11 +388,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     final func observeNetwork() {
         guard networkObserver == nil else { return }
-        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [unowned self] status in
-            DispatchQueue.main.async {
-                headerView?.offlineView.isHidden = status != .offline
-                collectionView.collectionViewLayout.invalidateLayout()
-                collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { status in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.headerView?.offlineView.isHidden = status != .offline
+                self.collectionView.collectionViewLayout.invalidateLayout()
+                self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
             }
         }
     }
@@ -400,13 +401,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     final func observeListOptions() {
         guard listStyleObserver == nil && sortTypeObserver == nil else { return }
         // List style observer
-        listStyleObserver = FileListOptions.instance.observeListStyleChange(self) { [unowned self] newStyle in
-            self.listStyle = newStyle
-            DispatchQueue.main.async { [weak self] in
-                UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
-                    self?.collectionViewLayout.invalidateLayout()
-                    self?.collectionView.reloadData()
-                    self?.setSelectedCells()
+        listStyleObserver = FileListOptions.instance.observeListStyleChange(self) { [weak self] newStyle in
+            self?.listStyle = newStyle
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                UIView.transition(with: self.collectionView, duration: 0.25, options: .transitionCrossDissolve) {
+                    self.collectionViewLayout.invalidateLayout()
+                    self.collectionView.reloadData()
+                    self.setSelectedCells()
                 }
             }
         }
