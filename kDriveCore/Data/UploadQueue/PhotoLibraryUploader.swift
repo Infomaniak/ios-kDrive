@@ -234,7 +234,7 @@ public class PhotoLibraryUploader {
 
     public struct PicturesAssets {
         public let files: [UploadFile]
-        public let assets: [PHAsset]
+        public let assets: PHFetchResult<PHAsset>
     }
 
     public func getPicturesToRemove() -> PicturesAssets? {
@@ -244,19 +244,13 @@ public class PhotoLibraryUploader {
         }
 
         let removeAssetsCountThreshold = 10
-        var toRemoveAssets = [PHAsset]()
+
         var toRemoveFiles = [UploadFile]()
-
         BackgroundRealm.uploads.execute { realm in
-            let uploadedFiles = UploadQueue.instance.getUploadedFiles(using: realm)
-
-            for uploadFile in uploadedFiles {
-                if let asset = uploadFile.getPHAsset() {
-                    toRemoveAssets.append(asset)
-                    toRemoveFiles.append(uploadFile)
-                }
-            }
+            toRemoveFiles = Array(UploadQueue.instance.getUploadedFiles(using: realm).filter("rawType = %@", UploadFileType.phAsset.rawValue))
         }
+
+        let toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFiles.map(\.id), options: nil)
 
         guard toRemoveAssets.count >= removeAssetsCountThreshold && UploadQueue.instance.operationQueue.operationCount == 0 else {
             return nil
@@ -267,7 +261,7 @@ public class PhotoLibraryUploader {
 
     public func removePicturesFromPhotoLibrary(_ toRemoveItems: PicturesAssets) {
         PHPhotoLibrary.shared().performChanges {
-            PHAssetChangeRequest.deleteAssets(toRemoveItems.assets as NSFastEnumeration)
+            PHAssetChangeRequest.deleteAssets(toRemoveItems.assets)
         } completionHandler: { success, _ in
             if success {
                 BackgroundRealm.uploads.execute { realm in
