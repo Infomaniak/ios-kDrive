@@ -35,7 +35,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     @IBOutlet weak var dateTextField: UITextField!
     @IBOutlet weak var passwordTextFiled: MaterialOutlinedTextField!
     @IBOutlet weak var newPasswordButton: IKButton!
-    @IBOutlet weak var pickersView: UIStackView!
     @IBOutlet weak var compactDatePicker: UIDatePicker!
     @IBOutlet weak var updateButton: UIButton!
 
@@ -52,7 +51,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         super.awakeFromNib()
         dateTextField.isHidden = true
         passwordTextFiled.isHidden = true
-        pickersView.isHidden = true
         compactDatePicker.isHidden = true
         updateButton.isHidden = true
         newPasswordButton.isHidden = true
@@ -115,28 +113,27 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func compactDatePickerChanged(_ sender: UIDatePicker) {
-        dateTextField.text = "\(sender.date)"
+//        dateTextField.text = "\(sender.date)"
         expirationDate = sender.date
         delegate?.didUpdateExpirationDateSettingValue(for: .expirationDate, newValue: settingSwitch.isOn, date: expirationDate?.timeIntervalSince1970)
     }
 
-    func configureWith(option: ShareLinkSettingsViewController.Option, optionValue: Bool, drive: Drive, expirationTime: TimeInterval? = nil, newPassword: Bool = false) {
+    func configureWith(option: ShareLinkSettingsViewController.Option, optionValue: Bool, drive: Drive, expirationTime: TimeInterval? = nil, newPassword: Bool = false, isFolder: Bool) {
         self.option = option
 
         titleLabel.text = option.title
-        settingDetail.text = option.description
+        settingDetail.text = isFolder ? option.folderDescription : option.fileDescription
         settingSwitch.isOn = optionValue
         settingSwitch.isEnabled = option.isEnabled(drive: drive)
         updateButton.isHidden = option.isEnabled(drive: drive)
         passwordTextFiled.isHidden = true
         newPasswordButton.isHidden = true
-        pickersView.isHidden = true
+        compactDatePicker.isHidden = true
 
         if option == .expirationDate {
             self.expirationDate = expirationTime != nil ? Date(timeIntervalSince1970: expirationTime!) : nil
             if #available(iOS 13.4, *) {
                 compactDatePicker.isHidden = !optionValue
-                pickersView.isHidden = !optionValue
                 if let date = expirationDate {
                     compactDatePicker.date = date
                 }

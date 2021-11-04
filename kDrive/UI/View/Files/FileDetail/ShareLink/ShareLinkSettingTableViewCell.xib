@@ -22,7 +22,7 @@
                         <rect key="frame" x="24" y="8" width="289" height="359"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="0.0" y="5" width="36" height="17"/>
+                                <rect key="frame" x="0.0" y="5" width="36" height="21"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -31,14 +31,14 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LR0-uD-ggb">
-                                <rect key="frame" x="240" y="0.0" width="51" height="27"/>
+                                <rect key="frame" x="240" y="0.0" width="51" height="31"/>
                                 <color key="onTintColor" name="infomaniakColor"/>
                                 <connections>
                                     <action selector="switchValueChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="bxC-zq-HcP"/>
                                 </connections>
                             </switch>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="1Xm-Dy-4ti">
-                                <rect key="frame" x="0.0" y="37" width="289" height="308"/>
+                                <rect key="frame" x="0.0" y="41" width="289" height="304"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K1i-a0-oIy" customClass="IKLabel" customModule="kDriveCore">
                                         <rect key="frame" x="0.0" y="0.0" width="289" height="14.5"/>
@@ -55,7 +55,7 @@
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="TIN-sh-74m" customClass="MaterialOutlinedTextField" customModule="MaterialOutlinedTextField">
-                                        <rect key="frame" x="0.0" y="80.5" width="289" height="50"/>
+                                        <rect key="frame" x="0.0" y="30.5" width="289" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="mBZ-iz-3S2"/>
                                         </constraints>
@@ -66,7 +66,7 @@
                                         </connections>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mNc-Na-0mD" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="146.5" width="46" height="2"/>
+                                        <rect key="frame" x="0.0" y="96.5" width="134" height="89.5"/>
                                         <state key="normal" title="Button"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonNewPassword"/>
@@ -76,25 +76,14 @@
                                             <action selector="newPasswordButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="VKy-b9-Ci5"/>
                                         </connections>
                                     </button>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LGa-Rb-5sK">
-                                        <rect key="frame" x="0.0" y="164.5" width="289" height="91.5"/>
-                                        <subviews>
-                                            <datePicker contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" style="compact" translatesAutoresizingMaskIntoConstraints="NO" id="Em4-Ij-GbM">
-                                                <rect key="frame" x="0.0" y="0.0" width="144.5" height="91.5"/>
-                                                <connections>
-                                                    <action selector="compactDatePickerChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="WEy-d9-ajH"/>
-                                                </connections>
-                                            </datePicker>
-                                            <datePicker contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="time" style="compact" translatesAutoresizingMaskIntoConstraints="NO" id="epM-q6-278">
-                                                <rect key="frame" x="144.5" y="0.0" width="144.5" height="91.5"/>
-                                                <connections>
-                                                    <action selector="compactDatePickerChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="6Qo-av-MDW"/>
-                                                </connections>
-                                            </datePicker>
-                                        </subviews>
-                                    </stackView>
+                                    <datePicker contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="leading" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="30" style="compact" translatesAutoresizingMaskIntoConstraints="NO" id="Em4-Ij-GbM">
+                                        <rect key="frame" x="0.0" y="202" width="193.5" height="50"/>
+                                        <connections>
+                                            <action selector="compactDatePickerChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="WEy-d9-ajH"/>
+                                        </connections>
+                                    </datePicker>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2ju-Mt-PMJ">
-                                        <rect key="frame" x="0.0" y="272" width="147" height="36"/>
+                                        <rect key="frame" x="0.0" y="268" width="147" height="36"/>
                                         <color key="backgroundColor" name="backgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="36" id="eHu-JC-Am2"/>
@@ -123,6 +112,11 @@
                                     <constraint firstItem="sUT-t1-Zjz" firstAttribute="leading" secondItem="1Xm-Dy-4ti" secondAttribute="leading" id="YYZ-QO-3QN"/>
                                     <constraint firstAttribute="trailing" secondItem="sUT-t1-Zjz" secondAttribute="trailing" id="jYe-Ld-B8b"/>
                                 </constraints>
+                                <variation key="default">
+                                    <mask key="subviews">
+                                        <exclude reference="sUT-t1-Zjz"/>
+                                    </mask>
+                                </variation>
                             </stackView>
                         </subviews>
                         <color key="backgroundColor" name="backgroundCardViewColor"/>
@@ -157,7 +151,6 @@
                 <outlet property="dateTextField" destination="sUT-t1-Zjz" id="WYD-Dn-P2G"/>
                 <outlet property="newPasswordButton" destination="mNc-Na-0mD" id="NL8-AB-5ex"/>
                 <outlet property="passwordTextFiled" destination="TIN-sh-74m" id="AVv-04-m9r"/>
-                <outlet property="pickersView" destination="LGa-Rb-5sK" id="c6O-H6-rr7"/>
                 <outlet property="settingDetail" destination="K1i-a0-oIy" id="9RQ-6t-TSl"/>
                 <outlet property="settingSwitch" destination="LR0-uD-ggb" id="Klu-2N-Y6R"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
@@ -172,7 +165,7 @@
             <size key="intrinsicContentSize" width="31" height="14.5"/>
         </designable>
         <designable name="mNc-Na-0mD">
-            <size key="intrinsicContentSize" width="46" height="30"/>
+            <size key="intrinsicContentSize" width="134" height="29"/>
         </designable>
         <designable name="rtI-Wc-46s">
             <size key="intrinsicContentSize" width="36" height="17"/>
