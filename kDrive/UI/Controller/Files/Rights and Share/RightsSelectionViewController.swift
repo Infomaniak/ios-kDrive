@@ -48,13 +48,13 @@ struct Right {
         Right(key: "restricted",
               title: KDriveStrings.Localizable.shareLinkRestrictedRightTitle,
               icon: KDriveAsset.lock.image,
-              fileDescription: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightDescription },
-              folderDescription: { _ in ""}),
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription },
+              folderDescription: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription }),
         Right(key: "public",
               title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
               icon: KDriveAsset.unlock.image,
-              fileDescription: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription },
-              folderDescription: { _ in "" })
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkPublicRightFileDescription },
+              folderDescription: { _ in KDriveStrings.Localizable.shareLinkPublicRightFolderDescription })
     ]
 
     static let onlyOfficeRights = [
@@ -85,7 +85,7 @@ class RightsSelectionViewController: UIViewController {
     weak var delegate: RightsSelectionDelegate?
 
     var isFolder = false
-    
+
     var canDelete = true
 
     var driveFileManager: DriveFileManager!

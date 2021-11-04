@@ -41,10 +41,25 @@ class ShareLinkSettingsViewController: UIViewController {
             }
         }
 
-        var description: String {
+        var fileDescription: String {
             switch self {
             case .addPassword:
-                return KDriveStrings.Localizable.shareLinkPasswordRightDescription
+                return KDriveStrings.Localizable.shareLinkPasswordRightFileDescription
+            case .allowDownload:
+                return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
+            case .expirationDate:
+                return KDriveStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
+            case .blockUsersConsult:
+                return KDriveStrings.Localizable.shareLinkSettingsBlockUsersConsultDescription
+            case .blockComments:
+                return KDriveStrings.Localizable.shareLinkSettingsBlockCommentsDescription
+            }
+        }
+        
+        var folderDescription: String {
+            switch self {
+            case .addPassword:
+                return KDriveStrings.Localizable.shareLinkPasswordRightFolderDescription
             case .allowDownload:
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .expirationDate:
@@ -250,7 +265,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         let cell = tableview.dequeueReusableCell(type: ShareLinkSettingTableViewCell.self, for: indexPath)
         cell.delegate = self
         let option = (file.isOfficeFile || file.isDirectory) ? content[indexPath.row - 1] : content[indexPath.row]
-        cell.configureWith(option: option, optionValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate, newPassword: shareFile.link?.permission == "password")
+        cell.configureWith(option: option, optionValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate, newPassword: shareFile.link?.permission == "password", isFolder: file.isDirectory)
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
                 guard let self = self else { return }
@@ -293,6 +308,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
+                rightsSelectionVC.isFolder = file.isDirectory
                 rightsSelectionVC.selectedRight = editRightValue
                 rightsSelectionVC.rightSelectionType = .officeOnly
                 rightsSelectionVC.delegate = self

@@ -87,7 +87,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         layoutIfNeeded()
         if let link = sharedFile?.link {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
-            activeLabel.text = KDriveStrings.Localizable.shareLinkPublicRightDescription
+            activeLabel.text = KDriveStrings.Localizable.shareLinkPublicRightFileDescription
             shareLinkStackView.isHidden = false
             copyTextField.text = link.url
 //            shareLinkRightsView.isHidden = !isOfficeFile
@@ -97,7 +97,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkRightsView.accessibilityLabel = right.title
         } else {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
-            activeLabel.text = KDriveStrings.Localizable.shareLinkRestrictedRightDescription
+            activeLabel.text = KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription
             shareLinkStackView.isHidden = true
         }
         shareLinkSwitch.isEnabled = enabled
