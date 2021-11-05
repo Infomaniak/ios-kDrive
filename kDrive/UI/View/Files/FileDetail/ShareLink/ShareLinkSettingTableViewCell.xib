@@ -150,7 +150,7 @@
                 <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
                 <outlet property="dateTextField" destination="sUT-t1-Zjz" id="WYD-Dn-P2G"/>
                 <outlet property="newPasswordButton" destination="mNc-Na-0mD" id="NL8-AB-5ex"/>
-                <outlet property="passwordTextFiled" destination="TIN-sh-74m" id="AVv-04-m9r"/>
+                <outlet property="passwordTextField" destination="TIN-sh-74m" id="AVv-04-m9r"/>
                 <outlet property="settingDetail" destination="K1i-a0-oIy" id="9RQ-6t-TSl"/>
                 <outlet property="settingSwitch" destination="LR0-uD-ggb" id="Klu-2N-Y6R"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>

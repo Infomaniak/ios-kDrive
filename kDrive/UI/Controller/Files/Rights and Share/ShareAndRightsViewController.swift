@@ -221,7 +221,21 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            break
+            shareLinkRights = true
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+            rightsSelectionViewController.modalPresentationStyle = .fullScreen
+            if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
+                rightsSelectionVC.driveFileManager = driveFileManager
+                rightsSelectionVC.isFolder = file.isDirectory
+                if let sharedFile = sharedFile, (sharedFile.link != nil) {
+                    rightsSelectionVC.selectedRight = Right.shareLinkRights[1].key
+                } else {
+                    rightsSelectionVC.selectedRight = Right.shareLinkRights[0].key
+                }
+                rightsSelectionVC.rightSelectionType = .shareLinkSettings
+                rightsSelectionVC.delegate = self
+            }
+            present(rightsSelectionViewController, animated: true)
         case .access:
             shareLinkRights = false
             selectedShareable = shareables[indexPath.row]
@@ -247,9 +261,14 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
 extension ShareAndRightsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         guard let sharedFile = sharedFile else { return }
-
-        if let sharedLink = sharedFile.link, shareLinkRights {
-            driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
+        if shareLinkRights {
+            driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { _, shareLink, _ in
+                if let link = shareLink {
+                    self.sharedFile?.link = link
+                } else {
+                    self.sharedFile?.link = nil
+                }
+                self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
             }
         } else if let user = selectedShareable as? DriveUser {
             driveFileManager.apiFetcher.updateUserRights(file: file, user: user, permission: value) { response, _ in

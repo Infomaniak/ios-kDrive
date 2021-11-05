@@ -21,7 +21,7 @@ import InfomaniakCore
 import MaterialOutlinedTextField
 
 protocol AccessRightPasswordDelegate: AnyObject {
-    func didUpdatePassword(newPassword: String)
+    func didUpdatePassword(newPasswordString: String)
 }
 
 class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
@@ -78,11 +78,11 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
 
     @IBAction func textFieldUpdated(_ sender: MaterialOutlinedTextField) {
         textField.borderColor = KDriveAsset.infomaniakColor.color
-        delegate?.didUpdatePassword(newPassword: textField.text ?? "")
+        delegate?.didUpdatePassword(newPasswordString: textField.text ?? "")
     }
 
     @IBAction func buttonNewPasswordClicked(_ sender: UIButton) {
-        delegate?.didUpdatePassword(newPassword: textField.text ?? "")
+        delegate?.didUpdatePassword(newPasswordString: textField.text ?? "")
         buttonNewPassword.isHidden = true
         textField.isHidden = false
     }

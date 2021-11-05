@@ -547,7 +547,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
                 rightsSelectionVC.isFolder = file.isDirectory
-                if let sharedFile = sharedFile, let sharedFileLink = sharedFile.link {
+                if let sharedFile = sharedFile, (sharedFile.link != nil) {
                     rightsSelectionVC.selectedRight = Right.shareLinkRights[1].key
                 } else {
                     rightsSelectionVC.selectedRight = Right.shareLinkRights[0].key
@@ -555,7 +555,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
                 rightsSelectionVC.delegate = self
             }
-            present(rightsSelectionViewController, animated: true)        }
+            present(rightsSelectionViewController, animated: true)
+        }
         if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && driveFileManager.drive.categoryRights.canPutCategoryOnFile {
             let manageCategoriesViewController = ManageCategoriesViewController.instantiate(file: file, driveFileManager: driveFileManager)
             navigationController?.pushViewController(manageCategoriesViewController, animated: true)
@@ -844,29 +845,13 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
 
 extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
-        if let sharedLink = sharedFile?.link {
-            sharedLink.permission = value
-            if value == "restricted" {
-                driveFileManager.removeShareLink(for: file) { file, _ in
-                    if file != nil {
-                        self.sharedFile?.link = nil
-                        self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
-                    }
-                }
+        driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { file, shareLink, error in
+            if let link = shareLink {
+                self.sharedFile?.link = link
             } else {
-                driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == "write", permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
-                }
+                self.sharedFile?.link = nil
             }
-        } else {
-            if value == "public" {
-                driveFileManager.activateShareLink(for: file) { _, shareLink, _ in
-                    if let link = shareLink {
-                        self.sharedFile?.link = link
-                        self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
-                        return
-                    }
-                }
-            }
+            self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
         }
     }
 }
