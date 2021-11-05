@@ -16,22 +16,21 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 protocol MainTabBarDelegate: AnyObject {
     func plusButtonPressed()
 }
 
 class MainTabBar: UITabBar {
-
     override var backgroundColor: UIColor? {
         get {
-            return self.fillColor
+            return fillColor
         }
         set {
             fillColor = newValue
-            self.setNeedsDisplay()
+            setNeedsDisplay()
         }
     }
 
@@ -39,13 +38,10 @@ class MainTabBar: UITabBar {
 
     var centerButton: IKRoundButton!
 
-    var tabBarHeight: CGFloat {
-        for subview in self.subviews {
-            if !subview.isKind(of: UIButton.self) {
-                return subview.frame.height + 2
-            }
-        }
-        return 55
+    private let extraHeight: CGFloat = 7
+    private let offsetY: CGFloat = -3
+    private var tabBarHeight: CGFloat {
+        return frame.height - safeAreaInsets.bottom + extraHeight
     }
 
     private var shapeLayer: CALayer?
@@ -54,7 +50,7 @@ class MainTabBar: UITabBar {
     weak var tabDelegate: MainTabBarDelegate?
 
     override func draw(_ rect: CGRect) {
-        self.addShape()
+        addShape()
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -69,9 +65,9 @@ class MainTabBar: UITabBar {
         shapeLayer.lineWidth = 0.5
 
         if let oldShapeLayer = self.shapeLayer {
-            self.layer.replaceSublayer(oldShapeLayer, with: shapeLayer)
+            layer.replaceSublayer(oldShapeLayer, with: shapeLayer)
         } else {
-            self.layer.insertSublayer(shapeLayer, at: 0)
+            layer.insertSublayer(shapeLayer, at: 0)
         }
         self.shapeLayer = shapeLayer
         setupBackgroundGradient()
@@ -80,28 +76,43 @@ class MainTabBar: UITabBar {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.layer.shadowPath = createPath()
-        self.addShadow()
+        layer.shadowPath = createPath()
+        addShadow()
     }
 
     func createPath() -> CGPath {
         let buttonRadius: CGFloat = tabBarHeight / 2
         let buttonMargin: CGFloat = 8
         let path = UIBezierPath()
-        let centerWidth = self.frame.width / 2
+        let centerWidth = frame.width / 2
 
         path.move(to: CGPoint(x: 45, y: 0))
-        path.addArc(withCenter: CGPoint(x: (centerWidth - (buttonRadius + buttonMargin + 3)), y: 3), radius: 3, startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180), clockwise: true)
-        path.addArc(withCenter: CGPoint(x: centerWidth, y: 10), radius: buttonRadius + buttonMargin, startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180), clockwise: false)
-        path.addArc(withCenter: CGPoint(x: (centerWidth + (buttonRadius + buttonMargin + 3)), y: 3), radius: 3, startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180), clockwise: true)
-        path.addArc(withCenter: CGPoint(x: self.frame.width - 40, y: tabBarHeight / 2), radius: tabBarHeight / 2, startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(90 * Double.pi / 180), clockwise: true)
-        path.addArc(withCenter: CGPoint(x: 40, y: tabBarHeight / 2), radius: tabBarHeight / 2, startAngle: CGFloat(90 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180), clockwise: true)
+        path.addArc(withCenter: CGPoint(x: centerWidth - (buttonRadius + buttonMargin + 3), y: 3),
+                    radius: 3,
+                    startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180),
+                    clockwise: true)
+        path.addArc(withCenter: CGPoint(x: centerWidth, y: 10),
+                    radius: buttonRadius + buttonMargin + 10 > tabBarHeight ? tabBarHeight - 10 : buttonRadius + buttonMargin,
+                    startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180),
+                    clockwise: false)
+        path.addArc(withCenter: CGPoint(x: centerWidth + (buttonRadius + buttonMargin + 3), y: 3),
+                    radius: 3,
+                    startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180),
+                    clockwise: true)
+        path.addArc(withCenter: CGPoint(x: frame.width - 40, y: tabBarHeight / 2),
+                    radius: tabBarHeight / 2,
+                    startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(90 * Double.pi / 180),
+                    clockwise: true)
+        path.addArc(withCenter: CGPoint(x: 40, y: tabBarHeight / 2), radius: tabBarHeight / 2,
+                    startAngle: CGFloat(90 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180),
+                    clockwise: true)
         path.close()
+        path.apply(CGAffineTransform(translationX: 0, y: offsetY))
         return path.cgPath
     }
 
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        if self.bounds.contains(point) || (centerButton != nil && centerButton.frame.contains(point)) {
+        if bounds.contains(point) || (centerButton != nil && centerButton.frame.contains(point)) {
             return true
         } else {
             return false
@@ -115,38 +126,33 @@ class MainTabBar: UITabBar {
         gradient.frame = CGRect(x: 0, y: bounds.height + inset - height, width: bounds.width, height: height)
         gradient.colors = [KDriveAsset.backgroundColor.color.withAlphaComponent(0).cgColor, KDriveAsset.backgroundColor.color.cgColor]
         if let oldBackgroundLayer = backgroundLayer {
-            self.layer.replaceSublayer(oldBackgroundLayer, with: gradient)
+            layer.replaceSublayer(oldBackgroundLayer, with: gradient)
         } else {
-            self.layer.insertSublayer(gradient, at: 0)
+            layer.insertSublayer(gradient, at: 0)
         }
         backgroundLayer = gradient
     }
 
     private func setupMiddleButton() {
-        let originY = tabBarHeight * -18 / 60
+        let originY = tabBarHeight * -18 / 60 + offsetY
         if centerButton?.superview != nil {
             centerButton.removeFromSuperview()
         }
-        centerButton = IKRoundButton(frame: CGRect(x: (self.bounds.width / 2) - (tabBarHeight / 2), y: originY, width: tabBarHeight, height: tabBarHeight))
+        centerButton = IKRoundButton(frame: CGRect(x: (bounds.width / 2) - (tabBarHeight / 2), y: originY, width: tabBarHeight, height: tabBarHeight))
         centerButton.setTitle("", for: .normal)
         centerButton.setImage(KDriveAsset.plus.image, for: .normal)
+        centerButton.imageEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         centerButton.accessibilityLabel = KDriveStrings.Localizable.buttonAdd
         // Shadow
         centerButton.layer.shadowPath = UIBezierPath(ovalIn: centerButton.bounds).cgPath
         centerButton.elevated = true
         centerButton.elevation = 16
-        self.addSubview(centerButton)
-        centerButton.addTarget(self, action: #selector(self.centerButtonAction), for: .touchUpInside)
+        addSubview(centerButton)
+        centerButton.addTarget(self, action: #selector(centerButtonAction), for: .touchUpInside)
     }
 
     @objc func centerButtonAction(sender: UIButton) {
         tabDelegate?.plusButtonPressed()
-    }
-
-    override open func sizeThatFits(_ size: CGSize) -> CGSize {
-        var sizeThatFits = super.sizeThatFits(size)
-        sizeThatFits.height = 55 + (UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0)
-        return sizeThatFits
     }
 }
 
@@ -154,6 +160,7 @@ extension CGFloat {
     var degreesToRadians: CGFloat {
         return self * .pi / 180
     }
+
     var radiansToDegrees: CGFloat {
         return self * 180 / .pi
     }

@@ -76,21 +76,11 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         if view.frame.width < 375 {
             spacing = 0
             itemWidth = 28
-            if #available(iOS 13, *) {
-                inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-            } else {
-                // Hack to properly center icons < iOS 13
-                inset = UIEdgeInsets(top: 0, left: 0, bottom: -8, right: 0)
-            }
+            inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         } else {
             spacing = 35
             itemWidth = 35
-            if #available(iOS 13, *) {
-                inset = UIEdgeInsets(top: -2, left: -2, bottom: -2, right: -2)
-            } else {
-                // Hack to properly center icons < iOS 13
-                inset = UIEdgeInsets(top: -2, left: -2, bottom: -10, right: -2)
-            }
+            inset = UIEdgeInsets(top: -2, left: -2, bottom: -2, right: -2)
         }
 
         tabBar.itemSpacing = spacing
@@ -121,7 +111,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
         tabBar.items![4].selectedImage = image
             .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
-            .maskImageWithRoundedRect(cornerRadius: CGFloat((iconSize + 2) / 2), borderWidth: 1, borderColor: KDriveAsset.infomaniakColor.color)
+            .maskImageWithRoundedRect(cornerRadius: CGFloat((iconSize + 2) / 2), borderWidth: 2, borderColor: KDriveAsset.infomaniakColor.color)
             .withRenderingMode(.alwaysOriginal)
 
         tabBar.items![4].image = image
