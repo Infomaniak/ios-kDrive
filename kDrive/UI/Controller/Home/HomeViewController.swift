@@ -560,7 +560,10 @@ extension HomeViewController {
                 driveHeaderView.isEnabled = AccountManager.instance.drives.count > 1
                 driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
-                    self?.performSegue(withIdentifier: "switchDriveSegue", sender: nil)
+                    guard let self = self else { return }
+                    let drives = AccountManager.instance.drives
+                    let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: self.driveFileManager.drive, headerTitle: KDriveStrings.Localizable.buttonSwitchDrive, delegate: self)
+                    self.present(floatingPanelViewController, animated: true)
                 }
                 return driveHeaderView
             case .recentFiles:
@@ -674,6 +677,32 @@ extension HomeViewController: RecentActivityDelegate {
             filePresenter.navigationController?.pushViewController(nextVC, animated: true)
         } else {
             filePresenter.present(driveFileManager: driveFileManager, file: file, files: activities.compactMap(\.file), normalFolderHierarchy: false)
+        }
+    }
+}
+
+// MARK: - SelectDelegate
+
+extension HomeViewController: SelectDelegate {
+    func didSelect(option: Selectable) {
+        if let drive = option as? Drive {
+            if drive.maintenance {
+                let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DriveMaintenanceFloatingPanelViewController
+                floatingPanelViewController?.setTitleLabel(with: drive.name)
+                present(driveFloatingPanelController, animated: true)
+            } else {
+                AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
+                AccountManager.instance.saveAccounts()
+                // Download root file
+                guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
+                    return
+                }
+
+                currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { [weak self] _, _, _ in
+                    (self?.tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
+                }
+            }
         }
     }
 }
