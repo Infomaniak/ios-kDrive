@@ -26,6 +26,10 @@ enum UploadFileType: String {
     case file, phAsset, unknown
 }
 
+public enum ConflictOption: String, PersistableEnum {
+    case error, replace, rename, ignore
+}
+
 public class UploadFile: Object {
     public static let defaultMaxRetryCount = 3
 
@@ -47,6 +51,7 @@ public class UploadFile: Object {
     @Persisted public var maxRetryCount: Int = defaultMaxRetryCount
     @Persisted private var rawPriority: Int = 0
     @Persisted private var _error: Data?
+    @Persisted var conflictOption: ConflictOption
 
     private var localAsset: PHAsset?
 
@@ -108,7 +113,7 @@ public class UploadFile: Object {
         }
     }
 
-    public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+    public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -120,10 +125,11 @@ public class UploadFile: Object {
         self.creationDate = url.creationDate
         self.modificationDate = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
         self.taskCreationDate = Date()
+        self.conflictOption = conflictOption
         self.rawPriority = priority.rawValue
     }
 
-    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, modificationDate: Date?, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, modificationDate: Date?, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -135,6 +141,7 @@ public class UploadFile: Object {
         self.creationDate = creationDate
         self.modificationDate = modificationDate
         self.taskCreationDate = Date()
+        self.conflictOption = conflictOption
         self.rawPriority = priority.rawValue
     }
 
