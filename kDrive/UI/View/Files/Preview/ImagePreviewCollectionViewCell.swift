@@ -26,7 +26,6 @@ class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDel
     @IBOutlet weak var zoomScrollView: UIScrollView!
     @IBOutlet weak var imagePreview: UIImageView!
     private var tapToZoomRecognizer: UITapGestureRecognizer!
-    var tapToFullScreen: UITapGestureRecognizer!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -64,7 +63,7 @@ class ImagePreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDel
 extension ImagePreviewCollectionViewCell: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         // Don't recognize a single tap until a double-tap fails.
-        if gestureRecognizer == tapToFullScreen && otherGestureRecognizer == tapToZoomRecognizer {
+        if gestureRecognizer == tapGestureRecognizer && otherGestureRecognizer == tapToZoomRecognizer {
             return true
         }
         return false
