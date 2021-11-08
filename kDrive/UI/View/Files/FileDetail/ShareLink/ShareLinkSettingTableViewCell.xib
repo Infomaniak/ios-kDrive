@@ -66,7 +66,7 @@
                                         </connections>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mNc-Na-0mD" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="96.5" width="46" height="89.5"/>
+                                        <rect key="frame" x="0.0" y="96.5" width="134" height="89.5"/>
                                         <state key="normal" title="Button"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonNewPassword"/>
@@ -165,7 +165,7 @@
             <size key="intrinsicContentSize" width="31" height="14.5"/>
         </designable>
         <designable name="mNc-Na-0mD">
-            <size key="intrinsicContentSize" width="46" height="30"/>
+            <size key="intrinsicContentSize" width="134" height="29"/>
         </designable>
         <designable name="rtI-Wc-46s">
             <size key="intrinsicContentSize" width="36" height="17"/>

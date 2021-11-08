@@ -227,7 +227,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
                 rightsSelectionVC.isFolder = file.isDirectory
-                if let sharedFile = sharedFile, (sharedFile.link != nil) {
+                if let sharedFile = sharedFile, sharedFile.link != nil {
                     rightsSelectionVC.selectedRight = Right.shareLinkRights[1].key
                 } else {
                     rightsSelectionVC.selectedRight = Right.shareLinkRights[0].key
@@ -343,24 +343,6 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
         shareLinkSettingsViewController.file = file
         shareLinkSettingsViewController.shareFile = sharedFile
         navigationController?.pushViewController(shareLinkSettingsViewController, animated: true)
-    }
-
-    func shareLinkSwitchToggled(isOn: Bool) {
-        if isOn {
-            driveFileManager.activateShareLink(for: file) { _, shareLink, _ in
-                if let link = shareLink {
-                    self.sharedFile?.link = link
-                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .automatic)
-                }
-            }
-        } else {
-            driveFileManager.removeShareLink(for: file) { file, _ in
-                if file != nil {
-                    self.sharedFile?.link = nil
-                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .automatic)
-                }
-            }
-        }
     }
 }
 

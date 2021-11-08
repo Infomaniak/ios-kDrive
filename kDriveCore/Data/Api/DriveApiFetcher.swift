@@ -247,14 +247,14 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     // swiftlint:disable function_parameter_count
-    public func updateShareLinkWith(file: File, canEdit: Bool, permission: String, password: String? = "", date: TimeInterval?, blockDownloads: Bool, blockComments: Bool, /*blockInformation: Bool,*/ isFree: Bool, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+    public func updateShareLinkWith(file: File, canEdit: Bool, permission: String, password: String? = "", date: TimeInterval?, blockDownloads: Bool, blockComments: Bool, isFree: Bool, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.updateShareLinkWith(file: file)
 
         var body: [String: Any]
         if isFree {
-            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads/*, "block_information": blockInformation*/]
+            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads]
         } else {
-            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads, /*"block_information": blockInformation,*/ "valid_until": date as Any]
+            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads, "valid_until": date as Any]
         }
         if permission == "password" {
             body.updateValue(password!, forKey: "password")

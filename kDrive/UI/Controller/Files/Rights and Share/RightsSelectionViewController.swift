@@ -174,7 +174,6 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         let cell = tableView.dequeueReusableCell(type: RightsSelectionTableViewCell.self, for: indexPath)
         let right = rights[indexPath.row]
         var disable = false
-        // LN: To remove
         if right.key == "password" && driveFileManager.drive.pack == .free {
             disable = true
             cell.actionHandler = { [weak self] _ in

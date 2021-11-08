@@ -16,25 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
 import MaterialOutlinedTextField
+import UIKit
 
 protocol ShareLinkSettingsDelegate: AnyObject {
-//    func didUpdateSettingValue(for option: ShareLinkSettingsViewController.OptionsRow, newValue value: Bool)
-//    func didUpdateExpirationDateSettingValue(for option: ShareLinkSettingsViewController.OptionsRow, newValue value: Bool, date: TimeInterval?)
-//    func didUpdatePasswordSettingValue(for option: ShareLinkSettingsViewController.OptionsRow, newValue value: Bool)
-//    func didUpdatePassword(newPasswordString: String)
-//    func didTapOnEditPasswordButton()
-    
     func didUpdateSettings(index: Int, isOn: Bool)
     func didUpdateSettingsValue(index: Int, content: Any?)
     func didTapOnActionButton(index: Int)
 }
 
 class ShareLinkSettingTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var settingSwitch: UISwitch!
     @IBOutlet weak var settingDetail: UILabel!
     @IBOutlet weak var dateTextField: UITextField!
@@ -52,7 +45,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     var showPassword = false
     var index: Int!
-
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -114,17 +106,11 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     }
 
     @objc func handleDatePicker() {
-//        dateTextField.text = Constants.formatDate(datePickerView.date, style: .date)
-//        expirationDate = datePickerView.date
-//        delegate?.didUpdateExpirationDateSettingValue(for: .optionDate, newValue: settingSwitch.isOn, date: expirationDate?.timeIntervalSince1970)
         dateTextField.text = Constants.formatDate(datePickerView.date, style: .date)
         delegate?.didUpdateSettingsValue(index: index, content: datePickerView.date)
     }
 
     @IBAction func compactDatePickerChanged(_ sender: UIDatePicker) {
-//        dateTextField.text = "\(sender.date)"
-//        expirationDate = sender.date
-//        delegate?.didUpdateExpirationDateSettingValue(for: .optionDate, newValue: settingSwitch.isOn, date: expirationDate?.timeIntervalSince1970)
         delegate?.didUpdateSettingsValue(index: index, content: compactDatePicker.date)
     }
 
@@ -141,18 +127,9 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         newPasswordButton.isHidden = true
         compactDatePicker.isHidden = true
 
-        
         if option == .optionDate {
-//            self.expirationDate = settingValue as? Date ?? Date()
-//            if #available(iOS 13.4, *) {
-//                compactDatePicker.isHidden = !switchValue
-//                compactDatePicker.date = settingValue as? Date ?? Date()
-//            } else {
-//                dateTextField.isHidden = !switchValue
-//                dateTextField.text = Constants.formatDate(settingValue as? Date ?? Date(), style: .date)
-//            }
-                compactDatePicker.isHidden = !switchValue
-                compactDatePicker.date = settingValue as? Date ?? Date()
+            compactDatePicker.isHidden = !switchValue
+            compactDatePicker.date = settingValue as? Date ?? Date()
 
             if switchValue {
                 compactDatePickerChanged(compactDatePicker)
@@ -160,29 +137,11 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         }
         if option == .optionPassword {
             togglePasswordTextField(newPassword: actionButtonVisible)
-//            if actionButtonVisible {
-//                newPasswordButton.isHidden = !switchValue
-//            } else {
-//                passwordTextField.isHidden = !switchValue
-//            }
         }
     }
 
     @IBAction func switchValueChanged(_ sender: UISwitch) {
         delegate?.didUpdateSettings(index: index, isOn: settingSwitch.isOn)
-
-//        guard let option = option else {
-//            return
-//        }
-//
-//        if option == .optionDate {
-//            let date = sender.isOn ? expirationDate : nil
-//            delegate?.didUpdateExpirationDateSettingValue(for: option, newValue: sender.isOn, date: date?.timeIntervalSince1970)
-//        } else if option == .optionPassword {
-//            delegate?.didUpdatePasswordSettingValue(for: option, newValue: sender.isOn)
-//        } else {
-//            delegate?.didUpdateSettingValue(for: option, newValue: sender.isOn)
-//        }
     }
 
     @IBAction func updateButtonPressed(_ sender: UIButton) {
@@ -193,16 +152,10 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         passwordTextField.borderColor = KDriveAsset.infomaniakColor.color
         let content = passwordTextField.text?.count ?? 0 > 0 ? passwordTextField.text : nil
         delegate?.didUpdateSettingsValue(index: index, content: index == 3 ? Int(passwordTextField.text ?? "0") : content)
-//        delegate?.didUpdatePassword(newPasswordString: passwordTextFiled.text ?? "")
     }
 
     @IBAction func newPasswordButtonPressed(_ sender: IKButton) {
-        // LN: To change
-//        delegate?.didUpdatePassword(newPasswordString: passwordTextFiled.text ?? "")
-//        delegate?.didTapOnEditPasswordButton()
         delegate?.didTapOnActionButton(index: index)
-//        newPasswordButton.isHidden = true
-//        passwordTextField.isHidden = false
     }
 
     @objc func displayPassword() {

@@ -16,16 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import MaterialOutlinedTextField
+import UIKit
 
 protocol AccessRightPasswordDelegate: AnyObject {
     func didUpdatePassword(newPasswordString: String)
 }
 
 class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var accessRightView: UIView!
     @IBOutlet weak var accessRightLabel: UILabel!
     @IBOutlet weak var accessRightImage: UIImageView!
@@ -102,5 +101,4 @@ extension ShareLinkAccessRightTableViewCell: UITextFieldDelegate {
         textField.endEditing(true)
         return true
     }
-
 }

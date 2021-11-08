@@ -21,7 +21,6 @@ import kDriveCore
 import UIKit
 
 protocol ShareLinkTableViewCellDelegate: AnyObject {
-    func shareLinkSwitchToggled(isOn: Bool)
     func shareLinkRightsButtonPressed()
     func shareLinkSettingsButtonPressed()
     func shareLinkSharedButtonPressed(link: String, sender: UIView)
@@ -32,7 +31,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var shareLinkTitleLabel: IKLabel!
     @IBOutlet weak var shareIconImageView: UIImageView!
     @IBOutlet weak var shareLinkStackView: UIStackView!
-    @IBOutlet weak var activeLabel: UILabel! // LN: change name
+    @IBOutlet weak var shareLinkDescriptionLabel: UILabel!
     @IBOutlet weak var copyTextField: UITextField!
     @IBOutlet weak var copyButton: ImageButton!
     @IBOutlet weak var shareLinkRightsView: UIView!
@@ -87,17 +86,16 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         layoutIfNeeded()
         if let link = sharedFile?.link {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
-            activeLabel.text = KDriveStrings.Localizable.shareLinkPublicRightFileDescription
+            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkPublicRightFileDescription
             shareLinkStackView.isHidden = false
             copyTextField.text = link.url
-//            shareLinkRightsView.isHidden = !isOfficeFile
             let right = Right.onlyOfficeRights[link.canEdit ? 1 : 0]
             rightsIconImageView.image = right.icon
             rightsLabel.text = right.title
             shareLinkRightsView.accessibilityLabel = right.title
         } else {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
-            activeLabel.text = KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription
+            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription
             shareLinkStackView.isHidden = true
         }
         shareLinkSwitch.isEnabled = enabled
@@ -105,10 +103,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
         delegate?.shareLinkSharedButtonPressed(link: copyTextField.text ?? "", sender: sender)
-    }
-
-    @IBAction func shareLinkSwitchChanged(_ sender: UISwitch) {
-        delegate?.shareLinkSwitchToggled(isOn: sender.isOn)
     }
 
     @objc func shareLinkRightsButtonPressed() {

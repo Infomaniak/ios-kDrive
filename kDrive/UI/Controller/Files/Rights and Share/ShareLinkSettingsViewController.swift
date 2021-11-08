@@ -24,7 +24,7 @@ class ShareLinkSettingsViewController: UIViewController {
     var driveFileManager: DriveFileManager!
 
     enum OptionsRow: CaseIterable {
-        case optionPassword, optionDownload, optionDate//, blockUsersConsult, blockComments
+        case optionPassword, optionDownload, optionDate
 
         var title: String {
             switch self {
@@ -34,10 +34,6 @@ class ShareLinkSettingsViewController: UIViewController {
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadTitle
             case .optionDate:
                 return KDriveStrings.Localizable.allAddExpirationDateTitle
-//            case .blockUsersConsult:
-//                return KDriveStrings.Localizable.shareLinkSettingsBlockUsersConsultTitle
-//            case .blockComments:
-//                return KDriveStrings.Localizable.shareLinkSettingsBlockCommentsTitle
             }
         }
 
@@ -49,10 +45,6 @@ class ShareLinkSettingsViewController: UIViewController {
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
                 return KDriveStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
-//            case .blockUsersConsult:
-//                return KDriveStrings.Localizable.shareLinkSettingsBlockUsersConsultDescription
-//            case .blockComments:
-//                return KDriveStrings.Localizable.shareLinkSettingsBlockCommentsDescription
             }
         }
 
@@ -64,10 +56,6 @@ class ShareLinkSettingsViewController: UIViewController {
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
                 return KDriveStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
-//            case .blockUsersConsult:
-//                return KDriveStrings.Localizable.shareLinkSettingsBlockUsersConsultDescription
-//            case .blockComments:
-//                return KDriveStrings.Localizable.shareLinkSettingsBlockCommentsDescription
             }
         }
 
@@ -119,7 +107,6 @@ class ShareLinkSettingsViewController: UIViewController {
 
         hideKeyboardWhenTappedAround()
         initOptions()
-//        updateButton()
 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -150,29 +137,13 @@ class ShareLinkSettingsViewController: UIViewController {
     func updateButton() {
         var activateButton = true
         for (option, enabled) in settings {
-            // Disable the button if the option is enabled but has no value, except in case of mail and password
+            // Disable the button if the option is enabled but has no value, except in case of password
             if enabled && (option != .optionDownload && getValue(for: option) == nil) && (option != .optionPassword || !newPassword) {
                 activateButton = false
             }
         }
         enableButton = activateButton
     }
-    
-//    func updateButton() {
-//        if (optionsValue[.expirationDate] ?? false) && expirationDate == nil {
-//            enableButton = false
-//        } else if (optionsValue[.addPassword] ?? false) && password?.count ?? 0 < 1 {
-//            enableButton = false
-//            // LN: To remove
-////            if accessRightValue == "password" && password?.count ?? 0 < 1 {
-////                enableButton = false
-////            } else {
-////                enableButton = true
-////            }
-//        } else {
-//            enableButton = true
-//        }
-//    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -208,9 +179,7 @@ class ShareLinkSettingsViewController: UIViewController {
         settings = [
             .optionPassword: shareFile.link!.permission == "password",
             .optionDownload: !shareFile.link!.blockDownloads,
-            .optionDate: shareFile.link!.validUntil != nil,
-//            .blockUsersConsult: shareFile.link!.blockInformation,
-//            .blockComments: shareFile.link!.blockComments
+            .optionDate: shareFile.link!.validUntil != nil
         ]
         settingsValue = [
             .optionPassword: nil,
@@ -268,17 +237,14 @@ class ShareLinkSettingsViewController: UIViewController {
 extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return (file.isOfficeFile || file.isDirectory) ? optionsRows.count + 1 : optionsRows.count
-        // return Option.allCases.count + 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
         // Access right
-            if indexPath.row == 0 && (file.isOfficeFile || file.isDirectory) {
+        if indexPath.row == 0 && (file.isOfficeFile || file.isDirectory) {
             let cell = tableView.dequeueReusableCell(type: ShareLinkAccessRightTableViewCell.self, for: indexPath)
             cell.accessRightLabel.text = nil
             cell.accessRightImage.image = nil
-//            cell.delegate = self
             if let right = editRights.first(where: { $0.key == editRightValue }) {
                 cell.accessRightView.accessibilityLabel = right.title
                 cell.accessRightLabel.text = right.title
@@ -348,50 +314,6 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
 // MARK: - ShareLinkSettingsDelegate
 
 extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
-//    func didUpdatePasswordSettingValue(for option: OptionsRow, newValue value: Bool) {
-//        settings[option] = value
-//        if value {
-//            accessRightValue = "password"
-//        } else {
-//            accessRightValue = ""//Right.shareLinkRights[1].key
-//        }
-//        updateButton()
-//        if let index = OptionsRow.allCases.firstIndex(of: option) {
-//            tableview.reloadRows(at: [IndexPath(row: (file.isOfficeFile || file.isDirectory) ? index + 1 : index, section: 0)], with: .automatic)
-//        }
-//    }
-//
-//    func didUpdateExpirationDateSettingValue(for option: OptionsRow, newValue value: Bool, date: TimeInterval?) {
-//        settings[option] = value
-//        expirationDate = date
-//        updateButton()
-//        if let index = OptionsRow.allCases.firstIndex(of: option) {
-//            tableview.reloadRows(at: [IndexPath(row: (file.isOfficeFile || file.isDirectory) ? index + 1 : index, section: 0)], with: .automatic)
-//        }
-//    }
-//
-//    func didUpdateSettingValue(for option: OptionsRow, newValue value: Bool) {
-//        settings[option] = value
-//    }
-//
-//    func didUpdatePassword(newPasswordString: String) {
-//        password = newPasswordString
-////        passwordHasBeenSet = true
-//        newPassword.toggle()
-//
-//        updateButton()
-//    }
-//
-//    func didTapOnEditPasswordButton() {
-//
-//        newPassword.toggle()
-////
-////        if let index = Option.allCases.firstIndex(of: option) {
-////            tableview.reloadRows(at: [IndexPath(row: (file.isOfficeFile || file.isDirectory) ? index + 1 : index, section: 0)], with: .automatic)
-////        }
-//        updateButton()
-//    }
-    
     func didUpdateSettings(index: Int, isOn: Bool) {
         let option = optionsRows[index]
         settings[option] = isOn
@@ -433,7 +355,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
         let date = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
         let validUntil = date?.timeIntervalSince1970
         let canEdit = editRightValue == Right.onlyOfficeRights[1].key
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: canEdit, permission: permission, password: password, date: validUntil, blockDownloads: !getSetting(for: .optionDownload), blockComments: !canEdit, /*blockInformation: getSetting(for: .blockUsersConsult),*/ isFree: driveFileManager.drive.pack == .free) { response, _ in
+        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: canEdit, permission: permission, password: password, date: validUntil, blockDownloads: !getSetting(for: .optionDownload), blockComments: !canEdit, isFree: driveFileManager.drive.pack == .free) { response, _ in
             if response?.data == true {
                 self.navigationController?.popViewController(animated: true)
             }
