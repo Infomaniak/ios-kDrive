@@ -73,7 +73,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         collectionView.contentInsetAdjustmentBehavior = .never
 
         floatingPanelViewController = DriveFloatingPanelController()
-        floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0, 8))
+        floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view?.window?.safeAreaInsets.bottom ?? 0, 8))
         floatingPanelViewController.isRemovalInteractionEnabled = false
         fileInformationsViewController = FileQuickActionsFloatingPanelViewController()
         fileInformationsViewController.presentingParent = self
