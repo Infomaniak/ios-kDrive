@@ -76,7 +76,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
     #endif
     private var loadingBarButtonItem: UIBarButtonItem = {
-        let activityView = UIActivityIndicatorView(style: .gray)
+        let activityView = UIActivityIndicatorView(style: .medium)
         activityView.startAnimating()
         return UIBarButtonItem(customView: activityView)
     }()

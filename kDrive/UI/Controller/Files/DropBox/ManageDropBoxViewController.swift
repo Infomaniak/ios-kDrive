@@ -156,7 +156,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func dismissAndRefreshDataSource() {
-        let mainTabViewController = UIApplication.shared.keyWindow?.rootViewController as? UITabBarController
+        let mainTabViewController = view?.window?.rootViewController as? UITabBarController
         let fileNavigationController = mainTabViewController?.selectedViewController as? UINavigationController
         if let viewControllers = fileNavigationController?.viewControllers, viewControllers.count > 1 {
             let fileListViewController = viewControllers[viewControllers.count - 2] as? FileListViewController

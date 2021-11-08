@@ -16,13 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import InfomaniakLogin
 import InfomaniakCore
+import InfomaniakLogin
 import kDriveCore
+import UIKit
 
 class DriveErrorViewController: UIViewController {
-
     enum DriveErrorViewType {
         case noDrive
         case maintenance
@@ -39,10 +38,10 @@ class DriveErrorViewController: UIViewController {
     var driveName: String?
 
     var isRootViewController: Bool {
-        if let navigationController = UIApplication.shared.keyWindow?.rootViewController as? UINavigationController {
+        if let navigationController = view.window?.rootViewController as? UINavigationController {
             return navigationController.visibleViewController == self
         } else {
-            return UIApplication.shared.keyWindow?.rootViewController == self
+            return view.window?.rootViewController == self
         }
     }
 
@@ -107,5 +106,4 @@ class DriveErrorViewController: UIViewController {
         navigationController.setInfomaniakAppearanceNavigationBar()
         return navigationController
     }
-
 }

@@ -90,10 +90,11 @@ class AlertDocViewController: AlertFieldViewController {
         driveFileManager.createOfficeFile(parentDirectory: directory, name: name.addingExtension(fileType), type: fileType) { file, error in
             self.setLoading(false)
 
+            let currentRootViewController = self.view.window?.rootViewController
             self.dismiss(animated: true) {
                 let message: String
                 if error == nil, let file = file {
-                    guard let mainTabViewController = UIApplication.shared.keyWindow?.rootViewController as? MainTabViewController else { return }
+                    guard let mainTabViewController = currentRootViewController as? MainTabViewController else { return }
                     OnlyOfficeViewController.open(driveFileManager: self.driveFileManager, file: file, viewController: mainTabViewController)
                     message = KDriveStrings.Localizable.snackbarFileCreateConfirmation
                 } else {

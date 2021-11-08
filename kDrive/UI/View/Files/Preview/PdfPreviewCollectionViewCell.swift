@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import PDFKit
 import kDriveCore
+import PDFKit
+import UIKit
 
 class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDelegate {
-
     @IBOutlet weak var pdfPreview: PDFView!
     private var document: PDFDocument?
 
@@ -47,6 +46,4 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
         NotificationCenter.default.removeObserver(self, name: .PDFViewPageChanged, object: pdfPreview)
         pdfPreview.document = nil
     }
-
 }
-

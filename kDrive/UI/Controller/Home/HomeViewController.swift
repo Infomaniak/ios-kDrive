@@ -348,7 +348,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             return
         }
 
-        if UIApplication.shared.statusBarOrientation.isPortrait {
+        if view.window?.windowScene?.interfaceOrientation.isPortrait ?? true {
             navigationItem.title = driveFileManager?.drive.name ?? ""
             navigationBar.alpha = min(1, max(0, (scrollOffset + collectionView.contentInset.top) / navbarHeight))
             navigationBar.isUserInteractionEnabled = navigationBar.alpha > 0.5

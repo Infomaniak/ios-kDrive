@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
 import Lottie
+import UIKit
 
 class MigrationViewController: UIViewController {
-
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var migrationDoneButton: UIButton!
     @IBOutlet weak var migrationProgressView: UIView!
@@ -46,10 +45,10 @@ class MigrationViewController: UIViewController {
         buttonView.isHidden = true
 
         let migrationSlide = Slide(backgroundImage: KDriveAsset.background1.image,
-            illustrationImage: KDriveAsset.illuDevices.image,
-            animationName: "illu_devices",
-            title: "migrationTitle".localized,
-            description: KDriveStrings.Localizable.migrationDescription)
+                                   illustrationImage: KDriveAsset.illuDevices.image,
+                                   animationName: "illu_devices",
+                                   title: "migrationTitle".localized,
+                                   description: KDriveStrings.Localizable.migrationDescription)
 
         slides = [migrationSlide]
         MigrationHelper.migrate { result in
@@ -88,8 +87,7 @@ class MigrationViewController: UIViewController {
             UserDefaults.shared.numberOfConnections = 1
             let mainTabBarViewController = MainTabViewController.instantiate()
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabBarViewController, animated: true)
-            if migrationResult?.photoSyncEnabled == true,
-                let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
+            if migrationResult?.photoSyncEnabled == true && AccountManager.instance.currentDriveFileManager != nil {
                 let driveFloatingPanelController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
@@ -116,13 +114,11 @@ class MigrationViewController: UIViewController {
     class func instantiate() -> MigrationViewController {
         return Storyboard.main.instantiateViewController(withIdentifier: "MigrationViewController") as! MigrationViewController
     }
-
 }
 
 // MARK: - UICollectionView Delegate
 
 extension MigrationViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -147,5 +143,4 @@ extension MigrationViewController: UICollectionViewDelegate, UICollectionViewDat
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
     }
-
 }

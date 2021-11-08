@@ -326,7 +326,7 @@ class PhotoListViewController: MultipleSelectionViewController {
     // MARK: - Scroll view delegate
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        isLargeTitle = UIApplication.shared.statusBarOrientation.isPortrait ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait ?? true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         headerView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
@@ -411,7 +411,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionFooter {
             let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: footerIdentifier, for: indexPath)
-            let indicator = UIActivityIndicatorView(style: .gray)
+            let indicator = UIActivityIndicatorView(style: .medium)
             indicator.hidesWhenStopped = true
             indicator.color = KDriveAsset.loaderDarkerDefaultColor.color
             if isLoading {
