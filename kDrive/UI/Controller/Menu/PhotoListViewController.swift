@@ -411,7 +411,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionFooter {
             let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: footerIdentifier, for: indexPath)
-            let indicator = UIActivityIndicatorView(style: .gray)
+            let indicator = UIActivityIndicatorView(style: .medium)
             indicator.hidesWhenStopped = true
             indicator.color = KDriveAsset.loaderDarkerDefaultColor.color
             if isLoading {

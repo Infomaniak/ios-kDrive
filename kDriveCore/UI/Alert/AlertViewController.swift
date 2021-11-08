@@ -144,7 +144,7 @@ open class AlertViewController: UIViewController {
 
     /// Set or unset the action button to loading state
     public func setLoading(_ loading: Bool) {
-        actionButton.setLoading(loading, style: .gray)
+        actionButton.setLoading(loading, style: .medium)
         cancelButton.isEnabled = !loading
     }
 
