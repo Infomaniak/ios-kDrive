@@ -550,7 +550,10 @@ extension HomeViewController {
             case .top:
                 let driveHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeLargeTitleHeaderView.self, for: indexPath)
                 driveHeaderView.isEnabled = AccountManager.instance.drives.count > 1
-                driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
+                UIView.performWithoutAnimation {
+                    driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
+                    driveHeaderView.titleButton.layoutIfNeeded()
+                }
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     guard let self = self else { return }
                     let drives = AccountManager.instance.drives
