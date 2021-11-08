@@ -26,6 +26,8 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        tapGestureRecognizer.delegate = self
+        documentPreview.configuration.websiteDataStore = .nonPersistent()
         documentPreview.scrollView.showsVerticalScrollIndicator = false
         documentPreview.addShadow()
     }

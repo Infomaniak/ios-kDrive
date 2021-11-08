@@ -16,15 +16,24 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class PreviewCollectionViewCell: UICollectionViewCell {
-
+    var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
 
-    func configureWith(file: File) { }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
+        addGestureRecognizer(tapGestureRecognizer)
+    }
 
-    func didEndDisplaying() { }
+    @objc func didTapOnCell() {
+        previewDelegate?.setFullscreen(nil)
+    }
 
+    func configureWith(file: File) {}
+
+    func didEndDisplaying() {}
 }
