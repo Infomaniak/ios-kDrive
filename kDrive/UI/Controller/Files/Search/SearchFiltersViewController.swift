@@ -38,7 +38,11 @@ enum FilterType: CaseIterable {
     }
 }
 
-extension ConvertedType: IconSelectable {}
+extension ConvertedType: Selectable {
+    var image: UIImage? {
+        return icon
+    }
+}
 
 class SearchFiltersViewController: UITableViewController {
     var driveFileManager: DriveFileManager!

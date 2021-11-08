@@ -21,7 +21,7 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable {
+class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
     enum HomeFileType {
@@ -436,14 +436,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     func scrollToTop() {
         collectionView?.scrollToTop(animated: true, navigationController: nil)
     }
-
-    // MARK: - Navigation
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let switchDriveAccountViewController = (segue.destination as? UINavigationController)?.viewControllers[0] as? SwitchDriveViewController {
-            switchDriveAccountViewController.delegate = (tabBarController as? SwitchDriveDelegate)
-        }
-    }
 }
 
 // MARK: - UICollectionViewDataSource
@@ -560,7 +552,10 @@ extension HomeViewController {
                 driveHeaderView.isEnabled = AccountManager.instance.drives.count > 1
                 driveHeaderView.titleButton.setTitle(driveFileManager.drive.name, for: .normal)
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
-                    self?.performSegue(withIdentifier: "switchDriveSegue", sender: nil)
+                    guard let self = self else { return }
+                    let drives = AccountManager.instance.drives
+                    let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: self.driveFileManager.drive, headerTitle: KDriveStrings.Localizable.buttonSwitchDrive, delegate: self)
+                    self.present(floatingPanelViewController, animated: true)
                 }
                 return driveHeaderView
             case .recentFiles:

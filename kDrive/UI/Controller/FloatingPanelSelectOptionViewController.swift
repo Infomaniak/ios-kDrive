@@ -17,14 +17,18 @@
  */
 
 import FloatingPanel
+import kDriveCore
 import UIKit
 
 protocol Selectable {
     var title: String { get }
+    var image: UIImage? { get }
+    var tintColor: UIColor? { get }
 }
 
-protocol IconSelectable: Selectable {
-    var icon: UIImage { get }
+extension Selectable {
+    var image: UIImage? { return nil }
+    var tintColor: UIColor? { return nil }
 }
 
 protocol SelectDelegate: AnyObject {
@@ -87,10 +91,9 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
             let option = options[indexPath.row - 1]
             cell.titleLabel.text = option.title
             cell.isHeader = false
-            if let option = option as? IconSelectable {
-                cell.iconImageView.image = option.icon
-                cell.iconImageView.isHidden = false
-            }
+            cell.iconImageView.image = option.image
+            cell.iconImageView.tintColor = option.tintColor
+            cell.iconImageView.isHidden = option.image == nil
         }
         return cell
     }
