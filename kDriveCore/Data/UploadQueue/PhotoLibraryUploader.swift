@@ -235,6 +235,7 @@ public class PhotoLibraryUploader {
     }
 
     public struct PicturesAssets {
+        /// This array should only be accessed from the BackgroundRealm thread
         public let files: [UploadFile]
         public let assets: PHFetchResult<PHAsset>
     }
@@ -248,11 +249,11 @@ public class PhotoLibraryUploader {
         let removeAssetsCountThreshold = 10
 
         var toRemoveFiles = [UploadFile]()
+        var toRemoveAssets = PHFetchResult<PHAsset>()
         BackgroundRealm.uploads.execute { realm in
             toRemoveFiles = Array(UploadQueue.instance.getUploadedFiles(using: realm).filter("rawType = %@", UploadFileType.phAsset.rawValue))
+            toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFiles.map(\.id), options: nil)
         }
-
-        let toRemoveAssets = PHAsset.fetchAssets(withLocalIdentifiers: toRemoveFiles.map(\.id), options: nil)
 
         guard toRemoveAssets.count >= removeAssetsCountThreshold && UploadQueue.instance.operationQueue.operationCount == 0 else {
             return nil
