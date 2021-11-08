@@ -141,14 +141,21 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         newPasswordButton.isHidden = true
         compactDatePicker.isHidden = true
 
+        
         if option == .optionDate {
-            self.expirationDate = settingValue as? Date ?? Date()
-            if #available(iOS 13.4, *) {
+//            self.expirationDate = settingValue as? Date ?? Date()
+//            if #available(iOS 13.4, *) {
+//                compactDatePicker.isHidden = !switchValue
+//                compactDatePicker.date = settingValue as? Date ?? Date()
+//            } else {
+//                dateTextField.isHidden = !switchValue
+//                dateTextField.text = Constants.formatDate(settingValue as? Date ?? Date(), style: .date)
+//            }
                 compactDatePicker.isHidden = !switchValue
                 compactDatePicker.date = settingValue as? Date ?? Date()
-            } else {
-                dateTextField.isHidden = !switchValue
-                dateTextField.text = Constants.formatDate(settingValue as? Date ?? Date(), style: .date)
+
+            if switchValue {
+                compactDatePickerChanged(compactDatePicker)
             }
         }
         if option == .optionPassword {
@@ -194,15 +201,15 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 //        delegate?.didUpdatePassword(newPasswordString: passwordTextFiled.text ?? "")
 //        delegate?.didTapOnEditPasswordButton()
         delegate?.didTapOnActionButton(index: index)
-        newPasswordButton.isHidden = true
-        passwordTextField.isHidden = false
+//        newPasswordButton.isHidden = true
+//        passwordTextField.isHidden = false
     }
 
     @objc func displayPassword() {
         showPassword.toggle()
         passwordTextField.isSecureTextEntry = !showPassword
     }
-    
+
     func togglePasswordTextField(newPassword: Bool) {
         newPasswordButton.isHidden = !newPassword || !settingSwitch.isOn
         passwordTextField.isHidden = newPassword || !settingSwitch.isOn

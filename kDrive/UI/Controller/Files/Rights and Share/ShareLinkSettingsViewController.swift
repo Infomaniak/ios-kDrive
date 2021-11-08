@@ -291,7 +291,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         cell.delegate = self
         let option = (file.isOfficeFile || file.isDirectory) ? optionsRows[indexPath.row - 1] : optionsRows[indexPath.row]
         let index = (file.isOfficeFile || file.isDirectory) ? indexPath.row - 1 : indexPath.row
-        cell.configureWith(index: index, option: option, switchValue: getSetting(for: option), settingValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate, actionButtonVisible: shareFile.link?.permission == "password", isFolder: file.isDirectory)
+        cell.configureWith(index: index, option: option, switchValue: getSetting(for: option), settingValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate, actionButtonVisible: option == .optionPassword && newPassword, isFolder: file.isDirectory)
 
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
@@ -428,8 +428,12 @@ extension ShareLinkSettingsViewController: RightsSelectionDelegate {
 
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
+        let permission = getSetting(for: .optionPassword) ? "password" : Right.shareLinkRights[1].key
+        let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
+        let date = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
+        let validUntil = date?.timeIntervalSince1970
         let canEdit = editRightValue == Right.onlyOfficeRights[1].key
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: canEdit, permission: accessRightValue, password: password, date: expirationDate, blockDownloads: !getSetting(for: .optionDownload), blockComments: !canEdit, /*blockInformation: getSetting(for: .blockUsersConsult),*/ isFree: driveFileManager.drive.pack == .free) { response, _ in
+        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: canEdit, permission: permission, password: password, date: validUntil, blockDownloads: !getSetting(for: .optionDownload), blockComments: !canEdit, /*blockInformation: getSetting(for: .blockUsersConsult),*/ isFree: driveFileManager.drive.pack == .free) { response, _ in
             if response?.data == true {
                 self.navigationController?.popViewController(animated: true)
             }

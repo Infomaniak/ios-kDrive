@@ -66,14 +66,14 @@
                                         </connections>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mNc-Na-0mD" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="96.5" width="134" height="89.5"/>
+                                        <rect key="frame" x="0.0" y="96.5" width="46" height="89.5"/>
                                         <state key="normal" title="Button"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonNewPassword"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="action"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="newPasswordButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="VKy-b9-Ci5"/>
+                                            <action selector="newPasswordButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="hfp-J3-Zob"/>
                                         </connections>
                                     </button>
                                     <datePicker contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="leading" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="30" style="compact" translatesAutoresizingMaskIntoConstraints="NO" id="Em4-Ij-GbM">
@@ -149,7 +149,7 @@
                 <outlet property="compactDatePicker" destination="Em4-Ij-GbM" id="op2-IE-Hyt"/>
                 <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
                 <outlet property="dateTextField" destination="sUT-t1-Zjz" id="WYD-Dn-P2G"/>
-                <outlet property="newPasswordButton" destination="mNc-Na-0mD" id="NL8-AB-5ex"/>
+                <outlet property="newPasswordButton" destination="mNc-Na-0mD" id="FQM-G6-POG"/>
                 <outlet property="passwordTextField" destination="TIN-sh-74m" id="AVv-04-m9r"/>
                 <outlet property="settingDetail" destination="K1i-a0-oIy" id="9RQ-6t-TSl"/>
                 <outlet property="settingSwitch" destination="LR0-uD-ggb" id="Klu-2N-Y6R"/>
@@ -165,7 +165,7 @@
             <size key="intrinsicContentSize" width="31" height="14.5"/>
         </designable>
         <designable name="mNc-Na-0mD">
-            <size key="intrinsicContentSize" width="134" height="29"/>
+            <size key="intrinsicContentSize" width="46" height="30"/>
         </designable>
         <designable name="rtI-Wc-46s">
             <size key="intrinsicContentSize" width="36" height="17"/>
