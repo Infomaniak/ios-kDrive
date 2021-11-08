@@ -21,7 +21,7 @@ import UIKit
 
 class StoreSuccessViewController: UIViewController {
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {
-        if let rootViewController = UIApplication.shared.keyWindow?.rootViewController as? MainTabViewController {
+        if let rootViewController = sender.window?.rootViewController as? MainTabViewController {
             rootViewController.dismiss(animated: true)
             (rootViewController.selectedViewController as? UINavigationController)?.popToRootViewController(animated: true)
             rootViewController.selectedIndex = 0

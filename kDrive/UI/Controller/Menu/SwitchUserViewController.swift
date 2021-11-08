@@ -25,10 +25,10 @@ class SwitchUserViewController: UIViewController {
     let accountManager = AccountManager.instance
 
     var isRootViewController: Bool {
-        if let navigationController = UIApplication.shared.keyWindow?.rootViewController as? UINavigationController {
+        if let navigationController = view.window?.rootViewController as? UINavigationController {
             return navigationController.visibleViewController == self
         } else {
-            return UIApplication.shared.keyWindow?.rootViewController == self
+            return view.window?.rootViewController == self
         }
     }
 
