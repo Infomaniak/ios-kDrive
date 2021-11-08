@@ -21,7 +21,7 @@ import kDriveCore
 import Sentry
 import UIKit
 
-class MenuViewController: UIViewController {
+class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var userAvatarFrame: UIView!
     @IBOutlet weak var userAvatarImageView: UIImageView!
@@ -154,9 +154,7 @@ class MenuViewController: UIViewController {
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let navController = segue.destination as? UINavigationController, let switchDriveAccountViewController = navController.topViewController as? SwitchDriveViewController {
-            switchDriveAccountViewController.delegate = tabBarController as? MainTabViewController
-        } else if let storeViewController = segue.destination as? StoreViewController {
+        if let storeViewController = segue.destination as? StoreViewController {
             storeViewController.driveFileManager = driveFileManager
         } else if let fileListViewController = segue.destination as? FileListViewController {
             fileListViewController.driveFileManager = driveFileManager
@@ -249,7 +247,9 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
     // MARK: - Cell Button Action
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
-        performSegue(withIdentifier: "toSwitchDriveSegue", sender: nil)
+        let drives = AccountManager.instance.drives
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: driveFileManager.drive, headerTitle: KDriveStrings.Localizable.buttonSwitchDrive, delegate: self)
+        present(floatingPanelViewController, animated: true)
     }
 }
 

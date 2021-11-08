@@ -21,7 +21,7 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
-class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable {
+class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
 
     enum HomeFileType {
@@ -436,14 +436,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     func scrollToTop() {
         collectionView?.scrollToTop(animated: true, navigationController: nil)
     }
-
-    // MARK: - Navigation
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let switchDriveAccountViewController = (segue.destination as? UINavigationController)?.viewControllers[0] as? SwitchDriveViewController {
-            switchDriveAccountViewController.delegate = (tabBarController as? SwitchDriveDelegate)
-        }
-    }
 }
 
 // MARK: - UICollectionViewDataSource
@@ -677,32 +669,6 @@ extension HomeViewController: RecentActivityDelegate {
             filePresenter.navigationController?.pushViewController(nextVC, animated: true)
         } else {
             filePresenter.present(driveFileManager: driveFileManager, file: file, files: activities.compactMap(\.file), normalFolderHierarchy: false)
-        }
-    }
-}
-
-// MARK: - SelectDelegate
-
-extension HomeViewController: SelectDelegate {
-    func didSelect(option: Selectable) {
-        if let drive = option as? Drive {
-            if drive.maintenance {
-                let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DriveMaintenanceFloatingPanelViewController
-                floatingPanelViewController?.setTitleLabel(with: drive.name)
-                present(driveFloatingPanelController, animated: true)
-            } else {
-                AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
-                AccountManager.instance.saveAccounts()
-                // Download root file
-                guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
-                    return
-                }
-
-                currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { [weak self] _, _, _ in
-                    (self?.tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
-                }
-            }
         }
     }
 }
