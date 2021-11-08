@@ -32,11 +32,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var shareIconImageView: UIImageView!
     @IBOutlet weak var shareLinkStackView: UIStackView!
     @IBOutlet weak var shareLinkDescriptionLabel: UILabel!
-    @IBOutlet weak var copyTextField: UITextField!
     @IBOutlet weak var copyButton: ImageButton!
-    @IBOutlet weak var shareLinkRightsView: UIView!
-    @IBOutlet weak var rightsIconImageView: UIImageView!
-    @IBOutlet weak var rightsLabel: UILabel!
     @IBOutlet weak var topInnerConstraint: NSLayoutConstraint!
     @IBOutlet weak var leadingInnerConstraint: NSLayoutConstraint!
     @IBOutlet weak var trailingInnerConstraint: NSLayoutConstraint!
@@ -44,15 +40,10 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     var insets = true
     weak var delegate: ShareLinkTableViewCellDelegate?
+    var url = ""
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        shareLinkRightsView.layer.borderWidth = 1
-        shareLinkRightsView.layer.borderColor = KDriveAsset.borderColor.color.cgColor
-        shareLinkRightsView.layer.cornerRadius = UIConstants.buttonCornerRadius
-        shareLinkRightsView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(shareLinkRightsButtonPressed)))
-        shareLinkRightsView.accessibilityTraits = .button
-        shareLinkRightsView.isAccessibilityElement = true
         copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
     }
 
@@ -88,11 +79,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkPublicRightFileDescription
             shareLinkStackView.isHidden = false
-            copyTextField.text = link.url
-            let right = Right.onlyOfficeRights[link.canEdit ? 1 : 0]
-            rightsIconImageView.image = right.icon
-            rightsLabel.text = right.title
-            shareLinkRightsView.accessibilityLabel = right.title
+            url = link.url
         } else {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription
@@ -102,7 +89,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        delegate?.shareLinkSharedButtonPressed(link: copyTextField.text ?? "", sender: sender)
+        delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }
 
     @objc func shareLinkRightsButtonPressed() {

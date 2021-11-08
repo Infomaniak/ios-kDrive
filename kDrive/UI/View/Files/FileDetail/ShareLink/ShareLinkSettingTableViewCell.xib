@@ -49,11 +49,6 @@
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
-                                    <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="sUT-t1-Zjz">
-                                        <rect key="frame" x="0.0" y="30.5" width="289" height="34"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits"/>
-                                    </textField>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="TIN-sh-74m" customClass="MaterialOutlinedTextField" customModule="MaterialOutlinedTextField">
                                         <rect key="frame" x="0.0" y="30.5" width="289" height="50"/>
                                         <constraints>
@@ -109,14 +104,7 @@
                                     <constraint firstAttribute="trailing" secondItem="TIN-sh-74m" secondAttribute="trailing" id="CGe-nA-c7d"/>
                                     <constraint firstItem="K1i-a0-oIy" firstAttribute="leading" secondItem="1Xm-Dy-4ti" secondAttribute="leading" id="M10-cz-Gqm"/>
                                     <constraint firstAttribute="trailing" secondItem="K1i-a0-oIy" secondAttribute="trailing" id="PbG-TA-j37"/>
-                                    <constraint firstItem="sUT-t1-Zjz" firstAttribute="leading" secondItem="1Xm-Dy-4ti" secondAttribute="leading" id="YYZ-QO-3QN"/>
-                                    <constraint firstAttribute="trailing" secondItem="sUT-t1-Zjz" secondAttribute="trailing" id="jYe-Ld-B8b"/>
                                 </constraints>
-                                <variation key="default">
-                                    <mask key="subviews">
-                                        <exclude reference="sUT-t1-Zjz"/>
-                                    </mask>
-                                </variation>
                             </stackView>
                         </subviews>
                         <color key="backgroundColor" name="backgroundCardViewColor"/>
@@ -148,7 +136,6 @@
                 <outlet property="bottomConstraint" destination="b3L-GJ-LSF" id="Y7h-fG-fCo"/>
                 <outlet property="compactDatePicker" destination="Em4-Ij-GbM" id="op2-IE-Hyt"/>
                 <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
-                <outlet property="dateTextField" destination="sUT-t1-Zjz" id="WYD-Dn-P2G"/>
                 <outlet property="newPasswordButton" destination="mNc-Na-0mD" id="FQM-G6-POG"/>
                 <outlet property="passwordTextField" destination="TIN-sh-74m" id="AVv-04-m9r"/>
                 <outlet property="settingDetail" destination="K1i-a0-oIy" id="9RQ-6t-TSl"/>

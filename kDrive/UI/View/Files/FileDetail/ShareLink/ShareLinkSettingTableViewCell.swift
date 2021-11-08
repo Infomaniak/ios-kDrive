@@ -30,7 +30,6 @@ protocol ShareLinkSettingsDelegate: AnyObject {
 class ShareLinkSettingTableViewCell: InsetTableViewCell {
     @IBOutlet weak var settingSwitch: UISwitch!
     @IBOutlet weak var settingDetail: UILabel!
-    @IBOutlet weak var dateTextField: UITextField!
     @IBOutlet weak var passwordTextField: MaterialOutlinedTextField!
     @IBOutlet weak var newPasswordButton: IKButton!
     @IBOutlet weak var compactDatePicker: UIDatePicker!
@@ -48,7 +47,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        dateTextField.isHidden = true
         passwordTextField.isHidden = true
         compactDatePicker.isHidden = true
         updateButton.isHidden = true
@@ -87,8 +85,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         passwordTextField.rightView = rightView
         passwordTextField.rightViewMode = .always
 
-        dateTextField.inputView = datePickerView
-        dateTextField.inputAccessoryView = toolBar
         datePickerView.addTarget(self, action: #selector(handleDatePicker), for: UIControl.Event.valueChanged)
     }
 
@@ -102,11 +98,9 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     @objc func donePicker() {
         handleDatePicker()
-        dateTextField.endEditing(true)
     }
 
     @objc func handleDatePicker() {
-        dateTextField.text = Constants.formatDate(datePickerView.date, style: .date)
         delegate?.didUpdateSettingsValue(index: index, content: datePickerView.date)
     }
 
