@@ -20,30 +20,14 @@ import FloatingPanel
 import kDriveCore
 import UIKit
 
-extension Drive: Selectable, IconSelectable {
-    var title: String {
-        return name
-    }
-
-    var icon: UIImage {
-        return KDriveCoreAsset.drive.image
-    }
-
-    var tintColor: UIColor? {
-        return UIColor(hex: preferences.color)
-    }
-}
-
 protocol Selectable {
     var title: String { get }
-}
-
-protocol IconSelectable: Selectable {
-    var icon: UIImage { get }
+    var image: UIImage? { get }
     var tintColor: UIColor? { get }
 }
 
-extension IconSelectable {
+extension Selectable {
+    var image: UIImage? { return nil }
     var tintColor: UIColor? { return nil }
 }
 
@@ -107,11 +91,9 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
             let option = options[indexPath.row - 1]
             cell.titleLabel.text = option.title
             cell.isHeader = false
-            if let option = option as? IconSelectable {
-                cell.iconImageView.image = option.icon
-                cell.iconImageView.tintColor = option.tintColor
-                cell.iconImageView.isHidden = false
-            }
+            cell.iconImageView.image = option.image
+            cell.iconImageView.tintColor = option.tintColor
+            cell.iconImageView.isHidden = option.image == nil
         }
         return cell
     }

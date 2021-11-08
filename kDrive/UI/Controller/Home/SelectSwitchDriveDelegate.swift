@@ -22,24 +22,37 @@ import UIKit
 protocol SelectSwitchDriveDelegate: SelectDelegate, UIViewController {}
 extension SelectSwitchDriveDelegate {
     func didSelect(option: Selectable) {
-        if let drive = option as? Drive {
-            if drive.maintenance {
-                let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DriveMaintenanceFloatingPanelViewController
-                floatingPanelViewController?.setTitleLabel(with: drive.name)
-                present(driveFloatingPanelController, animated: true)
-            } else {
-                AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
-                AccountManager.instance.saveAccounts()
-                // Download root file
-                guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
-                    return
-                }
+        guard let drive = option as? Drive else { return }
+        if drive.maintenance {
+            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
+            let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DriveMaintenanceFloatingPanelViewController
+            floatingPanelViewController?.setTitleLabel(with: drive.name)
+            present(driveFloatingPanelController, animated: true)
+        } else {
+            AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
+            AccountManager.instance.saveAccounts()
+            // Download root file
+            guard let currentDriveFileManager = AccountManager.instance.currentDriveFileManager else {
+                return
+            }
 
-                currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { [weak self] _, _, _ in
-                    (self?.tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
-                }
+            currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { [weak self] _, _, _ in
+                (self?.tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
             }
         }
+    }
+}
+
+extension Drive: Selectable {
+    var title: String {
+        return name
+    }
+
+    var image: UIImage? {
+        return KDriveCoreAsset.drive.image
+    }
+
+    var tintColor: UIColor? {
+        return UIColor(hex: preferences.color)
     }
 }
