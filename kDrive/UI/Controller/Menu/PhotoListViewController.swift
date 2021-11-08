@@ -326,7 +326,7 @@ class PhotoListViewController: MultipleSelectionViewController {
     // MARK: - Scroll view delegate
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        isLargeTitle = UIApplication.shared.statusBarOrientation.isPortrait ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait ?? true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         headerView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white

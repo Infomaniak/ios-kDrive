@@ -112,9 +112,10 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     func setUpPlayButtons() {
-        playButton.isHidden = UIApplication.shared.statusBarOrientation.isLandscape
-        landscapePlayButton.isHidden = UIApplication.shared.statusBarOrientation.isPortrait
-        iconHeightConstraint.constant = UIApplication.shared.statusBarOrientation.isPortrait ? 254 : 120
+        let isPortrait = (window?.windowScene?.interfaceOrientation.isPortrait ?? true)
+        playButton.isHidden = !isPortrait
+        landscapePlayButton.isHidden = isPortrait
+        iconHeightConstraint.constant = isPortrait ? 254 : 120
     }
 
     func setUpObservers() {
