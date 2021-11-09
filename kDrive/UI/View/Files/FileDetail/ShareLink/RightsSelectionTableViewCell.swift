@@ -27,27 +27,27 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
     @IBOutlet weak var bannerBackgroundView: UIView!
     @IBOutlet weak var bannerLabel: UILabel!
     @IBOutlet weak var updateButton: UIButton!
-    
+
     var isSelectable = true
     var actionHandler: ((UIButton) -> Void)?
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+
         bannerView.isHidden = true
         updateButton.isHidden = true
     }
-    
+
     override func prepareForReuse() {
         super.prepareForReuse()
-        
+
         bannerView.isHidden = true
         updateButton.isHidden = true
     }
-    
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-        
+
         contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         if isSelectable {
             if selected {
@@ -68,7 +68,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
             rightsDetailLabel.text = right.fileDescription(driveName)
         }
         rightsIconImageView.image = right.icon
-        
+
         if disable {
             disableCell()
             if type == .shareLinkSettings {
@@ -78,12 +78,12 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         } else {
             enableCell()
         }
-        
+
         if right.key == "delete" {
             rightsIconImageView.tintColor = KDriveAsset.binColor.color
         }
     }
-    
+
     func disableCell() {
         rightsTitleLabel.alpha = 0.5
         rightsDetailLabel.alpha = 0.5
@@ -93,7 +93,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         let borderColor = contentInsetView.borderColor
         contentInsetView.layer.borderColor = borderColor!.withAlphaComponent(0.5).cgColor
     }
-    
+
     func enableCell() {
         rightsTitleLabel.alpha = 1
         rightsDetailLabel.alpha = 1
@@ -101,7 +101,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         bannerView.isHidden = true
         isSelectable = true
     }
-    
+
     @IBAction func updateButtonPressed(_ sender: UIButton) {
         actionHandler?(sender)
     }

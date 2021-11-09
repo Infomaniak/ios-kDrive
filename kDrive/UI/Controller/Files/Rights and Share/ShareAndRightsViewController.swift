@@ -95,6 +95,7 @@ class ShareAndRightsViewController: UIViewController {
         rightsSelectionViewController.modalPresentationStyle = .fullScreen
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
             rightsSelectionVC.driveFileManager = driveFileManager
+            rightsSelectionVC.isFolder = file.isDirectory
             rightsSelectionVC.delegate = self
             if shareLink {
                 guard let sharedLink = sharedFile?.link else { return }
@@ -205,7 +206,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(sharedFile: sharedFile, isOfficeFile: file?.isOfficeFile ?? false, enabled: (file?.rights?.canBecomeLink ?? false) || file?.shareLink != nil)
+            cell.configureWith(sharedFile: sharedFile, isFolder: file?.isDirectory ?? false, enabled: (file?.rights?.canBecomeLink ?? false) || file?.shareLink != nil)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)

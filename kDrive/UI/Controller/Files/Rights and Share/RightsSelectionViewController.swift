@@ -61,13 +61,13 @@ struct Right {
         Right(key: "read",
               title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
               icon: KDriveAsset.view.image,
-              fileDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadDescription },
-              folderDescription: { _ in "" }),
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription },
+              folderDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadFolderDescription }),
         Right(key: "write",
               title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
               icon: KDriveAsset.edit.image,
-              fileDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteDescription },
-              folderDescription: { _ in "" })
+              fileDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription },
+              folderDescription: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription })
     ]
 }
 

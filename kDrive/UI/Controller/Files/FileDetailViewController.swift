@@ -452,7 +452,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
+                    cell.configureWith(sharedFile: sharedFile, isFolder: file.isDirectory, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
@@ -810,6 +810,7 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
         rightsSelectionViewController.modalPresentationStyle = .fullScreen
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
             rightsSelectionVC.driveFileManager = driveFileManager
+            rightsSelectionVC.isFolder = file.isDirectory
             rightsSelectionVC.delegate = self
             rightsSelectionVC.rightSelectionType = .officeOnly
             rightsSelectionVC.selectedRight = sharedLink.canEdit ? "write" : "read"

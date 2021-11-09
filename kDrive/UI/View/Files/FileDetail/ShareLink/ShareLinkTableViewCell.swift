@@ -61,7 +61,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(sharedFile: SharedFile?, isOfficeFile: Bool, enabled: Bool, insets: Bool = true) {
+    func configureWith(sharedFile: SharedFile?, isFolder: Bool, enabled: Bool, insets: Bool = true) {
         self.insets = insets
         if insets {
             topInnerConstraint.constant = 16
@@ -77,12 +77,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         layoutIfNeeded()
         if let link = sharedFile?.link {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
-            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkPublicRightFileDescription
+            shareLinkDescriptionLabel.text = isFolder ? KDriveStrings.Localizable.shareLinkPublicRightFolderDescription : KDriveStrings.Localizable.shareLinkPublicRightFileDescription
             shareLinkStackView.isHidden = false
             url = link.url
         } else {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
-            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription
+            shareLinkDescriptionLabel.text = isFolder ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription
             shareLinkStackView.isHidden = true
         }
         shareLinkSwitch.isEnabled = enabled
