@@ -511,7 +511,7 @@ extension HomeViewController {
                         if case .file(let files) = viewModel.recentFiles {
                             let file = files[indexPath.row]
                             cell.delegate = self
-                            cell.configureWith(file: file, selectionMode: false)
+                            cell.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: false)
                         }
                     }
                     return cell

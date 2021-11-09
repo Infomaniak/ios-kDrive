@@ -35,6 +35,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var accessoryImage: UIImageView?
     @IBOutlet weak var moreButton: UIButton!
     @IBOutlet weak var favoriteImageView: UIImageView?
+    @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var availableOfflineImageView: UIImageView!
     @IBOutlet weak var centerTitleConstraint: NSLayoutConstraint!
     @IBOutlet weak var innerViewTrailingConstraint: NSLayoutConstraint!
@@ -48,6 +49,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     var downloadProgressObserver: ObservationToken?
     var downloadObserver: ObservationToken?
     weak var delegate: FileCellDelegate?
+    var driveFileManager: DriveFileManager!
 
     override var isSelected: Bool {
         didSet {
@@ -90,6 +92,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         super.awakeFromNib()
         moreButton.accessibilityLabel = KDriveStrings.Localizable.buttonMenu
         downloadProgressView?.setInfomaniakStyle()
+        collectionView?.delegate = self
+        collectionView?.dataSource = self
+        collectionView?.register(cellView: CategoryBadgeCollectionViewCell.self)
     }
 
     override func prepareForReuse() {
@@ -156,9 +161,12 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
     }
 
-    func configureWith(file: File, selectionMode: Bool = false) {
+    func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
+        self.driveFileManager = driveFileManager
         self.file = file
         self.selectionMode = selectionMode
+        collectionView?.isHidden = file.categories.isEmpty
+        collectionView?.reloadData()
 
         titleLabel.text = file.name
         favoriteImageView?.isHidden = !file.isFavorite
@@ -259,5 +267,25 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     @IBAction func moreButtonTap(_ sender: Any) {
         delegate?.didTapMoreButton(self)
+    }
+}
+
+extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return min(file.categories.count, 3)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(type: CategoryBadgeCollectionViewCell.self, for: indexPath)
+        let categoryId = file.categories[indexPath.row].id
+        if let category = driveFileManager.drive.categories.filter("id = %d", categoryId).first {
+            let more = indexPath.item == 2 && file.categories.count > 3 ? file.categories.count - 3 : nil
+            cell.configure(with: category, more: more)
+        }
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 16, height: 16)
     }
 }

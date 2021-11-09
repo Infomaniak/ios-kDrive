@@ -1,0 +1,48 @@
+/*
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import kDriveCore
+import UIKit
+
+class CategoryBadgeCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var moreLabel: IKLabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // Initialization code
+        borderColor = KDriveAsset.backgroundCardViewColor.color
+        borderWidth = 1
+        cornerRadius = 8
+        moreLabel.font = moreLabel.font.withSize(9)
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        borderColor = KDriveAsset.backgroundCardViewColor.color
+    }
+
+    func configure(with category: kDriveCore.Category, more: Int? = nil) {
+        backgroundColor = category.color
+        if let more = more {
+            moreLabel.text = "+\(more)"
+            moreLabel.isHidden = false
+        } else {
+            moreLabel.isHidden = true
+        }
+    }
+}

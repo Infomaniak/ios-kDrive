@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -49,7 +49,7 @@
                                                 </constraints>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="MLs-rs-LMm">
-                                                <rect key="frame" x="58" y="10" width="56" height="17"/>
+                                                <rect key="frame" x="58" y="10" width="128" height="17"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="249" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TES-Tv-kfS" customClass="IKLabel" customModule="kDriveCore">
                                                         <rect key="frame" x="0.0" y="0.0" width="36" height="17"/>
@@ -68,6 +68,15 @@
                                                             <constraint firstAttribute="width" constant="12" id="wBo-cl-8pL"/>
                                                         </constraints>
                                                     </imageView>
+                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="RzT-IJ-oQu">
+                                                        <rect key="frame" x="64" y="0.5" width="64" height="16"/>
+                                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="16" id="dpJ-Vj-1hM"/>
+                                                            <constraint firstAttribute="width" constant="64" id="umB-Om-7Ey"/>
+                                                        </constraints>
+                                                        <collectionViewLayout key="collectionViewLayout" id="wUe-Wd-m3y" customClass="FileDetailInformationUserLayout" customModule="kDrive" customModuleProvider="target"/>
+                                                    </collectionView>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="dkb-OK-TmO">
@@ -175,6 +184,7 @@
             <connections>
                 <outlet property="availableOfflineImageView" destination="RNE-x0-Rf0" id="Zle-Q8-vFW"/>
                 <outlet property="centerTitleConstraint" destination="UE1-IH-OR4" id="fjM-7f-vFo"/>
+                <outlet property="collectionView" destination="RzT-IJ-oQu" id="ZDw-EQ-9Bb"/>
                 <outlet property="contentInsetView" destination="HyS-E9-hha" id="7zB-25-Jc9"/>
                 <outlet property="detailLabel" destination="xaN-Uz-J3R" id="s00-ZL-PdZ"/>
                 <outlet property="detailsStackView" destination="dkb-OK-TmO" id="gEj-24-Zm3"/>
