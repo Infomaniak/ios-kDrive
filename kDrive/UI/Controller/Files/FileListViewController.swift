@@ -1047,18 +1047,21 @@ extension FileListViewController: SelectDelegate {
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
             let isDifferentDrive = newDriveFileManager.drive.id != driveFileManager.drive.id
             driveFileManager = newDriveFileManager
+            filesObserver?.cancel()
+            filesObserver = nil
+            observeFiles()
             currentDirectory = driveFileManager.getRootFile()
-            setTitle()
             if configuration.showUploadingFiles {
                 updateUploadCount()
                 // We stop observing the old directory and observe the new one instead
                 uploadsObserver?.cancel()
+                uploadsObserver = nil
                 observeUploads()
             }
-            sortedFiles = []
-            collectionView.reloadData()
-            reloadData()
             if isDifferentDrive {
+                sortedFiles = []
+                collectionView.reloadData()
+                reloadData()
                 navigationController?.popToRootViewController(animated: false)
             }
         }
