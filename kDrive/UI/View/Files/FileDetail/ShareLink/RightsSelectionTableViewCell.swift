@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import kDriveCore
 import UIKit
 
 class RightsSelectionTableViewCell: InsetTableViewCell {
@@ -79,7 +80,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
             enableCell()
         }
 
-        if right.key == "delete" {
+        if right.key == UserPermission.delete.rawValue {
             rightsIconImageView.tintColor = KDriveAsset.binColor.color
         }
     }

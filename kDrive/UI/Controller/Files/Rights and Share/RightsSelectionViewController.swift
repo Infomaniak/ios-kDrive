@@ -174,7 +174,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         let cell = tableView.dequeueReusableCell(type: RightsSelectionTableViewCell.self, for: indexPath)
         let right = rights[indexPath.row]
         var disable = false
-        if right.key == "manage" {
+        if right.key == UserPermission.manage.rawValue {
             if let userId = shareable?.userId {
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
@@ -194,7 +194,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let right = rights[indexPath.row]
-        if right.key == "delete" {
+        if right.key == UserPermission.delete.rawValue {
             let deleteUser = shareable?.shareableName ?? ""
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: attrString, action: KDriveStrings.Localizable.buttonDelete, destructive: true) {
