@@ -452,7 +452,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(sharedFile: sharedFile, file: file, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
+                    cell.configureWith(sharedFile: sharedFile, file: file, insets: false)
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
@@ -541,7 +541,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if currentTab == .informations && fileInformationRows[indexPath.row] == .share && (file.visibility != .isCollaborativeFolder) {
+        let canBecomeLink = file?.rights?.canBecomeLink ?? false
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .share && (file.visibility != .isCollaborativeFolder) && (canBecomeLink || file.shareLink != nil) {
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {

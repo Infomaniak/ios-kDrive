@@ -59,13 +59,6 @@
                                                     </imageView>
                                                 </subviews>
                                             </stackView>
-                                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YaO-ZX-OJR">
-                                                <rect key="frame" x="457" y="-7.5" width="51" height="31"/>
-                                                <color key="onTintColor" name="infomaniakColor"/>
-                                                <connections>
-                                                    <action selector="shareLinkSwitchChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="MtU-7f-mRo"/>
-                                                </connections>
-                                            </switch>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activé" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mgb-o7-K8K" customClass="IKLabel" customModule="kDriveCore">
                                                 <rect key="frame" x="0.0" y="34" width="517" height="77"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -80,21 +73,13 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstItem="mgb-o7-K8K" firstAttribute="top" secondItem="ZSx-2r-Qvo" secondAttribute="bottom" constant="10" id="5zx-Sh-JsE"/>
-                                            <constraint firstItem="YaO-ZX-OJR" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ZSx-2r-Qvo" secondAttribute="trailing" constant="16" id="Eva-PK-bTk"/>
                                             <constraint firstItem="ZSx-2r-Qvo" firstAttribute="top" secondItem="9G9-wN-sCa" secondAttribute="top" id="HIl-ei-yjt"/>
                                             <constraint firstAttribute="bottom" secondItem="mgb-o7-K8K" secondAttribute="bottom" id="OcT-uF-ZTy"/>
                                             <constraint firstAttribute="trailing" secondItem="ZSx-2r-Qvo" secondAttribute="trailing" id="QBa-rI-NuL"/>
                                             <constraint firstItem="mgb-o7-K8K" firstAttribute="leading" secondItem="9G9-wN-sCa" secondAttribute="leading" id="kac-nP-pdF"/>
                                             <constraint firstAttribute="trailing" secondItem="mgb-o7-K8K" secondAttribute="trailing" id="pfi-8C-off"/>
                                             <constraint firstItem="ZSx-2r-Qvo" firstAttribute="leading" secondItem="9G9-wN-sCa" secondAttribute="leading" id="qMq-sJ-0xG"/>
-                                            <constraint firstAttribute="trailing" secondItem="YaO-ZX-OJR" secondAttribute="trailing" id="qw9-Hy-TYU"/>
-                                            <constraint firstItem="YaO-ZX-OJR" firstAttribute="centerY" secondItem="0dO-5m-k3M" secondAttribute="centerY" id="rut-N3-Wg5"/>
                                         </constraints>
-                                        <variation key="default">
-                                            <mask key="subviews">
-                                                <exclude reference="YaO-ZX-OJR"/>
-                                            </mask>
-                                        </variation>
                                     </view>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="dJW-Ri-FCD">
                                         <rect key="frame" x="0.0" y="122" width="517" height="24"/>
@@ -178,7 +163,6 @@
                 <outlet property="shareIconImageView" destination="CK7-c2-fMN" id="0pX-bP-daQ"/>
                 <outlet property="shareLinkDescriptionLabel" destination="mgb-o7-K8K" id="Cfr-Oc-zlq"/>
                 <outlet property="shareLinkStackView" destination="dJW-Ri-FCD" id="Id7-QK-lUf"/>
-                <outlet property="shareLinkSwitch" destination="YaO-ZX-OJR" id="d1y-uk-kM6"/>
                 <outlet property="shareLinkTitleLabel" destination="0dO-5m-k3M" id="ohL-aC-CyI"/>
                 <outlet property="topConstraint" destination="nXN-Pn-jyW" id="W9S-x4-Cil"/>
                 <outlet property="topInnerConstraint" destination="IzV-7H-z5E" id="k1n-Y4-BAq"/>

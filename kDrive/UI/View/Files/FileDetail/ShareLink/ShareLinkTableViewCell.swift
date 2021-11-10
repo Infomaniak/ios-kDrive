@@ -27,7 +27,6 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
 }
 
 class ShareLinkTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var shareLinkSwitch: UISwitch!
     @IBOutlet weak var shareLinkTitleLabel: IKLabel!
     @IBOutlet weak var shareIconImageView: UIImageView!
     @IBOutlet weak var shareLinkStackView: UIStackView!
@@ -61,7 +60,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(sharedFile: SharedFile?, file: File, enabled: Bool, insets: Bool = true) {
+    func configureWith(sharedFile: SharedFile?, file: File, insets: Bool = true) {
         self.insets = insets
         if insets {
             topInnerConstraint.constant = 16
@@ -89,7 +88,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription
             shareLinkStackView.isHidden = true
         }
-        shareLinkSwitch.isEnabled = enabled
+//        shareLinkSwitch.isEnabled = enabled
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
