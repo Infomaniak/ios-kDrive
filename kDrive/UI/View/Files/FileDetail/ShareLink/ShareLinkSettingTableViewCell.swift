@@ -52,6 +52,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         newPasswordButton.isHidden = true
 
         datePickerView.datePickerMode = UIDatePicker.Mode.date
+        compactDatePicker.minimumDate = Date()
         let toolBar = UIToolbar()
         toolBar.barStyle = UIBarStyle.default
         toolBar.isTranslucent = true
