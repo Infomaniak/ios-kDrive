@@ -48,10 +48,6 @@ enum DateOption: Filterable, Selectable, Equatable {
         return KDriveAsset.calendar.image
     }
 
-    var image: UIImage? {
-        return icon
-    }
-
     var title: String {
         switch self {
         case .today:
