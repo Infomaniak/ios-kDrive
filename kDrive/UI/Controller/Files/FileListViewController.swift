@@ -64,6 +64,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         var rootTitle: String?
         /// Type of empty view to display
         var emptyViewType: EmptyTableView.EmptyTableViewType
+        /// Does this folder support importing files with drop from external app
+        var supportsDrop = false
     }
 
     // MARK: - Properties
@@ -87,7 +89,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    lazy var configuration = Configuration(emptyViewType: .emptyFolder)
+    lazy var configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true)
     private var uploadingFilesCount = 0
     private var nextPage = 1
     var isLoadingData = false
@@ -119,6 +121,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     private var sortTypeObserver: ObservationToken?
 
     private var background: EmptyTableView?
+    private var lastDropPosition: DropPosition?
 
     var trashSort: Bool {
         #if ISEXTENSION
@@ -164,6 +167,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
             collectionView.addGestureRecognizer(longPressGesture)
             rightBarButtonItems = navigationItem.rightBarButtonItems
+        }
+
+        if configuration.supportsDrop {
+            collectionView.dropDelegate = self
         }
 
         // First load
@@ -1074,6 +1081,70 @@ extension FileListViewController: TopScrollable {
     func scrollToTop() {
         if isViewLoaded {
             collectionView.scrollToTop(animated: true, navigationController: navigationController)
+        }
+    }
+}
+
+// MARK: - UICollectionViewDropDelegate
+
+extension FileListViewController: UICollectionViewDropDelegate {
+    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+        #if !ISEXTENSION
+            if let indexPath = destinationIndexPath,
+               indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory {
+                if sortedFiles[indexPath.item].rights?.uploadNewFile ?? false {
+                    if let lastDropPosition = lastDropPosition {
+                        if lastDropPosition.indexPath == indexPath {
+                            collectionView.cellForItem(at: indexPath)?.isHighlighted = true
+                            if UIConstants.dropDelay > lastDropPosition.time.timeIntervalSinceNow {
+                                self.lastDropPosition = nil
+                                collectionView.cellForItem(at: indexPath)?.isHighlighted = false
+                                filePresenter.present(driveFileManager: driveFileManager, file: sortedFiles[indexPath.item], files: sortedFiles, normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
+                            }
+                        } else {
+                            collectionView.cellForItem(at: lastDropPosition.indexPath)?.isHighlighted = false
+                            self.lastDropPosition = DropPosition(indexPath: indexPath)
+                        }
+                    } else {
+                        lastDropPosition = DropPosition(indexPath: indexPath)
+                    }
+                    return UICollectionViewDropProposal(operation: .copy, intent: .insertIntoDestinationIndexPath)
+                } else {
+                    return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
+                }
+            } else {
+                if let indexPath = lastDropPosition?.indexPath {
+                    collectionView.cellForItem(at: indexPath)?.isHighlighted = false
+                }
+                return UICollectionViewDropProposal(operation: .copy, intent: .insertAtDestinationIndexPath)
+            }
+        #else
+            return UICollectionViewDropProposal(operation: .forbidden, intent: .insertAtDestinationIndexPath)
+        #endif
+    }
+
+    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
+        let itemProviders = coordinator.items.map(\.dragItem.itemProvider)
+        // We don't display iOS's progress indicator because we use our own snackbar
+        coordinator.session.progressIndicatorStyle = .none
+        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
+
+        let destinationDirectory: File
+        if let indexPath = coordinator.destinationIndexPath,
+           indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory &&
+           sortedFiles[indexPath.item].rights?.uploadNewFile ?? false {
+            destinationDirectory = sortedFiles[indexPath.item]
+        } else {
+            destinationDirectory = currentDirectory
+        }
+
+        _ = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles in
+            guard let self = self else { return }
+            do {
+                try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
+            } catch {
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+            }
         }
     }
 }
