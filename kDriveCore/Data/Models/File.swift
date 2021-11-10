@@ -520,6 +520,7 @@ extension File: Differentiable {
                 && visibility == source.visibility
                 && shareLink == source.shareLink
                 && rights.isContentEqual(to: source.rights)
+                && Array(categories).isContentEqual(to: Array(source.categories))
         }
     }
 }

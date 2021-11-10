@@ -59,7 +59,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         }
 
         let localizedKey: String
-        switch activity.action {
+        switch activity.type {
         case .fileAccess:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderAccess" : "fileDetailsActivityFileAccess"
         case .fileCreate:
@@ -74,6 +74,10 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderDelete" : "fileDetailsActivityFileDelete"
         case .fileUpdate:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderUpdate" : "fileDetailsActivityFileUpdate"
+        case .fileCategorize:
+            localizedKey = "fileDetailsActivityFileCategorize"
+        case .fileUncategorize:
+            localizedKey = "fileDetailsActivityFileUncategorize"
         case .fileFavoriteCreate:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderFavoriteCreate" : "fileDetailsActivityFileFavoriteCreate"
         case .fileFavoriteRemove:
@@ -106,7 +110,13 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = "fileDetailsActivityCommentResolve"
         case .fileMoveIn, .fileMoveOut:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderMove" : "fileDetailsActivityFileMove"
-        case .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete:
+        case .collaborativeFolderCreate:
+            localizedKey = "fileActivityCollaborativeFolderCreate"
+        case .collaborativeFolderUpdate:
+            localizedKey = "fileActivityCollaborativeFolderUpdate"
+        case .collaborativeFolderDelete:
+            localizedKey = "fileActivityCollaborativeFolderDelete"
+        case .none:
             localizedKey = "fileActivityUnknown"
         }
         detailLabel.text = localizedKey.localized
