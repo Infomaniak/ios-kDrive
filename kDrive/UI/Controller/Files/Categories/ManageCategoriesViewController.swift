@@ -33,6 +33,7 @@ class ManageCategoriesViewController: UITableViewController {
     var selectedCategories = [kDriveCore.Category]()
 
     weak var delegate: ManageCategoriesDelegate?
+    weak var fileListViewController: FileListViewController?
 
     private var categories = [kDriveCore.Category]()
     private var filteredCategories = [kDriveCore.Category]()
@@ -106,6 +107,11 @@ class ManageCategoriesViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         reloadCategories()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        fileListViewController?.getNewChanges()
     }
 
     @objc func closeButtonPressed() {

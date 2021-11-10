@@ -373,6 +373,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
             OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
         case .manageCategories:
             let manageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
+            (manageCategoriesViewController.topViewController as? ManageCategoriesViewController)?.fileListViewController = presentingParent as? FileListViewController
             present(manageCategoriesViewController, animated: true)
         case .favorite:
             driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { [wasFavorited = file.isFavorite] error in
