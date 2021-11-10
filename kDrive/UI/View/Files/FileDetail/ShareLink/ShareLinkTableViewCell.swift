@@ -61,7 +61,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(sharedFile: SharedFile?, isFolder: Bool, enabled: Bool, insets: Bool = true) {
+    func configureWith(sharedFile: SharedFile?, file: File, enabled: Bool, insets: Bool = true) {
         self.insets = insets
         if insets {
             topInnerConstraint.constant = 16
@@ -77,12 +77,16 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         layoutIfNeeded()
         if let link = sharedFile?.link {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
-            shareLinkDescriptionLabel.text = isFolder ? KDriveStrings.Localizable.shareLinkPublicRightFolderDescription : KDriveStrings.Localizable.shareLinkPublicRightFileDescription
+            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkPublicRightFolderDescription : KDriveStrings.Localizable.shareLinkPublicRightFileDescription
             shareLinkStackView.isHidden = false
             url = link.url
+        } else if file.visibility == .isCollaborativeFolder {
+            shareLinkTitleLabel.text = KDriveStrings.Localizable.dropboxSharedLinkTitle
+            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.dropboxSharedLinkDescription
+            shareLinkStackView.isHidden = true
         } else {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
-            shareLinkDescriptionLabel.text = isFolder ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription
+            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription
             shareLinkStackView.isHidden = true
         }
         shareLinkSwitch.isEnabled = enabled

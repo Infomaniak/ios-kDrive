@@ -206,7 +206,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(sharedFile: sharedFile, isFolder: file?.isDirectory ?? false, enabled: (file?.rights?.canBecomeLink ?? false) || file?.shareLink != nil)
+            cell.configureWith(sharedFile: sharedFile, file: file, enabled: (file?.rights?.canBecomeLink ?? false) || file?.shareLink != nil)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
@@ -222,6 +222,9 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
+            if file.visibility == .isCollaborativeFolder {
+                return
+            }
             shareLinkRights = true
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
