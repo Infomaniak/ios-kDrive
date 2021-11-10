@@ -108,7 +108,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         delegate?.didUpdateSettingsValue(index: index, content: compactDatePicker.date)
     }
 
-    func configureWith(index: Int, option: ShareLinkSettingsViewController.OptionsRow, switchValue: Bool, settingValue: Any?, drive: Drive, expirationTime: TimeInterval? = nil, actionButtonVisible: Bool = false, isFolder: Bool) {
+    func configureWith(index: Int, option: ShareLinkSettingsViewController.OptionsRow, switchValue: Bool, settingValue: Any?, drive: Drive, actionButtonVisible: Bool = false, isFolder: Bool) {
         self.option = option
         self.index = index
 

@@ -78,7 +78,6 @@ class ShareLinkSettingsViewController: UIViewController {
     var accessRightValue: String!
     var editRights = Right.onlyOfficeRights
     var editRightValue: String = ""
-    var expirationDate: TimeInterval?
     var optionsRows: [OptionsRow] = [.optionPassword, .optionDownload, .optionDate]
     var password: String?
     private var newPassword = false
@@ -186,7 +185,6 @@ class ShareLinkSettingsViewController: UIViewController {
             .optionDownload: nil,
             .optionDate: shareFile.link!.validUntil
         ]
-        expirationDate = shareFile.link!.validUntil != nil ? TimeInterval(shareFile.link!.validUntil!) : nil
         if shareFile.link!.permission == "password" {
             newPassword = true
         }
@@ -257,7 +255,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
         cell.delegate = self
         let option = (file.isOfficeFile || file.isDirectory) ? optionsRows[indexPath.row - 1] : optionsRows[indexPath.row]
         let index = (file.isOfficeFile || file.isDirectory) ? indexPath.row - 1 : indexPath.row
-        cell.configureWith(index: index, option: option, switchValue: getSetting(for: option), settingValue: getValue(for: option), drive: driveFileManager.drive, expirationTime: expirationDate, actionButtonVisible: option == .optionPassword && newPassword, isFolder: file.isDirectory)
+        cell.configureWith(index: index, option: option, switchValue: getSetting(for: option), settingValue: getValue(for: option), drive: driveFileManager.drive, actionButtonVisible: option == .optionPassword && newPassword, isFolder: file.isDirectory)
 
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
