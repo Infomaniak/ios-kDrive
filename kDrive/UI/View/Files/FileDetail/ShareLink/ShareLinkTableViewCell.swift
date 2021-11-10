@@ -88,7 +88,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription
             shareLinkStackView.isHidden = true
         }
-//        shareLinkSwitch.isEnabled = enabled
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {

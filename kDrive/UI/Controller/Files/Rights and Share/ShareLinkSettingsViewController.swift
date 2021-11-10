@@ -173,10 +173,10 @@ class ShareLinkSettingsViewController: UIViewController {
         // Access right
         accessRightValue = shareFile.link!.permission
         // Edit right
-        editRightValue = shareFile.link!.canEdit ? Right.onlyOfficeRights[1].key : Right.onlyOfficeRights[0].key
+        editRightValue = shareFile.link!.canEdit ? ShareLinkPermission.public.rawValue : ShareLinkPermission.restricted.rawValue
         // Options
         settings = [
-            .optionPassword: shareFile.link!.permission == "password",
+            .optionPassword: shareFile.link!.permission == ShareLinkPermission.password.rawValue,
             .optionDownload: !shareFile.link!.blockDownloads,
             .optionDate: shareFile.link!.validUntil != nil
         ]
@@ -185,7 +185,7 @@ class ShareLinkSettingsViewController: UIViewController {
             .optionDownload: nil,
             .optionDate: shareFile.link!.validUntil
         ]
-        if shareFile.link!.permission == "password" {
+        if shareFile.link!.permission == ShareLinkPermission.password.rawValue {
             newPassword = true
         }
     }
@@ -348,7 +348,7 @@ extension ShareLinkSettingsViewController: RightsSelectionDelegate {
 
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        let permission = getSetting(for: .optionPassword) ? "password" : Right.shareLinkRights[1].key
+        let permission = getSetting(for: .optionPassword) ? ShareLinkPermission.password.rawValue : ShareLinkPermission.public.rawValue
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
         let date = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
         let validUntil = date?.timeIntervalSince1970

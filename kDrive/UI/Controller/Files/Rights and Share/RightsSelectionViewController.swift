@@ -22,6 +22,9 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
+public enum ShareLinkPermission: String {
+    case restricted, `public`, password
+}
 enum RightsSelectionType {
     case shareLinkSettings
     case addUserRights
@@ -45,12 +48,12 @@ struct Right {
     var folderDescription: (String) -> String
 
     static let shareLinkRights = [
-        Right(key: "restricted",
+        Right(key: ShareLinkPermission.restricted.rawValue,
               title: KDriveStrings.Localizable.shareLinkRestrictedRightTitle,
               icon: KDriveAsset.lock.image,
               fileDescription: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription },
               folderDescription: { _ in KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription }),
-        Right(key: "public",
+        Right(key: ShareLinkPermission.public.rawValue,
               title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
               icon: KDriveAsset.unlock.image,
               fileDescription: { _ in KDriveStrings.Localizable.shareLinkPublicRightFileDescription },
