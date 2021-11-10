@@ -38,7 +38,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     var option: ShareLinkSettingsViewController.OptionsRow?
     weak var delegate: ShareLinkSettingsDelegate?
     var datePickerView = UIDatePicker()
-    var expirationDate: Date?
 
     var actionHandler: ((UIButton) -> Void)?
 
@@ -123,7 +122,13 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
         if option == .optionDate {
             compactDatePicker.isHidden = !switchValue
-            compactDatePicker.date = settingValue as? Date ?? Date()
+            if let timeInterval = settingValue as? Int {
+                compactDatePicker.date = Date(timeIntervalSince1970: Double(timeInterval))
+            } else if let date = settingValue as? Date {
+                compactDatePicker.date = date
+            } else {
+                compactDatePicker.date = Date()
+            }
 
             if switchValue {
                 compactDatePickerChanged(compactDatePicker)
