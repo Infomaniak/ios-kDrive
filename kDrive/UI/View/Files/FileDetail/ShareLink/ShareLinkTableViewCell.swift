@@ -33,45 +33,29 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var shareLinkDescriptionLabel: UILabel!
     @IBOutlet weak var copyButton: ImageButton!
     @IBOutlet weak var topInnerConstraint: NSLayoutConstraint!
-    @IBOutlet weak var leadingInnerConstraint: NSLayoutConstraint!
-    @IBOutlet weak var trailingInnerConstraint: NSLayoutConstraint!
+    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet weak var trailingConstraint: NSLayoutConstraint!
     @IBOutlet weak var bottomInnerConstraint: NSLayoutConstraint!
 
-    var insets = true
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
 
     override func awakeFromNib() {
         super.awakeFromNib()
         copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-        if !insets {
-            contentInsetView.backgroundColor = .clear
-        }
-    }
-
-    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-        super.setHighlighted(highlighted, animated: animated)
-        if !insets {
-            contentInsetView.backgroundColor = .clear
-        }
+        selectionStyle = .default
     }
 
     func configureWith(sharedFile: SharedFile?, file: File, insets: Bool = true) {
-        self.insets = insets
         if insets {
             topInnerConstraint.constant = 16
-            leadingInnerConstraint.constant = 16
-            trailingInnerConstraint.constant = 16
             bottomInnerConstraint.constant = 16
+            leadingConstraint.constant = 24
+            trailingConstraint.constant = 24
         } else {
             topInnerConstraint.constant = 8
-            leadingInnerConstraint.constant = 0
-            trailingInnerConstraint.constant = 0
             bottomInnerConstraint.constant = 8
+            initWithoutInsets()
         }
         layoutIfNeeded()
         if let link = sharedFile?.link {
@@ -92,6 +76,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
+    func initWithoutInsets() {
+        initWithPositionAndShadow()
+        leadingConstraint.constant = 0
+        trailingConstraint.constant = 0
+    }
+    
     @IBAction func copyButtonPressed(_ sender: UIButton) {
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }

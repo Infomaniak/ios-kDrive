@@ -451,6 +451,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
+                    cell.selectionStyle = file.visibility == .isCollaborativeFolder ? .none : .default
                     cell.delegate = self
                     cell.configureWith(sharedFile: sharedFile, file: file, insets: false)
                     return cell

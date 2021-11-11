@@ -161,7 +161,7 @@
                 <outlet property="bottomInnerConstraint" destination="ng4-O3-W1f" id="0Of-f0-NoA"/>
                 <outlet property="contentInsetView" destination="vRh-ng-z3o" id="6Jv-Eh-U01"/>
                 <outlet property="copyButton" destination="v5H-Mw-FXc" id="Wew-y0-4Gh"/>
-                <outlet property="leadingInnerConstraint" destination="vNE-RS-hpX" id="5TV-3Y-unO"/>
+                <outlet property="leadingConstraint" destination="BKx-m5-0Zy" id="Frn-SJ-XAF"/>
                 <outlet property="rightArrow" destination="5JS-W7-FAq" id="1bo-51-uEM"/>
                 <outlet property="shareIconImageView" destination="CK7-c2-fMN" id="0pX-bP-daQ"/>
                 <outlet property="shareLinkDescriptionLabel" destination="mgb-o7-K8K" id="Cfr-Oc-zlq"/>
@@ -169,7 +169,7 @@
                 <outlet property="shareLinkTitleLabel" destination="0dO-5m-k3M" id="ohL-aC-CyI"/>
                 <outlet property="topConstraint" destination="nXN-Pn-jyW" id="W9S-x4-Cil"/>
                 <outlet property="topInnerConstraint" destination="IzV-7H-z5E" id="k1n-Y4-BAq"/>
-                <outlet property="trailingInnerConstraint" destination="ett-Pc-fal" id="V6K-qW-GLl"/>
+                <outlet property="trailingConstraint" destination="Ac8-VZ-zKs" id="oTo-b1-I4w"/>
             </connections>
             <point key="canvasLocation" x="54" y="197"/>
         </tableViewCell>
