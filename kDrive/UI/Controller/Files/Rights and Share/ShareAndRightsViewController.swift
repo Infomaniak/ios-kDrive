@@ -338,10 +338,6 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
         present(ac, animated: true)
     }
 
-    func shareLinkRightsButtonPressed() {
-        showRightsSelection(shareLink: true)
-    }
-
     func shareLinkSettingsButtonPressed() {
         let shareLinkSettingsViewController = ShareLinkSettingsViewController.instantiate()
         shareLinkSettingsViewController.driveFileManager = driveFileManager

@@ -37,7 +37,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     var option: ShareLinkSettingsViewController.OptionsRow?
     weak var delegate: ShareLinkSettingsDelegate?
-    var datePickerView = UIDatePicker()
 
     var actionHandler: ((UIButton) -> Void)?
 
@@ -51,17 +50,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         updateButton.isHidden = true
         newPasswordButton.isHidden = true
 
-        datePickerView.datePickerMode = UIDatePicker.Mode.date
         compactDatePicker.minimumDate = Date()
-        let toolBar = UIToolbar()
-        toolBar.barStyle = UIBarStyle.default
-        toolBar.isTranslucent = true
-        toolBar.sizeToFit()
-
-        let doneButton = UIBarButtonItem(title: KDriveStrings.Localizable.buttonClose, style: .done, target: self, action: #selector(donePicker))
-        let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: nil, action: nil)
-        toolBar.setItems([spaceButton, doneButton], animated: false)
-        toolBar.isUserInteractionEnabled = true
 
         passwordTextField.delegate = self
         passwordTextField.setInfomaniakColors()
@@ -84,8 +73,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         rightView.addSubview(overlayButton)
         passwordTextField.rightView = rightView
         passwordTextField.rightViewMode = .always
-
-        datePickerView.addTarget(self, action: #selector(handleDatePicker), for: UIControl.Event.valueChanged)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -94,14 +81,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-    }
-
-    @objc func donePicker() {
-        handleDatePicker()
-    }
-
-    @objc func handleDatePicker() {
-        delegate?.didUpdateSettingsValue(index: index, content: datePickerView.date)
     }
 
     @IBAction func compactDatePickerChanged(_ sender: UIDatePicker) {
@@ -123,9 +102,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
         if option == .optionDate {
             compactDatePicker.isHidden = !switchValue
-            if let timeInterval = settingValue as? Int {
-                compactDatePicker.date = Date(timeIntervalSince1970: Double(timeInterval))
-            } else if let date = settingValue as? Date {
+            if let date = settingValue as? Date {
                 compactDatePicker.date = date
             } else {
                 compactDatePicker.date = Date()

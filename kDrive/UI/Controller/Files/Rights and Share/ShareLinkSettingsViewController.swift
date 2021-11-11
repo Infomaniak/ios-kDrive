@@ -173,17 +173,21 @@ class ShareLinkSettingsViewController: UIViewController {
         // Access right
         accessRightValue = shareFile.link!.permission
         // Edit right
-        editRightValue = shareFile.link!.canEdit ? ShareLinkPermission.public.rawValue : ShareLinkPermission.restricted.rawValue
+        editRightValue = shareFile.link!.canEdit ? Right.onlyOfficeRights[1].key : Right.onlyOfficeRights[0].key
         // Options
         settings = [
             .optionPassword: shareFile.link!.permission == ShareLinkPermission.password.rawValue,
             .optionDownload: !shareFile.link!.blockDownloads,
             .optionDate: shareFile.link!.validUntil != nil
         ]
+        var date: Date?
+        if let timeInterval = shareFile.link!.validUntil {
+            date = Date(timeIntervalSince1970: Double(timeInterval))
+        }
         settingsValue = [
             .optionPassword: nil,
             .optionDownload: nil,
-            .optionDate: shareFile.link!.validUntil
+            .optionDate: date
         ]
         if shareFile.link!.permission == ShareLinkPermission.password.rawValue {
             newPassword = true

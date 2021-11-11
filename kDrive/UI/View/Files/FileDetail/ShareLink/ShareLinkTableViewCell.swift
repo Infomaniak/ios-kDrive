@@ -21,7 +21,6 @@ import kDriveCore
 import UIKit
 
 protocol ShareLinkTableViewCellDelegate: AnyObject {
-    func shareLinkRightsButtonPressed()
     func shareLinkSettingsButtonPressed()
     func shareLinkSharedButtonPressed(link: String, sender: UIView)
 }
@@ -29,6 +28,7 @@ protocol ShareLinkTableViewCellDelegate: AnyObject {
 class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var shareLinkTitleLabel: IKLabel!
     @IBOutlet weak var shareIconImageView: UIImageView!
+    @IBOutlet weak var rightArrow: UIImageView!
     @IBOutlet weak var shareLinkStackView: UIStackView!
     @IBOutlet weak var shareLinkDescriptionLabel: UILabel!
     @IBOutlet weak var copyButton: ImageButton!
@@ -83,6 +83,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.dropboxSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveStrings.Localizable.dropboxSharedLinkDescription
             shareLinkStackView.isHidden = true
+            rightArrow.isHidden = true
+            shareIconImageView.image = KDriveAsset.folderDropBox.image
         } else {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
             shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription
@@ -92,10 +94,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
-    }
-
-    @objc func shareLinkRightsButtonPressed() {
-        delegate?.shareLinkRightsButtonPressed()
     }
 
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {

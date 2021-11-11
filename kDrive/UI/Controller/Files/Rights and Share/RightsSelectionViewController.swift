@@ -25,6 +25,7 @@ import UIKit
 public enum ShareLinkPermission: String {
     case restricted, `public`, password
 }
+
 enum RightsSelectionType {
     case shareLinkSettings
     case addUserRights

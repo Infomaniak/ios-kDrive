@@ -254,12 +254,16 @@ public class DriveApiFetcher: ApiFetcher {
         if isFree {
             body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads]
         } else {
-            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads, "valid_until": date as Any]
+            let intValidUntil = (date != nil) ? Int(date!) : nil
+            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads, "valid_until": intValidUntil as Any]
         }
         if permission == "password" {
-            body.updateValue(password!, forKey: "password")
+            if password != nil {
+                body.updateValue(password!, forKey: "password")
+            } else {
+                body.removeValue(forKey: "permission")
+            }
         }
-
         makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 

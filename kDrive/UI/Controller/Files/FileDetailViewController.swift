@@ -803,22 +803,6 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
         present(ac, animated: true)
     }
 
-    func shareLinkRightsButtonPressed() {
-        guard let sharedLink = sharedFile?.link else {
-            return
-        }
-        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-        rightsSelectionViewController.modalPresentationStyle = .fullScreen
-        if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-            rightsSelectionVC.driveFileManager = driveFileManager
-            rightsSelectionVC.isFolder = file.isDirectory
-            rightsSelectionVC.delegate = self
-            rightsSelectionVC.rightSelectionType = .officeOnly
-            rightsSelectionVC.selectedRight = sharedLink.canEdit ? "write" : "read"
-        }
-        present(rightsSelectionViewController, animated: true)
-    }
-
     func shareLinkSettingsButtonPressed() {
         performSegue(withIdentifier: "toShareLinkSettingsSegue", sender: nil)
     }
