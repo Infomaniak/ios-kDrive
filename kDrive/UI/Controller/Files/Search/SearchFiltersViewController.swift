@@ -250,7 +250,11 @@ extension SearchFiltersViewController: ManageCategoriesDelegate {
 extension SearchFiltersViewController: FiltersFooterDelegate {
     func clearButtonPressed() {
         filters.clearFilters()
+        let selectedIndexPath = tableView.indexPathForSelectedRow
         tableView.reloadData()
+        if let selectedIndexPath = selectedIndexPath {
+            tableView.selectRow(at: selectedIndexPath, animated: false, scrollPosition: .none)
+        }
         delegate?.didUpdateFilters(filters)
     }
 
