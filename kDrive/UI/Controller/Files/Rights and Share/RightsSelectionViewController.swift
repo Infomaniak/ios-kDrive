@@ -26,6 +26,10 @@ public enum ShareLinkPermission: String {
     case restricted, `public`, password
 }
 
+public enum EditPermission: String {
+    case read, write
+}
+
 enum RightsSelectionType {
     case shareLinkSettings
     case addUserRights
@@ -62,12 +66,12 @@ struct Right {
     ]
 
     static let onlyOfficeRights = [
-        Right(key: "read",
+        Right(key: EditPermission.read.rawValue,
               title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
               icon: KDriveAsset.view.image,
               fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription,
               folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFolderDescription),
-        Right(key: "write",
+        Right(key: EditPermission.write.rawValue,
               title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
               icon: KDriveAsset.edit.image,
               fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription,
