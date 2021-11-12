@@ -398,6 +398,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                                     driveId: driveId,
                                                     url: fileURL,
                                                     name: file.name,
+                                                    conflictOption: .replace,
                                                     shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true

@@ -251,6 +251,7 @@ class FileProviderExtension: NSFileProviderExtension {
             driveId: driveFileManager.drive.id,
             url: item.storageUrl,
             name: item.filename,
+            conflictOption: .replace,
             shouldRemoveAfterUpload: false)
         var observationToken: ObservationToken?
         observationToken = UploadQueue.instance.observeFileUploaded(self, fileId: fileId) { uploadedFile, _ in
