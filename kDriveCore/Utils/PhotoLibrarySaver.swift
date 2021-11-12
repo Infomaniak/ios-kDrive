@@ -23,7 +23,7 @@ public class PhotoLibrarySaver: NSObject {
     private let albumName = "kDrive"
     public static let instance = PhotoLibrarySaver()
 
-    private var assetCollection: PHAssetCollection?
+    public private(set) var assetCollection: PHAssetCollection?
 
     private override init() {
         super.init()

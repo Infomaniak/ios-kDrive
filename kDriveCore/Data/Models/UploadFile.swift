@@ -129,7 +129,7 @@ public class UploadFile: Object {
         self.rawPriority = priority.rawValue
     }
 
-    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, creationDate: Date?, modificationDate: Date?, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
+    public init(parentDirectoryId: Int, userId: Int, driveId: Int, name: String, asset: PHAsset, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId
         self.driveId = driveId
@@ -138,8 +138,8 @@ public class UploadFile: Object {
         self.localAsset = asset
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.rawType = UploadFileType.phAsset.rawValue
-        self.creationDate = creationDate
-        self.modificationDate = modificationDate
+        self.creationDate = asset.creationDate
+        self.modificationDate = asset.modificationDate
         self.taskCreationDate = Date()
         self.conflictOption = conflictOption
         self.rawPriority = priority.rawValue
