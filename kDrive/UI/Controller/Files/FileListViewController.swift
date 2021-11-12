@@ -388,8 +388,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     final func observeNetwork() {
         guard networkObserver == nil else { return }
-        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { status in
-            DispatchQueue.main.async { [weak self] in
+        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+            DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.headerView?.offlineView.isHidden = status != .offline
                 self.collectionView.collectionViewLayout.invalidateLayout()
@@ -414,7 +414,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
         // Sort type observer
         sortTypeObserver = FileListOptions.instance.observeSortTypeChange(self) { [unowned self] newSortType in
-            self.sortType = newSortType
+            sortType = newSortType
             reloadData(showRefreshControl: false)
         }
     }
