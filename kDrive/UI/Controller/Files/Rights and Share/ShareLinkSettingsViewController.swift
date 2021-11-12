@@ -173,7 +173,7 @@ class ShareLinkSettingsViewController: UIViewController {
         // Access right
         accessRightValue = shareFile.link!.permission
         // Edit right
-        editRightValue = shareFile.link!.canEdit ? Right.onlyOfficeRights[1].key : Right.onlyOfficeRights[0].key
+        editRightValue = shareFile.link!.canEdit ? EditPermission.write.rawValue : EditPermission.read.rawValue
         // Options
         settings = [
             .optionPassword: shareFile.link!.permission == ShareLinkPermission.password.rawValue,

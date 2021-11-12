@@ -1223,7 +1223,7 @@ public class DriveFileManager {
     public func updateShareLink(for file: File, with sharedFile: SharedFile?, and value: String, completion: @escaping (File?, ShareLink?, Error?) -> Void) {
         if let sharedLink = sharedFile?.link {
             sharedLink.permission = value
-            if value == "restricted" {
+            if value == ShareLinkPermission.restricted.rawValue {
                 removeShareLink(for: file) { file, error in
                     if file != nil {
                         completion(file, nil, error)
@@ -1235,7 +1235,7 @@ public class DriveFileManager {
                 }
             }
         } else {
-            if value == "public" {
+            if value == ShareLinkPermission.public.rawValue {
                 activateShareLink(for: file) { file, shareLink, error in
                     if let link = shareLink {
                         completion(file, link, error)

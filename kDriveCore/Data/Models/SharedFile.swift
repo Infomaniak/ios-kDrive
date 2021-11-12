@@ -18,6 +18,14 @@
 
 import Foundation
 
+public enum ShareLinkPermission: String {
+    case restricted, `public`, password
+}
+
+public enum EditPermission: String {
+    case read, write
+}
+
 public class SharedFile: NSObject, NSCoding, Codable {
     public var id: Int = 0
     public var path: String

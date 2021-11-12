@@ -48,6 +48,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     func configureWith(sharedFile: SharedFile?, file: File, insets: Bool = true) {
+        selectionStyle = file.visibility == .isCollaborativeFolder ? .none : .default
         if insets {
             leadingConstraint.constant = 24
             trailingConstraint.constant = 24

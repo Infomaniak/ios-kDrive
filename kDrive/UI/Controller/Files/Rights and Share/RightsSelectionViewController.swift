@@ -22,14 +22,6 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
-public enum ShareLinkPermission: String {
-    case restricted, `public`, password
-}
-
-public enum EditPermission: String {
-    case read, write
-}
-
 enum RightsSelectionType {
     case shareLinkSettings
     case addUserRights

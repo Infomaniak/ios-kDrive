@@ -257,9 +257,9 @@ public class DriveApiFetcher: ApiFetcher {
             let intValidUntil = (date != nil) ? Int(date!) : nil
             body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads, "valid_until": intValidUntil as Any]
         }
-        if permission == "password" {
-            if password != nil {
-                body.updateValue(password!, forKey: "password")
+        if permission == ShareLinkPermission.password.rawValue {
+            if let password = password {
+                body.updateValue(password, forKey: "password")
             } else {
                 body.removeValue(forKey: "permission")
             }
