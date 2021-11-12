@@ -43,18 +43,21 @@ struct Right {
     var icon: UIImage
     var fileDescription: String
     var folderDescription: String
+    var documentDescription: String
 
     static let shareLinkRights = [
         Right(key: ShareLinkPermission.restricted.rawValue,
               title: KDriveStrings.Localizable.shareLinkRestrictedRightTitle,
               icon: KDriveAsset.lock.image,
-              fileDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription,
-              folderDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription),
+              fileDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort,
+              folderDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort,
+              documentDescription: KDriveStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort),
         Right(key: ShareLinkPermission.public.rawValue,
               title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
               icon: KDriveAsset.unlock.image,
-              fileDescription: KDriveStrings.Localizable.shareLinkPublicRightFileDescription,
-              folderDescription: KDriveStrings.Localizable.shareLinkPublicRightFolderDescription)
+              fileDescription: KDriveStrings.Localizable.shareLinkPublicRightFileDescriptionShort,
+              folderDescription: KDriveStrings.Localizable.shareLinkPublicRightFolderDescriptionShort,
+              documentDescription: KDriveStrings.Localizable.shareLinkPublicRightDocumentDescriptionShort)
     ]
 
     static let onlyOfficeRights = [
@@ -62,12 +65,14 @@ struct Right {
               title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
               icon: KDriveAsset.view.image,
               fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription,
-              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFolderDescription),
+              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFolderDescription,
+              documentDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription),
         Right(key: EditPermission.write.rawValue,
               title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
               icon: KDriveAsset.edit.image,
               fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription,
-              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription)
+              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription,
+              documentDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription)
     ]
 }
 
@@ -84,7 +89,7 @@ class RightsSelectionViewController: UIViewController {
 
     weak var delegate: RightsSelectionDelegate?
 
-    var isFolder = false
+    var file: File!
 
     var canDelete = true
 
@@ -128,7 +133,7 @@ class RightsSelectionViewController: UIViewController {
                 }
             }
             let userPermissions = UserPermission.allCases.filter { $0 != .delete || canDelete } // Remove delete permission is `canDelete` is false
-            rights = userPermissions.map { Right(key: $0.rawValue, title: $0.title, icon: $0.icon, fileDescription: getUserRightDescription($0), folderDescription: getUserRightDescription($0)) }
+            rights = userPermissions.map { Right(key: $0.rawValue, title: $0.title, icon: $0.icon, fileDescription: getUserRightDescription($0), folderDescription: getUserRightDescription($0), documentDescription: getUserRightDescription($0)) }
         case .officeOnly:
             rights = Right.onlyOfficeRights
         }
@@ -179,7 +184,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
         }
-        cell.configureCell(right: right, type: rightSelectionType, disable: disable, isFolder: isFolder)
+        cell.configureCell(right: right, type: rightSelectionType, disable: disable, file: file)
 
         return cell
     }

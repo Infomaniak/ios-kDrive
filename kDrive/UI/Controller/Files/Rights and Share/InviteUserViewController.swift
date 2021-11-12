@@ -249,6 +249,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
+                rightsSelectionVC.file = file
                 rightsSelectionVC.delegate = self
                 rightsSelectionVC.selectedRight = newPermission.rawValue
                 rightsSelectionVC.canDelete = false

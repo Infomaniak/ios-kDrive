@@ -40,7 +40,7 @@ class ShareLinkSettingsViewController: UIViewController {
         var fileDescription: String {
             switch self {
             case .optionPassword:
-                return KDriveStrings.Localizable.shareLinkPasswordRightFileDescription
+                return KDriveStrings.Localizable.shareLinkPasswordRightDescription(KDriveStrings.Localizable.shareLinkTypeFile)
             case .optionDownload:
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
@@ -51,7 +51,7 @@ class ShareLinkSettingsViewController: UIViewController {
         var folderDescription: String {
             switch self {
             case .optionPassword:
-                return KDriveStrings.Localizable.shareLinkPasswordRightFolderDescription
+                return KDriveStrings.Localizable.shareLinkPasswordRightDescription(KDriveStrings.Localizable.shareLinkTypeFolder)
             case .optionDownload:
                 return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
@@ -70,7 +70,6 @@ class ShareLinkSettingsViewController: UIViewController {
         }
     }
 
-    let accessRights = Right.shareLinkRights
     var file: File!
     var shareFile: SharedFile!
     private var settings = [OptionsRow: Bool]()
@@ -303,7 +302,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
-                rightsSelectionVC.isFolder = file.isDirectory
+                rightsSelectionVC.file
                 rightsSelectionVC.selectedRight = editRightValue
                 rightsSelectionVC.rightSelectionType = .officeOnly
                 rightsSelectionVC.delegate = self

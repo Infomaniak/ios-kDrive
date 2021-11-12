@@ -61,7 +61,11 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         layoutIfNeeded()
         if let link = sharedFile?.link {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
-            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkPublicRightFolderDescription : KDriveStrings.Localizable.shareLinkPublicRightFileDescription
+            let rightPermission = link.canEdit ? KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle.lowercased() : KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle.lowercased()
+            let documentType = file.isDirectory ? KDriveStrings.Localizable.shareLinkTypeFolder : file.isOfficeFile ? KDriveStrings.Localizable.shareLinkTypeDocument : KDriveStrings.Localizable.shareLinkTypeFile
+            let password = link.permission == ShareLinkPermission.password.rawValue ? KDriveStrings.Localizable.shareLinkPublicRightDescriptionPassword : ""
+            let date = link.validUntil != nil ? KDriveStrings.Localizable.shareLinkPublicRightDescriptionDate(Constants.formatDate(Date(timeIntervalSince1970: Double(link.validUntil!)))) : ""
+            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkPublicRightDescription(rightPermission, documentType, password, date)
             shareLinkStackView.isHidden = false
             url = link.url
         } else if file.visibility == .isCollaborativeFolder {
@@ -72,7 +76,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareIconImageView.image = KDriveAsset.folderDropBox.image
         } else {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
-            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescription : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescription
+            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort
             shareLinkStackView.isHidden = true
         }
     }

@@ -547,7 +547,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.driveFileManager = driveFileManager
-                rightsSelectionVC.isFolder = file.isDirectory
+                rightsSelectionVC.file = file
                 if let sharedFile = sharedFile, sharedFile.link != nil {
                     rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
                 } else {
