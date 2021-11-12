@@ -90,23 +90,25 @@ class ShareAndRightsViewController: UIViewController {
         }
     }
 
-    private func showRightsSelection(shareLink: Bool) {
+    private func showRightsSelection(userAccess: Bool) {
         let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
         rightsSelectionViewController.modalPresentationStyle = .fullScreen
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
             rightsSelectionVC.driveFileManager = driveFileManager
             rightsSelectionVC.isFolder = file.isDirectory
             rightsSelectionVC.delegate = self
-            if shareLink {
-                guard let sharedLink = sharedFile?.link else { return }
-
-                rightsSelectionVC.rightSelectionType = .officeOnly
-                rightsSelectionVC.selectedRight = (sharedLink.canEdit ? UserPermission.write : UserPermission.read).rawValue
-            } else {
+            if userAccess {
                 guard let shareable = selectedShareable else { return }
 
                 rightsSelectionVC.selectedRight = (shareable.right ?? .read).rawValue
                 rightsSelectionVC.shareable = shareable
+            } else {
+                if let sharedFile = sharedFile, sharedFile.link != nil {
+                    rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
+                } else {
+                    rightsSelectionVC.selectedRight = ShareLinkPermission.restricted.rawValue
+                }
+                rightsSelectionVC.rightSelectionType = .shareLinkSettings
             }
         }
         present(rightsSelectionViewController, animated: true)
@@ -228,27 +230,14 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
                 return
             }
             shareLinkRights = true
-            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-            rightsSelectionViewController.modalPresentationStyle = .fullScreen
-            if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                rightsSelectionVC.driveFileManager = driveFileManager
-                rightsSelectionVC.isFolder = file.isDirectory
-                if let sharedFile = sharedFile, sharedFile.link != nil {
-                    rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
-                } else {
-                    rightsSelectionVC.selectedRight = ShareLinkPermission.restricted.rawValue
-                }
-                rightsSelectionVC.rightSelectionType = .shareLinkSettings
-                rightsSelectionVC.delegate = self
-            }
-            present(rightsSelectionViewController, animated: true)
+            showRightsSelection(userAccess: false)
         case .access:
             shareLinkRights = false
             selectedShareable = shareables[indexPath.row]
             if let user = selectedShareable as? DriveUser, user.id == driveFileManager.drive.userId {
                 break
             }
-            showRightsSelection(shareLink: false)
+            showRightsSelection(userAccess: true)
         }
     }
 
