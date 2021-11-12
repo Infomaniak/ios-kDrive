@@ -22,7 +22,7 @@ import UIKit
 public extension MaterialOutlinedTextField {
     func setInfomaniakColors() {
         let textColor = KDriveCoreAsset.titleColor.color
-        let normalLabelColor = ColorCompat.placeholderText
+        let normalLabelColor = UIColor.placeholderText
         let normalBorderColor = KDriveCoreAsset.borderColor.color
         let editingColor = KDriveCoreAsset.infomaniakColor.color
         let disabledAlpha: CGFloat = 0.6
