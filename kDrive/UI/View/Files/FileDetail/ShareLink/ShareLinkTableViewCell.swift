@@ -52,8 +52,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         if insets {
             leadingConstraint.constant = 24
             trailingConstraint.constant = 24
-            leadingInnerConstraint.constant = 12
-            trailingInnerConstraint.constant = 12
+            leadingInnerConstraint.constant = 16
+            trailingInnerConstraint.constant = 16
             separatorView.isHidden = true
         } else {
             initWithoutInsets()
