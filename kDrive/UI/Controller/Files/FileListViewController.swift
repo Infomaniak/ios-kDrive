@@ -1088,39 +1088,41 @@ extension FileListViewController: TopScrollable {
 // MARK: - UICollectionViewDropDelegate
 
 extension FileListViewController: UICollectionViewDropDelegate {
-    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
-        #if !ISEXTENSION
-            if let indexPath = destinationIndexPath,
-               indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory {
-                if sortedFiles[indexPath.item].rights?.uploadNewFile ?? false {
-                    if let lastDropPosition = lastDropPosition {
-                        if lastDropPosition.indexPath == indexPath {
-                            collectionView.cellForItem(at: indexPath)?.isHighlighted = true
-                            if UIConstants.dropDelay > lastDropPosition.time.timeIntervalSinceNow {
-                                self.lastDropPosition = nil
-                                collectionView.cellForItem(at: indexPath)?.isHighlighted = false
-                                filePresenter.present(driveFileManager: driveFileManager, file: sortedFiles[indexPath.item], files: sortedFiles, normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
-                            }
-                        } else {
-                            collectionView.cellForItem(at: lastDropPosition.indexPath)?.isHighlighted = false
-                            self.lastDropPosition = DropPosition(indexPath: indexPath)
-                        }
-                    } else {
-                        lastDropPosition = DropPosition(indexPath: indexPath)
-                    }
-                    return UICollectionViewDropProposal(operation: .copy, intent: .insertIntoDestinationIndexPath)
-                } else {
-                    return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
+    private func handleDropOverDirectory(_ directory: File, at indexPath: IndexPath) -> UICollectionViewDropProposal {
+        guard directory.rights?.uploadNewFile ?? false else {
+            return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
+        }
+
+        if let lastDropPosition = lastDropPosition {
+            if lastDropPosition.indexPath == indexPath {
+                collectionView.cellForItem(at: indexPath)?.isHighlighted = true
+                if UIConstants.dropDelay > lastDropPosition.time.timeIntervalSinceNow {
+                    self.lastDropPosition = nil
+                    collectionView.cellForItem(at: indexPath)?.isHighlighted = false
+                    #if !ISEXTENSION
+                        filePresenter.present(driveFileManager: driveFileManager, file: directory, files: sortedFiles, normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
+                    #endif
                 }
             } else {
-                if let indexPath = lastDropPosition?.indexPath {
-                    collectionView.cellForItem(at: indexPath)?.isHighlighted = false
-                }
-                return UICollectionViewDropProposal(operation: .copy, intent: .insertAtDestinationIndexPath)
+                collectionView.cellForItem(at: lastDropPosition.indexPath)?.isHighlighted = false
+                self.lastDropPosition = DropPosition(indexPath: indexPath)
             }
-        #else
-            return UICollectionViewDropProposal(operation: .forbidden, intent: .insertAtDestinationIndexPath)
-        #endif
+        } else {
+            lastDropPosition = DropPosition(indexPath: indexPath)
+        }
+        return UICollectionViewDropProposal(operation: .copy, intent: .insertIntoDestinationIndexPath)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+        if let indexPath = destinationIndexPath,
+           indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory {
+            return handleDropOverDirectory(sortedFiles[indexPath.item], at: indexPath)
+        } else {
+            if let indexPath = lastDropPosition?.indexPath {
+                collectionView.cellForItem(at: indexPath)?.isHighlighted = false
+            }
+            return UICollectionViewDropProposal(operation: .copy, intent: .insertAtDestinationIndexPath)
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
@@ -1136,6 +1138,10 @@ extension FileListViewController: UICollectionViewDropDelegate {
             destinationDirectory = sortedFiles[indexPath.item]
         } else {
             destinationDirectory = currentDirectory
+        }
+
+        if let lastHighlightedPath = lastDropPosition?.indexPath {
+            collectionView.cellForItem(at: lastHighlightedPath)?.isHighlighted = false
         }
 
         _ = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles in
