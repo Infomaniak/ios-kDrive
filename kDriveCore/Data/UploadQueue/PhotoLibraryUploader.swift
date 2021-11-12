@@ -101,14 +101,8 @@ public class PhotoLibraryUploader {
                 }
             }
         } else if asset.mediaType == .image {
-            if #available(iOS 13, *) {
-                _ = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
-                    self.handlePHAssetRequestData(data: data, completion: completion)
-                }
-            } else {
-                _ = PHImageManager.default().requestImageData(for: asset, options: requestImageOption) { data, _, _, _ in
-                    self.handlePHAssetRequestData(data: data, completion: completion)
-                }
+            _ = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
+                self.handlePHAssetRequestData(data: data, completion: completion)
             }
         } else {
             completion(nil)
@@ -142,33 +136,34 @@ public class PhotoLibraryUploader {
     }
 
     public func addNewPicturesToUploadQueue(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
-        var assets = PHFetchResult<PHAsset>()
-        if let settings = settings, PHPhotoLibrary.authorizationStatus() == .authorized || PHPhotoLibrary.authorizationStatus() == .restricted {
-            let options = PHFetchOptions()
-            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-            // Create predicate from settings
-            var typesPredicates = [NSPredicate]()
-            if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
-                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
-            } else if settings.syncPicturesEnabled {
-                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
-            } else if settings.syncScreenshotsEnabled {
-                typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
-            }
-            if settings.syncVideosEnabled {
-                typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
-            }
-            let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
-            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
-            DDLogInfo("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-            assets = PHAsset.fetchAssets(with: options)
-            let syncDate = Date()
-            addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
-            DDLogInfo("Photo sync - New assets count \(assets.count)")
-            updateLastSyncDate(syncDate, using: realm)
-            UploadQueue.instance.addToQueueFromRealm()
+        guard let settings = settings,
+              PHPhotoLibrary.authorizationStatus() == .authorized else {
+            return 0
         }
+        let options = PHFetchOptions()
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        // Create predicate from settings
+        var typesPredicates = [NSPredicate]()
+        if settings.syncPicturesEnabled && settings.syncScreenshotsEnabled {
+            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue))
+        } else if settings.syncPicturesEnabled {
+            typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND !((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+        } else if settings.syncScreenshotsEnabled {
+            typesPredicates.append(NSPredicate(format: "(mediaType == %d) AND ((mediaSubtype & %d) == %d)", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue, PHAssetMediaSubtype.photoScreenshot.rawValue))
+        }
+        if settings.syncVideosEnabled {
+            typesPredicates.append(NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue))
+        }
+        let datePredicate = NSPredicate(format: "creationDate > %@", settings.lastSync as NSDate)
+        let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+        options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+        DDLogInfo("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+        let assets = PHAsset.fetchAssets(with: options)
+        let syncDate = Date()
+        addImageAssetsToUploadQueue(assets: assets, initial: settings.lastSync.timeIntervalSince1970 == 0, using: realm)
+        DDLogInfo("Photo sync - New assets count \(assets.count)")
+        updateLastSyncDate(syncDate, using: realm)
+        UploadQueue.instance.addToQueueFromRealm()
         return assets.count
     }
 
@@ -182,6 +177,16 @@ public class PhotoLibraryUploader {
                     realm.cancelWrite()
                     stop.pointee = true
                     return
+                }
+                if let assetCollectionIdentifier = PhotoLibrarySaver.instance.assetCollection?.localIdentifier {
+                    let options = PHFetchOptions()
+                    options.predicate = NSPredicate(format: "localIdentifier = %@", assetCollectionIdentifier)
+                    let assetCollections = PHAssetCollection.fetchAssetCollectionsContaining(asset, with: .album, options: options)
+                    // swiftlint:disable:next empty_count
+                    if assetCollections.count > 0 {
+                        DDLogInfo("Asset ignored because it already originates from kDrive")
+                        return
+                    }
                 }
                 var correctName = "No-name-\(Date().timeIntervalSince1970)"
                 var fileExtension = ""
@@ -211,8 +216,6 @@ public class PhotoLibraryUploader {
                     driveId: settings.driveId,
                     name: correctName,
                     asset: asset,
-                    creationDate: asset.creationDate,
-                    modificationDate: asset.modificationDate,
                     conflictOption: .replace,
                     priority: initial ? .low : .high)
                 if settings.createDatedSubFolders {
