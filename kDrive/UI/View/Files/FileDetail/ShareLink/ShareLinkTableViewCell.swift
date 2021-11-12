@@ -32,10 +32,11 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     @IBOutlet weak var shareLinkStackView: UIStackView!
     @IBOutlet weak var shareLinkDescriptionLabel: UILabel!
     @IBOutlet weak var copyButton: ImageButton!
-    @IBOutlet weak var topInnerConstraint: NSLayoutConstraint!
     @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
     @IBOutlet weak var trailingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var bottomInnerConstraint: NSLayoutConstraint!
+    @IBOutlet weak var leadingInnerConstraint: NSLayoutConstraint!
+    @IBOutlet weak var trailingInnerConstraint: NSLayoutConstraint!
+    @IBOutlet weak var separatorView: UIView!
 
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
@@ -48,13 +49,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     func configureWith(sharedFile: SharedFile?, file: File, insets: Bool = true) {
         if insets {
-            topInnerConstraint.constant = 16
-            bottomInnerConstraint.constant = 16
             leadingConstraint.constant = 24
             trailingConstraint.constant = 24
+            leadingInnerConstraint.constant = 12
+            trailingInnerConstraint.constant = 12
+            separatorView.isHidden = true
         } else {
-            topInnerConstraint.constant = 8
-            bottomInnerConstraint.constant = 8
             initWithoutInsets()
         }
         layoutIfNeeded()
@@ -80,8 +80,11 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         initWithPositionAndShadow()
         leadingConstraint.constant = 0
         trailingConstraint.constant = 0
+        leadingInnerConstraint.constant = 24
+        trailingInnerConstraint.constant = 24
+        separatorView.isHidden = false
     }
-    
+
     @IBAction func copyButtonPressed(_ sender: UIButton) {
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }
