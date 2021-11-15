@@ -90,22 +90,23 @@ class ShareAndRightsViewController: UIViewController {
         }
     }
 
-    private func showRightsSelection(shareLink: Bool) {
-        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+    private func showRightsSelection(userAccess: Bool) {
+        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
         rightsSelectionViewController.modalPresentationStyle = .fullScreen
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-            rightsSelectionVC.driveFileManager = driveFileManager
             rightsSelectionVC.delegate = self
-            if shareLink {
-                guard let sharedLink = sharedFile?.link else { return }
-
-                rightsSelectionVC.rightSelectionType = .officeOnly
-                rightsSelectionVC.selectedRight = (sharedLink.canEdit ? UserPermission.write : UserPermission.read).rawValue
-            } else {
+            if userAccess {
                 guard let shareable = selectedShareable else { return }
 
                 rightsSelectionVC.selectedRight = (shareable.right ?? .read).rawValue
                 rightsSelectionVC.shareable = shareable
+            } else {
+                if let sharedFile = sharedFile, sharedFile.link != nil {
+                    rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
+                } else {
+                    rightsSelectionVC.selectedRight = ShareLinkPermission.restricted.rawValue
+                }
+                rightsSelectionVC.rightSelectionType = .shareLinkSettings
             }
         }
         present(rightsSelectionViewController, animated: true)
@@ -205,7 +206,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(sharedFile: sharedFile, isOfficeFile: file?.isOfficeFile ?? false, enabled: (file?.rights?.canBecomeLink ?? false) || file?.shareLink != nil)
+            cell.configureWith(sharedFile: sharedFile, file: file)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
@@ -221,14 +222,19 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            break
+            let canBecomeLink = file?.rights?.canBecomeLink ?? false || file.shareLink != nil
+            if file.visibility == .isCollaborativeFolder || !canBecomeLink {
+                return
+            }
+            shareLinkRights = true
+            showRightsSelection(userAccess: false)
         case .access:
             shareLinkRights = false
             selectedShareable = shareables[indexPath.row]
             if let user = selectedShareable as? DriveUser, user.id == driveFileManager.drive.userId {
                 break
             }
-            showRightsSelection(shareLink: false)
+            showRightsSelection(userAccess: true)
         }
     }
 
@@ -247,9 +253,14 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
 extension ShareAndRightsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         guard let sharedFile = sharedFile else { return }
-
-        if let sharedLink = sharedFile.link, shareLinkRights {
-            driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
+        if shareLinkRights {
+            driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { _, shareLink, _ in
+                if let link = shareLink {
+                    self.sharedFile?.link = link
+                } else {
+                    self.sharedFile?.link = nil
+                }
+                self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
             }
         } else if let user = selectedShareable as? DriveUser {
             driveFileManager.apiFetcher.updateUserRights(file: file, user: user, permission: value) { response, _ in
@@ -314,34 +325,12 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
         present(ac, animated: true)
     }
 
-    func shareLinkRightsButtonPressed() {
-        showRightsSelection(shareLink: true)
-    }
-
     func shareLinkSettingsButtonPressed() {
         let shareLinkSettingsViewController = ShareLinkSettingsViewController.instantiate()
         shareLinkSettingsViewController.driveFileManager = driveFileManager
         shareLinkSettingsViewController.file = file
         shareLinkSettingsViewController.shareFile = sharedFile
         navigationController?.pushViewController(shareLinkSettingsViewController, animated: true)
-    }
-
-    func shareLinkSwitchToggled(isOn: Bool) {
-        if isOn {
-            driveFileManager.activateShareLink(for: file) { _, shareLink, _ in
-                if let link = shareLink {
-                    self.sharedFile?.link = link
-                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .automatic)
-                }
-            }
-        } else {
-            driveFileManager.removeShareLink(for: file) { file, _ in
-                if file != nil {
-                    self.sharedFile?.link = nil
-                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .automatic)
-                }
-            }
-        }
     }
 }
 

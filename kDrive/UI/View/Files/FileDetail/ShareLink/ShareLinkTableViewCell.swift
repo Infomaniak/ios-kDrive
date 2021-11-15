@@ -21,96 +21,79 @@ import kDriveCore
 import UIKit
 
 protocol ShareLinkTableViewCellDelegate: AnyObject {
-    func shareLinkSwitchToggled(isOn: Bool)
-    func shareLinkRightsButtonPressed()
     func shareLinkSettingsButtonPressed()
     func shareLinkSharedButtonPressed(link: String, sender: UIView)
 }
 
 class ShareLinkTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var shareLinkSwitch: UISwitch!
+    @IBOutlet weak var shareLinkTitleLabel: IKLabel!
+    @IBOutlet weak var shareIconImageView: UIImageView!
+    @IBOutlet weak var rightArrow: UIImageView!
     @IBOutlet weak var shareLinkStackView: UIStackView!
-    @IBOutlet weak var activeLabel: UILabel!
-    @IBOutlet weak var copyTextField: UITextField!
+    @IBOutlet weak var shareLinkDescriptionLabel: UILabel!
     @IBOutlet weak var copyButton: ImageButton!
-    @IBOutlet weak var shareLinkRightsView: UIView!
-    @IBOutlet weak var rightsIconImageView: UIImageView!
-    @IBOutlet weak var rightsLabel: UILabel!
-    @IBOutlet weak var topInnerConstraint: NSLayoutConstraint!
+    @IBOutlet weak var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet weak var trailingConstraint: NSLayoutConstraint!
     @IBOutlet weak var leadingInnerConstraint: NSLayoutConstraint!
     @IBOutlet weak var trailingInnerConstraint: NSLayoutConstraint!
-    @IBOutlet weak var bottomInnerConstraint: NSLayoutConstraint!
+    @IBOutlet weak var separatorView: UIView!
 
-    var insets = true
     weak var delegate: ShareLinkTableViewCellDelegate?
+    var url = ""
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        shareLinkRightsView.layer.borderWidth = 1
-        shareLinkRightsView.layer.borderColor = KDriveAsset.borderColor.color.cgColor
-        shareLinkRightsView.layer.cornerRadius = UIConstants.buttonCornerRadius
-        shareLinkRightsView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(shareLinkRightsButtonPressed)))
-        shareLinkRightsView.accessibilityTraits = .button
-        shareLinkRightsView.isAccessibilityElement = true
         copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
+        selectionStyle = .default
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-        if !insets {
-            contentInsetView.backgroundColor = .clear
-        }
-    }
-
-    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-        super.setHighlighted(highlighted, animated: animated)
-        if !insets {
-            contentInsetView.backgroundColor = .clear
-        }
-    }
-
-    func configureWith(sharedFile: SharedFile?, isOfficeFile: Bool, enabled: Bool, insets: Bool = true) {
-        self.insets = insets
+    func configureWith(sharedFile: SharedFile?, file: File, insets: Bool = true) {
+        selectionStyle = file.visibility == .isCollaborativeFolder ? .none : .default
         if insets {
-            topInnerConstraint.constant = 16
+            leadingConstraint.constant = 24
+            trailingConstraint.constant = 24
             leadingInnerConstraint.constant = 16
             trailingInnerConstraint.constant = 16
-            bottomInnerConstraint.constant = 16
+            separatorView.isHidden = true
         } else {
-            topInnerConstraint.constant = 8
-            leadingInnerConstraint.constant = 0
-            trailingInnerConstraint.constant = 0
-            bottomInnerConstraint.constant = 8
+            initWithoutInsets()
         }
         layoutIfNeeded()
         if let link = sharedFile?.link {
-            shareLinkSwitch.isOn = true
-            activeLabel.text = KDriveStrings.Localizable.allActivated
+            shareLinkTitleLabel.text = KDriveStrings.Localizable.publicSharedLinkTitle
+            let rightPermission = link.canEdit ? KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle.lowercased() : KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle.lowercased()
+            let documentType = file.isDirectory ? KDriveStrings.Localizable.shareLinkTypeFolder : file.isOfficeFile ? KDriveStrings.Localizable.shareLinkTypeDocument : KDriveStrings.Localizable.shareLinkTypeFile
+            let password = link.permission == ShareLinkPermission.password.rawValue ? KDriveStrings.Localizable.shareLinkPublicRightDescriptionPassword : ""
+            let date = link.validUntil != nil ? KDriveStrings.Localizable.shareLinkPublicRightDescriptionDate(Constants.formatDate(Date(timeIntervalSince1970: Double(link.validUntil!)))) : ""
+            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkPublicRightDescription(rightPermission, documentType, password, date)
             shareLinkStackView.isHidden = false
-            copyTextField.text = link.url
-            shareLinkRightsView.isHidden = !isOfficeFile
-            let right = Right.onlyOfficeRights[link.canEdit ? 1 : 0]
-            rightsIconImageView.image = right.icon
-            rightsLabel.text = right.title
-            shareLinkRightsView.accessibilityLabel = right.title
-        } else {
-            shareLinkSwitch.isOn = false
-            activeLabel.text = KDriveStrings.Localizable.allDisabled
+            url = link.url
+            shareIconImageView.image = KDriveAsset.unlock.image
+        } else if file.visibility == .isCollaborativeFolder {
+            shareLinkTitleLabel.text = KDriveStrings.Localizable.dropboxSharedLinkTitle
+            shareLinkDescriptionLabel.text = KDriveStrings.Localizable.dropboxSharedLinkDescription
             shareLinkStackView.isHidden = true
+            rightArrow.isHidden = true
+            shareIconImageView.image = KDriveAsset.folderDropBox.image
+        } else {
+            shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
+            shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort
+            shareLinkStackView.isHidden = true
+            shareIconImageView.image = KDriveAsset.lock.image
         }
-        shareLinkSwitch.isEnabled = enabled
+    }
+
+    func initWithoutInsets() {
+        initWithPositionAndShadow()
+        leadingConstraint.constant = 0
+        trailingConstraint.constant = 0
+        leadingInnerConstraint.constant = 24
+        trailingInnerConstraint.constant = 24
+        separatorView.isHidden = false
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
-        delegate?.shareLinkSharedButtonPressed(link: copyTextField.text ?? "", sender: sender)
-    }
-
-    @IBAction func shareLinkSwitchChanged(_ sender: UISwitch) {
-        delegate?.shareLinkSwitchToggled(isOn: sender.isOn)
-    }
-
-    @objc func shareLinkRightsButtonPressed() {
-        delegate?.shareLinkRightsButtonPressed()
+        delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
     }
 
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {

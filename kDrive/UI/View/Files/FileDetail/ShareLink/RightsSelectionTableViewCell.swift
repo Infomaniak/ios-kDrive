@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
+import kDriveCore
+import UIKit
 
 class RightsSelectionTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var rightsIconImageView: UIImageView!
     @IBOutlet weak var rightsTitleLabel: UILabel!
     @IBOutlet weak var rightsDetailLabel: UILabel!
@@ -61,9 +61,9 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureCell(right: Right, type: RightsSelectionType, driveName: String, disable: Bool) {
+    func configureCell(right: Right, type: RightsSelectionType, disable: Bool, file: File) {
         rightsTitleLabel.text = right.title
-        rightsDetailLabel.text = right.description(driveName)
+        rightsDetailLabel.text = file.isDirectory ? right.folderDescription : file.isOfficeFile ? right.documentDescription : right.fileDescription
         rightsIconImageView.image = right.icon
 
         if disable {
@@ -76,7 +76,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
             enableCell()
         }
 
-        if right.key == "delete" {
+        if right.key == UserPermission.delete.rawValue {
             rightsIconImageView.tintColor = KDriveAsset.binColor.color
         }
     }

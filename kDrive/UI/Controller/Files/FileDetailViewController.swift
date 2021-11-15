@@ -452,7 +452,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(sharedFile: sharedFile, isOfficeFile: file.isOfficeFile, enabled: (file.rights?.canBecomeLink ?? false) || file.shareLink != nil, insets: false)
+                    cell.configureWith(sharedFile: sharedFile, file: file, insets: false)
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
@@ -541,6 +541,21 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let canBecomeLink = file?.rights?.canBecomeLink ?? false
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .share && (file.visibility != .isCollaborativeFolder) && (canBecomeLink || file.shareLink != nil) {
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
+            rightsSelectionViewController.modalPresentationStyle = .fullScreen
+            if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
+                if let sharedFile = sharedFile, sharedFile.link != nil {
+                    rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
+                } else {
+                    rightsSelectionVC.selectedRight = ShareLinkPermission.restricted.rawValue
+                }
+                rightsSelectionVC.rightSelectionType = .shareLinkSettings
+                rightsSelectionVC.delegate = self
+            }
+            present(rightsSelectionViewController, animated: true)
+        }
         if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && driveFileManager.drive.categoryRights.canPutCategoryOnFile {
             let manageCategoriesViewController = ManageCategoriesViewController.instantiate(file: file, driveFileManager: driveFileManager)
             navigationController?.pushViewController(manageCategoriesViewController, animated: true)
@@ -786,39 +801,6 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
         present(ac, animated: true)
     }
 
-    func shareLinkSwitchToggled(isOn: Bool) {
-        if isOn {
-            driveFileManager.activateShareLink(for: file) { _, shareLink, _ in
-                if let link = shareLink {
-                    self.sharedFile?.link = link
-                    self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
-                }
-            }
-        } else {
-            driveFileManager.removeShareLink(for: file) { file, _ in
-                if file != nil {
-                    self.sharedFile?.link = nil
-                    self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
-                }
-            }
-        }
-    }
-
-    func shareLinkRightsButtonPressed() {
-        guard let sharedLink = sharedFile?.link else {
-            return
-        }
-        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
-        rightsSelectionViewController.modalPresentationStyle = .fullScreen
-        if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-            rightsSelectionVC.driveFileManager = driveFileManager
-            rightsSelectionVC.delegate = self
-            rightsSelectionVC.rightSelectionType = .officeOnly
-            rightsSelectionVC.selectedRight = sharedLink.canEdit ? "write" : "read"
-        }
-        present(rightsSelectionViewController, animated: true)
-    }
-
     func shareLinkSettingsButtonPressed() {
         performSegue(withIdentifier: "toShareLinkSettingsSegue", sender: nil)
     }
@@ -828,10 +810,13 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
 
 extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
-        guard let sharedLink = sharedFile?.link else {
-            return
-        }
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: value == "write", permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, blockInformation: sharedLink.blockInformation, isFree: driveFileManager.drive.pack == .free) { _, _ in
+        driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { _, shareLink, _ in
+            if let link = shareLink {
+                self.sharedFile?.link = link
+            } else {
+                self.sharedFile?.link = nil
+            }
+            self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
         }
     }
 }

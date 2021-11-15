@@ -41,31 +41,38 @@ struct Right {
     var key: String
     var title: String
     var icon: UIImage
-    var description: (String) -> String
+    var fileDescription: String
+    var folderDescription: String
+    var documentDescription: String
 
     static let shareLinkRights = [
-        Right(key: "public",
-              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
-              icon: KDriveAsset.view.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkPublicRightDescription }),
-        Right(key: "inherit",
-              title: KDriveStrings.Localizable.shareLinkDriveUsersRightTitle,
-              icon: KDriveAsset.users.image,
-              description: { driveName in KDriveStrings.Localizable.shareLinkDriveUsersRightDescription(driveName) }),
-        Right(key: "password",
-              title: KDriveStrings.Localizable.shareLinkPasswordRightTitle,
+        Right(key: ShareLinkPermission.restricted.rawValue,
+              title: KDriveStrings.Localizable.shareLinkRestrictedRightTitle,
               icon: KDriveAsset.lock.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkPasswordRightDescription })
+              fileDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort,
+              folderDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort,
+              documentDescription: KDriveStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort),
+        Right(key: ShareLinkPermission.public.rawValue,
+              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
+              icon: KDriveAsset.unlock.image,
+              fileDescription: KDriveStrings.Localizable.shareLinkPublicRightFileDescriptionShort,
+              folderDescription: KDriveStrings.Localizable.shareLinkPublicRightFolderDescriptionShort,
+              documentDescription: KDriveStrings.Localizable.shareLinkPublicRightDocumentDescriptionShort)
     ]
+
     static let onlyOfficeRights = [
-        Right(key: "read",
+        Right(key: EditPermission.read.rawValue,
               title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
               icon: KDriveAsset.view.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionReadDescription }),
-        Right(key: "write",
+              fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription,
+              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFolderDescription,
+              documentDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription),
+        Right(key: EditPermission.write.rawValue,
               title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
               icon: KDriveAsset.edit.image,
-              description: { _ in KDriveStrings.Localizable.shareLinkOfficePermissionWriteDescription })
+              fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription,
+              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription,
+              documentDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription)
     ]
 }
 
@@ -81,6 +88,8 @@ class RightsSelectionViewController: UIViewController {
     var selectedRight = ""
 
     weak var delegate: RightsSelectionDelegate?
+
+    var file: File!
 
     var canDelete = true
 
@@ -111,20 +120,20 @@ class RightsSelectionViewController: UIViewController {
         case .shareLinkSettings:
             rights = Right.shareLinkRights
         case .addUserRights:
-            let getUserRightDescription = { (permission: UserPermission) -> ((String) -> String) in
+            let getUserRightDescription = { (permission: UserPermission) -> (String) in
                 switch permission {
                 case .read:
-                    return { _ in KDriveStrings.Localizable.userPermissionReadDescription }
+                    return KDriveStrings.Localizable.userPermissionReadDescription
                 case .write:
-                    return { _ in KDriveStrings.Localizable.userPermissionWriteDescription }
+                    return KDriveStrings.Localizable.userPermissionWriteDescription
                 case .manage:
-                    return { _ in KDriveStrings.Localizable.userPermissionManageDescription }
+                    return KDriveStrings.Localizable.userPermissionManageDescription
                 case .delete:
-                    return { _ in KDriveStrings.Localizable.userPermissionRemove }
+                    return KDriveStrings.Localizable.userPermissionRemove
                 }
             }
             let userPermissions = UserPermission.allCases.filter { $0 != .delete || canDelete } // Remove delete permission is `canDelete` is false
-            rights = userPermissions.map { Right(key: $0.rawValue, title: $0.title, icon: $0.icon, description: getUserRightDescription($0)) }
+            rights = userPermissions.map { Right(key: $0.rawValue, title: $0.title, icon: $0.icon, fileDescription: getUserRightDescription($0), folderDescription: getUserRightDescription($0), documentDescription: getUserRightDescription($0)) }
         case .officeOnly:
             rights = Right.onlyOfficeRights
         }
@@ -148,14 +157,17 @@ class RightsSelectionViewController: UIViewController {
         dismiss(animated: true)
     }
 
-    class func instantiateInNavigationController() -> TitleSizeAdjustingNavigationController {
-        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate())
+    class func instantiateInNavigationController(file: File, driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
+        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate(file: file, driveFileManager: driveFileManager))
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }
 
-    class func instantiate() -> RightsSelectionViewController {
-        return Storyboard.files.instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
+    class func instantiate(file: File, driveFileManager: DriveFileManager) -> RightsSelectionViewController {
+        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
+        viewController.file = file
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 }
 
@@ -170,26 +182,12 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         let cell = tableView.dequeueReusableCell(type: RightsSelectionTableViewCell.self, for: indexPath)
         let right = rights[indexPath.row]
         var disable = false
-        if right.key == "password" && driveFileManager.drive.pack == .free {
-            disable = true
-            cell.actionHandler = { [weak self] _ in
-                guard let self = self else { return }
-                let driveFloatingPanelController = SecureLinkFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? SecureLinkFloatingPanelViewController
-                floatingPanelViewController?.rightButton.isEnabled = self.driveFileManager.drive.accountAdmin
-                floatingPanelViewController?.actionHandler = { _ in
-                    driveFloatingPanelController.dismiss(animated: true) {
-                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
-                    }
-                }
-                self.present(driveFloatingPanelController, animated: true)
-            }
-        } else if right.key == "manage" {
+        if right.key == UserPermission.manage.rawValue {
             if let userId = shareable?.userId {
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
         }
-        cell.configureCell(right: right, type: rightSelectionType, driveName: driveFileManager.drive.name, disable: disable)
+        cell.configureCell(right: right, type: rightSelectionType, disable: disable, file: file)
 
         return cell
     }
@@ -204,7 +202,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let right = rights[indexPath.row]
-        if right.key == "delete" {
+        if right.key == UserPermission.delete.rawValue {
             let deleteUser = shareable?.shareableName ?? ""
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: attrString, action: KDriveStrings.Localizable.buttonDelete, destructive: true) {

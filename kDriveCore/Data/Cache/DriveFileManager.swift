@@ -1220,6 +1220,31 @@ public class DriveFileManager {
         }
     }
 
+    public func updateShareLink(for file: File, with sharedFile: SharedFile?, and value: String, completion: @escaping (File?, ShareLink?, Error?) -> Void) {
+        if let sharedLink = sharedFile?.link {
+            sharedLink.permission = value
+            if value == ShareLinkPermission.restricted.rawValue {
+                removeShareLink(for: file) { file, error in
+                    if file != nil {
+                        completion(file, nil, error)
+                    }
+                }
+            } else {
+                apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, /*blockInformation: sharedLink.blockInformation,*/ isFree: drive.pack == .free) { _, error in
+                    completion(file, sharedLink, error)
+                }
+            }
+        } else {
+            if value == ShareLinkPermission.public.rawValue {
+                activateShareLink(for: file) { file, shareLink, error in
+                    if let link = shareLink {
+                        completion(file, link, error)
+                    }
+                }
+            }
+        }
+    }
+
     public func activateShareLink(for file: File, completion: @escaping (File?, ShareLink?, Error?) -> Void) {
         apiFetcher.activateShareLinkFor(file: file) { response, error in
             if let link = response?.data {
