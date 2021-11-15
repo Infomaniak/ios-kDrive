@@ -66,6 +66,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         var emptyViewType: EmptyTableView.EmptyTableViewType
         /// Does this folder support importing files with drop from external app
         var supportsDrop = false
+        /// Does this folder support importing files with drag from external app
+        var supportDrag = true
     }
 
     // MARK: - Properties
@@ -171,6 +173,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         if configuration.supportsDrop {
             collectionView.dropDelegate = self
+        }
+
+        if configuration.supportDrag {
+            collectionView.dragDelegate = self
         }
 
         // First load
@@ -1082,6 +1088,24 @@ extension FileListViewController: TopScrollable {
         if isViewLoaded {
             collectionView.scrollToTop(animated: true, navigationController: navigationController)
         }
+    }
+}
+
+// MARK: - UICollectionViewDragDelegate
+
+extension FileListViewController: UICollectionViewDragDelegate {
+    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        let draggedFile = sortedFiles[indexPath.item]
+        draggedFile.userId = driveFileManager.drive.userId
+        let itemProvider = NSItemProvider(object: draggedFile)
+        itemProvider.suggestedName = draggedFile.name
+        let draggedItem = UIDragItem(itemProvider: itemProvider)
+        if let previewImageView = (collectionView.cellForItem(at: indexPath) as? FileCollectionViewCell)?.logoImage {
+            draggedItem.previewProvider = {
+                UIDragPreview(view: previewImageView)
+            }
+        }
+        return [draggedItem]
     }
 }
 

@@ -218,6 +218,7 @@ public class File: Object, Codable {
     @Persisted public var onlyOfficeConvertExtension: String?
     @Persisted public var fullyDownloaded = false
     @Persisted public var isAvailableOffline = false
+    public var userId: Int?
     public var isFirstInCollection = false
     public var isLastInCollection = false
 
@@ -521,6 +522,62 @@ extension File: Differentiable {
                 && shareLink == source.shareLink
                 && rights.isContentEqual(to: source.rights)
                 && Array(categories).isContentEqual(to: Array(source.categories))
+        }
+    }
+}
+
+extension File: NSItemProviderWriting {
+    public static var writableTypeIdentifiersForItemProvider: [String] {
+        return [UTI.item.rawValue as String, UTI.data.rawValue as String]
+    }
+
+    public var writableTypeIdentifiersForItemProvider: [String] {
+        if isDirectory {
+            return [UTI.zip.rawValue as String, UTI.item.rawValue as String, UTI.data.rawValue as String]
+        } else {
+            return [uti.rawValue as String, UTI.item.rawValue as String, UTI.data.rawValue as String]
+        }
+    }
+
+    private func loadLocalData(completionHandler: @escaping (Data?, Error?) -> Void) {
+        do {
+            let localUrl = isDirectory ? temporaryUrl : localUrl
+            let data = try Data(contentsOf: localUrl)
+            completionHandler(data, nil)
+        } catch {
+            completionHandler(nil, error)
+        }
+    }
+
+    public func loadData(withTypeIdentifier typeIdentifier: String, forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
+        if let userId = userId {
+            if !isLocalVersionOlderThanRemote() {
+                loadLocalData(completionHandler: completionHandler)
+                return nil
+            } else {
+                let progress = Progress(totalUnitCount: 100)
+                DownloadQueue.instance.temporaryDownload(file: self, userId: userId) { operation in
+                    progress.cancellationHandler = {
+                        operation?.cancel()
+                    }
+                    if let operation = operation,
+                       let downloadProgress = operation.task?.progress {
+                        progress.addChild(downloadProgress, withPendingUnitCount: 100)
+                    }
+                } completion: { [weak self] error in
+                    guard let self = self else { return }
+                    if let error = error {
+                        completionHandler(nil, error)
+                    } else {
+                        self.loadLocalData(completionHandler: completionHandler)
+                    }
+                }
+
+                return progress
+            }
+        } else {
+            completionHandler(nil, DriveError.localError)
+            return nil
         }
     }
 }
