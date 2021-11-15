@@ -41,8 +41,8 @@ public class UploadFile: Object {
     @Persisted private var url: String?
     @Persisted private var rawType: String = "file"
     @Persisted public var parentDirectoryId: Int = 1
-    @Persisted var userId: Int = 0
-    @Persisted var driveId: Int = 0
+    @Persisted public var userId: Int = 0
+    @Persisted public var driveId: Int = 0
     @Persisted public var uploadDate: Date?
     @Persisted public var creationDate: Date?
     @Persisted public var modificationDate: Date?

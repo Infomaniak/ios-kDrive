@@ -42,18 +42,20 @@ class UploadQueueFoldersViewController: UITableViewController {
 
     private func reload() {
         guard driveFileManager != nil else { return }
-        // First, get all uploading files
-        let uploadingFiles = UploadQueue.instance.getUploadingFiles(userId: driveFileManager.drive.userId, driveId: driveFileManager.drive.id, using: realm)
-        // Then, get parent ids and remove duplicates
-        var seen: Set<Int> = []
-        let parentIds = Array(uploadingFiles.filter { seen.insert($0.parentDirectoryId).inserted }.map(\.parentDirectoryId))
+        // First, get the drives (current + shared with me)
+        let userId = driveFileManager.drive.userId
+        let driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
+        // Then, get all uploading parent ids
+        let parentIds = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
+            .distinct(by: [\.parentDirectoryId])
+            .map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
         // (Pop view controller if nothing to show)
         if parentIds.isEmpty {
             navigationController?.popViewController(animated: true)
             return
         }
         // Finally, get the folders
-        folders = parentIds.compactMap { driveFileManager.getCachedFile(id: $0) }
+        folders = parentIds.compactMap { AccountManager.instance.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
         tableView.reloadData()
     }
 
