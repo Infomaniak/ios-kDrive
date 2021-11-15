@@ -1,0 +1,131 @@
+/*
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import Foundation
+
+public class DragAndDropFile: NSObject, Codable {
+    static let localDragIdentifier = "private.kdrive.file"
+
+    public let fileId: Int
+    public let driveId: Int
+    public let userId: Int
+    public let file: File?
+
+    public init(file: File, userId: Int) {
+        fileId = file.id
+        driveId = file.driveId
+        self.userId = userId
+        self.file = file
+    }
+
+    public required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        fileId = try values.decode(Int.self, forKey: .fileId)
+        driveId = try values.decode(Int.self, forKey: .driveId)
+        userId = try values.decode(Int.self, forKey: .userId)
+        file = AccountManager.instance.getDriveFileManager(for: driveId, userId: userId)?.getCachedFile(id: fileId)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case fileId
+        case driveId
+        case userId
+    }
+}
+
+// MARK: - NSItemProviderReading
+
+extension DragAndDropFile: NSItemProviderReading {
+    private static let decoder = JSONDecoder()
+
+    public static var readableTypeIdentifiersForItemProvider: [String] {
+        return [localDragIdentifier]
+    }
+
+    public static func object(withItemProviderData data: Data, typeIdentifier: String) throws -> Self {
+        return try decoder.decode(DragAndDropFile.self, from: data) as! Self
+    }
+}
+
+// MARK: - NSItemProviderWriting
+
+extension DragAndDropFile: NSItemProviderWriting {
+    public static var writableTypeIdentifiersForItemProvider: [String] {
+        return [localDragIdentifier, UTI.item.rawValue as String, UTI.data.rawValue as String]
+    }
+
+    public var writableTypeIdentifiersForItemProvider: [String] {
+        if let file = file {
+            return [DragAndDropFile.localDragIdentifier, file.uti.rawValue as String, UTI.item.rawValue as String, UTI.data.rawValue as String]
+        } else {
+            return [DragAndDropFile.localDragIdentifier, UTI.item.rawValue as String, UTI.data.rawValue as String]
+        }
+    }
+
+    private func loadLocalData(for url: URL, completionHandler: @escaping (Data?, Error?) -> Void) {
+        do {
+            let data = try Data(contentsOf: url)
+            completionHandler(data, nil)
+        } catch {
+            completionHandler(nil, error)
+        }
+    }
+
+    public func loadData(withTypeIdentifier typeIdentifier: String, forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
+        guard let file = file else {
+            completionHandler(nil, nil)
+            return nil
+        }
+
+        if typeIdentifier == DragAndDropFile.localDragIdentifier {
+            let encoder = JSONEncoder()
+            do {
+                let encodedData = try encoder.encode(self)
+                completionHandler(encodedData, nil)
+            } catch {
+                completionHandler(nil, error)
+            }
+            return nil
+        } else {
+            if !file.isLocalVersionOlderThanRemote() {
+                loadLocalData(for: file.localUrl, completionHandler: completionHandler)
+                return nil
+            } else {
+                let progress = Progress(totalUnitCount: 100)
+                DownloadQueue.instance.temporaryDownload(file: file, userId: userId) { operation in
+                    progress.cancellationHandler = {
+                        operation?.cancel()
+                    }
+                    if let operation = operation,
+                       let downloadProgress = operation.task?.progress {
+                        progress.addChild(downloadProgress, withPendingUnitCount: 100)
+                    }
+                } completion: { [weak self] error in
+                    guard let self = self else { return }
+                    if let error = error {
+                        completionHandler(nil, error)
+                    } else {
+                        let url = file.isDirectory ? file.temporaryUrl : file.localUrl
+                        self.loadLocalData(for: url, completionHandler: completionHandler)
+                    }
+                }
+                return progress
+            }
+        }
+    }
+}
