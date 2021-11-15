@@ -157,14 +157,17 @@ class RightsSelectionViewController: UIViewController {
         dismiss(animated: true)
     }
 
-    class func instantiateInNavigationController() -> TitleSizeAdjustingNavigationController {
-        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate())
+    class func instantiateInNavigationController(file: File, driveFileManager: DriveFileManager) -> TitleSizeAdjustingNavigationController {
+        let navigationController = TitleSizeAdjustingNavigationController(rootViewController: instantiate(file: file, driveFileManager: driveFileManager))
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }
 
-    class func instantiate() -> RightsSelectionViewController {
-        return Storyboard.files.instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
+    class func instantiate(file: File, driveFileManager: DriveFileManager) -> RightsSelectionViewController {
+        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "RightsSelectionViewController") as! RightsSelectionViewController
+        viewController.file = file
+        viewController.driveFileManager = driveFileManager
+        return viewController
     }
 }
 

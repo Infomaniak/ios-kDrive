@@ -298,11 +298,9 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 && (file.isOfficeFile || file.isDirectory) {
-            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                rightsSelectionVC.driveFileManager = driveFileManager
-                rightsSelectionVC.file = file
                 rightsSelectionVC.selectedRight = editRightValue
                 rightsSelectionVC.rightSelectionType = .officeOnly
                 rightsSelectionVC.delegate = self

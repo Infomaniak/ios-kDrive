@@ -543,11 +543,9 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         let canBecomeLink = file?.rights?.canBecomeLink ?? false
         if currentTab == .informations && fileInformationRows[indexPath.row] == .share && (file.visibility != .isCollaborativeFolder) && (canBecomeLink || file.shareLink != nil) {
-            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+            let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                rightsSelectionVC.driveFileManager = driveFileManager
-                rightsSelectionVC.file = file
                 if let sharedFile = sharedFile, sharedFile.link != nil {
                     rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
                 } else {

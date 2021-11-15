@@ -91,11 +91,9 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     private func showRightsSelection(userAccess: Bool) {
-        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController()
+        let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
         rightsSelectionViewController.modalPresentationStyle = .fullScreen
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-            rightsSelectionVC.driveFileManager = driveFileManager
-            rightsSelectionVC.file = file
             rightsSelectionVC.delegate = self
             if userAccess {
                 guard let shareable = selectedShareable else { return }
