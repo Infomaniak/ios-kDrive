@@ -68,6 +68,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkDescriptionLabel.text = KDriveStrings.Localizable.shareLinkPublicRightDescription(rightPermission, documentType, password, date)
             shareLinkStackView.isHidden = false
             url = link.url
+            shareIconImageView.image = KDriveAsset.unlock.image
         } else if file.visibility == .isCollaborativeFolder {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.dropboxSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveStrings.Localizable.dropboxSharedLinkDescription
@@ -78,6 +79,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkTitleLabel.text = KDriveStrings.Localizable.restrictedSharedLinkTitle
             shareLinkDescriptionLabel.text = file.isDirectory ? KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort : KDriveStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort
             shareLinkStackView.isHidden = true
+            shareIconImageView.image = KDriveAsset.lock.image
         }
     }
 
