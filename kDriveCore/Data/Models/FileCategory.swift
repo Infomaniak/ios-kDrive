@@ -16,14 +16,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DifferenceKit
 import Foundation
 import RealmSwift
 
-public class FileCategory: Object, Codable {
+public class FileCategory: Object, Codable, ContentEquatable {
     @Persisted public var id: Int
     @Persisted public var isGeneratedByIA: Bool
     @Persisted public var IACategoryUserValidation: String
     @Persisted public var userId: Int
+
+    public func isContentEqual(to source: FileCategory) -> Bool {
+        return id == source.id
+    }
 
     convenience init(id: Int, isGeneratedByIA: Bool = false, IACategoryUserValidation: String = "CORRECT", userId: Int) {
         self.init()

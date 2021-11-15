@@ -52,8 +52,8 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
 
     override func initStyle(isFirst: Bool, isLast: Bool) { }
 
-    override func configureWith(file: File, selectionMode: Bool = false) {
-        super.configureWith(file: file, selectionMode: selectionMode)
+    override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
+        super.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
         iconImageView.isHidden = file.isDirectory
         if file.isDirectory || !file.hasThumbnail {
             logoImage.isHidden = true

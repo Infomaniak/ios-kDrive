@@ -31,6 +31,8 @@ public enum FileActivityType: String, Codable {
     case fileRestore = "file_restore"
     case fileDelete = "file_delete"
     case fileUpdate = "file_update"
+    case fileCategorize = "file_categorize"
+    case fileUncategorize = "file_uncategorize"
     case fileFavoriteCreate = "file_favorite_create"
     case fileFavoriteRemove = "file_favorite_remove"
     case fileShareCreate = "file_share_create"
@@ -51,7 +53,7 @@ public enum FileActivityType: String, Codable {
     case collaborativeFolderDelete = "collaborative_folder_delete"
 
     public static var fileActivities: [FileActivityType] {
-        return [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete]
+        return [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileCategorize, .fileUncategorize, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete]
     }
 }
 
@@ -119,13 +121,17 @@ extension FileActivity: ContentIdentifiable, ContentEquatable {
 }
 
 public class FileDetailActivity: Codable {
-    public var action: FileActivityType
+    public var action: String
     public var id: Int = 0
     public var path: String
     public var user: DriveUser?
     public var createdAt: Int
     public var newPath: String?
     public var oldPath: String?
+
+    public var type: FileActivityType? {
+        return FileActivityType(rawValue: action)
+    }
 
     enum CodingKeys: String, CodingKey {
         case action

@@ -621,7 +621,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         let file = sortedFiles[indexPath.row]
         cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == sortedFiles.count - 1)
-        cell.configureWith(file: file, selectionMode: selectionMode)
+        cell.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
         cell.delegate = self
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             cell.setEnabled(false)
