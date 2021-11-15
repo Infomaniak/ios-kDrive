@@ -128,6 +128,10 @@ public class UploadQueue {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId)).sorted(byKeyPath: "taskCreationDate")
     }
 
+    public func getUploadingFiles(userId: Int, driveIds: [Int], using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+        return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds)).sorted(byKeyPath: "taskCreationDate")
+    }
+
     public func getUploadedFiles(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate != nil"))
     }

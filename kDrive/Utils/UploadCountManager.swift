@@ -18,15 +18,19 @@
 
 import Foundation
 import kDriveCore
+import RealmSwift
 
 class UploadCountManager {
     private let driveFileManager: DriveFileManager
     private let didUploadCountChange: () -> Void
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 1, queue: .main)
 
+    private lazy var userId = driveFileManager.drive.userId
+    private lazy var driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
+
     public var uploadCount = 0
 
-    private var uploadsObserver: ObservationToken?
+    private var uploadsObserver: NotificationToken?
 
     init(driveFileManager: DriveFileManager, didUploadCountChange: @escaping () -> Void) {
         self.driveFileManager = driveFileManager
@@ -35,9 +39,13 @@ class UploadCountManager {
         observeUploads()
     }
 
+    deinit {
+        uploadsObserver?.invalidate()
+    }
+
     @discardableResult
     func updateUploadCount() -> Int {
-        uploadCount = UploadQueue.instance.getUploadingFiles(userId: driveFileManager.drive.userId, driveId: driveFileManager.drive.id).count
+        uploadCount = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds).count
         return uploadCount
     }
 
@@ -49,8 +57,15 @@ class UploadCountManager {
             self?.didUploadCountChange()
         }
 
-        uploadsObserver = UploadQueue.instance.observeUploadCount(self, driveId: driveFileManager.drive.id) { [weak self] _, uploadCount in
-            self?.uploadCountThrottler.call(uploadCount)
+        uploadsObserver = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds).observe { [weak self] change in
+            switch change {
+            case .initial(let results):
+                self?.uploadCountThrottler.call(results.count)
+            case .update(let results, deletions: _, insertions: _, modifications: _):
+                self?.uploadCountThrottler.call(results.count)
+            case .error(let error):
+                print(error)
+            }
         }
     }
 }
