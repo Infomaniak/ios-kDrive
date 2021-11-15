@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
+import InfomaniakLogin
 
 public class DownloadOperation: Operation {
     // MARK: - Attributes
@@ -124,6 +125,21 @@ public class DownloadOperation: Operation {
         main()
     }
 
+    private func getToken() -> ApiToken? {
+        var apiToken: ApiToken?
+        if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
+            let lock = DispatchGroup()
+            lock.enter()
+            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { token, _ in
+                apiToken = token
+                lock.leave()
+            }
+            lock.wait()
+        }
+
+        return apiToken
+    }
+
     override public func main() {
         DDLogInfo("[DownloadOperation] Downloading \(file.id) with session \(urlSession.identifier)")
 
@@ -137,29 +153,22 @@ public class DownloadOperation: Operation {
             }
         }
 
-        if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, _ in
-                if let token = token {
-                    var request = URLRequest(url: url)
-                    request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                    task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
-                    progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
-                        guard let newValue = value.newValue else {
-                            return
-                        }
-                        DownloadQueue.instance.publishProgress(newValue, for: fileId)
-                    }
-                    if let itemIdentifier = itemIdentifier {
-                        DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
-                            manager.register(task!, forItemWithIdentifier: itemIdentifier) { _ in }
-                        }
-                    }
-                    task?.resume()
-                } else {
-                    self.error = .localError // Other error?
-                    end(sessionUrl: url)
+        if let token = getToken() {
+            var request = URLRequest(url: url)
+            request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
+            task = urlSession.downloadTask(with: request, completionHandler: downloadCompletion)
+            progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
+                guard let newValue = value.newValue else {
+                    return
+                }
+                DownloadQueue.instance.publishProgress(newValue, for: fileId)
+            }
+            if let itemIdentifier = itemIdentifier {
+                DriveInfosManager.instance.getFileProviderManager(for: driveFileManager.drive) { manager in
+                    manager.register(self.task!, forItemWithIdentifier: itemIdentifier) { _ in }
                 }
             }
+            task?.resume()
         } else {
             error = .localError // Other error?
             end(sessionUrl: url)
