@@ -25,10 +25,10 @@
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8gW-N4-qaK" customClass="IKLabel" customModule="kDriveCore">
-                    <rect key="frame" x="0.0" y="16" width="36" height="18"/>
+                    <rect key="frame" x="0.0" y="16" width="46" height="18"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                    <color key="textColor" name="actionColor"/>
+                    <color key="textColor" name="primaryTextColor"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
@@ -53,14 +53,11 @@
     </objects>
     <designables>
         <designable name="8gW-N4-qaK">
-            <size key="intrinsicContentSize" width="36" height="17"/>
+            <size key="intrinsicContentSize" width="46" height="21.5"/>
         </designable>
     </designables>
     <resources>
         <image name="list" width="24" height="24"/>
-        <namedColor name="actionColor">
-            <color red="0.33333333333333331" green="0.40392156862745099" blue="0.44705882352941179" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <namedColor name="primaryTextColor">
             <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
