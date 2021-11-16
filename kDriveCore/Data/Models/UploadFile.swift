@@ -105,6 +105,27 @@ public class UploadFile: Object {
         return UploadFileType(rawValue: rawType) ?? .unknown
     }
 
+    public var convertedType: ConvertedType {
+        if type == .phAsset, let asset = getPHAsset() {
+            switch asset.mediaType {
+            case .image:
+                return .image
+            case .video:
+                return .video
+            case .audio:
+                return .audio
+            case .unknown:
+                return .unknown
+            @unknown default:
+                return .unknown
+            }
+        } else if let url = pathURL {
+            return ConvertedType.fromUTI(url.uti ?? .data)
+        } else {
+            return ConvertedType.unknown
+        }
+    }
+
     var priority: Operation.QueuePriority {
         get {
             return Operation.QueuePriority(rawValue: rawPriority) ?? .normal
@@ -148,22 +169,9 @@ public class UploadFile: Object {
 
     override init() {}
 
-    public func getIconForUploadFile(placeholder: (UIImage) -> Void, completion: @escaping (UIImage) -> Void) {
+    public func getThumbnail(completion: @escaping (UIImage) -> Void) {
         let thumbnailSize = CGSize(width: 38, height: 38)
-        let convertedType: ConvertedType
         if type == .phAsset, let asset = getPHAsset() {
-            switch asset.mediaType {
-            case .image:
-                convertedType = .image
-            case .video:
-                convertedType = .video
-            case .audio:
-                convertedType = .audio
-            case .unknown:
-                convertedType = .unknown
-            @unknown default:
-                convertedType = .unknown
-            }
             let option = PHImageRequestOptions()
             option.deliveryMode = .fastFormat
             option.isNetworkAccessAllowed = true
@@ -174,7 +182,6 @@ public class UploadFile: Object {
                 }
             }
         } else if let url = pathURL {
-            convertedType = ConvertedType.fromUTI(url.uti ?? .data)
             let request = QLThumbnailGenerator.Request(
                 fileAt: url,
                 size: thumbnailSize,
@@ -185,10 +192,7 @@ public class UploadFile: Object {
                     completion(image.uiImage)
                 }
             }
-        } else {
-            convertedType = ConvertedType.unknown
         }
-        placeholder(convertedType.icon)
     }
 
     func getPHAsset() -> PHAsset? {

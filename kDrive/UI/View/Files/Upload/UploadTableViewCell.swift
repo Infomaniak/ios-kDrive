@@ -75,15 +75,14 @@ class UploadTableViewCell: InsetTableViewCell {
             updateProgress(fileId: currentFileId, progress: progress, animated: false)
         }
 
-        uploadFile.getIconForUploadFile { placeholder in
-            cardContentView.iconView.layer.cornerRadius = 0
-            cardContentView.iconView.image = placeholder
-        } completion: { icon in
+        cardContentView.iconView.image = uploadFile.convertedType.icon
+        uploadFile.getThumbnail { [weak self, fileId = uploadFile.id] image in
             DispatchQueue.main.async {
-                self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
-                self.cardContentView.iconView.contentMode = .scaleAspectFill
-                self.cardContentView.iconView.layer.masksToBounds = true
-                self.cardContentView.iconView.image = icon
+                guard fileId == self?.currentFileId else { return }
+                self?.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
+                self?.cardContentView.iconView.contentMode = .scaleAspectFill
+                self?.cardContentView.iconView.layer.masksToBounds = true
+                self?.cardContentView.iconView.image = image
             }
         }
 
