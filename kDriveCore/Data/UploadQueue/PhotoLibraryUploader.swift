@@ -89,10 +89,10 @@ public class PhotoLibraryUploader {
         if asset.mediaType == .video {
             _ = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { asset, _, _ in
                 if let assetUrl = (asset as? AVURLAsset)?.url {
-                    let importPath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(assetUrl.lastPathComponent)
+                    let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
                     do {
-                        try FileManager.default.copyOrReplace(sourceUrl: assetUrl, destinationUrl: importPath)
-                        completion(importPath)
+                        try FileManager.default.copyOrReplace(sourceUrl: assetUrl, destinationUrl: targetURL)
+                        completion(targetURL)
                     } catch {
                         completion(nil)
                     }
@@ -111,10 +111,10 @@ public class PhotoLibraryUploader {
 
     private func handlePHAssetRequestData(data: Data?, completion: @escaping ((URL?) -> Void)) {
         if let data = data {
-            let filePath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+            let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
             do {
-                try data.write(to: filePath)
-                completion(filePath)
+                try data.write(to: targetURL)
+                completion(targetURL)
             } catch {
                 completion(nil)
             }

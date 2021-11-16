@@ -235,6 +235,14 @@ public class FileImportHelper {
         return formatter.string(from: Date())
     }
 
+    public func generateImportURL(for contentType: UTI?) -> URL {
+        var url = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+        if let uti = contentType {
+            url.appendPathExtension(for: uti)
+        }
+        return url
+    }
+
     // MARK: - Private methods
 
     private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider) -> String? {
@@ -256,10 +264,7 @@ public class FileImportHelper {
             }
 
             if let text = coding as? String {
-                var targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-                if let uti = UTI(typeIdentifier) {
-                    targetURL.appendPathExtension(for: uti)
-                }
+                let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
 
                 do {
                     try text.data(using: .utf8)?.write(to: targetURL)
@@ -286,10 +291,7 @@ public class FileImportHelper {
             }
 
             if let url = url {
-                var targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-                if let uti = UTI(typeIdentifier) {
-                    targetURL.appendPathExtension(for: uti)
-                }
+                let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
 
                 do {
                     try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: targetURL)
@@ -306,13 +308,13 @@ public class FileImportHelper {
     }
 
     private func upload(data: Data, name: String, uti: UTI, drive: Drive, directory: File) throws {
-        let filepath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false).appendingPathExtension(for: uti)
-        try data.write(to: filepath)
+        let targetURL = generateImportURL(for: uti)
+        try data.write(to: targetURL)
         let newFile = UploadFile(
             parentDirectoryId: directory.id,
             userId: drive.userId,
             driveId: drive.id,
-            url: filepath,
+            url: targetURL,
             name: name
         )
         UploadQueue.instance.addToQueue(file: newFile)
