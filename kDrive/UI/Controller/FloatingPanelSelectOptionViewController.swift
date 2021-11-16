@@ -47,6 +47,7 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
 
         tableView.register(cellView: FloatingPanelSortOptionTableViewCell.self)
         tableView.separatorColor = .clear
+        tableView.alwaysBounceVertical = false
         tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
     }
 
