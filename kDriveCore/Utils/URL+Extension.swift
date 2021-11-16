@@ -18,8 +18,8 @@
 
 import Foundation
 
-extension URL {
-    public var typeIdentifier: String? {
+public extension URL {
+    var typeIdentifier: String? {
         if hasDirectoryPath {
             return UTI.folder.identifier
         }
@@ -31,14 +31,29 @@ extension URL {
         }
     }
 
-    public var uti: UTI? {
+    var uti: UTI? {
         if let typeIdentifier = typeIdentifier {
             return UTI(typeIdentifier)
         }
         return nil
     }
 
-    public var creationDate: Date? {
+    var creationDate: Date? {
         return try? resourceValues(forKeys: [.creationDateKey]).creationDate
+    }
+
+    func appendingPathExtension(for contentType: UTI) -> URL {
+        if let newExtension = contentType.preferredFilenameExtension {
+            if pathExtension == newExtension {
+                return self
+            } else {
+                return appendingPathExtension(newExtension)
+            }
+        }
+        return self
+    }
+
+    mutating func appendPathExtension(for contentType: UTI) {
+        self = appendingPathExtension(for: contentType)
     }
 }
