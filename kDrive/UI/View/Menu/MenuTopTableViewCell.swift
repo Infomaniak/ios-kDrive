@@ -43,7 +43,7 @@ class MenuTopTableViewCell: UITableViewCell {
         userAvatarImageView.clipsToBounds = true
         userAvatarImageView.layer.cornerRadius = userAvatarImageView.frame.width / 2
 
-        switchDriveButton.tintColor = KDriveAsset.actionColor.color
+        switchDriveButton.tintColor = KDriveAsset.primaryTextColor.color
         switchDriveButton.accessibilityLabel = KDriveStrings.Localizable.buttonSwitchDrive
 
         driveNameLabel.text = drive.name

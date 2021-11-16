@@ -19,7 +19,7 @@
                     <rect key="frame" x="24" y="0.0" width="366" height="53"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                    <color key="textColor" name="actionColor"/>
+                    <color key="textColor" name="primaryTextColor"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
@@ -43,12 +43,12 @@
     </objects>
     <designables>
         <designable name="EKQ-tS-4tN">
-            <size key="intrinsicContentSize" width="36" height="17"/>
+            <size key="intrinsicContentSize" width="46" height="21.5"/>
         </designable>
     </designables>
     <resources>
-        <namedColor name="actionColor">
-            <color red="0.33333333333333331" green="0.40392156862745099" blue="0.44705882352941179" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        <namedColor name="primaryTextColor">
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

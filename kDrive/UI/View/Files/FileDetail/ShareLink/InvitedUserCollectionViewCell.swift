@@ -42,7 +42,7 @@ class InvitedUserCollectionViewCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10)
-        removeButton.tintColor = KDriveAsset.actionColor.color
+        removeButton.tintColor = KDriveAsset.primaryTextColor.color
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true
     }
