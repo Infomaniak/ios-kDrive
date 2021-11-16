@@ -190,7 +190,7 @@ public class FileImportHelper {
         guard let data = data else {
             throw ImportError.emptyImageData
         }
-        try upload(data: data, name: name, drive: drive, directory: directory)
+        try upload(data: data, name: name, uti: format.uti, drive: drive, directory: directory)
     }
 
     public func upload(videoUrl: URL, name: String, in directory: File, drive: Drive) throws {
@@ -198,9 +198,10 @@ public class FileImportHelper {
             throw ImportError.accessDenied
         }
 
-        let name = name.addingExtension("mov")
+        let uti = UTI.quickTimeMovie
+        let name = name.addingExtension(uti.preferredFilenameExtension ?? "mov")
         let data = try Data(contentsOf: videoUrl)
-        try upload(data: data, name: name, drive: drive, directory: directory)
+        try upload(data: data, name: name, uti: uti, drive: drive, directory: directory)
     }
 
     public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive) throws {
@@ -225,13 +226,21 @@ public class FileImportHelper {
         guard let data = data else {
             throw ImportError.emptyImageData
         }
-        try upload(data: data, name: name, drive: drive, directory: directory)
+        try upload(data: data, name: name, uti: scanType.uti, drive: drive, directory: directory)
     }
 
     public func getDefaultFileName() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd_HHmmssSS"
         return formatter.string(from: Date())
+    }
+
+    public func generateImportURL(for contentType: UTI?) -> URL {
+        var url = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+        if let uti = contentType {
+            url.appendPathExtension(for: uti)
+        }
+        return url
     }
 
     // MARK: - Private methods
@@ -255,7 +264,8 @@ public class FileImportHelper {
             }
 
             if let text = coding as? String {
-                let targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false).appendingPathExtension("txt")
+                let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
+
                 do {
                     try text.data(using: .utf8)?.write(to: targetURL)
                     completion(targetURL.lastPathComponent, targetURL)
@@ -281,7 +291,7 @@ public class FileImportHelper {
             }
 
             if let url = url {
-                let targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+                let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
 
                 do {
                     try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: targetURL)
@@ -297,14 +307,14 @@ public class FileImportHelper {
         return progress
     }
 
-    private func upload(data: Data, name: String, drive: Drive, directory: File) throws {
-        let filepath = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
-        try data.write(to: filepath)
+    private func upload(data: Data, name: String, uti: UTI, drive: Drive, directory: File) throws {
+        let targetURL = generateImportURL(for: uti)
+        try data.write(to: targetURL)
         let newFile = UploadFile(
             parentDirectoryId: directory.id,
             userId: drive.userId,
             driveId: drive.id,
-            url: filepath,
+            url: targetURL,
             name: name
         )
         UploadQueue.instance.addToQueue(file: newFile)

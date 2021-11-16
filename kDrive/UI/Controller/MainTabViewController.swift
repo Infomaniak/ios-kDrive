@@ -237,7 +237,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         if let documentPicker = controller as? DriveImportDocumentPickerViewController {
             for url in urls {
-                let targetURL = DriveFileManager.constants.importDirectoryURL.appendingPathComponent(UUID().uuidString, isDirectory: false)
+                let targetURL = FileImportHelper.instance.generateImportURL(for: url.uti)
 
                 do {
                     if FileManager.default.fileExists(atPath: targetURL.path) {

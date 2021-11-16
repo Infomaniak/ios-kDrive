@@ -19,6 +19,7 @@
 import DifferenceKit
 import Foundation
 import Photos
+import QuickLookThumbnailing
 import RealmSwift
 import UIKit
 
@@ -104,6 +105,27 @@ public class UploadFile: Object {
         return UploadFileType(rawValue: rawType) ?? .unknown
     }
 
+    public var convertedType: ConvertedType {
+        if type == .phAsset, let asset = getPHAsset() {
+            switch asset.mediaType {
+            case .image:
+                return .image
+            case .video:
+                return .video
+            case .audio:
+                return .audio
+            case .unknown:
+                return .unknown
+            @unknown default:
+                return .unknown
+            }
+        } else if let url = pathURL {
+            return ConvertedType.fromUTI(url.uti ?? .data)
+        } else {
+            return ConvertedType.unknown
+        }
+    }
+
     var priority: Operation.QueuePriority {
         get {
             return Operation.QueuePriority(rawValue: rawPriority) ?? .normal
@@ -147,30 +169,29 @@ public class UploadFile: Object {
 
     override init() {}
 
-    public func getIconForUploadFile(placeholder: (UIImage) -> Void, completion: @escaping (UIImage) -> Void) {
-        if type == .phAsset {
-            let asset = getPHAsset()
-            if asset?.mediaType == .video {
-                placeholder(ConvertedType.video.icon)
-            } else if asset?.mediaType == .audio {
-                placeholder(ConvertedType.audio.icon)
-            } else {
-                placeholder(ConvertedType.image.icon)
-            }
-            if let asset = asset {
-                let option = PHImageRequestOptions()
-                option.deliveryMode = .fastFormat
-                option.isNetworkAccessAllowed = true
-                option.resizeMode = .fast
-                PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 128, height: 128), contentMode: .aspectFill, options: option) { image, _ in
-                    if let image = image {
-                        completion(image)
-                    }
+    public func getThumbnail(completion: @escaping (UIImage) -> Void) {
+        let thumbnailSize = CGSize(width: 38, height: 38)
+        if type == .phAsset, let asset = getPHAsset() {
+            let option = PHImageRequestOptions()
+            option.deliveryMode = .fastFormat
+            option.isNetworkAccessAllowed = true
+            option.resizeMode = .fast
+            PHImageManager.default().requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: option) { image, _ in
+                if let image = image {
+                    completion(image)
                 }
             }
-        } else {
-            let uti = pathURL?.uti ?? .data
-            placeholder(ConvertedType.fromUTI(uti).icon)
+        } else if let url = pathURL {
+            let request = QLThumbnailGenerator.Request(
+                fileAt: url,
+                size: thumbnailSize,
+                scale: UIScreen.main.scale,
+                representationTypes: [.lowQualityThumbnail, .thumbnail])
+            QLThumbnailGenerator.shared.generateRepresentations(for: request) { image, _, _ in
+                if let image = image {
+                    completion(image.uiImage)
+                }
+            }
         }
     }
 
@@ -178,15 +199,8 @@ public class UploadFile: Object {
         if localAsset != nil {
             return localAsset
         }
-        let assets = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil)
-        return assets.firstObject
-    }
-
-    func setVideoPath(url: URL) {
-        self.url = url.path
-        name = url.lastPathComponent
-
-        id = "\(Date().timeIntervalSinceNow)-\(name)"
+        localAsset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject
+        return localAsset
     }
 
     func setDatedRelativePath() {
