@@ -110,8 +110,9 @@ public class FileImportHelper {
 
         for itemProvider in itemProviders {
             dispatchGroup.enter()
-            if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier) {
-                // We don't handle saving web url, only file url
+            if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && itemProvider.registeredTypeIdentifiers.count == 1 {
+                // We don't handle saving web url
+                // TODO: When resolving issue https://github.com/Infomaniak/ios-kDrive/issues/367 add support for importing urls
                 progress.completedUnitCount += perItemUnitCount
                 dispatchGroup.leave()
             } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.plainText.identifier)
