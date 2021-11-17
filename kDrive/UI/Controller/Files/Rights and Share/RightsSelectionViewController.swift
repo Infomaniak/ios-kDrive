@@ -16,8 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// swiftlint:disable trailing_closure
-
 import InfomaniakCore
 import kDriveCore
 import UIKit
