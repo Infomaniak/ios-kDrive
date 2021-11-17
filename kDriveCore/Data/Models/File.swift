@@ -218,6 +218,7 @@ public class File: Object, Codable {
     @Persisted public var onlyOfficeConvertExtension: String?
     @Persisted public var fullyDownloaded = false
     @Persisted public var isAvailableOffline = false
+    public var userId: Int?
     public var isFirstInCollection = false
     public var isLastInCollection = false
 

@@ -125,6 +125,7 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
         tableView.register(cellView: FloatingPanelTableViewCell.self)
         tableView.register(cellView: FloatingPanelTitleTableViewCell.self)
         tableView.register(cellView: FloatingPanelCollectionTableViewCell.self)
+        tableView.dragDelegate = self
 
         ReachabilityListener.instance.observeNetworkChange(self) { _ in
             DispatchQueue.main.async { [weak self] in
@@ -809,5 +810,26 @@ extension FileQuickActionsFloatingPanelViewController: UIDocumentInteractionCont
     func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
         // Dismiss interaction controller when the user taps an app
         controller.dismissMenu(animated: true)
+    }
+}
+
+// MARK: UITableViewDragDelegate
+
+extension FileQuickActionsFloatingPanelViewController: UITableViewDragDelegate {
+    func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        guard indexPath == IndexPath(row: 0, section: 0), let file = file?.freeze(), file.rights?.move == true && !driveFileManager.drive.sharedWithMe else {
+            return []
+        }
+
+        let dragAndDropFile = DragAndDropFile(file: file, userId: driveFileManager.drive.userId)
+        let itemProvider = NSItemProvider(object: dragAndDropFile)
+        itemProvider.suggestedName = file.name
+        let draggedItem = UIDragItem(itemProvider: itemProvider)
+        if let previewImageView = (tableView.cellForRow(at: indexPath) as? FloatingPanelTitleTableViewCell)?.iconImageView {
+            draggedItem.previewProvider = {
+                UIDragPreview(view: previewImageView)
+            }
+        }
+        return [draggedItem]
     }
 }

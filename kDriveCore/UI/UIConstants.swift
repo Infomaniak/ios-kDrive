@@ -32,6 +32,7 @@ public enum UIConstants {
     public static let floatingPanelHeaderHeight: CGFloat = 70
     public static let largeTitleHeight: CGFloat = 96
     public static let insufficientStorageMinimumPercentage: Double = 90.0
+    public static let dropDelay: Double = -1.0
 
     @discardableResult
     public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {
