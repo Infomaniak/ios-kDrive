@@ -71,7 +71,7 @@ extension DragAndDropFile: NSItemProviderWriting {
 
     public var writableTypeIdentifiersForItemProvider: [String] {
         if let file = file {
-            return [DragAndDropFile.localDragIdentifier, file.uti.rawValue as String, UTI.item.rawValue as String, UTI.data.rawValue as String]
+            return [DragAndDropFile.localDragIdentifier, file.isDirectory ? UTI.zip.rawValue as String : file.uti.rawValue as String, UTI.item.rawValue as String, UTI.data.rawValue as String]
         } else {
             return [DragAndDropFile.localDragIdentifier, UTI.item.rawValue as String, UTI.data.rawValue as String]
         }
