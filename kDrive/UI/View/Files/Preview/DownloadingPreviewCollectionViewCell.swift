@@ -40,14 +40,16 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 
     weak var previewDelegate: PreviewContentCellDelegate?
     private var file: File!
+    var tapGestureRecognizer: UITapGestureRecognizer!
     private var tapToZoomRecognizer: UITapGestureRecognizer!
-    var tapToFullScreen: UITapGestureRecognizer!
     var previewDownloadTask: Kingfisher.DownloadTask?
     weak var parentViewController: UIViewController?
 
     override func awakeFromNib() {
         super.awakeFromNib()
         previewZoomView.delegate = self
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
+        addGestureRecognizer(tapGestureRecognizer)
         tapToZoomRecognizer = UITapGestureRecognizer(target: self, action: #selector(didDoubleTap))
         tapToZoomRecognizer.numberOfTapsRequired = 2
         previewZoomView.addGestureRecognizer(tapToZoomRecognizer)
@@ -61,6 +63,10 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
         previewImageView.image = nil
         previewDownloadTask?.cancel()
         progressView.isHidden = true
+    }
+
+    @objc func didTapOnCell() {
+        previewDelegate?.setFullscreen(nil)
     }
 
     @objc private func didDoubleTap(_ sender: UITapGestureRecognizer) {
@@ -116,7 +122,7 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 extension DownloadingPreviewCollectionViewCell: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         // Don't recognize a single tap until a double-tap fails.
-        if gestureRecognizer == tapToFullScreen && otherGestureRecognizer == tapToZoomRecognizer {
+        if gestureRecognizer == tapGestureRecognizer && otherGestureRecognizer == tapToZoomRecognizer {
             return true
         }
         return false
