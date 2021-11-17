@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DifferenceKit
 import kDriveCore
 import RealmSwift
 import UIKit
@@ -29,6 +28,7 @@ class UploadQueueViewController: UIViewController {
     var currentDirectory: File!
     private var uploadingFiles = [UploadFile]()
     private var progressForFileId = [String: CGFloat]()
+    private var notificationToken: NotificationToken?
 
     private let realm = DriveFileManager.constants.uploadsRealm
 
@@ -40,20 +40,8 @@ class UploadQueueViewController: UIViewController {
         retryButton.accessibilityLabel = KDriveStrings.Localizable.buttonRetry
         cancelButton.accessibilityLabel = KDriveStrings.Localizable.buttonCancel
 
-        reloadData(reloadTableView: false)
-        UploadQueue.instance.observeFileUploaded(self) { [weak self] uploadedFile, _ in
-            DispatchQueue.main.async { [uploadedFileId = uploadedFile.id] in
-                guard let self = self,
-                      let index = self.uploadingFiles.firstIndex(where: { $0.id == uploadedFileId }),
-                      self.isViewLoaded else {
-                    return
-                }
-                var newUploadingFiles = self.uploadingFiles
-                newUploadingFiles.remove(at: index)
-                newUploadingFiles.first?.isFirstInCollection = true
-                self.reloadData(with: newUploadingFiles)
-            }
-        }
+        setUpObserver()
+
         UploadQueue.instance.observeFileUploadProgress(self) { [weak self] fileId, progress in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -71,39 +59,62 @@ class UploadQueueViewController: UIViewController {
         }
     }
 
-    func reloadData(with maybeNewUploadingFiles: [UploadFile]? = nil, reloadTableView: Bool = true) {
-        var newUploadingFiles: [UploadFile]
-        if let uploadingFiles = maybeNewUploadingFiles {
-            newUploadingFiles = uploadingFiles
-        } else {
-            guard currentDirectory != nil else { return }
-            newUploadingFiles = Array(UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm).freeze())
-            newUploadingFiles.first?.isFirstInCollection = true
-            newUploadingFiles.last?.isLastInCollection = true
-        }
+    deinit {
+        notificationToken?.invalidate()
+    }
 
-        if reloadTableView {
-            let changeSet = StagedChangeset(source: uploadingFiles, target: newUploadingFiles)
-            tableView.reload(using: changeSet, with: .automatic) { newUploadingFiles in
-                uploadingFiles = newUploadingFiles
+    func setUpObserver() {
+        guard currentDirectory != nil else { return }
+        notificationToken = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm).observe { [weak self] change in
+            switch change {
+            case .initial(let results):
+                self?.uploadingFiles = Array(results)
+                self?.uploadingFiles.first?.isFirstInCollection = true
+                self?.uploadingFiles.last?.isLastInCollection = true
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                    if results.isEmpty {
+                        self?.navigationController?.popViewController(animated: true)
+                    }
+                }
+            case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                DispatchQueue.main.async {
+                    self?.tableView.performBatchUpdates {
+                        self?.uploadingFiles = Array(results)
+                        self?.uploadingFiles.first?.isFirstInCollection = true
+                        self?.uploadingFiles.last?.isLastInCollection = true
+                        // Always apply updates in the following order: deletions, insertions, then modifications.
+                        // Handling insertions before deletions may result in unexpected behavior.
+                        self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                    } completion: { _ in
+                        // Update cell corners
+                        var modifications = [Int]()
+                        if !results.isEmpty {
+                            modifications.append(0)
+                        }
+                        if results.count > 2 {
+                            modifications.append(results.count - 1)
+                        }
+                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                    }
+                    if results.isEmpty {
+                        self?.navigationController?.popViewController(animated: true)
+                    }
+                }
+            case .error(let error):
+                print(error)
             }
-        } else {
-            uploadingFiles = newUploadingFiles
-        }
-
-        if newUploadingFiles.isEmpty {
-            navigationController?.popViewController(animated: true)
         }
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
         UploadQueue.instance.cancelAllOperations(withParent: currentDirectory.id, driveId: currentDirectory.driveId)
-        reloadData()
     }
 
     @IBAction func retryButtonPressed(_ sender: UIBarButtonItem) {
         UploadQueue.instance.retryAllOperations(withParent: currentDirectory.id, driveId: currentDirectory.driveId)
-        reloadData()
     }
 
     class func instantiate() -> UploadQueueViewController {
@@ -131,7 +142,7 @@ class UploadQueueViewController: UIViewController {
             return
         }
         currentDirectory = directory
-        reloadData(reloadTableView: true)
+        setUpObserver()
     }
 }
 
