@@ -89,6 +89,9 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
 
         if !results.isEmpty {
             _ = FileImportHelper.instance.importItems(results.map(\.itemProvider)) { importedFiles in
+                guard !importedFiles.isEmpty else {
+                    return
+                }
                 do {
                     try FileImportHelper.instance.upload(files: importedFiles, in: self.currentDirectory, drive: self.driveFileManager.drive)
                     DispatchQueue.main.async {
