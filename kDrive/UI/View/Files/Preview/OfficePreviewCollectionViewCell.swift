@@ -16,35 +16,59 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 import WebKit
 
 class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
-
     @IBOutlet weak var documentPreview: WKWebView!
+    private var fileId: Int?
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        fileId = nil
+        documentPreview.alpha = 0
         tapGestureRecognizer.delegate = self
         documentPreview.configuration.websiteDataStore = .nonPersistent()
         documentPreview.scrollView.showsVerticalScrollIndicator = false
+        documentPreview.navigationDelegate = self
         documentPreview.addShadow()
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        documentPreview.alpha = 0
         documentPreview.load(URLRequest(url: URL(string: "about:blank")!))
     }
 
     override func configureWith(file: File) {
+        fileId = file.id
         documentPreview.loadFileURL(file.localUrl, allowingReadAccessTo: file.localUrl)
     }
-
 }
 
 extension OfficePreviewCollectionViewCell: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+}
+
+// MARK: - WKNavigationDelegate
+
+extension OfficePreviewCollectionViewCell: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        UIView.animate(withDuration: 0.25) {
+            self.documentPreview.alpha = 1
+        }
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        guard let fileId = fileId else { return }
+        previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        guard let fileId = fileId else { return }
+        previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
     }
 }
