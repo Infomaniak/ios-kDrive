@@ -24,13 +24,13 @@ public class FileCategory: Object, Codable, ContentEquatable {
     @Persisted public var id: Int
     @Persisted public var isGeneratedByIA: Bool
     @Persisted public var IACategoryUserValidation: String
-    @Persisted public var userId: Int
+    @Persisted public var userId: Int?
 
     public func isContentEqual(to source: FileCategory) -> Bool {
         return id == source.id
     }
 
-    convenience init(id: Int, isGeneratedByIA: Bool = false, IACategoryUserValidation: String = "CORRECT", userId: Int) {
+    convenience init(id: Int, isGeneratedByIA: Bool = false, IACategoryUserValidation: String = "CORRECT", userId: Int?) {
         self.init()
         self.id = id
         self.isGeneratedByIA = isGeneratedByIA
