@@ -120,7 +120,7 @@ public class FileImportHelper {
                 && itemProvider.canLoadObject(ofClass: String.self) {
                 let childProgress = getTextFile(from: itemProvider, typeIdentifier: UTI.plainText.identifier) { filename, url in
                     if let url = url {
-                        let name = itemProvider.suggestedName ?? self.getDefaultFileName()
+                        let name = itemProvider.suggestedName ?? self.getDefaultFileName().addingExtension(UTI.plainText.preferredFilenameExtension ?? "txt")
                         items.append(ImportedFile(name: filename ?? name, path: url, uti: .plainText))
                     }
                     dispatchGroup.leave()
@@ -129,7 +129,7 @@ public class FileImportHelper {
             } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { filename, url in
                     if let url = url {
-                        let name = itemProvider.suggestedName ?? self.getDefaultFileName()
+                        let name = itemProvider.suggestedName ?? self.getDefaultFileName().addingExtension(UTI(typeIdentifier)?.preferredFilenameExtension ?? "")
                         items.append(ImportedFile(name: filename ?? name, path: url, uti: UTI(typeIdentifier) ?? .data))
                     }
                     dispatchGroup.leave()
@@ -258,24 +258,28 @@ public class FileImportHelper {
 
     private func getTextFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
         let progress = Progress(totalUnitCount: 1)
-        itemProvider.loadItem(forTypeIdentifier: typeIdentifier, options: nil) { coding, error in
+        itemProvider.loadItem(forTypeIdentifier: typeIdentifier) { coding, error in
             if let error = error {
                 DDLogError("Error while loading data representation: \(error)")
                 completion(nil, nil)
             }
 
+            let data: Data?
             if let text = coding as? String {
-                let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
-
-                do {
-                    try text.data(using: .utf8)?.write(to: targetURL)
-                    completion(targetURL.lastPathComponent, targetURL)
-                } catch {
-                    DDLogError("Error while loading data representation: \(error)")
-                    completion(nil, nil)
-                }
+                data = text.data(using: .utf8)
+            } else if let text = coding as? Data {
+                data = text
             } else {
-                DDLogError("Error while loading data representation")
+                data = nil
+            }
+
+            let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
+
+            do {
+                try data?.write(to: targetURL)
+                completion(nil, targetURL)
+            } catch {
+                DDLogError("Error while loading data representation: \(error)")
                 completion(nil, nil)
             }
             progress.completedUnitCount = 1
