@@ -66,14 +66,14 @@ extension DragAndDropFile: NSItemProviderReading {
 
 extension DragAndDropFile: NSItemProviderWriting {
     public static var writableTypeIdentifiersForItemProvider: [String] {
-        return [localDragIdentifier, UTI.item.rawValue as String, UTI.data.rawValue as String]
+        return [localDragIdentifier, UTI.item.identifier, UTI.data.identifier]
     }
 
     public var writableTypeIdentifiersForItemProvider: [String] {
         if let file = file {
-            return [DragAndDropFile.localDragIdentifier, file.isDirectory ? UTI.zip.rawValue as String : file.uti.rawValue as String, UTI.item.rawValue as String, UTI.data.rawValue as String]
+            return [DragAndDropFile.localDragIdentifier, file.isDirectory ? UTI.zip.identifier : file.uti.identifier, UTI.item.identifier, UTI.data.identifier]
         } else {
-            return [DragAndDropFile.localDragIdentifier, UTI.item.rawValue as String, UTI.data.rawValue as String]
+            return [DragAndDropFile.localDragIdentifier, UTI.item.identifier, UTI.data.identifier]
         }
     }
 
