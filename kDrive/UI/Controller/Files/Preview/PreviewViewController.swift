@@ -26,11 +26,13 @@ import UIKit
 protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
     func setFullscreen(_ fullscreen: Bool?)
+    func errorWhilePreviewing(fileId: Int, error: Error)
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     @IBOutlet weak var collectionView: UICollectionView!
-    private var previewFiles: [File] = []
+    private var previewFiles = [File]()
+    private var previewErrorFileIds = Set<Int>()
     private var driveFileManager: DriveFileManager!
     private var normalFolderHierarchy = true
     private var initialLoading = true
@@ -353,6 +355,13 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
     }
 
+    func errorWhilePreviewing(fileId: Int, error: Error) {
+        previewErrorFileIds.insert(fileId)
+        if let index = previewFiles.firstIndex(where: { $0.id == fileId }) {
+            collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
+        }
+    }
+
     private func downloadFileIfNeeded(at indexPath: IndexPath) {
         var currentFile = previewFiles[indexPath.row]
         if currentFile.realm == nil {
@@ -477,7 +486,7 @@ extension PreviewViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
         // File is already downloaded and up to date OR we can remote play it (audio / video)
-        if !file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType) {
+        if !previewErrorFileIds.contains(file.id) && (!file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
             switch file.convertedType {
             case .image:
                 if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -520,8 +529,12 @@ extension PreviewViewController: UICollectionViewDataSource {
     }
 
     private func getNoLocalPreviewCellFor(file: File, indexPath: IndexPath) -> UICollectionViewCell {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
-        if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
+        if previewErrorFileIds.contains(file.id) {
+            let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
+            cell.configureWith(file: file)
+            cell.previewDelegate = self
+            return cell
+        } else if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             cell.parentViewController = self
             if let downloadOperation = currentDownloadOperation,
@@ -530,14 +543,11 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.setDownloadProgress(progress)
             }
             cell.previewDelegate = self
-            tap.delegate = cell
-            cell.tapToFullScreen = tap
-            cell.addGestureRecognizer(tap)
             return cell
         } else if ReachabilityListener.instance.currentStatus == .offline {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file, isOffline: true)
-            cell.addGestureRecognizer(tap)
+            cell.previewDelegate = self
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
@@ -547,8 +557,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                downloadOperation.fileId == file.id {
                 cell.setDownloadProgress(progress)
             }
-            let tap = UITapGestureRecognizer(target: self, action: #selector(tapPreview))
-            cell.addGestureRecognizer(tap)
+            cell.previewDelegate = self
             return cell
         }
     }

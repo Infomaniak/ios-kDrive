@@ -16,20 +16,31 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import UIKit
 
 class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserver {
-
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var subtitleLabel: UILabel!
     @IBOutlet weak var offlineView: UIStackView!
     @IBOutlet weak var progressView: UIProgressView!
+    var tapGestureRecognizer: UITapGestureRecognizer!
+    weak var previewDelegate: PreviewContentCellDelegate?
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
+        addGestureRecognizer(tapGestureRecognizer)
+    }
 
     override func prepareForReuse() {
         super.prepareForReuse()
         progressView.isHidden = true
+    }
+
+    @objc func didTapOnCell() {
+        previewDelegate?.setFullscreen(nil)
     }
 
     func configureWith(file: File, isOffline: Bool = false) {
