@@ -1096,7 +1096,7 @@ extension FileListViewController: TopScrollable {
 extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
         let draggedFile = sortedFiles[indexPath.item]
-        guard (draggedFile.rights?.move ?? false) && !driveFileManager.drive.sharedWithMe else {
+        guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe else {
             return []
         }
 
@@ -1117,7 +1117,7 @@ extension FileListViewController: UICollectionViewDragDelegate {
 
 extension FileListViewController: UICollectionViewDropDelegate {
     private func handleDropOverDirectory(_ directory: File, at indexPath: IndexPath) -> UICollectionViewDropProposal {
-        guard directory.rights?.uploadNewFile ?? false && directory.rights?.moveInto ?? false else {
+        guard directory.rights?.uploadNewFile == true && directory.rights?.moveInto == true else {
             return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
         }
 
@@ -1209,7 +1209,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
         let destinationDirectory: File
         if let indexPath = coordinator.destinationIndexPath,
            indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory &&
-           sortedFiles[indexPath.item].rights?.uploadNewFile ?? false {
+           sortedFiles[indexPath.item].rights?.uploadNewFile == true {
             destinationDirectory = sortedFiles[indexPath.item]
         } else {
             destinationDirectory = currentDirectory
