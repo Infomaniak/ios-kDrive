@@ -458,6 +458,13 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .delete, completion: completion)
     }
 
+    public func copyFileToAnotherDrive(destinationFile: File, sourceFile: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+        let url = ApiRoutes.copyToOtherDrive(destination: destinationFile)
+        let body: [String: Any] = ["source_drive_id": sourceFile.driveId, "source_file_id": sourceFile.id]
+
+        makeRequest(url, method: .post, parameters: body, completion: completion)
+    }
+
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
         AccountManager.instance.refreshTokenLockedQueue.async {
             if token.requiresRefresh {

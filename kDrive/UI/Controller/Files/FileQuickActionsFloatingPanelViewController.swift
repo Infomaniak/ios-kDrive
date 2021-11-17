@@ -60,11 +60,11 @@ public class FloatingPanelAction: Equatable {
     static let leaveShare = FloatingPanelAction(id: 13, name: KDriveStrings.Localizable.buttonLeaveShare, image: KDriveAsset.linkBroken.image)
 
     static var listActions: [FloatingPanelAction] {
-        return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [copyToOtherDrive, openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
     static var folderListActions: [FloatingPanelAction] {
-        return [manageCategories, favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [copyToOtherDrive, manageCategories, favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
     static let informations = FloatingPanelAction(id: 14, name: KDriveStrings.Localizable.fileDetailsInfosTitle, image: KDriveAsset.info.image)
@@ -72,6 +72,7 @@ public class FloatingPanelAction: Equatable {
     static let sendCopy = FloatingPanelAction(id: 16, name: KDriveStrings.Localizable.buttonSendCopy, image: KDriveAsset.exportIos.image)
     static let shareAndRights = FloatingPanelAction(id: 17, name: KDriveStrings.Localizable.buttonFileRights, image: KDriveAsset.share.image)
     static let shareLink = FloatingPanelAction(id: 18, name: KDriveStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveStrings.Localizable.buttonCopyPublicLink, image: KDriveAsset.link.image)
+    static let copyToOtherDrive = FloatingPanelAction(id: 19, name: "!Copy to an other drive", image: KDriveAsset.drive.image)
 
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
@@ -659,6 +660,9 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                     }
                 }
             }
+        case .copyToOtherDrive:
+            let saveViewNavigationController = CopyToOtherDriveViewController.instantiateInNavigationController(driveFileManager: driveFileManager, sourceFile: file)
+            present(saveViewNavigationController, animated: true)
         default:
             break
         }

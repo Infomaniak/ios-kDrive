@@ -276,4 +276,9 @@ public enum ApiRoutes {
     public static func downloadArchive(driveId: Int, archiveId: String) -> String {
         return "\(driveApiUrl)\(driveId)/file/archive/\(archiveId)/download"
     }
+    
+    static func copyToOtherDrive(destination: File) -> String {
+        return "\(fileURL(file: destination))copy-to-drive"
+    }
+
 }
