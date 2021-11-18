@@ -40,23 +40,30 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        switchView.isHidden = true
         progressView.setInfomaniakStyle()
     }
 
-    func configure(with action: FloatingPanelAction, file: File, showProgress: Bool) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        switchView.isHidden = true
+    }
+
+    func configure(with action: FloatingPanelAction, file: File?, showProgress: Bool) {
         titleLabel.text = action.name
         iconImageView.image = action.image
         iconImageView.tintColor = action.tintColor
 
-        if action == .favorite && file.isFavorite {
-            titleLabel.text = action.reverseName
-            iconImageView.tintColor = KDriveAsset.favoriteColor.color
-        }
-        if action == .offline {
-            configureAvailableOffline(with: file)
-        } else {
-            switchView.isHidden = true
-            observeProgress(showProgress, file: file)
+        if let file = file {
+            if action == .favorite && file.isFavorite {
+                titleLabel.text = action.reverseName
+                iconImageView.tintColor = KDriveAsset.favoriteColor.color
+            }
+            if action == .offline {
+                configureAvailableOffline(with: file)
+            } else {
+                observeProgress(showProgress, file: file)
+            }
         }
     }
 

@@ -51,7 +51,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var heightToHide = CGFloat(0)
 
     private var floatingPanelViewController: FloatingPanelController!
-    private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
+    private var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
     private var currentFile: File {
         get {
@@ -77,11 +77,11 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         floatingPanelViewController = DriveFloatingPanelController()
         floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view?.window?.safeAreaInsets.bottom ?? 0, 8))
         floatingPanelViewController.isRemovalInteractionEnabled = false
-        fileInformationsViewController = FileQuickActionsFloatingPanelViewController()
+        fileInformationsViewController = FileActionsFloatingPanelViewController()
         fileInformationsViewController.presentingParent = self
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
         floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-        floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
+        floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
         floatingPanelViewController.delegate = self
 
         if fromActivities {

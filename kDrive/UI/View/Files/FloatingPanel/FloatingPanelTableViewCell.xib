@@ -46,7 +46,7 @@
                                         </constraints>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="82" y="21" width="125" height="18"/>
+                                        <rect key="frame" x="82" y="21.5" width="192" height="17"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -54,13 +54,6 @@
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
-                                    <switch opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fOw-40-nFC">
-                                        <rect key="frame" x="223" y="14.5" width="53" height="31"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="51" id="gpD-Ma-HIV"/>
-                                        </constraints>
-                                        <color key="onTintColor" name="infomaniakColor"/>
-                                    </switch>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="5gi-x2-fAr"/>
@@ -105,7 +98,6 @@
                 <outlet property="bottomConstraint" destination="b3L-GJ-LSF" id="Y7h-fG-fCo"/>
                 <outlet property="contentInsetView" destination="aqX-hy-10J" id="elq-4h-42h"/>
                 <outlet property="disabledView" destination="N6V-J5-jZd" id="aVU-zN-c7i"/>
-                <outlet property="offlineSwitch" destination="fOw-40-nFC" id="3r2-uL-3I2"/>
                 <outlet property="progressView" destination="F0L-1s-lFt" id="LGL-5b-Mdl"/>
                 <outlet property="separator" destination="BSA-Kc-s9g" id="Aqp-OR-DH2"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
@@ -116,15 +108,12 @@
     </objects>
     <designables>
         <designable name="rtI-Wc-46s">
-            <size key="intrinsicContentSize" width="38.5" height="18"/>
+            <size key="intrinsicContentSize" width="36" height="17"/>
         </designable>
     </designables>
     <resources>
         <namedColor name="backgroundCardView">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="separatorColor">
             <color red="0.96862745098039216" green="0.96862745098039216" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

@@ -21,7 +21,6 @@ import kDriveCore
 import UIKit
 
 class FloatingPanelTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var offlineSwitch: UISwitch!
     @IBOutlet weak var progressView: RPCircularProgress!
     @IBOutlet weak var disabledView: UIView!
 
@@ -30,7 +29,6 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        offlineSwitch.isHidden = true
         progressView.isHidden = true
         progressView.setInfomaniakStyle()
     }
@@ -40,25 +38,10 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
 
         observationToken?.cancel()
         observationToken = nil
-        offlineSwitch.setOn(true, animated: false)
         contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         accessoryImageView.isHidden = false
-        offlineSwitch.isHidden = true
         progressView.isHidden = true
         progressView.updateProgress(0, animated: false)
-    }
-
-    func setEnabled(_ enabled: Bool) {
-        if enabled {
-            disabledView.isHidden = true
-            disabledView.superview?.sendSubviewToBack(disabledView)
-            isUserInteractionEnabled = true
-        } else {
-            disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-            disabledView.isHidden = false
-            disabledView.superview?.bringSubviewToFront(disabledView)
-            isUserInteractionEnabled = false
-        }
     }
 
     func setProgress(_ progress: CGFloat? = -1) {
@@ -74,40 +57,6 @@ class FloatingPanelTableViewCell: InsetTableViewCell {
         } else {
             accessoryImageView.isHidden = false
             progressView.isHidden = true
-        }
-    }
-
-    func configureAvailableOffline(with file: File) {
-        offlineSwitch.isHidden = false
-        if offlineSwitch.isOn != file.isAvailableOffline {
-            offlineSwitch.setOn(file.isAvailableOffline, animated: true)
-        }
-
-        let showProgress: Bool
-        if file.isAvailableOffline && FileManager.default.fileExists(atPath: file.localUrl.path) {
-            accessoryImageView.image = KDriveAsset.check.image
-            accessoryImageView.tintColor = KDriveAsset.greenColor.color
-            showProgress = false
-        } else if file.isAvailableOffline {
-            showProgress = true
-        } else {
-            accessoryImageView.image = KDriveAsset.availableOffline.image
-            accessoryImageView.tintColor = KDriveAsset.iconColor.color
-            showProgress = false
-        }
-
-        observeProgress(showProgress, file: file)
-    }
-
-    func observeProgress(_ showProgress: Bool, file: File) {
-        observationToken?.cancel()
-        setProgress(showProgress ? -1 : nil)
-        if showProgress {
-            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
-                DispatchQueue.main.async { [weak self] in
-                    self?.setProgress(CGFloat(progress))
-                }
-            }
         }
     }
 

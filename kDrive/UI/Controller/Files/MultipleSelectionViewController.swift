@@ -236,7 +236,7 @@ class MultipleSelectionViewController: UIViewController {
             getNewChanges()
         }
         floatingPanelViewController.set(contentViewController: selectViewController)
-        floatingPanelViewController.track(scrollView: selectViewController.tableView)
+        floatingPanelViewController.track(scrollView: selectViewController.collectionView)
         present(floatingPanelViewController, animated: true)
     }
     #endif

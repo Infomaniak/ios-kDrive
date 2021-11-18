@@ -19,13 +19,15 @@
 import kDriveCore
 import UIKit
 
-class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewController {
-    private var downloadedArchiveUrl: URL?
-    private var currentArchiveId: String?
-    private var downloadError: DriveError?
+class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewController {
     var files: [File]!
     var changedFiles: [File]? = []
     var downloadInProgress = false
+    var reloadAction: (() -> Void)?
+
+    override class var sections: [Section] {
+        return [.actions]
+    }
 
     var filesAvailableOffline: Bool {
         return files.allSatisfy(\.isAvailableOffline)
@@ -35,71 +37,28 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         return files.allSatisfy(\.isFavorite)
     }
 
-    lazy var actions: [FloatingPanelAction] = {
-        if sharedWithMe {
-            return FloatingPanelAction.multipleSelectionSharedWithMeActions
-        } else if files.count > Constants.bulkActionThreshold {
-            return FloatingPanelAction.multipleSelectionBulkActions
-        } else {
-            return FloatingPanelAction.multipleSelectionActions
-        }
-    }()
-
-    var reloadAction: (() -> Void)?
+    private var downloadedArchiveUrl: URL?
+    private var currentArchiveId: String?
+    private var downloadError: DriveError?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.separatorColor = .clear
-        tableView.alwaysBounceVertical = false
-        tableView.register(cellView: FloatingPanelTableViewCell.self)
+
+        collectionView.alwaysBounceVertical = false
+        setupContent()
     }
 
-    // MARK: - Table view data source
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return actions.count
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
-
-        let action = actions[indexPath.row]
-        cell.titleLabel.text = action.name
-        cell.accessoryImageView.image = action.image
-        cell.accessoryImageView.tintColor = action.tintColor
-
-        if action == .favorite && filesAreFavorite {
-            cell.titleLabel.text = action.reverseName
-            cell.accessoryImageView.tintColor = KDriveAsset.favoriteColor.color
-        } else if action == .offline {
-            cell.offlineSwitch.isHidden = false
-            cell.accessoryImageView.image = filesAvailableOffline ? KDriveAsset.check.image : action.image
-            cell.accessoryImageView.tintColor = filesAvailableOffline ? KDriveAsset.greenColor.color : action.tintColor
-            cell.offlineSwitch.isOn = filesAvailableOffline
-            cell.setProgress(downloadInProgress ? -1 : nil)
-            // Disable cell if all selected items are folders
-            cell.setEnabled(!files.allSatisfy(\.isDirectory))
-        } else if action == .download {
-            if let currentArchiveId = currentArchiveId {
-                cell.observeProgress(true, archiveId: currentArchiveId)
-            } else {
-                cell.setProgress(downloadInProgress ? -1 : nil)
-            }
+    override func setupContent() {
+        if sharedWithMe {
+            actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
+        } else if files.count > Constants.bulkActionThreshold {
+            actions = FloatingPanelAction.multipleSelectionBulkActions
+        } else {
+            actions = FloatingPanelAction.multipleSelectionActions
         }
-        return cell
     }
 
-    // MARK: - Table view delegate
-
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60
-    }
-
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         let action = actions[indexPath.row]
         var success = true
         var addAction = true
@@ -111,7 +70,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             addAction = !isAvailableOffline
             if !isAvailableOffline {
                 downloadInProgress = true
-                self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                // tableView.reloadRows(at: [indexPath], with: .automatic)
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             }
@@ -155,7 +114,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 } else {
                     downloadedArchiveUrl = nil
                     downloadInProgress = true
-                    self.tableView.reloadRows(at: [indexPath], with: .fade)
+                    // tableView.reloadRows(at: [indexPath], with: .fade)
                     group.enter()
                     downloadArchivedFiles(files: files, downloadCellPath: indexPath) { archiveUrl, error in
                         self.downloadedArchiveUrl = archiveUrl
@@ -167,15 +126,15 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             } else {
                 for file in files {
                     if file.isDownloaded {
-                        saveLocalFile(file: file)
+                        saveFile()
                     } else {
                         downloadInProgress = true
-                        self.tableView.reloadRows(at: [indexPath], with: .fade)
+                        // tableView.reloadRows(at: [indexPath], with: .fade)
                         group.enter()
                         DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
-                                    saveLocalFile(file: file)
+                                    saveFile()
                                 }
                             } else {
                                 success = false
@@ -211,7 +170,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             }
             group.enter()
             present(selectFolderNavigationController, animated: true)
-            tableView.reloadRows(at: [indexPath], with: .fade)
+            // tableView.reloadRows(at: [indexPath], with: .fade)
         default:
             break
         }
@@ -232,7 +191,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
             }
             self.files = self.changedFiles
             self.downloadInProgress = false
-            self.tableView.reloadRows(at: [indexPath], with: .fade)
+            // self.tableView.reloadRows(at: [indexPath], with: .fade)
             if action == .download {
                 if let downloadedArchiveUrl = self.downloadedArchiveUrl {
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
@@ -246,6 +205,37 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
         }
     }
 
+    // MARK: - Collection view data source
+
+    /* override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
+
+         let action = actions[indexPath.row]
+         cell.titleLabel.text = action.name
+         cell.accessoryImageView.image = action.image
+         cell.accessoryImageView.tintColor = action.tintColor
+
+         if action == .favorite && filesAreFavorite {
+             cell.titleLabel.text = action.reverseName
+             cell.accessoryImageView.tintColor = KDriveAsset.favoriteColor.color
+         } else if action == .offline {
+             cell.offlineSwitch.isHidden = false
+             cell.accessoryImageView.image = filesAvailableOffline ? KDriveAsset.check.image : action.image
+             cell.accessoryImageView.tintColor = filesAvailableOffline ? KDriveAsset.greenColor.color : action.tintColor
+             cell.offlineSwitch.isOn = filesAvailableOffline
+             cell.setProgress(downloadInProgress ? -1 : nil)
+             // Disable cell if all selected items are folders
+             cell.setEnabled(!files.allSatisfy(\.isDirectory))
+         } else if action == .download {
+             if let currentArchiveId = currentArchiveId {
+                 cell.observeProgress(true, archiveId: currentArchiveId)
+             } else {
+                 cell.setProgress(downloadInProgress ? -1 : nil)
+             }
+         }
+         return cell
+     } */
+
     private func downloadArchivedFiles(files: [File], downloadCellPath: IndexPath, completion: @escaping (URL?, DriveError?) -> Void) {
         driveFileManager.apiFetcher.getDownloadArchiveLink(driveId: driveFileManager.drive.id, for: files) { response, error in
             if let archiveId = response?.data?.uuid {
@@ -255,7 +245,7 @@ class SelectFloatingPanelTableViewController: FileQuickActionsFloatingPanelViewC
                 }
                 DownloadQueue.instance.addToQueue(archiveId: archiveId, driveId: self.driveFileManager.drive.id)
                 DispatchQueue.main.async {
-                    self.tableView.reloadRows(at: [downloadCellPath], with: .fade)
+                    // self.tableView.reloadRows(at: [downloadCellPath], with: .fade)
                 }
             } else {
                 completion(nil, (error as? DriveError) ?? .serverError)

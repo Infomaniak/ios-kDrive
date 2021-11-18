@@ -21,6 +21,83 @@ import kDriveCore
 import Sentry
 import UIKit
 
+public class FloatingPanelAction: Equatable {
+    let id: Int
+    let name: String
+    var reverseName: String?
+    let image: UIImage
+    var tintColor: UIColor = KDriveAsset.iconColor.color
+    var isLoading = false
+    var isEnabled = true
+
+    init(id: Int, name: String, reverseName: String? = nil, image: UIImage, tintColor: UIColor = KDriveAsset.iconColor.color) {
+        self.id = id
+        self.name = name
+        self.reverseName = reverseName
+        self.image = image
+        self.tintColor = tintColor
+    }
+
+    func reset() -> FloatingPanelAction {
+        isEnabled = true
+        isLoading = false
+        return self
+    }
+
+    static let openWith = FloatingPanelAction(id: 0, name: KDriveStrings.Localizable.buttonOpenWith, image: KDriveAsset.openWith.image)
+    static let edit = FloatingPanelAction(id: 1, name: KDriveStrings.Localizable.buttonEdit, image: KDriveAsset.editDocument.image)
+    static let manageCategories = FloatingPanelAction(id: 2, name: KDriveStrings.Localizable.manageCategoriesTitle, image: KDriveAsset.categories.image)
+    static let favorite = FloatingPanelAction(id: 3, name: KDriveStrings.Localizable.buttonAddFavorites, reverseName: KDriveStrings.Localizable.buttonRemoveFavorites, image: KDriveAsset.favorite.image)
+    static let convertToDropbox = FloatingPanelAction(id: 4, name: KDriveStrings.Localizable.buttonConvertToDropBox, image: KDriveAsset.folderDropBox1.image)
+    static let manageDropbox = FloatingPanelAction(id: 5, name: KDriveStrings.Localizable.buttonManageDropBox, image: KDriveAsset.folderDropBox1.image)
+    static let seeFolder = FloatingPanelAction(id: 6, name: KDriveStrings.Localizable.buttonSeeFolder, image: KDriveAsset.folderFill.image)
+    static let offline = FloatingPanelAction(id: 7, name: KDriveStrings.Localizable.buttonAvailableOffline, image: KDriveAsset.availableOffline.image)
+    static let download = FloatingPanelAction(id: 8, name: KDriveStrings.Localizable.buttonDownload, image: KDriveAsset.download.image)
+    static let move = FloatingPanelAction(id: 9, name: KDriveStrings.Localizable.buttonMoveTo, image: KDriveAsset.folderSelect.image)
+    static let duplicate = FloatingPanelAction(id: 10, name: KDriveStrings.Localizable.buttonDuplicate, image: KDriveAsset.duplicate.image)
+    static let rename = FloatingPanelAction(id: 11, name: KDriveStrings.Localizable.buttonRename, image: KDriveAsset.edit.image)
+    static let delete = FloatingPanelAction(id: 12, name: KDriveStrings.Localizable.modalMoveTrashTitle, image: KDriveAsset.delete.image, tintColor: KDriveAsset.binColor.color)
+    static let leaveShare = FloatingPanelAction(id: 13, name: KDriveStrings.Localizable.buttonLeaveShare, image: KDriveAsset.linkBroken.image)
+
+    static var listActions: [FloatingPanelAction] {
+        return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+    }
+
+    static var folderListActions: [FloatingPanelAction] {
+        return [manageCategories, favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+    }
+
+    static let informations = FloatingPanelAction(id: 14, name: KDriveStrings.Localizable.fileDetailsInfosTitle, image: KDriveAsset.info.image)
+    static let add = FloatingPanelAction(id: 15, name: KDriveStrings.Localizable.buttonAdd, image: KDriveAsset.add.image)
+    static let sendCopy = FloatingPanelAction(id: 16, name: KDriveStrings.Localizable.buttonSendCopy, image: KDriveAsset.exportIos.image)
+    static let shareAndRights = FloatingPanelAction(id: 17, name: KDriveStrings.Localizable.buttonFileRights, image: KDriveAsset.share.image)
+    static let shareLink = FloatingPanelAction(id: 18, name: KDriveStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveStrings.Localizable.buttonCopyPublicLink, image: KDriveAsset.link.image)
+
+    static var quickActions: [FloatingPanelAction] {
+        return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
+    }
+
+    static var folderQuickActions: [FloatingPanelAction] {
+        return [informations, add, shareAndRights, shareLink].map { $0.reset() }
+    }
+
+    static var multipleSelectionActions: [FloatingPanelAction] {
+        return [offline, favorite, download, duplicate].map { $0.reset() }
+    }
+
+    static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
+        return [download].map { $0.reset() }
+    }
+
+    static var multipleSelectionBulkActions: [FloatingPanelAction] {
+        return [download, duplicate].map { $0.reset() }
+    }
+
+    public static func == (lhs: FloatingPanelAction, rhs: FloatingPanelAction) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
 class FileActionsFloatingPanelViewController: UICollectionViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
@@ -35,8 +112,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case header, quickActions, actions
     }
 
-    private var quickActions = FloatingPanelAction.quickActions
-    private var actions = FloatingPanelAction.listActions
+    class var sections: [Section] {
+        return Section.allCases
+    }
+
+    var quickActions = FloatingPanelAction.quickActions
+    var actions = FloatingPanelAction.listActions
+
     private var downloadAction: FloatingPanelAction?
     private var fileObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
@@ -61,6 +143,19 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
         collectionView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         collectionView.dragDelegate = self
+
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
+            DispatchQueue.main.async {
+                guard self?.file != nil else { return }
+                self?.file.realm?.refresh()
+                if self?.file.isInvalidated == true {
+                    // File has been removed
+                    self?.dismiss(animated: true)
+                } else {
+                    self?.reload(animated: true)
+                }
+            }
+        }
     }
 
     func setFile(_ newFile: File, driveFileManager: DriveFileManager) {
@@ -99,7 +194,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     private static func createLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { section, _ in
-            switch Section.allCases[section] {
+            switch sections[section] {
             case .header:
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(UIConstants.fileListCellHeight + 10))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -123,7 +218,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    private func setupContent() {
+    internal func setupContent() {
         let offline = ReachabilityListener.instance.currentStatus == .offline
 
         quickActions = file.isDirectory ? FloatingPanelAction.folderQuickActions : FloatingPanelAction.quickActions
@@ -193,7 +288,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    private func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    internal func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         guard file.realm != nil else {
             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
             return
@@ -586,7 +681,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileInfoLinkCopiedToClipboard)
     }
 
-    private func saveFile() {
+    internal func saveFile() {
         switch file.convertedType {
         case .image:
             if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -622,11 +717,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     // MARK: - Collection view data source
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return Section.allCases.count
+        return Self.sections.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch Section.allCases[section] {
+        switch Self.sections[section] {
         case .header:
             return 1
         case .quickActions:
@@ -637,7 +732,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch Section.allCases[indexPath.section] {
+        switch Self.sections[indexPath.section] {
         case .header:
             let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
             cell.configureWith(driveFileManager: driveFileManager, file: file)
@@ -659,7 +754,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     // MARK: - Collection view delegate
 
     override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
-        switch Section.allCases[indexPath.section] {
+        switch Self.sections[indexPath.section] {
         case .header:
             return false
         case .quickActions:
@@ -671,7 +766,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let action: FloatingPanelAction
-        switch Section.allCases[indexPath.section] {
+        switch Self.sections[indexPath.section] {
         case .header:
             fatalError("Cannot select header")
         case .quickActions:
@@ -687,7 +782,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
 extension FileActionsFloatingPanelViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        guard Section.allCases[indexPath.section] == .header, file.rights?.move == true && !sharedWithMe else {
+        guard Self.sections[indexPath.section] == .header, file.rights?.move == true && !sharedWithMe else {
             return []
         }
 
