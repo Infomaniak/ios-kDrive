@@ -77,7 +77,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
 
         if file == nil || file != newFile {
-            self.file = newFile
+            file = newFile
             fileObserver?.cancel()
             fileObserver = driveFileManager.observeFileUpdated(self, fileId: file.id) { [weak self] _ in
                 DispatchQueue.main.async {
@@ -235,11 +235,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .shareLink:
             if file.visibility == .isCollaborativeFolder {
                 // Copy drop box link
-                // action.isLoading = true
-                // tableView.reloadSections([1], with: .none)
+                setLoading(true, action: action, at: indexPath)
                 driveFileManager.apiFetcher.getDropBoxSettings(directory: file) { [weak self] response, _ in
-                    // action.isLoading = false
-                    // self.tableView.reloadSections([1], with: .none)
+                    self?.setLoading(false, action: action, at: indexPath)
                     if let dropBox = response?.data {
                         self?.copyShareLinkToPasteboard(dropBox.url)
                     } else {
@@ -251,30 +249,23 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 copyShareLinkToPasteboard(link)
             } else {
                 // Create share link
-                // action.isLoading = true
-                // tableView.reloadSections([1], with: .none)
+                setLoading(true, action: action, at: indexPath)
                 // TODO: Check invalid thread error
-                driveFileManager.activateShareLink(for: file) { [weak self] newFile, shareLink, error in
-                    if let newFile = newFile, let link = shareLink {
-                        self?.file = newFile
-                        // action.isLoading = false
-                        // self.tableView.reloadSections([1], with: .none)
+                driveFileManager.activateShareLink(for: file) { [weak self] _, shareLink, error in
+                    if let link = shareLink {
+                        self?.setLoading(false, action: action, at: indexPath)
                         self?.copyShareLinkToPasteboard(link.url)
                     } else if let error = error as? DriveError, let file = self?.file, error == .shareLinkAlreadyExists {
                         // This should never happen
                         self?.driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
                             if let data = response?.data, let link = data.link?.url {
-                                if let newFile = self?.driveFileManager.setFileShareLink(file: file, shareLink: link) {
-                                    self?.file = newFile
-                                }
+                                _ = self?.driveFileManager.setFileShareLink(file: file, shareLink: link)
                                 self?.copyShareLinkToPasteboard(link)
                             }
-                            // action.isLoading = false
-                            // self.tableView.reloadSections([1], with: .none)
+                            self?.setLoading(false, action: action, at: indexPath)
                         }
                     } else {
-                        // action.isLoading = false
-                        // self.tableView.reloadSections([1], with: .none)
+                        self?.setLoading(false, action: action, at: indexPath)
                         UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorShareLink)
                     }
                 }
@@ -299,7 +290,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     if !wasFavorited {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
                     }
-                    // self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
                 } else {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorAddFavorite)
                 }
@@ -341,17 +331,16 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             }
-            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
-                if error != nil {
+            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { [weak self] error in
+                if error != nil && (error as? DriveError != .taskCancelled || error as? DriveError != .taskRescheduled) {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorCache)
                 }
-                // self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)], animated: false)
+                self?.collectionView.reloadItems(at: [indexPath])
             }
-        // refreshFileAndRows(oldFile: file, rows: [indexPath, IndexPath(row: 0, section: 0)])
+            collectionView.reloadItems(at: [indexPath])
         case .download:
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
                 saveFile()
-                // tableView.reloadRows(at: [indexPath], with: .fade)
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel
                 let alert = AlertTextViewController(title: KDriveStrings.Localizable.cancelDownloadTitle, message: KDriveStrings.Localizable.cancelDownloadDescription, action: KDriveStrings.Localizable.buttonYes, destructive: true) {
@@ -385,7 +374,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
             present(selectFolderNavigationController, animated: true)
-        // tableView.reloadRows(at: [indexPath], with: .fade)
         case .duplicate:
             let file = self.file.freeze()
             let pathString = self.file.name as NSString
@@ -405,7 +393,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     DispatchQueue.main.async {
                         if success {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
-                            // self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
                         } else {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDuplicate)
                         }
@@ -433,9 +420,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                     _ = group.wait(timeout: .now() + Constants.timeout)
                     DispatchQueue.main.async {
-                        if success {
-                            // self.refreshFileAndRows(oldFile: self.file, rows: [indexPath, IndexPath(row: 0, section: 0)])
-                        } else {
+                        if !success {
                             UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRename)
                         }
                     }
@@ -526,6 +511,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
+    private func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
+        action.isLoading = isLoading
+        DispatchQueue.main.async { [weak self] in
+            self?.collectionView.reloadItems(at: [indexPath])
+        }
+    }
+
     private func presentShareSheet(from indexPath: IndexPath) {
         let activityViewController = UIActivityViewController(activityItems: [file.localUrl], applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = collectionView.cellForItem(at: indexPath) ?? collectionView
@@ -572,23 +564,18 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     private func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
-        // TODO: Improve
-        // action.isLoading = true
         downloadAction = action
-        collectionView.reloadItems(at: [indexPath])
+        setLoading(true, action: action, at: indexPath)
         downloadObserver?.cancel()
         downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, error in
-            // action.isLoading = false
             self?.downloadAction = nil
+            self?.setLoading(true, action: action, at: indexPath)
             DispatchQueue.main.async {
                 if error == nil {
                     completion()
                 } else if error != .taskCancelled && error != .taskRescheduled {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
                 }
-                // guard let self = self else { return }
-                // self.refreshFileAndRows(oldFile: self.file, rows: [indexPath])
-                self?.collectionView.reloadItems(at: [indexPath])
             }
         }
         DownloadQueue.instance.addToQueue(file: file)

@@ -56,6 +56,11 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
     #if !ISEXTENSION
     func configure(with action: FloatingPanelAction, file: File) {
         actionImage.isHidden = action.isLoading
+        if action.isLoading {
+            loadingIndicator.startAnimating()
+        } else {
+            loadingIndicator.stopAnimating()
+        }
         actionImage.image = action.image
         actionImage.tintColor = action.tintColor
         actionLabel.text = action.name
