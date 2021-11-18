@@ -30,6 +30,7 @@ public enum UIConstants {
     public static let listFloatingButtonPaddingBottom: CGFloat = 75
     public static let homeListPaddingTop: CGFloat = 16
     public static let floatingPanelHeaderHeight: CGFloat = 70
+    public static let fileListCellHeight: CGFloat = 60
     public static let largeTitleHeight: CGFloat = 96
     public static let insufficientStorageMinimumPercentage: Double = 90.0
     public static let dropDelay: Double = -1.0

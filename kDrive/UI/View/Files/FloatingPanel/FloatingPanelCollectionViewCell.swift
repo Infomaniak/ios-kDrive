@@ -53,6 +53,30 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
         progressView.updateProgress(0, animated: false)
     }
 
+    #if !ISEXTENSION
+    func configure(with action: FloatingPanelAction, file: File) {
+        actionImage.isHidden = action.isLoading
+        actionImage.image = action.image
+        actionImage.tintColor = action.tintColor
+        actionLabel.text = action.name
+        darkLayer.isHidden = action.isEnabled
+        // Configuration
+        if action == .shareLink {
+            if file.visibility == .isCollaborativeFolder {
+                actionLabel.text = KDriveStrings.Localizable.buttonCopyLink
+            } else if file.shareLink != nil {
+                actionLabel.text = action.reverseName
+            }
+        } else if action == .sendCopy {
+            configureDownload(with: file, action: action, progress: action.isLoading ? -1 : nil)
+        }
+        // Accessibility
+        accessibilityLabel = action.name
+        accessibilityTraits = action.isEnabled ? .button : .notEnabled
+        isAccessibilityElement = true
+    }
+    #endif
+
     func setProgress(_ progress: CGFloat? = -1) {
         if let downloadProgress = progress {
             actionImage.isHidden = true
