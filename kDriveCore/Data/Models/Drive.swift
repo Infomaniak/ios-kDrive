@@ -208,6 +208,13 @@ public class Drive: Object, Codable {
 
     override public init() {}
 
+    public func categories(for file: File) -> [Category] {
+        let fileCategoriesIds = Array(file.categories.sorted(by: \.addedToFileAt, ascending: true)).map(\.id)
+        let categories = categories.filter(NSPredicate(format: "id IN %@", fileCategoriesIds))
+        // Sort the categories
+        return fileCategoriesIds.compactMap { id in categories.first { $0.id == id } }
+    }
+
     enum CodingKeys: String, CodingKey {
         case accountId = "account_id"
         case id

@@ -25,17 +25,19 @@ public class FileCategory: Object, Codable, ContentEquatable {
     @Persisted public var isGeneratedByIA: Bool
     @Persisted public var IACategoryUserValidation: String
     @Persisted public var userId: Int?
+    @Persisted public var addedToFileAt: Date
 
     public func isContentEqual(to source: FileCategory) -> Bool {
         return id == source.id
     }
 
-    convenience init(id: Int, isGeneratedByIA: Bool = false, IACategoryUserValidation: String = "CORRECT", userId: Int?) {
+    convenience init(id: Int, isGeneratedByIA: Bool = false, IACategoryUserValidation: String = "CORRECT", userId: Int?, addedToFileAt: Date = Date()) {
         self.init()
         self.id = id
         self.isGeneratedByIA = isGeneratedByIA
         self.IACategoryUserValidation = IACategoryUserValidation
         self.userId = userId
+        self.addedToFileAt = addedToFileAt
     }
 
     enum CodingKeys: String, CodingKey {
@@ -43,5 +45,6 @@ public class FileCategory: Object, Codable, ContentEquatable {
         case isGeneratedByIA = "is_generated_by_ia"
         case IACategoryUserValidation = "ia_category_user_validation"
         case userId = "user_id"
+        case addedToFileAt = "added_to_file_at"
     }
 }
