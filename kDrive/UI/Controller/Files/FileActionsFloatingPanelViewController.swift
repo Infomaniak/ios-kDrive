@@ -397,8 +397,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
                 present(driveFloatingPanelController, animated: true)
             } else {
-                let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: file)
-                viewController.convertingFolder = true
+                let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, convertingFolder: true, folder: file)
                 presentingParent?.navigationController?.pushViewController(viewController, animated: true)
                 dismiss(animated: true)
             }

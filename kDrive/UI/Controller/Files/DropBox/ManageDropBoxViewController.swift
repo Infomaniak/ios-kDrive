@@ -23,15 +23,15 @@ import UIKit
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
 
-    var driveFileManager: DriveFileManager!
-    var folder: File! {
+    private var driveFileManager: DriveFileManager!
+    private var folder: File! {
         didSet {
             setTitle()
             getSettings()
         }
     }
 
-    var convertingFolder = false {
+    private var convertingFolder = false {
         didSet { setTitle() }
     }
 
@@ -77,8 +77,9 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    class func instantiate(driveFileManager: DriveFileManager, folder: File) -> ManageDropBoxViewController {
+    class func instantiate(driveFileManager: DriveFileManager, convertingFolder: Bool = false, folder: File) -> ManageDropBoxViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
+        viewController.convertingFolder = convertingFolder
         viewController.driveFileManager = driveFileManager
         viewController.folder = folder
         return viewController
@@ -242,6 +243,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             driveFileManager.apiFetcher.disableDropBox(directory: folder) { _, error in
                 if error == nil {
                     self.dismissAndRefreshDataSource()
+                    self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: nil)
                 } else {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorModification)
                 }
@@ -256,6 +258,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
         coder.encode(folder.id, forKey: "FolderId")
+        coder.encode(convertingFolder, forKey: "ConvertingFolder")
     }
 
     override func decodeRestorableState(with coder: NSCoder) {
@@ -263,10 +266,12 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let folderId = coder.decodeInteger(forKey: "FolderId")
+        let convertingFolder = coder.decodeBool(forKey: "ConvertingFolder")
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager
+        self.convertingFolder = convertingFolder
         folder = driveFileManager.getCachedFile(id: folderId)
     }
 }
@@ -313,6 +318,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                     floatingPanelViewController?.copyTextField.text = dropBox.url
                     floatingPanelViewController?.titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle(self.folder.name)
                     self.present(driveFloatingPanelController, animated: true)
+                    self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: dropBox.url)
                 } else {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
                 }

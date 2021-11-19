@@ -627,6 +627,18 @@ public class DriveFileManager {
         return file
     }
 
+    public func setFileCollaborativeFolder(file: File, collaborativeFolder: String?) {
+        let realm = getRealm()
+        let file = realm.object(ofType: File.self, forPrimaryKey: file.id)
+        try? realm.write {
+            file?.collaborativeFolder = collaborativeFolder
+            file?.rights?.canBecomeCollab = collaborativeFolder == nil
+        }
+        if let file = file {
+            notifyObserversWith(file: file)
+        }
+    }
+
     public func getLocalRecentActivities() -> [FileActivity] {
         return Array(getRealm().objects(FileActivity.self).sorted(byKeyPath: "createdAt", ascending: false).freeze())
     }
