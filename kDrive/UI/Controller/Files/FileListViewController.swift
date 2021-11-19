@@ -1171,10 +1171,14 @@ extension FileListViewController: UICollectionViewDropDelegate {
                         }
                     } else {
                         // TODO: enable copy from different driveFileManager
-                        UIConstants.showSnackBar(message: KDriveCoreStrings.Localizable.errorMove)
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveCoreStrings.Localizable.errorMove)
+                        }
                     }
                 } else {
-                    UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
+                    }
                 }
             }
         }
@@ -1188,7 +1192,9 @@ extension FileListViewController: UICollectionViewDropDelegate {
                 do {
                     try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
                 } catch {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+                    }
                 }
             }
         }
