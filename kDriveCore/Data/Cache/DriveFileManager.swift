@@ -584,12 +584,12 @@ public class DriveFileManager {
                 var token: ObservationToken?
                 token = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
                     token?.cancel()
-                    if error != nil && (error != .taskCancelled || error != .taskRescheduled) {
+                    if error != nil && error != .taskRescheduled {
                         // Mark it as not available offline
                         let realm = self.getRealm()
                         if let file = self.getCachedFile(id: safeFile.id, freeze: false, using: realm) {
                             try? realm.safeWrite {
-                                file.isAvailableOffline = available
+                                file.isAvailableOffline = false
                             }
                         }
                     }

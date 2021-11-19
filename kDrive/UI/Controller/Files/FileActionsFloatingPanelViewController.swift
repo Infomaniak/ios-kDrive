@@ -426,13 +426,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             }
-            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { [weak self] error in
-                if error != nil && (error as? DriveError != .taskCancelled || error as? DriveError != .taskRescheduled) {
+            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
+                if error != nil && error as? DriveError != .taskCancelled && error as? DriveError != .taskRescheduled {
                     UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorCache)
                 }
-                self?.collectionView.reloadItems(at: [indexPath])
             }
-            collectionView.reloadItems(at: [indexPath])
+            collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
         case .download:
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
                 saveFile()
