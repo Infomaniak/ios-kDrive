@@ -18,15 +18,15 @@
 
 import UIKit
 
-protocol CategoryColorDelegate: AnyObject {
+protocol ColorSelectionDelegate: AnyObject {
     func didSelectColor(_ color: String)
 }
 
-class CategoryColorTableViewCell: UITableViewCell {
+class ColorSelectionTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
 
-    weak var delegate: CategoryColorDelegate?
+    weak var delegate: ColorSelectionDelegate?
 
     private let colors = [
         CategoryColor(hex: "#1abc9c"),
@@ -69,7 +69,7 @@ class CategoryColorTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        collectionView.register(cellView: CategoryColorCollectionViewCell.self)
+        collectionView.register(cellView: ColorSelectionCollectionViewCell.self)
         collectionView.dataSource = self
         collectionView.delegate = self
         // Observe content size to adjust table view cell height (need to call `cell.layoutIfNeeded()`)
@@ -89,13 +89,13 @@ class CategoryColorTableViewCell: UITableViewCell {
     }
 }
 
-extension CategoryColorTableViewCell: UICollectionViewDataSource, UICollectionViewDelegate {
+extension ColorSelectionTableViewCell: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return colors.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(type: CategoryColorCollectionViewCell.self, for: indexPath)
+        let cell = collectionView.dequeueReusableCell(type: ColorSelectionCollectionViewCell.self, for: indexPath)
         let color = colors[indexPath.row]
         cell.backgroundColor = color.color
         return cell

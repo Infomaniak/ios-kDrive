@@ -53,7 +53,7 @@ class EditCategoryViewController: UITableViewController {
 
         tableView.register(cellView: AlertTableViewCell.self)
         tableView.register(cellView: FileNameTableViewCell.self)
-        tableView.register(cellView: CategoryColorTableViewCell.self)
+        tableView.register(cellView: ColorSelectionTableViewCell.self)
 
         updateTitle()
         setRows()
@@ -161,7 +161,7 @@ class EditCategoryViewController: UITableViewController {
             cell.textField.becomeFirstResponder()
             return cell
         case .color:
-            let cell = tableView.dequeueReusableCell(type: CategoryColorTableViewCell.self, for: indexPath)
+            let cell = tableView.dequeueReusableCell(type: ColorSelectionTableViewCell.self, for: indexPath)
             cell.delegate = self
             cell.selectColor(category?.colorHex ?? color)
             cell.layoutIfNeeded()
@@ -183,7 +183,7 @@ class EditCategoryViewController: UITableViewController {
 
 // MARK: - Category color delegate
 
-extension EditCategoryViewController: CategoryColorDelegate {
+extension EditCategoryViewController: ColorSelectionDelegate {
     func didSelectColor(_ color: String) {
         if create {
             self.color = color
