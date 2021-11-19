@@ -22,7 +22,7 @@ import kDriveCore
 import PhotosUI
 import UIKit
 
-class SaveFileViewController: UIViewController {
+class SaveFileViewController: UIViewController, UITableViewDelegate {
     enum SaveFileSection {
         case fileName
         case fileType
@@ -280,11 +280,9 @@ extension SaveFileViewController: UITableViewDataSource {
         }
         return nil
     }
-}
 
-// MARK: - UITableViewDelegate
+    // MARK: - UITableViewDelegate
 
-extension SaveFileViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         switch sections[indexPath.section] {

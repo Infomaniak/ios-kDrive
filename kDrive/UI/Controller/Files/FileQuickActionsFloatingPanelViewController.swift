@@ -239,6 +239,8 @@ class FileQuickActionsFloatingPanelViewController: UITableViewController {
                 return file.rights?.delete ?? false
             case .leaveShare:
                 return file.rights?.leave ?? false
+            case .copyToOtherDrive:
+                return DriveInfosManager.instance.getDrives(for: driveFileManager.drive.userId).count > 1
             default:
                 return true
             }
