@@ -264,23 +264,24 @@ public class FileImportHelper {
                 completion(nil, nil)
             }
 
-            let data: Data?
-            if let text = coding as? String {
-                data = text.data(using: .utf8)
-            } else if let text = coding as? Data {
-                data = text
-            } else {
-                data = nil
-            }
-
             let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
 
-            do {
-                try data?.write(to: targetURL)
-                completion(nil, targetURL)
-            } catch {
-                DDLogError("Error while loading data representation: \(error)")
-                completion(nil, nil)
+            if let text = coding as? String {
+                do {
+                    try text.write(to: targetURL, atomically: true, encoding: .utf8)
+                    completion(nil, targetURL)
+                } catch {
+                    DDLogError("Error while loading data representation: \(error)")
+                    completion(nil, nil)
+                }
+            } else if let data = coding as? Data {
+                do {
+                    try data.write(to: targetURL)
+                    completion(nil, targetURL)
+                } catch {
+                    DDLogError("Error while loading data representation: \(error)")
+                    completion(nil, nil)
+                }
             }
             progress.completedUnitCount = 1
         }
