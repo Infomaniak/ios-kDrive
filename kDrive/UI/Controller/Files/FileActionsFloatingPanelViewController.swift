@@ -139,7 +139,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         super.viewDidLoad()
 
         collectionView.register(cellView: FileCollectionViewCell.self)
-        collectionView.register(cellView: FloatingPanelCollectionViewCell.self)
+        collectionView.register(cellView: FloatingPanelQuickActionCollectionViewCell.self)
         collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
         collectionView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         collectionView.dragDelegate = self
@@ -729,7 +729,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             cell.moreButton.isHidden = true
             return cell
         case .quickActions:
-            let cell = collectionView.dequeueReusableCell(type: FloatingPanelCollectionViewCell.self, for: indexPath)
+            let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
             let action = quickActions[indexPath.item]
             cell.configure(with: action, file: file)
             return cell

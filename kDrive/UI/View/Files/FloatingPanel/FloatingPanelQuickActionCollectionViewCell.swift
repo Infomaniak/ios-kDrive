@@ -19,7 +19,7 @@
 import kDriveCore
 import UIKit
 
-class FloatingPanelCollectionViewCell: UICollectionViewCell {
+class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var buttonView: UIView!
     @IBOutlet weak var actionImage: UIImageView!
     @IBOutlet weak var actionLabel: UILabel!

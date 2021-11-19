@@ -36,7 +36,7 @@ class CategoryFloatingPanelCollectionTableViewCell: UITableViewCell, UICollectio
         collectionView.delegate = self
         collectionView.dataSource = self
 
-        collectionView.register(cellView: FloatingPanelCollectionViewCell.self)
+        collectionView.register(cellView: FloatingPanelQuickActionCollectionViewCell.self)
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -44,7 +44,7 @@ class CategoryFloatingPanelCollectionTableViewCell: UITableViewCell, UICollectio
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(type: FloatingPanelCollectionViewCell.self, for: indexPath)
+        let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
         let action = actions[indexPath.row]
         cell.actionImage.isHidden = false
         cell.actionImage.image = action.image
