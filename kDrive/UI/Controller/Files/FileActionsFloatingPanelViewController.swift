@@ -296,17 +296,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         switch action {
         case .informations:
-            // TODO: Refactor init
-            let fileDetailViewController = FileDetailViewController.instantiate()
+            let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: file)
             fileDetailViewController.file = file
             presentingParent?.navigationController?.pushViewController(fileDetailViewController, animated: true)
             dismiss(animated: true)
         case .add:
             let floatingPanelViewController = DriveFloatingPanelController()
-            // TODO: Refactor init
-            let fileInformationsViewController = PlusButtonFloatingPanelViewController()
-            fileInformationsViewController.driveFileManager = driveFileManager
-            fileInformationsViewController.currentDirectory = file
+            let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager, folder: file)
             floatingPanelViewController.isRemovalInteractionEnabled = true
             floatingPanelViewController.delegate = fileInformationsViewController
 
@@ -402,18 +398,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
                 present(driveFloatingPanelController, animated: true)
             } else {
-                let viewController = ManageDropBoxViewController.instantiate()
-                viewController.driveFileManager = driveFileManager
+                let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: file)
                 viewController.convertingFolder = true
-                viewController.folder = file
                 presentingParent?.navigationController?.pushViewController(viewController, animated: true)
                 dismiss(animated: true)
             }
         case .manageDropbox:
-            // TODO: Refactor init
-            let viewController = ManageDropBoxViewController.instantiate()
-            viewController.driveFileManager = driveFileManager
-            viewController.folder = file
+            let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: file)
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
         case .seeFolder:

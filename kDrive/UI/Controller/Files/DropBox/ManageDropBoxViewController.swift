@@ -77,8 +77,11 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    class func instantiate() -> ManageDropBoxViewController {
-        return Storyboard.files.instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
+    class func instantiate(driveFileManager: DriveFileManager, folder: File) -> ManageDropBoxViewController {
+        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
+        viewController.driveFileManager = driveFileManager
+        viewController.folder = folder
+        return viewController
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {
