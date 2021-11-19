@@ -70,7 +70,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             addAction = !isAvailableOffline
             if !isAvailableOffline {
                 downloadInProgress = true
-                // tableView.reloadRows(at: [indexPath], with: .automatic)
+                collectionView.reloadItems(at: [indexPath])
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             }
@@ -114,7 +114,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 } else {
                     downloadedArchiveUrl = nil
                     downloadInProgress = true
-                    // tableView.reloadRows(at: [indexPath], with: .fade)
+                    collectionView.reloadItems(at: [indexPath])
                     group.enter()
                     downloadArchivedFiles(files: files, downloadCellPath: indexPath) { archiveUrl, error in
                         self.downloadedArchiveUrl = archiveUrl
@@ -129,7 +129,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                         saveFile()
                     } else {
                         downloadInProgress = true
-                        // tableView.reloadRows(at: [indexPath], with: .fade)
+                        collectionView.reloadItems(at: [indexPath])
                         group.enter()
                         DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
@@ -170,7 +170,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             }
             group.enter()
             present(selectFolderNavigationController, animated: true)
-            // tableView.reloadRows(at: [indexPath], with: .fade)
+            collectionView.reloadItems(at: [indexPath])
         default:
             break
         }
@@ -191,7 +191,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             }
             self.files = self.changedFiles
             self.downloadInProgress = false
-            // self.tableView.reloadRows(at: [indexPath], with: .fade)
+            self.collectionView.reloadItems(at: [indexPath])
             if action == .download {
                 if let downloadedArchiveUrl = self.downloadedArchiveUrl {
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
@@ -207,34 +207,17 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
 
     // MARK: - Collection view data source
 
-    /* override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
-
-         let action = actions[indexPath.row]
-         cell.titleLabel.text = action.name
-         cell.accessoryImageView.image = action.image
-         cell.accessoryImageView.tintColor = action.tintColor
-
-         if action == .favorite && filesAreFavorite {
-             cell.titleLabel.text = action.reverseName
-             cell.accessoryImageView.tintColor = KDriveAsset.favoriteColor.color
-         } else if action == .offline {
-             cell.offlineSwitch.isHidden = false
-             cell.accessoryImageView.image = filesAvailableOffline ? KDriveAsset.check.image : action.image
-             cell.accessoryImageView.tintColor = filesAvailableOffline ? KDriveAsset.greenColor.color : action.tintColor
-             cell.offlineSwitch.isOn = filesAvailableOffline
-             cell.setProgress(downloadInProgress ? -1 : nil)
-             // Disable cell if all selected items are folders
-             cell.setEnabled(!files.allSatisfy(\.isDirectory))
-         } else if action == .download {
-             if let currentArchiveId = currentArchiveId {
-                 cell.observeProgress(true, archiveId: currentArchiveId)
-             } else {
-                 cell.setProgress(downloadInProgress ? -1 : nil)
-             }
-         }
-         return cell
-     } */
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        switch Self.sections[indexPath.section] {
+        case .actions:
+            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
+            let action = actions[indexPath.item]
+            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+            return cell
+        default:
+            return super.collectionView(collectionView, cellForItemAt: indexPath)
+        }
+    }
 
     private func downloadArchivedFiles(files: [File], downloadCellPath: IndexPath, completion: @escaping (URL?, DriveError?) -> Void) {
         driveFileManager.apiFetcher.getDownloadArchiveLink(driveId: driveFileManager.drive.id, for: files) { response, error in
@@ -245,7 +228,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 }
                 DownloadQueue.instance.addToQueue(archiveId: archiveId, driveId: self.driveFileManager.drive.id)
                 DispatchQueue.main.async {
-                    // self.tableView.reloadRows(at: [downloadCellPath], with: .fade)
+                    self.collectionView.reloadItems(at: [downloadCellPath])
                 }
             } else {
                 completion(nil, (error as? DriveError) ?? .serverError)

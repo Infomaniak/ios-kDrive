@@ -20,6 +20,7 @@ import kDriveCore
 import UIKit
 
 class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var disabledView: UIView!
     @IBOutlet weak var highlightedView: UIView!
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var progressView: RPCircularProgress!
@@ -47,6 +48,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         switchView.isHidden = true
+        observationToken?.cancel()
     }
 
     func configure(with action: FloatingPanelAction, file: File?, showProgress: Bool) {
@@ -63,6 +65,29 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
                 configureAvailableOffline(with: file)
             } else {
                 observeProgress(showProgress, file: file)
+            }
+        }
+    }
+
+    func configure(with action: FloatingPanelAction, filesAreFavorite: Bool, filesAvailableOffline: Bool, filesAreDirectory: Bool, showProgress: Bool, archiveId: String?) {
+        configure(with: action, file: nil, showProgress: false)
+
+        if action == .favorite && filesAreFavorite {
+            titleLabel.text = action.reverseName
+            iconImageView.tintColor = KDriveAsset.favoriteColor.color
+        } else if action == .offline {
+            switchView.isHidden = false
+            iconImageView.image = filesAvailableOffline ? KDriveAsset.check.image : action.image
+            iconImageView.tintColor = filesAvailableOffline ? KDriveAsset.greenColor.color : action.tintColor
+            switchView.isOn = filesAvailableOffline
+            setProgress(showProgress ? -1 : nil)
+            // Disable cell if all selected items are folders
+            setEnabled(!filesAreDirectory)
+        } else if action == .download {
+            if let archiveId = archiveId {
+                observeProgress(true, archiveId: archiveId)
+            } else {
+                setProgress(showProgress ? -1 : nil)
             }
         }
     }
@@ -97,6 +122,18 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         }
     }
 
+    func observeProgress(_ showProgress: Bool, archiveId: String) {
+        observationToken?.cancel()
+        setProgress(showProgress ? -1 : nil)
+        if showProgress {
+            observationToken = DownloadQueue.instance.observeArchiveDownloadProgress(self, archiveId: archiveId) { _, progress in
+                DispatchQueue.main.async { [weak self] in
+                    self?.setProgress(CGFloat(progress))
+                }
+            }
+        }
+    }
+
     func setProgress(_ progress: CGFloat? = -1) {
         if let downloadProgress = progress, downloadProgress < 1 {
             iconImageView.isHidden = true
@@ -110,6 +147,19 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         } else {
             iconImageView.isHidden = false
             progressView.isHidden = true
+        }
+    }
+
+    func setEnabled(_ enabled: Bool) {
+        if enabled {
+            disabledView.isHidden = true
+            disabledView.superview?.sendSubviewToBack(disabledView)
+            isUserInteractionEnabled = true
+        } else {
+            disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+            disabledView.isHidden = false
+            disabledView.superview?.bringSubviewToFront(disabledView)
+            isUserInteractionEnabled = false
         }
     }
 }
