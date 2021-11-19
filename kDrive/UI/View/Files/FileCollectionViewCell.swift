@@ -49,7 +49,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     var downloadProgressObserver: ObservationToken?
     var downloadObserver: ObservationToken?
     weak var delegate: FileCellDelegate?
-    var driveFileManager: DriveFileManager!
 
     override var isSelected: Bool {
         didSet {
@@ -70,6 +69,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     var selectionMode = false
 
     internal var file: File!
+    private var categories = [kDriveCore.Category]()
 
     static var emptyCheckmarkImage: UIImage = {
         let size = CGSize(width: 24, height: 24)
@@ -99,6 +99,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        categories.removeAll()
         centerTitleConstraint?.isActive = false
         resetSwipeActions()
         detailLabel?.text = ""
@@ -162,8 +163,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
-        self.driveFileManager = driveFileManager
         self.file = file
+        categories = Array(driveFileManager.drive.categories.filter(NSPredicate(format: "id IN %@", file.categories.map(\.id))))
         self.selectionMode = selectionMode
         collectionView?.isHidden = file.categories.isEmpty
         collectionView?.reloadData()
@@ -272,16 +273,14 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
 extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return min(file.categories.count, 3)
+        return min(categories.count, 3)
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: CategoryBadgeCollectionViewCell.self, for: indexPath)
-        let categoryId = file.categories[indexPath.row].id
-        if let category = driveFileManager.drive.categories.filter("id = %d", categoryId).first {
-            let more = indexPath.item == 2 && file.categories.count > 3 ? file.categories.count - 3 : nil
-            cell.configure(with: category, more: more)
-        }
+        let category = categories[indexPath.row]
+        let more = indexPath.item == 2 && categories.count > 3 ? categories.count - 3 : nil
+        cell.configure(with: category, more: more)
         return cell
     }
 
