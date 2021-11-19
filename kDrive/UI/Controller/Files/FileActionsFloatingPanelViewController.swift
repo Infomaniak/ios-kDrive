@@ -341,7 +341,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             } else {
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
-                // TODO: Check invalid thread error
                 driveFileManager.activateShareLink(for: file) { [weak self] _, shareLink, error in
                     if let link = shareLink {
                         self?.setLoading(false, action: action, at: indexPath)
@@ -439,7 +438,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .move:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent, fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getRootFile()]) { [unowned self] selectedFolder in
-                // TODO: Check invalid thread error
                 self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { response, _, error in
                     if error != nil {
                         UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
@@ -453,8 +451,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                                 }
                             }
                         })
-                        // TODO: Check this?
-                        self.presentingParent?.navigationController?.popViewController(animated: true)
+                        // Close preview
+                        if self.presentingParent is PreviewViewController {
+                            self.presentingParent?.navigationController?.popViewController(animated: true)
+                        }
                     }
                 }
             }
