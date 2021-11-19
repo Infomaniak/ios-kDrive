@@ -1,37 +1,38 @@
 /*
-Infomaniak kDrive - iOS App
-Copyright (C) 2021 Infomaniak Network SA
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import UIKit
-import kDriveCore
-import InfomaniakCore
 import DropDown
+import InfomaniakCore
+import kDriveCore
+import UIKit
 
 protocol SelectDriveDelegate: AnyObject {
     func didSelectDrive(_ drive: Drive)
 }
 
 class SelectDriveViewController: UIViewController {
-
     @IBOutlet weak var tableView: UITableView!
     private var driveList: [Drive]!
     private var currentAccount: Account!
     private var accounts: [Account]!
     var selectedDrive: Drive!
+    var accountSelectionEnabled = true
+    var hiddenDriveList = [Drive]()
     weak var delegate: SelectDriveDelegate?
 
     private enum Section {
@@ -54,7 +55,7 @@ class SelectDriveViewController: UIViewController {
 
         if let account = AccountManager.instance.currentAccount {
             initForCurrentAccount(account)
-            if !accounts.isEmpty {
+            if !accounts.isEmpty && accountSelectionEnabled {
                 sections = [.selectAccount, .selectDrive]
             } else {
                 sections = [.selectDrive]
@@ -67,7 +68,7 @@ class SelectDriveViewController: UIViewController {
     private func initForCurrentAccount(_ account: Account) {
         currentAccount = account
         accounts = AccountManager.instance.accounts.filter { $0.userId != account.userId }
-        driveList = DriveInfosManager.instance.getDrives(for: account.userId, sharedWithMe: false)
+        driveList = DriveInfosManager.instance.getDrives(for: account.userId, sharedWithMe: false).filter { !hiddenDriveList.contains($0) }
         dropDown.dataSource = accounts.map(\.user.displayName)
     }
 
@@ -92,12 +93,11 @@ class SelectDriveViewController: UIViewController {
     class func instantiate() -> SelectDriveViewController {
         return Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectDriveViewController") as! SelectDriveViewController
     }
-
 }
 
 // MARK: - UITableViewDataSource
-extension SelectDriveViewController: UITableViewDataSource {
 
+extension SelectDriveViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
@@ -138,12 +138,11 @@ extension SelectDriveViewController: UITableViewDataSource {
             return cell
         }
     }
-
 }
 
 // MARK: - UITableViewDelegate
-extension SelectDriveViewController: UITableViewDelegate {
 
+extension SelectDriveViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch sections[indexPath.section] {
         case .noAccount:
@@ -162,5 +161,4 @@ extension SelectDriveViewController: UITableViewDelegate {
             }
         }
     }
-
 }
