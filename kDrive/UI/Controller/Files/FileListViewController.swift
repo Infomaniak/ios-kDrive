@@ -1023,6 +1023,10 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         }
         return headerView!.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
     }
+
+    func collectionView(_ collectionView: UICollectionView, targetIndexPathForMoveOfItemFromOriginalIndexPath originalIndexPath: IndexPath, atCurrentIndexPath currentIndexPath: IndexPath, toProposedIndexPath proposedIndexPath: IndexPath) -> IndexPath {
+        return originalIndexPath
+    }
 }
 
 // MARK: - File cell delegate
@@ -1096,7 +1100,7 @@ extension FileListViewController: TopScrollable {
 extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
         let draggedFile = sortedFiles[indexPath.item]
-        guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe else {
+        guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
         }
 
@@ -1149,6 +1153,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
                    let file = itemProvider.file {
                     let destinationDriveFileManager = self.driveFileManager!
                     if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
+                        if destinationDirectory.id == file.parentId { return }
                         destinationDriveFileManager.moveFile(file: file, newParent: destinationDirectory) { response, _, error in
                             if error != nil {
                                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
@@ -1166,10 +1171,14 @@ extension FileListViewController: UICollectionViewDropDelegate {
                         }
                     } else {
                         // TODO: enable copy from different driveFileManager
-                        UIConstants.showSnackBar(message: KDriveCoreStrings.Localizable.errorMove)
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveCoreStrings.Localizable.errorMove)
+                        }
                     }
                 } else {
-                    UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
+                    }
                 }
             }
         }
@@ -1183,7 +1192,9 @@ extension FileListViewController: UICollectionViewDropDelegate {
                 do {
                     try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
                 } catch {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+                    }
                 }
             }
         }
