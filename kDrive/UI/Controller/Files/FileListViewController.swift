@@ -1100,7 +1100,7 @@ extension FileListViewController: TopScrollable {
 extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
         let draggedFile = sortedFiles[indexPath.item]
-        guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe else {
+        guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
         }
 
@@ -1153,6 +1153,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
                    let file = itemProvider.file {
                     let destinationDriveFileManager = self.driveFileManager!
                     if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
+                        if destinationDirectory.id == file.parentId { return }
                         destinationDriveFileManager.moveFile(file: file, newParent: destinationDirectory) { response, _, error in
                             if error != nil {
                                 UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
