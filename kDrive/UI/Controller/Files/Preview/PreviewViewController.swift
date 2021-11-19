@@ -75,7 +75,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         collectionView.contentInsetAdjustmentBehavior = .never
 
         floatingPanelViewController = DriveFloatingPanelController()
-        floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view?.window?.safeAreaInsets.bottom ?? 0, 8))
         floatingPanelViewController.isRemovalInteractionEnabled = false
         fileInformationsViewController = FileActionsFloatingPanelViewController()
         fileInformationsViewController.presentingParent = self
@@ -242,10 +241,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Fix scrollToItem for iOS 12
-        guard isViewDidLayoutCallFirstTime, let rect = collectionView.layoutAttributesForItem(at: currentIndex)?.frame else { return }
-        isViewDidLayoutCallFirstTime = false
-        collectionView.scrollRectToVisible(rect, animated: false)
+        // Safe areas are set here
+        floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
