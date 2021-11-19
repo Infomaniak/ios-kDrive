@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import RealmSwift
 import UIKit
 
 class UploadQueueFoldersViewController: UITableViewController {
@@ -24,39 +25,71 @@ class UploadQueueFoldersViewController: UITableViewController {
 
     private let realm = DriveFileManager.constants.uploadsRealm
 
+    private var userId: Int {
+        return driveFileManager.drive.userId
+    }
+
     private var folders: [File] = []
+    private var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.register(cellView: UploadFolderTableViewCell.self)
 
-        reload()
+        setUpObserver()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        reload()
+    deinit {
+        notificationToken?.invalidate()
     }
 
-    private func reload() {
+    private func setUpObserver() {
         guard driveFileManager != nil else { return }
-        // First, get the drives (current + shared with me)
-        let userId = driveFileManager.drive.userId
+        // Get the drives (current + shared with me)
         let driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
-        // Then, get all uploading parent ids
-        let parentIds = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
+        // Observe uploading files
+        notificationToken = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])
-            .map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
+            .observe { [weak self] change in
+                switch change {
+                case .initial(let results):
+                    self?.updateFolders(from: results)
+                    DispatchQueue.main.async {
+                        self?.tableView.reloadData()
+                        if results.isEmpty {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                    }
+                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    DispatchQueue.main.async {
+                        self?.tableView.performBatchUpdates {
+                            self?.updateFolders(from: results)
+                            // Always apply updates in the following order: deletions, insertions, then modifications.
+                            // Handling insertions before deletions may result in unexpected behavior.
+                            self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                            self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                            self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        }
+                        if results.isEmpty {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                    }
+                case .error(let error):
+                    print(error)
+                }
+            }
+    }
+
+    private func updateFolders(from results: Results<UploadFile>) {
+        let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
+        folders = files.compactMap { AccountManager.instance.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
         // (Pop view controller if nothing to show)
-        if parentIds.isEmpty {
-            navigationController?.popViewController(animated: true)
-            return
+        if folders.isEmpty {
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
         }
-        // Finally, get the folders
-        folders = parentIds.compactMap { AccountManager.instance.getDriveFileManager(for: $0.driveId, userId: userId)?.getCachedFile(id: $0.parentId) }
-        tableView.reloadData()
     }
 
     static func instantiate(driveFileManager: DriveFileManager) -> UploadQueueFoldersViewController {
