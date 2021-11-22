@@ -147,7 +147,7 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            schemaVersion: 4,
+            schemaVersion: 5,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < 1 {
                     // Migration to version 1: migrating rights
@@ -168,6 +168,24 @@ public class DriveFileManager {
                         newObject?["canBecomeLink"] = oldObject?["canBecomeLink"] ?? false
                         newObject?["canFavorite"] = oldObject?["canFavorite"] ?? false
                     }
+                }
+                if oldSchemaVersion < 5 {
+                    // Get file ids
+                    var fileIds = Set<Int>()
+                    migration.enumerateObjects(ofType: File.className()) { oldObject, _ in
+                        if let id = oldObject?["id"] as? Int {
+                            fileIds.insert(id)
+                        }
+                    }
+                    // Remove dangling rights
+                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
+                        guard let newObject = newObject, let fileId = oldObject?["fileId"] as? Int else { return }
+                        if !fileIds.contains(fileId) {
+                            migration.delete(newObject)
+                        }
+                    }
+                    // Delete file categories for migration
+                    migration.deleteData(forType: FileCategory.className())
                 }
             },
             objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self])
@@ -980,9 +998,10 @@ public class DriveFileManager {
                 }
                 // Delete category from files
                 let realm = self.getRealm()
-                let categories = realm.objects(FileCategory.self).filter("id = %d", id)
-                try? realm.write {
-                    realm.delete(categories)
+                for file in realm.objects(File.self).filter(NSPredicate(format: "ANY categories.id = %d", id)) {
+                    try? realm.write {
+                        realm.delete(file.categories.filter("id = %d", id))
+                    }
                 }
                 completion(nil)
             }
@@ -1230,7 +1249,7 @@ public class DriveFileManager {
                     }
                 }
             } else {
-                apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, /*blockInformation: sharedLink.blockInformation,*/ isFree: drive.pack == .free) { _, error in
+                apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, /* blockInformation: sharedLink.blockInformation, */ isFree: drive.pack == .free) { _, error in
                     completion(file, sharedLink, error)
                 }
             }

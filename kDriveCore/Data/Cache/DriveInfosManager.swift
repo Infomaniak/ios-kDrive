@@ -57,7 +57,7 @@ public class DriveInfosManager {
         drive.sharedWithMe = sharedWithMe
     }
 
-    private func initFileProviderDomains(drives: [Drive], user: UserProfile) {
+    private func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
         let updatedDomains = drives.map { NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier($0.objectId), displayName: "\($0.name) (\(user.email))", pathRelativeToDocumentStorage: "\($0.id)") }
         NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
             if let error = error {
@@ -160,7 +160,7 @@ public class DriveInfosManager {
     }
 
     @discardableResult
-    func storeDriveResponse(user: UserProfile, driveResponse: DriveResponse) -> [Drive] {
+    func storeDriveResponse(user: InfomaniakCore.UserProfile, driveResponse: DriveResponse) -> [Drive] {
         var driveList = [Drive]()
         for drive in driveResponse.drives.main {
             initDriveForRealm(drive: drive, userId: user.id, sharedWithMe: false)
