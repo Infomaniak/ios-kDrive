@@ -68,7 +68,7 @@
                                                             <constraint firstAttribute="width" constant="12" id="wBo-cl-8pL"/>
                                                         </constraints>
                                                     </imageView>
-                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="RzT-IJ-oQu">
+                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" userInteractionEnabled="NO" contentMode="scaleToFill" scrollEnabled="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="RzT-IJ-oQu">
                                                         <rect key="frame" x="64" y="0.5" width="64" height="16"/>
                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <constraints>
