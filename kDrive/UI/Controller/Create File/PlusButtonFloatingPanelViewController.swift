@@ -75,7 +75,6 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         tableView.alwaysBounceVertical = false
         tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         tableView.register(cellView: FloatingPanelTableViewCell.self)
-        tableView.register(cellView: FloatingPanelTitleTableViewCell.self)
 
         // Hide unavailable actions
         #if !DEBUG
