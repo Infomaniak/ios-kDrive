@@ -215,10 +215,10 @@ class ManageCategoriesViewController: UITableViewController {
         category.isSelected = true
         if let file = file {
             driveFileManager.addCategory(file: file, category: category) { error in
-                if error != nil {
-                    category.isSelected = true
-                    tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                if let error = error {
+                    category.isSelected = false
+                    tableView.deselectRow(at: indexPath, animated: true)
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
         }
