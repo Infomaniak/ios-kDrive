@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/ProxymanApp/atlantis",
         "state": {
           "branch": null,
-          "revision": "f213b333f835e3974279ab92ad8ab8302fec71bf",
-          "version": "1.12.0"
+          "revision": "507b49a18b7a19324d98a454dd3c0ababc101950",
+          "version": "1.13.0"
         }
       },
       {
@@ -222,8 +222,8 @@
         "repositoryURL": "https://github.com/adam-fowler/mqtt-nio",
         "state": {
           "branch": null,
-          "revision": "b7957d330c283a7bfce9870cd7f5c82319b21e02",
-          "version": "2.5.0"
+          "revision": "8f728444098e2349d90abfcc8f00dc3bde443049",
+          "version": "2.4.0"
         }
       },
       {
