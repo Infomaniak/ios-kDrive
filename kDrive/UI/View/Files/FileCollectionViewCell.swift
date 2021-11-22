@@ -163,7 +163,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
-        self.file = file
+        self.file = file.isFrozen ? file : file.freeze()
         categories = driveFileManager.drive.categories(for: file)
         self.selectionMode = selectionMode
         collectionView?.isHidden = file.categories.isEmpty
@@ -181,20 +181,16 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
         availableOfflineImageView?.isHidden = !file.isAvailableOffline || !FileManager.default.fileExists(atPath: file.localUrl.path)
         availableOfflineImageView?.accessibilityLabel = KDriveStrings.Localizable.offlineFileTitle
-        downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { fileId, progress in
-            if fileId == file.id {
-                DispatchQueue.main.async { [weak self] in
-                    self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
-                    self?.downloadProgressView?.updateProgress(CGFloat(progress))
-                    self?.availableOfflineImageView?.isHidden = !file.isAvailableOffline || progress < 1
-                }
+        downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
+            DispatchQueue.main.async {
+                self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
+                self?.downloadProgressView?.updateProgress(CGFloat(progress))
+                self?.availableOfflineImageView?.isHidden = self?.file.isAvailableOffline != true || progress < 1
             }
         }
-        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { fileId, _ in
-            if fileId == file.id {
-                DispatchQueue.main.async { [weak self] in
-                    self?.downloadProgressView?.isHidden = true
-                }
+        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
+            DispatchQueue.main.async {
+                self?.downloadProgressView?.isHidden = true
             }
         }
 

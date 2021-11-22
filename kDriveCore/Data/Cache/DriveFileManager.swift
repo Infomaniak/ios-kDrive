@@ -581,7 +581,18 @@ public class DriveFileManager {
                 }
             } else {
                 let safeFile = file.freeze()
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+                var token: ObservationToken?
+                token = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
+                    token?.cancel()
+                    if error != nil && error != .taskRescheduled {
+                        // Mark it as not available offline
+                        let realm = self.getRealm()
+                        if let file = self.getCachedFile(id: safeFile.id, freeze: false, using: realm) {
+                            try? realm.safeWrite {
+                                file.isAvailableOffline = false
+                            }
+                        }
+                    }
                     self.notifyObserversWith(file: safeFile)
                     DispatchQueue.main.async {
                         completion(error)
@@ -590,10 +601,11 @@ public class DriveFileManager {
                 DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
             }
         } else {
-            let oldUrl = file.localUrl
             try? realm.safeWrite {
                 file.isAvailableOffline = false
             }
+            // Cancel the download
+            DownloadQueue.instance.operation(for: file)?.cancel()
             try? fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
             try? fileManager.moveItem(at: oldUrl, to: file.localUrl)
             notifyObserversWith(file: file)
@@ -613,6 +625,18 @@ public class DriveFileManager {
             notifyObserversWith(file: file)
         }
         return file
+    }
+
+    public func setFileCollaborativeFolder(file: File, collaborativeFolder: String?) {
+        let realm = getRealm()
+        let file = realm.object(ofType: File.self, forPrimaryKey: file.id)
+        try? realm.write {
+            file?.collaborativeFolder = collaborativeFolder
+            file?.rights?.canBecomeCollab = collaborativeFolder == nil
+        }
+        if let file = file {
+            notifyObserversWith(file: file)
+        }
     }
 
     public func getLocalRecentActivities() -> [FileActivity] {

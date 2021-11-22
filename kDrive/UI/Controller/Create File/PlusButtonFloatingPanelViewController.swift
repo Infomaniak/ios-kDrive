@@ -58,6 +58,17 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         }
     }
 
+    init(driveFileManager: DriveFileManager, folder: File) {
+        self.driveFileManager = driveFileManager
+        self.currentDirectory = folder
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.separatorColor = .clear

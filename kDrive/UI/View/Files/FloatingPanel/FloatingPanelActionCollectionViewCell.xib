@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="o7j-SJ-Uty" customClass="FloatingPanelActionCollectionViewCell" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="370" height="53"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="u4L-yp-I0Z">
+                <rect key="frame" x="0.0" y="0.0" width="370" height="53"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bMd-r9-rAt">
+                        <rect key="frame" x="0.0" y="0.0" width="370" height="53"/>
+                        <color key="backgroundColor" name="backgroundCardViewColor"/>
+                    </view>
+                    <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Y3Q-nc-2FL">
+                        <rect key="frame" x="0.0" y="0.0" width="370" height="53"/>
+                        <color key="backgroundColor" name="backgroundCardViewSelectedColor"/>
+                    </view>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="qXV-7J-B71">
+                        <rect key="frame" x="20" y="14.5" width="24" height="24"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="24" id="Nlz-vq-309"/>
+                            <constraint firstAttribute="height" constant="24" id="PWs-4A-nrU"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0FA-dt-y7y" customClass="IKLabel" customModule="kDriveCore">
+                        <rect key="frame" x="52" y="19" width="241" height="15"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
+                        </userDefinedRuntimeAttributes>
+                    </label>
+                    <switch opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nG8-v1-MKX">
+                        <rect key="frame" x="301" y="11" width="51" height="31"/>
+                    </switch>
+                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SnW-jI-CaQ" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
+                        <rect key="frame" x="20" y="14.5" width="24" height="24"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="24" id="QzI-Ew-qQX"/>
+                            <constraint firstAttribute="width" constant="24" id="oTq-Yw-93J"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="bottom" secondItem="bMd-r9-rAt" secondAttribute="bottom" id="4po-k6-UJP"/>
+                    <constraint firstAttribute="trailing" secondItem="Y3Q-nc-2FL" secondAttribute="trailing" id="AIZ-vp-h5V"/>
+                    <constraint firstAttribute="trailing" secondItem="nG8-v1-MKX" secondAttribute="trailing" constant="20" id="BFa-AM-x9S"/>
+                    <constraint firstAttribute="bottom" secondItem="0FA-dt-y7y" secondAttribute="bottom" constant="19" id="PtP-Qp-euN"/>
+                    <constraint firstItem="qXV-7J-B71" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" constant="20" id="T9J-lz-Lta"/>
+                    <constraint firstAttribute="bottom" secondItem="Y3Q-nc-2FL" secondAttribute="bottom" id="VDw-Yv-hzH"/>
+                    <constraint firstItem="nG8-v1-MKX" firstAttribute="centerY" secondItem="u4L-yp-I0Z" secondAttribute="centerY" id="aci-cf-Ovd"/>
+                    <constraint firstItem="0FA-dt-y7y" firstAttribute="top" secondItem="u4L-yp-I0Z" secondAttribute="top" constant="19" id="bBS-jY-bRl"/>
+                    <constraint firstItem="SnW-jI-CaQ" firstAttribute="centerY" secondItem="u4L-yp-I0Z" secondAttribute="centerY" id="cZF-qN-bEn"/>
+                    <constraint firstItem="bMd-r9-rAt" firstAttribute="top" secondItem="u4L-yp-I0Z" secondAttribute="top" id="exm-Vu-h57"/>
+                    <constraint firstItem="Y3Q-nc-2FL" firstAttribute="top" secondItem="u4L-yp-I0Z" secondAttribute="top" id="iEJ-xy-PIq"/>
+                    <constraint firstItem="Y3Q-nc-2FL" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" id="j1q-Xm-5GJ"/>
+                    <constraint firstItem="qXV-7J-B71" firstAttribute="centerY" secondItem="u4L-yp-I0Z" secondAttribute="centerY" id="oHS-QB-Dfe"/>
+                    <constraint firstItem="0FA-dt-y7y" firstAttribute="leading" secondItem="qXV-7J-B71" secondAttribute="trailing" constant="8" symbolic="YES" id="pN0-1u-Tgk"/>
+                    <constraint firstAttribute="trailing" secondItem="bMd-r9-rAt" secondAttribute="trailing" id="v88-Mh-fN9"/>
+                    <constraint firstItem="nG8-v1-MKX" firstAttribute="leading" secondItem="0FA-dt-y7y" secondAttribute="trailing" constant="8" id="wYU-OO-UMq"/>
+                    <constraint firstItem="bMd-r9-rAt" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" id="xcg-PE-hNL"/>
+                    <constraint firstItem="SnW-jI-CaQ" firstAttribute="leading" secondItem="u4L-yp-I0Z" secondAttribute="leading" constant="20" id="zmG-Ev-6ox"/>
+                </constraints>
+            </collectionViewCellContentView>
+            <size key="customSize" width="50" height="57"/>
+            <connections>
+                <outlet property="disabledView" destination="bMd-r9-rAt" id="kTs-of-LbH"/>
+                <outlet property="highlightedView" destination="Y3Q-nc-2FL" id="GTw-q2-zX8"/>
+                <outlet property="iconImageView" destination="qXV-7J-B71" id="0Pp-uD-tDM"/>
+                <outlet property="progressView" destination="SnW-jI-CaQ" id="eyv-eU-O2o"/>
+                <outlet property="switchView" destination="nG8-v1-MKX" id="UvX-cB-Voa"/>
+                <outlet property="titleLabel" destination="0FA-dt-y7y" id="yYf-y3-3NF"/>
+            </connections>
+            <point key="canvasLocation" x="-39.130434782608695" y="116.18303571428571"/>
+        </collectionViewCell>
+    </objects>
+    <designables>
+        <designable name="0FA-dt-y7y">
+            <size key="intrinsicContentSize" width="36" height="17"/>
+        </designable>
+    </designables>
+    <resources>
+        <namedColor name="backgroundCardViewColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="backgroundCardViewSelectedColor">
+            <color red="0.78823529411764703" green="0.78823529411764703" blue="0.81568627450980391" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

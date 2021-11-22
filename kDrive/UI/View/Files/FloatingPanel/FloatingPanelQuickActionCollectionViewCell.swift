@@ -19,7 +19,7 @@
 import kDriveCore
 import UIKit
 
-class FloatingPanelCollectionViewCell: UICollectionViewCell {
+class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var buttonView: UIView!
     @IBOutlet weak var actionImage: UIImageView!
     @IBOutlet weak var actionLabel: UILabel!
@@ -52,6 +52,35 @@ class FloatingPanelCollectionViewCell: UICollectionViewCell {
         progressView.isHidden = true
         progressView.updateProgress(0, animated: false)
     }
+
+    #if !ISEXTENSION
+    func configure(with action: FloatingPanelAction, file: File) {
+        actionImage.isHidden = action.isLoading
+        if action.isLoading {
+            loadingIndicator.startAnimating()
+        } else {
+            loadingIndicator.stopAnimating()
+        }
+        actionImage.image = action.image
+        actionImage.tintColor = action.tintColor
+        actionLabel.text = action.name
+        darkLayer.isHidden = action.isEnabled
+        // Configuration
+        if action == .shareLink {
+            if file.visibility == .isCollaborativeFolder {
+                actionLabel.text = KDriveStrings.Localizable.buttonCopyLink
+            } else if file.shareLink != nil {
+                actionLabel.text = action.reverseName
+            }
+        } else if action == .sendCopy {
+            configureDownload(with: file, action: action, progress: action.isLoading ? -1 : nil)
+        }
+        // Accessibility
+        accessibilityLabel = action.name
+        accessibilityTraits = action.isEnabled ? .button : .notEnabled
+        isAccessibilityElement = true
+    }
+    #endif
 
     func setProgress(_ progress: CGFloat? = -1) {
         if let downloadProgress = progress {

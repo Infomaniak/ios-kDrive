@@ -77,7 +77,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     private var headerView: FilesHeaderView?
     private var floatingPanelViewController: DriveFloatingPanelController!
     #if !ISEXTENSION
-        private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
+        private var fileInformationsViewController: FileActionsFloatingPanelViewController!
     #endif
     private var loadingBarButtonItem: UIBarButtonItem = {
         let activityView = UIActivityIndicatorView(style: .medium)
@@ -530,14 +530,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     #if !ISEXTENSION
         private func showQuickActionsPanel(file: File) {
             if fileInformationsViewController == nil {
-                fileInformationsViewController = FileQuickActionsFloatingPanelViewController()
+                fileInformationsViewController = FileActionsFloatingPanelViewController()
                 fileInformationsViewController.presentingParent = self
                 fileInformationsViewController.normalFolderHierarchy = configuration.normalFolderHierarchy
                 floatingPanelViewController = DriveFloatingPanelController()
                 floatingPanelViewController.isRemovalInteractionEnabled = true
                 floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
                 floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-                floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
+                floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
             }
             fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
             present(floatingPanelViewController, animated: true)
@@ -986,7 +986,7 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
         case .list:
             // Important: subtract safe area insets
             let cellWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView.safeAreaInsets.right - leftRightInset * 2
-            return CGSize(width: cellWidth, height: 60)
+            return CGSize(width: cellWidth, height: UIConstants.fileListCellHeight)
         case .grid:
             // Adjust cell size based on screen size
             let totalWidth = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)

@@ -159,8 +159,6 @@ class FileDetailViewController: UIViewController {
 
         guard file != nil else { return }
 
-        driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: AccountManager.instance.currentUserId)
-
         // Set initial rows
         fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile, categoryRights: driveFileManager.drive.categoryRights)
 
@@ -353,8 +351,11 @@ class FileDetailViewController: UIViewController {
         }
     }
 
-    class func instantiate() -> FileDetailViewController {
-        return Storyboard.files.instantiateViewController(withIdentifier: "FileDetailViewController") as! FileDetailViewController
+    class func instantiate(driveFileManager: DriveFileManager, file: File) -> FileDetailViewController {
+        let viewController = Storyboard.files.instantiateViewController(withIdentifier: "FileDetailViewController") as! FileDetailViewController
+        viewController.driveFileManager = driveFileManager
+        viewController.file = file
+        return viewController
     }
 
     // MARK: - State restoration

@@ -144,7 +144,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private var floatingPanelViewController: DriveFloatingPanelController?
-    private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
+    private var fileInformationsViewController: FileActionsFloatingPanelViewController!
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
 
     private var currentRecentFilesController: HomeRecentFilesController!
@@ -641,14 +641,14 @@ extension HomeViewController: FileCellDelegate {
 
     private func showQuickActionsPanel(file: File) {
         if fileInformationsViewController == nil {
-            fileInformationsViewController = FileQuickActionsFloatingPanelViewController()
+            fileInformationsViewController = FileActionsFloatingPanelViewController()
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = true
             floatingPanelViewController = DriveFloatingPanelController()
             floatingPanelViewController?.isRemovalInteractionEnabled = true
             floatingPanelViewController?.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
             floatingPanelViewController?.set(contentViewController: fileInformationsViewController)
-            floatingPanelViewController?.track(scrollView: fileInformationsViewController.tableView)
+            floatingPanelViewController?.track(scrollView: fileInformationsViewController.collectionView)
         }
         fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
         if let floatingPanelViewController = floatingPanelViewController {

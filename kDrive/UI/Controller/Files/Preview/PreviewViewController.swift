@@ -51,7 +51,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var heightToHide = CGFloat(0)
 
     private var floatingPanelViewController: FloatingPanelController!
-    private var fileInformationsViewController: FileQuickActionsFloatingPanelViewController!
+    private var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
     private var currentFile: File {
         get {
@@ -75,13 +75,12 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         collectionView.contentInsetAdjustmentBehavior = .never
 
         floatingPanelViewController = DriveFloatingPanelController()
-        floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view?.window?.safeAreaInsets.bottom ?? 0, 8))
         floatingPanelViewController.isRemovalInteractionEnabled = false
-        fileInformationsViewController = FileQuickActionsFloatingPanelViewController()
+        fileInformationsViewController = FileActionsFloatingPanelViewController()
         fileInformationsViewController.presentingParent = self
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
         floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-        floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
+        floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
         floatingPanelViewController.delegate = self
 
         if fromActivities {
@@ -242,10 +241,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Fix scrollToItem for iOS 12
-        guard isViewDidLayoutCallFirstTime, let rect = collectionView.layoutAttributesForItem(at: currentIndex)?.frame else { return }
-        isViewDidLayoutCallFirstTime = false
-        collectionView.scrollRectToVisible(rect, animated: false)
+        // Safe areas are set here
+        floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
