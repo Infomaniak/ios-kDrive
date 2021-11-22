@@ -20,7 +20,7 @@ import DifferenceKit
 import Foundation
 import RealmSwift
 
-public class FileCategory: Object, Codable, ContentEquatable {
+public class FileCategory: EmbeddedObject, Codable, ContentEquatable {
     @Persisted public var id: Int
     @Persisted public var isGeneratedByIA: Bool
     @Persisted public var IACategoryUserValidation: String

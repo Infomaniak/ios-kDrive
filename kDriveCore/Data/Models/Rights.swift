@@ -20,8 +20,7 @@ import DifferenceKit
 import Foundation
 import RealmSwift
 
-public class Rights: Object, Codable {
-    @Persisted(primaryKey: true) public var fileId: Int = 0
+public class Rights: EmbeddedObject, Codable {
     @Persisted public var show: Bool
     @Persisted public var read: Bool
     @Persisted public var write: Bool
@@ -78,11 +77,7 @@ public class Rights: Object, Codable {
     }
 }
 
-extension Rights: Differentiable {
-    public var differenceIdentifier: Int {
-        return fileId
-    }
-
+extension Rights: ContentEquatable {
     public func isContentEqual(to source: Rights) -> Bool {
         return show == source.show
             && read == source.read

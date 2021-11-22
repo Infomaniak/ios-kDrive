@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/ProxymanApp/atlantis",
         "state": {
           "branch": null,
-          "revision": "2ee37f1da01b438d67012cc1405617e158f358a1",
-          "version": "1.11.2"
+          "revision": "f213b333f835e3974279ab92ad8ab8302fec71bf",
+          "version": "1.12.0"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
         "state": {
           "branch": null,
-          "revision": "81b568348ab4e113dd8bcef5a83c5dd431741ae4",
-          "version": "8.8.1"
+          "revision": "839cc6b0cd80b0b8bf81fe9bd82b743b25dc6446",
+          "version": "8.9.1"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/google/GoogleAppMeasurement.git",
         "state": {
           "branch": null,
-          "revision": "06add56b27b88ae5180e92d4ee21a1199ee888a1",
-          "version": "8.8.0"
+          "revision": "9b2f6aca5b4685c45f9f5481f19bee8e7982c538",
+          "version": "8.9.1"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/airbnb/HorizonCalendar.git",
         "state": {
           "branch": null,
-          "revision": "c09dfba59bffa8c370ec00a2aa0aa4235dfad4a3",
-          "version": "1.10.1"
+          "revision": "27bc5a1ee79681e30dc06101ad81cb7172be425b",
+          "version": "1.11.0"
         }
       },
       {
@@ -222,8 +222,8 @@
         "repositoryURL": "https://github.com/adam-fowler/mqtt-nio",
         "state": {
           "branch": null,
-          "revision": "976a4b6019e1dd365a0da793babadd5cc958ce2b",
-          "version": "2.1.1"
+          "revision": "b7957d330c283a7bfce9870cd7f5c82319b21e02",
+          "version": "2.5.0"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/realm/realm-cocoa",
         "state": {
           "branch": null,
-          "revision": "7ca0ce1dd58553d5be1ec9cc7283b068c256979d",
-          "version": "10.17.0"
+          "revision": "bdbbd57f411a0f4e72b359113dbc6d23fdf96680",
+          "version": "10.20.0"
         }
       },
       {
@@ -258,8 +258,8 @@
         "repositoryURL": "https://github.com/realm/realm-core",
         "state": {
           "branch": null,
-          "revision": "23f60515a00f076a9e3f2dc672fe1ae07601ee90",
-          "version": "11.4.1"
+          "revision": "c3c11a841642ac93c27bd1edd61f989fc0bfb809",
+          "version": "11.6.1"
         }
       },
       {
@@ -267,8 +267,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
-          "revision": "3429d2236a9eebf551f82e513daa1cddd60050f7",
-          "version": "7.4.7"
+          "revision": "0510982c2df41baa5a662f4ce5f83488661fdd48",
+          "version": "7.5.2"
         }
       },
       {
@@ -303,8 +303,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "6aa9347d9bc5bbfe6a84983aec955c17ffea96ef",
-          "version": "2.33.0"
+          "revision": "addf69cfe60376c325397c8926589415576b1dd1",
+          "version": "2.34.0"
         }
       },
       {
@@ -312,8 +312,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "5e68c1ded15619bb281b273fa8c2d8fd7f7b2b7d",
-          "version": "2.16.1"
+          "revision": "36f6419f2b1b6490a8c0faa840298e28027cefe9",
+          "version": "2.16.3"
         }
       },
       {
