@@ -24,7 +24,7 @@ import QuickLook
 import RealmSwift
 
 public enum ConvertedType: String, CaseIterable {
-    case archive, audio, code, folder, font, image, pdf, presentation, spreadsheet, text, unknown, video
+    case archive, audio, code, folder, font, image, pdf, presentation, spreadsheet, text, unknown, url, video
 
     public var icon: UIImage {
         switch self {
@@ -50,6 +50,8 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveCoreAsset.fileText.image
         case .unknown:
             return KDriveCoreAsset.fileDefault.image
+        case .url:
+            return KDriveCoreAsset.reply.image
         case .video:
             return KDriveCoreAsset.fileVideo.image
         }
@@ -75,7 +77,7 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveCoreStrings.Localizable.allOfficeGrids
         case .text:
             return KDriveCoreStrings.Localizable.allOfficeDocs
-        case .unknown, .font:
+        case .unknown, .url, .font:
             return ""
         case .video:
             return KDriveCoreStrings.Localizable.allVideo
@@ -106,6 +108,8 @@ public enum ConvertedType: String, CaseIterable {
             return .text
         case .unknown:
             return .data
+        case .url:
+            return .url
         case .video:
             return .movie
         }
@@ -309,6 +313,10 @@ public class File: Object, Codable {
         return onlyOffice || onlyOfficeConvertExtension != nil
     }
 
+    public var isBookmark: Bool {
+        return self.extension == "url" || self.extension == "webloc"
+    }
+
     public var `extension`: String {
         return localUrl.pathExtension
     }
@@ -345,6 +353,8 @@ public class File: Object, Codable {
     public var convertedType: ConvertedType {
         if isDirectory {
             return .folder
+        } else if isBookmark {
+            return .url
         } else {
             return ConvertedType(rawValue: rawConvertedType ?? "") ?? .unknown
         }
@@ -395,6 +405,33 @@ public class File: Object, Codable {
                 }
             }
         } else {
+            return nil
+        }
+    }
+
+    public func getBookmarkURL() -> URL? {
+        do {
+            var urlStr: String?
+            if self.extension == "url" {
+                let content = try String(contentsOf: localUrl)
+                let components = content.components(separatedBy: "URL=")
+                if components.count > 1 {
+                    urlStr = components[1]
+                }
+            } else if self.extension == "webloc" {
+                let decoder = PropertyListDecoder()
+                let data = try Data(contentsOf: localUrl)
+                let content = try decoder.decode([String: String].self, from: data)
+                urlStr = content["URL"]
+            }
+
+            if let urlStr = urlStr {
+                return URL(string: urlStr)
+            } else {
+                return nil
+            }
+        } catch {
+            print("Error while decoding bookmark: \(error)")
             return nil
         }
     }
