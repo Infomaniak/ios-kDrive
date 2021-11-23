@@ -222,8 +222,8 @@
         "repositoryURL": "https://github.com/adam-fowler/mqtt-nio",
         "state": {
           "branch": null,
-          "revision": "8f728444098e2349d90abfcc8f00dc3bde443049",
-          "version": "2.4.0"
+          "revision": "55da431a0f59e008c889e79495a4cd9fe194d25c",
+          "version": "2.5.1"
         }
       },
       {

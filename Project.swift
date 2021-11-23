@@ -54,7 +54,7 @@ let project = Project(name: "kDrive",
             .package(url: "https://github.com/PhilippeWeidmann/SnackBar.swift", .upToNextMajor(from: "0.1.2")),
             .package(url: "https://github.com/flowbe/SwiftRegex.git", .upToNextMajor(from: "1.0.0")),
             .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "7.2.9")),
-            .package(url: "https://github.com/adam-fowler/mqtt-nio", .exact("2.4.0")),
+            .package(url: "https://github.com/adam-fowler/mqtt-nio", .upToNextMajor(from: "2.4.0")),
             .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "8.0.0")),
             .package(url: "https://github.com/airbnb/HorizonCalendar.git", .upToNextMajor(from: "1.0.0")),
             .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0"))
