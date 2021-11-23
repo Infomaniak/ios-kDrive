@@ -237,7 +237,7 @@ public class UploadQueue {
             return
         }
 
-        if file.realm == nil {
+        if !file.isManagedByRealm {
             // Save drive and directory
             UserDefaults.shared.lastSelectedUser = file.userId
             UserDefaults.shared.lastSelectedDrive = file.driveId
@@ -245,7 +245,7 @@ public class UploadQueue {
         }
 
         try? realm.safeWrite {
-            if file.realm == nil {
+            if !file.isManagedByRealm {
                 realm.add(file, update: .modified)
             }
             if file.error != nil {

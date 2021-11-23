@@ -360,14 +360,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     private func downloadFileIfNeeded(at indexPath: IndexPath) {
-        var currentFile = previewFiles[indexPath.row]
-        if currentFile.realm == nil {
-            if let file = driveFileManager.getCachedFile(id: currentFile.id, freeze: false) {
-                currentFile = file
-            } else {
-                SentrySDK.capture(message: "Got a file that doesn't exist in Realm in PreviewViewController!")
-            }
-        }
+        let currentFile = previewFiles[indexPath.row]
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
         if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {

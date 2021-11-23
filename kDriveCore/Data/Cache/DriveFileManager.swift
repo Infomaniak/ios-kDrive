@@ -616,25 +616,26 @@ public class DriveFileManager {
 
     public func setFileShareLink(file: File, shareLink: String?) -> File? {
         let realm = getRealm()
-        let file = realm.object(ofType: File.self, forPrimaryKey: file.id)
-        try? realm.write {
-            file?.shareLink = shareLink
-            file?.rights?.canBecomeLink = shareLink == nil
-        }
-        if let file = file {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+            try? realm.write {
+                file.shareLink = shareLink
+                file.rights?.canBecomeLink = shareLink == nil
+            }
             notifyObserversWith(file: file)
+
+            return file
+        } else {
+            return nil
         }
-        return file
     }
 
     public func setFileCollaborativeFolder(file: File, collaborativeFolder: String?) {
         let realm = getRealm()
-        let file = realm.object(ofType: File.self, forPrimaryKey: file.id)
-        try? realm.write {
-            file?.collaborativeFolder = collaborativeFolder
-            file?.rights?.canBecomeCollab = collaborativeFolder == nil
-        }
-        if let file = file {
+        if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+            try? realm.write {
+                file.collaborativeFolder = collaborativeFolder
+                file.rights?.canBecomeCollab = collaborativeFolder == nil
+            }
             notifyObserversWith(file: file)
         }
     }
@@ -1076,6 +1077,10 @@ public class DriveFileManager {
     }
 
     public func moveFile(file: File, newParent: File, completion: @escaping (CancelableResponse?, File?, Error?) -> Void) {
+        guard file.isManagedByRealm && newParent.isManagedByRealm else {
+            completion(nil, nil, DriveError.fileNotFound)
+            return
+        }
         let safeFile = ThreadSafeReference(to: file)
         let safeParent = ThreadSafeReference(to: newParent)
         apiFetcher.moveFile(file: file, newParent: newParent) { response, error in
@@ -1108,6 +1113,10 @@ public class DriveFileManager {
     }
 
     public func renameFile(file: File, newName: String, completion: @escaping (File?, Error?) -> Void) {
+        guard file.isManagedByRealm else {
+            completion(nil, DriveError.fileNotFound)
+            return
+        }
         let safeFile = ThreadSafeReference(to: file)
         apiFetcher.renameFile(file: file, newName: newName) { [self] response, error in
             let realm = getRealm()

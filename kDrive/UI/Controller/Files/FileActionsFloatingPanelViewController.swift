@@ -163,7 +163,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         // Try to get a live File
         var newFile = newFile
-        if newFile.realm == nil || newFile.isFrozen {
+        if !newFile.isManagedByRealm || newFile.isFrozen {
             if let file = driveFileManager.getCachedFile(id: newFile.id, freeze: false) {
                 newFile = file
             } else {
@@ -289,11 +289,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     internal func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
-        guard file.realm != nil else {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
-            return
-        }
-
         switch action {
         case .informations:
             let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: file)
@@ -459,6 +454,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             present(selectFolderNavigationController, animated: true)
         case .duplicate:
+            guard file.isManagedByRealm else {
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                return
+            }
             let file = self.file.freeze()
             let pathString = self.file.name as NSString
             let text = KDriveStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
@@ -489,6 +488,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             present(alert, animated: true)
         case .rename:
+            guard file.isManagedByRealm else {
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                return
+            }
             let file = self.file.freeze()
             let placeholder = file.isDirectory ? KDriveStrings.Localizable.hintInputDirName : KDriveStrings.Localizable.hintInputFileName
             let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonRename, placeholder: placeholder, text: file.name, action: KDriveStrings.Localizable.buttonSave, loading: true) { newName in
@@ -516,6 +519,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             present(alert, animated: true)
         case .delete:
+            guard file.isManagedByRealm else {
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                return
+            }
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
             let file = self.file.freeze()
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveStrings.Localizable.buttonMove, destructive: true, loading: true) {
@@ -568,6 +575,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             present(alert, animated: true)
         case .leaveShare:
+            guard file.isManagedByRealm else {
+                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                return
+            }
             let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)
             let file = self.file.freeze()
             let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalLeaveShareTitle, message: attrString, action: KDriveStrings.Localizable.buttonLeaveShare, loading: true) {

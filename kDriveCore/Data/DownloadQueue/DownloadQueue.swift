@@ -78,16 +78,16 @@ public class DownloadQueue {
     // MARK: - Public methods
 
     public func addToQueue(file: File, userId: Int = AccountManager.instance.currentUserId, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
-        dispatchQueue.async { [driveId = file.driveId, fileId = file.id] in
+        dispatchQueue.async { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
             guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
                   let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
-                  let file = driveFileManager.getCachedFile(id: fileId),
+                  let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {
                 return
             }
 
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.bestSession, itemIdentifier: itemIdentifier)
-            operation.completionBlock = { [fileId = file.id] in
+            operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
                     self.publishFileDownloaded(fileId: fileId, error: operation.error)
@@ -118,16 +118,16 @@ public class DownloadQueue {
     }
 
     public func temporaryDownload(file: File, userId: Int = AccountManager.instance.currentUserId, onOperationCreated: @escaping (DownloadOperation?) -> Void, completion: @escaping (DriveError?) -> Void) {
-        dispatchQueue.async(qos: .userInitiated) { [driveId = file.driveId, fileId = file.id] in
+        dispatchQueue.async(qos: .userInitiated) { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
             guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
                   let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
-                  let file = driveFileManager.getCachedFile(id: fileId),
+                  let file = isManagedByRealm ? driveFileManager.getCachedFile(id: fileId) : file,
                   !self.hasOperation(for: file) else {
                 return
             }
 
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
-            operation.completionBlock = { [fileId = file.id] in
+            operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
                     completion(operation.error)
