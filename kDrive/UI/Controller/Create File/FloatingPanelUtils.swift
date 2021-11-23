@@ -28,8 +28,9 @@ class DriveFloatingPanelController: FloatingPanelController {
         appearance.backgroundColor = KDriveAsset.backgroundCardViewColor.color
         surfaceView.appearance = appearance
         surfaceView.grabberHandlePadding = 16
+        surfaceView.grabberHandleSize = CGSize(width: 45, height: 5)
         surfaceView.grabberHandle.barColor = KDriveAsset.iconColor.color.withAlphaComponent(0.4)
-        surfaceView.contentPadding = UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0)
+        surfaceView.contentPadding = UIEdgeInsets(top: 24, left: 0, bottom: 0, right: 0)
         backdropView.dismissalTapGestureRecognizer.isEnabled = true
     }
 
