@@ -209,7 +209,13 @@ public class Drive: Object, Codable {
     override public init() {}
 
     public func categories(for file: File) -> [Category] {
-        let fileCategoriesIds = Array(file.categories.sorted(by: \.addedToFileAt, ascending: true)).map(\.id)
+        let fileCategoriesIds: [Int]
+        if file.realm == nil {
+            // File is not managed by Realm: cannot use the `.sorted(by:)` method :(
+            fileCategoriesIds = file.categories.sorted { $0.addedToFileAt.compare($1.addedToFileAt) == .orderedAscending }.map(\.id)
+        } else {
+            fileCategoriesIds = Array(file.categories.sorted(by: \.addedToFileAt, ascending: true)).map(\.id)
+        }
         let categories = categories.filter(NSPredicate(format: "id IN %@", fileCategoriesIds))
         // Sort the categories
         return fileCategoriesIds.compactMap { id in categories.first { $0.id == id } }
