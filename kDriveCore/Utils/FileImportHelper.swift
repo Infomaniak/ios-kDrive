@@ -111,10 +111,14 @@ public class FileImportHelper {
         for itemProvider in itemProviders {
             dispatchGroup.enter()
             if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && itemProvider.registeredTypeIdentifiers.count == 1 {
-                // We don't handle saving web url
-                // TODO: When resolving issue https://github.com/Infomaniak/ios-kDrive/issues/367 add support for importing urls
-                progress.completedUnitCount += perItemUnitCount
-                dispatchGroup.leave()
+                let childProgress = getURL(from: itemProvider) { url in
+                    if let url = url {
+                        let name = itemProvider.suggestedName ?? self.getDefaultFileName().addingExtension("webloc")
+                        items.append(ImportedFile(name: name, path: url, uti: .url))
+                    }
+                    dispatchGroup.leave()
+                }
+                progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.plainText.identifier)
                 && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier)
                 && itemProvider.canLoadObject(ofClass: String.self) {
@@ -254,6 +258,34 @@ public class FileImportHelper {
         } else {
             return itemProvider.registeredTypeIdentifiers.first
         }
+    }
+
+    private func getURL(from itemProvider: NSItemProvider, completion: @escaping (URL?) -> Void) -> Progress {
+        let progress = Progress(totalUnitCount: 10)
+        let childProgress = itemProvider.loadObject(ofClass: URL.self) { url, error in
+            if let error = error {
+                DDLogError("Error while loading URL: \(error)")
+                completion(nil)
+            }
+
+            if let url = url {
+                // Save the URL as a webloc file (plist)
+                let content = ["URL": url.absoluteString]
+                let targetURL = self.generateImportURL(for: nil).appendingPathExtension("webloc")
+                do {
+                    let encoder = PropertyListEncoder()
+                    let data = try encoder.encode(content)
+                    try data.write(to: targetURL)
+                    completion(targetURL)
+                } catch {
+                    DDLogError("Error while loading URL: \(error)")
+                    completion(nil)
+                }
+            }
+            progress.completedUnitCount += 2
+        }
+        progress.addChild(childProgress, withPendingUnitCount: 8)
+        return progress
     }
 
     private func getTextFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
