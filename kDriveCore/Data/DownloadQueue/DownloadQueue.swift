@@ -117,7 +117,7 @@ public class DownloadQueue {
         }
     }
 
-    public func temporaryDownload(file: File, userId: Int = AccountManager.instance.currentUserId, onOperationCreated: @escaping (DownloadOperation?) -> Void, completion: @escaping (DriveError?) -> Void) {
+    public func temporaryDownload(file: File, userId: Int = AccountManager.instance.currentUserId, onOperationCreated: ((DownloadOperation?) -> Void)? = nil, completion: @escaping (DriveError?) -> Void) {
         dispatchQueue.async(qos: .userInitiated) { [driveId = file.driveId, fileId = file.id, isManagedByRealm = file.isManagedByRealm] in
             guard let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
                   let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive),
@@ -135,7 +135,7 @@ public class DownloadQueue {
             }
             operation.start()
             self.operationsInQueue[file.id] = operation
-            onOperationCreated(operation)
+            onOperationCreated?(operation)
         }
     }
 

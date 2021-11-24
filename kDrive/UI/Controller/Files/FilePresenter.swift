@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import SafariServices
 import UIKit
 
 class FilePresenter {
@@ -89,6 +90,28 @@ class FilePresenter {
             } else {
                 navigationController?.pushViewController(nextVC, animated: true)
             }
+        } else if file.isBookmark {
+            // Open bookmark URL
+            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
+                if let url = file.getBookmarkURL() {
+                    presentSafariViewController(url: url)
+                } else {
+                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGetBookmarkURL)
+                }
+            } else {
+                // Download file
+                DownloadQueue.instance.temporaryDownload(file: file) { error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            UIConstants.showSnackBar(message: error.localizedDescription)
+                        } else if let url = file.getBookmarkURL() {
+                            self.presentSafariViewController(url: url)
+                        } else {
+                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGetBookmarkURL)
+                        }
+                    }
+                }
+            }
         } else {
             // Show file preview
             let files = files.filter { !$0.isDirectory && !$0.isTrashed }
@@ -106,5 +129,10 @@ class FilePresenter {
         if let driveFloatingPanelController = driveFloatingPanelController {
             viewController?.present(driveFloatingPanelController, animated: animated)
         }
+    }
+
+    private func presentSafariViewController(url: URL, animated: Bool = true) {
+        let safariViewController = SFSafariViewController(url: url)
+        viewController?.present(safariViewController, animated: animated)
     }
 }

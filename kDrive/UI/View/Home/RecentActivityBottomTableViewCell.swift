@@ -37,7 +37,7 @@ class RecentActivityBottomTableViewCell: UITableViewCell {
         } else {
             fileImage.image = recentActivity.file?.icon ?? ConvertedType.unknown.icon
             fileNameLabel.text = recentActivity.file?.name ?? String(recentActivity.path.split(separator: "/").last ?? "")
-            fileImage.tintColor = KDriveAsset.infomaniakColor.color
+            fileImage.tintColor = recentActivity.file?.convertedType.tintColor
         }
         fileImage.backgroundColor = nil
     }

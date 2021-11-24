@@ -176,7 +176,7 @@ class SearchFiltersViewController: UITableViewController {
             return nil
         case .type:
             var fileTypes = ConvertedType.allCases
-            fileTypes.removeAll { $0 == .font || $0 == .unknown }
+            fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
             let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: filterType.title, delegate: self)
             present(floatingPanelController, animated: true)
             return nil
