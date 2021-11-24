@@ -163,7 +163,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
-        self.file = file.isFrozen || file.realm == nil ? file : file.freeze()
+        self.file = file.isFrozen || !file.isManagedByRealm ? file : file.freeze()
         categories = driveFileManager.drive.categories(for: file)
         self.selectionMode = selectionMode
         collectionView?.isHidden = file.categories.isEmpty
