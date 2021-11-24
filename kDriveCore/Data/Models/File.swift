@@ -51,9 +51,18 @@ public enum ConvertedType: String, CaseIterable {
         case .unknown:
             return KDriveCoreAsset.fileDefault.image
         case .url:
-            return KDriveCoreAsset.reply.image
+            return KDriveCoreAsset.url.image
         case .video:
             return KDriveCoreAsset.fileVideo.image
+        }
+    }
+
+    public var tintColor: UIColor? {
+        switch self {
+        case .url:
+            return KDriveCoreAsset.secondaryTextColor.color
+        default:
+            return nil
         }
     }
 
