@@ -52,14 +52,7 @@ class MySharesViewController: FileListViewController {
                 }
             }
         } else {
-            driveFileManager.apiFetcher.getFileListForDirectory(driveId: driveFileManager.drive.id, parentId: currentDirectory.id, page: page, sortType: sortType) { response, error in
-                if let data = response?.data {
-                    let children = data.children
-                    completion(.success(Array(children)), children.count == DriveApiFetcher.itemPerPage, false)
-                } else {
-                    completion(.failure(error ?? DriveError.localError), false, false)
-                }
-            }
+            super.getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
         }
     }
 
