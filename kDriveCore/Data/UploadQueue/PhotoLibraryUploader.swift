@@ -31,6 +31,8 @@ public class PhotoLibraryUploader {
 
     private let requestImageOption = PHImageRequestOptions()
     private let requestVideoOption = PHVideoRequestOptions()
+    private let requestResourceOption = PHAssetResourceRequestOptions()
+
     private let dateFormatter = DateFormatter()
     private var exportSessions = Set<AVAssetExportSession>()
 
@@ -44,6 +46,8 @@ public class PhotoLibraryUploader {
         requestVideoOption.isNetworkAccessAllowed = true
         requestVideoOption.version = .current
         requestVideoOption.progressHandler = progressHandler
+
+        requestResourceOption.isNetworkAccessAllowed = true
 
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
 
@@ -85,20 +89,31 @@ public class PhotoLibraryUploader {
         }
     }
 
+    private func getBestResourceForAsset(asset: PHAsset) -> PHAssetResource? {
+        let resources = PHAssetResource.assetResources(for: asset)
+
+        if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizeVideo }) {
+            return modifiedVideoResource
+        } else if let originalVideoResource = resources.first(where: { $0.type == .video }) {
+            return originalVideoResource
+        } else {
+            return nil
+        }
+    }
+
     func getUrlForPHAsset(_ asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
         if asset.mediaType == .video {
-            _ = PHImageManager.default().requestAVAsset(forVideo: asset, options: requestVideoOption) { asset, _, _ in
-                if let assetUrl = (asset as? AVURLAsset)?.url {
-                    let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
-                    do {
-                        try FileManager.default.copyOrReplace(sourceUrl: assetUrl, destinationUrl: targetURL)
-                        completion(targetURL)
-                    } catch {
+            if let resource = getBestResourceForAsset(asset: asset) {
+                let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
+                PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption) { error in
+                    if error != nil {
                         completion(nil)
+                    } else {
+                        completion(targetURL)
                     }
-                } else {
-                    completion(nil)
                 }
+            } else {
+                completion(nil)
             }
         } else if asset.mediaType == .image {
             _ = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
