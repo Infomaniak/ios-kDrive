@@ -54,16 +54,8 @@ class EditCategoryViewController: UITableViewController {
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: CategoryColorTableViewCell.self)
 
-        title = create ? KDriveStrings.Localizable.createCategoryTitle : KDriveStrings.Localizable.editCategoryTitle
-
-        if !create {
-            rows.insert(.editInfo, at: 0)
-            // Remove name edition for predefined categories
-            if category?.isPredefined == true, let index = rows.firstIndex(of: .name) {
-                rows.remove(at: index)
-            }
-        }
-
+        updateTitle()
+        setRows()
         hideKeyboardWhenTappedAround()
     }
 
@@ -74,10 +66,65 @@ class EditCategoryViewController: UITableViewController {
         }
     }
 
+    private func updateTitle() {
+        title = create ? KDriveStrings.Localizable.createCategoryTitle : KDriveStrings.Localizable.editCategoryTitle
+    }
+
+    private func setRows() {
+        rows = [.name, .color]
+        if !create {
+            rows.insert(.editInfo, at: 0)
+            // Remove name edition for predefined categories
+            if category?.isPredefined == true, let index = rows.firstIndex(of: .name) {
+                rows.remove(at: index)
+            }
+        }
+    }
+
     static func instantiate(driveFileManager: DriveFileManager) -> EditCategoryViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
         viewController.driveFileManager = driveFileManager
         return viewController
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        if let categoryId = category?.id {
+            coder.encode(categoryId, forKey: "CategoryId")
+        }
+        if let fileId = fileToAdd?.id {
+            coder.encode(fileId, forKey: "FileId")
+        }
+        coder.encode(name, forKey: "Name")
+        coder.encode(color, forKey: "Color")
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let categoryId = coder.decodeInteger(forKey: "CategoryId")
+        let fileId = coder.decodeInteger(forKey: "FileId")
+        if let name = coder.decodeObject(of: NSString.self, forKey: "Name") {
+            self.name = name as String
+        }
+        if let color = coder.decodeObject(of: NSString.self, forKey: "Color") {
+            self.color = color as String
+        }
+
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        category = driveFileManager.drive.categories.first { $0.id == categoryId }
+        fileToAdd = driveFileManager.getCachedFile(id: fileId)
+        // Reload view
+        updateTitle()
+        setRows()
     }
 
     // MARK: - Table view data source

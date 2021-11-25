@@ -64,7 +64,7 @@ class ManageCategoriesViewController: UITableViewController {
         tableView.register(cellView: CategoryTableViewCell.self)
         tableView.keyboardDismissMode = .onDrag
 
-        title = file != nil ? KDriveStrings.Localizable.manageCategoriesTitle : KDriveStrings.Localizable.addCategoriesTitle
+        updateTitle()
 
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.obscuresBackgroundDuringPresentation = false
@@ -80,28 +80,10 @@ class ManageCategoriesViewController: UITableViewController {
             navigationItem.leftBarButtonItem = closeButton
         }
 
-        if !driveFileManager.drive.categoryRights.canCreateCategory || !canEdit {
-            navigationItem.rightBarButtonItem = nil
-        }
-
         definesPresentationContext = true
 
-        if let file = file {
-            // Observe file changes
-            driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
-                DispatchQueue.main.async { [weak self] in
-                    guard !newFile.isInvalidated else {
-                        if self?.presentingViewController != nil && viewControllersCount < 2 {
-                            self?.closeButtonPressed()
-                        } else {
-                            self?.navigationController?.popViewController(animated: true)
-                        }
-                        return
-                    }
-                    self?.file = newFile
-                }
-            }
-        }
+        updateNavigationItem()
+        setUpObserver()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -120,6 +102,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     func reloadCategories() {
+        guard driveFileManager != nil else { return }
         categories = Array(driveFileManager.drive.categories.sorted(by: \.userUsageCount, ascending: false))
         // Select categories
         if let file = file {
@@ -147,6 +130,35 @@ class ManageCategoriesViewController: UITableViewController {
         }
     }
 
+    private func updateTitle() {
+        title = file != nil ? KDriveStrings.Localizable.manageCategoriesTitle : KDriveStrings.Localizable.addCategoriesTitle
+    }
+
+    private func updateNavigationItem() {
+        if driveFileManager?.drive.categoryRights.canCreateCategory == false || !canEdit {
+            navigationItem.rightBarButtonItem = nil
+        }
+    }
+
+    private func setUpObserver() {
+        guard let file = file else { return }
+        let viewControllersCount = navigationController?.viewControllers.count ?? 0
+        // Observe file changes
+        driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
+            DispatchQueue.main.async { [weak self] in
+                guard !newFile.isInvalidated else {
+                    if self?.presentingViewController != nil && viewControllersCount < 2 {
+                        self?.closeButtonPressed()
+                    } else {
+                        self?.navigationController?.popViewController(animated: true)
+                    }
+                    return
+                }
+                self?.file = newFile
+            }
+        }
+    }
+
     private func category(at indexPath: IndexPath) -> kDriveCore.Category {
         return isFiltering ? filteredCategories[indexPath.row] : categories[indexPath.row]
     }
@@ -166,6 +178,34 @@ class ManageCategoriesViewController: UITableViewController {
     static func instantiateInNavigationController(file: File? = nil, driveFileManager: DriveFileManager) -> UINavigationController {
         let viewController = instantiate(file: file, driveFileManager: driveFileManager)
         return UINavigationController(rootViewController: viewController)
+    }
+
+    // MARK: - State restoration
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
+
+        coder.encode(driveFileManager.drive.id, forKey: "DriveId")
+        if let fileId = file?.id {
+            coder.encode(fileId, forKey: "FileId")
+        }
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+
+        let driveId = coder.decodeInteger(forKey: "DriveId")
+        let fileId = coder.decodeInteger(forKey: "FileId")
+
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
+            return
+        }
+        self.driveFileManager = driveFileManager
+        file = driveFileManager.getCachedFile(id: fileId)
+        // Reload view
+        updateTitle()
+        updateNavigationItem()
+        setUpObserver()
     }
 
     // MARK: - Table view data source
