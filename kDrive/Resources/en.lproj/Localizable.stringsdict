@@ -242,6 +242,22 @@
 			<string>%d users</string>
 		</dict>
 	</dict>
+	<key>snackBarUploadError</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>A file could not be imported</string>
+			<key>other</key>
+			<string>%d files could not be imported</string>
+		</dict>
+	</dict>
 	<key>uploadInProgressNumberFile</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

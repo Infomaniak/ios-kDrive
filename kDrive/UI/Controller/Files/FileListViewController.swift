@@ -1187,13 +1187,21 @@ extension FileListViewController: UICollectionViewDropDelegate {
     func handleExternalDrop(externalFiles: [NSItemProvider], destinationDirectory: File) {
         if !externalFiles.isEmpty {
             UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
-            _ = FileImportHelper.instance.importItems(externalFiles) { [weak self] importedFiles in
+            _ = FileImportHelper.instance.importItems(externalFiles) { [weak self] importedFiles, errorCount in
                 guard let self = self else { return }
+                if errorCount > 0 {
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackBarUploadError(errorCount))
+                    }
+                }
+                guard !importedFiles.isEmpty else {
+                    return
+                }
                 do {
                     try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
                 } catch {
                     DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+                        UIConstants.showSnackBar(message: error.localizedDescription)
                     }
                 }
             }

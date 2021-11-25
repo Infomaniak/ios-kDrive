@@ -90,9 +90,18 @@ public enum ScanFileFormat: Int, CaseIterable {
     }
 }
 
-public enum ImportError: Error {
+public enum ImportError: LocalizedError {
     case accessDenied
     case emptyImageData
+
+    public var errorDescription: String? {
+        switch self {
+        case .accessDenied:
+            return KDriveCoreStrings.Localizable.allFileAddRightError
+        case .emptyImageData:
+            return KDriveCoreStrings.Localizable.errorUpload
+        }
+    }
 }
 
 public class FileImportHelper {
@@ -102,11 +111,12 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
-    public func importItems(_ itemProviders: [NSItemProvider], completion: @escaping ([ImportedFile]) -> Void) -> Progress {
+    public func importItems(_ itemProviders: [NSItemProvider], completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
         let perItemUnitCount: Int64 = 10
         let progress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
         let dispatchGroup = DispatchGroup()
         var items = [ImportedFile]()
+        var errorCount = 0
 
         for itemProvider in itemProviders {
             dispatchGroup.enter()
@@ -118,6 +128,7 @@ public class FileImportHelper {
                         items.append(ImportedFile(name: name, path: fileURL, uti: .url))
                     case .failure(let error):
                         DDLogError("[FileImportHelper] Error while getting URL: \(error)")
+                        errorCount += 1
                     }
                     dispatchGroup.leave()
                 }
@@ -132,6 +143,7 @@ public class FileImportHelper {
                         items.append(ImportedFile(name: name, path: fileURL, uti: .plainText))
                     case .failure(let error):
                         DDLogError("[FileImportHelper] Error while getting text: \(error)")
+                        errorCount += 1
                     }
                     dispatchGroup.leave()
                 }
@@ -143,6 +155,7 @@ public class FileImportHelper {
                         items.append(ImportedFile(name: filename, path: fileURL, uti: UTI(typeIdentifier) ?? .data))
                     case .failure(let error):
                         DDLogError("[FileImportHelper] Error while getting file: \(error)")
+                        errorCount += 1
                     }
                     dispatchGroup.leave()
                 }
@@ -150,12 +163,13 @@ public class FileImportHelper {
             } else {
                 // For some reason registeredTypeIdentifiers is empty (shouldn't occur)
                 progress.completedUnitCount += perItemUnitCount
+                errorCount += 1
                 dispatchGroup.leave()
             }
         }
 
         dispatchGroup.notify(queue: .global()) {
-            completion(items)
+            completion(items, errorCount)
         }
 
         return progress
