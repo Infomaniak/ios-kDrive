@@ -44,8 +44,7 @@ public class DriveList: Codable {
     }
 }
 
-public class DriveUsersCategories: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId: String = ""
+public class DriveUsersCategories: EmbeddedObject, Codable {
     @Persisted public var account: List<Int>
     @Persisted public var drive: List<Int>
     @Persisted public var internalUsers: List<Int>
@@ -59,15 +58,9 @@ public class DriveUsersCategories: Object, Codable {
     }
 }
 
-public class DriveTeamsCategories: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId: String = ""
+public class DriveTeamsCategories: EmbeddedObject, Codable {
     @Persisted public var account: List<Int>
     @Persisted public var drive: List<Int>
-
-    enum CodingKeys: String, CodingKey {
-        case account
-        case drive
-    }
 }
 
 public enum DrivePack: String, Codable {
@@ -77,8 +70,7 @@ public enum DrivePack: String, Codable {
     case free
 }
 
-public class DrivePackFunctionality: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId: String = ""
+public class DrivePackFunctionality: EmbeddedObject, Codable {
     @Persisted public var versionsNumber: Int = 0
     @Persisted public var dropbox = false
     @Persisted public var versioning = false
@@ -96,19 +88,13 @@ public class DrivePackFunctionality: Object, Codable {
     }
 }
 
-public class DrivePreferences: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId: String = ""
+public class DrivePreferences: EmbeddedObject, Codable {
     @Persisted public var color: String
     @Persisted public var hide: Bool
 
     override public init() {
         color = "#0098FF"
         hide = false
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case color
-        case hide
     }
 }
 
@@ -146,12 +132,7 @@ public class Drive: Object, Codable {
     @Persisted public var productIsInApp = false
     @Persisted public var userId: Int = 0 {
         didSet {
-            let objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
-            self.objectId = objectId
-            _preferences?.objectId = objectId
-            packFunctionality?.objectId = objectId
-            _users?.objectId = objectId
-            _teams?.objectId = objectId
+            self.objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
         }
     }
 
