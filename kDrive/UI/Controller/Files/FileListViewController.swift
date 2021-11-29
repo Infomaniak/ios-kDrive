@@ -1099,6 +1099,8 @@ extension FileListViewController: TopScrollable {
 
 extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        guard indexPath.item < sortedFiles.count else { return [] }
+
         let draggedFile = sortedFiles[indexPath.item]
         guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
