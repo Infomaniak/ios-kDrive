@@ -564,11 +564,11 @@ extension HomeViewController {
             case .recentFiles:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeRecentFilesHeaderView.self, for: indexPath)
                 headerView.titleLabel.text = currentRecentFilesController.title
-                headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
+                headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.largelist.image : KDriveAsset.grid.image, for: .normal)
                 headerView.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
                 headerView.actionHandler = { button in
                     UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
-                    button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.list.image : KDriveAsset.largelist.image, for: .normal)
+                    button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.largelist.image : KDriveAsset.grid.image, for: .normal)
                     collectionView.performBatchUpdates {
                         collectionView.reloadSections([1])
                     } completion: { _ in
