@@ -328,7 +328,7 @@ extension ManageCategoriesViewController: CategoryCellDelegate {
         floatingPanelViewController.delegate = manageCategoryViewController
 
         floatingPanelViewController.set(contentViewController: manageCategoryViewController)
-        floatingPanelViewController.track(scrollView: manageCategoryViewController.tableView)
+        floatingPanelViewController.track(scrollView: manageCategoryViewController.collectionView)
         present(floatingPanelViewController, animated: true)
     }
 }

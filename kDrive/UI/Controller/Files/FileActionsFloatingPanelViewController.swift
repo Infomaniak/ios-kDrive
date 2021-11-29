@@ -126,13 +126,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     // MARK: - Public methods
 
-    init() {
-        super.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    convenience init() {
+        self.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
     }
 
     override func viewDidLoad() {
