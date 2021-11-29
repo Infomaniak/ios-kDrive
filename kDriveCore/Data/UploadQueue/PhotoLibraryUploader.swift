@@ -32,7 +32,6 @@ public class PhotoLibraryUploader {
     private let requestResourceOption = PHAssetResourceRequestOptions()
 
     private let dateFormatter = DateFormatter()
-    private var exportSessions = Set<AVAssetExportSession>()
 
     private init() {
         requestResourceOption.isNetworkAccessAllowed = true
@@ -69,7 +68,7 @@ public class PhotoLibraryUploader {
         }
     }
 
-    private func getBestResourceForAsset(asset: PHAsset) -> PHAssetResource? {
+    private func bestResource(for asset: PHAsset) -> PHAssetResource? {
         let resources = PHAssetResource.assetResources(for: asset)
 
         // We take the edited asset if there is one else we take the original
@@ -78,20 +77,24 @@ public class PhotoLibraryUploader {
                 return modifiedVideoResource
             } else if let originalVideoResource = resources.first(where: { $0.type == .video }) {
                 return originalVideoResource
+            } else {
+                return resources.first
             }
         } else if asset.mediaType == .image {
             if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizePhoto }) {
                 return modifiedVideoResource
             } else if let originalVideoResource = resources.first(where: { $0.type == .photo }) {
                 return originalVideoResource
+            } else {
+                return resources.first
             }
         }
 
         return nil
     }
 
-    func getUrlForPHAsset(_ asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
-        if let resource = getBestResourceForAsset(asset: asset) {
+    func getUrl(for asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
+        if let resource = bestResource(for: asset) {
             let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
             PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption) { error in
                 if let error = error {
@@ -113,7 +116,7 @@ public class PhotoLibraryUploader {
         var url: URL?
         let getUrlLock = DispatchGroup()
         getUrlLock.enter()
-        getUrlForPHAsset(asset) { fetchedUrl in
+        getUrl(for: asset) { fetchedUrl in
             url = fetchedUrl
             getUrlLock.leave()
         }
