@@ -1063,7 +1063,7 @@ public class DriveFileManager {
                 file.signalChanges(userId: self.drive.userId)
                 self.backgroundQueue.async { [self] in
                     let localRealm = getRealm()
-                    removeFileInDatabase(fileId: fileId, cascade: false, withTransaction: true, using: localRealm)
+                    removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: true, using: localRealm)
                     DispatchQueue.main.async {
                         completion(response?.data, error)
                     }

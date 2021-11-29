@@ -150,7 +150,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     private var currentRecentFilesController: HomeRecentFilesController!
     private var recentFilesControllersCache = [String: HomeRecentFilesController]()
     private var recentFilesControllers: [HomeRecentFilesController.Type] {
-        if driveFileManager.drive.isProOrTeam {
+        if driveFileManager?.drive.isProOrTeam == true {
             return [HomeRecentActivitiesController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
         } else {
             return [HomeLastModificationsController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
