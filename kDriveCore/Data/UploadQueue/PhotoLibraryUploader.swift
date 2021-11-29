@@ -29,38 +29,18 @@ public class PhotoLibraryUploader {
         return settings != nil
     }
 
-    private let requestImageOption = PHImageRequestOptions()
-    private let requestVideoOption = PHVideoRequestOptions()
     private let requestResourceOption = PHAssetResourceRequestOptions()
 
     private let dateFormatter = DateFormatter()
     private var exportSessions = Set<AVAssetExportSession>()
 
     private init() {
-        requestImageOption.deliveryMode = .highQualityFormat
-        requestImageOption.isSynchronous = false
-        requestImageOption.isNetworkAccessAllowed = true
-        requestImageOption.progressHandler = progressHandler
-
-        requestVideoOption.deliveryMode = .highQualityFormat
-        requestVideoOption.isNetworkAccessAllowed = true
-        requestVideoOption.version = .current
-        requestVideoOption.progressHandler = progressHandler
-
         requestResourceOption.isNetworkAccessAllowed = true
 
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
 
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
             self.settings = PhotoSyncSettings(value: settings)
-        }
-    }
-
-    private let progressHandler: PHAssetImageProgressHandler = { _, error, _, _ in
-        if let error = error {
-            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
-            breadcrumb.message = error.localizedDescription
-            SentrySDK.addBreadcrumb(crumb: breadcrumb)
         }
     }
 
@@ -92,46 +72,37 @@ public class PhotoLibraryUploader {
     private func getBestResourceForAsset(asset: PHAsset) -> PHAssetResource? {
         let resources = PHAssetResource.assetResources(for: asset)
 
-        if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizeVideo }) {
-            return modifiedVideoResource
-        } else if let originalVideoResource = resources.first(where: { $0.type == .video }) {
-            return originalVideoResource
-        } else {
-            return nil
+        // We take the edited asset if there is one else we take the original
+        if asset.mediaType == .video {
+            if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizeVideo }) {
+                return modifiedVideoResource
+            } else if let originalVideoResource = resources.first(where: { $0.type == .video }) {
+                return originalVideoResource
+            }
+        } else if asset.mediaType == .image {
+            if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizePhoto }) {
+                return modifiedVideoResource
+            } else if let originalVideoResource = resources.first(where: { $0.type == .photo }) {
+                return originalVideoResource
+            }
         }
+
+        return nil
     }
 
     func getUrlForPHAsset(_ asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
-        if asset.mediaType == .video {
-            if let resource = getBestResourceForAsset(asset: asset) {
-                let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
-                PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption) { error in
-                    if error != nil {
-                        completion(nil)
-                    } else {
-                        completion(targetURL)
-                    }
-                }
-            } else {
-                completion(nil)
-            }
-        } else if asset.mediaType == .image {
-            _ = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: requestImageOption) { data, _, _, _ in
-                self.handlePHAssetRequestData(data: data, completion: completion)
-            }
-        } else {
-            completion(nil)
-        }
-    }
-
-    private func handlePHAssetRequestData(data: Data?, completion: @escaping ((URL?) -> Void)) {
-        if let data = data {
+        if let resource = getBestResourceForAsset(asset: asset) {
             let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
-            do {
-                try data.write(to: targetURL)
-                completion(targetURL)
-            } catch {
-                completion(nil)
+            PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption) { error in
+                if let error = error {
+                    let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+                    breadcrumb.message = error.localizedDescription
+                    SentrySDK.addBreadcrumb(crumb: breadcrumb)
+
+                    completion(nil)
+                } else {
+                    completion(targetURL)
+                }
             }
         } else {
             completion(nil)
