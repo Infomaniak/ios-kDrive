@@ -90,9 +90,18 @@ public enum ScanFileFormat: Int, CaseIterable {
     }
 }
 
-public enum ImportError: Error {
+public enum ImportError: LocalizedError {
     case accessDenied
     case emptyImageData
+
+    public var errorDescription: String? {
+        switch self {
+        case .accessDenied:
+            return KDriveCoreStrings.Localizable.allFileAddRightError
+        case .emptyImageData:
+            return KDriveCoreStrings.Localizable.errorUpload
+        }
+    }
 }
 
 public class FileImportHelper {
@@ -102,19 +111,24 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
-    public func importItems(_ itemProviders: [NSItemProvider], completion: @escaping ([ImportedFile]) -> Void) -> Progress {
+    public func importItems(_ itemProviders: [NSItemProvider], completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
         let perItemUnitCount: Int64 = 10
         let progress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
         let dispatchGroup = DispatchGroup()
         var items = [ImportedFile]()
+        var errorCount = 0
 
         for itemProvider in itemProviders {
             dispatchGroup.enter()
             if itemProvider.hasItemConformingToTypeIdentifier(UTI.url.identifier) && itemProvider.registeredTypeIdentifiers.count == 1 {
-                let childProgress = getURL(from: itemProvider) { url in
-                    if let url = url {
-                        let name = itemProvider.suggestedName ?? self.getDefaultFileName().addingExtension("webloc")
-                        items.append(ImportedFile(name: name, path: url, uti: .url))
+                let childProgress = getURL(from: itemProvider) { result in
+                    switch result {
+                    case .success(let fileURL):
+                        let name = (itemProvider.suggestedName ?? self.getDefaultFileName()).addingExtension("webloc")
+                        items.append(ImportedFile(name: name, path: fileURL, uti: .url))
+                    case .failure(let error):
+                        DDLogError("[FileImportHelper] Error while getting URL: \(error)")
+                        errorCount += 1
                     }
                     dispatchGroup.leave()
                 }
@@ -122,19 +136,26 @@ public class FileImportHelper {
             } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.plainText.identifier)
                 && !itemProvider.hasItemConformingToTypeIdentifier(UTI.fileURL.identifier)
                 && itemProvider.canLoadObject(ofClass: String.self) {
-                let childProgress = getTextFile(from: itemProvider, typeIdentifier: UTI.plainText.identifier) { filename, url in
-                    if let url = url {
-                        let name = itemProvider.suggestedName ?? self.getDefaultFileName().addingExtension(UTI.plainText.preferredFilenameExtension ?? "txt")
-                        items.append(ImportedFile(name: filename ?? name, path: url, uti: .plainText))
+                let childProgress = getTextFile(from: itemProvider, typeIdentifier: UTI.plainText.identifier) { result in
+                    switch result {
+                    case .success(let fileURL):
+                        let name = (itemProvider.suggestedName ?? self.getDefaultFileName()).addingExtension(UTI.plainText.preferredFilenameExtension ?? "txt")
+                        items.append(ImportedFile(name: name, path: fileURL, uti: .plainText))
+                    case .failure(let error):
+                        DDLogError("[FileImportHelper] Error while getting text: \(error)")
+                        errorCount += 1
                     }
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
             } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider) {
-                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { filename, url in
-                    if let url = url {
-                        let name = itemProvider.suggestedName ?? self.getDefaultFileName().addingExtension(UTI(typeIdentifier)?.preferredFilenameExtension ?? "")
-                        items.append(ImportedFile(name: filename ?? name, path: url, uti: UTI(typeIdentifier) ?? .data))
+                let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
+                    switch result {
+                    case .success((let filename, let fileURL)):
+                        items.append(ImportedFile(name: filename, path: fileURL, uti: UTI(typeIdentifier) ?? .data))
+                    case .failure(let error):
+                        DDLogError("[FileImportHelper] Error while getting file: \(error)")
+                        errorCount += 1
                     }
                     dispatchGroup.leave()
                 }
@@ -142,12 +163,13 @@ public class FileImportHelper {
             } else {
                 // For some reason registeredTypeIdentifiers is empty (shouldn't occur)
                 progress.completedUnitCount += perItemUnitCount
+                errorCount += 1
                 dispatchGroup.leave()
             }
         }
 
         dispatchGroup.notify(queue: .global()) {
-            completion(items)
+            completion(items, errorCount)
         }
 
         return progress
@@ -260,15 +282,12 @@ public class FileImportHelper {
         }
     }
 
-    private func getURL(from itemProvider: NSItemProvider, completion: @escaping (URL?) -> Void) -> Progress {
+    private func getURL(from itemProvider: NSItemProvider, completion: @escaping (Result<URL, Error>) -> Void) -> Progress {
         let progress = Progress(totalUnitCount: 10)
         let childProgress = itemProvider.loadObject(ofClass: URL.self) { url, error in
             if let error = error {
-                DDLogError("Error while loading URL: \(error)")
-                completion(nil)
-            }
-
-            if let url = url {
+                completion(.failure(error))
+            } else if let url = url {
                 // Save the URL as a webloc file (plist)
                 let content = ["URL": url.absoluteString]
                 let targetURL = self.generateImportURL(for: nil).appendingPathExtension("webloc")
@@ -276,11 +295,12 @@ public class FileImportHelper {
                     let encoder = PropertyListEncoder()
                     let data = try encoder.encode(content)
                     try data.write(to: targetURL)
-                    completion(targetURL)
+                    completion(.success(targetURL))
                 } catch {
-                    DDLogError("Error while loading URL: \(error)")
-                    completion(nil)
+                    completion(.failure(error))
                 }
+            } else {
+                completion(.failure(DriveError.unknownError))
             }
             progress.completedUnitCount += 2
         }
@@ -288,56 +308,50 @@ public class FileImportHelper {
         return progress
     }
 
-    private func getTextFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
+    private func getTextFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (Result<URL, Error>) -> Void) -> Progress {
         let progress = Progress(totalUnitCount: 1)
         itemProvider.loadItem(forTypeIdentifier: typeIdentifier) { coding, error in
             if let error = error {
-                DDLogError("Error while loading data representation: \(error)")
-                completion(nil, nil)
-            }
-
-            let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
-
-            if let text = coding as? String {
+                completion(.failure(error))
+            } else if let text = coding as? String {
+                let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
                 do {
                     try text.write(to: targetURL, atomically: true, encoding: .utf8)
-                    completion(nil, targetURL)
+                    completion(.success(targetURL))
                 } catch {
-                    DDLogError("Error while loading data representation: \(error)")
-                    completion(nil, nil)
+                    completion(.failure(error))
                 }
             } else if let data = coding as? Data {
+                let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
                 do {
                     try data.write(to: targetURL)
-                    completion(nil, targetURL)
+                    completion(.success(targetURL))
                 } catch {
-                    DDLogError("Error while loading data representation: \(error)")
-                    completion(nil, nil)
+                    completion(.failure(error))
                 }
+            } else {
+                completion(.failure(DriveError.unknownError))
             }
             progress.completedUnitCount = 1
         }
         return progress
     }
 
-    private func getFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (String?, URL?) -> Void) -> Progress {
+    private func getFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (Result<(String, URL), Error>) -> Void) -> Progress {
         let progress = Progress(totalUnitCount: 10)
         let childProgress = itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
             if let error = error {
-                DDLogError("Error while loading file representation: \(error)")
-                completion(nil, nil)
-            }
-
-            if let url = url {
+                completion(.failure(error))
+            } else if let url = url {
                 let targetURL = self.generateImportURL(for: UTI(typeIdentifier))
-
                 do {
                     try FileManager.default.copyOrReplace(sourceUrl: url, destinationUrl: targetURL)
-                    completion(url.lastPathComponent, targetURL)
+                    completion(.success((url.lastPathComponent, targetURL)))
                 } catch {
-                    DDLogError("Error while loading file representation: \(error)")
-                    completion(nil, nil)
+                    completion(.failure(error))
                 }
+            } else {
+                completion(.failure(DriveError.unknownError))
             }
             progress.completedUnitCount += 2
         }

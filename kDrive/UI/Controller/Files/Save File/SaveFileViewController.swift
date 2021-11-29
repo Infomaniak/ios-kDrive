@@ -24,6 +24,7 @@ import UIKit
 
 class SaveFileViewController: UIViewController {
     enum SaveFileSection {
+        case alert
         case fileName
         case fileType
         case driveSelection
@@ -38,9 +39,8 @@ class SaveFileViewController: UIViewController {
     var selectedDriveFileManager: DriveFileManager?
     var selectedDirectory: File?
     var items = [ImportedFile]()
-    var skipOptionsSelection = false
+    private var errorCount = 0
     private var importProgress: Progress?
-    private var progressObserver: NSKeyValueObservation?
     private var enableButton = false {
         didSet {
             guard let footer = tableView.footerView(forSection: tableView.numberOfSections - 1) as? FooterButtonView else {
@@ -72,18 +72,10 @@ class SaveFileViewController: UIViewController {
             selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
         }
 
-        // Set table view content
-        if !importInProgress {
-            if selectedDriveFileManager == nil {
-                sections = [.fileName, .driveSelection]
-            } else {
-                sections = [.fileName, .driveSelection, .directorySelection]
-            }
-        }
-
         closeBarButtonItem.accessibilityLabel = KDriveStrings.Localizable.buttonClose
 
         tableView.separatorColor = .clear
+        tableView.register(cellView: AlertTableViewCell.self)
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: ImportingTableViewCell.self)
@@ -96,11 +88,6 @@ class SaveFileViewController: UIViewController {
 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-
-        // Immediately start import if we want to skip options and import is finished
-        if !importInProgress && skipOptionsSelection {
-            didClickOnButton()
-        }
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {
@@ -121,46 +108,44 @@ class SaveFileViewController: UIViewController {
     }
 
     deinit {
-        progressObserver?.invalidate()
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
     func setItemProviders(_ itemProviders: [NSItemProvider]) {
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles in
+        importProgress = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
-        }
-        progressObserver = importProgress?.observe(\.fractionCompleted) { _, _ in
-            // Observe progress to update table view when import is finished
-            DispatchQueue.main.async { [weak self] in
+            self?.errorCount = errorCount
+            DispatchQueue.main.async {
                 self?.updateTableViewAfterImport()
             }
         }
     }
 
     private func updateButton() {
-        enableButton = selectedDirectory != nil && items.allSatisfy { !$0.name.isEmpty } && !importInProgress
+        enableButton = selectedDirectory != nil && items.allSatisfy { !$0.name.isEmpty } && !items.isEmpty && !importInProgress
     }
 
     private func updateTableViewAfterImport() {
-        if !importInProgress {
-            if skipOptionsSelection {
-                if isViewLoaded {
-                    didClickOnButton()
-                }
+        guard !importInProgress else { return }
+        // Update table view
+        var newSections = [SaveFileSection]()
+        if errorCount > 0 {
+            newSections.append(.alert)
+        }
+        if !items.isEmpty {
+            if selectedDriveFileManager == nil {
+                newSections.append(contentsOf: [.fileName, .driveSelection])
             } else {
-                // Update UI
-                if selectedDriveFileManager == nil {
-                    sections = [.fileName, .driveSelection]
-                } else {
-                    sections = [.fileName, .driveSelection, .directorySelection]
-                }
-                if isViewLoaded {
-                    updateButton()
-                    tableView.reloadData()
-                }
+                newSections.append(contentsOf: [.fileName, .driveSelection, .directorySelection])
             }
+        }
+        sections = newSections
+        // Reload data if needed
+        if isViewLoaded {
+            updateButton()
+            tableView.reloadData()
         }
     }
 
@@ -210,6 +195,10 @@ extension SaveFileViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch sections[indexPath.section] {
+        case .alert:
+            let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
+            cell.configure(with: .warning, message: KDriveStrings.Localizable.snackBarUploadError(errorCount))
+            return cell
         case .fileName:
             let item = items[indexPath.row]
             if items.count > 1 {
@@ -272,7 +261,7 @@ extension SaveFileViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        if section == tableView.numberOfSections - 1 && !importInProgress && !skipOptionsSelection {
+        if section == tableView.numberOfSections - 1 && !importInProgress {
             let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
             view.delegate = self
             view.footerButton.isEnabled = enableButton
@@ -359,7 +348,7 @@ extension SaveFileViewController: FooterButtonDelegate {
             }
             message = items.count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveStrings.Localizable.allUploadInProgress(items[0].name)
         } catch {
-            message = KDriveStrings.Localizable.errorUpload
+            message = error.localizedDescription
         }
 
         navigationController?.dismiss(animated: true) {

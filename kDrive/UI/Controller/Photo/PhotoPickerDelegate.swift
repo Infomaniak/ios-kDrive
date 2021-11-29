@@ -28,7 +28,7 @@ class PhotoPickerDelegate: NSObject {
 
     private func handleError(_ error: Error) {
         DDLogError("Error while uploading file: \(error)")
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+        UIConstants.showSnackBar(message: error.localizedDescription)
     }
 
     private func showUploadSnackbar(count: Int, filename: String) {
@@ -81,14 +81,16 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
 @available(iOS 14, *)
 extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true) {
-            if !results.isEmpty {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
-            }
-        }
+        picker.dismiss(animated: true)
 
         if !results.isEmpty {
-            _ = FileImportHelper.instance.importItems(results.map(\.itemProvider)) { importedFiles in
+            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
+            _ = FileImportHelper.instance.importItems(results.map(\.itemProvider)) { importedFiles, errorCount in
+                if errorCount > 0 {
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackBarUploadError(errorCount))
+                    }
+                }
                 guard !importedFiles.isEmpty else {
                     return
                 }
