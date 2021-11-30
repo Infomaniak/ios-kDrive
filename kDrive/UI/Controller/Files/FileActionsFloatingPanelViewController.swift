@@ -110,9 +110,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         return driveFileManager?.drive.sharedWithMe ?? false
     }
 
-    var isProOrTeam: Bool {
-        return driveFileManager?.drive.isProOrTeam ?? false
-    }
+//    var isProOrTeam: Bool {
+//        return driveFileManager?.drive.isProOrTeam ?? false
+//    }
 
     enum Section: CaseIterable {
         case header, quickActions, actions
@@ -257,7 +257,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .manageDropbox:
                 return file.visibility == .isCollaborativeFolder
             case .folderColor:
-                return !sharedWithMe && isProOrTeam && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
+                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
@@ -404,14 +404,27 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
         case .folderColor:
-            let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(file: file, driveFileManager: driveFileManager)
-            let floatingPanelViewController = DriveFloatingPanelController()
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 312)
-            floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
-            floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
-            dismiss(animated: true) {
-                self.presentingParent?.present(floatingPanelViewController, animated: true)
+            if driveFileManager.drive.pack == .free {
+                let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = self.driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.actionHandler = { _ in
+                    driveFloatingPanelController.dismiss(animated: true) {
+                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    }
+                }
+                self.present(driveFloatingPanelController, animated: true)
+            } else {
+                let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(file: file, driveFileManager: driveFileManager)
+                let floatingPanelViewController = DriveFloatingPanelController()
+                floatingPanelViewController.isRemovalInteractionEnabled = true
+                floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 312)
+                floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
+                floatingPanelViewController.delegate = colorSelectionFloatingPanelViewController
+                floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
+                dismiss(animated: true) {
+                    self.presentingParent?.present(floatingPanelViewController, animated: true)
+                }
             }
         case .seeFolder:
             guard let viewController = presentingParent else { return }

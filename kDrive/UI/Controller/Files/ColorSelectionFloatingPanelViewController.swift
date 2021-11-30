@@ -17,6 +17,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FloatingPanel
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
@@ -146,8 +147,14 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let color = folderColors[indexPath.row]
 
-//        driveFileManager.updateFolderColor(file: file, color: color.hex) { _, _ in
-//            dismiss(animated: true)
-//        }
+        driveFileManager.updateFolderColor(file: file, color: color.hex) { _ in
+            self.dismiss(animated: true)
+        }
+    }
+}
+
+extension ColorSelectionFloatingPanelViewController: FloatingPanelControllerDelegate {
+    func floatingPanel(_ fpc: FloatingPanelController, layoutFor size: CGSize) -> FloatingPanelLayout {
+        return PlusButtonFloatingPanelLayout(height: collectionView.contentSize.height)
     }
 }
