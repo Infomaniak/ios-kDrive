@@ -51,29 +51,25 @@ class UploadQueueFoldersViewController: UITableViewController {
         // Observe uploading files
         notificationToken = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds, using: realm)
             .distinct(by: [\.parentDirectoryId])
-            .observe { [weak self] change in
+            .observe(on: .main) { [weak self] change in
                 switch change {
                 case .initial(let results):
                     self?.updateFolders(from: results)
-                    DispatchQueue.main.async {
-                        self?.tableView.reloadData()
-                        if results.isEmpty {
-                            self?.navigationController?.popViewController(animated: true)
-                        }
+                    self?.tableView.reloadData()
+                    if results.isEmpty {
+                        self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    DispatchQueue.main.async {
-                        self?.tableView.performBatchUpdates {
-                            self?.updateFolders(from: results)
-                            // Always apply updates in the following order: deletions, insertions, then modifications.
-                            // Handling insertions before deletions may result in unexpected behavior.
-                            self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                            self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                            self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                        }
-                        if results.isEmpty {
-                            self?.navigationController?.popViewController(animated: true)
-                        }
+                    self?.tableView.performBatchUpdates {
+                        self?.updateFolders(from: results)
+                        // Always apply updates in the following order: deletions, insertions, then modifications.
+                        // Handling insertions before deletions may result in unexpected behavior.
+                        self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                    }
+                    if results.isEmpty {
+                        self?.navigationController?.popViewController(animated: true)
                     }
                 case .error(let error):
                     print(error)

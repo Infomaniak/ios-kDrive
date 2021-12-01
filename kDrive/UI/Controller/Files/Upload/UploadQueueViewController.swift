@@ -65,20 +65,18 @@ class UploadQueueViewController: UIViewController {
 
     func setUpObserver() {
         guard currentDirectory != nil else { return }
-        notificationToken = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm).observe { [weak self] change in
-            switch change {
-            case .initial(let results):
-                self?.uploadingFiles = Array(results)
-                self?.uploadingFiles.first?.isFirstInCollection = true
-                self?.uploadingFiles.last?.isLastInCollection = true
-                DispatchQueue.main.async {
+        notificationToken = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: currentDirectory.driveId, using: realm)
+            .observe(on: .main) { [weak self] change in
+                switch change {
+                case .initial(let results):
+                    self?.uploadingFiles = Array(results)
+                    self?.uploadingFiles.first?.isFirstInCollection = true
+                    self?.uploadingFiles.last?.isLastInCollection = true
                     self?.tableView.reloadData()
                     if results.isEmpty {
                         self?.navigationController?.popViewController(animated: true)
                     }
-                }
-            case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                DispatchQueue.main.async {
+                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     self?.tableView.performBatchUpdates {
                         self?.uploadingFiles = Array(results)
                         self?.uploadingFiles.first?.isFirstInCollection = true
@@ -102,11 +100,10 @@ class UploadQueueViewController: UIViewController {
                     if results.isEmpty {
                         self?.navigationController?.popViewController(animated: true)
                     }
+                case .error(let error):
+                    print(error)
                 }
-            case .error(let error):
-                print(error)
             }
-        }
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
