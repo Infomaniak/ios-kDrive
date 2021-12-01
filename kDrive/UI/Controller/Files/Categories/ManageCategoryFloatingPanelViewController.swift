@@ -21,11 +21,19 @@ import InfomaniakCore
 import kDriveCore
 import UIKit
 
-struct CategoryFloatingPanelAction: Equatable {
+class CategoryFloatingPanelAction: Equatable {
     let id: Int
     let name: String
     let image: UIImage
     var tintColor: UIColor = KDriveAsset.iconColor.color
+    var isEnabled = true
+
+    init(id: Int, name: String, image: UIImage, tintColor: UIColor = KDriveAsset.iconColor.color) {
+        self.id = id
+        self.name = name
+        self.image = image
+        self.tintColor = tintColor
+    }
 
     static let edit = CategoryFloatingPanelAction(id: 1, name: KDriveStrings.Localizable.buttonEdit, image: KDriveAsset.edit.image)
     static let delete = CategoryFloatingPanelAction(id: 2, name: KDriveStrings.Localizable.buttonDelete, image: KDriveAsset.delete.image, tintColor: KDriveAsset.binColor.color)
@@ -49,7 +57,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         case header, actions
     }
 
-    private var actions = CategoryFloatingPanelAction.actions
+    private let actions = CategoryFloatingPanelAction.actions
 
     // MARK: - Public methods
 
@@ -91,14 +99,14 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
     }
 
     private func setupContent() {
-        actions = actions.filter { action in
+        actions.forEach { action in
             switch action {
             case .edit:
-                return driveFileManager.drive.categoryRights.canEditCategory
+                action.isEnabled = driveFileManager.drive.categoryRights.canEditCategory
             case .delete:
-                return driveFileManager.drive.categoryRights.canDeleteCategory && !category.isPredefined
+                action.isEnabled = driveFileManager.drive.categoryRights.canDeleteCategory && !category.isPredefined
             default:
-                return true
+                break
             }
         }
     }
@@ -167,14 +175,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
-            cell.actionImage.isHidden = false
-            cell.actionImage.image = action.image
-            cell.actionImage.tintColor = action.tintColor
-            cell.actionLabel.text = action.name
-            cell.darkLayer.isHidden = true
-            cell.accessibilityLabel = action.name
-            cell.accessibilityTraits = .button
-            cell.isAccessibilityElement = true
+            cell.configure(name: action.name, icon: action.image, tintColor: action.tintColor, isEnabled: action.isEnabled, isLoading: false)
             return cell
         }
     }
@@ -186,7 +187,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         case .header:
             return false
         case .actions:
-            return true
+            return actions[indexPath.item].isEnabled
         }
     }
 

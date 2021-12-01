@@ -55,16 +55,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
 
     #if !ISEXTENSION
     func configure(with action: FloatingPanelAction, file: File) {
-        actionImage.isHidden = action.isLoading
-        if action.isLoading {
-            loadingIndicator.startAnimating()
-        } else {
-            loadingIndicator.stopAnimating()
-        }
-        actionImage.image = action.image
-        actionImage.tintColor = action.tintColor
-        actionLabel.text = action.name
-        darkLayer.isHidden = action.isEnabled
+        configure(name: action.name, icon: action.image, tintColor: action.tintColor, isEnabled: action.isEnabled, isLoading: action.isLoading)
         // Configuration
         if action == .shareLink {
             if file.visibility == .isCollaborativeFolder {
@@ -75,12 +66,25 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
         } else if action == .sendCopy {
             configureDownload(with: file, action: action, progress: action.isLoading ? -1 : nil)
         }
-        // Accessibility
-        accessibilityLabel = action.name
-        accessibilityTraits = action.isEnabled ? .button : .notEnabled
-        isAccessibilityElement = true
     }
     #endif
+
+    func configure(name: String, icon: UIImage, tintColor: UIColor, isEnabled: Bool, isLoading: Bool) {
+        actionImage.isHidden = isLoading
+        if isLoading {
+            loadingIndicator.startAnimating()
+        } else {
+            loadingIndicator.stopAnimating()
+        }
+        actionImage.image = icon
+        actionImage.tintColor = tintColor
+        actionLabel.text = name
+        darkLayer.isHidden = isEnabled
+        // Accessibility
+        accessibilityLabel = name
+        accessibilityTraits = isEnabled ? .button : .notEnabled
+        isAccessibilityElement = true
+    }
 
     func setProgress(_ progress: CGFloat? = -1) {
         if let downloadProgress = progress {
