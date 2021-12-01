@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import kDriveCore
 import RealmSwift
 import UIKit
@@ -101,7 +102,7 @@ class UploadQueueViewController: UIViewController {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .error(let error):
-                    print(error)
+                    DDLogError("Realm observer error: \(error)")
                 }
             }
     }
