@@ -100,6 +100,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         categories.removeAll()
+        collectionView?.isHidden = true
+        collectionView?.reloadData()
         centerTitleConstraint?.isActive = false
         resetSwipeActions()
         detailLabel?.text = ""
