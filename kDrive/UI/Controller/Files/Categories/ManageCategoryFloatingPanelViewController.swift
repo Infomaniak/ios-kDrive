@@ -17,14 +17,23 @@
  */
 
 import FloatingPanel
+import InfomaniakCore
 import kDriveCore
 import UIKit
 
-struct CategoryFloatingPanelAction: Equatable {
+class CategoryFloatingPanelAction: Equatable {
     let id: Int
     let name: String
     let image: UIImage
     var tintColor: UIColor = KDriveAsset.iconColor.color
+    var isEnabled = true
+
+    init(id: Int, name: String, image: UIImage, tintColor: UIColor = KDriveAsset.iconColor.color) {
+        self.id = id
+        self.name = name
+        self.image = image
+        self.tintColor = tintColor
+    }
 
     static let edit = CategoryFloatingPanelAction(id: 1, name: KDriveStrings.Localizable.buttonEdit, image: KDriveAsset.edit.image)
     static let delete = CategoryFloatingPanelAction(id: 2, name: KDriveStrings.Localizable.buttonDelete, image: KDriveAsset.delete.image, tintColor: KDriveAsset.binColor.color)
@@ -38,46 +47,66 @@ struct CategoryFloatingPanelAction: Equatable {
     }
 }
 
-class ManageCategoryFloatingPanelViewController: UITableViewController {
+class ManageCategoryFloatingPanelViewController: UICollectionViewController {
     weak var presentingParent: UIViewController?
 
     var driveFileManager: DriveFileManager!
     var category: kDriveCore.Category!
 
-    private var actions = CategoryFloatingPanelAction.actions
+    private enum Section: CaseIterable {
+        case header, actions
+    }
+
+    private let actions = CategoryFloatingPanelAction.actions
+
+    // MARK: - Public methods
+
+    convenience init() {
+        self.init(collectionViewLayout: Self.createLayout())
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.register(cellView: CategoryTableViewCell.self)
-        tableView.register(cellView: CategoryFloatingPanelCollectionTableViewCell.self)
-        tableView.separatorStyle = .none
-        tableView.allowsSelection = false
-        tableView.alwaysBounceVertical = false
-        tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
+        collectionView.register(cellView: FloatingPanelQuickActionCollectionViewCell.self)
+        collectionView.alwaysBounceVertical = false
+        collectionView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
 
         setupContent()
     }
 
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { _ in
-            // Reload collection view
-            if self.tableView.numberOfSections > 1 {
-                self.tableView.reloadRows(at: [IndexPath(row: 0, section: 1)], with: .fade)
+    // MARK: - Private methods
+
+    private static func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { section, _ in
+            switch Section.allCases[section] {
+            case .header:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(56))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                return NSCollectionLayoutSection(group: group)
+            case .actions:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100))
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 2)
+                group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 15)
+                return NSCollectionLayoutSection(group: group)
             }
         }
     }
 
     private func setupContent() {
-        actions = actions.filter { action in
+        actions.forEach { action in
             switch action {
             case .edit:
-                return driveFileManager.drive.categoryRights.canEditCategory
+                action.isEnabled = driveFileManager.drive.categoryRights.canEditCategory
             case .delete:
-                return driveFileManager.drive.categoryRights.canDeleteCategory && !category.isPredefined
+                action.isEnabled = driveFileManager.drive.categoryRights.canDeleteCategory && !category.isPredefined
             default:
-                return true
+                break
             }
         }
     }
@@ -119,48 +148,62 @@ class ManageCategoryFloatingPanelViewController: UITableViewController {
         }
     }
 
-    // MARK: - Table view data source
+    // MARK: - Collection view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return Section.allCases.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-    }
-
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == 1 {
-            return 98
-        } else {
-            return UITableView.automaticDimension
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch Section.allCases[section] {
+        case .header:
+            return 1
+        case .actions:
+            return actions.count
         }
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.section == 0 {
-            let cell = tableView.dequeueReusableCell(type: CategoryTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
-            cell.configure(with: category, showMoreButton: false)
-            cell.leadingConstraint.constant = 0
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        switch Section.allCases[indexPath.section] {
+        case .header:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let tableCell = cell.initWith(cell: CategoryTableViewCell.self)
+            tableCell.initWithPositionAndShadow()
+            tableCell.configure(with: category, showMoreButton: false)
+            tableCell.leadingConstraint.constant = 0
             return cell
-        } else {
-            let cell = tableView.dequeueReusableCell(type: CategoryFloatingPanelCollectionTableViewCell.self, for: indexPath)
-            cell.delegate = self
-            cell.actions = actions
+        case .actions:
+            let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
+            let action = actions[indexPath.item]
+            cell.configure(name: action.name, icon: action.image, tintColor: action.tintColor, isEnabled: action.isEnabled, isLoading: false)
             return cell
         }
     }
-}
 
-extension ManageCategoryFloatingPanelViewController: CategoryActionDelegate {
-    func didSelectAction(_ action: CategoryFloatingPanelAction) {
-        handleAction(action, at: IndexPath(row: 0, section: 1))
+    // MARK: - Collection view delegate
+
+    override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
+        switch Section.allCases[indexPath.section] {
+        case .header:
+            return false
+        case .actions:
+            return actions[indexPath.item].isEnabled
+        }
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        switch Section.allCases[indexPath.section] {
+        case .header:
+            break
+        case .actions:
+            let action = actions[indexPath.item]
+            handleAction(action, at: indexPath)
+        }
     }
 }
 
 extension ManageCategoryFloatingPanelViewController: FloatingPanelControllerDelegate {
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-        return PlusButtonFloatingPanelLayout(height: min(170, UIScreen.main.bounds.size.height - 48))
+        return PlusButtonFloatingPanelLayout(height: min(180, UIScreen.main.bounds.size.height - 48))
     }
 }
