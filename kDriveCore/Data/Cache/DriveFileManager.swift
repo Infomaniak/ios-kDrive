@@ -1412,6 +1412,19 @@ public class DriveFileManager {
             completion(error)
         }
     }
+
+    public func updateFolderColor(file: File, color: String, completion: @escaping (Error?) -> Void) {
+        apiFetcher.updateFolderColor(file: file, color: color) { [fileId = file.id] _, error in
+            if error == nil {
+                self.updateFileProperty(fileId: fileId) { file in
+                    file.color = color
+                }
+                completion(nil)
+            } else {
+                completion(error ?? DriveError.unknownError)
+            }
+        }
+    }
 }
 
 public extension Realm {

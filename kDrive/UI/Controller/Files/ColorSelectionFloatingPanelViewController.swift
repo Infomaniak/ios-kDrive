@@ -81,6 +81,8 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
         collectionView.register(cellView: ColorSelectionCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
+
+        setSelectedColor()
     }
 
     // MARK: - Private methods
@@ -99,13 +101,17 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(40))
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
                 group.interItemSpacing = .flexible(16)
-//                group.contentInsets = NSDirectionalEdgeInsets(top: 30, leading: 25, bottom: 0, trailing: 25)
                 let section = NSCollectionLayoutSection(group: group)
                 section.interGroupSpacing = 16
                 section.contentInsets = NSDirectionalEdgeInsets(top: 30, leading: 20, bottom: 0, trailing: 20)
                 return section
             }
         }
+    }
+
+    func setSelectedColor() {
+        let selectedColorIndex = folderColors.firstIndex { $0.hex == file.color } ?? 0
+        collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
     }
 
     // MARK: - Collection view data source & delegate
@@ -137,7 +143,6 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         case .colorSelection:
             let cell = collectionView.dequeueReusableCell(type: ColorSelectionCollectionViewCell.self, for: indexPath)
             let color = folderColors[indexPath.row]
-
             cell.backgroundColor = color.color
             cell.configureCell()
             return cell
@@ -146,9 +151,12 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let color = folderColors[indexPath.row]
-
-        driveFileManager.updateFolderColor(file: file, color: color.hex) { _ in
-            self.dismiss(animated: true)
+        driveFileManager.updateFolderColor(file: file, color: color.hex) { error in
+            if let error = error {
+                UIConstants.showSnackBar(message: error.localizedDescription)
+            } else {
+                self.dismiss(animated: true)
+            }
         }
     }
 }

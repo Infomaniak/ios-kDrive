@@ -74,9 +74,9 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         titleLabel.textAlignment = file.isDirectory ? .center : .natural
         checkmarkImage?.isHidden = !selectionMode
         iconImageView.image = file.icon
-        iconImageView.tintColor = file.convertedType.tintColor
+        iconImageView.tintColor = file.tintColor
         largeIconImageView.image = file.icon
-        largeIconImageView.tintColor = file.convertedType.tintColor
+        largeIconImageView.tintColor = file.tintColor
         if file.isDirectory {
             file.getThumbnail { image, _ in
                 self.largeIconImageView.image = image

@@ -29,9 +29,9 @@ public enum IconUtils {
             case .isSharedSpace:
                 return KDriveResourcesAsset.folderShared.image
             case .isCollaborativeFolder:
-                return KDriveResourcesAsset.folderDropBox.image
+                return KDriveResourcesAsset.folderDropBox1.image
             default:
-                return (file.isDisabled ? KDriveResourcesAsset.folderDisable : KDriveResourcesAsset.folderFilled).image
+                return (file.isDisabled ? KDriveResourcesAsset.folderDisable : KDriveResourcesAsset.folderFill).image
             }
         } else {
             return file.convertedType.icon

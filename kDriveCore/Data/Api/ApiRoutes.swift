@@ -280,4 +280,9 @@ public enum ApiRoutes {
     public static func downloadFileAsPdf(file: File) -> String {
         return "\(fileURL(file: file))download?as=pdf"
     }
+
+    public static func updateFolderColor(file: File) -> String {
+        // TODO: to change with new url
+        return "https://drive.preprod.dev.infomaniak.ch/2/drive/\(file.driveId)/files/\(file.id)/color"
+    }
 }
