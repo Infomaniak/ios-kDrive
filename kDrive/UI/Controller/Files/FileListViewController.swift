@@ -493,38 +493,43 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     private func reloadCollectionView(with files: [File]) {
-        let firstFileId = sortedFiles.first?.id
-        let lastFileId = sortedFiles.last?.id
-        // Reload file list with DifferenceKit
-        let changeSet = StagedChangeset(source: sortedFiles, target: files)
-        collectionView.reload(using: changeSet) { $0.changeCount > self.maxDiffChanges } setData: { files in
-            sortedFiles = files
-            updateSelectedItems(newChildren: files)
-        }
-        // Reload corners
-        if listStyle == .list,
-           let oldFirstFileId = firstFileId,
-           let oldLastFileId = lastFileId,
-           let newFirstFileId = sortedFiles.first?.id,
-           let newLastFileId = sortedFiles.last?.id {
-            var indexPaths = [IndexPath]()
-            if oldFirstFileId != newFirstFileId {
-                indexPaths.append(IndexPath(item: 0, section: 0))
-                if let index = sortedFiles.firstIndex(where: { $0.id == oldFirstFileId }) {
-                    indexPaths.append(IndexPath(item: index, section: 0))
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            let firstFileId = self.sortedFiles.first?.id
+            let lastFileId = self.sortedFiles.last?.id
+            // Reload file list with DifferenceKit
+            let changeSet = StagedChangeset(source: self.sortedFiles, target: files)
+            DispatchQueue.main.async {
+                self.collectionView.reload(using: changeSet) { $0.changeCount > self.maxDiffChanges } setData: { files in
+                    self.sortedFiles = files
+                    self.updateSelectedItems(newChildren: files)
                 }
-            }
-            if oldLastFileId != newLastFileId {
-                indexPaths.append(IndexPath(item: sortedFiles.count - 1, section: 0))
-                if let index = sortedFiles.firstIndex(where: { $0.id == oldLastFileId }) {
-                    indexPaths.append(IndexPath(item: index, section: 0))
+                // Reload corners
+                if self.listStyle == .list,
+                   let oldFirstFileId = firstFileId,
+                   let oldLastFileId = lastFileId,
+                   let newFirstFileId = self.sortedFiles.first?.id,
+                   let newLastFileId = self.sortedFiles.last?.id {
+                    var indexPaths = [IndexPath]()
+                    if oldFirstFileId != newFirstFileId {
+                        indexPaths.append(IndexPath(item: 0, section: 0))
+                        if let index = self.sortedFiles.firstIndex(where: { $0.id == oldFirstFileId }) {
+                            indexPaths.append(IndexPath(item: index, section: 0))
+                        }
+                    }
+                    if oldLastFileId != newLastFileId {
+                        indexPaths.append(IndexPath(item: self.sortedFiles.count - 1, section: 0))
+                        if let index = self.sortedFiles.firstIndex(where: { $0.id == oldLastFileId }) {
+                            indexPaths.append(IndexPath(item: index, section: 0))
+                        }
+                    }
+                    if !indexPaths.isEmpty {
+                        self.collectionView.reloadItems(at: indexPaths)
+                    }
                 }
-            }
-            if !indexPaths.isEmpty {
-                collectionView.reloadItems(at: indexPaths)
+                self.setSelectedCells()
             }
         }
-        setSelectedCells()
     }
 
     #if !ISEXTENSION
