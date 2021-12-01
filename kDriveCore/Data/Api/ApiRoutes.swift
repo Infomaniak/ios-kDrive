@@ -170,7 +170,7 @@ public enum ApiRoutes {
     }
 
     static func getRecentActivity(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link&depth=unlimited" +
+        return "\(driveApiUrl)\(driveId)/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&depth=unlimited" +
             "&actions[]=file_create" +
             "&actions[]=file_update" +
             "&actions[]=comment_create" +
@@ -180,12 +180,12 @@ public enum ApiRoutes {
 
     static func getFileActivitiesFromDate(file: File, date: Int) -> String {
         let activitiesParam = FileActivityType.fileActivities.map { "&actions[]=\($0.rawValue)" }.joined()
-        return "\(fileURL(file: file))activity?depth=children&with=file,rights,collaborative_folder,favorite,mobile,share_link&from_date=\(date)" + activitiesParam
+        return "\(fileURL(file: file))activity?depth=children&with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&from_date=\(date)" + activitiesParam
     }
 
     static func getFilesActivities(driveId: Int, files: [File], from date: Int) -> String {
         let fileIds = files.map { String($0.id) }
-        return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link&actions[]=file_rename&actions[]=file_delete&actions[]=file_update&from_date=\(date)"
+        return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&actions[]=file_rename&actions[]=file_delete&actions[]=file_update&from_date=\(date)"
     }
 
     static func favorite(file: File) -> String {
