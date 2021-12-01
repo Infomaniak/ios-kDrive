@@ -20,8 +20,7 @@ import Foundation
 import RealmSwift
 import UIKit
 
-public class Category: Object, Codable {
-    @Persisted(primaryKey: true) public var objectId: String = ""
+public class Category: EmbeddedObject, Codable {
     @Persisted public var id: Int
     @Persisted public var name: String
     @Persisted public var isPredefined: Bool
@@ -29,11 +28,6 @@ public class Category: Object, Codable {
     @Persisted public var createdBy: Int
     @Persisted public var createdAt: Date
     @Persisted public var userUsageCount: Int?
-    @Persisted public var driveId: Int = 0 {
-        didSet {
-            objectId = "\(driveId)_\(id)"
-        }
-    }
 
     public var isSelected = false
 

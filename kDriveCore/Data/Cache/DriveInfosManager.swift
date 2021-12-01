@@ -20,14 +20,24 @@ import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
+import Realm
 import RealmSwift
 
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
-    private static let currentDbVersion: UInt64 = 4
+    private static let currentDbVersion: UInt64 = 5
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
     private var fileProviderManagers: [String: NSFileProviderManager] = [:]
+
+    private class func removeDanglingObjects(ofType type: RLMObjectBase.Type, migration: Migration, ids: Set<String>) {
+        migration.enumerateObjects(ofType: type.className()) { oldObject, newObject in
+            guard let newObject = newObject, let objectId = oldObject?["objectId"] as? String else { return }
+            if !ids.contains(objectId) {
+                migration.delete(newObject)
+            }
+        }
+    }
 
     private init() {
         realmConfiguration = Realm.Configuration(
@@ -40,7 +50,25 @@ public class DriveInfosManager {
                         // Remove tags
                         migration.deleteData(forType: Tag.className())
                     }
-                    // No migration needed from version 2 to version 3
+                    // No migration needed for versions 3 & 4
+                    if oldSchemaVersion < 5 {
+                        // Get drive ids
+                        var driveIds = Set<String>()
+                        migration.enumerateObjects(ofType: Drive.className()) { oldObject, _ in
+                            if let objectId = oldObject?["objectId"] as? String {
+                                driveIds.insert(objectId)
+                            }
+                        }
+                        // Remove dangling objects
+                        DriveInfosManager.removeDanglingObjects(ofType: DrivePackFunctionality.self, migration: migration, ids: driveIds)
+                        DriveInfosManager.removeDanglingObjects(ofType: DrivePreferences.self, migration: migration, ids: driveIds)
+                        DriveInfosManager.removeDanglingObjects(ofType: DriveUsersCategories.self, migration: migration, ids: driveIds)
+                        DriveInfosManager.removeDanglingObjects(ofType: DriveTeamsCategories.self, migration: migration, ids: driveIds)
+                        DriveInfosManager.removeDanglingObjects(ofType: Category.self, migration: migration, ids: driveIds)
+                        // Delete team details & category rights for migration
+                        migration.deleteData(forType: TeamDetail.className())
+                        migration.deleteData(forType: CategoryRights.className())
+                    }
                 }
             },
             objectTypes: [Drive.self, DrivePackFunctionality.self, DrivePreferences.self, DriveUsersCategories.self, DriveTeamsCategories.self, DriveUser.self, Team.self, TeamDetail.self, Category.self, CategoryRights.self])
@@ -53,7 +81,6 @@ public class DriveInfosManager {
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {
         drive.userId = userId
-        drive.categories.forEach { $0.driveId = drive.id }
         drive.sharedWithMe = sharedWithMe
     }
 

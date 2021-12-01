@@ -104,7 +104,7 @@ extension Team: Comparable {
     }
 }
 
-public class TeamDetail: Object, Codable {
+public class TeamDetail: EmbeddedObject, Codable {
     @Persisted public var driveId: Int
     @Persisted public var usersCount: Int
 

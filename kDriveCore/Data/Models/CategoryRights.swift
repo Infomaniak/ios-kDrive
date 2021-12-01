@@ -19,7 +19,7 @@
 import Foundation
 import RealmSwift
 
-public class CategoryRights: Object, Codable {
+public class CategoryRights: EmbeddedObject, Codable {
     @Persisted public var canCreateCategory: Bool
     @Persisted public var canEditCategory: Bool
     @Persisted public var canDeleteCategory: Bool

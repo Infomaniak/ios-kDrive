@@ -966,7 +966,6 @@ public class DriveFileManager {
     public func createCategory(name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
         apiFetcher.createCategory(driveId: drive.id, name: name, color: color) { response, error in
             if let category = response?.data {
-                category.driveId = self.drive.id
                 // Add category to drive
                 let realm = DriveInfosManager.instance.getRealm()
                 let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
@@ -986,15 +985,15 @@ public class DriveFileManager {
     public func editCategory(id: Int, name: String?, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
         apiFetcher.editCategory(driveId: drive.id, id: id, name: name, color: color) { response, error in
             if let category = response?.data {
-                category.driveId = self.drive.id
-                // Update category
+                // Update category on drive
                 let realm = DriveInfosManager.instance.getRealm()
-                try? realm.write {
-                    realm.add(category, update: .modified)
-                }
-                // Update drive
-                if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, using: realm) {
-                    self.drive = drive
+                if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm) {
+                    try? realm.write {
+                        if let index = drive.categories.firstIndex(where: { $0.id == id }) {
+                            drive.categories[index] = category
+                        }
+                    }
+                    self.drive = drive.freeze()
                 }
                 completion(.success(category))
             } else {
@@ -1010,15 +1009,12 @@ public class DriveFileManager {
             } else {
                 // Delete category from drive
                 let realmDrive = DriveInfosManager.instance.getRealm()
-                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realmDrive)
-                try? realmDrive.write {
-                    if let drive = drive, let index = drive.categories.firstIndex(where: { $0.id == id }) {
-                        let category = drive.categories[index]
-                        drive.categories.remove(at: index)
-                        realmDrive.delete(category)
+                if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realmDrive) {
+                    try? realmDrive.write {
+                        if let index = drive.categories.firstIndex(where: { $0.id == id }) {
+                            drive.categories.remove(at: index)
+                        }
                     }
-                }
-                if let drive = drive {
                     self.drive = drive.freeze()
                 }
                 // Delete category from files
