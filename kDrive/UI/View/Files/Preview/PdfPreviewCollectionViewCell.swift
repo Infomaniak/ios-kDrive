@@ -37,8 +37,12 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     }
 
     override func configureWith(file: File) {
+        configureWith(documentUrl: file.localUrl)
+    }
+
+    func configureWith(documentUrl: URL) {
         NotificationCenter.default.addObserver(self, selector: #selector(pageChanged), name: .PDFViewPageChanged, object: pdfPreview)
-        document = PDFDocument(url: file.localUrl)
+        document = PDFDocument(url: documentUrl)
         pdfPreview.document = document
     }
 

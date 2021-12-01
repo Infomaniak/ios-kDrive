@@ -31,9 +31,15 @@ protocol PreviewContentCellDelegate: AnyObject {
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
+    struct PreviewFallbackPdf {
+        let fileId: Int
+        var pdfUrl: URL?
+    }
+
     @IBOutlet weak var collectionView: UICollectionView!
     private var previewFiles = [File]()
     private var previewErrorFileIds = Set<Int>()
+    private var previewFallbackPdfFileIds = [Int: PreviewFallbackPdf]()
     private var driveFileManager: DriveFileManager!
     private var normalFolderHierarchy = true
     private var initialLoading = true
@@ -354,8 +360,24 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func errorWhilePreviewing(fileId: Int, error: Error) {
-        previewErrorFileIds.insert(fileId)
         if let index = previewFiles.firstIndex(where: { $0.id == fileId }) {
+            let file = previewFiles[index]
+            if file.convertedType == .spreadsheet || file.convertedType == .presentation || file.convertedType == .text {
+                previewFallbackPdfFileIds[fileId] = PreviewFallbackPdf(fileId: fileId)
+                PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { url, _ in
+                    if let url = url {
+                        self.previewFallbackPdfFileIds[fileId]?.pdfUrl = url
+                    } else {
+                        self.previewFallbackPdfFileIds[fileId] = nil
+                        self.previewErrorFileIds.insert(fileId)
+                    }
+                    DispatchQueue.main.async {
+                        self.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
+                    }
+                }
+            } else {
+                previewErrorFileIds.insert(fileId)
+            }
             collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
         }
     }
@@ -477,7 +499,7 @@ extension PreviewViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
         // File is already downloaded and up to date OR we can remote play it (audio / video)
-        if !previewErrorFileIds.contains(file.id) && (!file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
+        if !previewFallbackPdfFileIds.keys.contains(file.id) && !previewErrorFileIds.contains(file.id) && (!file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
             switch file.convertedType {
             case .image:
                 if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -525,6 +547,18 @@ extension PreviewViewController: UICollectionViewDataSource {
             cell.configureWith(file: file)
             cell.previewDelegate = self
             return cell
+        } else if let previewFallback = previewFallbackPdfFileIds[file.id] {
+            if let url = previewFallback.pdfUrl {
+                let cell = collectionView.dequeueReusableCell(type: PdfPreviewCollectionViewCell.self, for: indexPath)
+                cell.previewDelegate = self
+                cell.configureWith(documentUrl: url)
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
+                cell.configureWith(file: file)
+                cell.previewDelegate = self
+                return cell
+            }
         } else if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             cell.parentViewController = self
