@@ -46,12 +46,12 @@ public enum IconUtils {
             case .isSharedSpace:
                 completion(KDriveResourcesAsset.folderShared.image, false)
             case .isCollaborativeFolder:
-                completion(KDriveResourcesAsset.folderDropBox.image, false)
+                completion(KDriveResourcesAsset.folderDropBox1.image, false)
             default:
                 if file.isDisabled {
                     completion(KDriveResourcesAsset.folderDisable.image, false)
                 } else {
-                    completion(KDriveResourcesAsset.folderFilled.image, false)
+                    completion(KDriveResourcesAsset.folderFill.image, false)
                 }
             }
         } else {
