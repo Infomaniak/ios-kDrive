@@ -186,18 +186,7 @@ let project = Project(name: "kDrive",
                                  product: .appExtension,
                                  bundleId: "com.infomaniak.drive.FileProvider",
                                  deploymentTarget: deploymentTarget,
-                                 infoPlist: .extendingDefault(with: [
-                                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
-                                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
-                                     "CFBundleDisplayName": "kDrive",
-                                     "AppIdentifierPrefix": "$(AppIdentifierPrefix)",
-                                     "NSExtension": [
-                                         "NSExtensionPointIdentifier": "com.apple.fileprovider-nonui",
-                                         "NSExtensionPrincipalClass": "$(PRODUCT_MODULE_NAME).FileProviderExtension",
-                                         "NSExtensionFileProviderDocumentGroup": "group.com.infomaniak.drive",
-                                         "NSExtensionFileProviderSupportsEnumeration": true
-                                     ]
-                                 ]),
+                                 infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
                                  sources: "kDriveFileProvider/**",
                                  headers: Headers(project: "kDriveFileProvider/**"),
                                  entitlements: "kDriveFileProvider/FileProvider.entitlements",
@@ -210,17 +199,7 @@ let project = Project(name: "kDrive",
                                  product: .appExtension,
                                  bundleId: "com.infomaniak.drive.ShareExtension",
                                  deploymentTarget: deploymentTarget,
-                                 infoPlist: .extendingDefault(with: [
-                                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
-                                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
-                                     "CFBundleDisplayName": "$(PRODUCT_NAME)",
-                                     "AppIdentifierPrefix": "$(AppIdentifierPrefix)",
-                                     "NSExtension": [
-                                         "NSExtensionMainStoryboard": "MainInterface",
-                                         "NSExtensionPointIdentifier": "com.apple.share-services",
-                                         "NSExtensionAttributes": ["NSExtensionActivationRule": "SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, (ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.data\")).@count == $extensionItem.attachments.@count ).@count > 0"]
-                                     ]
-                                 ]),
+                                 infoPlist: .file(path: "kDriveShareExtension/Info.plist"),
                                  sources: [
                                      "kDriveShareExtension/**",
                                      "kDrive/UI/Controller/FloatingPanelSelectOptionViewController.swift",
@@ -300,24 +279,7 @@ let project = Project(name: "kDrive",
                                  product: .appExtension,
                                  bundleId: "com.infomaniak.drive.ActionExtension",
                                  deploymentTarget: deploymentTarget,
-                                 infoPlist: .extendingDefault(with: [
-                                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
-                                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
-                                     "CFBundleDisplayName": "Enregistrer dans kDrive",
-                                     "AppIdentifierPrefix": "$(AppIdentifierPrefix)",
-                                     "NSExtension": [
-                                         "NSExtensionMainStoryboard": "MainInterface",
-                                         "NSExtensionPointIdentifier": "com.apple.ui-services",
-                                         "NSExtensionAttributes": [
-                                             "NSExtensionActivationRule": "SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, (ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.data\")).@count == $extensionItem.attachments.@count ).@count > 0",
-                                             "NSExtensionServiceAllowsFinderPreviewItem": true,
-                                             "NSExtensionServiceAllowsTouchBarItem": true,
-                                             "NSExtensionServiceFinderPreviewIconName": "NSActionTemplate",
-                                             "NSExtensionServiceTouchBarBezelColorName": "TouchBarBezel",
-                                             "NSExtensionServiceTouchBarIconName": "NSActionTemplate"
-                                         ]
-                                     ]
-                                 ]),
+                                 infoPlist: .file(path: "kDriveActionExtension/Info.plist"),
                                  sources: [
                                      "kDriveActionExtension/**",
                                      "kDrive/UI/Controller/FloatingPanelSelectOptionViewController.swift",
