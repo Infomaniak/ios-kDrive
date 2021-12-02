@@ -1415,13 +1415,13 @@ public class DriveFileManager {
 
     public func updateFolderColor(file: File, color: String, completion: @escaping (Error?) -> Void) {
         apiFetcher.updateFolderColor(file: file, color: color) { [fileId = file.id] _, error in
-            if error == nil {
+            if let error = error {
+                completion(error)
+            } else {
                 self.updateFileProperty(fileId: fileId) { file in
                     file.color = color
                 }
                 completion(nil)
-            } else {
-                completion(error ?? DriveError.unknownError)
             }
         }
     }

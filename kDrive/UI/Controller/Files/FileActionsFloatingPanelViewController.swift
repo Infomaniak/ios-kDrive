@@ -110,10 +110,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         return driveFileManager?.drive.sharedWithMe ?? false
     }
 
-//    var isProOrTeam: Bool {
-//        return driveFileManager?.drive.isProOrTeam ?? false
-//    }
-
     enum Section: CaseIterable {
         case header, quickActions, actions
     }
