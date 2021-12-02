@@ -16,21 +16,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class CategoryFloatingPanelViewController: InformationFloatingPanelViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        imageView.image = KDriveAsset.illuCategories.image
+        imageView.image = KDriveResourcesAsset.illuCategories.image
         imageViewHeightConstraint.constant = 190
         animationView.isHidden = true
-        titleLabel.text = KDriveStrings.Localizable.categoriesPanelTitle
-        descriptionLabel.text = KDriveStrings.Localizable.categoriesPanelDescription
+        titleLabel.text = KDriveResourcesStrings.Localizable.categoriesPanelTitle
+        descriptionLabel.text = KDriveResourcesStrings.Localizable.categoriesPanelDescription
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
         leftButton.isHidden = true
-        rightButton.setTitle(KDriveStrings.Localizable.buttonClose, for: .normal)
+        rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonClose, for: .normal)
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {

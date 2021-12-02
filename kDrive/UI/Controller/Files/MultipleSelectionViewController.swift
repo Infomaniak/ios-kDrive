@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class MultipleSelectionViewController: UIViewController {
@@ -140,7 +141,7 @@ class MultipleSelectionViewController: UIViewController {
                 }
             }
             group.notify(queue: DispatchQueue.main) {
-                let message = success ? KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedItems.count, selectedFolder.name) : KDriveStrings.Localizable.errorMove
+                let message = success ? KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedItems.count, selectedFolder.name) : KDriveResourcesStrings.Localizable.errorMove
                 UIConstants.showSnackBar(message: message)
                 self.selectionMode = false
                 self.getNewChanges()
@@ -152,21 +153,21 @@ class MultipleSelectionViewController: UIViewController {
     func deleteSelectedItems() {
         let message: NSMutableAttributedString
         if selectedItems.count == 1 {
-            message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescription(selectedItems.first!.name), boldText: selectedItems.first!.name)
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(selectedItems.first!.name), boldText: selectedItems.first!.name)
         } else {
-            message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedItems.count))
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescriptionPlural(selectedItems.count))
         }
 
-        let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true, loading: true) {
+        let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
             let message: String
             if let success = self.deleteFiles(Array(self.selectedItems), async: false), success {
                 if self.selectedItems.count == 1 {
-                    message = KDriveStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedItems.first!.name)
+                    message = KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedItems.first!.name)
                 } else {
-                    message = KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(self.selectedItems.count)
+                    message = KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmationPlural(self.selectedItems.count)
                 }
             } else {
-                message = KDriveStrings.Localizable.errorMove
+                message = KDriveResourcesStrings.Localizable.errorMove
             }
             DispatchQueue.main.async {
                 UIConstants.showSnackBar(message: message)
@@ -197,20 +198,20 @@ class MultipleSelectionViewController: UIViewController {
             group.notify(queue: DispatchQueue.main) {
                 if success {
                     if files.count == 1 {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
                             guard let cancelId = cancelId else { return }
                             self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                 self.getNewChanges()
                                 if error == nil {
-                                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
+                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
                                 }
                             }
                         })
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
                     }
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                 }
                 if self.selectionMode {
                     self.selectionMode = false

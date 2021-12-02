@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 extension UINavigationController {
@@ -42,7 +43,7 @@ extension UINavigationController {
         navigationBar.layoutMargins.right = 24
         let navbarAppearance = UINavigationBarAppearance()
         navbarAppearance.configureWithTransparentBackground()
-        navbarAppearance.backgroundColor = KDriveAsset.backgroundColor.color
+        navbarAppearance.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         let largeTitleStyle = TextStyle.header1
         let titleStyle = TextStyle.header3
         navbarAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]

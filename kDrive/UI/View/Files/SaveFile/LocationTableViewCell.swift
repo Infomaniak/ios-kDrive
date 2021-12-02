@@ -16,23 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class LocationTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var logoImage: UIImageView!
 
     func configure(with drive: Drive?) {
-        logoImage.image = KDriveAsset.drive.image
+        logoImage.image = KDriveResourcesAsset.drive.image
 
         if let drive = drive {
             titleLabel.text = drive.name
             logoImage.tintColor = UIColor(hex: drive.preferences.color)
         } else {
-            titleLabel.text = KDriveStrings.Localizable.selectDriveTitle
-            logoImage.tintColor = KDriveAsset.secondaryTextColor.color
+            titleLabel.text = KDriveResourcesStrings.Localizable.selectDriveTitle
+            logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
         }
     }
 
@@ -40,7 +40,7 @@ class LocationTableViewCell: InsetTableViewCell {
         if let folder = folder {
             if folder.isRoot {
                 configure(with: drive)
-                titleLabel.text = KDriveStrings.Localizable.allRootName(drive.name)
+                titleLabel.text = KDriveResourcesStrings.Localizable.allRootName(drive.name)
             } else {
                 titleLabel.text = folder.name
                 folder.getThumbnail { image, _ in
@@ -49,25 +49,25 @@ class LocationTableViewCell: InsetTableViewCell {
                 logoImage.tintColor = nil
             }
         } else {
-            titleLabel.text = KDriveStrings.Localizable.selectFolderTitle
-            logoImage.image = KDriveAsset.folderFilled.image
+            titleLabel.text = KDriveResourcesStrings.Localizable.selectFolderTitle
+            logoImage.image = KDriveResourcesAsset.folderFilled.image
         }
     }
 
     func configure(with filterType: FilterType, filters: Filters) {
         switch filterType {
         case .date:
-            titleLabel.text = filters.date?.localizedName ?? KDriveStrings.Localizable.searchFiltersSelectDate
-            logoImage.image = KDriveAsset.calendar.image
-            logoImage.tintColor = KDriveAsset.secondaryTextColor.color
+            titleLabel.text = filters.date?.localizedName ?? KDriveResourcesStrings.Localizable.searchFiltersSelectDate
+            logoImage.image = KDriveResourcesAsset.calendar.image
+            logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
         case .type:
-            titleLabel.text = filters.fileType?.title ?? KDriveStrings.Localizable.searchFiltersSelectType
-            logoImage.image = filters.fileType?.icon ?? KDriveAsset.fileDefault.image
-            logoImage.tintColor = KDriveAsset.infomaniakColor.color
+            titleLabel.text = filters.fileType?.title ?? KDriveResourcesStrings.Localizable.searchFiltersSelectType
+            logoImage.image = filters.fileType?.icon ?? KDriveResourcesAsset.fileDefault.image
+            logoImage.tintColor = KDriveResourcesAsset.infomaniakColor.color
         case .categories:
             titleLabel.text = ""
-            logoImage.image = KDriveAsset.categories.image
-            logoImage.tintColor = KDriveAsset.secondaryTextColor.color
+            logoImage.image = KDriveResourcesAsset.categories.image
+            logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
         }
     }
 }

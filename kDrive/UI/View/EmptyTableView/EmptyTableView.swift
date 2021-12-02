@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class EmptyTableView: UIView {
-
     enum EmptyTableViewType {
         case noNetwork
         case noOffline
@@ -50,12 +50,12 @@ class EmptyTableView: UIView {
     var actionHandler: ((UIButton) -> Void)?
 
     private func setCenteringEnabled(_ enabled: Bool) {
-        centerConstraint.isActive = enabled
-        mandatoryTopConstraint.isActive = enabled
-        topConstraint.isActive = !enabled
+        self.centerConstraint.isActive = enabled
+        self.mandatoryTopConstraint.isActive = enabled
+        self.topConstraint.isActive = !enabled
     }
 
-    class func instantiate(logo: UIImage, message: String, details: String = "", button: Bool = false, backgroundColor: UIColor = KDriveAsset.backgroundCardViewColor.color) -> EmptyTableView {
+    class func instantiate(logo: UIImage, message: String, details: String = "", button: Bool = false, backgroundColor: UIColor = KDriveResourcesAsset.backgroundCardViewColor.color) -> EmptyTableView {
         let view = Bundle.main.loadNibNamed("EmptyTableView", owner: nil, options: nil)![0] as! EmptyTableView
         view.emptyImageView.image = logo
         view.emptyMessageLabel.text = message
@@ -74,32 +74,32 @@ class EmptyTableView: UIView {
         let view: EmptyTableView
         switch type {
         case .noNetwork:
-            view = self.instantiate(logo: KDriveAsset.offline.image, message: KDriveStrings.Localizable.noFilesDescriptionNoNetwork, button: button)
+            view = self.instantiate(logo: KDriveResourcesAsset.offline.image, message: KDriveResourcesStrings.Localizable.noFilesDescriptionNoNetwork, button: button)
         case .noOffline:
-            view = self.instantiate(logo: KDriveAsset.availableOffline.image, message: KDriveStrings.Localizable.offlineFileNoFile, details: KDriveStrings.Localizable.offlineFileNoFileDescription)
+            view = self.instantiate(logo: KDriveResourcesAsset.availableOffline.image, message: KDriveResourcesStrings.Localizable.offlineFileNoFile, details: KDriveResourcesStrings.Localizable.offlineFileNoFileDescription)
         case .noTrash:
-            view = self.instantiate(logo: KDriveAsset.delete.image, message: KDriveStrings.Localizable.trashNoFile)
+            view = self.instantiate(logo: KDriveResourcesAsset.delete.image, message: KDriveResourcesStrings.Localizable.trashNoFile)
         case .emptyFolder:
-            view = self.instantiate(logo: KDriveAsset.folderFilled.image, message: KDriveStrings.Localizable.noFilesDescription)
+            view = self.instantiate(logo: KDriveResourcesAsset.folderFilled.image, message: KDriveResourcesStrings.Localizable.noFilesDescription)
         case .noFavorite:
-            view = self.instantiate(logo: KDriveAsset.favorite.image, message: KDriveStrings.Localizable.favoritesNoFile)
-            view.emptyImageView.tintColor = KDriveAsset.favoriteColor.color
+            view = self.instantiate(logo: KDriveResourcesAsset.favorite.image, message: KDriveResourcesStrings.Localizable.favoritesNoFile)
+            view.emptyImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
         case .noShared:
-            view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.mySharesNoFile)
+            view = self.instantiate(logo: KDriveResourcesAsset.share.image, message: KDriveResourcesStrings.Localizable.mySharesNoFile)
         case .noSharedWithMe:
-            view = self.instantiate(logo: KDriveAsset.share.image, message: KDriveStrings.Localizable.sharedWithMeNoFile)
+            view = self.instantiate(logo: KDriveResourcesAsset.share.image, message: KDriveResourcesStrings.Localizable.sharedWithMeNoFile)
         case .noSearchResults:
-            view = self.instantiate(logo: KDriveAsset.search.image, message: KDriveStrings.Localizable.searchNoFile)
+            view = self.instantiate(logo: KDriveResourcesAsset.search.image, message: KDriveResourcesStrings.Localizable.searchNoFile)
         case .noActivities:
-            view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescription)
+            view = self.instantiate(logo: KDriveResourcesAsset.copy.image, message: KDriveResourcesStrings.Localizable.homeNoActivities, details: KDriveResourcesStrings.Localizable.homeNoActivitiesDescription)
         case .noActivitiesSolo:
-            view = self.instantiate(logo: KDriveAsset.copy.image, message: KDriveStrings.Localizable.homeNoActivities, details: KDriveStrings.Localizable.homeNoActivitiesDescriptionSolo)
+            view = self.instantiate(logo: KDriveResourcesAsset.copy.image, message: KDriveResourcesStrings.Localizable.homeNoActivities, details: KDriveResourcesStrings.Localizable.homeNoActivitiesDescriptionSolo)
         case .noImages:
-            view = self.instantiate(logo: KDriveAsset.images.image, message: KDriveStrings.Localizable.homeNoPictures)
+            view = self.instantiate(logo: KDriveResourcesAsset.images.image, message: KDriveResourcesStrings.Localizable.homeNoPictures)
         case .noComments:
-            view = self.instantiate(logo: KDriveAsset.comment.image, message: KDriveStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveAsset.backgroundColor.color)
+            view = self.instantiate(logo: KDriveResourcesAsset.comment.image, message: KDriveResourcesStrings.Localizable.fileDetailsNoComments, backgroundColor: KDriveResourcesAsset.backgroundColor.color)
         case .noCategories:
-            view = self.instantiate(logo: KDriveAsset.categories.image, message: KDriveStrings.Localizable.manageCategoriesNoCategory)
+            view = self.instantiate(logo: KDriveResourcesAsset.categories.image, message: KDriveResourcesStrings.Localizable.manageCategoriesNoCategory)
         }
 
         if !setCenteringEnabled {
@@ -109,6 +109,6 @@ class EmptyTableView: UIView {
     }
 
     @IBAction func reloadButtonClicked(_ sender: UIButton) {
-        actionHandler?(sender)
+        self.actionHandler?(sender)
     }
 }

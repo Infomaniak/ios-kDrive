@@ -18,6 +18,7 @@
 
 import AVKit
 import kDriveCore
+import kDriveResources
 import Kingfisher
 import UIKit
 
@@ -47,7 +48,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        playButton.accessibilityLabel = KDriveStrings.Localizable.buttonPlayerPlayPause
+        playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
     }
 
     override func prepareForReuse() {
@@ -76,12 +77,12 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
                     }
                 } else {
                     DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
                     }
                 }
             }
         } else {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
         }
     }
 

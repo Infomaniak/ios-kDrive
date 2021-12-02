@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class FileHomeCollectionViewCell: FileGridCollectionViewCell {
@@ -57,7 +58,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
         if file.isDirectory || !file.hasThumbnail {
             logoImage.isHidden = true
             largeIconImageView.isHidden = false
-            moreButton.tintColor = KDriveAsset.primaryTextColor.color
+            moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
             moreButton.backgroundColor = nil
         } else {
             logoImage.isHidden = false
@@ -85,7 +86,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
     override func setThumbnailFor(file: File) {
         let fileId = file.id
         logoImage.image = nil
-        logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         file.getThumbnail { image, _ in
             if fileId == self.file.id {
                 self.logoImage.image = image
@@ -100,14 +101,14 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
         let titleLayer = CALayer()
         titleLayer.anchorPoint = .zero
         titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 15)
-        titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        titleLayer.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color.cgColor
         titleLabel.layer.addSublayer(titleLayer)
         logoImage.image = nil
-        logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         largeIconImageView.isHidden = true
         iconImageView.isHidden = false
         iconImageView.image = nil
-        iconImageView.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        iconImageView.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         moreButton.isHidden = true
         checkmarkImage?.isHidden = true
     }

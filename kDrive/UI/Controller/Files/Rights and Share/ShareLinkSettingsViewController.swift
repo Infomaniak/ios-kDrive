@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class ShareLinkSettingsViewController: UIViewController {
@@ -29,33 +30,33 @@ class ShareLinkSettingsViewController: UIViewController {
         var title: String {
             switch self {
             case .optionPassword:
-                return KDriveStrings.Localizable.shareLinkPasswordRightTitle
+                return KDriveResourcesStrings.Localizable.shareLinkPasswordRightTitle
             case .optionDownload:
-                return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadTitle
+                return KDriveResourcesStrings.Localizable.shareLinkSettingsAllowDownloadTitle
             case .optionDate:
-                return KDriveStrings.Localizable.allAddExpirationDateTitle
+                return KDriveResourcesStrings.Localizable.allAddExpirationDateTitle
             }
         }
 
         var fileDescription: String {
             switch self {
             case .optionPassword:
-                return KDriveStrings.Localizable.shareLinkPasswordRightDescription(KDriveStrings.Localizable.shareLinkTypeFile)
+                return KDriveResourcesStrings.Localizable.shareLinkPasswordRightDescription(KDriveResourcesStrings.Localizable.shareLinkTypeFile)
             case .optionDownload:
-                return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
+                return KDriveResourcesStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
-                return KDriveStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
+                return KDriveResourcesStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
             }
         }
 
         var folderDescription: String {
             switch self {
             case .optionPassword:
-                return KDriveStrings.Localizable.shareLinkPasswordRightDescription(KDriveStrings.Localizable.shareLinkTypeFolder)
+                return KDriveResourcesStrings.Localizable.shareLinkPasswordRightDescription(KDriveResourcesStrings.Localizable.shareLinkTypeFolder)
             case .optionDownload:
-                return KDriveStrings.Localizable.shareLinkSettingsAllowDownloadDescription
+                return KDriveResourcesStrings.Localizable.shareLinkSettingsAllowDownloadDescription
             case .optionDate:
-                return KDriveStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
+                return KDriveResourcesStrings.Localizable.shareLinkSettingsAddExpirationDateDescription
             }
         }
 
@@ -92,7 +93,7 @@ class ShareLinkSettingsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = KDriveStrings.Localizable.fileShareLinkSettingsTitle
+        title = KDriveResourcesStrings.Localizable.fileShareLinkSettingsTitle
 
         tableView.delegate = self
         tableView.dataSource = self
@@ -148,12 +149,12 @@ class ShareLinkSettingsViewController: UIViewController {
 
         let navigationBarAppearanceStandard = UINavigationBarAppearance()
         navigationBarAppearanceStandard.configureWithTransparentBackground()
-        navigationBarAppearanceStandard.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        navigationBarAppearanceStandard.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         navigationItem.standardAppearance = navigationBarAppearanceStandard
 
         let navigationBarAppearanceLarge = UINavigationBarAppearance()
         navigationBarAppearanceLarge.configureWithTransparentBackground()
-        navigationBarAppearanceLarge.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        navigationBarAppearanceLarge.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
     }
 
@@ -287,7 +288,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         if section == tableView.numberOfSections - 1 {
-            let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
+            let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
             view.delegate = self
             view.footerButton.isEnabled = enableButton
             view.background.backgroundColor = tableView.backgroundColor

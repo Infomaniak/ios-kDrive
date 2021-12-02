@@ -16,8 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 /// Alert to create a new office document
 class AlertDocViewController: AlertFieldViewController {
@@ -35,10 +36,11 @@ class AlertDocViewController: AlertFieldViewController {
         self.fileType = fileType
         self.directory = directory
         self.driveFileManager = driveFileManager
-        super.init(title: KDriveStrings.Localizable.modalCreateFileTitle, label: KDriveStrings.Localizable.hintInputFileName, placeholder: nil, action: KDriveStrings.Localizable.buttonCreate, handler: nil)
+        super.init(title: KDriveResourcesStrings.Localizable.modalCreateFileTitle, label: KDriveResourcesStrings.Localizable.hintInputFileName, placeholder: nil, action: KDriveResourcesStrings.Localizable.buttonCreate, handler: nil)
         self.textFieldConfiguration = .fileNameConfiguration
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -50,17 +52,17 @@ class AlertDocViewController: AlertFieldViewController {
         let typeImage = UIImageView()
         switch fileType {
         case "docx":
-            typeImage.image = KDriveAsset.fileText.image
-            typeImage.tintColor = KDriveAsset.infomaniakColor.color
+            typeImage.image = KDriveResourcesAsset.fileText.image
+            typeImage.tintColor = KDriveResourcesAsset.infomaniakColor.color
         case "pptx":
-            typeImage.image = KDriveAsset.filePresentation.image
-            typeImage.tintColor = KDriveAsset.iconColor.color
+            typeImage.image = KDriveResourcesAsset.filePresentation.image
+            typeImage.tintColor = KDriveResourcesAsset.iconColor.color
         case "xlsx":
-            typeImage.image = KDriveAsset.fileSheets.image
-            typeImage.tintColor = KDriveAsset.iconColor.color
+            typeImage.image = KDriveResourcesAsset.fileSheets.image
+            typeImage.tintColor = KDriveResourcesAsset.iconColor.color
         case "txt":
-            typeImage.image = KDriveAsset.fileText.image
-            typeImage.tintColor = KDriveAsset.secondaryTextColor.color
+            typeImage.image = KDriveResourcesAsset.fileText.image
+            typeImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
         default:
             break
         }
@@ -96,13 +98,12 @@ class AlertDocViewController: AlertFieldViewController {
                 if error == nil, let file = file {
                     guard let mainTabViewController = currentRootViewController as? MainTabViewController else { return }
                     OnlyOfficeViewController.open(driveFileManager: self.driveFileManager, file: file, viewController: mainTabViewController)
-                    message = KDriveStrings.Localizable.snackbarFileCreateConfirmation
+                    message = KDriveResourcesStrings.Localizable.snackbarFileCreateConfirmation
                 } else {
-                    message = KDriveStrings.Localizable.errorFileCreate
+                    message = KDriveResourcesStrings.Localizable.errorFileCreate
                 }
                 UIConstants.showSnackBar(message: message)
             }
         }
     }
-
 }

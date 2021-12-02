@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
+import kDriveResources
+import UIKit
 
 class MessageTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var messageTextView: UITextView!
 
     var textDidChange: ((String) -> Void)?
@@ -33,9 +33,10 @@ class MessageTableViewCell: InsetTableViewCell {
 }
 
 // MARK: - UITextViewDelegate
+
 extension MessageTableViewCell: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == KDriveStrings.Localizable.fileShareAddMessage {
+        if textView.text == KDriveResourcesStrings.Localizable.fileShareAddMessage {
             textView.text = ""
         }
     }
@@ -46,7 +47,7 @@ extension MessageTableViewCell: UITextViewDelegate {
 
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.isEmpty {
-            textView.text = KDriveStrings.Localizable.fileShareAddMessage
+            textView.text = KDriveResourcesStrings.Localizable.fileShareAddMessage
         }
     }
 }

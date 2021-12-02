@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class UploadCardView: UIView {
-
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var cancelButton: UIButton?
     @IBOutlet weak var retryButton: UIButton?
@@ -36,7 +36,7 @@ class UploadCardView: UIView {
     }
 
     func setUploadCount(_ count: Int) {
-        detailsLabel.text = KDriveStrings.Localizable.uploadInProgressNumberFile(count)
+        detailsLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressNumberFile(count)
     }
 
     @objc private func retryButtonPressed() {
@@ -46,5 +46,4 @@ class UploadCardView: UIView {
     @objc private func cancelButtonPressed() {
         cancelButtonPressedHandler?()
     }
-
 }

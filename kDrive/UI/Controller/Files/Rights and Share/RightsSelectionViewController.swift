@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 enum RightsSelectionType {
@@ -45,32 +46,32 @@ struct Right {
 
     static let shareLinkRights = [
         Right(key: ShareLinkPermission.restricted.rawValue,
-              title: KDriveStrings.Localizable.shareLinkRestrictedRightTitle,
-              icon: KDriveAsset.lock.image,
-              fileDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort,
-              folderDescription: KDriveStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort,
-              documentDescription: KDriveStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort),
+              title: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightTitle,
+              icon: KDriveResourcesAsset.lock.image,
+              fileDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort,
+              folderDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort,
+              documentDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort),
         Right(key: ShareLinkPermission.public.rawValue,
-              title: KDriveStrings.Localizable.shareLinkPublicRightTitle,
-              icon: KDriveAsset.unlock.image,
-              fileDescription: KDriveStrings.Localizable.shareLinkPublicRightFileDescriptionShort,
-              folderDescription: KDriveStrings.Localizable.shareLinkPublicRightFolderDescriptionShort,
-              documentDescription: KDriveStrings.Localizable.shareLinkPublicRightDocumentDescriptionShort)
+              title: KDriveResourcesStrings.Localizable.shareLinkPublicRightTitle,
+              icon: KDriveResourcesAsset.unlock.image,
+              fileDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFileDescriptionShort,
+              folderDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFolderDescriptionShort,
+              documentDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightDocumentDescriptionShort)
     ]
 
     static let onlyOfficeRights = [
         Right(key: EditPermission.read.rawValue,
-              title: KDriveStrings.Localizable.shareLinkOfficePermissionReadTitle,
-              icon: KDriveAsset.view.image,
-              fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription,
-              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFolderDescription,
-              documentDescription: KDriveStrings.Localizable.shareLinkOfficePermissionReadFileDescription),
+              title: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle,
+              icon: KDriveResourcesAsset.view.image,
+              fileDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadFileDescription,
+              folderDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadFolderDescription,
+              documentDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadFileDescription),
         Right(key: EditPermission.write.rawValue,
-              title: KDriveStrings.Localizable.shareLinkOfficePermissionWriteTitle,
-              icon: KDriveAsset.edit.image,
-              fileDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription,
-              folderDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription,
-              documentDescription: KDriveStrings.Localizable.shareLinkOfficePermissionWriteFileDescription)
+              title: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteTitle,
+              icon: KDriveResourcesAsset.edit.image,
+              fileDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteFileDescription,
+              folderDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription,
+              documentDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteFileDescription)
     ]
 }
 
@@ -101,7 +102,7 @@ class RightsSelectionViewController: UIViewController {
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelButtonPressed))
-        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         navigationItem.largeTitleDisplayMode = .always
 
         setupView()
@@ -121,13 +122,13 @@ class RightsSelectionViewController: UIViewController {
             let getUserRightDescription = { (permission: UserPermission) -> (String) in
                 switch permission {
                 case .read:
-                    return KDriveStrings.Localizable.userPermissionReadDescription
+                    return KDriveResourcesStrings.Localizable.userPermissionReadDescription
                 case .write:
-                    return KDriveStrings.Localizable.userPermissionWriteDescription
+                    return KDriveResourcesStrings.Localizable.userPermissionWriteDescription
                 case .manage:
-                    return KDriveStrings.Localizable.userPermissionManageDescription
+                    return KDriveResourcesStrings.Localizable.userPermissionManageDescription
                 case .delete:
-                    return KDriveStrings.Localizable.userPermissionRemove
+                    return KDriveResourcesStrings.Localizable.userPermissionRemove
                 }
             }
             let userPermissions = UserPermission.allCases.filter { $0 != .delete || canDelete } // Remove delete permission is `canDelete` is false
@@ -136,7 +137,7 @@ class RightsSelectionViewController: UIViewController {
             rights = Right.onlyOfficeRights
         }
         selectRight()
-        closeButton.setTitle(KDriveStrings.Localizable.buttonSave, for: .normal)
+        closeButton.setTitle(KDriveResourcesStrings.Localizable.buttonSave, for: .normal)
     }
 
     private func selectRight() {
@@ -202,8 +203,8 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         let right = rights[indexPath.row]
         if right.key == UserPermission.delete.rawValue {
             let deleteUser = shareable?.shareableName ?? ""
-            let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
-            let alert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: attrString, action: KDriveStrings.Localizable.buttonDelete, destructive: true) {
+            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: attrString, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true) {
                 self.delegate?.didDeleteUserRight()
                 self.presentingViewController?.dismiss(animated: true)
             }

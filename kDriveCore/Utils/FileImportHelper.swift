@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import kDriveResources
 import PDFKit
 import Photos
 import VisionKit
@@ -97,9 +98,9 @@ public enum ImportError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .accessDenied:
-            return KDriveCoreStrings.Localizable.allFileAddRightError
+            return KDriveResourcesStrings.Localizable.allFileAddRightError
         case .emptyImageData:
-            return KDriveCoreStrings.Localizable.errorUpload
+            return KDriveResourcesStrings.Localizable.errorUpload
         }
     }
 }

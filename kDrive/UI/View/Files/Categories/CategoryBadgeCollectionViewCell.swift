@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class CategoryBadgeCollectionViewCell: UICollectionViewCell {
@@ -25,7 +26,7 @@ class CategoryBadgeCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        borderColor = KDriveAsset.backgroundCardViewColor.color
+        borderColor = KDriveResourcesAsset.backgroundCardViewColor.color
         borderWidth = 1
         cornerRadius = 8
         moreLabel.font = moreLabel.font.withSize(9)
@@ -33,7 +34,7 @@ class CategoryBadgeCollectionViewCell: UICollectionViewCell {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        borderColor = KDriveAsset.backgroundCardViewColor.color
+        borderColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     func configure(with category: kDriveCore.Category, more: Int? = nil) {

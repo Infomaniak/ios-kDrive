@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol SelectSwitchDriveDelegate: SelectDelegate, UIViewController {}
@@ -49,7 +50,7 @@ extension Drive: Selectable {
     }
 
     var image: UIImage? {
-        return KDriveCoreAsset.drive.image
+        return KDriveResourcesAsset.drive.image
     }
 
     var tintColor: UIColor? {

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 public class IKRoundButton: IKLargeButton {
@@ -28,6 +29,6 @@ public class IKRoundButton: IKLargeButton {
     }
 
     override func setBackgroundColor() {
-        backgroundColor = isEnabled ? KDriveCoreAsset.infomaniakColor.color : KDriveCoreAsset.infomaniakColor.color.withAlphaComponent(0.38)
+        backgroundColor = isEnabled ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.infomaniakColor.color.withAlphaComponent(0.38)
     }
 }

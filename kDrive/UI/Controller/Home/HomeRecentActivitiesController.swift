@@ -18,6 +18,7 @@
 
 import Foundation
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class HomeRecentActivitiesController: HomeRecentFilesController {
@@ -29,7 +30,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         self.init(driveFileManager: driveFileManager,
                   homeViewController: homeViewController,
                   listCellType: RecentActivityCollectionViewCell.self, gridCellType: RecentActivityCollectionViewCell.self, emptyCellType: .noActivities,
-                  title: KDriveStrings.Localizable.lastEditsTitle, selectorTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle,
+                  title: KDriveResourcesStrings.Localizable.lastEditsTitle, selectorTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
                   listStyleEnabled: false)
     }
 

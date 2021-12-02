@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import DropDown
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class ShareAndRightsViewController: UIViewController {
@@ -70,7 +71,7 @@ class ShareAndRightsViewController: UIViewController {
 
     private func setTitle() {
         guard file != nil else { return }
-        title = file.isDirectory ? KDriveStrings.Localizable.fileShareDetailsFolderTitle(file.name) : KDriveStrings.Localizable.fileShareDetailsFileTitle(file.name)
+        title = file.isDirectory ? KDriveResourcesStrings.Localizable.fileShareDetailsFolderTitle(file.name) : KDriveResourcesStrings.Localizable.fileShareDetailsFileTitle(file.name)
     }
 
     private func updateShareList() {
@@ -243,7 +244,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite, .link:
             return nil
         case .access:
-            return NewFolderSectionHeaderView.instantiate(title: KDriveStrings.Localizable.fileShareDetailsUsersAccesTitle)
+            return NewFolderSectionHeaderView.instantiate(title: KDriveResourcesStrings.Localizable.fileShareDetailsUsersAccesTitle)
         }
     }
 }

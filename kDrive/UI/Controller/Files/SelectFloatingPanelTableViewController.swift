@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewController {
@@ -106,7 +107,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 if downloadInProgress,
                    let currentArchiveId = currentArchiveId,
                    let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
-                    let alert = AlertTextViewController(title: KDriveStrings.Localizable.cancelDownloadTitle, message: KDriveStrings.Localizable.cancelDownloadDescription, action: KDriveStrings.Localizable.buttonYes, destructive: true) {
+                    let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
                         operation.cancel()
                     }
                     present(alert, animated: true)
@@ -178,15 +179,15 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         group.notify(queue: .main) {
             if success {
                 if action == .offline && addAction {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.count))
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.count))
                 } else if action == .favorite && addAction {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
                 } else if action == .duplicate && addAction {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
                 }
             } else {
                 if self.downloadError != .taskCancelled {
-                    UIConstants.showSnackBar(message: self.downloadError?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: self.downloadError?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
             self.files = self.changedFiles

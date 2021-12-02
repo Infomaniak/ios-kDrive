@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
@@ -32,7 +33,7 @@ class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
 
     func configure(with shareable: Shareable) {
         if let user = shareable as? DriveUser {
-            userImage.image = KDriveAsset.placeholderAvatar.image
+            userImage.image = KDriveResourcesAsset.placeholderAvatar.image
             user.getAvatar { image in
                 self.userImage.image = image
             }

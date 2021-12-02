@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 public enum Theme: String, CaseIterable {
@@ -25,9 +26,9 @@ public enum Theme: String, CaseIterable {
 
     public var interfaceStyle: UIUserInterfaceStyle {
         let styles: [Theme: UIUserInterfaceStyle] = [
-                .light: .light,
-                .dark: .dark,
-                .system: .unspecified
+            .light: .light,
+            .dark: .dark,
+            .system: .unspecified
         ]
         return styles[self] ?? .unspecified
     }
@@ -35,11 +36,11 @@ public enum Theme: String, CaseIterable {
     public var title: String {
         switch self {
         case .light:
-            return KDriveCoreStrings.Localizable.themeSettingsLightLabel
+            return KDriveResourcesStrings.Localizable.themeSettingsLightLabel
         case .dark:
-            return KDriveCoreStrings.Localizable.themeSettingsDarkLabel
+            return KDriveResourcesStrings.Localizable.themeSettingsDarkLabel
         case .system:
-            return KDriveCoreStrings.Localizable.themeSettingsSystemLabel
+            return KDriveResourcesStrings.Localizable.themeSettingsSystemLabel
         }
     }
 
@@ -48,7 +49,7 @@ public enum Theme: String, CaseIterable {
         case .light, .dark:
             return title
         case .system:
-            return KDriveCoreStrings.Localizable.themeSettingsSystemDefaultLabel
+            return KDriveResourcesStrings.Localizable.themeSettingsSystemDefaultLabel
         }
     }
 }

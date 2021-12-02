@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
@@ -33,7 +34,7 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
         super.awakeFromNib()
         // Initialization code
         progressView.setInfomaniakStyle()
-        progressView.progressTintColor = KDriveAsset.binColor.color
+        progressView.progressTintColor = KDriveResourcesAsset.binColor.color
     }
 
     func configureCell(with drive: Drive) {
@@ -42,10 +43,10 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
         storageLabel.text = "\(Constants.formatFileSize(drive.usedSize, decimals: 1, unit: false)) / \(Constants.formatFileSize(drive.size))"
 
         if drive.accountAdmin {
-            storageDescription.text = KDriveStrings.Localizable.notEnoughStorageDescription1
+            storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription1
             upgradeButton.isHidden = false
         } else {
-            storageDescription.text = KDriveStrings.Localizable.notEnoughStorageDescription2
+            storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription2
             upgradeButton.isHidden = true
         }
     }

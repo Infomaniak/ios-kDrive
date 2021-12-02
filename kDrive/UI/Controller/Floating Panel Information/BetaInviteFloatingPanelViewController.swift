@@ -16,23 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import kDriveResources
 import Lottie
+import UIKit
 
 class BetaInviteFloatingPanelViewController: InformationFloatingPanelViewController {
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        imageView.image = KDriveAsset.logoKdriveBeta.image
+        imageView.image = KDriveResourcesAsset.logoKdriveBeta.image
         imageViewHeightConstraint.constant = 70
         animationView.isHidden = true
-        titleLabel.text = KDriveStrings.Localizable.betaTestTitle
-        descriptionLabel.text = KDriveStrings.Localizable.betaTestDescription
+        titleLabel.text = KDriveResourcesStrings.Localizable.betaTestTitle
+        descriptionLabel.text = KDriveResourcesStrings.Localizable.betaTestDescription
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
-        leftButton.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
-        rightButton.setTitle(KDriveStrings.Localizable.buttonBetaTest, for: .normal)
+        leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
+        rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonBetaTest, for: .normal)
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {

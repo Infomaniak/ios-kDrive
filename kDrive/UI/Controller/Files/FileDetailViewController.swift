@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class FileDetailViewController: UIViewController {
@@ -103,7 +104,7 @@ class FileDetailViewController: UIViewController {
         navigationController?.navigationBar.tintColor = tableView.contentOffset.y == 0 && UIDevice.current.orientation.isPortrait && file.hasThumbnail ? .white : nil
         let navigationBarAppearanceStandard = UINavigationBarAppearance()
         navigationBarAppearanceStandard.configureWithTransparentBackground()
-        navigationBarAppearanceStandard.backgroundColor = KDriveAsset.backgroundColor.color
+        navigationBarAppearanceStandard.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         navigationItem.standardAppearance = navigationBarAppearanceStandard
         navigationItem.compactAppearance = navigationBarAppearanceStandard
 
@@ -293,7 +294,7 @@ class FileDetailViewController: UIViewController {
     }
 
     @IBAction func addComment(_ sender: UIButton) {
-        let messageAlert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonAddComment, placeholder: KDriveStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveStrings.Localizable.buttonSend, loading: true) { comment in
+        let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { comment in
             let group = DispatchGroup()
             var newComment: Comment?
             group.enter()
@@ -309,7 +310,7 @@ class FileDetailViewController: UIViewController {
                     self.comments.insert(comment, at: 0)
                     self.tableView.reloadSections([1], with: .automatic)
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorAddComment)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorAddComment)
                 }
             }
         }
@@ -467,7 +468,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 case .creation:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
-                    cell.titleLabel.text = KDriveStrings.Localizable.fileDetailsInfosCreationDateTitle
+                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosCreationDateTitle
                     if let creationDate = file.fileCreatedAtDate {
                         cell.creationLabel.text = Constants.formatDate(creationDate)
                     } else {
@@ -476,7 +477,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 case .added:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
-                    cell.titleLabel.text = KDriveStrings.Localizable.fileDetailsInfosAddedDateTitle
+                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosAddedDateTitle
                     if let creationDate = file.createdAtDate {
                         cell.creationLabel.text = Constants.formatDate(creationDate)
                     } else {
@@ -493,12 +494,12 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 case .sizeAll:
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)
-                    cell.titleLabel.text = KDriveStrings.Localizable.fileDetailsInfosTotalSizeTitle
+                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosTotalSizeTitle
                     cell.sizeLabel.text = file.getFileSize(withVersion: true)
                     return cell
                 case .size:
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)
-                    cell.titleLabel.text = KDriveStrings.Localizable.fileDetailsInfosOriginalSize
+                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosOriginalSize
                     cell.sizeLabel.text = file.getFileSize()
                     return cell
                 }
@@ -568,7 +569,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { _, _, completionHandler in
-            let deleteAlert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: KDriveStrings.Localizable.modalCommentDeleteDescription, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: true) {
+            let deleteAlert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: KDriveResourcesStrings.Localizable.modalCommentDeleteDescription, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
@@ -588,7 +589,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                             self.tableView.reloadSections(IndexSet([1]), with: .automatic)
                         }
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
                     }
                     completionHandler(success)
                 }
@@ -599,7 +600,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let editAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
-            let editAlert = AlertFieldViewController(title: KDriveStrings.Localizable.modalCommentAddTitle, placeholder: KDriveStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveStrings.Localizable.buttonSave, loading: true) { comment in
+            let editAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.modalCommentAddTitle, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { comment in
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
@@ -615,7 +616,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                         self.comments[indexPath.row].body = comment
                         self.tableView.reloadRows(at: [indexPath], with: .automatic)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorModification)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                     }
                     completionHandler(success)
                 }
@@ -626,7 +627,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let answerAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
-            let answerAlert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonAddComment, placeholder: KDriveStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveStrings.Localizable.buttonSend, loading: true) { comment in
+            let answerAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { comment in
                 self.driveFileManager.apiFetcher.answerComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { response, _ in
                     if let data = response?.data {
                         data.isResponse = true
@@ -643,12 +644,12 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             self.present(answerAlert, animated: true)
         }
 
-        deleteAction.image = KDriveAsset.delete.image
-        deleteAction.accessibilityLabel = KDriveStrings.Localizable.buttonDelete
-        editAction.image = KDriveAsset.edit.image
-        editAction.accessibilityLabel = KDriveStrings.Localizable.buttonEdit
-        answerAction.image = KDriveAsset.reply.image
-        answerAction.accessibilityLabel = KDriveStrings.Localizable.buttonSend
+        deleteAction.image = KDriveResourcesAsset.delete.image
+        deleteAction.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDelete
+        editAction.image = KDriveResourcesAsset.edit.image
+        editAction.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+        answerAction.image = KDriveResourcesAsset.reply.image
+        answerAction.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonSend
 
         var actions: [UIContextualAction] = [deleteAction, editAction, answerAction]
         if comments[indexPath.row].isResponse {

@@ -19,6 +19,7 @@
 import DropDown
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class UsersDropDownTableViewCell: DropDownCell {
@@ -30,18 +31,18 @@ class UsersDropDownTableViewCell: DropDownCell {
         super.awakeFromNib()
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     func configure(with mail: String) {
         usernameLabel.text = mail
-        detailLabel.text = KDriveStrings.Localizable.userInviteByEmail
-        avatarImage.image = KDriveAsset.circleSend.image
+        detailLabel.text = KDriveResourcesStrings.Localizable.userInviteByEmail
+        avatarImage.image = KDriveResourcesAsset.circleSend.image
     }
 
     func configure(with shareable: Shareable, drive: Drive) {
@@ -65,9 +66,9 @@ class UsersDropDownTableViewCell: DropDownCell {
     }
 
     func configureWith(team: Team, drive: Drive) {
-        usernameLabel.text = team.isAllUsers ? KDriveStrings.Localizable.allAllDriveUsers : team.name
+        usernameLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
         avatarImage.image = team.icon
-        detailLabel.text = KDriveStrings.Localizable.shareUsersCount(team.usersCount(in: drive))
+        detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(team.usersCount(in: drive))
     }
 
     func configureWith(account: Account) {

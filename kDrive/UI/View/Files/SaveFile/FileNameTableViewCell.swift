@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
 import MaterialOutlinedTextField
+import UIKit
 
 class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
-
     @IBOutlet weak var textField: MaterialOutlinedTextField!
     var textDidChange: ((String?) -> Void)?
     var textDidEndEditing: ((String?) -> Void)?
@@ -30,8 +30,8 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
         super.awakeFromNib()
 
         textField.setInfomaniakColors()
-        textField.backgroundColor = KDriveAsset.backgroundCardViewColor.color
-        textField.setHint(KDriveStrings.Localizable.saveExternalFileInputFileName)
+        textField.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        textField.setHint(KDriveResourcesStrings.Localizable.saveExternalFileInputFileName)
         textField.delegate = self
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
@@ -51,5 +51,4 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.endEditing(true)
     }
-
 }

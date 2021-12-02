@@ -16,24 +16,24 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class FileInformationOwnerTableViewCell: UITableViewCell {
-
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var ownerImage: UIImageView!
     @IBOutlet weak var ownerLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        ownerImage.image = KDriveAsset.placeholderAvatar.image
+        ownerImage.image = KDriveResourcesAsset.placeholderAvatar.image
         ownerImage.cornerRadius = ownerImage.frame.width / 2
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        ownerImage.image = KDriveAsset.placeholderAvatar.image
+        ownerImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     func configureWith(file: File) {

@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol SelectedUsersDelegate: AnyObject {
@@ -114,7 +115,7 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
         } else {
             let email = emails[indexPath.row - shareables.count]
             cell.usernameLabel.text = email
-            cell.avatarImage.image = KDriveAsset.circleSend.image
+            cell.avatarImage.image = KDriveResourcesAsset.circleSend.image
             cell.removeButtonHandler = { [weak self] _ in
                 self?.delegate?.didDelete(email: email)
             }

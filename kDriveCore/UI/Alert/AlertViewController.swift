@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 /**
@@ -64,7 +65,7 @@ open class AlertViewController: UIViewController {
         // Alert view
         alertView = UIView()
         alertView.cornerRadius = UIConstants.alertCornerRadius
-        alertView.backgroundColor = KDriveCoreAsset.backgroundCardViewColor.color
+        alertView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         alertView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(alertView)
 
@@ -94,7 +95,7 @@ open class AlertViewController: UIViewController {
 
         // Cancel button
         cancelButton = UIButton(type: .system)
-        cancelButton.setTitle(KDriveCoreStrings.Localizable.buttonCancel, for: .normal)
+        cancelButton.setTitle(KDriveResourcesStrings.Localizable.buttonCancel, for: .normal)
         cancelButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: UIFontMetrics.default.scaledValue(for: 15))
         cancelButton.sizeToFit()
         cancelButton.addTarget(self, action: #selector(cancel), for: .touchUpInside)

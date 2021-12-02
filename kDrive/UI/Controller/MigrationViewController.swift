@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import Lottie
 import UIKit
 
@@ -44,11 +45,11 @@ class MigrationViewController: UIViewController {
         migrationProgressView.isHidden = false
         buttonView.isHidden = true
 
-        let migrationSlide = Slide(backgroundImage: KDriveAsset.background1.image,
-                                   illustrationImage: KDriveAsset.illuDevices.image,
+        let migrationSlide = Slide(backgroundImage: KDriveResourcesAsset.background1.image,
+                                   illustrationImage: KDriveResourcesAsset.illuDevices.image,
                                    animationName: "illu_devices",
                                    title: "migrationTitle".localized,
-                                   description: KDriveStrings.Localizable.migrationDescription)
+                                   description: KDriveResourcesStrings.Localizable.migrationDescription)
 
         slides = [migrationSlide]
         MigrationHelper.migrate { result in
@@ -58,7 +59,7 @@ class MigrationViewController: UIViewController {
                 buttonView.isHidden = false
                 retryButton.isHidden = result.success
                 migrationFailedLabel.isHidden = result.success
-                migrationDoneButton.setTitle(result.success ? KDriveStrings.Localizable.buttonMigrationDone : KDriveStrings.Localizable.buttonLogin, for: .normal)
+                migrationDoneButton.setTitle(result.success ? KDriveResourcesStrings.Localizable.buttonMigrationDone : KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
 
                 UIView.animate(withDuration: 0.5) {
                     self.buttonView.alpha = 1

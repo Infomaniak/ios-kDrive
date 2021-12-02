@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol MainTabBarDelegate: AnyObject {
@@ -55,7 +56,7 @@ class MainTabBar: UITabBar {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     private func addShape() {
@@ -124,7 +125,7 @@ class MainTabBar: UITabBar {
         let height: CGFloat = 120
         let inset = (superview?.frame.height ?? 0) - frame.height - frame.minY
         gradient.frame = CGRect(x: 0, y: bounds.height + inset - height, width: bounds.width, height: height)
-        gradient.colors = [KDriveAsset.backgroundColor.color.withAlphaComponent(0).cgColor, KDriveAsset.backgroundColor.color.cgColor]
+        gradient.colors = [KDriveResourcesAsset.backgroundColor.color.withAlphaComponent(0).cgColor, KDriveResourcesAsset.backgroundColor.color.cgColor]
         if let oldBackgroundLayer = backgroundLayer {
             layer.replaceSublayer(oldBackgroundLayer, with: gradient)
         } else {
@@ -140,9 +141,9 @@ class MainTabBar: UITabBar {
         }
         centerButton = IKRoundButton(frame: CGRect(x: (bounds.width / 2) - (tabBarHeight / 2), y: originY, width: tabBarHeight, height: tabBarHeight))
         centerButton.setTitle("", for: .normal)
-        centerButton.setImage(KDriveAsset.plus.image, for: .normal)
+        centerButton.setImage(KDriveResourcesAsset.plus.image, for: .normal)
         centerButton.imageEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-        centerButton.accessibilityLabel = KDriveStrings.Localizable.buttonAdd
+        centerButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAdd
         // Shadow
         centerButton.layer.shadowPath = UIBezierPath(ovalIn: centerButton.bounds).cgPath
         centerButton.elevated = true

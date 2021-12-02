@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import Lottie
 import UIKit
 
@@ -27,16 +28,16 @@ class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewControl
         imageView.isHidden = true
         animationView.animation = Animation.named("illu_photos")
         animationViewHeightConstraint.constant = 258
-        titleLabel.text = KDriveStrings.Localizable.syncConfigureTitle
+        titleLabel.text = KDriveResourcesStrings.Localizable.syncConfigureTitle
         if let drive = drive {
-            descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.syncConfigureDescription(drive.name), boldText: drive.name)
+            descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.syncConfigureDescription(drive.name), boldText: drive.name)
         } else {
             descriptionLabel.text = nil
         }
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
-        leftButton.setTitle(KDriveStrings.Localizable.buttonLater, for: .normal)
-        rightButton.setTitle(KDriveStrings.Localizable.buttonConfigure, for: .normal)
+        leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
+        rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonConfigure, for: .normal)
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {

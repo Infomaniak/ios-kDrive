@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class RecentActivityBottomTableViewCell: UITableViewCell {
-
     @IBOutlet weak var fileNameLabel: UILabel!
     @IBOutlet weak var fileImage: UIImageView!
 
@@ -31,9 +31,9 @@ class RecentActivityBottomTableViewCell: UITableViewCell {
 
     func configureWith(recentActivity: FileActivity, more: Int?) {
         if let count = more {
-            fileImage.image = KDriveAsset.copy.image
-            fileNameLabel.text = KDriveStrings.Localizable.fileActivityOtherFiles(count)
-            fileImage.tintColor = KDriveAsset.secondaryTextColor.color
+            fileImage.image = KDriveResourcesAsset.copy.image
+            fileNameLabel.text = KDriveResourcesStrings.Localizable.fileActivityOtherFiles(count)
+            fileImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
         } else {
             fileImage.image = recentActivity.file?.icon ?? ConvertedType.unknown.icon
             fileNameLabel.text = recentActivity.file?.name ?? String(recentActivity.path.split(separator: "/").last ?? "")
@@ -47,9 +47,9 @@ class RecentActivityBottomTableViewCell: UITableViewCell {
         let fileNameLayer = CALayer()
         fileNameLayer.anchorPoint = .zero
         fileNameLayer.frame = CGRect(x: 0, y: 4, width: 150, height: 10)
-        fileNameLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        fileNameLayer.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color.cgColor
         fileNameLabel.layer.addSublayer(fileNameLayer)
         fileImage.image = nil
-        fileImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        fileImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
     }
 }

@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol FileUsersDelegate: AnyObject {
@@ -47,7 +48,7 @@ class FileInformationUsersTableViewCell: UITableViewCell {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(cellView: FileDetailInformationUserCollectionViewCell.self)
-        shareButton.accessibilityLabel = KDriveStrings.Localizable.buttonFileRights
+        shareButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonFileRights
     }
 
     @IBAction func shareButtonTapped(_ sender: Any) {

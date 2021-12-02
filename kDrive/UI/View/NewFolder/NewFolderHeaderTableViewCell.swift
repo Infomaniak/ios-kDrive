@@ -16,17 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import MaterialOutlinedTextField
+import UIKit
 
 protocol NewFolderTextFieldDelegate: AnyObject {
     func textFieldUpdated(content: String)
 }
 
 class NewFolderHeaderTableViewCell: InsetTableViewCell, UITextFieldDelegate {
-
     @IBOutlet weak var titleTextField: MaterialOutlinedTextField!
     weak var delegate: NewFolderTextFieldDelegate?
 
@@ -34,7 +34,7 @@ class NewFolderHeaderTableViewCell: InsetTableViewCell, UITextFieldDelegate {
         super.awakeFromNib()
 
         titleTextField.setInfomaniakColors()
-        titleTextField.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        titleTextField.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         titleTextField.delegate = self
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
@@ -48,26 +48,23 @@ class NewFolderHeaderTableViewCell: InsetTableViewCell, UITextFieldDelegate {
         delegate?.textFieldUpdated(content: titleTextField.text ?? "")
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-    }
+    override func setSelected(_ selected: Bool, animated: Bool) {}
 
-    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-    }
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {}
 
     func configureWith(folderType: FolderType) {
         if folderType == .folder {
-            titleLabel.text = KDriveStrings.Localizable.createFolderTitle
-            accessoryImageView.image = KDriveAsset.folderFilled.image
-            titleTextField.setHint(KDriveStrings.Localizable.hintInputDirName)
+            titleLabel.text = KDriveResourcesStrings.Localizable.createFolderTitle
+            accessoryImageView.image = KDriveResourcesAsset.folderFilled.image
+            titleTextField.setHint(KDriveResourcesStrings.Localizable.hintInputDirName)
         } else if folderType == .commonFolder {
-            titleLabel.text = KDriveStrings.Localizable.createCommonFolderTitle
-            accessoryImageView.image = KDriveAsset.folderCommonDocuments.image
-            titleTextField.setHint(KDriveStrings.Localizable.hintInputDirName)
+            titleLabel.text = KDriveResourcesStrings.Localizable.createCommonFolderTitle
+            accessoryImageView.image = KDriveResourcesAsset.folderCommonDocuments.image
+            titleTextField.setHint(KDriveResourcesStrings.Localizable.hintInputDirName)
         } else {
-            titleLabel.text = KDriveStrings.Localizable.createDropBoxTitle
-            accessoryImageView.image = KDriveAsset.folderDropBox.image
-            titleTextField.setHint(KDriveStrings.Localizable.createDropBoxHint)
+            titleLabel.text = KDriveResourcesStrings.Localizable.createDropBoxTitle
+            accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
+            titleTextField.setHint(KDriveResourcesStrings.Localizable.createDropBoxHint)
         }
     }
-
 }

@@ -19,11 +19,12 @@
 import CocoaLumberjackSwift
 import DifferenceKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 extension SwipeCellAction {
-    static let share = SwipeCellAction(identifier: "share", title: KDriveStrings.Localizable.buttonFileRights, backgroundColor: KDriveAsset.infomaniakColor.color, icon: KDriveAsset.share.image)
-    static let delete = SwipeCellAction(identifier: "delete", title: KDriveStrings.Localizable.buttonDelete, backgroundColor: KDriveAsset.binColor.color, icon: KDriveAsset.delete.image)
+    static let share = SwipeCellAction(identifier: "share", title: KDriveResourcesStrings.Localizable.buttonFileRights, backgroundColor: KDriveResourcesAsset.infomaniakColor.color, icon: KDriveResourcesAsset.share.image)
+    static let delete = SwipeCellAction(identifier: "delete", title: KDriveResourcesStrings.Localizable.buttonDelete, backgroundColor: KDriveResourcesAsset.binColor.color, icon: KDriveResourcesAsset.delete.image)
 }
 
 extension SortType: Selectable {
@@ -269,7 +270,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         if configuration.showUploadingFiles {
             headerView.uploadCardView.isHidden = uploadingFilesCount == 0
-            headerView.uploadCardView.titleLabel.text = KDriveStrings.Localizable.uploadInThisFolderTitle
+            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
             headerView.uploadCardView.setUploadCount(uploadingFilesCount)
             headerView.uploadCardView.progressView.enableIndeterminate()
         }
@@ -558,7 +559,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             collectionView.allowsMultipleSelection = true
             navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
-            navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+            navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
             updateSelectAllButton()
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
@@ -804,9 +805,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             // Select all not supported, don't show button
             navigationItem.rightBarButtonItem = nil
         } else if selectedItems.count == sortedFiles.count || selectAllMode {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonDeselectAll, style: .plain, target: self, action: #selector(deselectAllChildren))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonDeselectAll, style: .plain, target: self, action: #selector(deselectAllChildren))
         } else {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
         }
     }
 
@@ -847,13 +848,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             let message: String
             switch action {
             case .trash:
-                message = KDriveStrings.Localizable.fileListDeletionStartedSnackbar
+                message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
             case .move:
-                message = KDriveStrings.Localizable.fileListMoveStartedSnackbar
+                message = KDriveResourcesStrings.Localizable.fileListMoveStartedSnackbar
             case .copy:
-                message = KDriveStrings.Localizable.fileListCopyStartedSnackbar
+                message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
             }
-            let progressSnack = UIConstants.showSnackBar(message: message, duration: .infinite, action: IKSnackBar.Action(title: KDriveStrings.Localizable.buttonCancel) {
+            let progressSnack = UIConstants.showSnackBar(message: message, duration: .infinite, action: IKSnackBar.Action(title: KDriveResourcesStrings.Localizable.buttonCancel) {
                 if let cancelId = cancelId {
                     self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                         if let error = error {
@@ -870,21 +871,21 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                     case .processing:
                         switch action {
                         case .trash:
-                            progressSnack?.message = KDriveStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                         case .move:
-                            progressSnack?.message = KDriveStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                         case .copy:
-                            progressSnack?.message = KDriveStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                         }
                         self?.notifyObserversForCurrentDirectory()
                     case .done:
                         switch action {
                         case .trash:
-                            progressSnack?.message = KDriveStrings.Localizable.fileListDeletionDoneSnackbar
+                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
                         case .move:
-                            progressSnack?.message = KDriveStrings.Localizable.fileListMoveDoneSnackbar
+                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveDoneSnackbar
                         case .copy:
-                            progressSnack?.message = KDriveStrings.Localizable.fileListCopyDoneSnackbar
+                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyDoneSnackbar
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             progressSnack?.dismiss()
@@ -894,11 +895,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                         let message: String
                         switch action {
                         case .trash:
-                            message = KDriveStrings.Localizable.allTrashActionCancelled
+                            message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
                         case .move:
-                            message = KDriveStrings.Localizable.allFileMoveCancelled
+                            message = KDriveResourcesStrings.Localizable.allFileMoveCancelled
                         case .copy:
-                            message = KDriveStrings.Localizable.allFileDuplicateCancelled
+                            message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
                         }
                         UIConstants.showSnackBar(message: message)
                         self?.notifyObserversForCurrentDirectory()
@@ -915,7 +916,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Files header view delegate
 
     func sortButtonPressed() {
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: trashSort ? [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest] : [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest], selectedOption: sortType, headerTitle: KDriveStrings.Localizable.sortTitle, delegate: self)
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: trashSort ? [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest] : [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest], selectedOption: sortType, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 
@@ -959,13 +960,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 let alert: AlertTextViewController
                 if let count = currentDirectoryCount?.count,
                    selectAllMode {
-                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(count))
-                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
+                    message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescriptionPlural(count))
+                    alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true) {
                         self.bulkDeleteAll()
                     }
                 } else {
-                    message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescriptionPlural(selectedItems.count))
-                    alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveStrings.Localizable.buttonMove, destructive: true) {
+                    message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescriptionPlural(selectedItems.count))
+                    alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true) {
                         self.bulkDeleteFiles(Array(self.selectedItems))
                     }
                 }
@@ -1163,13 +1164,13 @@ extension FileListViewController: UICollectionViewDropDelegate {
                         if destinationDirectory.id == file.parentId { return }
                         destinationDriveFileManager.moveFile(file: file, newParent: destinationDirectory) { response, _, error in
                             if error != nil {
-                                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                             } else {
-                                UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
                                     if let cancelId = response?.id {
                                         self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                             if error == nil {
-                                                UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileMoveCancelled)
+                                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
                                             }
                                         }
                                     }
@@ -1179,7 +1180,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
                     } else {
                         // TODO: enable copy from different driveFileManager
                         DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveCoreStrings.Localizable.errorMove)
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                         }
                     }
                 } else {
@@ -1193,12 +1194,12 @@ extension FileListViewController: UICollectionViewDropDelegate {
 
     func handleExternalDrop(externalFiles: [NSItemProvider], destinationDirectory: File) {
         if !externalFiles.isEmpty {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
             _ = FileImportHelper.instance.importItems(externalFiles) { [weak self] importedFiles, errorCount in
                 guard let self = self else { return }
                 if errorCount > 0 {
                     DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackBarUploadError(errorCount))
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
                     }
                 }
                 guard !importedFiles.isEmpty else {

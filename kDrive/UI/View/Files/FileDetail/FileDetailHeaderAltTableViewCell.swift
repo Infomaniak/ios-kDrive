@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class FileDetailHeaderAltTableViewCell: UITableViewCell {
@@ -39,7 +40,7 @@ class FileDetailHeaderAltTableViewCell: UITableViewCell {
     }
 
     private func resetSegmentedControl() {
-        segmentedControl.setSegments([KDriveStrings.Localizable.fileDetailsInfosTitle, KDriveStrings.Localizable.fileDetailsActivitiesTitle, KDriveStrings.Localizable.fileDetailsCommentsTitle])
+        segmentedControl.setSegments([KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle, KDriveResourcesStrings.Localizable.fileDetailsCommentsTitle])
     }
 
     @IBAction func segmentedControlUpdated(_ sender: UISegmentedControl) {

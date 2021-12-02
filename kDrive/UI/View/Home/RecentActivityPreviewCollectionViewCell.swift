@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var contentInsetView: UIView!
     @IBOutlet weak var previewImage: UIImageView!
     @IBOutlet weak var moreLabel: UILabel!
@@ -65,7 +65,7 @@ class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
         previewImage.isHidden = false
         noPreviewView.isHidden = true
         previewImage.image = nil
-        previewImage.backgroundColor = KDriveAsset.backgroundColor.color
+        previewImage.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         let fileId = file.id
         file.getThumbnail { image, _ in
             if fileId == file.id {
@@ -85,7 +85,7 @@ class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
     func configureWithoutPreview(file: File?, more: Int?) {
         previewImage.isHidden = true
         noPreviewView.isHidden = false
-        logoImage.image = file?.icon ?? KDriveCoreAsset.fileDefault.image
+        logoImage.image = file?.icon ?? KDriveResourcesAsset.fileDefault.image
         logoImage.tintColor = file?.convertedType.tintColor
         accessibilityLabel = file?.name
         if let count = more {
@@ -111,6 +111,6 @@ class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
         previewImage.isHidden = false
         noPreviewView.isHidden = true
         previewImage.image = nil
-        previewImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        previewImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
     }
 }

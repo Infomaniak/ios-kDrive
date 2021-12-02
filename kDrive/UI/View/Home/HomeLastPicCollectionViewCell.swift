@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class HomeLastPicCollectionViewCell: UICollectionViewCell {
@@ -56,7 +57,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     func configureLoading() {
         darkLayer.isHidden = true
         checkmarkImage.isHidden = true
-        fileImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        fileImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         contentInsetView.cornerRadius = UIConstants.cornerRadius
     }
 
@@ -68,7 +69,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
             if fileId == self?.file?.id {
                 self?.darkLayer.isHidden = true
-                self?.fileImage.image = isThumbnail ? image : KDriveAsset.fileImageSmall.image
+                self?.fileImage.image = isThumbnail ? image : KDriveResourcesAsset.fileImageSmall.image
             }
         }
         accessibilityLabel = file.name
@@ -81,6 +82,6 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     private func configureForSelection() {
         guard selectionMode else { return }
-        checkmarkImage.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+        checkmarkImage.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
     }
 }

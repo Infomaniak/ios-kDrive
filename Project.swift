@@ -41,6 +41,8 @@ let baseSettings = SettingsDictionary()
     .currentProjectVersion("11")
     .marketingVersion("4.1.0")
 
+let deploymentTarget = DeploymentTarget.iOS(targetVersion: "13.0", devices: [.iphone, .ipad])
+
 let fileProviderSettings = baseSettings
     .bridgingHeader(path: "$(SRCROOT)/kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h")
     .compilationConditions("ISEXTENSION")
@@ -86,7 +88,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .app,
                                  bundleId: "com.infomaniak.drive",
-                                 deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone, .ipad]),
+                                 deploymentTarget: deploymentTarget,
                                  infoPlist: .file(path: "kDrive/Resources/Info.plist"),
                                  sources: "kDrive/**",
                                  resources: [
@@ -138,24 +140,31 @@ let project = Project(name: "kDrive",
                                      .target(name: "kDrive"),
                                      .target(name: "kDriveCore")
                                  ]),
+                          Target(name: "kDriveResources",
+                                 platform: .iOS,
+                                 product: .staticLibrary,
+                                 bundleId: "com.infomaniak.drive.resources",
+                                 deploymentTarget: deploymentTarget,
+                                 infoPlist: .default,
+                                 resources: [
+                                     "kDrive/**/*.xcassets",
+                                     "kDrive/**/*.strings",
+                                     "kDrive/**/*.stringsdict"
+                                 ]),
                           Target(name: "kDriveCore",
                                  platform: .iOS,
                                  product: .framework,
                                  bundleId: "com.infomaniak.drive.core",
-                                 deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone, .ipad]),
+                                 deploymentTarget: deploymentTarget,
                                  infoPlist: .file(path: "kDriveCore/Info.plist"),
                                  sources: "kDriveCore/**",
                                  resources: [
                                      "kDrive/**/*.xcassets",
                                      "kDrive/**/*.strings",
-                                     "kDrive/**/*.stringsdict",
-                                     "kDriveCore/**/*.storyboard",
-                                     "kDriveCore/**/*.xcassets",
-                                     "kDriveCore/**/*.xib",
-                                     "kDriveCore/**/*.json",
-                                     "kDriveCore/GoogleService-Info.plist"
+                                     "kDrive/**/*.stringsdict"
                                  ],
                                  dependencies: [
+                                     .target(name: "kDriveResources"),
                                      .package(product: "Alamofire"),
                                      .package(product: "Atlantis"),
                                      .package(product: "MQTTNIO"),
@@ -176,7 +185,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .appExtension,
                                  bundleId: "com.infomaniak.drive.FileProvider",
-                                 deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone, .ipad]),
+                                 deploymentTarget: deploymentTarget,
                                  infoPlist: .extendingDefault(with: [
                                      "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                                      "CFBundleShortVersionString": "$(MARKETING_VERSION)",
@@ -200,7 +209,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .appExtension,
                                  bundleId: "com.infomaniak.drive.ShareExtension",
-                                 deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone, .ipad]),
+                                 deploymentTarget: deploymentTarget,
                                  infoPlist: .extendingDefault(with: [
                                      "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                                      "CFBundleShortVersionString": "$(MARKETING_VERSION)",
@@ -245,10 +254,7 @@ let project = Project(name: "kDrive",
                                      "kDrive/UI/View/Menu/SwitchUser/**",
                                      "kDrive/UI/View/Menu/MenuTableViewCell.swift",
                                      "kDrive/UI/View/NewFolder/**",
-                                     "kDrive/Utils/**",
-                                     "Derived/Sources/Assets+KDrive.swift",
-                                     "Derived/Sources/Bundle+kDrive.swift",
-                                     "Derived/Sources/Strings+kDrive.swift"
+                                     "kDrive/Utils/**"
                                  ],
                                  resources: [
                                      "kDriveShareExtension/**/*.storyboard",
@@ -279,9 +285,6 @@ let project = Project(name: "kDrive",
                                  ],
                                  entitlements: "kDriveShareExtension/ShareExtension.entitlements",
                                  scripts: [
-                                     /* This prevents Tuist from generating automatic resources definition for this extension
-                                      as disabling it seems only possible at a project level (.disableSynthesizedResourceAccessors */
-                                     .pre(path: "scripts/fix-tuist.sh", name: "Fix Tuist"),
                                      .post(path: "scripts/lint.sh", name: "Swiftlint")
                                  ],
                                  dependencies: [
@@ -296,7 +299,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .appExtension,
                                  bundleId: "com.infomaniak.drive.ActionExtension",
-                                 deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone, .ipad]),
+                                 deploymentTarget: deploymentTarget,
                                  infoPlist: .extendingDefault(with: [
                                      "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                                      "CFBundleShortVersionString": "$(MARKETING_VERSION)",
@@ -348,10 +351,7 @@ let project = Project(name: "kDrive",
                                      "kDrive/UI/View/Menu/SwitchUser/**",
                                      "kDrive/UI/View/Menu/MenuTableViewCell.swift",
                                      "kDrive/UI/View/NewFolder/**",
-                                     "kDrive/Utils/**",
-                                     "Derived/Sources/Assets+KDrive.swift",
-                                     "Derived/Sources/Bundle+kDrive.swift",
-                                     "Derived/Sources/Strings+kDrive.swift"
+                                     "kDrive/Utils/**"
                                  ],
                                  resources: [
                                      "kDriveActionExtension/**/*.storyboard",
@@ -384,9 +384,6 @@ let project = Project(name: "kDrive",
                                  ],
                                  entitlements: "kDriveActionExtension/ActionExtension.entitlements",
                                  scripts: [
-                                     /* This prevents Tuist from generating automatic resources definition for this extension
-                                      as disabling it seems only possible at a project level (.disableSynthesizedResourceAccessors */
-                                     .pre(path: "scripts/fix-tuist.sh", name: "Fix Tuist"),
                                      .post(path: "scripts/lint.sh", name: "Swiftlint")
                                  ],
                                  dependencies: [

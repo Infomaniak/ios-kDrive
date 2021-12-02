@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol FileCellDelegate: AnyObject {
@@ -77,8 +78,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         let renderer = UIGraphicsImageRenderer(size: size)
 
         return renderer.image { ctx in
-            ctx.cgContext.setFillColor(KDriveAsset.backgroundCardViewColor.color.cgColor)
-            ctx.cgContext.setStrokeColor(KDriveAsset.borderColor.color.cgColor)
+            ctx.cgContext.setFillColor(KDriveResourcesAsset.backgroundCardViewColor.color.cgColor)
+            ctx.cgContext.setStrokeColor(KDriveResourcesAsset.borderColor.color.cgColor)
             ctx.cgContext.setLineWidth(lineWidth)
 
             let diameter = min(size.width, size.height) - lineWidth
@@ -90,7 +91,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        moreButton.accessibilityLabel = KDriveStrings.Localizable.buttonMenu
+        moreButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
         downloadProgressView?.setInfomaniakStyle()
         collectionView?.delegate = self
         collectionView?.dataSource = self
@@ -136,7 +137,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
             disabledView.superview?.sendSubviewToBack(disabledView)
             isUserInteractionEnabled = true
         } else {
-            disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+            disabledView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
             disabledView.isHidden = false
             disabledView.superview?.bringSubviewToFront(disabledView)
             isUserInteractionEnabled = false
@@ -154,7 +155,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
             logoImage.contentMode = .scaleAspectFill
             logoImage.layer.cornerRadius = UIConstants.imageCornerRadius
             logoImage.layer.masksToBounds = true
-            logoImage.backgroundColor = KDriveAsset.loaderDefaultColor.color
+            logoImage.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
             file.getThumbnail { image, _ in
                 if fileId == self.file.id {
                     self.logoImage.image = image
@@ -173,7 +174,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
         titleLabel.text = file.name
         favoriteImageView?.isHidden = !file.isFavorite
-        favoriteImageView?.accessibilityLabel = KDriveStrings.Localizable.favoritesTitle
+        favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         logoImage.image = file.icon
         logoImage.tintColor = file.convertedType.tintColor
         moreButton.isHidden = selectionMode
@@ -183,7 +184,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
 
         availableOfflineImageView?.isHidden = !file.isAvailableOffline || !FileManager.default.fileExists(atPath: file.localUrl.path)
-        availableOfflineImageView?.accessibilityLabel = KDriveStrings.Localizable.offlineFileTitle
+        availableOfflineImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.offlineFileTitle
         downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
             DispatchQueue.main.async {
                 self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
@@ -238,7 +239,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     private func configureForSelection() {
         guard selectionMode else { return }
         accessoryImage?.isHidden = true
-        checkmarkImage?.image = isSelected ? KDriveAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+        checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
     }
 
     func configureWith(recentSearch: String) {
@@ -246,8 +247,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         detailsStackView?.isHidden = true
         favoriteImageView?.isHidden = true
         accessoryImage?.isHidden = true
-        logoImage.image = KDriveCoreAsset.clock.image
-        logoImage.tintColor = KDriveCoreAsset.secondaryTextColor.color
+        logoImage.image = KDriveResourcesAsset.clock.image
+        logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
         titleLabel.text = recentSearch
     }
 
@@ -256,11 +257,11 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         let titleLayer = CALayer()
         titleLayer.anchorPoint = .zero
         titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 15)
-        titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        titleLayer.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color.cgColor
         titleLabel.layer.addSublayer(titleLayer)
         favoriteImageView?.isHidden = true
         logoImage.image = nil
-        logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         moreButton.isHidden = true
         checkmarkImage?.isHidden = true
     }

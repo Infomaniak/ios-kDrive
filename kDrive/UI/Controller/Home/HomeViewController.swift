@@ -19,6 +19,7 @@
 import DifferenceKit
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
@@ -200,8 +201,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.navigationBar.shadowImage = UIImage()
         navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
-        navigationController?.navigationBar.barTintColor = KDriveAsset.backgroundColor.color
-        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: KDriveAsset.titleColor.color]
+        navigationController?.navigationBar.barTintColor = KDriveResourcesAsset.backgroundColor.color
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: KDriveResourcesAsset.titleColor.color]
         updateNavbarAppearance()
     }
 
@@ -557,18 +558,18 @@ extension HomeViewController {
                 driveHeaderView.titleButtonPressedHandler = { [weak self] _ in
                     guard let self = self else { return }
                     let drives = AccountManager.instance.drives
-                    let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: self.driveFileManager.drive, headerTitle: KDriveStrings.Localizable.buttonSwitchDrive, delegate: self)
+                    let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: self.driveFileManager.drive, headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive, delegate: self)
                     self.present(floatingPanelViewController, animated: true)
                 }
                 return driveHeaderView
             case .recentFiles:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: HomeRecentFilesHeaderView.self, for: indexPath)
                 headerView.titleLabel.text = currentRecentFilesController.title
-                headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.largelist.image : KDriveAsset.grid.image, for: .normal)
+                headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveResourcesAsset.largelist.image : KDriveResourcesAsset.grid.image, for: .normal)
                 headerView.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
                 headerView.actionHandler = { button in
                     UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
-                    button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveAsset.largelist.image : KDriveAsset.grid.image, for: .normal)
+                    button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveResourcesAsset.largelist.image : KDriveResourcesAsset.grid.image, for: .normal)
                     collectionView.performBatchUpdates {
                         collectionView.reloadSections([1])
                     } completion: { _ in
@@ -663,7 +664,7 @@ extension HomeViewController: RecentActivityDelegate {
     func didSelectActivity(index: Int, activities: [FileActivity]) {
         let activity = activities[index]
         guard let file = activity.file else {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorPreviewDeleted)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPreviewDeleted)
             return
         }
 

@@ -24,6 +24,7 @@ import Firebase
 import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
+import kDriveResources
 import Kingfisher
 import Sentry
 import StoreKit
@@ -241,8 +242,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     private func launchSetup() {
         // Set global tint color
-        window?.tintColor = KDriveAsset.infomaniakColor.color
-        UITabBar.appearance().unselectedItemTintColor = KDriveAsset.iconColor.color
+        window?.tintColor = KDriveResourcesAsset.infomaniakColor.color
+        UITabBar.appearance().unselectedItemTintColor = KDriveResourcesAsset.iconColor.color
         // Migration from old UserDefaults
         if UserDefaults.shared.isFirstLaunch {
             UserDefaults.shared.isFirstLaunch = UserDefaults.standard.isFirstLaunch
@@ -284,7 +285,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             uploadEditedFiles()
             // Ask to remove uploaded pictures
             if let toRemoveItems = PhotoLibraryUploader.instance.getPicturesToRemove() {
-                let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalDeletePhotosTitle, message: KDriveStrings.Localizable.modalDeletePhotosDescription, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: false) {
+                let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle, message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: false) {
                     // Proceed with removal
                     PhotoLibraryUploader.instance.removePicturesFromPhotoLibrary(toRemoveItems)
                 }
@@ -321,7 +322,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         accountManager.updateUserForAccount(currentAccount, registerToken: true) { [self] _, switchedDrive, error in
             if let error = error {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 DDLogError("Error while updating user account: \(error)")
             } else {
                 // if isSwitching {

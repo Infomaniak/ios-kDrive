@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
+import kDriveResources
+import UIKit
 
 class MenuTopTableViewCell: UITableViewCell {
-
     @IBOutlet weak var userAvatarContainerView: UIView!
     @IBOutlet weak var userAvatarImageView: UIImageView!
     @IBOutlet weak var userDisplayNameLabel: UILabel!
@@ -43,14 +43,14 @@ class MenuTopTableViewCell: UITableViewCell {
         userAvatarImageView.clipsToBounds = true
         userAvatarImageView.layer.cornerRadius = userAvatarImageView.frame.width / 2
 
-        switchDriveButton.tintColor = KDriveAsset.primaryTextColor.color
-        switchDriveButton.accessibilityLabel = KDriveStrings.Localizable.buttonSwitchDrive
+        switchDriveButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        switchDriveButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonSwitchDrive
 
         driveNameLabel.text = drive.name
         driveImageView.tintColor = UIColor(hex: drive.preferences.color)
         userDisplayNameLabel.text = account.user.displayName
         userEmailLabel.text = account.user.email
-        userAvatarImageView.image = KDriveAsset.placeholderAvatar.image
+        userAvatarImageView.image = KDriveResourcesAsset.placeholderAvatar.image
         account.user.getAvatar(size: CGSize(width: 512, height: 512)) { image in
             self.userAvatarImageView.image = image
         }

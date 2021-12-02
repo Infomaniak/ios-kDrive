@@ -16,17 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class FavoriteViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.favorite }
     override class var storyboardIdentifier: String { "FavoriteViewController" }
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
+        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
 
         super.viewDidLoad()
 
@@ -96,5 +96,4 @@ class FavoriteViewController: FileListViewController {
         // We don't need to decode anything for Favorites
         // DriveFileManager will be recovered from tab bar controller
     }
-
 }

@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol Filterable {
@@ -33,9 +34,9 @@ enum DateOption: Filterable, Selectable, Equatable {
     var localizedName: String {
         switch self {
         case .today:
-            return KDriveStrings.Localizable.allToday
+            return KDriveResourcesStrings.Localizable.allToday
         case .yesterday:
-            return KDriveStrings.Localizable.allYesterday
+            return KDriveResourcesStrings.Localizable.allYesterday
         case .last7days, .custom:
             let dateIntervalFormatter = DateIntervalFormatter()
             dateIntervalFormatter.dateStyle = .long
@@ -45,19 +46,19 @@ enum DateOption: Filterable, Selectable, Equatable {
     }
 
     var icon: UIImage {
-        return KDriveAsset.calendar.image
+        return KDriveResourcesAsset.calendar.image
     }
 
     var title: String {
         switch self {
         case .today:
-            return KDriveStrings.Localizable.allToday
+            return KDriveResourcesStrings.Localizable.allToday
         case .yesterday:
-            return KDriveStrings.Localizable.allYesterday
+            return KDriveResourcesStrings.Localizable.allYesterday
         case .last7days:
-            return KDriveStrings.Localizable.allLast7Days
+            return KDriveResourcesStrings.Localizable.allLast7Days
         case .custom:
-            return KDriveStrings.Localizable.allDateCustom
+            return KDriveResourcesStrings.Localizable.allDateCustom
         }
     }
 

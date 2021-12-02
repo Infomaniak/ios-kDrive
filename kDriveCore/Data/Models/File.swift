@@ -19,6 +19,7 @@
 import Alamofire
 import DifferenceKit
 import Foundation
+import kDriveResources
 import Kingfisher
 import QuickLook
 import RealmSwift
@@ -29,38 +30,38 @@ public enum ConvertedType: String, CaseIterable {
     public var icon: UIImage {
         switch self {
         case .archive:
-            return KDriveCoreAsset.fileZip.image
+            return KDriveResourcesAsset.fileZip.image
         case .audio:
-            return KDriveCoreAsset.fileAudio.image
+            return KDriveResourcesAsset.fileAudio.image
         case .code:
-            return KDriveCoreAsset.fileCode.image
+            return KDriveResourcesAsset.fileCode.image
         case .folder:
-            return KDriveCoreAsset.folderFilled.image
+            return KDriveResourcesAsset.folderFilled.image
         case .font:
-            return KDriveCoreAsset.fileDefault.image
+            return KDriveResourcesAsset.fileDefault.image
         case .image:
-            return KDriveCoreAsset.fileImage.image
+            return KDriveResourcesAsset.fileImage.image
         case .pdf:
-            return KDriveCoreAsset.filePdf.image
+            return KDriveResourcesAsset.filePdf.image
         case .presentation:
-            return KDriveCoreAsset.filePresentation.image
+            return KDriveResourcesAsset.filePresentation.image
         case .spreadsheet:
-            return KDriveCoreAsset.fileSheets.image
+            return KDriveResourcesAsset.fileSheets.image
         case .text:
-            return KDriveCoreAsset.fileText.image
+            return KDriveResourcesAsset.fileText.image
         case .unknown:
-            return KDriveCoreAsset.fileDefault.image
+            return KDriveResourcesAsset.fileDefault.image
         case .url:
-            return KDriveCoreAsset.url.image
+            return KDriveResourcesAsset.url.image
         case .video:
-            return KDriveCoreAsset.fileVideo.image
+            return KDriveResourcesAsset.fileVideo.image
         }
     }
 
     public var tintColor: UIColor? {
         switch self {
         case .url:
-            return KDriveCoreAsset.secondaryTextColor.color
+            return KDriveResourcesAsset.secondaryTextColor.color
         default:
             return nil
         }
@@ -69,27 +70,27 @@ public enum ConvertedType: String, CaseIterable {
     public var title: String {
         switch self {
         case .archive:
-            return KDriveCoreStrings.Localizable.allArchive
+            return KDriveResourcesStrings.Localizable.allArchive
         case .audio:
-            return KDriveCoreStrings.Localizable.allAudio
+            return KDriveResourcesStrings.Localizable.allAudio
         case .code:
-            return KDriveCoreStrings.Localizable.allCode
+            return KDriveResourcesStrings.Localizable.allCode
         case .folder:
-            return KDriveCoreStrings.Localizable.allFolder
+            return KDriveResourcesStrings.Localizable.allFolder
         case .image:
-            return KDriveCoreStrings.Localizable.allPictures
+            return KDriveResourcesStrings.Localizable.allPictures
         case .pdf:
-            return KDriveCoreStrings.Localizable.allPdf
+            return KDriveResourcesStrings.Localizable.allPdf
         case .presentation:
-            return KDriveCoreStrings.Localizable.allOfficePoints
+            return KDriveResourcesStrings.Localizable.allOfficePoints
         case .spreadsheet:
-            return KDriveCoreStrings.Localizable.allOfficeGrids
+            return KDriveResourcesStrings.Localizable.allOfficeGrids
         case .text:
-            return KDriveCoreStrings.Localizable.allOfficeDocs
+            return KDriveResourcesStrings.Localizable.allOfficeDocs
         case .unknown, .url, .font:
             return ""
         case .video:
-            return KDriveCoreStrings.Localizable.allVideo
+            return KDriveResourcesStrings.Localizable.allVideo
         }
     }
 
@@ -173,23 +174,23 @@ public enum SortType: String {
     public var value: SortTypeValue {
         switch self {
         case .nameAZ:
-            return SortTypeValue(apiValue: "files.path", order: "asc", translation: KDriveCoreStrings.Localizable.sortNameAZ, realmKeyPath: \.nameNaturalSorting)
+            return SortTypeValue(apiValue: "files.path", order: "asc", translation: KDriveResourcesStrings.Localizable.sortNameAZ, realmKeyPath: \.nameNaturalSorting)
         case .nameZA:
-            return SortTypeValue(apiValue: "files.path", order: "desc", translation: KDriveCoreStrings.Localizable.sortNameZA, realmKeyPath: \.nameNaturalSorting)
+            return SortTypeValue(apiValue: "files.path", order: "desc", translation: KDriveResourcesStrings.Localizable.sortNameZA, realmKeyPath: \.nameNaturalSorting)
         case .older:
-            return SortTypeValue(apiValue: "last_modified_at", order: "asc", translation: KDriveCoreStrings.Localizable.sortOlder, realmKeyPath: \.lastModifiedAt)
+            return SortTypeValue(apiValue: "last_modified_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.lastModifiedAt)
         case .newer:
-            return SortTypeValue(apiValue: "last_modified_at", order: "desc", translation: KDriveCoreStrings.Localizable.sortRecent, realmKeyPath: \.lastModifiedAt)
+            return SortTypeValue(apiValue: "last_modified_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.lastModifiedAt)
         case .biggest:
-            return SortTypeValue(apiValue: "files.size", order: "desc", translation: KDriveCoreStrings.Localizable.sortBigger, realmKeyPath: \.size)
+            return SortTypeValue(apiValue: "files.size", order: "desc", translation: KDriveResourcesStrings.Localizable.sortBigger, realmKeyPath: \.size)
         case .smallest:
-            return SortTypeValue(apiValue: "files.size", order: "asc", translation: KDriveCoreStrings.Localizable.sortSmaller, realmKeyPath: \.size)
+            return SortTypeValue(apiValue: "files.size", order: "asc", translation: KDriveResourcesStrings.Localizable.sortSmaller, realmKeyPath: \.size)
         case .ext:
-            return SortTypeValue(apiValue: "files", order: "asc", translation: KDriveCoreStrings.Localizable.sortExtension, realmKeyPath: \.name)
+            return SortTypeValue(apiValue: "files", order: "asc", translation: KDriveResourcesStrings.Localizable.sortExtension, realmKeyPath: \.name)
         case .olderDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveCoreStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
+            return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
         case .newerDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveCoreStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
+            return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
         }
     }
 }

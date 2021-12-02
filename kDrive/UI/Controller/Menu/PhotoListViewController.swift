@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import DifferenceKit
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 extension PhotoSortMode: Selectable {}
@@ -119,7 +120,7 @@ class PhotoListViewController: MultipleSelectionViewController {
         super.viewWillAppear(animated)
 
         setPhotosNavigationBar()
-        navigationItem.title = KDriveStrings.Localizable.allPictures
+        navigationItem.title = KDriveResourcesStrings.Localizable.allPictures
         applyGradient(view: headerImageView)
     }
 
@@ -138,7 +139,7 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     @IBAction func sortButtonPressed(_ sender: UIBarButtonItem) {
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>.instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode, headerTitle: KDriveStrings.Localizable.sortTitle, delegate: self)
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>.instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 
@@ -251,7 +252,7 @@ class PhotoListViewController: MultipleSelectionViewController {
             collectionView.allowsMultipleSelection = true
             navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
-            navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+            navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
             navigationItem.rightBarButtonItems = nil
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
@@ -264,7 +265,7 @@ class PhotoListViewController: MultipleSelectionViewController {
             scrollViewDidScroll(collectionView)
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
-            navigationItem.title = KDriveStrings.Localizable.allPictures
+            navigationItem.title = KDriveResourcesStrings.Localizable.allPictures
             navigationItem.leftBarButtonItem = nil
             navigationItem.rightBarButtonItems = rightBarButtonItems
         }
@@ -304,7 +305,7 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     override func updateSelectedCount() {
-        headerTitleLabel.text = KDriveStrings.Localizable.fileListMultiSelectedTitle(selectedItems.count)
+        headerTitleLabel.text = KDriveResourcesStrings.Localizable.fileListMultiSelectedTitle(selectedItems.count)
     }
 
     @IBAction func moveButtonPressed(_ sender: Any) {
@@ -413,7 +414,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
             let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: footerIdentifier, for: indexPath)
             let indicator = UIActivityIndicatorView(style: .medium)
             indicator.hidesWhenStopped = true
-            indicator.color = KDriveAsset.loaderDarkerDefaultColor.color
+            indicator.color = KDriveResourcesAsset.loaderDarkerDefaultColor.color
             if isLoading {
                 indicator.startAnimating()
             } else {

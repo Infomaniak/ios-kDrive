@@ -16,13 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import WebKit
 import InfomaniakLogin
 import kDriveCore
+import kDriveResources
+import UIKit
+import WebKit
 
 class RegisterViewController: UIViewController {
-
     @IBOutlet weak var webView: WKWebView!
     weak var delegate: InfomaniakLoginDelegate?
 
@@ -35,7 +35,7 @@ class RegisterViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = KDriveStrings.Localizable.buttonSignIn
+        title = KDriveResourcesStrings.Localizable.buttonSignIn
         setupProgressView()
         setupEstimatedProgressObserver()
         webView.load(URLRequest(url: URL(string: ApiRoutes.registerIkDriveUser())!))
@@ -56,7 +56,7 @@ class RegisterViewController: UIViewController {
 
             progressView.bottomAnchor.constraint(equalTo: navigationBar.bottomAnchor),
             progressView.heightAnchor.constraint(equalToConstant: 2.0)
-            ])
+        ])
     }
 
     private func setupEstimatedProgressObserver() {
@@ -68,7 +68,7 @@ class RegisterViewController: UIViewController {
     @IBAction func dismissButtonPressed(_ sender: Any) {
         WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             for record in records {
-                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record]) { }
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record]) {}
             }
         }
         dismiss(animated: true)
@@ -83,12 +83,11 @@ class RegisterViewController: UIViewController {
         registerViewController.delegate = delegate
         return UINavigationController(rootViewController: registerViewController)
     }
-
 }
 
 // MARK: - WKNavigationDelegate
-extension RegisterViewController: WKNavigationDelegate {
 
+extension RegisterViewController: WKNavigationDelegate {
     func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
         if progressView.isHidden {
             progressView.isHidden = false
@@ -100,12 +99,12 @@ extension RegisterViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         UIView.animate(withDuration: 0.33,
-            animations: {
-                self.progressView.alpha = 0.0
-            },
-            completion: { isFinished in
-                self.progressView.isHidden = isFinished
-            })
+                       animations: {
+                           self.progressView.alpha = 0.0
+                       },
+                       completion: { isFinished in
+                           self.progressView.isHidden = isFinished
+                       })
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -113,7 +112,7 @@ extension RegisterViewController: WKNavigationDelegate {
             if host == "drive.infomaniak.com" {
                 decisionHandler(.cancel)
                 if let delegate = delegate,
-                    let navigationController = self.navigationController {
+                   let navigationController = self.navigationController {
                     InfomaniakLogin.webviewLoginFrom(viewController: navigationController, delegate: delegate)
                 }
             } else if host == "login.infomaniak.com" {
@@ -126,5 +125,4 @@ extension RegisterViewController: WKNavigationDelegate {
             decisionHandler(.allow)
         }
     }
-
 }

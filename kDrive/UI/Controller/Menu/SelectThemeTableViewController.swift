@@ -16,18 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class SelectThemeTableViewController: UITableViewController {
-
     private var tableContent: [Theme] = Theme.allCases
     private var selectedTheme: Theme!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = KDriveStrings.Localizable.themeSettingsTitle
+        title = KDriveResourcesStrings.Localizable.themeSettingsTitle
 
         tableView.register(cellView: ThemeSelectionTableViewCell.self)
         tableView.separatorColor = .clear
@@ -59,5 +59,4 @@ class SelectThemeTableViewController: UITableViewController {
         (UIApplication.shared.delegate as? AppDelegate)?.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         navigationController?.popViewController(animated: true)
     }
-
 }

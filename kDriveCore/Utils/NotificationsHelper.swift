@@ -18,21 +18,22 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import kDriveResources
 import UserNotifications
 
 public enum NotificationsHelper {
-    public struct CategoryIdentifier {
+    public enum CategoryIdentifier {
         public static let general = "com.kdrive.notification.general"
         public static let upload = "com.kdrive.notification.upload"
         public static let photoSyncError = "com.kdrive.notification.syncError"
     }
 
-    public struct UserInfoKey {
+    public enum UserInfoKey {
         public static let previousUploadCount = "previousUploadCountKey"
         public static let parentId = "parentIdKey"
     }
 
-    private struct NotificationIdentifier {
+    private enum NotificationIdentifier {
         static let uploadQueueCount = "uploadQueueCount"
         static let uploadDone = "uploadDone"
         static let uploadPaused = "uploadPaused"
@@ -77,8 +78,8 @@ public enum NotificationsHelper {
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
 
-        content.title = KDriveCoreStrings.Localizable.errorUpload
-        content.body = KDriveCoreStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
+        content.title = KDriveResourcesStrings.Localizable.errorUpload
+        content.body = KDriveResourcesStrings.Localizable.allUploadErrorDescription(filename, error.localizedDescription)
         content.userInfo[UserInfoKey.parentId] = parentId
 
         sendImmediately(notification: content, id: UUID().uuidString)
@@ -90,10 +91,10 @@ public enum NotificationsHelper {
         content.sound = .default
 
         UNUserNotificationCenter.current().getDeliveredNotifications { _ in
-            content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
-            content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescription(filename)
+            content.title = KDriveResourcesStrings.Localizable.allUploadFinishedTitle
+            content.body = KDriveResourcesStrings.Localizable.allUploadFinishedDescription(filename)
             content.userInfo[UserInfoKey.parentId] = parentId
-            let action = IKSnackBar.Action(title: KDriveCoreStrings.Localizable.locateButton) {
+            let action = IKSnackBar.Action(title: KDriveResourcesStrings.Localizable.locateButton) {
                 NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId])
             }
             sendImmediately(notification: content, id: NotificationIdentifier.uploadDone, action: action)
@@ -105,10 +106,10 @@ public enum NotificationsHelper {
         let content = UNMutableNotificationContent()
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
-        content.title = KDriveCoreStrings.Localizable.allUploadFinishedTitle
-        content.body = KDriveCoreStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
+        content.title = KDriveResourcesStrings.Localizable.allUploadFinishedTitle
+        content.body = KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
         content.userInfo[UserInfoKey.parentId] = parentId
-        let action = IKSnackBar.Action(title: KDriveCoreStrings.Localizable.locateButton) {
+        let action = IKSnackBar.Action(title: KDriveResourcesStrings.Localizable.locateButton) {
             NotificationCenter.default.post(name: .locateUploadActionTapped, object: nil, userInfo: ["parentId": parentId as Any])
         }
         sendImmediately(notification: content, id: NotificationIdentifier.uploadDone, action: action)
@@ -116,8 +117,8 @@ public enum NotificationsHelper {
 
     public static func sendPausedUploadQueueNotification() {
         let content = UNMutableNotificationContent()
-        content.title = KDriveCoreStrings.Localizable.uploadPausedTitle
-        content.body = KDriveCoreStrings.Localizable.uploadPausedDescription
+        content.title = KDriveResourcesStrings.Localizable.uploadPausedTitle
+        content.body = KDriveResourcesStrings.Localizable.uploadPausedDescription
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
         sendImmediately(notification: content, id: NotificationIdentifier.uploadPaused)
@@ -125,8 +126,8 @@ public enum NotificationsHelper {
 
     public static func sendDisconnectedNotification() {
         let content = UNMutableNotificationContent()
-        content.title = KDriveCoreStrings.Localizable.errorGeneric
-        content.body = KDriveCoreStrings.Localizable.refreshTokenError
+        content.title = KDriveResourcesStrings.Localizable.errorGeneric
+        content.body = KDriveResourcesStrings.Localizable.refreshTokenError
         content.categoryIdentifier = CategoryIdentifier.general
         content.sound = .default
         sendImmediately(notification: content, id: NotificationIdentifier.disconnected)
@@ -134,8 +135,8 @@ public enum NotificationsHelper {
 
     public static func sendMigrateNotification() {
         let content = UNMutableNotificationContent()
-        content.title = KDriveCoreStrings.Localizable.migrateNotificationTitle
-        content.body = KDriveCoreStrings.Localizable.migrateNotificationDescription
+        content.title = KDriveResourcesStrings.Localizable.migrateNotificationTitle
+        content.body = KDriveResourcesStrings.Localizable.migrateNotificationDescription
         content.categoryIdentifier = CategoryIdentifier.general
         content.sound = .default
         sendImmediately(notification: content, id: NotificationIdentifier.migrate)
@@ -143,8 +144,8 @@ public enum NotificationsHelper {
 
     public static func sendPhotoSyncErrorNotification() {
         let content = UNMutableNotificationContent()
-        content.title = KDriveCoreStrings.Localizable.errorGeneric
-        content.body = KDriveCoreStrings.Localizable.uploadFolderNotFoundSyncDisabledError
+        content.title = KDriveResourcesStrings.Localizable.errorGeneric
+        content.body = KDriveResourcesStrings.Localizable.uploadFolderNotFoundSyncDisabledError
         content.categoryIdentifier = CategoryIdentifier.photoSyncError
         content.sound = .default
         sendImmediately(notification: content, id: NotificationIdentifier.photoSyncError)

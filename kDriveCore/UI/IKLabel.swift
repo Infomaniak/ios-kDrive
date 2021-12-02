@@ -16,24 +16,25 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 public struct TextStyle: RawRepresentable {
     public var font: UIFont
     public var color: UIColor
 
-    public static let header1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: KDriveCoreAsset.titleColor.color, rawValue: "header1")
-    public static let header2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 18), weight: .semibold), color: KDriveCoreAsset.titleColor.color, rawValue: "header2")
-    public static let header3 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .semibold), color: KDriveCoreAsset.titleColor.color, rawValue: "header3")
-    public static let subtitle1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle1")
-    public static let subtitle2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium), color: KDriveCoreAsset.titleColor.color, rawValue: "subtitle2")
-    public static let body1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.titleColor.color, rawValue: "body1")
-    public static let body2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.primaryTextColor.color, rawValue: "body2")
-    public static let caption = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: KDriveCoreAsset.primaryTextColor.color, rawValue: "caption")
+    public static let header1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: KDriveResourcesAsset.titleColor.color, rawValue: "header1")
+    public static let header2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 18), weight: .semibold), color: KDriveResourcesAsset.titleColor.color, rawValue: "header2")
+    public static let header3 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .semibold), color: KDriveResourcesAsset.titleColor.color, rawValue: "header3")
+    public static let subtitle1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .regular), color: KDriveResourcesAsset.titleColor.color, rawValue: "subtitle1")
+    public static let subtitle2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium), color: KDriveResourcesAsset.titleColor.color, rawValue: "subtitle2")
+    public static let body1 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveResourcesAsset.titleColor.color, rawValue: "body1")
+    public static let body2 = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveResourcesAsset.primaryTextColor.color, rawValue: "body2")
+    public static let caption = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: KDriveResourcesAsset.primaryTextColor.color, rawValue: "caption")
     public static let header1Light = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 28), weight: .bold), color: .white, rawValue: "header1Light")
     public static let captionLight = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 12), weight: .regular), color: .white, rawValue: "captionLight")
     public static let body1Light = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: .white, rawValue: "body1Light")
-    public static let action = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveCoreAsset.infomaniakColor.color, rawValue: "action")
+    public static let action = TextStyle(font: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .regular), color: KDriveResourcesAsset.infomaniakColor.color, rawValue: "action")
 
     static let allValues = [header1, header2, header3, subtitle1, subtitle2, body1, body2, caption, header1Light, captionLight, body1Light, action]
 

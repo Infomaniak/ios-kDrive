@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class ParameterTableViewController: UITableViewController {
@@ -34,19 +35,19 @@ class ParameterTableViewController: UITableViewController {
         var title: String {
             switch self {
             case .photos:
-                return KDriveStrings.Localizable.syncSettingsTitle
+                return KDriveResourcesStrings.Localizable.syncSettingsTitle
             case .theme:
-                return KDriveStrings.Localizable.themeSettingsTitle
+                return KDriveResourcesStrings.Localizable.themeSettingsTitle
             case .notifications:
-                return KDriveStrings.Localizable.notificationTitle
+                return KDriveResourcesStrings.Localizable.notificationTitle
             case .security:
-                return KDriveStrings.Localizable.securityTitle
+                return KDriveResourcesStrings.Localizable.securityTitle
             case .wifi:
-                return KDriveStrings.Localizable.settingsOnlyWifiSyncTitle
+                return KDriveResourcesStrings.Localizable.settingsOnlyWifiSyncTitle
             case .storage:
-                return KDriveStrings.Localizable.manageStorageTitle
+                return KDriveResourcesStrings.Localizable.manageStorageTitle
             case .about:
-                return KDriveStrings.Localizable.aboutTitle
+                return KDriveResourcesStrings.Localizable.aboutTitle
             }
         }
 
@@ -88,11 +89,11 @@ class ParameterTableViewController: UITableViewController {
 
     private func getNotificationText() -> String {
         if !UserDefaults.shared.isNotificationEnabled {
-            return KDriveStrings.Localizable.notificationDisable
+            return KDriveResourcesStrings.Localizable.notificationDisable
         } else if UserDefaults.shared.generalNotificationEnabled && UserDefaults.shared.newCommentNotificationsEnabled && UserDefaults.shared.importNotificationsEnabled && UserDefaults.shared.sharingNotificationsEnabled {
-            return KDriveStrings.Localizable.notificationAll
+            return KDriveResourcesStrings.Localizable.notificationAll
         } else {
-            return KDriveStrings.Localizable.notificationCustom
+            return KDriveResourcesStrings.Localizable.notificationCustom
         }
     }
 
@@ -112,7 +113,7 @@ class ParameterTableViewController: UITableViewController {
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
             cell.titleLabel.text = row.title
             if row == .photos {
-                cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+                cell.valueLabel.text = PhotoLibraryUploader.instance.isSyncEnabled ? KDriveResourcesStrings.Localizable.allActivated : KDriveResourcesStrings.Localizable.allDisabled
             } else if row == .theme {
                 cell.valueLabel.text = UserDefaults.shared.theme.title
             } else if row == .notifications {

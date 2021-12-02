@@ -16,17 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import kDriveResources
 import LocalAuthentication
+import UIKit
 
 struct AppLockHelper {
-
     static var shared = AppLockHelper()
 
     private var lastAppLock: Double = 0
     private let appUnlockTime: Double = 10 * 60 // 10 minutes
 
-    private init() { }
+    private init() {}
 
     var isAppLocked: Bool {
         return lastAppLock + appUnlockTime < Date().timeIntervalSince1970
@@ -35,11 +35,9 @@ struct AppLockHelper {
     mutating func setTime() {
         lastAppLock = Date().timeIntervalSince1970
     }
-
 }
 
 class AppLockSettingsViewController: UIViewController {
-
     @IBOutlet weak var faceIdSwitch: UISwitch!
     @IBOutlet weak var navigationBar: UINavigationBar!
 
@@ -64,7 +62,7 @@ class AppLockSettingsViewController: UIViewController {
 
     @IBAction func didChangeSwitchValue(_ sender: UISwitch) {
         let context = LAContext()
-        let reason = KDriveStrings.Localizable.appSecurityDescription
+        let reason = KDriveResourcesStrings.Localizable.appSecurityDescription
         var error: NSError?
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {

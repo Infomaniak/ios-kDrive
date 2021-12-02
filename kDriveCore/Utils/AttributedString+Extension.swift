@@ -16,10 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
-extension NSMutableAttributedString {
-    public convenience init(string: String, boldText: String, color: UIColor? = nil) {
+public extension NSMutableAttributedString {
+    convenience init(string: String, boldText: String, color: UIColor? = nil) {
         self.init(string: string)
         let range = (string as NSString).localizedStandardRange(of: boldText)
         addAttribute(.strokeWidth, value: NSNumber(value: -3.0), range: range)
@@ -28,8 +29,8 @@ extension NSMutableAttributedString {
         }
     }
 
-    public convenience init(string: String, highlightedText: String) {
+    convenience init(string: String, highlightedText: String) {
         self.init(string: string)
-        addAttribute(.foregroundColor, value: KDriveCoreAsset.infomaniakColor.color, range: (string as NSString).localizedStandardRange(of: highlightedText))
+        addAttribute(.foregroundColor, value: KDriveResourcesAsset.infomaniakColor.color, range: (string as NSString).localizedStandardRange(of: highlightedText))
     }
 }

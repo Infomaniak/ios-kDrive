@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 open class RPCircularProgress: UIView {
@@ -455,8 +456,8 @@ extension RPCircularProgress: CAAnimationDelegate {
 
 public extension RPCircularProgress {
     func setInfomaniakStyle() {
-        trackTintColor = KDriveAsset.secondaryTextColor.color.withAlphaComponent(0.2)
-        progressTintColor = KDriveAsset.infomaniakColor.color
+        trackTintColor = KDriveResourcesAsset.secondaryTextColor.color.withAlphaComponent(0.2)
+        progressTintColor = KDriveResourcesAsset.infomaniakColor.color
         thicknessRatio = 0.15
         indeterminateProgress = 0.75
     }

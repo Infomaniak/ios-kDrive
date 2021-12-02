@@ -18,6 +18,7 @@
 
 import FloatingPanel
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol Selectable {
@@ -48,7 +49,7 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         tableView.register(cellView: FloatingPanelSortOptionTableViewCell.self)
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
-        tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     override func viewWillAppear(_ animated: Bool) {

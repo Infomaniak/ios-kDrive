@@ -19,6 +19,7 @@
 import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
+import kDriveResources
 import Lottie
 import Sentry
 import UIKit
@@ -44,14 +45,14 @@ class OnboardingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         InfomaniakLogin.setupWebviewNavbar(title: "", titleColor: nil, color: nil, buttonColor: nil, clearCookie: true, timeOutMessage: "Timeout")
-        nextButton.setImage(KDriveAsset.arrowRight.image.withRenderingMode(.alwaysTemplate), for: .normal)
+        nextButton.setImage(KDriveResourcesAsset.arrowRight.image.withRenderingMode(.alwaysTemplate), for: .normal)
         nextButton.imageView?.tintColor = .white
-        nextButton.accessibilityLabel = KDriveStrings.Localizable.buttonPlayerNext
+        nextButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerNext
         navigationBar.isHidden = !addUser
         navigationBar.isTranslucent = true
         navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationBar.shadowImage = UIImage()
-        closeBarButtonItem.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+        closeBarButtonItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         collectionView.register(cellView: SlideCollectionViewCell.self)
 
         slides = createSlides()
@@ -150,22 +151,22 @@ class OnboardingViewController: UIViewController {
     }
 
     private func createSlides() -> [Slide] {
-        let slide1 = Slide(backgroundImage: KDriveAsset.background1.image,
-                           illustrationImage: KDriveAsset.illuDevices.image,
+        let slide1 = Slide(backgroundImage: KDriveResourcesAsset.background1.image,
+                           illustrationImage: KDriveResourcesAsset.illuDevices.image,
                            animationName: "illu_devices",
-                           title: KDriveStrings.Localizable.onBoardingTitle1,
-                           description: KDriveStrings.Localizable.onBoardingDescription1)
+                           title: KDriveResourcesStrings.Localizable.onBoardingTitle1,
+                           description: KDriveResourcesStrings.Localizable.onBoardingDescription1)
 
-        let slide2 = Slide(backgroundImage: KDriveAsset.background2.image,
-                           illustrationImage: KDriveAsset.illuCollab.image,
-                           animationName: "illu_collab", title: KDriveStrings.Localizable.onBoardingTitle2,
-                           description: KDriveStrings.Localizable.onBoardingDescription2)
+        let slide2 = Slide(backgroundImage: KDriveResourcesAsset.background2.image,
+                           illustrationImage: KDriveResourcesAsset.illuCollab.image,
+                           animationName: "illu_collab", title: KDriveResourcesStrings.Localizable.onBoardingTitle2,
+                           description: KDriveResourcesStrings.Localizable.onBoardingDescription2)
 
-        let slide3 = Slide(backgroundImage: KDriveAsset.background3.image,
-                           illustrationImage: KDriveAsset.illuPhotos.image,
+        let slide3 = Slide(backgroundImage: KDriveResourcesAsset.background3.image,
+                           illustrationImage: KDriveResourcesAsset.illuPhotos.image,
                            animationName: "illu_photos",
-                           title: KDriveStrings.Localizable.onBoardingTitle3,
-                           description: KDriveStrings.Localizable.onBoardingDescription3)
+                           title: KDriveResourcesStrings.Localizable.onBoardingTitle3,
+                           description: KDriveResourcesStrings.Localizable.onBoardingDescription3)
 
         return [slide1, slide2, slide3]
     }
@@ -251,7 +252,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                         } else {
                             SentrySDK.capture(message: "Failed to fetch account on login (no error reported)")
                         }
-                        self.okAlert(title: KDriveStrings.Localizable.errorTitle, message: KDriveStrings.Localizable.errorConnection, completion: nil)
+                        self.okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection, completion: nil)
                     }
                 }
             }

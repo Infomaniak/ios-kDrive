@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 protocol FileLocationDelegate: AnyObject {
@@ -23,7 +24,6 @@ protocol FileLocationDelegate: AnyObject {
 }
 
 class FileInformationLocationTableViewCell: UITableViewCell {
-
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var locationImage: UIImageView!
     @IBOutlet weak var locationLabel: UILabel!
@@ -33,11 +33,10 @@ class FileInformationLocationTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        locationButton.accessibilityLabel = KDriveStrings.Localizable.allPathTitle
+        locationButton.accessibilityLabel = KDriveResourcesStrings.Localizable.allPathTitle
     }
 
     @IBAction func locationButtonTapped(_ sender: Any) {
         delegate?.locationButtonTapped()
     }
-
 }

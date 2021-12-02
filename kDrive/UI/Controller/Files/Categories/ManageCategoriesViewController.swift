@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import RealmSwift
 import UIKit
 
@@ -69,14 +70,14 @@ class ManageCategoriesViewController: UITableViewController {
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
-        searchController.searchBar.searchTextField.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        searchController.searchBar.searchTextField.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         navigationItem.searchController = searchController
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
         if presentingViewController != nil && viewControllersCount < 2 {
             // Show cancel button
             let closeButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
-            closeButton.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+            closeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
             navigationItem.leftBarButtonItem = closeButton
         }
 
@@ -131,7 +132,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     private func updateTitle() {
-        title = file != nil ? KDriveStrings.Localizable.manageCategoriesTitle : KDriveStrings.Localizable.addCategoriesTitle
+        title = file != nil ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable.addCategoriesTitle
     }
 
     private func updateNavigationItem() {

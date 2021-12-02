@@ -18,6 +18,7 @@
 
 import InfomaniakLogin
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class SwitchUserViewController: UIViewController {
@@ -115,7 +116,7 @@ extension SwitchUserViewController: UITableViewDataSource {
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         cell.titleLabel.text = account.user.displayName
         cell.userEmailLabel.text = account.user.email
-        cell.logoImage.image = KDriveAsset.placeholderAvatar.image
+        cell.logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
         cell.isUserInteractionEnabled = !DriveInfosManager.instance.getDrives(for: account.userId).isEmpty
 
         account.user.getAvatar { image in
@@ -136,12 +137,12 @@ extension SwitchUserViewController: InfomaniakLoginDelegate {
                     (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate())
                 }
             } else {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorConnection)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorConnection)
             }
         }
     }
 
     func didFailLoginWith(error: String) {
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorConnection)
+        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorConnection)
     }
 }

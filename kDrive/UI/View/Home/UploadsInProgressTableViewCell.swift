@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class UploadsInProgressTableViewCell: InsetTableViewCell {
@@ -31,6 +32,6 @@ class UploadsInProgressTableViewCell: InsetTableViewCell {
     }
 
     func setUploadCount(_ count: Int) {
-        subtitleLabel.text = KDriveStrings.Localizable.uploadInProgressNumberFile(count)
+        subtitleLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressNumberFile(count)
     }
 }

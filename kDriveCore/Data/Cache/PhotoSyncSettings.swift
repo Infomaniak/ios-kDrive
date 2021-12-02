@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import kDriveResources
 import RealmSwift
 
 @objc public enum PhotoSyncMode: Int, RealmEnum {
@@ -26,9 +27,9 @@ import RealmSwift
     public var title: String {
         switch self {
         case .new:
-            return KDriveCoreStrings.Localizable.syncSettingsSaveDateNowValue
+            return KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue
         case .all:
-            return KDriveCoreStrings.Localizable.syncSettingsSaveDateAllPictureValue
+            return KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue
         }
     }
 }

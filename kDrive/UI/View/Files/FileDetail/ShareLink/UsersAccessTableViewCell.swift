@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import Kingfisher
 import UIKit
 
@@ -34,12 +35,12 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         accessoryImageView.isHidden = false
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     func configure(with shareable: Shareable, drive: Drive) {
@@ -60,7 +61,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         titleLabel.text = user.displayName
         detailLabel.text = user.email
         rightsLabel.text = user.permission?.title
-        rightsLabel.textColor = blocked ? KDriveAsset.secondaryTextColor.color : KDriveAsset.titleColor.color
+        rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor.color
         user.getAvatar { image in
             self.avatarImage.image = image
                 .resize(size: CGSize(width: 35, height: 35))
@@ -76,7 +77,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         titleLabel.text = invitation.displayName
         detailLabel.text = invitation.email
         rightsLabel.text = invitation.permission.title
-        avatarImage.image = KDriveAsset.circleSend.image
+        avatarImage.image = KDriveResourcesAsset.circleSend.image
         if let avatar = invitation.avatar, let url = URL(string: avatar) {
             KingfisherManager.shared.retrieveImage(with: url) { result in
                 if let image = try? result.get().image {
@@ -87,7 +88,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
                 }
             }
         } else {
-            avatarImage.image = KDriveAsset.placeholderAvatar.image
+            avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
         }
     }
 
@@ -95,14 +96,14 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         notAcceptedView.isHidden = true
         externalUserView.isHidden = true
 
-        titleLabel.text = team.isAllUsers ? KDriveStrings.Localizable.allAllDriveUsers : team.name
+        titleLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
         avatarImage.image = team.icon
         if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id) {
-            detailLabel.text = KDriveStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
+            detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
         } else {
             detailLabel.text = nil
         }
         rightsLabel.text = team.right?.title
-        rightsLabel.textColor = KDriveAsset.titleColor.color
+        rightsLabel.textColor = KDriveResourcesAsset.titleColor.color
     }
 }

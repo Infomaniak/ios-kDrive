@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class InviteUserViewController: UIViewController {
@@ -56,7 +57,7 @@ class InviteUserViewController: UIViewController {
         setTitle()
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
-        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -90,17 +91,17 @@ class InviteUserViewController: UIViewController {
 
     func setTitle() {
         guard file != nil else { return }
-        navigationItem.title = file.isDirectory ? KDriveStrings.Localizable.fileShareFolderTitle : KDriveStrings.Localizable.fileShareFileTitle
+        navigationItem.title = file.isDirectory ? KDriveResourcesStrings.Localizable.fileShareFolderTitle : KDriveResourcesStrings.Localizable.fileShareFileTitle
     }
 
     func showConflictDialog(conflictList: [FileCheckResult]) {
         let message: NSMutableAttributedString
         if conflictList.count == 1, let user = sharedFile.users.first(where: { $0.id == conflictList[0].userId }) {
-            message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictDescription(user.displayName, (user.permission ?? .read).title, newPermission.title), boldText: user.displayName)
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.sharedConflictDescription(user.displayName, (user.permission ?? .read).title, newPermission.title), boldText: user.displayName)
         } else {
-            message = NSMutableAttributedString(string: KDriveStrings.Localizable.sharedConflictManyUserDescription(newPermission.title))
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.sharedConflictManyUserDescription(newPermission.title))
         }
-        let alert = AlertTextViewController(title: KDriveStrings.Localizable.sharedConflictTitle, message: message, action: KDriveStrings.Localizable.buttonShare) {
+        let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.sharedConflictTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonShare) {
             self.shareAndDismiss()
         }
         present(alert, animated: true)
@@ -212,7 +213,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             cell.canUseTeam = sharedFile.canUseTeam
             cell.drive = driveFileManager.drive
             cell.textField.text = savedText
-            cell.textField.placeholder = KDriveStrings.Localizable.shareFileInputUserAndEmail
+            cell.textField.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail
             cell.ignoredShareables = ignoredShareables
             cell.ignoredEmails = ignoredEmails
             cell.delegate = self
@@ -220,7 +221,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .rights:
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.logoImage.tintColor = KDriveAsset.iconColor.color
+            cell.logoImage.tintColor = KDriveResourcesAsset.iconColor.color
             (cell.titleLabel as? IKLabel)?.style = .header3
             cell.selectionStyle = .none
             cell.titleLabel.text = newPermission.title
@@ -264,7 +265,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         if section == tableView.numberOfSections - 1 {
-            let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonShare)
+            let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonShare)
             view.delegate = self
             return view
         }

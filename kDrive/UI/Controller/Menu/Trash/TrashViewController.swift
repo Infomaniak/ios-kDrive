@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class TrashViewController: FileListViewController {
@@ -32,7 +33,7 @@ class TrashViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(selectAllSupported: false, rootTitle: KDriveStrings.Localizable.trashTitle, emptyViewType: .noTrash)
+        configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash)
         sortType = .newerDelete
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile
@@ -87,7 +88,7 @@ class TrashViewController: FileListViewController {
     // MARK: - Actions
 
     @IBAction func emptyTrash(_ sender: UIBarButtonItem) {
-        let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalEmptyTrashTitle, message: KDriveStrings.Localizable.modalEmptyTrashDescription, action: KDriveStrings.Localizable.buttonEmpty, destructive: true, loading: true) { [self] in
+        let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalEmptyTrashTitle, message: KDriveResourcesStrings.Localizable.modalEmptyTrashDescription, action: KDriveResourcesStrings.Localizable.buttonEmpty, destructive: true, loading: true) { [self] in
             let group = DispatchGroup()
             var success = false
             group.enter()
@@ -103,7 +104,7 @@ class TrashViewController: FileListViewController {
             }
             _ = group.wait(timeout: .now() + Constants.timeout)
             DispatchQueue.main.async {
-                let message = success ? KDriveStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveStrings.Localizable.errorDelete
+                let message = success ? KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveResourcesStrings.Localizable.errorDelete
                 UIConstants.showSnackBar(message: message)
             }
         }
@@ -127,11 +128,11 @@ class TrashViewController: FileListViewController {
     private func deleteFiles(_ files: [File]) {
         let message: NSMutableAttributedString
         if files.count == 1 {
-            message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalDeleteDescription(files[0].name), boldText: files[0].name)
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescription(files[0].name), boldText: files[0].name)
         } else {
-            message = NSMutableAttributedString(string: KDriveStrings.Localizable.modalDeleteDescriptionPlural(files.count))
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescriptionPlural(files.count))
         }
-        let alert = AlertTextViewController(title: KDriveStrings.Localizable.trashActionDelete, message: message, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: true) {
+        let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.trashActionDelete, message: message, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
             let group = DispatchGroup()
             var success = true
             for file in files {
@@ -155,12 +156,12 @@ class TrashViewController: FileListViewController {
                 let message: String
                 if success {
                     if files.count == 1 {
-                        message = KDriveStrings.Localizable.snackbarDeleteConfirmation(files[0].name)
+                        message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(files[0].name)
                     } else {
-                        message = KDriveStrings.Localizable.snackbarDeleteConfirmationPlural(files.count)
+                        message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(files.count)
                     }
                 } else {
-                    message = KDriveStrings.Localizable.errorDelete
+                    message = KDriveResourcesStrings.Localizable.errorDelete
                 }
                 UIConstants.showSnackBar(message: message)
                 if self.selectionMode {
@@ -251,9 +252,9 @@ extension TrashViewController: TrashOptionsDelegate {
                     file.signalChanges(userId: self.driveFileManager.drive.userId)
                     if error == nil {
                         removeFileFromList(id: file.id)
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
                     } else {
-                        UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorRestore)
+                        UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorRestore)
                     }
                     group.leave()
                 }
@@ -280,9 +281,9 @@ extension TrashViewController: SelectFolderDelegate {
                 folder.signalChanges(userId: driveFileManager.drive.userId)
                 if error == nil {
                     removeFileFromList(id: file.id)
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, folder.name))
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, folder.name))
                 } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorRestore)
+                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorRestore)
                 }
                 group.leave()
             }

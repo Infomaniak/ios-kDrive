@@ -19,24 +19,25 @@
 import FloatingPanel
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class CategoryFloatingPanelAction: Equatable {
     let id: Int
     let name: String
     let image: UIImage
-    var tintColor: UIColor = KDriveAsset.iconColor.color
+    var tintColor: UIColor = KDriveResourcesAsset.iconColor.color
     var isEnabled = true
 
-    init(id: Int, name: String, image: UIImage, tintColor: UIColor = KDriveAsset.iconColor.color) {
+    init(id: Int, name: String, image: UIImage, tintColor: UIColor = KDriveResourcesAsset.iconColor.color) {
         self.id = id
         self.name = name
         self.image = image
         self.tintColor = tintColor
     }
 
-    static let edit = CategoryFloatingPanelAction(id: 1, name: KDriveStrings.Localizable.buttonEdit, image: KDriveAsset.edit.image)
-    static let delete = CategoryFloatingPanelAction(id: 2, name: KDriveStrings.Localizable.buttonDelete, image: KDriveAsset.delete.image, tintColor: KDriveAsset.binColor.color)
+    static let edit = CategoryFloatingPanelAction(id: 1, name: KDriveResourcesStrings.Localizable.buttonEdit, image: KDriveResourcesAsset.edit.image)
+    static let delete = CategoryFloatingPanelAction(id: 2, name: KDriveResourcesStrings.Localizable.buttonDelete, image: KDriveResourcesAsset.delete.image, tintColor: KDriveResourcesAsset.binColor.color)
 
     static var actions: [CategoryFloatingPanelAction] {
         return [edit, delete]
@@ -71,7 +72,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
         collectionView.register(cellView: FloatingPanelQuickActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
-        collectionView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         setupContent()
     }
@@ -119,8 +120,8 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(editCategoryViewController, animated: true)
             dismiss(animated: true)
         case .delete:
-            let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalDeleteCategoryDescription(category.name), boldText: category.name)
-            let alert = AlertTextViewController(title: KDriveStrings.Localizable.buttonDelete, message: attrString, action: KDriveStrings.Localizable.buttonDelete, destructive: true, loading: true) {
+            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteCategoryDescription(category.name), boldText: category.name)
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: attrString, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
@@ -136,9 +137,9 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
                         // Dismiss panel
                         (self.presentingParent as? ManageCategoriesViewController)?.reloadCategories()
                         self.presentingParent?.dismiss(animated: true)
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackBarCategoryDeleted)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarCategoryDeleted)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
                     }
                 }
             }

@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 import VisionKit
 
@@ -32,7 +33,7 @@ class ScanTypeTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        segmentedControl.backgroundColor = KDriveCoreAsset.backgroundCardViewColor.color
+        segmentedControl.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     func configureForPhoto() {

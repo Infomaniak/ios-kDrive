@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import SafariServices
 import UIKit
 
@@ -47,11 +48,11 @@ class FilePresenter {
                 if let parent = parent {
                     self.present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
                 } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
         } else {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
         }
     }
 
@@ -75,7 +76,7 @@ class FilePresenter {
                         floatingPanelViewController?.rightButton.setLoading(true)
                         driveFileManager.apiFetcher.requireFileAccess(file: file) { _, error in
                             if error != nil {
-                                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRightModification)
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
                             } else {
                                 self?.driveFloatingPanelController?.dismiss(animated: true)
                                 self?.navigationController?.pushViewController(nextVC, animated: true)
@@ -96,7 +97,7 @@ class FilePresenter {
                 if let url = file.getBookmarkURL() {
                     presentSafariViewController(url: url)
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGetBookmarkURL)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
                 }
             } else {
                 // Download file
@@ -107,7 +108,7 @@ class FilePresenter {
                         } else if let url = file.getBookmarkURL() {
                             self.presentSafariViewController(url: url)
                         } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGetBookmarkURL)
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
                         }
                     }
                 }
@@ -120,7 +121,7 @@ class FilePresenter {
                 navigationController?.pushViewController(previewViewController, animated: true)
             }
             if file.isTrashed {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorPreviewTrash)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPreviewTrash)
             }
         }
     }

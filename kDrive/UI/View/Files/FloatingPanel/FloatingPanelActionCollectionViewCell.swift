@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
@@ -59,7 +60,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         if let file = file {
             if action == .favorite && file.isFavorite {
                 titleLabel.text = action.reverseName
-                iconImageView.tintColor = KDriveAsset.favoriteColor.color
+                iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
             }
             if action == .offline {
                 configureAvailableOffline(with: file)
@@ -74,11 +75,11 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
         if action == .favorite && filesAreFavorite {
             titleLabel.text = action.reverseName
-            iconImageView.tintColor = KDriveAsset.favoriteColor.color
+            iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
         } else if action == .offline {
             switchView.isHidden = false
-            iconImageView.image = filesAvailableOffline ? KDriveAsset.check.image : action.image
-            iconImageView.tintColor = filesAvailableOffline ? KDriveAsset.greenColor.color : action.tintColor
+            iconImageView.image = filesAvailableOffline ? KDriveResourcesAsset.check.image : action.image
+            iconImageView.tintColor = filesAvailableOffline ? KDriveResourcesAsset.greenColor.color : action.tintColor
             switchView.isOn = filesAvailableOffline
             setProgress(showProgress ? -1 : nil)
             // Disable cell if all selected items are folders
@@ -100,11 +101,11 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
         let fileExists = FileManager.default.fileExists(atPath: file.localUrl.path)
         if file.isAvailableOffline && fileExists {
-            iconImageView.image = KDriveAsset.check.image
-            iconImageView.tintColor = KDriveAsset.greenColor.color
+            iconImageView.image = KDriveResourcesAsset.check.image
+            iconImageView.tintColor = KDriveResourcesAsset.greenColor.color
         } else {
-            iconImageView.image = KDriveAsset.availableOffline.image
-            iconImageView.tintColor = KDriveAsset.iconColor.color
+            iconImageView.image = KDriveResourcesAsset.availableOffline.image
+            iconImageView.tintColor = KDriveResourcesAsset.iconColor.color
         }
 
         observeProgress(file.isAvailableOffline && !fileExists, file: file)
@@ -156,7 +157,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
             disabledView.superview?.sendSubviewToBack(disabledView)
             isUserInteractionEnabled = true
         } else {
-            disabledView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+            disabledView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
             disabledView.isHidden = false
             disabledView.superview?.bringSubviewToFront(disabledView)
             isUserInteractionEnabled = false

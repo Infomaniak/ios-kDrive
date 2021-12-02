@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import StoreKit
 import UIKit
 
@@ -46,9 +47,9 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         var title: String {
             switch self {
             case .monthly:
-                return KDriveStrings.Localizable.storeMonthly
+                return KDriveResourcesStrings.Localizable.storeMonthly
             case .yearly:
-                return KDriveStrings.Localizable.storeYearly
+                return KDriveResourcesStrings.Localizable.storeYearly
             }
         }
     }
@@ -92,12 +93,12 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         if presentingViewController != nil && viewControllersCount < 2 {
             // Show cancel button
             let closeButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
-            closeButton.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+            closeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
             navigationItem.leftBarButtonItem = closeButton
         }
 
         if #available(iOS 14.0, *) {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveStrings.Localizable.buttonRedeemPromoCode, style: .plain, target: self, action: #selector(redeemButtonPressed))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonRedeemPromoCode, style: .plain, target: self, action: #selector(redeemButtonPressed))
         }
 
         checkDriveFileManager()
@@ -129,7 +130,7 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
     private func fetchProductInformation() {
         guard StoreObserver.shared.isAuthorizedForPayments else {
             // Warn the user that they are not allowed to make purchases
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.storePaymentNotAuthorized)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.storePaymentNotAuthorized)
             return
         }
 
@@ -173,9 +174,9 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
 
     private func showBlockingMessage(existingIAP: Bool) {
-        let title = existingIAP ? KDriveStrings.Localizable.storeExistingIAPTitle : KDriveStrings.Localizable.storeAccessDeniedTitle
-        let message = existingIAP ? KDriveStrings.Localizable.storeExistingIAPDescription : KDriveStrings.Localizable.storeAccessDeniedDescription
-        let alert = AlertTextViewController(title: title, message: message, action: KDriveStrings.Localizable.buttonClose, hasCancelButton: false) {
+        let title = existingIAP ? KDriveResourcesStrings.Localizable.storeExistingIAPTitle : KDriveResourcesStrings.Localizable.storeAccessDeniedTitle
+        let message = existingIAP ? KDriveResourcesStrings.Localizable.storeExistingIAPDescription : KDriveResourcesStrings.Localizable.storeAccessDeniedDescription
+        let alert = AlertTextViewController(title: title, message: message, action: KDriveResourcesStrings.Localizable.buttonClose, hasCancelButton: false) {
             let viewControllersCount = self.navigationController?.viewControllers.count ?? 0
             if self.presentingViewController != nil && viewControllersCount < 2 {
                 self.dismiss(animated: true)
@@ -219,7 +220,7 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
             return cell
         case .warning:
             let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
-            cell.configure(with: .warning, message: KDriveStrings.Localizable.storeBillingWarningDescription)
+            cell.configure(with: .warning, message: KDriveResourcesStrings.Localizable.storeBillingWarningDescription)
             return cell
         case .offers:
             let cell = tableView.dequeueReusableCell(type: StoreOffersTableViewCell.self, for: indexPath)

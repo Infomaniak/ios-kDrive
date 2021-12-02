@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import StoreKit
 import UIKit
 
@@ -41,7 +42,7 @@ class StoreCollectionViewCell: UICollectionViewCell {
         super.awakeFromNib()
 
         cornerRadius = UIConstants.cornerRadius
-        backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         tableView.register(cellView: StoreFeatureTableViewCell.self)
     }
 
@@ -52,31 +53,31 @@ class StoreCollectionViewCell: UICollectionViewCell {
         case .free:
             break
         case .solo:
-            imageView.image = KDriveAsset.circleSolo.image
+            imageView.image = KDriveResourcesAsset.circleSolo.image
             titleLabel.text = "Solo"
-            descriptionLabel.text = KDriveStrings.Localizable.storeOfferSoloDescription
-            features = [KDriveStrings.Localizable.storeOfferSoloFeature1,
-                        KDriveStrings.Localizable.storeOfferSoloFeature2,
-                        KDriveStrings.Localizable.storeOfferSoloFeature3]
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.storeOfferSoloDescription
+            features = [KDriveResourcesStrings.Localizable.storeOfferSoloFeature1,
+                        KDriveResourcesStrings.Localizable.storeOfferSoloFeature2,
+                        KDriveResourcesStrings.Localizable.storeOfferSoloFeature3]
         case .team:
-            imageView.image = KDriveAsset.circleTeam.image
+            imageView.image = KDriveResourcesAsset.circleTeam.image
             titleLabel.text = "Team"
-            descriptionLabel.text = KDriveStrings.Localizable.storeOfferTeamDescription
-            features = [KDriveStrings.Localizable.storeOfferTeamFeature1,
-                        KDriveStrings.Localizable.storeOfferTeamFeature2,
-                        KDriveStrings.Localizable.storeOfferTeamFeature3,
-                        KDriveStrings.Localizable.storeOfferTeamFeature4]
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.storeOfferTeamDescription
+            features = [KDriveResourcesStrings.Localizable.storeOfferTeamFeature1,
+                        KDriveResourcesStrings.Localizable.storeOfferTeamFeature2,
+                        KDriveResourcesStrings.Localizable.storeOfferTeamFeature3,
+                        KDriveResourcesStrings.Localizable.storeOfferTeamFeature4]
         case .pro:
-            imageView.image = KDriveAsset.circlePro.image
+            imageView.image = KDriveResourcesAsset.circlePro.image
             titleLabel.text = "Pro"
             descriptionLabel.text = ""
             features = []
         }
 
         if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
-            priceLabel.text = KDriveStrings.Localizable.storePricing(formattedPrice, "\(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)")
+            priceLabel.text = KDriveResourcesStrings.Localizable.storePricing(formattedPrice, "\(subscriptionPeriod.numberOfUnits) \(subscriptionPeriod.unit.localizedString)")
         } else {
-            priceLabel.text = KDriveStrings.Localizable.storeRetrieving
+            priceLabel.text = KDriveResourcesStrings.Localizable.storeRetrieving
         }
 
         selectButton.isSelected = currentPack == item.pack
@@ -113,15 +114,15 @@ extension SKProduct.PeriodUnit {
     var localizedString: String {
         switch self {
         case .day:
-            return KDriveStrings.Localizable.storePeriodDay
+            return KDriveResourcesStrings.Localizable.storePeriodDay
         case .week:
-            return KDriveStrings.Localizable.storePeriodWeek
+            return KDriveResourcesStrings.Localizable.storePeriodWeek
         case .month:
-            return KDriveStrings.Localizable.storePeriodMonth
+            return KDriveResourcesStrings.Localizable.storePeriodMonth
         case .year:
-            return KDriveStrings.Localizable.storePeriodYear
+            return KDriveResourcesStrings.Localizable.storePeriodYear
         @unknown default:
-            return KDriveStrings.Localizable.storePeriodUnknown
+            return KDriveResourcesStrings.Localizable.storePeriodUnknown
         }
     }
 }

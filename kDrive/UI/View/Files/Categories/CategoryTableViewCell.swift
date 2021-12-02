@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol CategoryCellDelegate: AnyObject {
@@ -68,9 +69,9 @@ class CategoryTableViewCell: InsetTableViewCell {
     }
 
     func configureCreateCell(name: String) {
-        circleImageView.image = KDriveAsset.add.image
+        circleImageView.image = KDriveResourcesAsset.add.image
         label.style = .body1
-        label.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.manageCategoriesCreateTitle(name), boldText: name)
+        label.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.manageCategoriesCreateTitle(name), boldText: name)
         moreButton.isHidden = true
         selectionStyle = .default
         borderView.isHidden = false
@@ -85,7 +86,7 @@ class CategoryTableViewCell: InsetTableViewCell {
             ctx.cgContext.fill(rect)
             if isSelected {
                 UIColor.white.setFill()
-                KDriveAsset.bigCheck.image.draw(in: CGRect(x: 6.5, y: 8, width: 11, height: 8.5))
+                KDriveResourcesAsset.bigCheck.image.draw(in: CGRect(x: 6.5, y: 8, width: 11, height: 8.5))
             }
         }
     }

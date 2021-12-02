@@ -18,13 +18,14 @@
 
 import Foundation
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class HomePhotoListController: HomeRecentFilesController {
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager, homeViewController: homeViewController,
                   listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self, emptyCellType: .noImages,
-                  title: KDriveStrings.Localizable.allPictures, selectorTitle: KDriveStrings.Localizable.allPictures,
+                  title: KDriveResourcesStrings.Localizable.allPictures, selectorTitle: KDriveResourcesStrings.Localizable.allPictures,
                   listStyleEnabled: false)
     }
 

@@ -17,6 +17,7 @@
  */
 
 import HorizonCalendar
+import kDriveResources
 import UIKit
 
 class DayRangeIndicatorView: UIView {
@@ -84,7 +85,7 @@ class DayRangeIndicatorView: UIView {
 
 extension DayRangeIndicatorView: CalendarItemViewRepresentable {
     struct InvariantViewProperties: Hashable {
-        var indicatorColor = KDriveAsset.infomaniakColor.color.withAlphaComponent(0.1)
+        var indicatorColor = KDriveResourcesAsset.infomaniakColor.color.withAlphaComponent(0.1)
     }
 
     struct ViewModel: Equatable {

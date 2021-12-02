@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol SearchFiltersDelegate: AnyObject {
@@ -29,11 +30,11 @@ enum FilterType: CaseIterable {
     var title: String {
         switch self {
         case .date:
-            return KDriveStrings.Localizable.modificationDateFilterTitle
+            return KDriveResourcesStrings.Localizable.modificationDateFilterTitle
         case .type:
-            return KDriveStrings.Localizable.fileTypeFilterTitle
+            return KDriveResourcesStrings.Localizable.fileTypeFilterTitle
         case .categories:
-            return KDriveStrings.Localizable.categoriesFilterTitle
+            return KDriveResourcesStrings.Localizable.categoriesFilterTitle
         }
     }
 }
@@ -126,9 +127,9 @@ class SearchFiltersViewController: UITableViewController {
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 switch indexPath.row {
                 case 1:
-                    cell.label.text = KDriveStrings.Localizable.belongToAllCategoriesFilterDescription
+                    cell.label.text = KDriveResourcesStrings.Localizable.belongToAllCategoriesFilterDescription
                 case 2:
-                    cell.label.text = KDriveStrings.Localizable.belongToOneCategoryFilterDescription
+                    cell.label.text = KDriveResourcesStrings.Localizable.belongToOneCategoryFilterDescription
                 default:
                     cell.label.text = ""
                 }

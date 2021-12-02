@@ -18,6 +18,7 @@
 
 import Alamofire
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class SearchViewController: FileListViewController {
@@ -29,7 +30,7 @@ class SearchViewController: FileListViewController {
     private let minSearchCount = 1
     private let maxRecentSearch = 5
     private let searchHeaderIdentifier = "BasicTitleCollectionReusableView"
-    private let sectionTitles = [KDriveStrings.Localizable.searchLastTitle, KDriveStrings.Localizable.searchFilterTitle]
+    private let sectionTitles = [KDriveResourcesStrings.Localizable.searchLastTitle, KDriveResourcesStrings.Localizable.searchFilterTitle]
 
     // MARK: - Properties
 
@@ -53,7 +54,7 @@ class SearchViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, rootTitle: KDriveStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
+        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
         listStyle = .list
         sortType = .newer
 
@@ -67,10 +68,10 @@ class SearchViewController: FileListViewController {
         searchController.isActive = true
         searchController.searchBar.showsCancelButton = false
         searchController.searchResultsUpdater = self
-        searchController.searchBar.placeholder = KDriveStrings.Localizable.searchViewHint
+        searchController.searchBar.placeholder = KDriveResourcesStrings.Localizable.searchViewHint
 
         navigationItem.searchController = searchController
-        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
 
         definesPresentationContext = true
 
