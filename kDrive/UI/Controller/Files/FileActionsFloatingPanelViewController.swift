@@ -253,7 +253,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .manageDropbox:
                 return file.visibility == .isCollaborativeFolder
             case .folderColor:
-                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
+                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace && !file.isDisabled
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
