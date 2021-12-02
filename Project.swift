@@ -21,8 +21,8 @@ import ProjectDescription
 let baseSettings: [String: SettingValue] = [
     "CODE_SIGN_STYLE": "Automatic",
     "DEVELOPMENT_TEAM": "864VDCS2QY",
-    "CURRENT_PROJECT_VERSION": "11",
-    "MARKETING_VERSION": "4.1.0"
+    "CURRENT_PROJECT_VERSION": "1",
+    "MARKETING_VERSION": "4.1.1"
 ]
 
 let fileProviderSettings = baseSettings.merging(["SWIFT_OBJC_BRIDGING_HEADER": "kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h", "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "ISEXTENSION"]) { first, _ in first }
