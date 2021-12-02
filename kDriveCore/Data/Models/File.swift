@@ -343,7 +343,7 @@ public class File: Object, Codable {
     public var uti: UTI {
         localUrl.uti ?? convertedType.uti
     }
-    
+
     public var tintColor: UIColor? {
         if let color = color {
             return UIColor(hex: color)
