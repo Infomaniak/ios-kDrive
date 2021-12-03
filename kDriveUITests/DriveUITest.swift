@@ -17,7 +17,6 @@
  */
 
 import XCTest
-import kDrive
 import kDriveCore
 
 class AppUITest: XCTestCase {

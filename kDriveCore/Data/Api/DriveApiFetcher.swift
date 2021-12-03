@@ -24,13 +24,13 @@ import Kingfisher
 import Sentry
 import UIKit
 
-extension ApiFetcher {
+public extension ApiFetcher {
     convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
         self.init()
         setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
     }
 
-    public func getUserDrives(completion: @escaping (ApiResponse<DriveResponse>?, Error?) -> Void) {
+    func getUserDrives(completion: @escaping (ApiResponse<DriveResponse>?, Error?) -> Void) {
         authenticatedSession.request(ApiRoutes.getAllDrivesData(), method: .get)
             .validate()
             .responseDecodable(of: ApiResponse<DriveResponse>.self, decoder: ApiFetcher.decoder) { response in
