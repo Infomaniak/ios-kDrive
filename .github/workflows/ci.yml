@@ -1,0 +1,27 @@
+name: CI workflow
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build and Test project
+    runs-on: macos-11
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: .tuist-bin/tuist build --generate
+      - name: Create test env
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          USER_ID: ${{ secrets.USER_ID }}
+          INVITE_USER_ID: ${{ secrets.INVITE_USER_ID }}
+          INVITE_EMAIL: ${{ secrets.INVITE_EMAIL }}
+        run: echo "import Foundation\n\nstruct Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 140946\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > kDriveTests/Env.swift
+      - name: Test
+        run: xcodebuild test -workspace kDrive.xcworkspace -scheme kDrive -destination "platform=iOS Simulator,name=iPhone 13" -only-testing:kDriveTests/DriveApiTests
