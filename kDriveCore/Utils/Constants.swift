@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import kDriveResources
 
 public enum Constants {
     public static let isInExtension: Bool = {
@@ -55,9 +56,9 @@ public enum Constants {
         if relative && style != .date && timeInterval < 3_600 {
             let minutes = Int(timeInterval / 60)
             if minutes < 1 {
-                return KDriveCoreStrings.Localizable.allJustNow
+                return KDriveResourcesStrings.Localizable.allJustNow
             } else if minutes < 60 {
-                return KDriveCoreStrings.Localizable.allMinutesShort(minutes)
+                return KDriveResourcesStrings.Localizable.allMinutesShort(minutes)
             }
         }
 
@@ -85,13 +86,13 @@ public enum Constants {
             let relativeDateFormatter = RelativeDateTimeFormatter()
             let timeInterval = lastModified.timeIntervalSinceNow < -1 ? lastModified.timeIntervalSinceNow : -1
             let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
-            return KDriveCoreStrings.Localizable.allLastModifiedFileRelativeTime(relativeTime)
+            return KDriveResourcesStrings.Localizable.allLastModifiedFileRelativeTime(relativeTime)
         }
         return formatFileLastModifiedDate(lastModified)
     }
 
     public static func formatFileLastModifiedDate(_ lastModified: Date) -> String {
-        dateFormatter.dateFormat = KDriveCoreStrings.Localizable.allLastModifiedFilePattern
+        dateFormatter.dateFormat = KDriveResourcesStrings.Localizable.allLastModifiedFilePattern
         return dateFormatter.string(from: lastModified)
     }
 
@@ -100,13 +101,13 @@ public enum Constants {
             let relativeDateFormatter = RelativeDateTimeFormatter()
             let timeInterval = deletionDate.timeIntervalSinceNow < -1 ? deletionDate.timeIntervalSinceNow : -1
             let relativeTime = relativeDateFormatter.localizedString(fromTimeInterval: timeInterval)
-            return KDriveCoreStrings.Localizable.allDeletedFileRelativeTime(relativeTime)
+            return KDriveResourcesStrings.Localizable.allDeletedFileRelativeTime(relativeTime)
         }
         return formatFileDeletionDate(deletionDate)
     }
 
     public static func formatFileDeletionDate(_ deletionDate: Date) -> String {
-        dateFormatter.dateFormat = KDriveCoreStrings.Localizable.allDeletedFilePattern
+        dateFormatter.dateFormat = KDriveResourcesStrings.Localizable.allDeletedFilePattern
         return dateFormatter.string(from: deletionDate)
     }
 

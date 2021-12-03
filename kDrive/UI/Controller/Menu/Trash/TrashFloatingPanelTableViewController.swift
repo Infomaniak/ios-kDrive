@@ -16,9 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import FloatingPanel
 import kDriveCore
+import kDriveResources
+import UIKit
 
 protocol TrashOptionsDelegate: AnyObject {
     func didClickOnTrashOption(option: TrashOption, files: [File])
@@ -30,26 +31,25 @@ enum TrashOption: CaseIterable {
     var title: String {
         switch self {
         case .restoreIn:
-            return KDriveStrings.Localizable.trashActionRestoreFileIn
+            return KDriveResourcesStrings.Localizable.trashActionRestoreFileIn
         case .restore:
-            return KDriveStrings.Localizable.trashActionRestoreFileOriginalPlace
+            return KDriveResourcesStrings.Localizable.trashActionRestoreFileOriginalPlace
         case .delete:
-            return KDriveStrings.Localizable.trashActionDelete
+            return KDriveResourcesStrings.Localizable.trashActionDelete
         }
     }
 
     var icon: UIImage {
         switch self {
         case .restore, .restoreIn:
-            return KDriveAsset.refresh.image
+            return KDriveResourcesAsset.refresh.image
         case .delete:
-            return KDriveAsset.delete.image
+            return KDriveResourcesAsset.delete.image
         }
     }
 }
 
 class TrashFloatingPanelTableViewController: UITableViewController, FloatingPanelControllerDelegate {
-
     weak var delegate: TrashOptionsDelegate?
     var trashedFiles: [File]!
 
@@ -59,7 +59,7 @@ class TrashFloatingPanelTableViewController: UITableViewController, FloatingPane
         super.viewDidLoad()
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
-        tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         tableView.register(cellView: FloatingPanelTableViewCell.self)
     }
 
@@ -80,7 +80,7 @@ class TrashFloatingPanelTableViewController: UITableViewController, FloatingPane
         let option = tableContent[indexPath.row]
         cell.titleLabel.text = option.title
         cell.accessoryImageView.image = option.icon
-        cell.accessoryImageView.tintColor = KDriveAsset.iconColor.color
+        cell.accessoryImageView.tintColor = KDriveResourcesAsset.iconColor.color
         cell.separator?.isHidden = true
 
         return cell

@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import kDriveCore
+import kDriveResources
 import Photos
 import PhotosUI
 import UIKit
@@ -32,7 +33,7 @@ class PhotoPickerDelegate: NSObject {
     }
 
     private func showUploadSnackbar(count: Int, filename: String) {
-        let message = count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(count) : KDriveStrings.Localizable.allUploadInProgress(filename)
+        let message = count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(count) : KDriveResourcesStrings.Localizable.allUploadInProgress(filename)
         UIConstants.showSnackBar(message: message)
     }
 }
@@ -84,11 +85,11 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
         picker.dismiss(animated: true)
 
         if !results.isEmpty {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarProcessingUploads)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
             _ = FileImportHelper.instance.importItems(results.map(\.itemProvider)) { importedFiles, errorCount in
                 if errorCount > 0 {
                     DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackBarUploadError(errorCount))
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
                     }
                 }
                 guard !importedFiles.isEmpty else {

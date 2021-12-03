@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import kDriveResources
 import MaterialOutlinedTextField
 import UIKit
 
@@ -40,8 +41,8 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
         accessRightView.isAccessibilityElement = true
         accessRightView.accessibilityTraits = .button
 
-        titleLabel.text = KDriveStrings.Localizable.fileShareLinkSettingsAccessRightTitle
-        buttonNewPassword.setTitle(KDriveStrings.Localizable.buttonNewPassword, for: .normal)
+        titleLabel.text = KDriveResourcesStrings.Localizable.fileShareLinkSettingsAccessRightTitle
+        buttonNewPassword.setTitle(KDriveResourcesStrings.Localizable.buttonNewPassword, for: .normal)
 
         textField.delegate = self
         textField.setInfomaniakColors()
@@ -49,19 +50,19 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
         textField.isAccessibilityElement = true
         buttonNewPassword.isHidden = true
 
-        textField.setHint(KDriveStrings.Localizable.allPasswordHint)
+        textField.setHint(KDriveResourcesStrings.Localizable.allPasswordHint)
         textField.isSecureTextEntry = !showPassword
         textField.keyboardType = .default
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
 
         let overlayButton = UIButton(type: .custom)
-        let viewImage = KDriveAsset.view.image
+        let viewImage = KDriveResourcesAsset.view.image
         overlayButton.setImage(viewImage, for: .normal)
-        overlayButton.tintColor = KDriveAsset.iconColor.color
+        overlayButton.tintColor = KDriveResourcesAsset.iconColor.color
         overlayButton.addTarget(self, action: #selector(displayPassword), for: .touchUpInside)
         overlayButton.sizeToFit()
-        overlayButton.accessibilityLabel = KDriveStrings.Localizable.buttonTogglePassword
+        overlayButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonTogglePassword
         let rightView = UIView(frame: CGRect(x: 0, y: 0, width: overlayButton.frame.width + 10, height: overlayButton.frame.height))
         rightView.addSubview(overlayButton)
 
@@ -76,7 +77,7 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func textFieldUpdated(_ sender: MaterialOutlinedTextField) {
-        textField.borderColor = KDriveAsset.infomaniakColor.color
+        textField.borderColor = KDriveResourcesAsset.infomaniakColor.color
         delegate?.didUpdatePassword(newPasswordString: textField.text ?? "")
     }
 
@@ -94,7 +95,7 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
 
 extension ShareLinkAccessRightTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        textField.borderColor = KDriveAsset.infomaniakColor.color
+        textField.borderColor = KDriveResourcesAsset.infomaniakColor.color
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

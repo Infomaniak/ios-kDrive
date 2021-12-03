@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol SelectFolderDelegate: AnyObject {
@@ -46,7 +47,7 @@ class SelectFolderViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
+        configuration = Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
 
         super.viewDidLoad()
 
@@ -56,14 +57,14 @@ class SelectFolderViewController: FileListViewController {
 
     private func setUpDirectory() {
         addFolderButton.isEnabled = currentDirectory.rights?.createNewFolder ?? false
-        addFolderButton.accessibilityLabel = KDriveStrings.Localizable.createFolderTitle
+        addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
         selectFolderButton.isEnabled = !disabledDirectoriesSelection.map(\.id).contains(currentDirectory.id) && (currentDirectory.rights?.moveInto ?? false || currentDirectory.rights?.createNewFile ?? false)
         if currentDirectory.id == DriveFileManager.constants.rootID {
             // Root directory: set back button if the view controller is presented modally
             let viewControllersCount = navigationController?.viewControllers.count ?? 0
             if isModal && viewControllersCount < 2 {
                 navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
-                navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+                navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
             }
         }
     }

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 @IBDesignable class IKSlider: UISlider {
@@ -41,12 +42,12 @@ import UIKit
     }
 
     private func setUpSlider() {
-        maximumTrackTintColor = KDriveCoreAsset.borderColor.color
+        maximumTrackTintColor = KDriveResourcesAsset.borderColor.color
         // Change thumb
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: 28, height: 28))
         let circleImage = renderer.image { ctx in
-            KDriveCoreAsset.infomaniakColor.color.setFill()
-            KDriveCoreAsset.backgroundCardViewColor.color.setStroke()
+            KDriveResourcesAsset.infomaniakColor.color.setFill()
+            KDriveResourcesAsset.backgroundCardViewColor.color.setStroke()
             ctx.cgContext.setLineWidth(2)
             ctx.cgContext.setShadow(offset: CGSize(width: 0, height: 2), blur: 4, color: UIColor(red: 0, green: 0, blue: 0, alpha: 0.12).cgColor)
             let rect = CGRect(x: 3, y: 3, width: 20, height: 20)

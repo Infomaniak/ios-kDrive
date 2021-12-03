@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class NewFolderShareRuleTableViewCell: InsetTableViewCell {
@@ -49,17 +50,17 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         super.setSelected(selected, animated: animated)
         if selected {
             contentInsetView.borderWidth = 2
-            contentInsetView.borderColor = KDriveAsset.infomaniakColor.color
+            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
         } else {
             contentInsetView.borderWidth = 0
         }
     }
 
     func configureMeOnly() {
-        titleLabel.text = KDriveStrings.Localizable.createFolderMeOnly
+        titleLabel.text = KDriveResourcesStrings.Localizable.createFolderMeOnly
         descriptionLabel.isHidden = true
         imageStackViewWidth.constant = 30
-        accessoryImageView.image = KDriveAsset.placeholderAvatar.image
+        accessoryImageView.image = KDriveResourcesAsset.placeholderAvatar.image
         accessoryImageView.layer.cornerRadius = accessoryImageView.bounds.width / 2
 
         AccountManager.instance.currentAccount?.user?.getAvatar { image in
@@ -82,25 +83,25 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         accessoryImageView.isHidden = true
         collectionView.isHidden = false
         collectionView.reloadData()
-        titleLabel.text = KDriveStrings.Localizable.createFolderKeepParentsRightTitle
-        descriptionLabel.text = KDriveStrings.Localizable.createFolderKeepParentsRightDescription(folderName)
+        titleLabel.text = KDriveResourcesStrings.Localizable.createFolderKeepParentsRightTitle
+        descriptionLabel.text = KDriveResourcesStrings.Localizable.createFolderKeepParentsRightDescription(folderName)
     }
 
     func configureSomeUser() {
         rights = false
         imageStackViewWidth.constant = 24
-        accessoryImageView.image = KDriveAsset.users.image
-        accessoryImageView.tintColor = KDriveAsset.iconColor.color
-        titleLabel.text = KDriveStrings.Localizable.createFolderSomeUsersTitle
-        descriptionLabel.text = KDriveStrings.Localizable.createFolderSomeUsersDescription
+        accessoryImageView.image = KDriveResourcesAsset.users.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        titleLabel.text = KDriveResourcesStrings.Localizable.createFolderSomeUsersTitle
+        descriptionLabel.text = KDriveResourcesStrings.Localizable.createFolderSomeUsersDescription
     }
 
     func configureAllUsers(driveName: String) {
         imageStackViewWidth.constant = 24
-        accessoryImageView.image = KDriveAsset.drive.image
-        accessoryImageView.tintColor = KDriveAsset.blueFolderColor.color
-        titleLabel.text = KDriveStrings.Localizable.allAllDriveUsers
-        descriptionLabel.text = KDriveStrings.Localizable.createCommonFolderAllUsersDescription(driveName)
+        accessoryImageView.image = KDriveResourcesAsset.drive.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.blueFolderColor.color
+        titleLabel.text = KDriveResourcesStrings.Localizable.allAllDriveUsers
+        descriptionLabel.text = KDriveResourcesStrings.Localizable.createCommonFolderAllUsersDescription(driveName)
     }
 }
 

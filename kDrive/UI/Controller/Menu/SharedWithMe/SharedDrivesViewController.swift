@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class SharedDrivesViewController: UIViewController {
@@ -26,7 +27,7 @@ class SharedDrivesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = KDriveStrings.Localizable.sharedWithMeTitle
+        title = KDriveResourcesStrings.Localizable.sharedWithMeTitle
         tableView.register(cellView: MenuTableViewCell.self)
 
         drives = DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true)
@@ -76,7 +77,7 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
         let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         cell.titleLabel.text = drives[indexPath.row]?.name
-        cell.logoImage.image = KDriveAsset.drive.image
+        cell.logoImage.image = KDriveResourcesAsset.drive.image
         cell.logoImage.tintColor = UIColor(hex: (drives[indexPath.row]?.preferences.color)!)
         return cell
     }

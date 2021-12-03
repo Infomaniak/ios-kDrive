@@ -19,6 +19,7 @@
 import FloatingPanel
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import PDFKit
 import Sentry
 import UIKit
@@ -96,25 +97,25 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         view.addSubview(pdfPageLabel)
 
         editButton.tintColor = .white
-        editButton.backgroundColor = KDriveCoreAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+        editButton.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
         editButton.contentMode = .center
-        editButton.setImage(KDriveAsset.editDocument.image, for: .normal)
+        editButton.setImage(KDriveResourcesAsset.editDocument.image, for: .normal)
         editButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
         editButton.imageEdgeInsets = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
         editButton.cornerRadius = editButton.frame.width / 2
-        editButton.accessibilityLabel = KDriveStrings.Localizable.buttonEdit
+        editButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
         editButton.addTarget(self, action: #selector(editFile), for: .touchUpInside)
         editButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(editButton)
 
         backButton.tintColor = .white
-        backButton.backgroundColor = KDriveCoreAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+        backButton.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
         backButton.contentMode = .center
-        backButton.setImage(KDriveAsset.chevronLeft.image, for: .normal)
+        backButton.setImage(KDriveResourcesAsset.chevronLeft.image, for: .normal)
         backButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
         backButton.imageEdgeInsets = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
         backButton.cornerRadius = backButton.frame.width / 2
-        backButton.accessibilityLabel = KDriveStrings.Localizable.buttonBack
+        backButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonBack
         backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
         backButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(backButton)
@@ -297,7 +298,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
         backButton.isHidden = false
         editButton.isHidden = true
-        pdfPageLabel.text = KDriveStrings.Localizable.previewPdfPages(currentPage, totalPages)
+        pdfPageLabel.text = KDriveResourcesStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
         titleWidthConstraint?.constant = pdfPageLabel.frame.width + 32
         let height = pdfPageLabel.frame.height + 16
@@ -305,7 +306,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         pdfPageLabel.setNeedsUpdateConstraints()
         pdfPageLabel.layer.cornerRadius = height / 2
         pdfPageLabel.clipsToBounds = true
-        pdfPageLabel.backgroundColor = KDriveCoreAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+        pdfPageLabel.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
         pdfPageLabel.isHidden = false
     }
 
@@ -380,7 +381,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                         if self?.view.window != nil {
                             if let error = error {
                                 if error != .taskCancelled {
-                                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
+                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
                                     if let cell = (self?.collectionView.cellForItem(at: indexPath) as? NoPreviewCollectionViewCell) {
                                         cell.errorDownloading()
                                     }

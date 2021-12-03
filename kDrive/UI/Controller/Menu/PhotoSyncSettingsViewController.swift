@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import Photos
 import RealmSwift
 import UIKit
@@ -93,7 +94,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
 
-        let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
+        let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
         view.delegate = self
         tableView.tableFooterView = view
 
@@ -234,16 +235,16 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch sections[section] {
         case .syncSwitch:
-            let saveDetailsHeaderText = KDriveStrings.Localizable.syncSettingsDescription
+            let saveDetailsHeaderText = KDriveResourcesStrings.Localizable.syncSettingsDescription
             // We recycle the header view, it's easier to add \n than setting dynamic constraints
             let headerView = HomeTitleView.instantiate(title: "\n" + saveDetailsHeaderText + "\n")
             headerView.titleLabel.font = .systemFont(ofSize: 14)
             headerView.titleLabel.numberOfLines = 0
             return headerView
         case .syncLocation:
-            return HomeTitleView.instantiate(title: KDriveStrings.Localizable.syncSettingsSaveOn)
+            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.syncSettingsSaveOn)
         case .syncSettings:
-            return HomeTitleView.instantiate(title: KDriveStrings.Localizable.settingsTitle)
+            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.settingsTitle)
         case .syncDenied:
             return nil
         }
@@ -273,7 +274,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .syncSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == switchSyncRows.count - 1)
-                cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonActiveSync
+                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync
                 cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
                     guard let self = self else { return }
@@ -318,7 +319,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .importPicturesSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncPicture
+                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncPicture
                 cell.valueSwitch.setOn(newSyncSettings.syncPicturesEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
                     self?.newSyncSettings.syncPicturesEnabled = sender.isOn
@@ -328,7 +329,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .importVideosSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncVideo
+                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncVideo
                 cell.valueSwitch.setOn(newSyncSettings.syncVideosEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
                     self?.newSyncSettings.syncVideosEnabled = sender.isOn
@@ -338,7 +339,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .importScreenshotsSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.valueLabel.text = KDriveStrings.Localizable.syncSettingsButtonSyncScreenshot
+                cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncScreenshot
                 cell.valueSwitch.setOn(newSyncSettings.syncScreenshotsEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
                     self?.newSyncSettings.syncScreenshotsEnabled = sender.isOn
@@ -348,8 +349,8 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .createDatedSubFolders:
                 let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.titleLabel.text = KDriveStrings.Localizable.createDatedSubFoldersTitle
-                cell.detailsLabel.text = KDriveStrings.Localizable.createDatedSubFoldersDescription
+                cell.titleLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersTitle
+                cell.detailsLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersDescription
                 cell.valueSwitch.setOn(newSyncSettings.createDatedSubFolders, animated: true)
                 cell.switchHandler = { [weak self] sender in
                     self?.newSyncSettings.createDatedSubFolders = sender.isOn
@@ -359,8 +360,8 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .deleteAssetsAfterImport:
                 let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.titleLabel.text = KDriveStrings.Localizable.deletePicturesTitle
-                cell.detailsLabel.text = KDriveStrings.Localizable.deletePicturesDescription
+                cell.titleLabel.text = KDriveResourcesStrings.Localizable.deletePicturesTitle
+                cell.detailsLabel.text = KDriveResourcesStrings.Localizable.deletePicturesDescription
                 cell.valueSwitch.setOn(newSyncSettings.deleteAssetsAfterImport, animated: true)
                 cell.switchHandler = { [weak self] sender in
                     self?.newSyncSettings.deleteAssetsAfterImport = sender.isOn
@@ -370,7 +371,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
             case .syncMode:
                 let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
-                cell.titleLabel.text = KDriveStrings.Localizable.syncSettingsButtonSaveDate
+                cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate
                 cell.valueLabel.text = newSyncSettings.syncMode.title
                 return cell
             }
@@ -408,7 +409,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
         } else if section == .syncSettings {
             let row = settingsRows[indexPath.row]
             if row == .syncMode {
-                let alert = AlertChoiceViewController(title: KDriveStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveStrings.Localizable.syncSettingsSaveDateAllPictureValue], selected: newSyncSettings.syncMode.rawValue, action: KDriveStrings.Localizable.buttonValid) { selectedIndex in
+                let alert = AlertChoiceViewController(title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue], selected: newSyncSettings.syncMode.rawValue, action: KDriveResourcesStrings.Localizable.buttonValid) { selectedIndex in
                     self.newSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)

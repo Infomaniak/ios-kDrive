@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
@@ -25,14 +26,14 @@ class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
         avatarImage.cornerRadius = avatarImage.bounds.width / 2
         moreLabel.isHidden = true
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     func configureWith(moreValue: Int, shareable: Shareable) {

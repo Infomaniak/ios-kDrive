@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import MaterialOutlinedTextField
 import UIKit
 
@@ -67,7 +68,7 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
         toolBar.isTranslucent = true
         toolBar.sizeToFit()
 
-        let doneButton = UIBarButtonItem(title: KDriveStrings.Localizable.buttonClose, style: .done, target: self, action: #selector(donePicker))
+        let doneButton = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonClose, style: .done, target: self, action: #selector(donePicker))
         let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: nil, action: nil)
         toolBar.setItems([spaceButton, doneButton], animated: false)
         toolBar.isUserInteractionEnabled = true
@@ -104,7 +105,7 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func textFieldUpdated(_ sender: MaterialOutlinedTextField) {
-        textField.borderColor = KDriveAsset.infomaniakColor.color
+        textField.borderColor = KDriveResourcesAsset.infomaniakColor.color
         let content = textField.text?.count ?? 0 > 0 ? textField.text : nil
         delegate?.didUpdateSettingsValue(index: index, content: index == 3 ? Int(textField.text ?? "0") : content)
     }
@@ -134,15 +135,15 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
     }
 
     func configureMail() {
-        titleLabel.text = KDriveStrings.Localizable.createFolderEmailWhenFinishedTitle
+        titleLabel.text = KDriveResourcesStrings.Localizable.createFolderEmailWhenFinishedTitle
         bottomStackView.isHidden = true
     }
 
     func configurePassword(switchValue: Bool, newPassword: Bool, setting: Any?) {
-        titleLabel.text = KDriveStrings.Localizable.createFolderPasswordTitle
-        detailLabel.text = KDriveStrings.Localizable.createFolderPasswordDescription
+        titleLabel.text = KDriveResourcesStrings.Localizable.createFolderPasswordTitle
+        detailLabel.text = KDriveResourcesStrings.Localizable.createFolderPasswordDescription
         togglePasswordTextField(newPassword: newPassword)
-        textField.setHint(KDriveStrings.Localizable.allPasswordHint)
+        textField.setHint(KDriveResourcesStrings.Localizable.allPasswordHint)
         textField.isSecureTextEntry = !showPassword
         textField.keyboardType = .default
         textField.autocorrectionType = .no
@@ -150,12 +151,12 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
         textField.text = setting as? String
 
         let overlayButton = UIButton(type: .custom)
-        let viewImage = KDriveAsset.view.image
+        let viewImage = KDriveResourcesAsset.view.image
         overlayButton.setImage(viewImage, for: .normal)
-        overlayButton.tintColor = KDriveAsset.iconColor.color
+        overlayButton.tintColor = KDriveResourcesAsset.iconColor.color
         overlayButton.addTarget(self, action: #selector(displayPassword), for: .touchUpInside)
         overlayButton.sizeToFit()
-        overlayButton.accessibilityLabel = KDriveStrings.Localizable.buttonTogglePassword
+        overlayButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonTogglePassword
         let rightView = UIView(frame: CGRect(x: 0, y: 0, width: overlayButton.frame.width + 10, height: overlayButton.frame.height))
         rightView.addSubview(overlayButton)
 
@@ -175,8 +176,8 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
     }
 
     func configureDate(switchValue: Bool, setting: Any?) {
-        titleLabel.text = KDriveStrings.Localizable.allAddExpirationDateTitle
-        detailLabel.text = KDriveStrings.Localizable.createFolderValidUntilDescription
+        titleLabel.text = KDriveResourcesStrings.Localizable.allAddExpirationDateTitle
+        detailLabel.text = KDriveResourcesStrings.Localizable.createFolderValidUntilDescription
 
         if #available(iOS 13.4, *) {
             datePicker.isHidden = !switchValue
@@ -192,8 +193,8 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
     }
 
     func configureSize(switchValue: Bool, setting: Any?) {
-        titleLabel.text = KDriveStrings.Localizable.createFolderLimitFileSizeTitle
-        detailLabel.text = KDriveStrings.Localizable.createFolderLimitFileSizeDescription
+        titleLabel.text = KDriveResourcesStrings.Localizable.createFolderLimitFileSizeTitle
+        detailLabel.text = KDriveResourcesStrings.Localizable.createFolderLimitFileSizeDescription
         textField.isHidden = !switchValue
         textFieldStackView.isHidden = !switchValue
         textField.isSecureTextEntry = false
@@ -206,7 +207,7 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
         }
 
         let label = UILabel()
-        label.text = KDriveStrings.Localizable.createFolderLimitFileSizeUnitTitle
+        label.text = KDriveResourcesStrings.Localizable.createFolderLimitFileSizeUnitTitle
         label.font = UIFont.systemFont(ofSize: 14)
         label.sizeToFit()
         let rightView = UIView(frame: CGRect(x: 0, y: 0, width: label.frame.width + 10, height: label.frame.height))
@@ -218,7 +219,7 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
 
 extension NewFolderSettingsTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        textField.borderColor = KDriveAsset.infomaniakColor.color
+        textField.borderColor = KDriveResourcesAsset.infomaniakColor.color
         if index == 3 && textField.text == "0" {
             textField.selectAll(nil)
         }

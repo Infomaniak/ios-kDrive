@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
+import kDriveResources
+import UIKit
 
 class ThemeSelectionTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var themeLabel: UILabel!
 
     override func awakeFromNib() {
@@ -34,12 +34,12 @@ class ThemeSelectionTableViewCell: InsetTableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         if selected {
-            contentInsetView.borderColor = KDriveAsset.infomaniakColor.color
+            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
             contentInsetView.borderWidth = 2
         } else {
-            contentInsetView.borderColor = KDriveAsset.borderColor.color
+            contentInsetView.borderColor = KDriveResourcesAsset.borderColor.color
             contentInsetView.borderWidth = 1
         }
     }

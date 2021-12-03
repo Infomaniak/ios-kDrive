@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class SavePhotoViewController: SaveFileViewController {
@@ -57,7 +58,7 @@ class SavePhotoViewController: SaveFileViewController {
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch sections[section] {
         case .fileType:
-            return HomeTitleView.instantiate(title: KDriveStrings.Localizable.searchFilterTitle)
+            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.searchFilterTitle)
         default:
             return super.tableView(tableView, viewForHeaderInSection: section)
         }
@@ -89,10 +90,10 @@ class SavePhotoViewController: SaveFileViewController {
         dismiss(animated: true) {
             if let parent = self.presentingViewController {
                 parent.dismiss(animated: true) {
-                    UIConstants.showSnackBar(message: success ? KDriveStrings.Localizable.allUploadInProgress(filename) : KDriveStrings.Localizable.errorUpload)
+                    UIConstants.showSnackBar(message: success ? KDriveResourcesStrings.Localizable.allUploadInProgress(filename) : KDriveResourcesStrings.Localizable.errorUpload)
                 }
             } else {
-                UIConstants.showSnackBar(message: success ? KDriveStrings.Localizable.allUploadInProgress(filename) : KDriveStrings.Localizable.errorUpload)
+                UIConstants.showSnackBar(message: success ? KDriveResourcesStrings.Localizable.allUploadInProgress(filename) : KDriveResourcesStrings.Localizable.errorUpload)
             }
         }
     }

@@ -18,13 +18,14 @@
 
 import Foundation
 import kDriveCore
+import kDriveResources
 
 class HomeOfflineFilesController: HomeRecentFilesController {
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager,
                   homeViewController: homeViewController,
                   listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noOffline,
-                  title: KDriveStrings.Localizable.offlineFileTitle, selectorTitle: KDriveStrings.Localizable.offlineFileTitle,
+                  title: KDriveResourcesStrings.Localizable.offlineFileTitle, selectorTitle: KDriveResourcesStrings.Localizable.offlineFileTitle,
                   listStyleEnabled: true)
     }
 

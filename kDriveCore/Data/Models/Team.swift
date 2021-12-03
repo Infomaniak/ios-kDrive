@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import kDriveResources
 import RealmSwift
 import UIKit
 
@@ -64,7 +65,7 @@ public class Team: Object, Codable {
             let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
             ctx.cgContext.fill(rect)
             UIColor.white.setFill()
-            let icon = isAllUsers ? KDriveCoreAsset.drive.image : KDriveCoreAsset.team.image
+            let icon = isAllUsers ? KDriveResourcesAsset.drive.image : KDriveResourcesAsset.team.image
             icon.draw(in: CGRect(x: 8.5, y: 8.5, width: 18, height: 18))
         }
     }
@@ -94,7 +95,7 @@ extension Team: Shareable {
     }
 
     public var shareableName: String {
-        return isAllUsers ? KDriveCoreStrings.Localizable.allAllDriveUsers : name
+        return isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : name
     }
 }
 

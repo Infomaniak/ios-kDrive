@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import PhotosUI
 import UIKit
 
@@ -72,7 +73,7 @@ class SaveFileViewController: UIViewController {
             selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
         }
 
-        closeBarButtonItem.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+        closeBarButtonItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
 
         tableView.separatorColor = .clear
         tableView.register(cellView: AlertTableViewCell.self)
@@ -197,14 +198,14 @@ extension SaveFileViewController: UITableViewDataSource {
         switch sections[indexPath.section] {
         case .alert:
             let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
-            cell.configure(with: .warning, message: KDriveStrings.Localizable.snackBarUploadError(errorCount))
+            cell.configure(with: .warning, message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
             return cell
         case .fileName:
             let item = items[indexPath.row]
             if items.count > 1 {
                 let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-                cell.accessoryImageView.image = KDriveAsset.edit.image
+                cell.accessoryImageView.image = KDriveResourcesAsset.edit.image
                 cell.logoImage.image = ConvertedType.fromUTI(item.uti).icon
                 cell.titleLabel.text = item.name
                 return cell
@@ -212,7 +213,7 @@ extension SaveFileViewController: UITableViewDataSource {
                 let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
                 cell.textField.text = item.name
                 cell.textDidChange = { [unowned self] text in
-                    item.name = text ?? KDriveStrings.Localizable.allUntitledFileName
+                    item.name = text ?? KDriveResourcesStrings.Localizable.allUntitledFileName
                     if let text = text, !text.isEmpty {
                         updateButton()
                     } else {
@@ -247,7 +248,7 @@ extension SaveFileViewController: UITableViewDataSource {
         case .driveSelection:
             return HomeTitleView.instantiate(title: "kDrive")
         case .directorySelection:
-            return HomeTitleView.instantiate(title: KDriveStrings.Localizable.allPathTitle)
+            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.allPathTitle)
         default:
             return nil
         }
@@ -262,7 +263,7 @@ extension SaveFileViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         if section == tableView.numberOfSections - 1 && !importInProgress {
-            let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
+            let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
             view.delegate = self
             view.footerButton.isEnabled = enableButton
             return view
@@ -280,7 +281,7 @@ extension SaveFileViewController: UITableViewDelegate {
         case .fileName:
             let item = items[indexPath.row]
             if items.count > 1 {
-                let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonRename, placeholder: KDriveStrings.Localizable.hintInputFileName, text: item.name, action: KDriveStrings.Localizable.buttonSave, loading: false) { newName in
+                let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename, placeholder: KDriveResourcesStrings.Localizable.hintInputFileName, text: item.name, action: KDriveResourcesStrings.Localizable.buttonSave, loading: false) { newName in
                     item.name = newName
                     tableView.reloadRows(at: [indexPath], with: .automatic)
                 }
@@ -346,7 +347,7 @@ extension SaveFileViewController: FooterButtonDelegate {
                 navigationController?.dismiss(animated: true)
                 return
             }
-            message = items.count > 1 ? KDriveStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveStrings.Localizable.allUploadInProgress(items[0].name)
+            message = items.count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(items.count) : KDriveResourcesStrings.Localizable.allUploadInProgress(items[0].name)
         } catch {
             message = error.localizedDescription
         }

@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -110,7 +111,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         } else {
             truncatedName = folder.name
         }
-        navigationItem.title = convertingFolder ? KDriveStrings.Localizable.convertToDropboxTitle(truncatedName) : KDriveStrings.Localizable.manageDropboxTitle(folder.name)
+        navigationItem.title = convertingFolder ? KDriveResourcesStrings.Localizable.convertToDropboxTitle(truncatedName) : KDriveResourcesStrings.Localizable.manageDropboxTitle(folder.name)
     }
 
     private func getSettings() {
@@ -144,7 +145,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                     ]
                     self.newPassword = dropBox.password
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 }
                 self.tableView.reloadData()
             }
@@ -227,7 +228,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         if section == tableView.numberOfSections - 1 {
-            let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
+            let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
             view.delegate = self
             updateButton(footer: view)
             return view
@@ -245,7 +246,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                     self.dismissAndRefreshDataSource()
                     self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: nil)
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorModification)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                 }
             }
         }
@@ -316,11 +317,11 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                     let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url
-                    floatingPanelViewController?.titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle(self.folder.name)
+                    floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.folder.name)
                     self.present(driveFloatingPanelController, animated: true)
                     self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: dropBox.url)
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
         } else {
@@ -328,7 +329,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                 if error == nil {
                     self.navigationController?.popViewController(animated: true)
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorModification)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                 }
             }
         }

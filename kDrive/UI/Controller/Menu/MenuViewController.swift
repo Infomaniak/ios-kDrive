@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import Sentry
 import UIKit
 
@@ -51,19 +52,19 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
         let image: UIImage
         let segue: String?
 
-        static let store = MenuAction(name: KDriveStrings.Localizable.upgradeOfferTitle, image: KDriveAsset.upgradeKdrive.image, segue: "toStoreSegue")
+        static let store = MenuAction(name: KDriveResourcesStrings.Localizable.upgradeOfferTitle, image: KDriveResourcesAsset.upgradeKdrive.image, segue: "toStoreSegue")
 
-        static let sharedWithMe = MenuAction(name: KDriveStrings.Localizable.sharedWithMeTitle, image: KDriveAsset.folderSelect2.image, segue: "toDriveListSegue")
-        static let lastModifications = MenuAction(name: KDriveStrings.Localizable.lastEditsTitle, image: KDriveAsset.clock.image, segue: "toLastModificationsSegue")
-        static let images = MenuAction(name: KDriveStrings.Localizable.allPictures, image: KDriveAsset.images.image, segue: "toPhotoListSegue")
-        static let myShares = MenuAction(name: KDriveStrings.Localizable.mySharesTitle, image: KDriveAsset.folderSelect.image, segue: "toMySharedSegue")
-        static let offline = MenuAction(name: KDriveStrings.Localizable.offlineFileTitle, image: KDriveAsset.availableOffline.image, segue: "toOfflineSegue")
-        static let trash = MenuAction(name: KDriveStrings.Localizable.trashTitle, image: KDriveAsset.delete.image, segue: "toTrashSegue")
+        static let sharedWithMe = MenuAction(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle, image: KDriveResourcesAsset.folderSelect2.image, segue: "toDriveListSegue")
+        static let lastModifications = MenuAction(name: KDriveResourcesStrings.Localizable.lastEditsTitle, image: KDriveResourcesAsset.clock.image, segue: "toLastModificationsSegue")
+        static let images = MenuAction(name: KDriveResourcesStrings.Localizable.allPictures, image: KDriveResourcesAsset.images.image, segue: "toPhotoListSegue")
+        static let myShares = MenuAction(name: KDriveResourcesStrings.Localizable.mySharesTitle, image: KDriveResourcesAsset.folderSelect.image, segue: "toMySharedSegue")
+        static let offline = MenuAction(name: KDriveResourcesStrings.Localizable.offlineFileTitle, image: KDriveResourcesAsset.availableOffline.image, segue: "toOfflineSegue")
+        static let trash = MenuAction(name: KDriveResourcesStrings.Localizable.trashTitle, image: KDriveResourcesAsset.delete.image, segue: "toTrashSegue")
 
-        static let switchUser = MenuAction(name: KDriveStrings.Localizable.switchUserTitle, image: KDriveAsset.userSwitch.image, segue: "switchUserSegue")
-        static let parameters = MenuAction(name: KDriveStrings.Localizable.settingsTitle, image: KDriveAsset.parameters.image, segue: "toParameterSegue")
-        static let help = MenuAction(name: KDriveStrings.Localizable.supportTitle, image: KDriveAsset.supportLink.image, segue: nil)
-        static let disconnect = MenuAction(name: KDriveStrings.Localizable.buttonLogout, image: KDriveAsset.logout.image, segue: nil)
+        static let switchUser = MenuAction(name: KDriveResourcesStrings.Localizable.switchUserTitle, image: KDriveResourcesAsset.userSwitch.image, segue: "switchUserSegue")
+        static let parameters = MenuAction(name: KDriveResourcesStrings.Localizable.settingsTitle, image: KDriveResourcesAsset.parameters.image, segue: "toParameterSegue")
+        static let help = MenuAction(name: KDriveResourcesStrings.Localizable.supportTitle, image: KDriveResourcesAsset.supportLink.image, segue: nil)
+        static let disconnect = MenuAction(name: KDriveResourcesStrings.Localizable.buttonLogout, image: KDriveResourcesAsset.logout.image, segue: nil)
     }
 
     private var sections: [Section] = []
@@ -203,7 +204,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             cell.titleLabel.text = action.name
             cell.titleLabel.numberOfLines = 0
             cell.logoImage.image = action.image
-            cell.logoImage.tintColor = KDriveAsset.iconColor.color
+            cell.logoImage.tintColor = KDriveResourcesAsset.iconColor.color
             return cell
         }
     }
@@ -221,7 +222,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         let action = section.actions[indexPath.row]
         switch action {
         case .disconnect:
-            let alert = AlertTextViewController(title: KDriveStrings.Localizable.alertRemoveUserTitle, message: KDriveStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveStrings.Localizable.buttonConfirm, destructive: true) {
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle, message: KDriveResourcesStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveResourcesStrings.Localizable.buttonConfirm, destructive: true) {
                 AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
                 if let nextAccount = AccountManager.instance.accounts.first {
                     AccountManager.instance.switchAccount(newAccount: nextAccount)
@@ -248,7 +249,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
         let drives = AccountManager.instance.drives
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: driveFileManager.drive, headerTitle: KDriveStrings.Localizable.buttonSwitchDrive, delegate: self)
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives, selectedOption: driveFileManager.drive, headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive, delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 }

@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import kDriveResources
 import Kingfisher
 import RealmSwift
 import UIKit
@@ -36,26 +37,26 @@ public enum UserPermission: String, Codable, CaseIterable {
     public var title: String {
         switch self {
         case .read:
-            return KDriveCoreStrings.Localizable.userPermissionRead
+            return KDriveResourcesStrings.Localizable.userPermissionRead
         case .write:
-            return KDriveCoreStrings.Localizable.userPermissionWrite
+            return KDriveResourcesStrings.Localizable.userPermissionWrite
         case .manage:
-            return KDriveCoreStrings.Localizable.userPermissionManage
+            return KDriveResourcesStrings.Localizable.userPermissionManage
         case .delete:
-            return KDriveCoreStrings.Localizable.buttonDelete
+            return KDriveResourcesStrings.Localizable.buttonDelete
         }
     }
 
     public var icon: UIImage {
         switch self {
         case .read:
-            return KDriveCoreAsset.view.image
+            return KDriveResourcesAsset.view.image
         case .write:
-            return KDriveCoreAsset.edit.image
+            return KDriveResourcesAsset.edit.image
         case .manage:
-            return KDriveCoreAsset.crown.image
+            return KDriveResourcesAsset.crown.image
         case .delete:
-            return KDriveCoreAsset.delete.image
+            return KDriveResourcesAsset.delete.image
         }
     }
 }

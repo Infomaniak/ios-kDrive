@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol FilesHeaderViewDelegate: AnyObject {
@@ -65,7 +66,7 @@ class FilesHeaderView: UICollectionReusableView {
         sortButton.semanticContentAttribute = layoutDirection == .rightToLeft ? .forceLeftToRight : .forceRightToLeft
         sortButton.imageView?.contentMode = .scaleAspectFit
 
-        listOrGridButton.accessibilityLabel = KDriveStrings.Localizable.buttonToggleDisplay
+        listOrGridButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonToggleDisplay
         if ReachabilityListener.instance.currentStatus == .offline {
             offlineView.isHidden = false
         }

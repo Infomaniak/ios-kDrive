@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserver {
@@ -46,12 +47,12 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     func configureWith(file: File, isOffline: Bool = false) {
         titleLabel.text = file.name
         if isOffline {
-            iconImageView.image = KDriveAsset.fileDefault.image
-            subtitleLabel.text = KDriveStrings.Localizable.previewLoadError
+            iconImageView.image = KDriveResourcesAsset.fileDefault.image
+            subtitleLabel.text = KDriveResourcesStrings.Localizable.previewLoadError
             offlineView.isHidden = false
         } else {
             iconImageView.image = file.icon
-            subtitleLabel.text = KDriveStrings.Localizable.previewNoPreview
+            subtitleLabel.text = KDriveResourcesStrings.Localizable.previewNoPreview
             offlineView.isHidden = true
         }
     }
@@ -59,11 +60,11 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     func setDownloadProgress(_ progress: Progress) {
         progressView.isHidden = false
         progressView.observedProgress = progress
-        subtitleLabel.text = KDriveStrings.Localizable.previewDownloadIndication
+        subtitleLabel.text = KDriveResourcesStrings.Localizable.previewDownloadIndication
     }
 
     func errorDownloading() {
         progressView.isHidden = true
-        subtitleLabel.text = KDriveStrings.Localizable.errorDownload
+        subtitleLabel.text = KDriveResourcesStrings.Localizable.errorDownload
     }
 }

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 public enum ListStyle: String {
@@ -25,9 +26,9 @@ public enum ListStyle: String {
     public var icon: UIImage {
         switch self {
         case .list:
-            return KDriveCoreAsset.list.image
+            return KDriveResourcesAsset.list.image
         case .grid:
-            return KDriveCoreAsset.grid.image
+            return KDriveResourcesAsset.grid.image
         }
     }
 }

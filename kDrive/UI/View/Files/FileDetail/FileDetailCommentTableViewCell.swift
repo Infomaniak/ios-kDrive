@@ -16,8 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 protocol FileCommentDelegate: AnyObject {
     func didLikeComment(comment: Comment, index: Int)
@@ -25,7 +26,6 @@ protocol FileCommentDelegate: AnyObject {
 }
 
 class FileDetailCommentTableViewCell: UITableViewCell {
-
     @IBOutlet weak var userAvatar: UIImageView!
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
@@ -44,8 +44,8 @@ class FileDetailCommentTableViewCell: UITableViewCell {
         let tap = UITapGestureRecognizer(target: self, action: #selector(likeButton))
         likeImage.addGestureRecognizer(tap)
         likeImage.accessibilityTraits = .button
-        likeImage.accessibilityLabel = KDriveStrings.Localizable.buttonLike
-        userAvatar.image = KDriveAsset.placeholderAvatar.image
+        likeImage.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonLike
+        userAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
 
         let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressureLikeButton))
         likesView.addGestureRecognizer(longGesture)
@@ -54,7 +54,7 @@ class FileDetailCommentTableViewCell: UITableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        userAvatar.image = KDriveAsset.placeholderAvatar.image
+        userAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
         likeImage.tintAdjustmentMode = .normal
     }
 
@@ -71,15 +71,15 @@ class FileDetailCommentTableViewCell: UITableViewCell {
         descriptionLabel.text = comment.body
         timeLabel.text = Constants.formatTimestamp(TimeInterval(comment.createdAt), relative: true)
         likeLabel.text = "\(comment.likesCount)"
-        likeLabel.textColor = comment.liked ? KDriveAsset.infomaniakColor.color : KDriveAsset.iconColor.color
-        likeImage.tintColor = comment.liked ? KDriveAsset.infomaniakColor.color : KDriveAsset.iconColor.color
+        likeLabel.textColor = comment.liked ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.iconColor.color
+        likeImage.tintColor = comment.liked ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.iconColor.color
         commentLeadingConstraint.constant = response ? 48 : 24
     }
 
     @objc func likeButton() {
         commentDelegate?.didLikeComment(comment: comment, index: index)
-        likeImage.tintColor = !comment.liked ? KDriveAsset.infomaniakColor.color : KDriveAsset.iconColor.color
-        likeLabel.textColor = !comment.liked ? KDriveAsset.infomaniakColor.color : KDriveAsset.iconColor.color
+        likeImage.tintColor = !comment.liked ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.iconColor.color
+        likeLabel.textColor = !comment.liked ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.iconColor.color
         likeLabel.text = !comment.liked ? "\(comment.likesCount + 1)" : "\(comment.likesCount - 1)"
     }
 

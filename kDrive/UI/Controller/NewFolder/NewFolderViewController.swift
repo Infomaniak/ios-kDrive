@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 enum FolderType {
@@ -168,7 +169,7 @@ class NewFolderViewController: UIViewController {
         let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
         let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
         floatingPanelViewController?.copyTextField.text = url
-        floatingPanelViewController?.titleLabel.text = KDriveStrings.Localizable.dropBoxResultTitle(fileName)
+        floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(fileName)
         present(driveFloatingPanelController, animated: true)
     }
 
@@ -263,14 +264,14 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
         if section == 1 {
             let sectionHeaderView = NewFolderSectionHeaderView.instantiate()
             if folderType == .commonFolder {
-                sectionHeaderView.titleLabel.text = KDriveStrings.Localizable.createCommonFolderDescription
+                sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.createCommonFolderDescription
             } else {
-                sectionHeaderView.titleLabel.text = KDriveStrings.Localizable.createFolderAccessPermissionTitle
+                sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.createFolderAccessPermissionTitle
             }
             return sectionHeaderView
         } else if section == 2 && folderType == .commonFolder {
             let sectionHeaderView = NewFolderSectionHeaderView.instantiate()
-            sectionHeaderView.titleLabel.text = KDriveStrings.Localizable.allPathTitle
+            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.allPathTitle
             return sectionHeaderView
         }
         return nil
@@ -285,7 +286,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         if section == tableView.numberOfSections - 1 {
-            let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonCreateFolder)
+            let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonCreateFolder)
             view.delegate = self
             view.footerButton.isEnabled = enableButton
             return view
@@ -397,10 +398,10 @@ extension NewFolderViewController: FooterButtonDelegate {
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
                         self.dismissAndRefreshDataSource()
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.createPrivateFolderSucces)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createPrivateFolderSucces)
                     }
                 } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
         case .commonFolder:
@@ -414,10 +415,10 @@ extension NewFolderViewController: FooterButtonDelegate {
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
                         self.dismissAndRefreshDataSource()
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.createCommonFolderSucces)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createCommonFolderSucces)
                     }
                 } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
         case .dropbox:
@@ -438,7 +439,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                         self.showDropBoxLink(url: dropBox?.url ?? "", fileName: createdFile.name)
                     }
                 } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorGeneric)
+                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
         }

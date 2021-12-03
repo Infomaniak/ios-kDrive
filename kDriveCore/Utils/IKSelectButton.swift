@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class IKSelectButton: IKLargeButton {
@@ -26,14 +27,14 @@ class IKSelectButton: IKLargeButton {
     }
 
     override func setUpButton() {
-        disabledBackgroundColor = KDriveCoreAsset.borderColor.color
+        disabledBackgroundColor = KDriveResourcesAsset.borderColor.color
 
         super.setUpButton()
 
         setTitle("", for: .selected)
         setTitle("", for: [.selected, .disabled])
-        setImage(KDriveCoreAsset.bigCheck.image, for: .selected)
-        setImage(KDriveCoreAsset.bigCheck.image, for: [.selected, .disabled])
+        setImage(KDriveResourcesAsset.bigCheck.image, for: .selected)
+        setImage(KDriveResourcesAsset.bigCheck.image, for: [.selected, .disabled])
         setTitleColor(style.backgroundColor, for: .normal)
         setTitleColor(style.titleColor, for: .selected)
         setTitleColor(style.titleColor, for: [.selected, .disabled])

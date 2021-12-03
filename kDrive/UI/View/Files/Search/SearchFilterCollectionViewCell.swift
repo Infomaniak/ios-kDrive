@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol SearchFilterCellDelegate: AnyObject {
@@ -37,13 +38,13 @@ class SearchFilterCollectionViewCell: UICollectionViewCell {
 
         contentView.layer.cornerRadius = UIConstants.buttonCornerRadius
         contentView.clipsToBounds = true
-        removeButton.accessibilityLabel = KDriveStrings.Localizable.buttonDelete
+        removeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDelete
     }
 
     func configure(with filter: Filterable) {
         self.filter = filter
         iconImageView.image = filter.icon
-        iconImageView.tintColor = filter is ConvertedType ? KDriveAsset.infomaniakColor.color : KDriveAsset.secondaryTextColor.color
+        iconImageView.tintColor = filter is ConvertedType ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.secondaryTextColor.color
         titleLabel.text = filter.localizedName
         titleLabel.sizeToFit()
     }

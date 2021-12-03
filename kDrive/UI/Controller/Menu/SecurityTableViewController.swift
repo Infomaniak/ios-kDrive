@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class SecurityTableViewController: UITableViewController {
-
     private enum SecurityOption: CaseIterable {
         case appLock
         case fileProviderExtension
@@ -49,15 +49,15 @@ class SecurityTableViewController: UITableViewController {
         case .appLock:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true)
-            cell.titleLabel.text = KDriveStrings.Localizable.appSecurityTitle
-            cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveStrings.Localizable.allActivated : KDriveStrings.Localizable.allDisabled
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.appSecurityTitle
+            cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveResourcesStrings.Localizable.allActivated : KDriveResourcesStrings.Localizable.allDisabled
             return cell
         case .fileProviderExtension:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isLast: true)
             cell.valueSwitch.isOn = UserDefaults.shared.isFileProviderExtensionEnabled
-            cell.titleLabel.text = KDriveStrings.Localizable.fileProviderExtensionTitle
-            cell.detailsLabel.text = KDriveStrings.Localizable.fileProviderExtensionDescription
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionTitle
+            cell.detailsLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionDescription
             cell.switchHandler = { sender in
                 UserDefaults.shared.isFileProviderExtensionEnabled = sender.isOn
             }

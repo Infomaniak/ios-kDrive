@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import Sentry
 import UIKit
 import WebKit
@@ -36,11 +37,11 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
 
         if let newExtension = file.onlyOfficeConvertExtension {
             let driveFloatingPanelController = UnsupportedExtensionFloatingPanelViewController.instantiatePanel()
-            let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.notSupportedExtensionDescription(file.name), boldText: file.name, color: KDriveAsset.titleColor.color)
+            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.notSupportedExtensionDescription(file.name), boldText: file.name, color: KDriveResourcesAsset.titleColor.color)
             guard let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UnsupportedExtensionFloatingPanelViewController else { return }
-            floatingPanelViewController.titleLabel.text = KDriveStrings.Localizable.notSupportedExtensionTitle(file.extension)
+            floatingPanelViewController.titleLabel.text = KDriveResourcesStrings.Localizable.notSupportedExtensionTitle(file.extension)
             floatingPanelViewController.descriptionLabel.attributedText = attrString
-            floatingPanelViewController.rightButton.setTitle(KDriveStrings.Localizable.buttonCreateOnlyOfficeCopy(newExtension), for: .normal)
+            floatingPanelViewController.rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonCreateOnlyOfficeCopy(newExtension), for: .normal)
             floatingPanelViewController.cancelHandler = { _ in
                 viewController.dismiss(animated: true)
                 let onlyOfficeViewController = OnlyOfficeViewController.instantiate(driveFileManager: driveFileManager, file: file, previewParent: viewController as? PreviewViewController)
@@ -57,7 +58,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
                         viewController.dismiss(animated: true)
                         open(driveFileManager: driveFileManager, file: newFile, viewController: viewController)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                     }
                 }
             }
@@ -139,7 +140,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             scope.setContext(value: context, key: "office")
         }
         dismiss(animated: true) {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorLoadingOfficeEditor)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorLoadingOfficeEditor)
         }
     }
 

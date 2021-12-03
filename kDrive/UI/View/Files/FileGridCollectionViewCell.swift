@@ -16,8 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class FileGridCollectionViewCell: FileCollectionViewCell {
     @IBOutlet weak var _checkmarkImage: UIImageView!
@@ -50,7 +51,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         iconImageView.backgroundColor = nil
     }
 
-    override func initStyle(isFirst: Bool, isLast: Bool) { }
+    override func initStyle(isFirst: Bool, isLast: Bool) {}
 
     override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
         super.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
@@ -58,7 +59,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         if file.isDirectory || !file.hasThumbnail {
             logoImage.isHidden = true
             largeIconImageView.isHidden = false
-            moreButton.tintColor = KDriveAsset.primaryTextColor.color
+            moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
             moreButton.backgroundColor = nil
         } else {
             logoImage.isHidden = false
@@ -86,7 +87,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
     override func setThumbnailFor(file: File) {
         let fileId = file.id
         logoImage.image = nil
-        logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         file.getThumbnail { image, _ in
             if fileId == self.file.id {
                 self.logoImage.image = image
@@ -100,17 +101,16 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         let titleLayer = CALayer()
         titleLayer.anchorPoint = .zero
         titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 15)
-        titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        titleLayer.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color.cgColor
         titleLabel.layer.addSublayer(titleLayer)
         favoriteImageView?.isHidden = true
         logoImage.image = nil
-        logoImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         largeIconImageView.isHidden = true
         iconImageView.isHidden = false
         iconImageView.image = nil
-        iconImageView.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        iconImageView.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         moreButton.isHidden = true
         checkmarkImage?.isHidden = true
     }
-
 }

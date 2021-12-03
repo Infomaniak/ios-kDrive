@@ -18,6 +18,7 @@
 
 import AVKit
 import kDriveCore
+import kDriveResources
 import MediaPlayer
 import UIKit
 
@@ -67,7 +68,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         let size = CGSize(width: 10, height: 10)
         let renderer = UIGraphicsImageRenderer(size: size)
         let circleImage = renderer.image { ctx in
-            KDriveAsset.infomaniakColor.color.setFill()
+            KDriveResourcesAsset.infomaniakColor.color.setFill()
             let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
             ctx.cgContext.addEllipse(in: rect)
             ctx.cgContext.drawPath(using: .fill)
@@ -102,12 +103,12 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
                     }
                 } else {
                     DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
                     }
                 }
             }
         } else {
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.previewLoadError)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
         }
     }
 
@@ -260,11 +261,11 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     private func updateUI() {
         if playerState == .playing && !isInterrupted {
-            playButton?.setImage(KDriveAsset.pause.image, for: .normal)
-            landscapePlayButton?.setImage(KDriveAsset.pause.image, for: .normal)
+            playButton?.setImage(KDriveResourcesAsset.pause.image, for: .normal)
+            landscapePlayButton?.setImage(KDriveResourcesAsset.pause.image, for: .normal)
         } else {
-            playButton?.setImage(KDriveAsset.play.image, for: .normal)
-            landscapePlayButton?.setImage(KDriveAsset.play.image, for: .normal)
+            playButton?.setImage(KDriveResourcesAsset.play.image, for: .normal)
+            landscapePlayButton?.setImage(KDriveResourcesAsset.play.image, for: .normal)
         }
     }
 

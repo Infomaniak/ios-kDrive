@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import kDriveCore
+import kDriveResources
 import Sentry
 import UIKit
 
@@ -26,11 +27,11 @@ public class FloatingPanelAction: Equatable {
     let name: String
     var reverseName: String?
     let image: UIImage
-    var tintColor: UIColor = KDriveAsset.iconColor.color
+    var tintColor: UIColor = KDriveResourcesAsset.iconColor.color
     var isLoading = false
     var isEnabled = true
 
-    init(id: Int, name: String, reverseName: String? = nil, image: UIImage, tintColor: UIColor = KDriveAsset.iconColor.color) {
+    init(id: Int, name: String, reverseName: String? = nil, image: UIImage, tintColor: UIColor = KDriveResourcesAsset.iconColor.color) {
         self.id = id
         self.name = name
         self.reverseName = reverseName
@@ -44,20 +45,20 @@ public class FloatingPanelAction: Equatable {
         return self
     }
 
-    static let openWith = FloatingPanelAction(id: 0, name: KDriveStrings.Localizable.buttonOpenWith, image: KDriveAsset.openWith.image)
-    static let edit = FloatingPanelAction(id: 1, name: KDriveStrings.Localizable.buttonEdit, image: KDriveAsset.editDocument.image)
-    static let manageCategories = FloatingPanelAction(id: 2, name: KDriveStrings.Localizable.manageCategoriesTitle, image: KDriveAsset.categories.image)
-    static let favorite = FloatingPanelAction(id: 3, name: KDriveStrings.Localizable.buttonAddFavorites, reverseName: KDriveStrings.Localizable.buttonRemoveFavorites, image: KDriveAsset.favorite.image)
-    static let convertToDropbox = FloatingPanelAction(id: 4, name: KDriveStrings.Localizable.buttonConvertToDropBox, image: KDriveAsset.folderDropBox1.image)
-    static let manageDropbox = FloatingPanelAction(id: 5, name: KDriveStrings.Localizable.buttonManageDropBox, image: KDriveAsset.folderDropBox1.image)
-    static let seeFolder = FloatingPanelAction(id: 6, name: KDriveStrings.Localizable.buttonSeeFolder, image: KDriveAsset.folderFill.image)
-    static let offline = FloatingPanelAction(id: 7, name: KDriveStrings.Localizable.buttonAvailableOffline, image: KDriveAsset.availableOffline.image)
-    static let download = FloatingPanelAction(id: 8, name: KDriveStrings.Localizable.buttonDownload, image: KDriveAsset.download.image)
-    static let move = FloatingPanelAction(id: 9, name: KDriveStrings.Localizable.buttonMoveTo, image: KDriveAsset.folderSelect.image)
-    static let duplicate = FloatingPanelAction(id: 10, name: KDriveStrings.Localizable.buttonDuplicate, image: KDriveAsset.duplicate.image)
-    static let rename = FloatingPanelAction(id: 11, name: KDriveStrings.Localizable.buttonRename, image: KDriveAsset.edit.image)
-    static let delete = FloatingPanelAction(id: 12, name: KDriveStrings.Localizable.modalMoveTrashTitle, image: KDriveAsset.delete.image, tintColor: KDriveAsset.binColor.color)
-    static let leaveShare = FloatingPanelAction(id: 13, name: KDriveStrings.Localizable.buttonLeaveShare, image: KDriveAsset.linkBroken.image)
+    static let openWith = FloatingPanelAction(id: 0, name: KDriveResourcesStrings.Localizable.buttonOpenWith, image: KDriveResourcesAsset.openWith.image)
+    static let edit = FloatingPanelAction(id: 1, name: KDriveResourcesStrings.Localizable.buttonEdit, image: KDriveResourcesAsset.editDocument.image)
+    static let manageCategories = FloatingPanelAction(id: 2, name: KDriveResourcesStrings.Localizable.manageCategoriesTitle, image: KDriveResourcesAsset.categories.image)
+    static let favorite = FloatingPanelAction(id: 3, name: KDriveResourcesStrings.Localizable.buttonAddFavorites, reverseName: KDriveResourcesStrings.Localizable.buttonRemoveFavorites, image: KDriveResourcesAsset.favorite.image)
+    static let convertToDropbox = FloatingPanelAction(id: 4, name: KDriveResourcesStrings.Localizable.buttonConvertToDropBox, image: KDriveResourcesAsset.folderDropBox1.image)
+    static let manageDropbox = FloatingPanelAction(id: 5, name: KDriveResourcesStrings.Localizable.buttonManageDropBox, image: KDriveResourcesAsset.folderDropBox1.image)
+    static let seeFolder = FloatingPanelAction(id: 6, name: KDriveResourcesStrings.Localizable.buttonSeeFolder, image: KDriveResourcesAsset.folderFill.image)
+    static let offline = FloatingPanelAction(id: 7, name: KDriveResourcesStrings.Localizable.buttonAvailableOffline, image: KDriveResourcesAsset.availableOffline.image)
+    static let download = FloatingPanelAction(id: 8, name: KDriveResourcesStrings.Localizable.buttonDownload, image: KDriveResourcesAsset.download.image)
+    static let move = FloatingPanelAction(id: 9, name: KDriveResourcesStrings.Localizable.buttonMoveTo, image: KDriveResourcesAsset.folderSelect.image)
+    static let duplicate = FloatingPanelAction(id: 10, name: KDriveResourcesStrings.Localizable.buttonDuplicate, image: KDriveResourcesAsset.duplicate.image)
+    static let rename = FloatingPanelAction(id: 11, name: KDriveResourcesStrings.Localizable.buttonRename, image: KDriveResourcesAsset.edit.image)
+    static let delete = FloatingPanelAction(id: 12, name: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, image: KDriveResourcesAsset.delete.image, tintColor: KDriveResourcesAsset.binColor.color)
+    static let leaveShare = FloatingPanelAction(id: 13, name: KDriveResourcesStrings.Localizable.buttonLeaveShare, image: KDriveResourcesAsset.linkBroken.image)
 
     static var listActions: [FloatingPanelAction] {
         return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
@@ -67,11 +68,11 @@ public class FloatingPanelAction: Equatable {
         return [manageCategories, favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
-    static let informations = FloatingPanelAction(id: 14, name: KDriveStrings.Localizable.fileDetailsInfosTitle, image: KDriveAsset.info.image)
-    static let add = FloatingPanelAction(id: 15, name: KDriveStrings.Localizable.buttonAdd, image: KDriveAsset.add.image)
-    static let sendCopy = FloatingPanelAction(id: 16, name: KDriveStrings.Localizable.buttonSendCopy, image: KDriveAsset.exportIos.image)
-    static let shareAndRights = FloatingPanelAction(id: 17, name: KDriveStrings.Localizable.buttonFileRights, image: KDriveAsset.share.image)
-    static let shareLink = FloatingPanelAction(id: 18, name: KDriveStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveStrings.Localizable.buttonCopyPublicLink, image: KDriveAsset.link.image)
+    static let informations = FloatingPanelAction(id: 14, name: KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, image: KDriveResourcesAsset.info.image)
+    static let add = FloatingPanelAction(id: 15, name: KDriveResourcesStrings.Localizable.buttonAdd, image: KDriveResourcesAsset.add.image)
+    static let sendCopy = FloatingPanelAction(id: 16, name: KDriveResourcesStrings.Localizable.buttonSendCopy, image: KDriveResourcesAsset.exportIos.image)
+    static let shareAndRights = FloatingPanelAction(id: 17, name: KDriveResourcesStrings.Localizable.buttonFileRights, image: KDriveResourcesAsset.share.image)
+    static let shareLink = FloatingPanelAction(id: 18, name: KDriveResourcesStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveResourcesStrings.Localizable.buttonCopyPublicLink, image: KDriveResourcesAsset.link.image)
 
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
@@ -136,7 +137,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FloatingPanelQuickActionCollectionViewCell.self)
         collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
-        collectionView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         collectionView.dragDelegate = self
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
@@ -322,7 +323,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     if let dropBox = response?.data {
                         self?.copyShareLinkToPasteboard(dropBox.url)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                     }
                 }
             } else if let link = file.shareLink {
@@ -346,7 +347,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         }
                     } else {
                         self?.setLoading(false, action: action, at: indexPath)
-                        UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveStrings.Localizable.errorShareLink)
+                        UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorShareLink)
                     }
                 }
             }
@@ -368,10 +369,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { [wasFavorited = file.isFavorite] error in
                 if error == nil {
                     if !wasFavorited {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
                     }
                 } else {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorAddFavorite)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorAddFavorite)
                 }
             }
         case .convertToDropbox:
@@ -407,7 +408,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
                 if error != nil && error as? DriveError != .taskCancelled && error as? DriveError != .taskRescheduled {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorCache)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorCache)
                 }
             }
             collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
@@ -416,7 +417,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 saveFile()
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel
-                let alert = AlertTextViewController(title: KDriveStrings.Localizable.cancelDownloadTitle, message: KDriveStrings.Localizable.cancelDownloadDescription, action: KDriveStrings.Localizable.buttonYes, destructive: true) {
+                let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
                     operation.cancel()
                 }
                 present(alert, animated: true)
@@ -429,13 +430,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent, fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getRootFile()]) { [unowned self] selectedFolder in
                 self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { response, _, error in
                     if error != nil {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorMove)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
                             if let cancelId = response?.id {
                                 self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                     if error == nil {
-                                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.allFileMoveCancelled)
+                                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
                                     }
                                 }
                             }
@@ -450,13 +451,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             present(selectFolderNavigationController, animated: true)
         case .duplicate:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 return
             }
             let file = self.file.freeze()
             let pathString = self.file.name as NSString
-            let text = KDriveStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
-            let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonDuplicate, placeholder: KDriveStrings.Localizable.fileInfoInputDuplicateFile, text: text, action: KDriveStrings.Localizable.buttonCopy, loading: true) { duplicateName in
+            let text = KDriveResourcesStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
+            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate, placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile, text: text, action: KDriveResourcesStrings.Localizable.buttonCopy, loading: true) { duplicateName in
                 if duplicateName != file.name {
                     let group = DispatchGroup()
                     var success = false
@@ -470,9 +471,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     _ = group.wait(timeout: .now() + Constants.timeout)
                     DispatchQueue.main.async {
                         if success {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
                         } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDuplicate)
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDuplicate)
                         }
                     }
                 }
@@ -484,12 +485,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             present(alert, animated: true)
         case .rename:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 return
             }
             let file = self.file.freeze()
-            let placeholder = file.isDirectory ? KDriveStrings.Localizable.hintInputDirName : KDriveStrings.Localizable.hintInputFileName
-            let alert = AlertFieldViewController(title: KDriveStrings.Localizable.buttonRename, placeholder: placeholder, text: file.name, action: KDriveStrings.Localizable.buttonSave, loading: true) { newName in
+            let placeholder = file.isDirectory ? KDriveResourcesStrings.Localizable.hintInputDirName : KDriveResourcesStrings.Localizable.hintInputFileName
+            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename, placeholder: placeholder, text: file.name, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { newName in
                 if newName != file.name {
                     let group = DispatchGroup()
                     var success = false
@@ -503,7 +504,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     _ = group.wait(timeout: .now() + Constants.timeout)
                     DispatchQueue.main.async {
                         if !success {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorRename)
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRename)
                         }
                     }
                 }
@@ -515,12 +516,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             present(alert, animated: true)
         case .delete:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 return
             }
-            let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
+            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
             let file = self.file.freeze()
-            let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveStrings.Localizable.buttonMove, destructive: true, loading: true) {
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
                 let group = DispatchGroup()
                 var success = false
                 var cancelId: String?
@@ -553,30 +554,30 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         }
                         // Show snackbar (wait for panel dismissal)
                         group.notify(queue: .main) {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveStrings.Localizable.buttonCancel) {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
                                 if let cancelId = cancelId {
                                     self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                         if error == nil {
-                                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allTrashActionCancelled)
+                                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
                                         }
                                     }
                                 }
                             })
                         }
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDelete)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
                     }
                 }
             }
             present(alert, animated: true)
         case .leaveShare:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 return
             }
-            let attrString = NSMutableAttributedString(string: KDriveStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)
+            let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)
             let file = self.file.freeze()
-            let alert = AlertTextViewController(title: KDriveStrings.Localizable.modalLeaveShareTitle, message: attrString, action: KDriveStrings.Localizable.buttonLeaveShare, loading: true) {
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalLeaveShareTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonLeaveShare, loading: true) {
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
@@ -587,11 +588,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
                     if success {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarLeaveShareConfirmation)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarLeaveShareConfirmation)
                         self.presentingParent?.navigationController?.popViewController(animated: true)
                         self.dismiss(animated: true)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorLeaveShare)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorLeaveShare)
                     }
                 }
             }
@@ -617,7 +618,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     private func presentInteractionController(from indexPath: IndexPath) {
         guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
             DDLogError("Open in place directory not found")
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
             return
         }
         do {
@@ -649,7 +650,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             interactionController.presentOpenInMenu(from: view, in: collectionView, animated: true)
         } catch {
             DDLogError("Cannot present interaction controller: \(error)")
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorGeneric)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
         }
     }
 
@@ -664,7 +665,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 if error == nil {
                     completion()
                 } else if error != .taskCancelled && error != .taskRescheduled {
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDownload)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
                 }
             }
         }
@@ -673,7 +674,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     private func copyShareLinkToPasteboard(_ link: String) {
         UIPasteboard.general.url = URL(string: link)
-        UIConstants.showSnackBar(message: KDriveStrings.Localizable.fileInfoLinkCopiedToClipboard)
+        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileInfoLinkCopiedToClipboard)
     }
 
     internal func saveFile() {
@@ -683,9 +684,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 PhotoLibrarySaver.instance.save(image: image) { success, _ in
                     DispatchQueue.main.async {
                         if success {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarImageSavedConfirmation)
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
                         } else {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorSave)
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
                         }
                     }
                 }
@@ -694,9 +695,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             PhotoLibrarySaver.instance.save(videoUrl: file.localUrl) { success, _ in
                 DispatchQueue.main.async {
                     if success {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.snackbarVideoSavedConfirmation)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorSave)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
                     }
                 }
             }

@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import MaterialOutlinedTextField
 import UIKit
 
@@ -56,19 +57,19 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         passwordTextField.setInfomaniakColors()
         passwordTextField.isAccessibilityElement = true
 
-        passwordTextField.setHint(KDriveStrings.Localizable.allPasswordHint)
+        passwordTextField.setHint(KDriveResourcesStrings.Localizable.allPasswordHint)
         passwordTextField.isSecureTextEntry = !showPassword
         passwordTextField.keyboardType = .default
         passwordTextField.autocorrectionType = .no
         passwordTextField.autocapitalizationType = .none
 
         let overlayButton = UIButton(type: .custom)
-        let viewImage = KDriveAsset.view.image
+        let viewImage = KDriveResourcesAsset.view.image
         overlayButton.setImage(viewImage, for: .normal)
-        overlayButton.tintColor = KDriveAsset.iconColor.color
+        overlayButton.tintColor = KDriveResourcesAsset.iconColor.color
         overlayButton.addTarget(self, action: #selector(displayPassword), for: .touchUpInside)
         overlayButton.sizeToFit()
-        overlayButton.accessibilityLabel = KDriveStrings.Localizable.buttonTogglePassword
+        overlayButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonTogglePassword
         let rightView = UIView(frame: CGRect(x: 0, y: 0, width: overlayButton.frame.width + 10, height: overlayButton.frame.height))
         rightView.addSubview(overlayButton)
         passwordTextField.rightView = rightView
@@ -76,11 +77,11 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
-        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     @IBAction func compactDatePickerChanged(_ sender: UIDatePicker) {
@@ -126,7 +127,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     }
 
     @IBAction func textFieldUpdated(_ sender: MaterialOutlinedTextField) {
-        passwordTextField.borderColor = KDriveAsset.infomaniakColor.color
+        passwordTextField.borderColor = KDriveResourcesAsset.infomaniakColor.color
         let content = passwordTextField.text?.count ?? 0 > 0 ? passwordTextField.text : nil
         delegate?.didUpdateSettingsValue(index: index, content: index == 3 ? Int(passwordTextField.text ?? "0") : content)
     }
@@ -148,7 +149,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
 extension ShareLinkSettingTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        passwordTextField.borderColor = KDriveAsset.infomaniakColor.color
+        passwordTextField.borderColor = KDriveResourcesAsset.infomaniakColor.color
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

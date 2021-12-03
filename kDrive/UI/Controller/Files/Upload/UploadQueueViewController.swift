@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import kDriveCore
+import kDriveResources
 import RealmSwift
 import UIKit
 
@@ -38,8 +39,8 @@ class UploadQueueViewController: UIViewController {
 
         tableView.register(cellView: UploadTableViewCell.self)
 
-        retryButton.accessibilityLabel = KDriveStrings.Localizable.buttonRetry
-        cancelButton.accessibilityLabel = KDriveStrings.Localizable.buttonCancel
+        retryButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonRetry
+        cancelButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonCancel
 
         setUpObserver()
 

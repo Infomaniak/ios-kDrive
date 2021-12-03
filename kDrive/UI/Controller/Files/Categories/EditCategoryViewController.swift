@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class EditCategoryViewController: UITableViewController {
@@ -67,7 +68,7 @@ class EditCategoryViewController: UITableViewController {
     }
 
     private func updateTitle() {
-        title = create ? KDriveStrings.Localizable.createCategoryTitle : KDriveStrings.Localizable.editCategoryTitle
+        title = create ? KDriveResourcesStrings.Localizable.createCategoryTitle : KDriveResourcesStrings.Localizable.editCategoryTitle
     }
 
     private func setRows() {
@@ -137,11 +138,11 @@ class EditCategoryViewController: UITableViewController {
         switch rows[indexPath.row] {
         case .editInfo:
             let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
-            cell.configure(with: .info, message: KDriveStrings.Localizable.editCategoryInfoDescription)
+            cell.configure(with: .info, message: KDriveResourcesStrings.Localizable.editCategoryInfoDescription)
             return cell
         case .name:
             let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)
-            cell.textField.setHint(KDriveStrings.Localizable.categoryNameField)
+            cell.textField.setHint(KDriveResourcesStrings.Localizable.categoryNameField)
             cell.textField.text = category?.name ?? name
             cell.textDidChange = { [unowned self] text in
                 if let text = text {
@@ -173,7 +174,7 @@ class EditCategoryViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        let view = FooterButtonView.instantiate(title: KDriveStrings.Localizable.buttonSave)
+        let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
         view.footerButton.isEnabled = saveButtonEnabled
         view.delegate = self
         return view

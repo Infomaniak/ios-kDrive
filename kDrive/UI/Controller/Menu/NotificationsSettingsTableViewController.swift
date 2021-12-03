@@ -18,6 +18,7 @@
 
 import FirebaseMessaging
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class NotificationsSettingsTableViewController: UITableViewController {
@@ -87,7 +88,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
         case .receiveNotification:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true)
-            cell.titleLabel.text = KDriveStrings.Localizable.notificationReceiveNotifications
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationReceiveNotifications
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
             cell.switchHandler = { [weak self] sender in
@@ -98,7 +99,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
         case .general:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.notificationGeneralChannelName
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationGeneralChannelName
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.generalNotificationEnabled
@@ -111,7 +112,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
         case .importFile:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.notificationFileUpload
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationFileUpload
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
@@ -124,7 +125,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
         case .sharedWithMe:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow()
-            cell.titleLabel.text = KDriveStrings.Localizable.notificationSharedWithMeChannelName
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationSharedWithMeChannelName
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
@@ -137,7 +138,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
         case .newComments:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isLast: true)
-            cell.titleLabel.text = KDriveStrings.Localizable.notificationCommentChannelName
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationCommentChannelName
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
             cell.switchHandler = { [weak self] sender in
@@ -148,7 +149,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
             return cell
         case .notificationMainSetting:
             let cell = tableView.dequeueReusableCell(type: ParameterAccessDeniedTableViewCell.self, for: indexPath)
-            cell.descriptionLabel.text = KDriveStrings.Localizable.notificationsDisabledDescription
+            cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.notificationsDisabledDescription
             return cell
         }
     }

@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class RightsSelectionTableViewCell: InsetTableViewCell {
@@ -49,13 +50,13 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         if isSelectable {
             if selected {
-                contentInsetView.borderColor = KDriveAsset.infomaniakColor.color
+                contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
                 contentInsetView.borderWidth = 2
             } else {
-                contentInsetView.borderColor = KDriveAsset.borderColor.color
+                contentInsetView.borderColor = KDriveResourcesAsset.borderColor.color
                 contentInsetView.borderWidth = 1
             }
         }
@@ -77,7 +78,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         }
 
         if right.key == UserPermission.delete.rawValue {
-            rightsIconImageView.tintColor = KDriveAsset.binColor.color
+            rightsIconImageView.tintColor = KDriveResourcesAsset.binColor.color
         }
     }
 

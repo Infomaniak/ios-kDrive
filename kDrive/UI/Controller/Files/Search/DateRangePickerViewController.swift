@@ -18,6 +18,7 @@
 
 import HorizonCalendar
 import kDriveCore
+import kDriveResources
 import UIKit
 
 extension Day {
@@ -70,7 +71,7 @@ class DateRangePickerViewController: UIViewController {
 
     private lazy var saveButton: IKLargeButton = {
         let button = IKLargeButton(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
-        button.setTitle(KDriveStrings.Localizable.buttonValid, for: .normal)
+        button.setTitle(KDriveResourcesStrings.Localizable.buttonValid, for: .normal)
         button.addTarget(self, action: #selector(saveButtonPressed), for: .touchUpInside)
         return button
     }()
@@ -78,7 +79,7 @@ class DateRangePickerViewController: UIViewController {
     private lazy var clearButton: IKLargeButton = {
         let button = IKLargeButton(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
         button.style = .secondaryButton
-        button.setTitle(KDriveStrings.Localizable.buttonClear, for: .normal)
+        button.setTitle(KDriveResourcesStrings.Localizable.buttonClear, for: .normal)
         button.addTarget(self, action: #selector(clearButtonPressed), for: .touchUpInside)
         return button
     }()
@@ -191,7 +192,7 @@ class DateRangePickerViewController: UIViewController {
                 headerLabel.text = dateIntervalFormatter.string(from: interval)
             }
         case .none:
-            headerLabel.text = KDriveStrings.Localizable.searchFiltersSelectDate
+            headerLabel.text = KDriveResourcesStrings.Localizable.searchFiltersSelectDate
         }
     }
 
@@ -262,7 +263,7 @@ class DateRangePickerViewController: UIViewController {
         }
 
         if isSelectedStyle {
-            invariantViewProperties.backgroundShapeDrawingConfig.fillColor = KDriveAsset.infomaniakColor.color
+            invariantViewProperties.backgroundShapeDrawingConfig.fillColor = KDriveResourcesAsset.infomaniakColor.color
             invariantViewProperties.textColor = .white
             invariantViewProperties.font = UIFont.boldSystemFont(ofSize: invariantViewProperties.font.pointSize)
         } else {

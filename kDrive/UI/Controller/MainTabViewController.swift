@@ -19,6 +19,7 @@
 import FloatingPanel
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class MainTabViewController: UITabBarController, MainTabBarDelegate {
@@ -41,7 +42,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
         }
 
-        tabBar.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         delegate = self
     }
 
@@ -62,10 +63,10 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     private func setAccessibilityLabels() {
-        tabBar.items?[0].accessibilityLabel = KDriveStrings.Localizable.homeTitle
-        tabBar.items?[1].accessibilityLabel = KDriveStrings.Localizable.fileListTitle
-        tabBar.items?[3].accessibilityLabel = KDriveStrings.Localizable.favoritesTitle
-        tabBar.items?[4].accessibilityLabel = KDriveStrings.Localizable.menuTitle
+        tabBar.items?[0].accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+        tabBar.items?[1].accessibilityLabel = KDriveResourcesStrings.Localizable.fileListTitle
+        tabBar.items?[3].accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
+        tabBar.items?[4].accessibilityLabel = KDriveResourcesStrings.Localizable.menuTitle
     }
 
     private func configureTabBar() {
@@ -93,7 +94,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func updateTabBarProfilePicture() {
-        setProfilePicture(image: KDriveAsset.placeholderAvatar.image)
+        setProfilePicture(image: KDriveResourcesAsset.placeholderAvatar.image)
 
         AccountManager.instance.currentAccount?.user?.getAvatar { image in
             self.setProfilePicture(image: image)
@@ -111,7 +112,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
         tabBar.items![4].selectedImage = image
             .resize(size: CGSize(width: iconSize + 2, height: iconSize + 2))
-            .maskImageWithRoundedRect(cornerRadius: CGFloat((iconSize + 2) / 2), borderWidth: 2, borderColor: KDriveAsset.infomaniakColor.color)
+            .maskImageWithRoundedRect(cornerRadius: CGFloat((iconSize + 2) / 2), borderWidth: 2, borderColor: KDriveResourcesAsset.infomaniakColor.color)
             .withRenderingMode(.alwaysOriginal)
 
         tabBar.items![4].image = image
@@ -159,7 +160,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             } else {
                 // Invalid token or unknown error
                 (UIApplication.shared.delegate as? AppDelegate)?.setRootViewController(SwitchUserViewController.instantiateInNavigationController())
-                UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorDisconnected)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDisconnected)
             }
         }
     }

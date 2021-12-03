@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class AboutTableViewController: UITableViewController {
-
     private enum AboutRow: CaseIterable {
         case privacy, sourceCode, license, version
 
@@ -70,24 +70,24 @@ class AboutTableViewController: UITableViewController {
         case .privacy:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
-            cell.titleLabel.text = KDriveStrings.Localizable.aboutPrivacyTitle
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutPrivacyTitle
             return cell
         case .sourceCode:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
-            cell.titleLabel.text = KDriveStrings.Localizable.aboutSourceCodeTitle
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutSourceCodeTitle
             return cell
         case .license:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
-            cell.titleLabel.text = KDriveStrings.Localizable.aboutLicenseTitle
-            cell.detailLabel.text = KDriveStrings.Localizable.aboutLicenseDescription
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseTitle
+            cell.detailLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseDescription
             return cell
         case .version:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.accessoryImageView.isHidden = true
-            cell.titleLabel.text = KDriveStrings.Localizable.aboutAppVersionTitle
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutAppVersionTitle
             cell.detailLabel.text = "v\(appVersion ?? "1.0.0")" + (counter == maxCount ? " (\(buildNumber ?? "--"))" : "")
             return cell
         }

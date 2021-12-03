@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import kDriveResources
 
 public enum PhotoSortMode: String, CaseIterable {
     case day, month, year
@@ -24,11 +25,11 @@ public enum PhotoSortMode: String, CaseIterable {
     public var title: String {
         switch self {
         case .day:
-            return KDriveCoreStrings.Localizable.sortDay
+            return KDriveResourcesStrings.Localizable.sortDay
         case .month:
-            return KDriveCoreStrings.Localizable.sortMonth
+            return KDriveResourcesStrings.Localizable.sortMonth
         case .year:
-            return KDriveCoreStrings.Localizable.sortYear
+            return KDriveResourcesStrings.Localizable.sortYear
         }
     }
 
@@ -50,7 +51,7 @@ public enum PhotoSortMode: String, CaseIterable {
             dateFormatter.dateStyle = .long
             dateFormatter.timeStyle = .none
         case .month:
-            dateFormatter.dateFormat = KDriveCoreStrings.Localizable.photosHeaderDateFormat
+            dateFormatter.dateFormat = KDriveResourcesStrings.Localizable.photosHeaderDateFormat
         case .year:
             dateFormatter.dateFormat = "yyyy"
         }

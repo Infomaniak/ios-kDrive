@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class UploadFolderTableViewCell: InsetTableViewCell {
@@ -34,12 +35,12 @@ class UploadFolderTableViewCell: InsetTableViewCell {
 
     func configure(with folder: File, drive: Drive) {
         if folder.isRoot {
-            iconImageView.image = KDriveAsset.drive.image
+            iconImageView.image = KDriveResourcesAsset.drive.image
             iconImageView.tintColor = UIColor(hex: drive.preferences.color)
-            folderLabel.text = KDriveStrings.Localizable.allRootName(drive.name)
+            folderLabel.text = KDriveResourcesStrings.Localizable.allRootName(drive.name)
             subtitleLabel.isHidden = true
         } else {
-            iconImageView.image = KDriveAsset.folderFilled.image
+            iconImageView.image = KDriveResourcesAsset.folderFilled.image
             iconImageView.tintColor = nil
             folderLabel.text = folder.name
             subtitleLabel.text = folder.path.isEmpty ? nil : folder.path

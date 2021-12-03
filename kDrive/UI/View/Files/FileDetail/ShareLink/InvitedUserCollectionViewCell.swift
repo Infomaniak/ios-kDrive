@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class InvitedUserCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var contentInsetView: UIView!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var avatarImage: UIImageView!
@@ -30,19 +30,19 @@ class InvitedUserCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
-        removeButton.accessibilityLabel = KDriveStrings.Localizable.buttonDelete
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
+        removeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDelete
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
         contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10)
-        removeButton.tintColor = KDriveAsset.primaryTextColor.color
+        removeButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true
     }
@@ -50,5 +50,4 @@ class InvitedUserCollectionViewCell: UICollectionViewCell {
     @IBAction func closeButton(_ sender: UIButton) {
         removeButtonHandler?(sender)
     }
-
 }

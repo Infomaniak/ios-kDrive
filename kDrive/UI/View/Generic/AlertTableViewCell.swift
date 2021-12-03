@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class AlertTableViewCell: UITableViewCell {
@@ -36,11 +37,11 @@ class AlertTableViewCell: UITableViewCell {
     func configure(with style: Style, message: String) {
         switch style {
         case .info:
-            iconImageView.image = KDriveAsset.infoFilled.image
-            iconImageView.tintColor = KDriveAsset.infomaniakColor.color
+            iconImageView.image = KDriveResourcesAsset.infoFilled.image
+            iconImageView.tintColor = KDriveResourcesAsset.infomaniakColor.color
         case .warning:
-            iconImageView.image = KDriveAsset.warning.image
-            iconImageView.tintColor = KDriveAsset.warningColor.color
+            iconImageView.image = KDriveResourcesAsset.warning.image
+            iconImageView.tintColor = KDriveResourcesAsset.warningColor.color
         }
         messageLabel.text = message
     }

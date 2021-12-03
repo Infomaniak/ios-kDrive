@@ -18,13 +18,14 @@
 
 import Foundation
 import kDriveCore
+import kDriveResources
 
 class HomeLastModificationsController: HomeRecentFilesController {
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager,
                   homeViewController: homeViewController,
                   listCellType: FileHomeCollectionViewCell.self, gridCellType: FileGridCollectionViewCell.self, emptyCellType: .noActivitiesSolo,
-                  title: KDriveStrings.Localizable.lastEditsTitle, selectorTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle,
+                  title: KDriveResourcesStrings.Localizable.lastEditsTitle, selectorTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
                   listStyleEnabled: true)
     }
 

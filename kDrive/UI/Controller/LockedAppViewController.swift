@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import kDriveResources
 import LocalAuthentication
+import UIKit
 
 class LockedAppViewController: UIViewController {
-
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -32,7 +32,7 @@ class LockedAppViewController: UIViewController {
 
     func tryToUnlock() {
         let context = LAContext()
-        let reason = KDriveStrings.Localizable.lockAppTitle
+        let reason = KDriveResourcesStrings.Localizable.lockAppTitle
         var error: NSError?
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {

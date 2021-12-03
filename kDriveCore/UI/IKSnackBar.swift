@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import SnackBar
 import UIKit
 
@@ -165,7 +166,7 @@ public class IKSnackBar: SnackBar {
         let buttonStyle = TextStyle.action
         var style = SnackBarStyle()
         style.padding = 24
-        style.background = KDriveCoreAsset.backgroundCardViewColor.color
+        style.background = KDriveResourcesAsset.backgroundCardViewColor.color
         style.textColor = textStyle.color
         style.font = textStyle.font
         style.actionTextColor = buttonStyle.color

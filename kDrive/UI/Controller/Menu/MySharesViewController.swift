@@ -16,17 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class MySharesViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "MySharesViewController" }
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, rootTitle: KDriveStrings.Localizable.mySharesTitle, emptyViewType: .noShared)
+        configuration = Configuration(normalFolderHierarchy: false, selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle, emptyViewType: .noShared)
         filePresenter.listType = MySharesViewController.self
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.mySharedRootFile
@@ -60,5 +60,4 @@ class MySharesViewController: FileListViewController {
         // We don't have incremental changes for My Shared so we just fetch everything again
         forceRefresh()
     }
-
 }

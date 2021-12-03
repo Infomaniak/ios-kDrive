@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class ManageCategoriesTableViewCell: InsetTableViewCell {
@@ -50,12 +51,12 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
 
     func configure(with categories: [kDriveCore.Category]) {
         if categories.isEmpty {
-            label.text = KDriveStrings.Localizable.addCategoriesTitle
+            label.text = KDriveResourcesStrings.Localizable.addCategoriesTitle
             collectionViewBottomConstraint.constant = 0
             viewCenterConstraint.isActive = true
             contentViewHeightConstraint.isActive = true
         } else {
-            label.text = KDriveStrings.Localizable.manageCategoriesTitle
+            label.text = KDriveResourcesStrings.Localizable.manageCategoriesTitle
             collectionViewBottomConstraint.constant = 16
             viewCenterConstraint.isActive = false
             contentViewHeightConstraint.isActive = false

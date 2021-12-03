@@ -16,15 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import MaterialOutlinedTextField
 import UIKit
 
 public extension MaterialOutlinedTextField {
     func setInfomaniakColors() {
-        let textColor = KDriveCoreAsset.titleColor.color
+        let textColor = KDriveResourcesAsset.titleColor.color
         let normalLabelColor = UIColor.placeholderText
-        let normalBorderColor = KDriveCoreAsset.borderColor.color
-        let editingColor = KDriveCoreAsset.infomaniakColor.color
+        let normalBorderColor = KDriveResourcesAsset.borderColor.color
+        let editingColor = KDriveResourcesAsset.infomaniakColor.color
         let disabledAlpha: CGFloat = 0.6
 
         let normalColorModel = ColorModel(textColor: textColor, floatingLabelColor: normalLabelColor, normalLabelColor: normalLabelColor, outlineColor: normalBorderColor)

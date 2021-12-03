@@ -16,22 +16,21 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
+import kDriveResources
+import UIKit
 
 class UserAccountTableViewCell: MenuTableViewCell {
-
     @IBOutlet weak var userEmailLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        logoImage.image = KDriveAsset.placeholderAvatar.image
+        logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
         logoImage.layer.cornerRadius = logoImage.frame.size.width / 2
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        logoImage.image = KDriveAsset.placeholderAvatar.image
+        logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
-
 }

@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class RecentActivityFilesViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.files }
     override class var storyboardIdentifier: String { "RecentActivityFilesViewController" }
 
@@ -29,7 +29,7 @@ class RecentActivityFilesViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, fromActivities: true, rootTitle: KDriveStrings.Localizable.fileDetailsActivitiesTitle, emptyViewType: .emptyFolder)
+        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, fromActivities: true, rootTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle, emptyViewType: .emptyFolder)
 
         super.viewDidLoad()
     }
@@ -49,7 +49,7 @@ class RecentActivityFilesViewController: FileListViewController {
         // Set up activity header
         guard let activity = activity else { return }
         headerView.activityListView.isHidden = false
-        headerView.activityAvatar.image = KDriveAsset.placeholderAvatar.image
+        headerView.activityAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
 
         let count = activityFiles.count
         let isDirectory = activity.file?.isDirectory ?? false
@@ -58,17 +58,17 @@ class RecentActivityFilesViewController: FileListViewController {
             var text = user.displayName + " "
             switch activity.action {
             case .fileCreate:
-                text += isDirectory ? KDriveStrings.Localizable.fileActivityFolderCreate(count) : KDriveStrings.Localizable.fileActivityFileCreate(count)
+                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderCreate(count) : KDriveResourcesStrings.Localizable.fileActivityFileCreate(count)
             case .fileTrash:
-                text += isDirectory ? KDriveStrings.Localizable.fileActivityFolderTrash(count) : KDriveStrings.Localizable.fileActivityFileTrash(count)
+                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderTrash(count) : KDriveResourcesStrings.Localizable.fileActivityFileTrash(count)
             case .fileUpdate:
-                text += KDriveStrings.Localizable.fileActivityFileUpdate(count)
+                text += KDriveResourcesStrings.Localizable.fileActivityFileUpdate(count)
             case .commentCreate:
-                text += KDriveStrings.Localizable.fileActivityCommentCreate(count)
+                text += KDriveResourcesStrings.Localizable.fileActivityCommentCreate(count)
             case .fileRestore:
-                text += isDirectory ? KDriveStrings.Localizable.fileActivityFolderRestore(count) : KDriveStrings.Localizable.fileActivityFileRestore(count)
+                text += isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderRestore(count) : KDriveResourcesStrings.Localizable.fileActivityFileRestore(count)
             default:
-                text += KDriveStrings.Localizable.fileActivityUnknown(count)
+                text += KDriveResourcesStrings.Localizable.fileActivityUnknown(count)
             }
 
             headerView.activityLabel.text = text
@@ -132,7 +132,7 @@ class RecentActivityFilesViewController: FileListViewController {
 
         let activityId = coder.decodeInteger(forKey: "ActivityId")
         let activityFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-        navigationItem.title = KDriveStrings.Localizable.fileDetailsActivitiesTitle
+        navigationItem.title = KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle
         if driveFileManager != nil {
             let realm = driveFileManager.getRealm()
             activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)
@@ -140,5 +140,4 @@ class RecentActivityFilesViewController: FileListViewController {
             forceRefresh()
         }
     }
-
 }

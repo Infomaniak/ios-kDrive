@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import PDFKit
 import UIKit
 
@@ -28,7 +29,7 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
         super.awakeFromNib()
         pdfPreview.autoScales = true
         pdfPreview.enableDataDetectors = true
-        pdfPreview.backgroundColor = KDriveAsset.previewBackgroundColor.color
+        pdfPreview.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color
     }
 
     @objc private func pageChanged() {

@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
@@ -32,7 +33,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
     override var isHighlighted: Bool {
         didSet {
             UIView.animate(withDuration: 0.1) {
-                self.buttonView.backgroundColor = self.isHighlighted ? KDriveAsset.backgroundCardViewSelectedColor.color : KDriveAsset.backgroundColor.color
+                self.buttonView.backgroundColor = self.isHighlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : KDriveResourcesAsset.backgroundColor.color
             }
         }
     }
@@ -59,7 +60,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
         // Configuration
         if action == .shareLink {
             if file.visibility == .isCollaborativeFolder {
-                actionLabel.text = KDriveStrings.Localizable.buttonCopyLink
+                actionLabel.text = KDriveResourcesStrings.Localizable.buttonCopyLink
             } else if file.shareLink != nil {
                 actionLabel.text = action.reverseName
             }

@@ -16,22 +16,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import kDriveResources
 import Kingfisher
+import UIKit
 
-public class IconUtils {
-
+public enum IconUtils {
     public static func getIcon(for file: File) -> UIImage {
         if file.isDirectory {
             switch file.visibility {
             case .isTeamSpace:
-                return KDriveCoreAsset.folderCommonDocuments.image
+                return KDriveResourcesAsset.folderCommonDocuments.image
             case .isSharedSpace:
-                return KDriveCoreAsset.folderShared.image
+                return KDriveResourcesAsset.folderShared.image
             case .isCollaborativeFolder:
-                return KDriveCoreAsset.folderDropBox.image
+                return KDriveResourcesAsset.folderDropBox.image
             default:
-                return (file.isDisabled ? KDriveCoreAsset.folderDisable : KDriveCoreAsset.folderFilled).image
+                return (file.isDisabled ? KDriveResourcesAsset.folderDisable : KDriveResourcesAsset.folderFilled).image
             }
         } else {
             return file.convertedType.icon
@@ -42,16 +42,16 @@ public class IconUtils {
         if file.isDirectory {
             switch file.visibility {
             case .isTeamSpace:
-                completion(KDriveCoreAsset.folderCommonDocuments.image, false)
+                completion(KDriveResourcesAsset.folderCommonDocuments.image, false)
             case .isSharedSpace:
-                completion(KDriveCoreAsset.folderShared.image, false)
+                completion(KDriveResourcesAsset.folderShared.image, false)
             case .isCollaborativeFolder:
-                completion(KDriveCoreAsset.folderDropBox.image, false)
+                completion(KDriveResourcesAsset.folderDropBox.image, false)
             default:
                 if file.isDisabled {
-                    completion(KDriveCoreAsset.folderDisable.image, false)
+                    completion(KDriveResourcesAsset.folderDisable.image, false)
                 } else {
-                    completion(KDriveCoreAsset.folderFilled.image, false)
+                    completion(KDriveResourcesAsset.folderFilled.image, false)
                 }
             }
         } else {
@@ -68,5 +68,4 @@ public class IconUtils {
             }
         }
     }
-
 }

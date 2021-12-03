@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol FileDetailDelegate: AnyObject {
@@ -43,7 +44,7 @@ class FileDetailHeaderTableViewCell: UITableViewCell {
     }
 
     private func resetSegmentedControl() {
-        segmentedControl.setSegments([KDriveStrings.Localizable.fileDetailsInfosTitle, KDriveStrings.Localizable.fileDetailsActivitiesTitle, KDriveStrings.Localizable.fileDetailsCommentsTitle])
+        segmentedControl.setSegments([KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle, KDriveResourcesStrings.Localizable.fileDetailsCommentsTitle])
     }
 
     @IBAction func segmentedControlUpdated(_ sender: UISegmentedControl) {
@@ -58,7 +59,7 @@ class FileDetailHeaderTableViewCell: UITableViewCell {
         fileNameLabel.textColor = .white
         fileDetailLabel.textColor = .white
         fileImage.image = nil
-        fileImage.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color
+        fileImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         file.getThumbnail { image, _ in
             self.fileImage.image = image
             self.fileImage.backgroundColor = nil

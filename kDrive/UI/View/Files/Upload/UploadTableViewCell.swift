@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class UploadTableViewCell: InsetTableViewCell {
@@ -49,14 +50,14 @@ class UploadTableViewCell: InsetTableViewCell {
     private func setStatusFor(uploadFile: UploadFile) {
         if let error = uploadFile.error, error != .taskRescheduled {
             cardContentView.retryButton?.isHidden = false
-            cardContentView.detailsLabel.text = KDriveStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
+            cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable.errorUpload + " (\(error.localizedDescription))"
         } else {
             cardContentView.retryButton?.isHidden = true
-            var status = KDriveStrings.Localizable.uploadInProgressPending
+            var status = KDriveResourcesStrings.Localizable.uploadInProgressPending
             if ReachabilityListener.instance.currentStatus == .offline {
-                status = KDriveStrings.Localizable.uploadNetworkErrorDescription
+                status = KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
             } else if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
-                status = KDriveStrings.Localizable.uploadNetworkErrorWifiRequired
+                status = KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
             }
             if uploadFile.size > 0 {
                 cardContentView.detailsLabel.text = uploadFile.formattedSize + " • " + status
@@ -107,11 +108,11 @@ class UploadTableViewCell: InsetTableViewCell {
             cardContentView.progressView.isHidden = false
             cardContentView.progressView.updateProgress(progress, animated: animated)
 
-            var status = KDriveStrings.Localizable.uploadInProgressTitle
+            var status = KDriveResourcesStrings.Localizable.uploadInProgressTitle
             if ReachabilityListener.instance.currentStatus == .offline {
-                status += " • " + KDriveStrings.Localizable.uploadNetworkErrorDescription
+                status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorDescription
             } else if UserDefaults.shared.isWifiOnly && ReachabilityListener.instance.currentStatus != .wifi {
-                status += " • " + KDriveStrings.Localizable.uploadNetworkErrorWifiRequired
+                status += " • " + KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired
             }
             cardContentView.detailsLabel.text = status
         }

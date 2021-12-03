@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
+import kDriveResources
 import Lottie
+import UIKit
 
 class SlideCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var backgroundImageView: UIImageView!
     @IBOutlet weak var illustrationAnimationView: AnimationView!
     @IBOutlet weak var titleLabel: UILabel!
@@ -38,7 +38,7 @@ class SlideCollectionViewCell: UICollectionViewCell {
 
     func configureCell(slide: Slide, isSmallDevice: Bool = false) {
         backgroundImageView.image = slide.backgroundImage
-        backgroundImageView.tintColor = KDriveAsset.backgroundColor.color
+        backgroundImageView.tintColor = KDriveResourcesAsset.backgroundColor.color
         illustrationAnimationView.animation = Animation.named(slide.animationName)
         titleLabel.text = slide.title
         descriptionLabel.text = slide.description

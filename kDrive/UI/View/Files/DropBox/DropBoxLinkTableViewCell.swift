@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import kDriveResources
 import UIKit
 
 protocol DropBoxLinkDelegate: AnyObject {
@@ -30,11 +31,11 @@ class DropBoxLinkTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        copyButton.accessibilityLabel = KDriveStrings.Localizable.buttonShare
+        copyButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonShare
     }
 
     @IBAction func
-    copyButtonPressed(_ sender: UIButton) {
+        copyButtonPressed(_ sender: UIButton) {
         delegate?.didClickOnShareLink(link: copyTextField.text ?? "", sender: sender)
     }
 }

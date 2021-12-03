@@ -19,6 +19,7 @@
 import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class DriveErrorViewController: UIViewController {
@@ -76,18 +77,18 @@ class DriveErrorViewController: UIViewController {
     private func setupView() {
         switch driveErrorViewType {
         case .noDrive:
-            imageView.image = KDriveAsset.noDrive.image
-            titleLabel.text = KDriveStrings.Localizable.noDriveTitle
-            descriptionLabel.text = KDriveStrings.Localizable.noDriveDescription
+            imageView.image = KDriveResourcesAsset.noDrive.image
+            titleLabel.text = KDriveResourcesStrings.Localizable.noDriveTitle
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.noDriveDescription
         case .maintenance:
-            imageView.image = KDriveAsset.maintenance.image
-            imageView.tintColor = KDriveAsset.iconColor.color
+            imageView.image = KDriveResourcesAsset.maintenance.image
+            imageView.tintColor = KDriveResourcesAsset.iconColor.color
             if let driveName = driveName {
-                titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitle(driveName)
+                titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitle(driveName)
             } else {
-                titleLabel.text = KDriveStrings.Localizable.driveMaintenanceTitlePlural
+                titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitlePlural
             }
-            descriptionLabel.text = KDriveStrings.Localizable.driveMaintenanceDescription
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceDescription
             mainButton.isHidden = true
         }
     }

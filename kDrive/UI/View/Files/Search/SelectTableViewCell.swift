@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class SelectTableViewCell: InsetTableViewCell {
@@ -28,7 +29,7 @@ class SelectTableViewCell: InsetTableViewCell {
 
         if selected {
             contentInsetView.borderWidth = 2
-            contentInsetView.borderColor = KDriveAsset.infomaniakColor.color
+            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
         } else {
             contentInsetView.borderWidth = 0
         }

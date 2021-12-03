@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 @IBDesignable public class IKLargeButton: UIButton {
@@ -44,16 +45,16 @@ import UIKit
         }
     }
 
-    public var disabledBackgroundColor = KDriveCoreAsset.buttonDisabledBackgroundColor.color
+    public var disabledBackgroundColor = KDriveResourcesAsset.buttonDisabledBackgroundColor.color
 
     public struct Style: RawRepresentable {
         var titleFont: UIFont
         var titleColor: UIColor
         var backgroundColor: UIColor
 
-        public static let primaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: .white, backgroundColor: KDriveCoreAsset.infomaniakColor.color, rawValue: "primaryButton")
-        public static let secondaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveCoreAsset.titleColor.color, backgroundColor: KDriveCoreAsset.backgroundColor.color, rawValue: "secondaryButton")
-        public static let whiteButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveCoreAsset.titleColor.color, backgroundColor: KDriveCoreAsset.backgroundCardViewColor.color, rawValue: "whiteButton")
+        public static let primaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: .white, backgroundColor: KDriveResourcesAsset.infomaniakColor.color, rawValue: "primaryButton")
+        public static let secondaryButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveResourcesAsset.titleColor.color, backgroundColor: KDriveResourcesAsset.backgroundColor.color, rawValue: "secondaryButton")
+        public static let whiteButton = Style(titleFont: UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium), titleColor: KDriveResourcesAsset.titleColor.color, backgroundColor: KDriveResourcesAsset.backgroundCardViewColor.color, rawValue: "whiteButton")
 
         static let allValues = [primaryButton, secondaryButton, whiteButton]
 
@@ -100,7 +101,7 @@ import UIKit
         // Set text font & color
         titleLabel?.font = style.titleFont
         setTitleColor(style.titleColor, for: .normal)
-        setTitleColor(KDriveCoreAsset.buttonDisabledTitleColor.color, for: .disabled)
+        setTitleColor(KDriveResourcesAsset.buttonDisabledTitleColor.color, for: .disabled)
 
         setBackgroundColor()
         setElevation()

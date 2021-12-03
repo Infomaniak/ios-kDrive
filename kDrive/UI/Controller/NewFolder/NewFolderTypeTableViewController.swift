@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class NewFolderTypeTableViewController: UITableViewController {
@@ -32,12 +33,12 @@ class NewFolderTypeTableViewController: UITableViewController {
         tableView.separatorColor = .clear
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
-        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveStrings.Localizable.buttonClose
+        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.largeTitleDisplayMode = .always
 
-        title = KDriveStrings.Localizable.newFolderTitle
+        title = KDriveResourcesStrings.Localizable.newFolderTitle
 
         setupFolderType()
     }
@@ -76,17 +77,17 @@ class NewFolderTypeTableViewController: UITableViewController {
         cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
         switch content[indexPath.row] {
         case .folder:
-            cell.titleLabel.text = KDriveStrings.Localizable.allFolder
-            cell.accessoryImageView.image = KDriveAsset.folderFilled.image
-            cell.descriptionLabel.text = KDriveStrings.Localizable.folderDescription
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.allFolder
+            cell.accessoryImageView.image = KDriveResourcesAsset.folderFilled.image
+            cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.folderDescription
         case .commonFolder:
-            cell.titleLabel.text = KDriveStrings.Localizable.commonFolderTitle
-            cell.accessoryImageView.image = KDriveAsset.folderCommonDocuments.image
-            cell.descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveStrings.Localizable.commonFolderDescription(driveFileManager.drive.name), boldText: driveFileManager.drive.name)
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.commonFolderTitle
+            cell.accessoryImageView.image = KDriveResourcesAsset.folderCommonDocuments.image
+            cell.descriptionLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.commonFolderDescription(driveFileManager.drive.name), boldText: driveFileManager.drive.name)
         case .dropbox:
-            cell.titleLabel.text = KDriveStrings.Localizable.dropBoxTitle
-            cell.accessoryImageView.image = KDriveAsset.folderDropBox.image
-            cell.descriptionLabel.text = KDriveStrings.Localizable.dropBoxDescription
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
+            cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
+            cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
         }
         return cell
     }

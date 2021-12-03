@@ -16,17 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class OfflineViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "OfflineViewController" }
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
+        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
 
         super.viewDidLoad()
     }
@@ -66,5 +66,4 @@ class OfflineViewController: FileListViewController {
             self?.collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
         }
     }
-
 }

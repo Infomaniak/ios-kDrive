@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class StorageTableViewController: UITableViewController {
@@ -42,15 +43,15 @@ class StorageTableViewController: UITableViewController {
         var directoryTitle: String {
             switch name {
             case "drives":
-                return KDriveStrings.Localizable.drivesDirectory
+                return KDriveResourcesStrings.Localizable.drivesDirectory
             case "Documents":
-                return KDriveStrings.Localizable.documentsDirectory
+                return KDriveResourcesStrings.Localizable.documentsDirectory
             case "import":
-                return KDriveStrings.Localizable.importDirectory
+                return KDriveResourcesStrings.Localizable.importDirectory
             case "tmp":
-                return KDriveStrings.Localizable.tempDirectory
+                return KDriveResourcesStrings.Localizable.tempDirectory
             case "Caches":
-                return KDriveStrings.Localizable.cacheDirectory
+                return KDriveResourcesStrings.Localizable.cacheDirectory
             default:
                 return name.capitalized
             }
@@ -69,9 +70,9 @@ class StorageTableViewController: UITableViewController {
 
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.separatorStyle = .none
-        tableView.backgroundColor = KDriveAsset.backgroundColor.color
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
-        title = KDriveStrings.Localizable.manageStorageTitle
+        title = KDriveResourcesStrings.Localizable.manageStorageTitle
 
         reload()
     }
@@ -172,7 +173,7 @@ class StorageTableViewController: UITableViewController {
         switch section {
         case .header:
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.titleLabel.text = KDriveStrings.Localizable.totalStorageUsedTitle
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.totalStorageUsedTitle
             cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize))
             cell.selectionStyle = .none
         case .directories:
@@ -200,9 +201,9 @@ class StorageTableViewController: UITableViewController {
         case .header:
             break
         case .directories:
-            sectionHeaderView.titleLabel.text = KDriveStrings.Localizable.directoriesTitle
+            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.directoriesTitle
         case .files:
-            sectionHeaderView.titleLabel.text = KDriveStrings.Localizable.cachedFileTitle
+            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.cachedFileTitle
         }
         return sectionHeaderView
     }
@@ -217,12 +218,12 @@ class StorageTableViewController: UITableViewController {
         case .directories:
             guard indexPath.row != 0 else { return }
             file = directories[indexPath.row]
-            message = KDriveStrings.Localizable.modalClearCacheDirectoryDescription(file.directoryTitle)
+            message = KDriveResourcesStrings.Localizable.modalClearCacheDirectoryDescription(file.directoryTitle)
         case .files:
             file = files[indexPath.row]
-            message = KDriveStrings.Localizable.modalClearCacheFileDescription(file.name)
+            message = KDriveResourcesStrings.Localizable.modalClearCacheFileDescription(file.name)
         }
-        let alertViewController = AlertTextViewController(title: KDriveStrings.Localizable.modalClearCacheTitle, message: message, action: KDriveStrings.Localizable.buttonClear, destructive: true) {
+        let alertViewController = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalClearCacheTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonClear, destructive: true) {
             let isDirectory = file.isDirectory
             do {
                 try self.fileManager.removeItem(atPath: file.path)

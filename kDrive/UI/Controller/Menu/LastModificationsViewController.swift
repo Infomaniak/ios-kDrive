@@ -16,17 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class LastModificationsViewController: FileListViewController {
-
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "LastModificationsViewController" }
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo)
+        configuration = Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo)
         filePresenter.listType = LastModificationsViewController.self
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.lastModificationsRootFile
@@ -66,5 +66,4 @@ class LastModificationsViewController: FileListViewController {
         // Hide sort button
         headerView.sortButton.isHidden = true
     }
-
 }

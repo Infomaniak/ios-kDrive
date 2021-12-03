@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 @IBDesignable public class IKSegmentedControl: UISegmentedControl {
@@ -40,10 +41,10 @@ import UIKit
             size = ceil(size * UIScreen.main.bounds.width / 390)
         }
         let font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: size))
-        setTitleTextAttributes([.foregroundColor: KDriveCoreAsset.disconnectColor.color, .font: font], for: .normal)
+        setTitleTextAttributes([.foregroundColor: KDriveResourcesAsset.disconnectColor.color, .font: font], for: .normal)
         setTitleTextAttributes([.foregroundColor: UIColor.white, .font: font], for: .selected)
-        backgroundColor = KDriveCoreAsset.backgroundColor.color
-        selectedSegmentTintColor = KDriveCoreAsset.infomaniakColor.color
+        backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        selectedSegmentTintColor = KDriveResourcesAsset.infomaniakColor.color
     }
 
     public func setSegments(_ segments: [String], selectedSegmentIndex: Int = 0) {

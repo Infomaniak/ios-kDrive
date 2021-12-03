@@ -16,14 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
-import VisionKit
-import Vision
-import PDFKit
 import kDriveCore
+import kDriveResources
+import PDFKit
+import UIKit
+import Vision
+import VisionKit
 
 class SaveScanViewController: SaveFileViewController {
-
     var scan: VNDocumentCameraScan!
     var scanType = ScanFileFormat(rawValue: 0)!
 
@@ -55,7 +55,7 @@ class SaveScanViewController: SaveFileViewController {
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch sections[section] {
         case .fileType:
-            return HomeTitleView.instantiate(title: KDriveStrings.Localizable.searchFilterTitle)
+            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.searchFilterTitle)
         default:
             return super.tableView(tableView, viewForHeaderInSection: section)
         }
@@ -65,8 +65,8 @@ class SaveScanViewController: SaveFileViewController {
         let footer = tableView.footerView(forSection: sections.count - 1) as! FooterButtonView
         footer.footerButton.setLoading(true)
         guard let filename = items.first?.name,
-            let selectedDriveFileManager = selectedDriveFileManager,
-            let selectedDirectory = selectedDirectory else {
+              let selectedDriveFileManager = selectedDriveFileManager,
+              let selectedDirectory = selectedDirectory else {
             footer.footerButton.setLoading(false)
             return
         }
@@ -79,14 +79,14 @@ class SaveScanViewController: SaveFileViewController {
                     footer.footerButton.setLoading(false)
                     dismiss(animated: true) {
                         parent?.dismiss(animated: true) {
-                            UIConstants.showSnackBar(message: KDriveStrings.Localizable.allUploadInProgress(filename))
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allUploadInProgress(filename))
                         }
                     }
                 }
             } catch {
                 DispatchQueue.main.async {
                     footer.footerButton.setLoading(false)
-                    UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUpload)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorUpload)
                 }
             }
         }

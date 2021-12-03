@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 /// Alert with choices
@@ -31,8 +32,8 @@ public class AlertChoiceViewController: AlertViewController {
         let renderer = UIGraphicsImageRenderer(size: size)
 
         return renderer.image { ctx in
-            ctx.cgContext.setFillColor(KDriveCoreAsset.backgroundCardViewColor.color.cgColor)
-            ctx.cgContext.setStrokeColor(KDriveCoreAsset.borderColor.color.cgColor)
+            ctx.cgContext.setFillColor(KDriveResourcesAsset.backgroundCardViewColor.color.cgColor)
+            ctx.cgContext.setStrokeColor(KDriveResourcesAsset.borderColor.color.cgColor)
             ctx.cgContext.setLineWidth(lineWidth)
 
             let diameter = min(size.width, size.height) - lineWidth
@@ -116,7 +117,7 @@ public class AlertChoiceViewController: AlertViewController {
     }
 
     private func checkmarkImage(for index: Int) -> UIImage {
-        return index == selectedIndex ? KDriveCoreAsset.check.image : AlertChoiceViewController.emptyCheckmarkImage
+        return index == selectedIndex ? KDriveResourcesAsset.check.image : AlertChoiceViewController.emptyCheckmarkImage
     }
 
     // MARK: - Actions

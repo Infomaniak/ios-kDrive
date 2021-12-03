@@ -19,6 +19,7 @@
 import AVFoundation
 import FloatingPanel
 import kDriveCore
+import kDriveResources
 import PhotosUI
 import UIKit
 import Vision
@@ -31,19 +32,19 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     private struct PlusButtonMenuAction: Equatable {
         let name: String
         let image: UIImage
-        var color: UIColor = KDriveAsset.iconColor.color
+        var color: UIColor = KDriveResourcesAsset.iconColor.color
         var docType: String = ""
 
-        static let takePictureAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.buttonTakePhotoOrVideo, image: KDriveAsset.camera.image)
-        static let importMediaAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.buttonUploadPhotoOrVideo, image: KDriveAsset.images.image)
-        static let importAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.buttonUploadFile, image: KDriveAsset.upload.image)
-        static let scanAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.buttonDocumentScanning, image: KDriveAsset.scan.image)
-        static let folderAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.allFolder, image: KDriveAsset.folderFill.image)
+        static let takePictureAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonTakePhotoOrVideo, image: KDriveResourcesAsset.camera.image)
+        static let importMediaAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo, image: KDriveResourcesAsset.images.image)
+        static let importAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadFile, image: KDriveResourcesAsset.upload.image)
+        static let scanAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonDocumentScanning, image: KDriveResourcesAsset.scan.image)
+        static let folderAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allFolder, image: KDriveResourcesAsset.folderFill.image)
 
-        static let docsAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.allOfficeDocs, image: KDriveAsset.fileText.image, color: KDriveAsset.infomaniakColor.color, docType: "docx")
-        static let pointsAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.allOfficePoints, image: KDriveAsset.filePresentation.image, docType: "pptx")
-        static let gridsAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.allOfficeGrids, image: KDriveAsset.fileSheets.image, docType: "xlsx")
-        static let noteAction = PlusButtonMenuAction(name: KDriveStrings.Localizable.allOfficeNote, image: KDriveAsset.fileText.image, color: KDriveAsset.secondaryTextColor.color, docType: "txt")
+        static let docsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeDocs, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.infomaniakColor.color, docType: "docx")
+        static let pointsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficePoints, image: KDriveResourcesAsset.filePresentation.image, docType: "pptx")
+        static let gridsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeGrids, image: KDriveResourcesAsset.fileSheets.image, docType: "xlsx")
+        static let noteAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeNote, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.secondaryTextColor.color, docType: "txt")
     }
 
     private var content: [[PlusButtonMenuAction]] = [
@@ -73,7 +74,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         super.viewDidLoad()
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
-        tableView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         tableView.register(cellView: FloatingPanelTableViewCell.self)
 
         // Hide unavailable actions
@@ -112,8 +113,8 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FloatingPanelTableViewCell.self, for: indexPath)
         if indexPath.section == 0 {
-            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveStrings.Localizable.allRootName(driveFileManager.drive.name) : currentDirectory.name
-            cell.accessoryImageView.image = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveAsset.drive.image : KDriveAsset.folderFilled.image
+            cell.titleLabel.text = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesStrings.Localizable.allRootName(driveFileManager.drive.name) : currentDirectory.name
+            cell.accessoryImageView.image = currentDirectory.id == DriveFileManager.constants.rootID ? KDriveResourcesAsset.drive.image : KDriveResourcesAsset.folderFilled.image
             cell.accessoryImageView.tintColor = currentDirectory.id == DriveFileManager.constants.rootID ? UIColor(hex: driveFileManager.drive.preferences.color) : nil
             cell.separator?.isHidden = false
             cell.selectionStyle = .none
@@ -186,7 +187,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 let sourceType: UIImagePickerController.SourceType = action == .takePictureAction ? .camera : .photoLibrary
 
                 guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
-                    let alert = AlertTextViewController(title: KDriveStrings.Localizable.cameraAccessDeniedTitle, message: KDriveStrings.Localizable.cameraAccessDeniedDescription, action: KDriveStrings.Localizable.buttonGoToSettings) {
+                    let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle, message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription, action: KDriveResourcesStrings.Localizable.buttonGoToSettings) {
                         if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
                             UIApplication.shared.open(settingsUrl)
                         }

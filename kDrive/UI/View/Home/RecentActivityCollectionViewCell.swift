@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -53,7 +54,7 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         super.prepareForReuse()
         isLoading = false
         activity = nil
-        contentInsetView.backgroundColor = KDriveAsset.backgroundCardViewColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         detailLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
     }
@@ -69,20 +70,20 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         let titleLayer = CALayer()
         titleLayer.anchorPoint = .zero
         titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 10)
-        titleLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        titleLayer.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color.cgColor
         titleLabel.layer.addSublayer(titleLayer)
         detailLabel.text = " "
         let detailLayer = CALayer()
         detailLayer.anchorPoint = .zero
         detailLayer.bounds = CGRect(x: 0, y: 0, width: 80, height: 10)
-        detailLayer.backgroundColor = KDriveAsset.loaderDarkerDefaultColor.color.cgColor
+        detailLayer.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color.cgColor
         detailLabel.layer.addSublayer(detailLayer)
         timeLabel.text = nil
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
         tableViewHeight.constant = bottomViewCellHeight
         collectionView.reloadData()
         tableView.reloadData()
-        contentInsetView.backgroundColor = KDriveAsset.loaderDefaultColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
     }
 
     func configureWith(recentActivity: FileActivity) {
@@ -92,22 +93,22 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         let isDirectory = activity?.file?.isDirectory ?? false
         switch recentActivity.action {
         case .fileCreate:
-            detailLabel.text = isDirectory ? KDriveStrings.Localizable.fileActivityFolderCreate(count) : KDriveStrings.Localizable.fileActivityFileCreate(count)
+            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderCreate(count) : KDriveResourcesStrings.Localizable.fileActivityFileCreate(count)
         case .fileTrash:
-            detailLabel.text = isDirectory ? KDriveStrings.Localizable.fileActivityFolderTrash(count) : KDriveStrings.Localizable.fileActivityFileTrash(count)
+            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderTrash(count) : KDriveResourcesStrings.Localizable.fileActivityFileTrash(count)
         case .fileUpdate:
-            detailLabel.text = KDriveStrings.Localizable.fileActivityFileUpdate(count)
+            detailLabel.text = KDriveResourcesStrings.Localizable.fileActivityFileUpdate(count)
         case .commentCreate:
-            detailLabel.text = KDriveStrings.Localizable.fileActivityCommentCreate(count)
+            detailLabel.text = KDriveResourcesStrings.Localizable.fileActivityCommentCreate(count)
         case .fileRestore:
-            detailLabel.text = isDirectory ? KDriveStrings.Localizable.fileActivityFolderRestore(count) : KDriveStrings.Localizable.fileActivityFileRestore(count)
+            detailLabel.text = isDirectory ? KDriveResourcesStrings.Localizable.fileActivityFolderRestore(count) : KDriveResourcesStrings.Localizable.fileActivityFileRestore(count)
         default:
-            detailLabel.text = KDriveStrings.Localizable.fileActivityUnknown(count)
+            detailLabel.text = KDriveResourcesStrings.Localizable.fileActivityUnknown(count)
         }
 
         tableViewHeight.constant = CGFloat(min(activities.count, 3)) * bottomViewCellHeight
 
-        avatarImage.image = KDriveAsset.placeholderAvatar.image
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
 
         if let user = activity?.user {
             titleLabel.text = user.displayName

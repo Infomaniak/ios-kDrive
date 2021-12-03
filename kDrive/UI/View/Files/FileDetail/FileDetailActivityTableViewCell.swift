@@ -16,23 +16,23 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
+import UIKit
 
 class FileDetailActivityTableViewCell: InsetTableViewCell {
-
     @IBOutlet weak var detailLabel: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        accessoryImageView.image = KDriveAsset.placeholderAvatar.image
+        accessoryImageView.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        accessoryImageView.image = KDriveAsset.placeholderAvatar.image
+        accessoryImageView.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -47,7 +47,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
 
     // swiftlint:disable cyclomatic_complexity
     func configureWith(activity: FileDetailActivity, file: File) {
-        titleLabel.text = activity.user?.displayName ?? KDriveStrings.Localizable.allUserAnonymous
+        titleLabel.text = activity.user?.displayName ?? KDriveResourcesStrings.Localizable.allUserAnonymous
 
         if let user = activity.user {
             user.getAvatar { image in
@@ -123,5 +123,4 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
 
         timeLabel.text = Constants.formatTimestamp(TimeInterval(activity.createdAt), style: .time, relative: true)
     }
-
 }

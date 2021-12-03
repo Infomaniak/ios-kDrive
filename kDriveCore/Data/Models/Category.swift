@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import kDriveResources
 import RealmSwift
 import UIKit
 
@@ -71,29 +72,29 @@ public enum PredefinedCategory: String {
     var title: String {
         switch self {
         case .banking:
-            return KDriveCoreStrings.Localizable.categoryBanking
+            return KDriveResourcesStrings.Localizable.categoryBanking
         case .bill:
-            return KDriveCoreStrings.Localizable.categoryBill
+            return KDriveResourcesStrings.Localizable.categoryBill
         case .contract:
-            return KDriveCoreStrings.Localizable.categoryContract
+            return KDriveResourcesStrings.Localizable.categoryContract
         case .form:
-            return KDriveCoreStrings.Localizable.categoryForm
+            return KDriveResourcesStrings.Localizable.categoryForm
         case .hobbies:
-            return KDriveCoreStrings.Localizable.categoryHobbies
+            return KDriveResourcesStrings.Localizable.categoryHobbies
         case .id:
-            return KDriveCoreStrings.Localizable.categoryID
+            return KDriveResourcesStrings.Localizable.categoryID
         case .insurance:
-            return KDriveCoreStrings.Localizable.categoryInsurance
+            return KDriveResourcesStrings.Localizable.categoryInsurance
         case .quotation:
-            return KDriveCoreStrings.Localizable.categoryQuotation
+            return KDriveResourcesStrings.Localizable.categoryQuotation
         case .taxation:
-            return KDriveCoreStrings.Localizable.categoryTaxation
+            return KDriveResourcesStrings.Localizable.categoryTaxation
         case .transportation:
-            return KDriveCoreStrings.Localizable.categoryTransportation
+            return KDriveResourcesStrings.Localizable.categoryTransportation
         case .warranty:
-            return KDriveCoreStrings.Localizable.categoryWarranty
+            return KDriveResourcesStrings.Localizable.categoryWarranty
         case .work:
-            return KDriveCoreStrings.Localizable.categoryWork
+            return KDriveResourcesStrings.Localizable.categoryWork
         }
     }
 }
