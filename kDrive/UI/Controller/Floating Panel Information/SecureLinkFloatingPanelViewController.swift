@@ -34,8 +34,8 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
         rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonUpgradeOffer, for: .normal)
-        rightButton?.titleLabel?.lineBreakMode = NSLineBreakMode.byWordWrapping
-        rightButton.titleLabel?.textAlignment = NSTextAlignment.center
+        rightButton?.titleLabel?.lineBreakMode = .byWordWrapping
+        rightButton.titleLabel?.textAlignment = .center
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {
