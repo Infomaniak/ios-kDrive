@@ -332,7 +332,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             } else {
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
-                driveFileManager.activateShareLink(for: file) { [weak self] _, shareLink, error in
+                driveFileManager.activateShareLink(for: file) { [weak self] shareLink, error in
                     if let link = shareLink {
                         self?.setLoading(false, action: action, at: indexPath)
                         self?.copyShareLinkToPasteboard(link.url)

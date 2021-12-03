@@ -586,11 +586,8 @@ public class DriveFileManager {
                     token?.cancel()
                     if error != nil && error != .taskRescheduled {
                         // Mark it as not available offline
-                        let realm = self.getRealm()
-                        if let file = self.getCachedFile(id: safeFile.id, freeze: false, using: realm) {
-                            try? realm.safeWrite {
-                                file.isAvailableOffline = false
-                            }
+                        self.updateFileProperty(fileId: safeFile.id) { file in
+                            file.isAvailableOffline = false
                         }
                     }
                     self.notifyObserversWith(file: safeFile)
@@ -614,29 +611,17 @@ public class DriveFileManager {
         }
     }
 
-    public func setFileShareLink(file: File, shareLink: String?) -> File? {
-        let realm = getRealm()
-        if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
-            try? realm.write {
-                file.shareLink = shareLink
-                file.rights?.canBecomeLink = shareLink == nil
-            }
-            notifyObserversWith(file: file)
-
-            return file
-        } else {
-            return nil
+    public func setFileShareLink(file: File, shareLink: String?) {
+        updateFileProperty(fileId: file.id) { file in
+            file.shareLink = shareLink
+            file.rights?.canBecomeLink = shareLink == nil
         }
     }
 
     public func setFileCollaborativeFolder(file: File, collaborativeFolder: String?) {
-        let realm = getRealm()
-        if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
-            try? realm.write {
-                file.collaborativeFolder = collaborativeFolder
-                file.rights?.canBecomeCollab = collaborativeFolder == nil
-            }
-            notifyObserversWith(file: file)
+        updateFileProperty(fileId: file.id) { file in
+            file.collaborativeFolder = collaborativeFolder
+            file.rights?.canBecomeCollab = collaborativeFolder == nil
         }
     }
 
@@ -933,13 +918,9 @@ public class DriveFileManager {
             if response?.data == nil {
                 completion(response?.error ?? error ?? DriveError.unknownError)
             } else {
-                let realm = self.getRealm()
-                if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
-                    try? realm.write {
-                        let newCategory = FileCategory(id: categoryId, userId: self.drive.userId)
-                        file.categories.append(newCategory)
-                    }
-                    self.notifyObserversWith(file: file)
+                self.updateFileProperty(fileId: fileId) { file in
+                    let newCategory = FileCategory(id: categoryId, userId: self.drive.userId)
+                    file.categories.append(newCategory)
                 }
                 completion(nil)
             }
@@ -951,14 +932,10 @@ public class DriveFileManager {
             if response?.data == nil {
                 completion(error ?? DriveError.unknownError)
             } else {
-                let realm = self.getRealm()
-                if let file = self.getCachedFile(id: fileId, freeze: false, using: realm) {
+                self.updateFileProperty(fileId: fileId) { file in
                     if let index = file.categories.firstIndex(where: { $0.id == categoryId }) {
-                        try? realm.write {
-                            file.categories.remove(at: index)
-                        }
+                        file.categories.remove(at: index)
                     }
-                    self.notifyObserversWith(file: file)
                 }
                 completion(nil)
             }
@@ -1270,55 +1247,53 @@ public class DriveFileManager {
         }
     }
 
-    public func updateShareLink(for file: File, with sharedFile: SharedFile?, and value: String, completion: @escaping (File?, ShareLink?, Error?) -> Void) {
+    public func updateShareLink(for file: File, with sharedFile: SharedFile?, and value: String, completion: @escaping (ShareLink?, Error?) -> Void) {
         if let sharedLink = sharedFile?.link {
             sharedLink.permission = value
             if value == ShareLinkPermission.restricted.rawValue {
-                removeShareLink(for: file) { file, error in
-                    if file != nil {
-                        completion(file, nil, error)
-                    }
+                removeShareLink(for: file) { error in
+                    completion(nil, error)
                 }
             } else {
                 apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, /* blockInformation: sharedLink.blockInformation, */ isFree: drive.pack == .free) { _, error in
-                    completion(file, sharedLink, error)
+                    completion(sharedLink, error)
                 }
             }
         } else {
             if value == ShareLinkPermission.public.rawValue {
-                activateShareLink(for: file) { file, shareLink, error in
+                activateShareLink(for: file) { shareLink, error in
                     if let link = shareLink {
-                        completion(file, link, error)
+                        completion(link, error)
                     }
                 }
             }
         }
     }
 
-    public func activateShareLink(for file: File, completion: @escaping (File?, ShareLink?, Error?) -> Void) {
+    public func activateShareLink(for file: File, completion: @escaping (ShareLink?, Error?) -> Void) {
         apiFetcher.activateShareLinkFor(file: file) { response, error in
             if let link = response?.data {
                 // Fix for API not returning share link activities
-                let newFile = self.setFileShareLink(file: file, shareLink: link.url)?.freeze()
-                completion(newFile, link, nil)
+                self.setFileShareLink(file: file, shareLink: link.url)
+                completion(link, nil)
             } else {
-                completion(nil, nil, error)
+                completion(nil, error)
             }
         }
     }
 
-    public func removeShareLink(for file: File, completion: @escaping (File?, Error?) -> Void) {
+    public func removeShareLink(for file: File, completion: @escaping (Error?) -> Void) {
         apiFetcher.removeShareLinkFor(file: file) { response, error in
             if let data = response?.data {
                 if data {
                     // Fix for API not returning share link activities
-                    let newFile = self.setFileShareLink(file: file, shareLink: nil)?.freeze()
-                    completion(newFile, nil)
+                    self.setFileShareLink(file: file, shareLink: nil)
+                    completion(nil)
                 } else {
-                    completion(nil, nil)
+                    completion(nil)
                 }
             } else {
-                completion(nil, error)
+                completion(error)
             }
         }
     }

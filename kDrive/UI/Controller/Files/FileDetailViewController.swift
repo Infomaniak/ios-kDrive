@@ -811,7 +811,7 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
 
 extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
-        driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { _, shareLink, _ in
+        driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { shareLink, _ in
             if let link = shareLink {
                 self.sharedFile?.link = link
             } else {
