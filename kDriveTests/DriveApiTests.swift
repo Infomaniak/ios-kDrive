@@ -1493,4 +1493,44 @@ final class DriveApiTests: XCTestCase {
         wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
+
+    func testCategory() {
+        let createExpectation = XCTestExpectation(description: "Create category")
+        let addExpectation = XCTestExpectation(description: "Add category")
+        let removeExpectation = XCTestExpectation(description: "Remove category")
+        let deleteExpectation = XCTestExpectation(description: "Delete category")
+
+        var folder = File()
+
+        setUpTest(testName: "Categories") { file in
+            folder = file
+            // 1. Create category
+            self.currentApiFetcher.createCategory(driveId: Env.driveId, name: "UnitTest-\(Date())", color: "#1abc9c") { response, error in
+                XCTAssertNil(error, "There should be no error on create category")
+                guard let category = response?.data else {
+                    XCTFail("Category shouldn't be nil")
+                    return
+                }
+                createExpectation.fulfill()
+                // 2. Add category to folder
+                self.currentApiFetcher.addCategory(file: folder, category: category) { _, error in
+                    XCTAssertNil(error, "There should be no error on add category")
+                    addExpectation.fulfill()
+                    // 3. Remove category from folder
+                    self.currentApiFetcher.removeCategory(file: folder, category: category) { _, error in
+                        XCTAssertNil(error, "There should be no error on remove category")
+                        removeExpectation.fulfill()
+                        // 4. Delete category
+                        self.currentApiFetcher.deleteCategory(driveId: Env.driveId, id: category.id) { _, error in
+                            XCTAssertNil(error, "There should be no error on delete category")
+                            deleteExpectation.fulfill()
+                        }
+                    }
+                }
+            }
+        }
+
+        wait(for: [createExpectation, addExpectation, removeExpectation, deleteExpectation], timeout: DriveApiTests.defaultTimeout)
+        tearDownTest(directory: folder)
+    }
 }
