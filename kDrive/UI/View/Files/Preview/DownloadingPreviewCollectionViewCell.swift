@@ -43,7 +43,6 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
     var tapGestureRecognizer: UITapGestureRecognizer!
     private var tapToZoomRecognizer: UITapGestureRecognizer!
     var previewDownloadTask: Kingfisher.DownloadTask?
-    weak var parentViewController: UIViewController?
 
     override func awakeFromNib() {
         super.awakeFromNib()

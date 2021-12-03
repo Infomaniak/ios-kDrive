@@ -44,7 +44,9 @@ public class PdfPreviewCache {
         return pdfCacheDirectory.appendingPathComponent("\(file.driveId)").appendingPathComponent("\(file.id)").appendingPathExtension("pdf")
     }
 
-    public func retrievePdf(for file: File, driveFileManager: DriveFileManager, completion: @escaping (URL?, Error?) -> Void) {
+    public func retrievePdf(for file: File, driveFileManager: DriveFileManager,
+                            downloadTaskCreated: @escaping (URLSessionDownloadTask) -> Void,
+                            completion: @escaping (URL?, Error?) -> Void) {
         let pdfUrl = pdfPreviewUrl(for: file)
         if isLocalVersionOlderThanRemote(for: file) {
             guard let token = driveFileManager.apiFetcher.currentToken else {
@@ -55,7 +57,7 @@ public class PdfPreviewCache {
                 if let token = token {
                     var urlRequest = URLRequest(url: URL(string: ApiRoutes.downloadFileAsPdf(file: file))!)
                     urlRequest.addValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                    let request = URLSession.shared.downloadTask(with: urlRequest) { url, _, error in
+                    let task = URLSession.shared.downloadTask(with: urlRequest) { url, _, error in
                         if let url = url {
                             do {
                                 let driveCacheDirectory = self.pdfCacheDirectory.appendingPathComponent("\(file.driveId)", isDirectory: true)
@@ -71,7 +73,8 @@ public class PdfPreviewCache {
                             completion(nil, error ?? DriveError.unknownError)
                         }
                     }
-                    request.resume()
+                    downloadTaskCreated(task)
+                    task.resume()
                 }
             }
         } else {
