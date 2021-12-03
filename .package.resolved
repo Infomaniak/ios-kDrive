@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
         "state": {
           "branch": null,
-          "revision": "839cc6b0cd80b0b8bf81fe9bd82b743b25dc6446",
-          "version": "8.9.1"
+          "revision": "08686f04881483d2bc098b2696e674c0ba135e47",
+          "version": "8.10.0"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/SCENEE/FloatingPanel",
         "state": {
           "branch": null,
-          "revision": "29beea0ff9b8744da4ba618907f48c0439995d00",
-          "version": "2.5.0"
+          "revision": "0fbbbc8d99b4dfe58bb1dd704d14b45f35b46584",
+          "version": "2.5.1"
         }
       },
       {
@@ -267,8 +267,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
-          "revision": "0510982c2df41baa5a662f4ce5f83488661fdd48",
-          "version": "7.5.2"
+          "revision": "3dd1867f423c9f0dd241d0669d2563f091f805e9",
+          "version": "7.5.4"
         }
       },
       {
@@ -303,8 +303,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "addf69cfe60376c325397c8926589415576b1dd1",
-          "version": "2.34.0"
+          "revision": "37e7a33de45bac894c0b08b56a2f755ebe4884e6",
+          "version": "2.35.0"
         }
       },
       {
@@ -312,8 +312,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "36f6419f2b1b6490a8c0faa840298e28027cefe9",
-          "version": "2.16.3"
+          "revision": "0324d60429870284810ba5bdb039640761bf10c9",
+          "version": "2.17.0"
         }
       },
       {

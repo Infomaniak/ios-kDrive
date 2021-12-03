@@ -147,7 +147,7 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            schemaVersion: 5,
+            schemaVersion: 6,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < 1 {
                     // Migration to version 1: migrating rights
