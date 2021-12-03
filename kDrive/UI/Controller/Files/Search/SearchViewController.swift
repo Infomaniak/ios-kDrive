@@ -61,6 +61,7 @@ class SearchViewController: FileListViewController {
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         collectionView.register(UINib(nibName: searchHeaderIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: searchHeaderIdentifier)
+        collectionView.register(cellView: RecentSearchCollectionViewCell.self)
         collectionView.keyboardDismissMode = .onDrag
 
         searchController.hidesNavigationBarDuringPresentation = false
@@ -203,12 +204,31 @@ class SearchViewController: FileListViewController {
         if isDisplayingSearchResults {
             return super.collectionView(collectionView, cellForItemAt: indexPath)
         } else {
-            let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
+            let cell = collectionView.dequeueReusableCell(type: RecentSearchCollectionViewCell.self, for: indexPath)
             cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == self.collectionView(collectionView, numberOfItemsInSection: indexPath.section) - 1)
-            cell.moreButton.isHidden = true
             let recentSearch = recentSearches[indexPath.row]
             cell.configureWith(recentSearch: recentSearch)
+            cell.removeButtonHandler = { [weak self] _ in
+                guard let self = self else { return }
+                if let toRemoveIndex = self.recentSearches.firstIndex(where: { $0 == recentSearch }) {
+                    self.recentSearches.remove(at: toRemoveIndex)
+                    UserDefaults.shared.recentSearches = self.recentSearches
+                    collectionView.deleteItems(at: [IndexPath(row: toRemoveIndex, section: 0)])
 
+                    guard !self.recentSearches.isEmpty else { return }
+                    var toReloadItems = [IndexPath]()
+                    if toRemoveIndex == 0 {
+                        toReloadItems.append(IndexPath(row: 0, section: 0))
+                    }
+                    if toRemoveIndex > self.recentSearches.count - 1 {
+                        toReloadItems.append(IndexPath(row: self.recentSearches.count - 1, section: 0))
+                    }
+
+                    collectionView.performBatchUpdates {
+                        collectionView.reloadItems(at: toReloadItems)
+                    }
+                }
+            }
             return cell
         }
     }

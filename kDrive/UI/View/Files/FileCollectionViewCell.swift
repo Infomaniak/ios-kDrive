@@ -242,16 +242,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
     }
 
-    func configureWith(recentSearch: String) {
-        centerTitleConstraint.isActive = true
-        detailsStackView?.isHidden = true
-        favoriteImageView?.isHidden = true
-        accessoryImage?.isHidden = true
-        logoImage.image = KDriveResourcesAsset.clock.image
-        logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
-        titleLabel.text = recentSearch
-    }
-
     func configureLoading() {
         titleLabel.text = " "
         let titleLayer = CALayer()
