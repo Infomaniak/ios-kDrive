@@ -61,6 +61,8 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
     var driveFileManager: DriveFileManager!
     var file: File!
+    weak var floatingPanelController: FloatingPanelController?
+    var width = CGFloat(0)
 
     // MARK: - Public methods
 
@@ -82,6 +84,18 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
 
         setSelectedColor()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        width = view.frame.width
+        setUpHeight()
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        width = size.width
+        setUpHeight()
     }
 
     // MARK: - Private methods
@@ -106,6 +120,19 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 return section
             }
         }
+    }
+
+    func setUpHeight() {
+        let headerCellHeight = CGFloat(80)
+        let topInset = CGFloat(30)
+        let colorWidthAndHeight = CGFloat(40)
+        let colorSpacing = CGFloat(16)
+        let leadingTrailingPading = CGFloat(40)
+        let numberOfColorInARow = ((width - leadingTrailingPading) / (colorWidthAndHeight + colorSpacing)).rounded(.down)
+        let numberOfRow = (CGFloat(folderColors.count) / numberOfColorInARow).rounded(.up)
+        let height = numberOfRow * (colorWidthAndHeight + colorSpacing) + headerCellHeight + topInset
+        floatingPanelController?.layout = PlusButtonFloatingPanelLayout(height: height)
+        floatingPanelController?.invalidateLayout()
     }
 
     func setSelectedColor() {
@@ -157,11 +184,5 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 self.dismiss(animated: true)
             }
         }
-    }
-}
-
-extension ColorSelectionFloatingPanelViewController: FloatingPanelControllerDelegate {
-    func floatingPanel(_ fpc: FloatingPanelController, layoutFor size: CGSize) -> FloatingPanelLayout {
-        return PlusButtonFloatingPanelLayout(height: collectionView.contentSize.height)
     }
 }

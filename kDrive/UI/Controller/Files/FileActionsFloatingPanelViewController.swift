@@ -414,10 +414,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(file: file, driveFileManager: driveFileManager)
                 let floatingPanelViewController = DriveFloatingPanelController()
                 floatingPanelViewController.isRemovalInteractionEnabled = true
-                floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 312)
                 floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
-                floatingPanelViewController.delegate = colorSelectionFloatingPanelViewController
                 floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
+                colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
                 dismiss(animated: true) {
                     self.presentingParent?.present(floatingPanelViewController, animated: true)
                 }
