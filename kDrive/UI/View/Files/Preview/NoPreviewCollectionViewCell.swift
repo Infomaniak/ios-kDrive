@@ -37,6 +37,8 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        progressView.progress = 0
+        progressView.observedProgress = nil
         progressView.isHidden = true
     }
 
