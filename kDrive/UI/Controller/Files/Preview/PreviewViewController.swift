@@ -431,10 +431,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                         if self?.view.window != nil {
                             if let error = error {
                                 if error != .taskCancelled {
-                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
-                                    if let cell = (self?.collectionView.cellForItem(at: indexPath) as? NoPreviewCollectionViewCell) {
-                                        cell.errorDownloading()
-                                    }
+                                    self?.previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, error: error)
+                                    self?.collectionView.reloadItems(at: [indexPath])
                                 }
                             } else {
                                 (self?.collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?.previewDownloadTask?.cancel()
@@ -527,7 +525,7 @@ extension PreviewViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
         // File is already downloaded and up to date OR we can remote play it (audio / video)
-        if previewErrors[file.id] != nil && (!file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
+        if previewErrors[file.id] == nil && (!file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
             switch file.convertedType {
             case .image:
                 if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -581,6 +579,8 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.configureWith(file: file)
                 if let progress = previewFallback.pdfGenerationProgress {
                     cell.setDownloadProgress(progress)
+                } else if previewFallback.error != nil {
+                    cell.errorDownloading()
                 }
                 cell.previewDelegate = self
                 return cell
