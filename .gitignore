@@ -66,3 +66,6 @@ DerivedData/
 ### Tuist ###
 Derived/
 release/
+
+### Tests ###
+kDriveTests/Env.swift
