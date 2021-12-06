@@ -54,6 +54,7 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         super.prepareForReuse()
         isLoading = false
         activity = nil
+        activities = []
         contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         detailLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
@@ -114,8 +115,8 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
             titleLabel.text = user.displayName
             timeLabel.text = Constants.formatTimestamp(TimeInterval(activity?.createdAt ?? 0), relative: true)
 
-            user.getAvatar { image in
-                self.avatarImage.image = image.withRenderingMode(.alwaysOriginal)
+            user.getAvatar { [weak self] image in
+                self?.avatarImage.image = image.withRenderingMode(.alwaysOriginal)
             }
         }
         collectionView.reloadData()
@@ -191,7 +192,7 @@ extension RecentActivityCollectionViewCell: UITableViewDelegate, UITableViewData
         if isLoading {
             cell.configureLoading()
         } else {
-            let more = indexPath.item == 2 && activities.count > 3 ? activities.count - 2 : nil
+            let more = indexPath.row == 2 && activities.count > 3 ? activities.count - 2 : nil
             cell.configureWith(recentActivity: activities[indexPath.row], more: more)
         }
         return cell
