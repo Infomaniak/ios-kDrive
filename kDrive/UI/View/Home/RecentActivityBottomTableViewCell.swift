@@ -37,7 +37,7 @@ class RecentActivityBottomTableViewCell: UITableViewCell {
         } else {
             fileImage.image = recentActivity.file?.icon ?? ConvertedType.unknown.icon
             fileNameLabel.text = recentActivity.file?.name ?? String(recentActivity.path.split(separator: "/").last ?? "")
-            fileImage.tintColor = recentActivity.file?.convertedType.tintColor
+            fileImage.tintColor = recentActivity.file?.tintColor
         }
         fileImage.backgroundColor = nil
     }

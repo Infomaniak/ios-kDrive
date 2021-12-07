@@ -20,6 +20,7 @@ import Foundation
 
 public enum ApiRoutes {
     static let driveApiUrl = "https://drive.infomaniak.com/drive/"
+    static let driveApiUrlV2 = "https://drive.infomaniak.com/2/drive/"
     static let officeApiUrl = "https://drive.infomaniak.com/app/office/"
     static let with = "with=parent,children,rights,collaborative_folder,favorite,mobile,share_link,categories"
     static let shopUrl = "https://shop.infomaniak.com/order/"
@@ -279,5 +280,9 @@ public enum ApiRoutes {
     
     public static func downloadFileAsPdf(file: File) -> String {
         return "\(fileURL(file: file))download?as=pdf"
+    }
+
+    public static func updateFolderColor(file: File) -> String {
+        return "\(driveApiUrlV2)\(file.driveId)/files/\(file.id)/color"
     }
 }

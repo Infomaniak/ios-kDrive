@@ -1533,4 +1533,22 @@ final class DriveApiTests: XCTestCase {
         wait(for: [createExpectation, addExpectation, removeExpectation, deleteExpectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: folder)
     }
+
+    func testFolderColor() {
+        let expectation = XCTestExpectation(description: "Change folder color")
+
+        var folder = File()
+
+        setUpTest(testName: "FolderColor") { file in
+            folder = file
+
+            self.currentApiFetcher.updateFolderColor(file: folder, color: "#E91E63") { _, error in
+                XCTAssertNil(error, "There should be no error on changing folder color")
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+        tearDownTest(directory: folder)
+    }
 }

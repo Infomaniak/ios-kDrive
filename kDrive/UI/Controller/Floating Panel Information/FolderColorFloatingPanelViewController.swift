@@ -20,15 +20,15 @@ import kDriveResources
 import Lottie
 import UIKit
 
-class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewController {
+class FolderColorFloatingPanelViewController: InformationFloatingPanelViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
         imageView.isHidden = true
         animationView.animation = Animation.named("illu_upgrade")
         animationViewHeightConstraint.constant = 105
-        titleLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareTitle
-        descriptionLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareDescription
+        titleLabel.text = KDriveResourcesStrings.Localizable.folderColorTitle
+        descriptionLabel.text = KDriveResourcesStrings.Localizable.folderColorDescription
         let teams = "Solo, Team & Pro"
         additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability(teams), highlightedText: teams)
         copyStackView.isHidden = true
@@ -40,7 +40,7 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
 
     override class func instantiate() -> InformationFloatingPanelViewController {
         let contentViewController = Storyboard.informationFloatingPanel.instantiateViewController(withIdentifier: "InformationFloatingPanelViewController") as! InformationFloatingPanelViewController
-        object_setClass(contentViewController, SecureLinkFloatingPanelViewController.self)
+        object_setClass(contentViewController, FolderColorFloatingPanelViewController.self)
         return contentViewController
     }
 }

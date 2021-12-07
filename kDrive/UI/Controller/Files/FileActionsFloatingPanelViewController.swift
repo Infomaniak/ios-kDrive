@@ -50,29 +50,30 @@ public class FloatingPanelAction: Equatable {
     static let manageCategories = FloatingPanelAction(id: 2, name: KDriveResourcesStrings.Localizable.manageCategoriesTitle, image: KDriveResourcesAsset.categories.image)
     static let favorite = FloatingPanelAction(id: 3, name: KDriveResourcesStrings.Localizable.buttonAddFavorites, reverseName: KDriveResourcesStrings.Localizable.buttonRemoveFavorites, image: KDriveResourcesAsset.favorite.image)
     static let convertToDropbox = FloatingPanelAction(id: 4, name: KDriveResourcesStrings.Localizable.buttonConvertToDropBox, image: KDriveResourcesAsset.folderDropBox1.image)
-    static let manageDropbox = FloatingPanelAction(id: 5, name: KDriveResourcesStrings.Localizable.buttonManageDropBox, image: KDriveResourcesAsset.folderDropBox1.image)
-    static let seeFolder = FloatingPanelAction(id: 6, name: KDriveResourcesStrings.Localizable.buttonSeeFolder, image: KDriveResourcesAsset.folderFill.image)
-    static let offline = FloatingPanelAction(id: 7, name: KDriveResourcesStrings.Localizable.buttonAvailableOffline, image: KDriveResourcesAsset.availableOffline.image)
-    static let download = FloatingPanelAction(id: 8, name: KDriveResourcesStrings.Localizable.buttonDownload, image: KDriveResourcesAsset.download.image)
-    static let move = FloatingPanelAction(id: 9, name: KDriveResourcesStrings.Localizable.buttonMoveTo, image: KDriveResourcesAsset.folderSelect.image)
-    static let duplicate = FloatingPanelAction(id: 10, name: KDriveResourcesStrings.Localizable.buttonDuplicate, image: KDriveResourcesAsset.duplicate.image)
-    static let rename = FloatingPanelAction(id: 11, name: KDriveResourcesStrings.Localizable.buttonRename, image: KDriveResourcesAsset.edit.image)
-    static let delete = FloatingPanelAction(id: 12, name: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, image: KDriveResourcesAsset.delete.image, tintColor: KDriveResourcesAsset.binColor.color)
-    static let leaveShare = FloatingPanelAction(id: 13, name: KDriveResourcesStrings.Localizable.buttonLeaveShare, image: KDriveResourcesAsset.linkBroken.image)
+    static let folderColor = FloatingPanelAction(id: 5, name: KDriveResourcesStrings.Localizable.buttonChangeFolderColor, image: KDriveResourcesAsset.colorBucket.image)
+    static let manageDropbox = FloatingPanelAction(id: 6, name: KDriveResourcesStrings.Localizable.buttonManageDropBox, image: KDriveResourcesAsset.folderDropBox1.image)
+    static let seeFolder = FloatingPanelAction(id: 7, name: KDriveResourcesStrings.Localizable.buttonSeeFolder, image: KDriveResourcesAsset.folderFill.image)
+    static let offline = FloatingPanelAction(id: 8, name: KDriveResourcesStrings.Localizable.buttonAvailableOffline, image: KDriveResourcesAsset.availableOffline.image)
+    static let download = FloatingPanelAction(id: 9, name: KDriveResourcesStrings.Localizable.buttonDownload, image: KDriveResourcesAsset.download.image)
+    static let move = FloatingPanelAction(id: 10, name: KDriveResourcesStrings.Localizable.buttonMoveTo, image: KDriveResourcesAsset.folderSelect.image)
+    static let duplicate = FloatingPanelAction(id: 11, name: KDriveResourcesStrings.Localizable.buttonDuplicate, image: KDriveResourcesAsset.duplicate.image)
+    static let rename = FloatingPanelAction(id: 12, name: KDriveResourcesStrings.Localizable.buttonRename, image: KDriveResourcesAsset.edit.image)
+    static let delete = FloatingPanelAction(id: 13, name: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, image: KDriveResourcesAsset.delete.image, tintColor: KDriveResourcesAsset.binColor.color)
+    static let leaveShare = FloatingPanelAction(id: 14, name: KDriveResourcesStrings.Localizable.buttonLeaveShare, image: KDriveResourcesAsset.linkBroken.image)
 
     static var listActions: [FloatingPanelAction] {
         return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
     static var folderListActions: [FloatingPanelAction] {
-        return [manageCategories, favorite, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [manageCategories, favorite, convertToDropbox, folderColor, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
     }
 
-    static let informations = FloatingPanelAction(id: 14, name: KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, image: KDriveResourcesAsset.info.image)
-    static let add = FloatingPanelAction(id: 15, name: KDriveResourcesStrings.Localizable.buttonAdd, image: KDriveResourcesAsset.add.image)
-    static let sendCopy = FloatingPanelAction(id: 16, name: KDriveResourcesStrings.Localizable.buttonSendCopy, image: KDriveResourcesAsset.exportIos.image)
-    static let shareAndRights = FloatingPanelAction(id: 17, name: KDriveResourcesStrings.Localizable.buttonFileRights, image: KDriveResourcesAsset.share.image)
-    static let shareLink = FloatingPanelAction(id: 18, name: KDriveResourcesStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveResourcesStrings.Localizable.buttonCopyPublicLink, image: KDriveResourcesAsset.link.image)
+    static let informations = FloatingPanelAction(id: 15, name: KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, image: KDriveResourcesAsset.info.image)
+    static let add = FloatingPanelAction(id: 16, name: KDriveResourcesStrings.Localizable.buttonAdd, image: KDriveResourcesAsset.add.image)
+    static let sendCopy = FloatingPanelAction(id: 17, name: KDriveResourcesStrings.Localizable.buttonSendCopy, image: KDriveResourcesAsset.exportIos.image)
+    static let shareAndRights = FloatingPanelAction(id: 18, name: KDriveResourcesStrings.Localizable.buttonFileRights, image: KDriveResourcesAsset.share.image)
+    static let shareLink = FloatingPanelAction(id: 19, name: KDriveResourcesStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveResourcesStrings.Localizable.buttonCopyPublicLink, image: KDriveResourcesAsset.link.image)
 
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
@@ -251,6 +252,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return file.rights?.canBecomeCollab == true && file.shareLink == nil
             case .manageDropbox:
                 return file.visibility == .isCollaborativeFolder
+            case .folderColor:
+                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace && !file.isDisabled
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
@@ -396,6 +399,28 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             let viewController = ManageDropBoxViewController.instantiate(driveFileManager: driveFileManager, folder: file)
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
+        case .folderColor:
+            if driveFileManager.drive.pack == .free {
+                let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.actionHandler = { _ in
+                    driveFloatingPanelController.dismiss(animated: true) {
+                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    }
+                }
+                present(driveFloatingPanelController, animated: true)
+            } else {
+                let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(file: file, driveFileManager: driveFileManager)
+                let floatingPanelViewController = DriveFloatingPanelController()
+                floatingPanelViewController.isRemovalInteractionEnabled = true
+                floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
+                floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
+                colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
+                dismiss(animated: true) {
+                    self.presentingParent?.present(floatingPanelViewController, animated: true)
+                }
+            }
         case .seeFolder:
             guard let viewController = presentingParent else { return }
             let filePresenter = FilePresenter(viewController: viewController, floatingPanelViewController: nil)

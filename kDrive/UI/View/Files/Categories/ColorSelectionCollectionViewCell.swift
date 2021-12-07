@@ -18,7 +18,7 @@
 
 import UIKit
 
-class CategoryColorCollectionViewCell: UICollectionViewCell {
+class ColorSelectionCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var checkmark: UIImageView!
 
     override var isSelected: Bool {
@@ -32,5 +32,9 @@ class CategoryColorCollectionViewCell: UICollectionViewCell {
         layer.cornerRadius = frame.height / 2
         clipsToBounds = true
         checkmark.isHidden = true
+    }
+
+    func configureCell() {
+        layer.cornerRadius = frame.height / 2
     }
 }

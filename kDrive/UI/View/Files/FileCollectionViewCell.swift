@@ -176,7 +176,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         favoriteImageView?.isHidden = !file.isFavorite
         favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         logoImage.image = file.icon
-        logoImage.tintColor = file.convertedType.tintColor
+        logoImage.tintColor = file.tintColor
         moreButton.isHidden = selectionMode
         if !selectionMode || checkmarkImage != logoImage {
             // We don't fetch the thumbnail if we are in selection mode. In list mode we fetch thumbnail for images only
@@ -221,7 +221,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         titleLabel.text = trashedFile.name
         favoriteImageView?.isHidden = true
         logoImage.image = trashedFile.icon
-        logoImage.tintColor = trashedFile.convertedType.tintColor
+        logoImage.tintColor = trashedFile.tintColor
 
         let formattedDate = Constants.formatFileLastModifiedDate(trashedFile.lastModifiedDate)
 

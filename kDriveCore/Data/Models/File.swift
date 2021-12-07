@@ -60,7 +60,7 @@ public enum ConvertedType: String, CaseIterable {
 
     public var tintColor: UIColor? {
         switch self {
-        case .url:
+        case .folder, .url:
             return KDriveResourcesAsset.secondaryTextColor.color
         default:
             return nil
@@ -204,6 +204,7 @@ public class File: Object, Codable {
     @Persisted public var categories: List<FileCategory>
     @Persisted public var children: List<File>
     @Persisted public var canUseTag = false
+    @Persisted public var color: String?
     @Persisted public var createdBy: Int = 0
     @Persisted private var createdAt: Int = 0
     @Persisted private var fileCreatedAt: Int = 0
@@ -341,6 +342,14 @@ public class File: Object, Codable {
 
     public var uti: UTI {
         localUrl.uti ?? convertedType.uti
+    }
+
+    public var tintColor: UIColor? {
+        if let color = color {
+            return UIColor(hex: color)
+        } else {
+            return convertedType.tintColor
+        }
     }
 
     public func applyLastModifiedDateToLocalFile() {
@@ -498,6 +507,7 @@ public class File: Object, Codable {
         path = (try values.decodeIfPresent(String.self, forKey: .path)) ?? ""
         sizeWithVersion = (try values.decodeIfPresent(Int.self, forKey: .sizeWithVersion)) ?? 0
         users = try values.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
+        color = try values.decodeIfPresent(String.self, forKey: .color)
     }
 
     // We have to keep it for Realm
@@ -521,6 +531,7 @@ public class File: Object, Codable {
         case categories
         case children
         case canUseTag = "can_use_tag"
+        case color
         case createdBy = "created_by"
         case createdAt = "created_at"
         case fileCreatedAt = "file_created_at"
@@ -566,6 +577,7 @@ extension File: Differentiable {
                 && shareLink == source.shareLink
                 && rights.isContentEqual(to: source.rights)
                 && Array(categories).isContentEqual(to: Array(source.categories))
+                && color == source.color
         }
     }
 }

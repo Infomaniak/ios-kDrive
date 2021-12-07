@@ -51,7 +51,7 @@ class FileDetailHeaderAltTableViewCell: UITableViewCell {
         fileNameLabel.text = file.name
         fileDetailLabel.text = Constants.formatFileLastModifiedDate(file.lastModifiedDate)
         logoImage.image = file.icon
-        logoImage.tintColor = file.convertedType.tintColor
+        logoImage.tintColor = file.tintColor
 
         if file.isDirectory {
             segmentedControl.removeSegment(at: 2, animated: false)

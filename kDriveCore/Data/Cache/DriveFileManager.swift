@@ -147,7 +147,7 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            schemaVersion: 5,
+            schemaVersion: 6,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < 1 {
                     // Migration to version 1: migrating rights
@@ -1410,6 +1410,19 @@ public class DriveFileManager {
     public func cancelAction(cancelId: String, completion: @escaping (Error?) -> Void) {
         apiFetcher.cancelAction(driveId: drive.id, cancelId: cancelId) { _, error in
             completion(error)
+        }
+    }
+
+    public func updateFolderColor(file: File, color: String, completion: @escaping (Error?) -> Void) {
+        apiFetcher.updateFolderColor(file: file, color: color) { [fileId = file.id] _, error in
+            if let error = error {
+                completion(error)
+            } else {
+                self.updateFileProperty(fileId: fileId) { file in
+                    file.color = color
+                }
+                completion(nil)
+            }
         }
     }
 }

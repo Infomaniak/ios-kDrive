@@ -639,6 +639,15 @@ public class DriveApiFetcher: ApiFetcher {
 
         makeRequest(url, method: .post, parameters: body, completion: completion)
     }
+
+    public func updateFolderColor(file: File, color: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
+        let url = ApiRoutes.updateFolderColor(file: file)
+        let body: [String: Any] = [
+            "color": color
+        ]
+
+        makeRequest(url, method: .post, parameters: body, completion: completion)
+    }
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {
