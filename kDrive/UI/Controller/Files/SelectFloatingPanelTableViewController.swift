@@ -127,7 +127,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             } else {
                 for file in files {
                     if file.isDownloaded {
-                        saveFile()
+                        save(file: file)
                     } else {
                         downloadInProgress = true
                         collectionView.reloadItems(at: [indexPath])
@@ -135,7 +135,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                         DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
-                                    saveFile()
+                                    save(file: file)
                                 }
                             } else {
                                 success = false

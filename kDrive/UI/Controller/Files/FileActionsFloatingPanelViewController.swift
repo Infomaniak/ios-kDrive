@@ -439,7 +439,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
         case .download:
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
-                saveFile()
+                save(file: file)
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel
                 let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
@@ -448,7 +448,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 present(alert, animated: true)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    self?.saveFile()
+                    if let file = self?.file {
+                        self?.save(file: file)
+                    }
                 }
             }
         case .move:
@@ -702,7 +704,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileInfoLinkCopiedToClipboard)
     }
 
-    internal func saveFile() {
+    internal func save(file: File) {
         switch file.convertedType {
         case .image:
             if let image = UIImage(contentsOfFile: file.localUrl.path) {
