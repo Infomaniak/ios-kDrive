@@ -312,10 +312,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         } else {
             var token: ObservationToken?
             token = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
-                DispatchQueue.main.async {
+                // Remove observer after 1 pass
+                token?.cancel()
+                DispatchQueue.global(qos: .utility).async {
                     self?.updateAvailableOfflineFiles(status: status)
-                    // Remove observer after 1 pass
-                    token?.cancel()
                 }
             }
         }
