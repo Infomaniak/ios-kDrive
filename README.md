@@ -1,6 +1,7 @@
 # Infomaniak kDrive app
 
 [![Tuist badge](https://img.shields.io/badge/Powered%20by-Tuist-blue)](https://tuist.io)
+[![CI workflow](https://github.com/Infomaniak/ios-kDrive/actions/workflows/ci.yml/badge.svg)](https://github.com/Infomaniak/ios-kDrive/actions/workflows/ci.yml)
 
 ## A modern iOS application for [kDrive by Infomaniak](https://www.infomaniak.com/kdrive).
 ### Synchronise, share, collaborate.  The Swiss cloud that’s 100% secure.
@@ -36,7 +37,10 @@ The minimum needed version to execute the app is iOS 12.0, anyway, we recommend 
 We use [Realm.io](https://realm.io/) on both platforms (iOS and Android) to store the offline data of files and shares (in different databases instances). App and user preferences are stored in `UserDefaults`. 
 
 ### Structure
-The structure of the app, its algorithms and the general functioning are common with the Android app. 
+The structure of the app, its algorithms and the general functioning are common with the Android app.
+
+## Testing
+Before running the Unit and UI tests, you must create an `Env` struct/enum. Duplicate the sample file (`kDriveTests/Env.sample.swift`), rename it to `Env`, and complete it. You can then run the tests using Xcode or Tuist.
 
 ## Legal Requirements
 

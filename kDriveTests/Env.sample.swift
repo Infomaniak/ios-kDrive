@@ -16,11 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-
-@testable import kDrive
-
-struct Env {
+// Use this template to create your `Env` file. You will need to remove "_Sample" from the name.
+enum Env_Sample {
     // Set your token here
     static let token = "<token>"
 
@@ -40,5 +37,4 @@ struct Env {
     static let inviteTeam = 0
 
     static let commonDocumentsId = 3
-
 }
