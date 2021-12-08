@@ -172,26 +172,29 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         for command in registeredCommands {
             command.removeHandler()
 
-            command.addHandler { [unowned self] command, event in
+            command.addHandler { [weak self] command, event in
+                guard let self = self else {
+                    return .commandFailed
+                }
                 switch command {
                 case .togglePausePlay:
-                    togglePlayPause()
+                    self.togglePlayPause()
                 case .play:
-                    play()
+                    self.play()
                 case .pause:
-                    pause()
+                    self.pause()
                 case .skipBackward:
                     guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    skipBackward(by: event.interval)
+                    self.skipBackward(by: event.interval)
                 case .skipForward:
                     guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
-                    skipForward(by: event.interval)
+                    self.skipForward(by: event.interval)
                 case .changePlaybackPosition:
                     guard let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-                    seek(to: event.positionTime)
+                    self.seek(to: event.positionTime)
                 case .changePlaybackRate:
                     guard let event = event as? MPChangePlaybackRateCommandEvent else { return .commandFailed }
-                    setPlaybackRate(event.playbackRate)
+                    self.setPlaybackRate(event.playbackRate)
                 default:
                     return .commandFailed
                 }
