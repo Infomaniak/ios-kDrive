@@ -191,9 +191,9 @@ public class DriveFileManager {
             objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self])
 
         // Only compact in the background
-        if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
-            // compactRealmsIfNeeded()
-        }
+        /* if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
+            compactRealmsIfNeeded()
+        } */
 
         // Get root file
         let realm = getRealm()
