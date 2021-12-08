@@ -21,7 +21,7 @@ import kDriveResources
 import PDFKit
 import UIKit
 
-class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDelegate {
+class PdfPreviewCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet weak var pdfPreview: PDFView!
     private var document: PDFDocument?
 

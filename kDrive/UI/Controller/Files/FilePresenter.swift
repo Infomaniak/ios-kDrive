@@ -118,7 +118,14 @@ class FilePresenter {
             let files = files.filter { !$0.isDirectory && !$0.isTrashed }
             if let index = files.firstIndex(where: { $0.id == file.id }) {
                 let previewViewController = PreviewViewController.instantiate(files: files, index: Int(index), driveFileManager: driveFileManager, normalFolderHierarchy: normalFolderHierarchy, fromActivities: fromActivities)
-                navigationController?.pushViewController(previewViewController, animated: true)
+
+                let previewNavigation = UINavigationController(rootViewController: previewViewController)
+                previewNavigation.providesPresentationContextTransitionStyle = true
+                previewNavigation.definesPresentationContext = true
+                previewNavigation.modalPresentationStyle = .overCurrentContext
+                previewNavigation.modalPresentationCapturesStatusBarAppearance = true
+
+                navigationController?.tabBarController?.present(previewNavigation, animated: true)
             }
             if file.isTrashed {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPreviewTrash)

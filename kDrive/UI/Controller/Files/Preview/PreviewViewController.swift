@@ -30,7 +30,12 @@ protocol PreviewContentCellDelegate: AnyObject {
     func errorWhilePreviewing(fileId: Int, error: Error)
 }
 
-class PreviewViewController: UIViewController, PreviewContentCellDelegate {
+class PreviewViewController: UIViewController, PreviewContentCellDelegate, SNViewPullable {
+    var pullableOriginPoint: CGPoint = .zero
+    var pullableOriginSafeAreaInsets: UIEdgeInsets = .zero
+    var pullableMaxDistance: CGFloat = 200
+    var viewAnimationDuration: TimeInterval = 0.3
+
     class PreviewError {
         let fileId: Int
         var pdfGenerationProgress: Progress?
@@ -166,12 +171,16 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             pdfPageLabel.centerYAnchor.constraint(equalTo: editButton.centerYAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
-
+        addViewPullablePanGesture()
         observeFileUpdated()
     }
 
     @objc func tapPreview() {
         setFullscreen()
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
     }
 
     func observeFileUpdated() {
@@ -344,7 +353,13 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     @objc private func goBack() {
-        navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
+    }
+
+    override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+        floatingPanelViewController.dismiss(animated: false) {
+            super.dismiss(animated: flag, completion: completion)
+        }
     }
 
     func setFullscreen(_ fullscreen: Bool? = nil) {
