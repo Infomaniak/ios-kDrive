@@ -143,13 +143,6 @@ class SearchFiltersViewController: UITableViewController {
         return HomeTitleView.instantiate(title: filterType.title)
     }
 
-    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        if section == tableView.numberOfSections - 1 {
-            return UITableView.automaticDimension
-        }
-        return 0
-    }
-
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         if section == tableView.numberOfSections - 1 {
             let footerView = FiltersFooterView.instantiate()
