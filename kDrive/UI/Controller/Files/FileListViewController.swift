@@ -501,6 +501,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             // Reload file list with DifferenceKit
             let changeSet = StagedChangeset(source: self.sortedFiles, target: files)
             DispatchQueue.main.async {
+                if changeSet.isEmpty {
+                    // Invalidate layout to update header properly
+                    self.collectionView.collectionViewLayout.invalidateLayout()
+                }
                 self.collectionView.reload(using: changeSet) { $0.changeCount > self.maxDiffChanges } setData: { files in
                     self.sortedFiles = files
                     self.updateSelectedItems(newChildren: files)
