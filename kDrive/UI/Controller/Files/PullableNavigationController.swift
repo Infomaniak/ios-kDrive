@@ -19,8 +19,8 @@
 import UIKit
 
 class PullableNavigationController: UINavigationController, UIGestureRecognizerDelegate {
-    private let maxPullDistance: CGFloat = 200
     private var pullOriginPoint: CGPoint = .zero
+    private var pullOriginSafeAreaInsets = UIEdgeInsets.zero
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,17 +64,26 @@ class PullableNavigationController: UINavigationController, UIGestureRecognizerD
 
         switch gesture.state {
         case .began:
+            pullOriginSafeAreaInsets = UIEdgeInsets(
+                top: additionalSafeAreaInsets.top + view.safeAreaInsets.top,
+                left: additionalSafeAreaInsets.left,
+                bottom: additionalSafeAreaInsets.bottom,
+                right: additionalSafeAreaInsets.right
+            )
             pullOriginPoint = translation
         case .changed:
             pullDistance = translation.y - pullOriginPoint.y
             if pullDistance < 0 {
                 pullDistance = 0
+            } else {
+                additionalSafeAreaInsets = pullOriginSafeAreaInsets
             }
             targetFrame.origin.y = pullDistance
             view.frame = targetFrame
         case .ended, .cancelled:
             pullDistance = translation.y - pullOriginPoint.y
-            if pullDistance < maxPullDistance {
+            if pullDistance < view.frame.height / 3 {
+                additionalSafeAreaInsets = UIEdgeInsets.zero
                 targetFrame.origin.y = 0
                 UIView.animate(withDuration: 0.2) {
                     self.view.frame = targetFrame

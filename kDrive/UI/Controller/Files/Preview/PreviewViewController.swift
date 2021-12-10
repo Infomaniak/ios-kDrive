@@ -73,7 +73,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var titleHeightConstraint: NSLayoutConstraint?
     private let editButton = UIButton(type: .custom)
     private let backButton = UIButton(type: .custom)
-    private var popRecognizer: InteractivePopRecognizer?
     @IBOutlet weak var statusBarView: UIView!
     private var fullScreenPreview = false
     private var heightToHide = CGFloat(0)
@@ -190,12 +189,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
     }
 
-    private func setInteractiveRecognizer() {
-        guard let controller = navigationController else { return }
-        popRecognizer = InteractivePopRecognizer(controller: controller)
-        controller.interactivePopGestureRecognizer?.delegate = popRecognizer
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
@@ -210,7 +203,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
         }
-        setInteractiveRecognizer()
     }
 
     private func updateFileForCurrentIndex() {
