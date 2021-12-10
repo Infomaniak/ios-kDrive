@@ -30,12 +30,7 @@ protocol PreviewContentCellDelegate: AnyObject {
     func errorWhilePreviewing(fileId: Int, error: Error)
 }
 
-class PreviewViewController: UIViewController, PreviewContentCellDelegate, SNViewPullable {
-    var pullableOriginPoint: CGPoint = .zero
-    var pullableOriginSafeAreaInsets: UIEdgeInsets = .zero
-    var pullableMaxDistance: CGFloat = 200
-    var viewAnimationDuration: TimeInterval = 0.3
-
+class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     class PreviewError {
         let fileId: Int
         var pdfGenerationProgress: Progress?
@@ -83,7 +78,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, SNVie
     private var fullScreenPreview = false
     private var heightToHide = CGFloat(0)
 
-    private var floatingPanelViewController: FloatingPanelController!
+    var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
     private var currentFile: File {
@@ -171,7 +166,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate, SNVie
             pdfPageLabel.centerYAnchor.constraint(equalTo: editButton.centerYAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
-        addViewPullablePanGesture()
         observeFileUpdated()
     }
 

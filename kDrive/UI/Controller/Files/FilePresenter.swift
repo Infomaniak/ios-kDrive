@@ -119,7 +119,7 @@ class FilePresenter {
             if let index = files.firstIndex(where: { $0.id == file.id }) {
                 let previewViewController = PreviewViewController.instantiate(files: files, index: Int(index), driveFileManager: driveFileManager, normalFolderHierarchy: normalFolderHierarchy, fromActivities: fromActivities)
 
-                let previewNavigation = UINavigationController(rootViewController: previewViewController)
+                let previewNavigation = PullableNavigationController(rootViewController: previewViewController)
                 previewNavigation.providesPresentationContextTransitionStyle = true
                 previewNavigation.definesPresentationContext = true
                 previewNavigation.modalPresentationStyle = .overCurrentContext
