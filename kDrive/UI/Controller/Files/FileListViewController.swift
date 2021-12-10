@@ -792,7 +792,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         selectAllMode = false
         if let indexPaths = collectionView.indexPathsForSelectedItems {
             for indexPath in indexPaths {
-                collectionView.deselectItem(at: indexPath, animated: true)
+                if indexPath.row < collectionView.numberOfItems(inSection: indexPath.section) {
+                    collectionView.deselectItem(at: indexPath, animated: true)
+                }
             }
         }
         selectedItems.removeAll()
