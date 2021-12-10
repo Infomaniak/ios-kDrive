@@ -39,7 +39,7 @@ enum DateOption: Filterable, Selectable, Equatable {
             return KDriveResourcesStrings.Localizable.allYesterday
         case .last7days, .custom:
             let dateIntervalFormatter = DateIntervalFormatter()
-            dateIntervalFormatter.dateStyle = .long
+            dateIntervalFormatter.dateStyle = .medium
             dateIntervalFormatter.timeStyle = .none
             return dateIntervalFormatter.string(from: dateInterval) ?? ""
         }
@@ -74,7 +74,7 @@ enum DateOption: Filterable, Selectable, Equatable {
             let yesterdayEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: oneDayAgo)!
             return DateInterval(start: yesterdayStart, end: yesterdayEnd)
         case .last7days:
-            let sevenDaysAgo = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())!
+            let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
             let sevenDaysStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: sevenDaysAgo)!
             let sevenDaysEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date())!
             return DateInterval(start: sevenDaysStart, end: sevenDaysEnd)
