@@ -241,18 +241,18 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                     if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
                         let driveErrorVC = DriveErrorViewController.instantiate()
                         driveErrorVC.driveErrorViewType = .noDrive
-                        self.present(driveErrorVC, animated: true, completion: nil)
+                        self.present(driveErrorVC, animated: true)
                     } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance {
                         let driveErrorVC = DriveErrorViewController.instantiate()
                         driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
-                        self.present(driveErrorVC, animated: true, completion: nil)
+                        self.present(driveErrorVC, animated: true)
                     } else {
                         if let error = error {
                             SentrySDK.capture(error: error)
                         } else {
                             SentrySDK.capture(message: "Failed to fetch account on login (no error reported)")
                         }
-                        self.okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection, completion: nil)
+                        self.okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection)
                     }
                 }
             }

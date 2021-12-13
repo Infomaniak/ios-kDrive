@@ -93,33 +93,31 @@ public class PhotoLibraryUploader {
         return nil
     }
 
-    func getUrl(for asset: PHAsset, completion: @escaping ((URL?) -> Void)) {
-        if let resource = bestResource(for: asset) {
-            let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
-            PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption) { error in
-                if let error = error {
-                    let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
-                    breadcrumb.message = error.localizedDescription
-                    SentrySDK.addBreadcrumb(crumb: breadcrumb)
-
-                    completion(nil)
-                } else {
-                    completion(targetURL)
-                }
-            }
-        } else {
-            completion(nil)
+    func getUrl(for asset: PHAsset) async -> URL? {
+        guard let resource = bestResource(for: asset) else {
+            return nil
+        }
+        let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
+        do {
+            try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
+            return targetURL
+        } catch {
+            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+            breadcrumb.message = error.localizedDescription
+            SentrySDK.addBreadcrumb(crumb: breadcrumb)
+            return nil
         }
     }
 
-    func getUrlForPHAssetSync(_ asset: PHAsset) -> URL? {
+    func getUrlSync(for asset: PHAsset) -> URL? {
         var url: URL?
         let getUrlLock = DispatchGroup()
         getUrlLock.enter()
-        getUrl(for: asset) { fetchedUrl in
-            url = fetchedUrl
+        // TODO: Find a way to achieve this
+        /* Task {
+            url = await getUrl(for: asset)
             getUrlLock.leave()
-        }
+        } */
         getUrlLock.wait()
         return url
     }

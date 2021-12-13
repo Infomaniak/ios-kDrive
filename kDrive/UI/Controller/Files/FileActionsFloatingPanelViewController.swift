@@ -639,7 +639,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     private func presentShareSheet(from indexPath: IndexPath) {
         let activityViewController = UIActivityViewController(activityItems: [file.localUrl], applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = collectionView.cellForItem(at: indexPath) ?? collectionView
-        present(activityViewController, animated: true, completion: nil)
+        present(activityViewController, animated: true)
     }
 
     private func presentInteractionController(from indexPath: IndexPath) {
@@ -708,22 +708,30 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         switch file.convertedType {
         case .image:
             if let image = UIImage(contentsOfFile: file.localUrl.path) {
-                PhotoLibrarySaver.instance.save(image: image) { success, _ in
-                    DispatchQueue.main.async {
-                        if success {
+                Task {
+                    do {
+                        try await PhotoLibrarySaver.instance.save(image: image)
+                        DispatchQueue.main.async {
                             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
-                        } else {
+                        }
+                    } catch {
+                        DDLogError("Cannot save image: \(error)")
+                        DispatchQueue.main.async {
                             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
                         }
                     }
                 }
             }
         case .video:
-            PhotoLibrarySaver.instance.save(videoUrl: file.localUrl) { success, _ in
-                DispatchQueue.main.async {
-                    if success {
+            Task {
+                do {
+                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
+                    DispatchQueue.main.async {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
-                    } else {
+                    }
+                } catch {
+                    DDLogError("Cannot save video: \(error)")
+                    DispatchQueue.main.async {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
                     }
                 }
