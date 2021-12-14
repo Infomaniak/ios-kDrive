@@ -423,7 +423,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
         } else if section == .syncSettings {
             let row = settingsRows[indexPath.row]
             if row == .syncMode {
-                let alert = AlertChoiceViewController(title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue, "From date"], selected: newSyncSettings.syncMode.rawValue, action: KDriveResourcesStrings.Localizable.buttonValid) { selectedIndex in
+                let alert = AlertChoiceViewController(title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue, KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue2], selected: newSyncSettings.syncMode.rawValue, action: KDriveResourcesStrings.Localizable.buttonValid) { selectedIndex in
                     self.newSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)

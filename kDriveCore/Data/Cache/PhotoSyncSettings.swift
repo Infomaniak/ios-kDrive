@@ -32,7 +32,7 @@ import RealmSwift
         case .all:
             return KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue
         case .fromDate:
-            return "From Date"
+            return KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue
         }
     }
 }
