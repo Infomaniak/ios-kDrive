@@ -32,6 +32,32 @@ public protocol AccountManagerDelegate: AnyObject {
     func currentAccountNeedsAuthentication()
 }
 
+public extension InfomaniakLogin {
+    static func apiToken(username: String, applicationPassword: String) async throws -> ApiToken {
+        try await withCheckedThrowingContinuation { continuation in
+            getApiToken(username: username, applicationPassword: applicationPassword) { token, error in
+                if let token = token {
+                    continuation.resume(returning: token)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+    }
+
+    static func apiToken(using code: String, codeVerifier: String) async throws -> ApiToken {
+        try await withCheckedThrowingContinuation { continuation in
+            getApiTokenUsing(code: code, codeVerifier: codeVerifier) { token, error in
+                if let token = token {
+                    continuation.resume(returning: token)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+    }
+}
+
 public class AccountManager: RefreshTokenDelegate {
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -181,94 +207,65 @@ public class AccountManager: RefreshTokenDelegate {
         }
     }
 
-    public func createAndSetCurrentAccount(code: String, codeVerifier: String, completion: @escaping (Account?, Error?) -> Void) {
-        InfomaniakLogin.getApiTokenUsing(code: code, codeVerifier: codeVerifier) { apiToken, error in
-            if let token = apiToken {
-                self.createAndSetCurrentAccount(token: token, completion: completion)
-            } else {
-                completion(nil, error)
-            }
-        }
+    public func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account {
+        let token = try await InfomaniakLogin.apiToken(using: code, codeVerifier: codeVerifier)
+        return try await createAndSetCurrentAccount(token: token)
     }
 
-    public func createAndSetCurrentAccount(token: ApiToken, completion: @escaping (Account?, Error?) -> Void) {
+    public func createAndSetCurrentAccount(token: ApiToken) async throws -> Account {
         let newAccount = Account(apiToken: token)
         addAccount(account: newAccount)
         setCurrentAccount(account: newAccount)
         let apiFetcher = ApiFetcher(token: token, delegate: self)
-        apiFetcher.getUserForAccount { response, error in
-            if let user = response?.data {
-                newAccount.user = user
-
-                apiFetcher.getUserDrives { response, error in
-                    if let driveResponse = response?.data {
-                        guard !driveResponse.drives.main.isEmpty else {
-                            self.removeAccount(toDeleteAccount: newAccount)
-                            completion(nil, DriveError.noDrive)
-                            return
-                        }
-
-                        DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
-
-                        guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
-                            self.removeAccount(toDeleteAccount: newAccount)
-                            completion(nil, DriveError.maintenance)
-                            return
-                        }
-                        self.setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
-                        self.saveAccounts()
-                        self.mqService.registerForNotifications(with: driveResponse.ipsToken)
-                        completion(newAccount, nil)
-                    } else {
-                        self.removeAccount(toDeleteAccount: newAccount)
-                        completion(nil, error)
-                    }
-                }
-            } else {
-                completion(nil, error)
-            }
+        let user = try await apiFetcher.userProfile()
+        newAccount.user = user
+        let driveResponse = try await apiFetcher.userDrives()
+        guard !driveResponse.drives.main.isEmpty else {
+            removeAccount(toDeleteAccount: newAccount)
+            throw DriveError.noDrive
         }
+        DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
+        guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
+            removeAccount(toDeleteAccount: newAccount)
+            throw DriveError.maintenance
+        }
+        setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
+        saveAccounts()
+        mqService.registerForNotifications(with: driveResponse.ipsToken)
+        return newAccount
     }
 
-    public func updateUserForAccount(_ account: Account, registerToken: Bool, completion: @escaping (Account?, Drive?, Error?) -> Void) {
-        guard account.isConnected else { return }
+    public func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?) {
+        guard account.isConnected else {
+            throw DriveError.unknownToken
+        }
 
         let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
-        apiFetcher.getUserForAccount { response, error in
-            if let user = response?.data {
-                account.user = user
-                apiFetcher.getUserDrives { response, error in
-                    if let driveResponse = response?.data,
-                       !driveResponse.drives.main.isEmpty {
-                        let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
-                        self.clearDriveFileManagers()
-                        var switchedDrive: Drive?
-                        for driveRemoved in driveRemovedList {
-                            if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.userId == user.id && PhotoLibraryUploader.instance.settings?.driveId == driveRemoved.id {
-                                PhotoLibraryUploader.instance.disableSync()
-                            }
-                            if self.currentDriveFileManager?.drive.id == driveRemoved.id {
-                                switchedDrive = self.drives.first
-                                self.setCurrentDriveForCurrentAccount(drive: switchedDrive!)
-                            }
-                            DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
-                        }
-                        self.saveAccounts()
-                        if registerToken {
-                            self.mqService.registerForNotifications(with: driveResponse.ipsToken)
-                        }
-                        completion(account, switchedDrive, nil)
-                    } else {
-                        if let error = error as? DriveError, error == .noDrive {
-                            self.removeAccount(toDeleteAccount: account)
-                        }
-                        completion(nil, nil, error)
-                    }
-                }
-            } else {
-                completion(nil, nil, error)
-            }
+        let user = try await apiFetcher.userProfile()
+        account.user = user
+        let driveResponse = try await apiFetcher.userDrives()
+        guard !driveResponse.drives.main.isEmpty else {
+            removeAccount(toDeleteAccount: account)
+            throw DriveError.noDrive
         }
+        let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
+        clearDriveFileManagers()
+        var switchedDrive: Drive?
+        for driveRemoved in driveRemovedList {
+            if PhotoLibraryUploader.instance.isSyncEnabled && PhotoLibraryUploader.instance.settings?.userId == user.id && PhotoLibraryUploader.instance.settings?.driveId == driveRemoved.id {
+                PhotoLibraryUploader.instance.disableSync()
+            }
+            if currentDriveFileManager?.drive.id == driveRemoved.id {
+                switchedDrive = drives.first
+                setCurrentDriveForCurrentAccount(drive: switchedDrive!)
+            }
+            DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
+        }
+        saveAccounts()
+        if registerToken {
+            mqService.registerForNotifications(with: driveResponse.ipsToken)
+        }
+        return (account, switchedDrive)
     }
 
     public func loadAccounts() -> [Account] {

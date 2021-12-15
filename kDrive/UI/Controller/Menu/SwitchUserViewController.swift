@@ -38,8 +38,15 @@ class SwitchUserViewController: UIViewController {
         InfomaniakLogin.setupWebviewNavbar(title: "", titleColor: nil, color: nil, buttonColor: nil, clearCookie: true, timeOutMessage: "Timeout")
         tableView.register(cellView: UserAccountTableViewCell.self)
         // Try to update other accounts infos
-        for account in accountManager.accounts where account != accountManager.currentAccount {
-            accountManager.updateUserForAccount(account, registerToken: false) { _, _, _ in }
+        Task {
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for account in accountManager.accounts where account != accountManager.currentAccount {
+                    group.addTask {
+                        _ = try await self.accountManager.updateUser(for: account, registerToken: false)
+                    }
+                }
+                try await group.waitForAll()
+            }
         }
     }
 
@@ -130,13 +137,14 @@ extension SwitchUserViewController: UITableViewDataSource {
 
 extension SwitchUserViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
-        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { account, _ in
-            if account != nil {
+        Task {
+            do {
+                _ = try await AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
                 // Download root file
                 AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                     (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate())
                 }
-            } else {
+            } catch {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorConnection)
             }
         }

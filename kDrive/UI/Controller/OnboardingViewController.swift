@@ -223,15 +223,16 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
         let previousAccount = AccountManager.instance.currentAccount
         signInButton.setLoading(true)
         registerButton.isEnabled = false
-        AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier) { account, error in
-            if account != nil {
+        Task {
+            do {
+                _ = try await AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
                 // Download root file
                 AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
                     self.goToMainScreen()
                 }
-            } else {
+            } catch {
                 if previousAccount != nil {
                     AccountManager.instance.switchAccount(newAccount: previousAccount!)
                 }
@@ -247,11 +248,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                         driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
                         self.present(driveErrorVC, animated: true)
                     } else {
-                        if let error = error {
-                            SentrySDK.capture(error: error)
-                        } else {
-                            SentrySDK.capture(message: "Failed to fetch account on login (no error reported)")
-                        }
+                        SentrySDK.capture(error: error)
                         self.okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection)
                     }
                 }
