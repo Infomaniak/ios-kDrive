@@ -32,6 +32,7 @@ class PhotoSyncSettingsTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         valueLabel.text = ""
+        datePicker.maximumDate = Date()
     }
 
     @IBAction func didSelectDate(_ sender: UIDatePicker) {
