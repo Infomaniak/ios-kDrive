@@ -107,6 +107,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         resetSwipeActions()
         detailLabel?.text = ""
         logoImage.image = nil
+        logoImage.backgroundColor = nil
         logoImage.contentMode = .scaleAspectFit
         logoImage.layer.cornerRadius = 0
         logoImage.layer.masksToBounds = false
