@@ -42,8 +42,10 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
         super.prepareForReuse()
         titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         titleLabel.textAlignment = .natural
+        largeIconImageView.image = nil
         largeIconImageView.isHidden = true
         logoImage.isHidden = false
+        logoImage.image = nil
         logoImage.backgroundColor = nil
         iconImageView.backgroundColor = nil
         timeLabel.text = ""
