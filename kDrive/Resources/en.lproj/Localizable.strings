@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: en, English
  * Tagged: ios
- * Exported by: Florentin Bekier
- * Exported at: Wed, 08 Dec 2021 13:09:37 +0100
+ * Exported by: elena willen
+ * Exported at: Tue, 14 Dec 2021 13:35:44 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1856,6 +1856,12 @@
 
 /* loco:6049df4d5c2c3a04bc397a6d */
 "syncSettingsSaveDateAllPictureValue" = "All photos";
+
+/* loco:61b87c150eabdf2793302df2 */
+"syncSettingsSaveDateFromDateValue" = "from date";
+
+/* loco:61b87cfc3e2af8325337e394 */
+"syncSettingsSaveDateFromDateValue2" = "From date";
 
 /* loco:6049df4d5c2c3a04bc397a6e */
 "syncSettingsSaveDateNowValue" = "from now on";

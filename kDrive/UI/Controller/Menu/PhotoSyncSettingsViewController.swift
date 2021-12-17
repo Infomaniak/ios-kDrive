@@ -90,6 +90,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.register(cellView: LocationTableViewCell.self)
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
+        tableView.register(cellView: PhotoSyncSettingsTableViewCell.self)
 
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
@@ -198,12 +199,18 @@ class PhotoSyncSettingsViewController: UIViewController {
             guard newSyncSettings.userId != -1 && newSyncSettings.driveId != -1 && newSyncSettings.parentDirectoryId != -1 else { return }
             switch newSyncSettings.syncMode {
             case .new:
-                newSyncSettings.lastSync = Date(timeIntervalSinceNow: 0)
+                newSyncSettings.lastSync = Date()
             case .all:
                 if let currentSyncSettings = PhotoLibraryUploader.instance.settings, currentSyncSettings.syncMode == .all {
                     newSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
                     newSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                }
+            case .fromDate:
+                if let currentSyncSettings = PhotoLibraryUploader.instance.settings, currentSyncSettings.syncMode == .all || (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate.compare(newSyncSettings.fromDate) == .orderedAscending) {
+                    newSyncSettings.lastSync = currentSyncSettings.lastSync
+                } else {
+                    newSyncSettings.lastSync = newSyncSettings.fromDate
                 }
             }
             PhotoLibraryUploader.instance.enableSync(with: newSyncSettings)
@@ -369,10 +376,17 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 }
                 return cell
             case .syncMode:
-                let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
+                let cell = tableView.dequeueReusableCell(type: PhotoSyncSettingsTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate
                 cell.valueLabel.text = newSyncSettings.syncMode.title
+                cell.delegate = self
+                if newSyncSettings.syncMode == .fromDate {
+                    cell.datePicker.isHidden = false
+                    cell.datePicker.date = newSyncSettings.fromDate
+                } else {
+                    cell.datePicker.isHidden = true
+                }
                 return cell
             }
         case .syncDenied:
@@ -409,7 +423,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
         } else if section == .syncSettings {
             let row = settingsRows[indexPath.row]
             if row == .syncMode {
-                let alert = AlertChoiceViewController(title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue], selected: newSyncSettings.syncMode.rawValue, action: KDriveResourcesStrings.Localizable.buttonValid) { selectedIndex in
+                let alert = AlertChoiceViewController(title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue, KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue2], selected: newSyncSettings.syncMode.rawValue, action: KDriveResourcesStrings.Localizable.buttonValid) { selectedIndex in
                     self.newSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
@@ -453,5 +467,14 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             }
             _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
+    }
+}
+
+// MARK: - Photo Sync Settings Cell Delegate
+
+extension PhotoSyncSettingsViewController: PhotoSyncSettingsTableViewCellDelegate {
+    func didSelectDate(date: Date) {
+        newSyncSettings.fromDate = date
+        updateSaveButtonState()
     }
 }

@@ -277,7 +277,7 @@ public enum ApiRoutes {
     public static func downloadArchive(driveId: Int, archiveId: String) -> String {
         return "\(driveApiUrl)\(driveId)/file/archive/\(archiveId)/download"
     }
-    
+
     public static func downloadFileAsPdf(file: File) -> String {
         return "\(fileURL(file: file))download?as=pdf"
     }

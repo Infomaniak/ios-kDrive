@@ -23,6 +23,7 @@ import RealmSwift
 @objc public enum PhotoSyncMode: Int, RealmEnum {
     case new = 0
     case all = 1
+    case fromDate = 2
 
     public var title: String {
         switch self {
@@ -30,6 +31,8 @@ import RealmSwift
             return KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue
         case .all:
             return KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue
+        case .fromDate:
+            return KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue
         }
     }
 }
@@ -40,18 +43,20 @@ public class PhotoSyncSettings: Object {
     @objc public dynamic var parentDirectoryId: Int = -1
     @objc public dynamic var lastSync = Date(timeIntervalSince1970: 0)
     @objc public dynamic var syncMode: PhotoSyncMode = .new
+    @objc public dynamic var fromDate = Date()
     @objc public dynamic var syncPicturesEnabled = true
     @objc public dynamic var syncVideosEnabled = true
     @objc public dynamic var syncScreenshotsEnabled = true
     @objc public dynamic var createDatedSubFolders = false
     @objc public dynamic var deleteAssetsAfterImport = false
 
-    public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool, createDatedSubFolders: Bool, deleteAssetsAfterImport: Bool) {
+    public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, fromDate: Date, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool, createDatedSubFolders: Bool, deleteAssetsAfterImport: Bool) {
         self.userId = userId
         self.driveId = driveId
         self.parentDirectoryId = parentDirectoryId
         self.lastSync = lastSync
         self.syncMode = syncMode
+        self.fromDate = fromDate
         self.syncPicturesEnabled = syncPictures
         self.syncVideosEnabled = syncVideos
         self.syncScreenshotsEnabled = syncScreenshots
@@ -74,6 +79,7 @@ public class PhotoSyncSettings: Object {
             syncScreenshotsEnabled == settings.syncScreenshotsEnabled &&
             createDatedSubFolders == settings.createDatedSubFolders &&
             deleteAssetsAfterImport == settings.deleteAssetsAfterImport &&
-            syncMode == settings.syncMode
+            syncMode == settings.syncMode &&
+            fromDate == settings.fromDate
     }
 }
