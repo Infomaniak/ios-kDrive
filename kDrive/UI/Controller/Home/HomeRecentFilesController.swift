@@ -60,7 +60,7 @@ class HomeRecentFilesController {
     func getFiles(completion: @escaping ([File]?) -> Void) {}
 
     func restoreCachedPages() {
-        invalidated = true
+        invalidated = false
         homeViewController?.reloadWith(fetchedFiles: .file(files), isEmpty: empty)
         refreshIfNeeded()
     }
@@ -94,10 +94,11 @@ class HomeRecentFilesController {
             resetController()
         }
 
+        invalidated = false
         guard !loading && moreComing else {
             return
         }
-        invalidated = false
+
         loading = true
         getFiles { files in
             self.loading = false
@@ -161,6 +162,6 @@ class HomeRecentFilesController {
     }
 
     class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {
-        fatalError("initInstance must me overriden")
+        fatalError("initInstance must be overridden")
     }
 }
