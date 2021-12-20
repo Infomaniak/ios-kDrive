@@ -91,7 +91,7 @@ public class AccountManager: RefreshTokenDelegate {
 
         reloadTokensAndAccounts()
 
-        if let account = accounts.first(where: { $0.userId == currentUserId }) ?? accounts.first {
+        if let account = account(for: currentUserId) ?? accounts.first {
             setCurrentAccount(account: account)
 
             if let currentDrive = DriveInfosManager.instance.getDrive(id: currentDriveId, userId: currentUserId) ?? drives.first {
@@ -112,7 +112,7 @@ public class AccountManager: RefreshTokenDelegate {
         }
 
         for token in tokens {
-            if let account = accounts.first(where: { $0.userId == token.userId }) {
+            if let account = account(for: token.userId) {
                 account.token = token
             } else {
                 // Remove token with no account
@@ -159,7 +159,7 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
-        return accounts.first { $0.userId == id }?.token
+        return account(for: id)?.token
     }
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
@@ -172,7 +172,7 @@ public class AccountManager: RefreshTokenDelegate {
         }
         tokens.removeAll { $0.userId == token.userId }
         KeychainHelper.deleteToken(for: token.userId)
-        if let account = getAccountForToken(token: token) {
+        if let account = account(for: token) {
             account.token = nil
             if account.userId == currentUserId {
                 delegate?.currentAccountNeedsAuthentication()
@@ -353,15 +353,17 @@ public class AccountManager: RefreshTokenDelegate {
     public func removeTokenAndAccount(token: ApiToken) {
         tokens.removeAll { $0.userId == token.userId }
         KeychainHelper.deleteToken(for: token.userId)
-        if let account = getAccountForToken(token: token) {
+        if let account = account(for: token) {
             removeAccount(toDeleteAccount: account)
         }
     }
 
-    public func getAccountForToken(token: ApiToken) -> Account? {
-        return accounts.first { account -> Bool in
-            account.token?.userId == token.userId
-        }
+    public func account(for token: ApiToken) -> Account? {
+        return accounts.first { $0.token?.userId == token.userId }
+    }
+
+    public func account(for userId: Int) -> Account? {
+        return accounts.first { $0.userId == userId }
     }
 
     public func updateToken(newToken: ApiToken, oldToken: ApiToken) {
