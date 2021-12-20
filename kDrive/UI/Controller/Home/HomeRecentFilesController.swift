@@ -100,18 +100,18 @@ class HomeRecentFilesController {
         }
 
         loading = true
-        getFiles { files in
+        getFiles { fetchedFiles in
             self.loading = false
-            if let files = files {
-                self.files.append(contentsOf: files)
-                self.empty = files.isEmpty
-                self.moreComing = files.count == DriveApiFetcher.itemPerPage
+            if let fetchedFiles = fetchedFiles {
+                self.files.append(contentsOf: fetchedFiles)
+                self.empty = self.page == 1 && fetchedFiles.isEmpty
+                self.moreComing = fetchedFiles.count == DriveApiFetcher.itemPerPage
                 self.page += 1
 
                 guard !self.invalidated else {
                     return
                 }
-                self.homeViewController?.reloadWith(fetchedFiles: .file(files), isEmpty: self.empty)
+                self.homeViewController?.reloadWith(fetchedFiles: .file(self.files), isEmpty: self.empty)
             }
         }
     }
