@@ -319,6 +319,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func setSelectedHomeIndex(_ index: Int) {
+        let emptyViewModel = HomeViewModel(topRows: viewModel.topRows, recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
+        reload(newViewModel: emptyViewModel)
+
         UserDefaults.shared.selectedHomeIndex = index
         currentRecentFilesController?.invalidated = true
 

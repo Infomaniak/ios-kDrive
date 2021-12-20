@@ -35,6 +35,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
     }
 
     override func restoreCachedPages() {
+        invalidated = false
         homeViewController?.reloadWith(fetchedFiles: .fileActivity(mergedActivities), isEmpty: empty)
     }
 
@@ -44,10 +45,10 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
             mergedActivities = []
         }
 
+        invalidated = false
         guard !loading && moreComing else {
             return
         }
-        invalidated = false
         loading = true
 
         driveFileManager.apiFetcher.getRecentActivity(driveId: driveFileManager.drive.id, page: page) { response, _ in
