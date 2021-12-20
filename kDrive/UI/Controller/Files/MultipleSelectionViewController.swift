@@ -42,6 +42,11 @@ class MultipleSelectionViewController: UIViewController {
         return []
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        selectionMode = false
+    }
+
     @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
         guard !selectionMode else { return }
         let pos = sender.location(in: collectionView)
