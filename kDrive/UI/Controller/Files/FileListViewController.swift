@@ -1125,6 +1125,8 @@ extension FileListViewController: UICollectionViewDragDelegate {
                 UIDragPreview(view: previewImageView)
             }
         }
+        session.localContext = draggedFile
+
         return [draggedItem]
     }
 }
@@ -1223,7 +1225,15 @@ extension FileListViewController: UICollectionViewDropDelegate {
     func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
         if let indexPath = destinationIndexPath,
            indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory {
-            return handleDropOverDirectory(sortedFiles[indexPath.item], at: indexPath)
+            if let draggedFile = session.localDragSession?.localContext as? File,
+               draggedFile.id == sortedFiles[indexPath.item].id {
+                if let indexPath = lastDropPosition?.indexPath {
+                    collectionView.cellForItem(at: indexPath)?.isHighlighted = false
+                }
+                return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
+            } else {
+                return handleDropOverDirectory(sortedFiles[indexPath.item], at: indexPath)
+            }
         } else {
             if let indexPath = lastDropPosition?.indexPath {
                 collectionView.cellForItem(at: indexPath)?.isHighlighted = false
