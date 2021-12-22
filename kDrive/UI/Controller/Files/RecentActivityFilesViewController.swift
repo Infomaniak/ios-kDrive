@@ -90,7 +90,7 @@ class RecentActivityFilesViewController: FileListViewController {
 
     private func sortFiles(_ files: [File]) -> [File] {
         return files.sorted { firstFile, secondFile -> Bool in
-            switch sortType {
+            switch viewModel.sortType {
             case .nameAZ:
                 return firstFile.name.lowercased() < secondFile.name.lowercased()
             case .nameZA:
@@ -112,7 +112,7 @@ class RecentActivityFilesViewController: FileListViewController {
     // MARK: - Swipe action collection view data source
 
     override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if sortedFiles[indexPath.row].isTrashed {
+        if viewModel.getFile(at: indexPath.item).isTrashed {
             return nil
         }
         return super.collectionView(collectionView, actionsFor: cell, at: indexPath)
