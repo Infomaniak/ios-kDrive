@@ -107,8 +107,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     private var uploadsObserver: ObservationToken?
     private var networkObserver: ObservationToken?
-    private var listStyleObserver: ObservationToken?
-    private var sortTypeObserver: ObservationToken?
 
     private var background: EmptyTableView?
     private var lastDropPosition: DropPosition?
@@ -195,7 +193,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         }
 
-        viewModel.onSortTypeUpdated = { [weak self] _ in
+        viewModel.onSortTypeUpdated = { _ in
         }
 
         viewModel.onListStyleUpdated = { [weak self] listStyle in
@@ -377,8 +375,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         // File observer
         // Network observer
         observeNetwork()
-        // Options observer
-        observeListOptions()
     }
 
     final func observeUploads() {
@@ -415,10 +411,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
             }
         }
-    }
-
-    final func observeListOptions() {
-        guard listStyleObserver == nil && sortTypeObserver == nil else { return }
     }
 
     final func updateUploadCount() {
@@ -1010,9 +1002,8 @@ extension FileListViewController: SelectDelegate {
     func didSelect(option: Selectable) {
         guard let type = option as? SortType else { return }
         MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
-        viewModel.sortType = type
         if !trashSort {
-            FileListOptions.instance.currentSortType = viewModel.sortType
+            FileListOptions.instance.currentSortType = type
             // Collection view will be reloaded via the observer
         } else {
             reloadData(showRefreshControl: false)
