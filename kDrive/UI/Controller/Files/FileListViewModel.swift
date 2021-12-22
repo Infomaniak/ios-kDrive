@@ -25,12 +25,15 @@ import RealmSwift
 protocol FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
-    /// deletions, insertions, modifications, shouldReload
+    /// SortType
     typealias SortTypeUpdatedCallback = (SortType) -> Void
+    /// ListStyle
+    typealias ListStyleUpdatedCallback = (ListStyle) -> Void
 
     var isEmpty: Bool { get }
     var fileCount: Int { get }
     var sortType: SortType { get set }
+    var listStyle: ListStyle { get set }
 
     func getFile(at index: Int) -> File
     func setFile(_ file: File, at index: Int)
@@ -40,6 +43,7 @@ protocol FileListViewModel {
 
     var onFileListUpdated: FileListUpdatedCallback? { get set }
     var onSortTypeUpdated: SortTypeUpdatedCallback? { get set }
+    var onListStyleUpdated: ListStyleUpdatedCallback? { get set }
 }
 
 class ManagedFileListViewModel: FileListViewModel {
@@ -48,6 +52,11 @@ class ManagedFileListViewModel: FileListViewModel {
         didSet {
             updateDataSource()
             onSortTypeUpdated?(sortType)
+        }
+    }
+    var listStyle: ListStyle {
+        didSet {
+            onListStyleUpdated?(listStyle)
         }
     }
 
@@ -62,10 +71,12 @@ class ManagedFileListViewModel: FileListViewModel {
 
     var onFileListUpdated: FileListUpdatedCallback?
     var onSortTypeUpdated: SortTypeUpdatedCallback?
+    var onListStyleUpdated: ListStyleUpdatedCallback?
 
     private var files: Results<File>
     private var realmObservationToken: NotificationToken?
-    private var sortTypeObserVation: AnyCancellable?
+    private var sortTypeObservation: AnyCancellable?
+    private var listStyleObservation: AnyCancellable?
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.driveFileManager = driveFileManager
@@ -75,6 +86,7 @@ class ManagedFileListViewModel: FileListViewModel {
             self.currentDirectory = driveFileManager.getRootFile()
         }
         self.sortType = FileListOptions.instance.currentSortType
+        self.listStyle = FileListOptions.instance.currentStyle
         self.files = driveFileManager.getRealm().objects(File.self).filter(NSPredicate(value: false))
 
         setupObservation()
@@ -82,7 +94,8 @@ class ManagedFileListViewModel: FileListViewModel {
     }
 
     private func setupObservation() {
-        sortTypeObserVation = FileListOptions.instance.$currentSortType.assign(to: \.sortType, on: self)
+        sortTypeObservation = FileListOptions.instance.$currentSortType.assign(to: \.sortType, on: self)
+        listStyleObservation = FileListOptions.instance.$currentStyle.assign(to: \.listStyle, on: self)
     }
 
     private func updateDataSource() {
