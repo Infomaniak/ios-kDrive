@@ -56,7 +56,7 @@ class SearchViewController: FileListViewController {
         // Set configuration
         configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
         listStyle = .list
-        sortType = .newer
+        viewModel.sortType = .newer
 
         collectionView.register(UINib(nibName: searchHeaderIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: searchHeaderIdentifier)
         collectionView.register(cellView: RecentSearchCollectionViewCell.self)
@@ -160,7 +160,6 @@ class SearchViewController: FileListViewController {
         listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
         collectionView.refreshControl = isDisplayingSearchResults ? refreshControl : nil
         collectionViewLayout?.sectionHeadersPinToVisibleBounds = isDisplayingSearchResults
-        sortedFiles = []
         collectionView.backgroundView = nil
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadData()
