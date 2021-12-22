@@ -98,11 +98,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     var isLoadingData = false
     private var isReloading = false
     private var isContentLoaded = false
-    var listStyle = FileListOptions.instance.currentStyle {
-        didSet {
-            headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
-        }
-    }
 
     var currentDirectoryCount: FileCount?
     var selectAllMode = false
@@ -202,6 +197,15 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         viewModel.onSortTypeUpdated = { [weak self] _ in
         }
+
+        viewModel.onListStyleUpdated = { [weak self] listStyle in
+            guard let self = self else { return }
+            self.headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
+            UIView.transition(with: self.collectionView, duration: 0.25, options: .transitionCrossDissolve) {
+                self.collectionView.reloadData()
+                self.setSelectedCells()
+            }
+        }
     }
 
     deinit {
@@ -286,7 +290,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         headerView.sortView.isHidden = isListEmpty
 
         headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
-        headerView.listOrGridButton.setImage(listStyle.icon, for: .normal)
+        headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
 
         if configuration.showUploadingFiles {
             headerView.uploadCardView.isHidden = uploadingFilesCount == 0
@@ -409,18 +413,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     final func observeListOptions() {
         guard listStyleObserver == nil && sortTypeObserver == nil else { return }
-        // List style observer
-        listStyleObserver = FileListOptions.instance.observeListStyleChange(self) { [weak self] newStyle in
-            self?.listStyle = newStyle
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                UIView.transition(with: self.collectionView, duration: 0.25, options: .transitionCrossDissolve) {
-                    self.collectionViewLayout.invalidateLayout()
-                    self.collectionView.reloadData()
-                    self.setSelectedCells()
-                }
-            }
-        }
     }
 
     final func updateUploadCount() {
@@ -578,7 +570,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cellType: UICollectionViewCell.Type
-        switch listStyle {
+        switch viewModel.listStyle {
         case .list:
             cellType = FileCollectionViewCell.self
         case .grid:
@@ -657,7 +649,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Swipe action collection view data source
 
     func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if configuration.fromActivities || listStyle == .grid {
+        if configuration.fromActivities || viewModel.listStyle == .grid {
             return nil
         }
         var actions = [SwipeCellAction]()
@@ -884,12 +876,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func gridButtonPressed() {
         // Toggle grid/list
-        if listStyle == .grid {
-            listStyle = .list
-        } else {
-            listStyle = .grid
-        }
-        FileListOptions.instance.currentStyle = listStyle
+        FileListOptions.instance.currentStyle = viewModel.listStyle == .grid ? .list : .grid
         // Collection view will be reloaded via the observer
     }
 
@@ -950,7 +937,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
 extension FileListViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        switch listStyle {
+        switch viewModel.listStyle {
         case .list:
             // Important: subtract safe area insets
             let cellWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView.safeAreaInsets.right - leftRightInset * 2
@@ -964,7 +951,7 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        switch listStyle {
+        switch viewModel.listStyle {
         case .list:
             return 0
         case .grid:
@@ -973,7 +960,7 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        switch listStyle {
+        switch viewModel.listStyle {
         case .list:
             return 0
         case .grid:

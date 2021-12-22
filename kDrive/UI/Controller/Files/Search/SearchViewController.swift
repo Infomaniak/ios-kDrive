@@ -156,7 +156,7 @@ class SearchViewController: FileListViewController {
     private func updateList() {
         guard isViewLoaded else { return }
         // Update UI
-        listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
+        viewModel.listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
         collectionView.refreshControl = isDisplayingSearchResults ? refreshControl : nil
         collectionViewLayout?.sectionHeadersPinToVisibleBounds = isDisplayingSearchResults
         collectionView.backgroundView = nil
