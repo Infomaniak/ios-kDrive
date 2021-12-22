@@ -46,7 +46,7 @@ class OfflineViewController: FileListViewController {
     override func updateChild(_ file: File, at index: Int) {
         // Remove file from list if it is not available offline anymore
         if !file.isAvailableOffline {
-            let fileId = sortedFiles[index].id
+            let fileId = viewModel.getFile(at: index).id
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.removeFileFromList(id: fileId)
@@ -54,8 +54,8 @@ class OfflineViewController: FileListViewController {
             return
         }
 
-        let oldFile = sortedFiles[index]
-        sortedFiles[index] = file
+        let oldFile = viewModel.getFile(at: index)
+        viewModel.setFile(file, at: index)
 
         // We don't need to call reload data if only the children were updated
         if oldFile.isContentEqual(to: file) {
