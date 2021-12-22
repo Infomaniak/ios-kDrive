@@ -20,57 +20,22 @@ import Combine
 import Foundation
 
 public class FileListOptions {
-    private var didChangeListStyleObservers = [UUID: (ListStyle) -> Void]()
-
     public static let instance = FileListOptions()
 
     private init() {
+        currentStyle = UserDefaults.shared.listStyle
         currentSortType = UserDefaults.shared.sortType
     }
 
-    public var currentStyle: ListStyle {
-        get {
-            return UserDefaults.shared.listStyle
-        }
-        set {
-            setStyle(newValue)
+    @Published public var currentStyle: ListStyle {
+        didSet {
+            UserDefaults.shared.listStyle = currentStyle
         }
     }
 
     @Published public var currentSortType: SortType {
         didSet {
             UserDefaults.shared.sortType = currentSortType
-        }
-    }
-
-    private func setStyle(_ listStyle: ListStyle) {
-        UserDefaults.shared.listStyle = listStyle
-
-        didChangeListStyleObservers.values.forEach { closure in
-            closure(listStyle)
-        }
-    }
-}
-
-// MARK: - Observation
-
-public extension FileListOptions {
-    @discardableResult
-    func observeListStyleChange<T: AnyObject>(_ observer: T, using closure: @escaping (ListStyle) -> Void) -> ObservationToken {
-        let key = UUID()
-        didChangeListStyleObservers[key] = { [weak self, weak observer] style in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.didChangeListStyleObservers.removeValue(forKey: key)
-                return
-            }
-
-            closure(style)
-        }
-
-        return ObservationToken { [weak self] in
-            self?.didChangeListStyleObservers.removeValue(forKey: key)
         }
     }
 }
