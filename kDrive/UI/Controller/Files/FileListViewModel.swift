@@ -94,8 +94,12 @@ class ManagedFileListViewModel: FileListViewModel {
     }
 
     private func setupObservation() {
-        sortTypeObservation = FileListOptions.instance.$currentSortType.assign(to: \.sortType, on: self)
-        listStyleObservation = FileListOptions.instance.$currentStyle.assign(to: \.listStyle, on: self)
+        sortTypeObservation = FileListOptions.instance.$currentSortType
+            .receive(on: RunLoop.main)
+            .assign(to: \.sortType, on: self)
+        listStyleObservation = FileListOptions.instance.$currentStyle
+            .receive(on: RunLoop.main)
+            .assign(to: \.listStyle, on: self)
     }
 
     private func updateDataSource() {
