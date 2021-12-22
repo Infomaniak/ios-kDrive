@@ -104,21 +104,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    var sortType = FileListOptions.instance.currentSortType {
-        didSet {
-            headerView?.sortButton.setTitle(sortType.value.translation, for: .normal)
-        }
-    }
-
     var currentDirectoryCount: FileCount?
     var selectAllMode = false
-    var sortedFiles: [File] = []
     #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
 
     private var uploadsObserver: ObservationToken?
-    private var filesObserver: ObservationToken?
     private var networkObserver: ObservationToken?
     private var listStyleObserver: ObservationToken?
     private var sortTypeObserver: ObservationToken?
@@ -134,10 +126,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         #endif
     }
 
+    var viewModel: FileListViewModel!
+
     // MARK: - View controller lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        viewModel = ManagedFileListViewModel(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
 
         setTitle()
 
@@ -186,8 +181,27 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         // Set up observers
         setUpObservers()
-
+        setupViewModelCallbacks()
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+
+    private func setupViewModelCallbacks() {
+        viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, shouldReload in
+            guard !shouldReload else {
+                self?.collectionView.reloadData()
+                return
+            }
+            self?.collectionView.performBatchUpdates {
+                // Always apply updates in the following order: deletions, insertions, then modifications.
+                // Handling insertions before deletions may result in unexpected behavior.
+                self?.collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 0) })
+                self?.collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 0) })
+                self?.collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 0) })
+            }
+        }
+
+        viewModel.onSortTypeUpdated = { [weak self] _ in
+        }
     }
 
     deinit {
@@ -215,7 +229,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        if sortedFiles.isEmpty {
+        if viewModel.isEmpty {
             updateEmptyView()
         }
         coordinator.animate { _ in
@@ -271,7 +285,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         headerView.sortView.isHidden = isListEmpty
 
-        headerView.sortButton.setTitle(sortType.value.translation, for: .normal)
+        headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
         headerView.listOrGridButton.setImage(listStyle.icon, for: .normal)
 
         if configuration.showUploadingFiles {
@@ -283,8 +297,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func updateChild(_ file: File, at index: Int) {
-        let oldFile = sortedFiles[index]
-        sortedFiles[index] = file
+        let oldFile = viewModel.getFile(at: index)
+        viewModel.setFile(file, at: index)
 
         // We don't need to call reload data if only the children were updated
         if oldFile.isContentEqual(to: file) {
@@ -313,7 +327,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         }
 
-        getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] result, moreComing, replaceFiles in
+        getFiles(page: page, sortType: viewModel.sortType, forceRefresh: forceRefresh) { [weak self] result, moreComing, _ in
             guard let self = self else { return }
             self.isReloading = false
             if self.configuration.isRefreshControlEnabled {
@@ -321,16 +335,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
             switch result {
             case .success(let newFiles):
-                let files: [File]
-                if replaceFiles || page == 1 {
-                    files = newFiles
-                } else {
-                    files = self.sortedFiles + newFiles
-                }
-
-                self.showEmptyViewIfNeeded(files: files)
-                self.reloadCollectionView(with: files)
-
                 if moreComing {
                     self.reloadData(page: page + 1, forceRefresh: forceRefresh, showRefreshControl: showRefreshControl, withActivities: withActivities)
                 } else {
@@ -361,7 +365,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         // Upload files observer
         observeUploads()
         // File observer
-        observeFiles()
         // Network observer
         observeNetwork()
         // Options observer
@@ -392,20 +395,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    final func observeFiles() {
-        guard filesObserver == nil else { return }
-        fileObserverThrottler.handler = { [weak self] _ in
-            self?.reloadData(showRefreshControl: false)
-        }
-        filesObserver = driveFileManager?.observeFileUpdated(self, fileId: nil) { [unowned self] file in
-            if file.id == currentDirectory?.id {
-                fileObserverThrottler.call(file)
-            } else if let index = sortedFiles.firstIndex(where: { $0.id == file.id }) {
-                updateChild(file, at: index)
-            }
-        }
-    }
-
     final func observeNetwork() {
         guard networkObserver == nil else { return }
         networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
@@ -432,11 +421,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 }
             }
         }
-        // Sort type observer
-        sortTypeObserver = FileListOptions.instance.observeSortTypeChange(self) { [unowned self] newSortType in
-            sortType = newSortType
-            reloadData(showRefreshControl: false)
-        }
     }
 
     final func updateUploadCount() {
@@ -461,11 +445,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    final func removeFileFromList(id: Int) {
-        let newSortedFiles = sortedFiles.filter { $0.id != id }
-        reloadCollectionView(with: newSortedFiles)
-        showEmptyViewIfNeeded(files: newSortedFiles)
-    }
+    final func removeFileFromList(id: Int) {}
 
     static func instantiate(driveFileManager: DriveFileManager) -> Self {
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
@@ -499,49 +479,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    private func reloadCollectionView(with files: [File]) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            let firstFileId = self.sortedFiles.first?.id
-            let lastFileId = self.sortedFiles.last?.id
-            // Reload file list with DifferenceKit
-            let changeSet = StagedChangeset(source: self.sortedFiles, target: files)
-            DispatchQueue.main.async {
-                if changeSet.isEmpty {
-                    // Invalidate layout to update header properly
-                    self.collectionView.collectionViewLayout.invalidateLayout()
-                }
-                self.collectionView.reload(using: changeSet) { $0.changeCount > self.maxDiffChanges } setData: { files in
-                    self.sortedFiles = files
-                    self.updateSelectedItems(newChildren: files)
-                }
-                // Reload corners
-                if self.listStyle == .list,
-                   let oldFirstFileId = firstFileId,
-                   let oldLastFileId = lastFileId,
-                   let newFirstFileId = self.sortedFiles.first?.id,
-                   let newLastFileId = self.sortedFiles.last?.id {
-                    var indexPaths = [IndexPath]()
-                    if oldFirstFileId != newFirstFileId {
-                        indexPaths.append(IndexPath(item: 0, section: 0))
-                        if let index = self.sortedFiles.firstIndex(where: { $0.id == oldFirstFileId }) {
-                            indexPaths.append(IndexPath(item: index, section: 0))
-                        }
-                    }
-                    if oldLastFileId != newLastFileId {
-                        indexPaths.append(IndexPath(item: self.sortedFiles.count - 1, section: 0))
-                        if let index = self.sortedFiles.firstIndex(where: { $0.id == oldLastFileId }) {
-                            indexPaths.append(IndexPath(item: index, section: 0))
-                        }
-                    }
-                    if !indexPaths.isEmpty {
-                        self.collectionView.reloadItems(at: indexPaths)
-                    }
-                }
-                self.setSelectedCells()
-            }
-        }
-    }
+    private func reloadCollectionView(with files: [File]) {}
 
     #if !ISEXTENSION
         private func showQuickActionsPanel(file: File) {
@@ -587,22 +525,22 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     override func getItem(at indexPath: IndexPath) -> File? {
-        return sortedFiles[indexPath.row]
+        return viewModel.getFile(at: indexPath.item)
     }
 
     override func getAllItems() -> [File] {
-        return sortedFiles
+        return viewModel.getAllFiles()
     }
 
     override final func setSelectedCells() {
         if selectAllMode {
-            selectedItems = Set(sortedFiles)
-            for i in 0 ..< sortedFiles.count {
+            selectedItems = Set(viewModel.getAllFiles())
+            for i in 0 ..< viewModel.fileCount {
                 collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: [])
             }
         } else {
             if selectionMode && !selectedItems.isEmpty {
-                for i in 0 ..< sortedFiles.count where selectedItems.contains(sortedFiles[i]) {
+                for i in 0 ..< viewModel.fileCount where selectedItems.contains(viewModel.getFile(at: i)) {
                     collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: .centeredVertically)
                 }
             }
@@ -628,12 +566,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Collection view data source
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        sortedFiles.count
+        return viewModel.fileCount
     }
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
-        setUpHeaderView(headerView, isListEmpty: sortedFiles.isEmpty)
+        setUpHeaderView(headerView, isListEmpty: viewModel.isEmpty)
         self.headerView = headerView
         return headerView
     }
@@ -648,8 +586,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
         let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
 
-        let file = sortedFiles[indexPath.row]
-        cell.initStyle(isFirst: indexPath.row == 0, isLast: indexPath.row == sortedFiles.count - 1)
+        let file = viewModel.getFile(at: indexPath.item)
+        cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.fileCount - 1)
         cell.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
         cell.delegate = self
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
@@ -677,12 +615,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             selectChild(at: indexPath)
             return
         }
-        let file = sortedFiles[indexPath.row]
+        let file = viewModel.getFile(at: indexPath.item)
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             return
         }
         #if !ISEXTENSION
-            filePresenter.present(driveFileManager: driveFileManager, file: file, files: sortedFiles, normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
+            filePresenter.present(driveFileManager: driveFileManager, file: file, files: viewModel.getAllFiles(), normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
         #endif
     }
 
@@ -703,7 +641,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
         #if !ISEXTENSION
-            let file = sortedFiles[indexPath.row]
+            let file = viewModel.getFile(at: indexPath.item)
             switch action {
             case .share:
                 let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
@@ -723,7 +661,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             return nil
         }
         var actions = [SwipeCellAction]()
-        let rights = sortedFiles[indexPath.row].capabilities
+        let rights = viewModel.getFile(at: indexPath.item).capabilities
         if rights.canShare {
             actions.append(.share)
         }
@@ -778,7 +716,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             updateUploadCount()
         }
         observeUploads()
-        observeFiles()
         reloadData()
     }
 
@@ -818,7 +755,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if !configuration.selectAllSupported {
             // Select all not supported, don't show button
             navigationItem.rightBarButtonItem = nil
-        } else if selectedItems.count == sortedFiles.count || selectAllMode {
+        } else if selectedItems.count == viewModel.fileCount || selectAllMode {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonDeselectAll, style: .plain, target: self, action: #selector(deselectAllChildren))
         } else {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
@@ -941,7 +878,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Files header view delegate
 
     func sortButtonPressed() {
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: trashSort ? [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest] : [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest], selectedOption: sortType, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: trashSort ? [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest] : [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest], selectedOption: viewModel.sortType, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 
@@ -1068,7 +1005,7 @@ extension FileListViewController: FileCellDelegate {
             guard let indexPath = collectionView.indexPath(for: cell) else {
                 return
             }
-            showQuickActionsPanel(file: sortedFiles[indexPath.row])
+            showQuickActionsPanel(file: viewModel.getFile(at: indexPath.item))
         #endif
     }
 }
@@ -1078,9 +1015,9 @@ extension FileListViewController: FileCellDelegate {
 extension FileListViewController: SelectDelegate {
     func didSelect(option: Selectable) {
         guard let type = option as? SortType else { return }
-        sortType = type
+        viewModel.sortType = type
         if !trashSort {
-            FileListOptions.instance.currentSortType = sortType
+            FileListOptions.instance.currentSortType = viewModel.sortType
             // Collection view will be reloaded via the observer
         } else {
             reloadData(showRefreshControl: false)
@@ -1095,9 +1032,6 @@ extension FileListViewController: SelectDelegate {
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
             let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
             driveFileManager = newDriveFileManager
-            filesObserver?.cancel()
-            filesObserver = nil
-            observeFiles()
             currentDirectory = driveFileManager.getCachedRootFile()
             if configuration.showUploadingFiles {
                 updateUploadCount()
@@ -1107,9 +1041,8 @@ extension FileListViewController: SelectDelegate {
                 observeUploads()
             }
             if isDifferentDrive {
-                sortedFiles = []
-                collectionView.reloadData()
-                reloadData()
+                viewModel = ManagedFileListViewModel(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                setupViewModelCallbacks()
                 navigationController?.popToRootViewController(animated: false)
             }
         }
@@ -1130,9 +1063,9 @@ extension FileListViewController: TopScrollable {
 
 extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        guard indexPath.item < sortedFiles.count else { return [] }
+        guard indexPath.item < viewModel.fileCount else { return [] }
 
-        let draggedFile = sortedFiles[indexPath.item]
+        let draggedFile = viewModel.getFile(at: indexPath.item)
         guard draggedFile.capabilities.canMove && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
         }
@@ -1167,7 +1100,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
                     self.lastDropPosition = nil
                     collectionView.cellForItem(at: indexPath)?.isHighlighted = false
                     #if !ISEXTENSION
-                        filePresenter.present(driveFileManager: driveFileManager, file: directory, files: sortedFiles, normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
+                        filePresenter.present(driveFileManager: driveFileManager, file: directory, files: viewModel.getAllFiles(), normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
                     #endif
                 }
             } else {
@@ -1238,15 +1171,15 @@ extension FileListViewController: UICollectionViewDropDelegate {
 
     func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
         if let indexPath = destinationIndexPath,
-           indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory {
+           indexPath.item < viewModel.fileCount && viewModel.getFile(at: indexPath.item).isDirectory {
             if let draggedFile = session.localDragSession?.localContext as? File,
-               draggedFile.id == sortedFiles[indexPath.item].id {
+               draggedFile.id == viewModel.getFile(at: indexPath.item).id {
                 if let indexPath = lastDropPosition?.indexPath {
                     collectionView.cellForItem(at: indexPath)?.isHighlighted = false
                 }
                 return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
             } else {
-                return handleDropOverDirectory(sortedFiles[indexPath.item], at: indexPath)
+                return handleDropOverDirectory(viewModel.getFile(at: indexPath.item), at: indexPath)
             }
         } else {
             if let indexPath = lastDropPosition?.indexPath {
@@ -1263,9 +1196,9 @@ extension FileListViewController: UICollectionViewDropDelegate {
 
         let destinationDirectory: File
         if let indexPath = coordinator.destinationIndexPath,
-           indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory &&
-           sortedFiles[indexPath.item].capabilities.canUpload {
-            destinationDirectory = sortedFiles[indexPath.item]
+           indexPath.item < viewModel.fileCount && viewModel.getFile(at: indexPath.item).isDirectory &&
+           viewModel.getFile(at: indexPath.item).capabilities.canUpload {
+            destinationDirectory = viewModel.getFile(at: indexPath.item)
         } else {
             destinationDirectory = currentDirectory
         }

@@ -16,13 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Combine
 import Foundation
 
 public class FileListOptions {
     private var didChangeListStyleObservers = [UUID: (ListStyle) -> Void]()
-    private var didChangeSortTypeObservers = [UUID: (SortType) -> Void]()
 
     public static let instance = FileListOptions()
+
+    private init() {
+        currentSortType = UserDefaults.shared.sortType
+    }
 
     public var currentStyle: ListStyle {
         get {
@@ -33,12 +37,9 @@ public class FileListOptions {
         }
     }
 
-    public var currentSortType: SortType {
-        get {
-            return UserDefaults.shared.sortType
-        }
-        set {
-            setSortType(newValue)
+    @Published public var currentSortType: SortType {
+        didSet {
+            UserDefaults.shared.sortType = currentSortType
         }
     }
 
@@ -49,22 +50,13 @@ public class FileListOptions {
             closure(listStyle)
         }
     }
-
-    private func setSortType(_ sortType: SortType) {
-        UserDefaults.shared.sortType = sortType
-
-        didChangeSortTypeObservers.values.forEach { closure in
-            closure(sortType)
-        }
-    }
-
 }
 
 // MARK: - Observation
 
-extension FileListOptions {
+public extension FileListOptions {
     @discardableResult
-    public func observeListStyleChange<T: AnyObject>(_ observer: T, using closure: @escaping (ListStyle) -> Void) -> ObservationToken {
+    func observeListStyleChange<T: AnyObject>(_ observer: T, using closure: @escaping (ListStyle) -> Void) -> ObservationToken {
         let key = UUID()
         didChangeListStyleObservers[key] = { [weak self, weak observer] style in
             // If the observer has been deallocated, we can
@@ -79,25 +71,6 @@ extension FileListOptions {
 
         return ObservationToken { [weak self] in
             self?.didChangeListStyleObservers.removeValue(forKey: key)
-        }
-    }
-
-    @discardableResult
-    public func observeSortTypeChange<T: AnyObject>(_ observer: T, using closure: @escaping (SortType) -> Void) -> ObservationToken {
-        let key = UUID()
-        didChangeSortTypeObservers[key] = { [weak self, weak observer] sortType in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.didChangeSortTypeObservers.removeValue(forKey: key)
-                return
-            }
-
-            closure(sortType)
-        }
-
-        return ObservationToken { [weak self] in
-            self?.didChangeSortTypeObservers.removeValue(forKey: key)
         }
     }
 }

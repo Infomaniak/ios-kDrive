@@ -34,7 +34,7 @@ class TrashViewController: FileListViewController {
     override func viewDidLoad() {
         // Set configuration
         configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash)
-        sortType = .newerDelete
+        viewModel.sortType = .newerDelete
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile
         }
@@ -163,7 +163,7 @@ class TrashViewController: FileListViewController {
             return
         }
 
-        let file = sortedFiles[indexPath.row]
+        let file = viewModel.getFile(at: indexPath.item)
         if file.isDirectory {
             let trashCV = TrashViewController.instantiate(driveFileManager: driveFileManager)
             trashCV.currentDirectory = file
@@ -176,7 +176,7 @@ class TrashViewController: FileListViewController {
     // MARK: - Swipe action collection view delegate
 
     override func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
-        let file = sortedFiles[indexPath.row]
+        let file = viewModel.getFile(at: indexPath.item)
         switch action {
         case .delete:
             deleteFiles([file])
@@ -200,7 +200,7 @@ class TrashViewController: FileListViewController {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
         }
-        let file = sortedFiles[indexPath.row]
+        let file = viewModel.getFile(at: indexPath.item)
         showFloatingPanel(files: [file])
     }
 
