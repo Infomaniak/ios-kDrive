@@ -194,7 +194,7 @@ class TrashViewController: FileListViewController {
     // MARK: - Swipe action collection view data source
 
     override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if configuration.fromActivities || listStyle == .grid {
+        if configuration.fromActivities || viewModel.listStyle == .grid {
             return nil
         }
         return [.delete]
