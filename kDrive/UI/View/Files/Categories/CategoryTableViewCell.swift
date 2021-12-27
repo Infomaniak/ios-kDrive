@@ -39,6 +39,7 @@ class CategoryTableViewCell: InsetTableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
+        moreButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
         borderView.isHidden = true
         circleImageView.layer.cornerRadius = circleImageView.frame.height / 2
         circleImageView.clipsToBounds = true
@@ -84,7 +85,7 @@ class CategoryTableViewCell: InsetTableViewCell {
             category.color?.setFill()
             let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
             ctx.cgContext.fill(rect)
-            if isSelected {
+            if selected {
                 UIColor.white.setFill()
                 KDriveResourcesAsset.bigCheck.image.draw(in: CGRect(x: 6.5, y: 8, width: 11, height: 8.5))
             }
