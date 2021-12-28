@@ -91,6 +91,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        favoriteImageView?.isAccessibilityElement = true
+        favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
+        availableOfflineImageView?.isAccessibilityElement = true
+        availableOfflineImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAvailableOffline
         moreButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
         downloadProgressView?.setInfomaniakStyle()
         collectionView?.delegate = self
@@ -177,6 +181,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         favoriteImageView?.isHidden = !file.isFavorite
         favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         logoImage.image = file.icon
+        logoImage.isAccessibilityElement = true
+        logoImage.accessibilityLabel = file.convertedType.title
         logoImage.tintColor = file.tintColor
         moreButton.isHidden = selectionMode
         if !selectionMode || checkmarkImage != logoImage {
@@ -241,6 +247,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         guard selectionMode else { return }
         accessoryImage?.isHidden = true
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+        checkmarkImage?.isAccessibilityElement = true
+        checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
     }
 
     func configureLoading() {
