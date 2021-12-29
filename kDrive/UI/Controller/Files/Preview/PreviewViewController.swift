@@ -23,6 +23,7 @@ import kDriveResources
 import PDFKit
 import Sentry
 import UIKit
+import SafariServices
 
 protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
@@ -303,6 +304,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 } else {
                     setNavbarStandard()
                 }
+            case .url:
+                setNavbarForEditing()
             default:
                 setNavbarStandard()
             }
@@ -339,8 +342,18 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     @objc private func editFile() {
-        floatingPanelViewController.dismiss(animated: true)
-        OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
+        if currentFile.isOfficeFile {
+            floatingPanelViewController.dismiss(animated: true)
+            OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
+        } else if currentFile.isBookmark {
+            if let url = currentFile.getBookmarkURL() {
+                let safariViewController = SFSafariViewController(url: url)
+                floatingPanelViewController.dismiss(animated: true)
+                present(safariViewController, animated: true)
+            } else {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
+            }
+        }
     }
 
     @objc private func goBack() {
