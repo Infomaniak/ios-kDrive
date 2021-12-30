@@ -126,7 +126,7 @@ public class FileImportHelper {
                     switch result {
                     case .success(let fileURL):
                         let name = (itemProvider.suggestedName ?? self.getDefaultFileName()).addingExtension("webloc")
-                        items.append(ImportedFile(name: name, path: fileURL, uti: .url))
+                        items.append(ImportedFile(name: name, path: fileURL, uti: .internetShortcut))
                     case .failure(let error):
                         DDLogError("[FileImportHelper] Error while getting URL: \(error)")
                         errorCount += 1

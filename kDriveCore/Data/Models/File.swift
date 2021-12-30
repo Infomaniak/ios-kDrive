@@ -119,7 +119,7 @@ public enum ConvertedType: String, CaseIterable {
         case .unknown:
             return .data
         case .url:
-            return .url
+            return .internetShortcut
         case .video:
             return .movie
         }
