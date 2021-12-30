@@ -17,6 +17,7 @@
  */
 
 import Alamofire
+import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
 import kDriveResources
@@ -433,9 +434,11 @@ public class File: Object, Codable {
             var urlStr: String?
             if self.extension == "url" {
                 let content = try String(contentsOf: localUrl)
-                let components = content.components(separatedBy: "URL=")
-                if components.count > 1 {
-                    urlStr = components[1]
+                let lines = content.components(separatedBy: .newlines)
+                let prefix = "URL="
+                if let urlLine = lines.first(where: { $0.starts(with: prefix) }),
+                   let index = urlLine.range(of: prefix)?.upperBound {
+                    urlStr = String(urlLine[index...])
                 }
             } else if self.extension == "webloc" {
                 let decoder = PropertyListDecoder()
@@ -450,7 +453,7 @@ public class File: Object, Codable {
                 return nil
             }
         } catch {
-            print("Error while decoding bookmark: \(error)")
+            DDLogError("Error while decoding bookmark: \(error)")
             return nil
         }
     }
