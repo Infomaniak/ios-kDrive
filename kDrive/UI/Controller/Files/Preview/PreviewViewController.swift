@@ -441,6 +441,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 },
                 completion: { error in
                     DispatchQueue.main.async { [weak self] in
+                        self?.currentDownloadOperation = nil
                         if self?.view.window != nil {
                             if let error = error {
                                 if error != .taskCancelled {
