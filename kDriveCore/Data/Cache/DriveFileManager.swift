@@ -22,6 +22,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakLogin
 import RealmSwift
+import Sentry
 import SwiftRegex
 
 public class DriveFileManager {
@@ -65,8 +66,13 @@ public class DriveFileManager {
             objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
 
         public var uploadsRealm: Realm {
-            // swiftlint:disable force_try
-            return try! Realm(configuration: uploadsRealmConfiguration)
+            do {
+                return try Realm(configuration: uploadsRealmConfiguration)
+            } catch {
+                // We can't recover from this error but at least we report it correctly on Sentry
+                SentrySDK.capture(error: error)
+                fatalError(error.localizedDescription)
+            }
         }
 
         init() {
@@ -192,8 +198,8 @@ public class DriveFileManager {
 
         // Only compact in the background
         /* if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
-            compactRealmsIfNeeded()
-        } */
+             compactRealmsIfNeeded()
+         } */
 
         // Get root file
         let realm = getRealm()
@@ -239,8 +245,13 @@ public class DriveFileManager {
     }
 
     public func getRealm() -> Realm {
-        // swiftlint:disable force_try
-        return try! Realm(configuration: realmConfiguration)
+        do {
+            return try Realm(configuration: realmConfiguration)
+        } catch {
+            // We can't recover from this error but at least we report it correctly on Sentry
+            SentrySDK.capture(error: error)
+            fatalError(error.localizedDescription)
+        }
     }
 
     /// Delete all drive data cache for a user
