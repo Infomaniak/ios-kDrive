@@ -329,34 +329,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         }
 
-        getFiles(page: page, sortType: viewModel.sortType, forceRefresh: forceRefresh) { [weak self] result, moreComing, _ in
-            guard let self = self else { return }
-            self.isReloading = false
-            if self.configuration.isRefreshControlEnabled {
-                self.refreshControl.endRefreshing()
-            }
-            switch result {
-            case .success(let newFiles):
-                if moreComing {
-                    self.reloadData(page: page + 1, forceRefresh: forceRefresh, showRefreshControl: showRefreshControl, withActivities: withActivities)
-                } else {
-                    self.isContentLoaded = true
-                    self.isLoadingData = false
-                    if withActivities {
-                        self.getNewChanges()
-                    }
-                }
-            case .failure(let error):
-                if let error = error as? DriveError, error == .objectNotFound {
-                    // Pop view controller
-                    self.navigationController?.popViewController(animated: true)
-                }
-                if error as? DriveError != .searchCancelled {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
-                }
-                self.isLoadingData = false
-            }
-        }
+        isReloading = false
+        viewModel.loadNextPages(1)
     }
 
     @objc func forceRefresh() {
