@@ -39,6 +39,9 @@ protocol FileListViewModel {
     func setFile(_ file: File, at index: Int)
     func getAllFiles() -> [File]
 
+    func loadNextPages(_ page: Int)
+    func loadActivities()
+
     init(driveFileManager: DriveFileManager, currentDirectory: File?)
 
     var onFileListUpdated: FileListUpdatedCallback? { get set }
@@ -54,6 +57,7 @@ class ManagedFileListViewModel: FileListViewModel {
             onSortTypeUpdated?(sortType)
         }
     }
+
     var listStyle: ListStyle {
         didSet {
             onListStyleUpdated?(listStyle)
@@ -74,6 +78,7 @@ class ManagedFileListViewModel: FileListViewModel {
     var onListStyleUpdated: ListStyleUpdatedCallback?
 
     private var files: Results<File>
+
     private var realmObservationToken: NotificationToken?
     private var sortTypeObservation: AnyCancellable?
     private var listStyleObservation: AnyCancellable?
@@ -96,10 +101,10 @@ class ManagedFileListViewModel: FileListViewModel {
     private func setupObservation() {
         sortTypeObservation = FileListOptions.instance.$currentSortType
             .receive(on: RunLoop.main)
-            .assign(to: \.sortType, on: self)
+            .assignNoRetain(to: \.sortType, on: self)
         listStyleObservation = FileListOptions.instance.$currentStyle
             .receive(on: RunLoop.main)
-            .assign(to: \.listStyle, on: self)
+            .assignNoRetain(to: \.listStyle, on: self)
     }
 
     private func updateDataSource() {
@@ -122,6 +127,22 @@ class ManagedFileListViewModel: FileListViewModel {
         }
     }
 
+    public func loadNextPages(_ page: Int) {
+        if !currentDirectory.fullyDownloaded {
+            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: false) { [weak self] file, _, _ in
+                if let fetchedCurrentDirectory = file {
+                    if !fetchedCurrentDirectory.fullyDownloaded {
+                        self?.loadNextPages(page + 1)
+                    }
+                } else {
+                    // TODO: report error
+                }
+            }
+        }
+    }
+
+    public func loadActivities() {}
+
     func getFile(at index: Int) -> File {
         return files[index]
     }
@@ -132,5 +153,13 @@ class ManagedFileListViewModel: FileListViewModel {
 
     func getAllFiles() -> [File] {
         return Array(files.freeze())
+    }
+}
+
+extension Publisher where Self.Failure == Never {
+    func assignNoRetain<Root>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>, on object: Root) -> AnyCancellable where Root: AnyObject {
+        sink { [weak object] value in
+            object?[keyPath: keyPath] = value
+        }
     }
 }
