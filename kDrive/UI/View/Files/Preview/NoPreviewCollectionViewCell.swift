@@ -54,6 +54,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
             offlineView.isHidden = false
         } else {
             iconImageView.image = file.icon
+            iconImageView.tintColor = file.tintColor
             subtitleLabel.text = KDriveResourcesStrings.Localizable.previewNoPreview
             offlineView.isHidden = true
         }

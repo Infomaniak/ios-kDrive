@@ -17,6 +17,7 @@
  */
 
 import Alamofire
+import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
 import kDriveResources
@@ -119,7 +120,7 @@ public enum ConvertedType: String, CaseIterable {
         case .unknown:
             return .data
         case .url:
-            return .url
+            return .internetShortcut
         case .video:
             return .movie
         }
@@ -132,7 +133,7 @@ public enum ConvertedType: String, CaseIterable {
         return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
 
-    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .pdf, .presentation, .spreadsheet, .text)
+    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .pdf, .presentation, .spreadsheet, .text, .url)
     public static let remotePlayableTypes = Set<ConvertedType>(arrayLiteral: .audio, .video)
     // Currently it's the same as the downloadableTypes but later this could change
     public static let ignoreThumbnailTypes = downloadableTypes
@@ -433,9 +434,11 @@ public class File: Object, Codable {
             var urlStr: String?
             if self.extension == "url" {
                 let content = try String(contentsOf: localUrl)
-                let components = content.components(separatedBy: "URL=")
-                if components.count > 1 {
-                    urlStr = components[1]
+                let lines = content.components(separatedBy: .newlines)
+                let prefix = "URL="
+                if let urlLine = lines.first(where: { $0.starts(with: prefix) }),
+                   let index = urlLine.range(of: prefix)?.upperBound {
+                    urlStr = String(urlLine[index...])
                 }
             } else if self.extension == "webloc" {
                 let decoder = PropertyListDecoder()
@@ -450,7 +453,7 @@ public class File: Object, Codable {
                 return nil
             }
         } catch {
-            print("Error while decoding bookmark: \(error)")
+            DDLogError("Error while decoding bookmark: \(error)")
             return nil
         }
     }
