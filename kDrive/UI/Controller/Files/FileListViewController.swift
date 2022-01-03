@@ -573,7 +573,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
-            navigationItem.title = currentDirectory.name
+            setTitle()
             navigationItem.leftBarButtonItem = nil
             navigationItem.rightBarButtonItems = rightBarButtonItems
         }
@@ -760,7 +760,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             return
         }
         self.driveFileManager = driveFileManager
-        currentDirectory = driveFileManager.getCachedFile(id: directoryId)
+        let maybeCurrentDirectory = driveFileManager.getCachedFile(id: directoryId)
+        if let currentDirectory = maybeCurrentDirectory {
+            self.currentDirectory = currentDirectory
+        }
         if currentDirectory == nil && directoryId > DriveFileManager.constants.rootID {
             navigationController?.popViewController(animated: true)
         }
