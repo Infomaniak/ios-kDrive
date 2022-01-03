@@ -58,6 +58,8 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
         contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         detailLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        collectionView.reloadData()
+        tableView.reloadData()
     }
 
     override func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 6) {
