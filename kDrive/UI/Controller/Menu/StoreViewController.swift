@@ -16,14 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import StoreKit
 import UIKit
 
-class StoreViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var helpButton: IKRoundButton!
+class StoreViewController: UICollectionViewController {
+//    @IBOutlet weak var tableView: UITableView!
+//    @IBOutlet weak var helpButton: IKRoundButton!
 
     struct Item {
         let pack: DrivePack
@@ -54,11 +55,11 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         }
     }
 
-    private enum Row: CaseIterable {
+    private enum Section: CaseIterable {
         case segmentedControl, warning, offers, storage, nextButton
     }
 
-    private var rows: [Row] = [.segmentedControl, .offers]
+    private var sections: [Section] = [.segmentedControl, .offers]
 
     var driveFileManager: DriveFileManager!
 
@@ -78,12 +79,19 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         super.viewDidLoad()
 
         // Set up table view
-        tableView.register(cellView: StoreControlTableViewCell.self)
-        tableView.register(cellView: AlertTableViewCell.self)
-        tableView.register(cellView: StoreOffersTableViewCell.self)
-        tableView.register(cellView: StoreStorageTableViewCell.self)
-        tableView.register(cellView: StoreNextTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 92, right: 0)
+//        tableView.register(cellView: StoreControlTableViewCell.self)
+//        tableView.register(cellView: AlertTableViewCell.self)
+//        tableView.register(cellView: StoreOffersTableViewCell.self)
+//        tableView.register(cellView: StoreStorageTableViewCell.self)
+//        tableView.register(cellView: StoreNextTableViewCell.self)
+//        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 92, right: 0)
+
+        // Set up collection view
+        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
+        collectionView.register(cellView: StoreCollectionViewCell.self)
+        collectionView.collectionViewLayout = createLayout()
+        collectionView.allowsSelection = false
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
 
         // Set up delegates
         StoreManager.shared.delegate = self
@@ -127,6 +135,26 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         SKPaymentQueue.default().presentCodeRedemptionSheet()
     }
 
+    private func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { section, _ in
+            switch self.sections[section] {
+            case .offers:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(360))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                let section = NSCollectionLayoutSection(group: group)
+                section.interGroupSpacing = 8
+                section.contentInsets = .init(top: 0, leading: 24, bottom: 0, trailing: 24)
+                return section
+            default:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                return NSCollectionLayoutSection(group: group)
+            }
+        }
+    }
+
     private func fetchProductInformation() {
         guard StoreObserver.shared.isAuthorizedForPayments else {
             // Warn the user that they are not allowed to make purchases
@@ -162,14 +190,15 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
             purchaseEnabled = false
         } else if !driveFileManager.drive.productIsInApp && driveFileManager.drive.pack != .free {
             // Show a warning message to inform that they have a different subscription method
-            rows.insert(.warning, at: 1)
+            sections.insert(.warning, at: 1)
             purchaseEnabled = false
         }
     }
 
     private func updateOffers() {
-        if let index = rows.firstIndex(of: .offers) {
-            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        if let index = sections.firstIndex(of: .offers) {
+            collectionView.reloadSections([index])
+//            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
         }
     }
 
@@ -188,10 +217,10 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
 
     private func setNextButtonLoading(_ loading: Bool) {
-        if let index = rows.firstIndex(of: .nextButton),
-           let cell = tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? StoreNextTableViewCell {
-            cell.button.setLoading(loading)
-        }
+//        if let index = sections.firstIndex(of: .nextButton),
+//           let cell = tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? StoreNextTableViewCell {
+//            cell.button.setLoading(loading)
+//        }
     }
 
     private func showSuccessView() {
@@ -200,14 +229,66 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         present(successViewController, animated: true)
     }
 
+    // MARK: - Collection view data source
+
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return sections.count
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch sections[section] {
+        case .offers:
+            return displayedItems.count
+        default:
+            return 1
+        }
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        switch sections[indexPath.section] {
+        case .segmentedControl:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let tableCell = cell.initWith(cell: StoreControlTableViewCell.self)
+            let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
+            tableCell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
+            tableCell.onChange = { [weak self] index in
+                if let period = PeriodTab(rawValue: index) {
+                    self?.selectedPeriod = period
+                }
+            }
+            return cell
+        case .warning:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let tableCell = cell.initWith(cell: AlertTableViewCell.self)
+            tableCell.configure(with: .warning, message: KDriveResourcesStrings.Localizable.storeBillingWarningDescription)
+            return cell
+        case .offers:
+            let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
+            let item = displayedItems[indexPath.row]
+            cell.configure(with: item, currentPack: selectedPack, enabled: purchaseEnabled)
+            cell.delegate = self
+            return cell
+        case .storage:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let tableCell = cell.initWith(cell: StoreStorageTableViewCell.self)
+            tableCell.delegate = self
+            return cell
+        case .nextButton:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let tableCell = cell.initWith(cell: StoreNextTableViewCell.self)
+            tableCell.delegate = self
+            return cell
+        }
+    }
+
     // MARK: - Table view data source
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return driveFileManager == nil ? 1 : rows.count
+        return driveFileManager == nil ? 1 : sections.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch rows[indexPath.row] {
+        switch sections[indexPath.row] {
         case .segmentedControl:
             let cell = tableView.dequeueReusableCell(type: StoreControlTableViewCell.self, for: indexPath)
             let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
@@ -286,12 +367,14 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
 extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate {
     func selectButtonTapped(item: StoreViewController.Item) {
         guard selectedPack != item.pack else { return }
-        if !rows.contains(.nextButton) {
-            rows.append(.nextButton)
+        if !sections.contains(.nextButton) {
+            sections.append(.nextButton)
         }
         selectedPack = item.pack
-        tableView.reloadData()
-        tableView.scrollToRow(at: IndexPath(row: rows.count - 1, section: 0), at: .bottom, animated: true)
+//        tableView.reloadData()
+//        tableView.scrollToRow(at: IndexPath(row: sections.count - 1, section: 0), at: .bottom, animated: true)
+        collectionView.reloadData()
+        collectionView.scrollToItem(at: IndexPath(row: 0, section: sections.count - 1), at: .bottom, animated: true)
     }
 
     func storageDidChange(_ newValue: Int) {
