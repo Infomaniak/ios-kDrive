@@ -891,6 +891,14 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
+    func testDeleteAllFilesDefinitely() {
+        // TODO
+    }
+    
+    func testDeleteFileDefinitely() {
+        // TODO
+    }
+    
     func testRenameFile() {
         let testName = "Rename file"
         let expectation = XCTestExpectation(description: testName)
@@ -938,6 +946,10 @@ final class DriveApiTests: XCTestCase {
 
         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
+    }
+    
+    func testCopyFile() {
+        // TODO
     }
 
     func testMoveFile() {
@@ -1001,6 +1013,10 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
+    func testGetFilesActivities() {
+        // TODO
+    }
+    
     func testPostFavoriteFile() {
         let testName = "Post favorite file"
         let expectations = [
@@ -1047,6 +1063,10 @@ final class DriveApiTests: XCTestCase {
 
         wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
+    }
+    
+    func testDeleteFavoriteFile() {
+        // TODO
     }
 
     func testPerformAuthenticatedRequest() {}
@@ -1169,6 +1189,18 @@ final class DriveApiTests: XCTestCase {
     func testRequireFileAccess() {}
 
     func testCancelAction() {}
+    
+    func testConvertFile() {
+        // TODO
+    }
+    
+    func testGetFileCount() {
+        // TODO
+    }
+    
+    func testGetDownloadArchiveLink() {
+        // TODO
+    }
 
     // MARK: - Complementary tests
 
