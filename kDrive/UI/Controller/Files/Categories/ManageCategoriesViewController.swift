@@ -27,6 +27,8 @@ protocol ManageCategoriesDelegate: AnyObject {
 }
 
 class ManageCategoriesViewController: UITableViewController {
+    @IBOutlet weak var createButton: UIBarButtonItem!
+
     var driveFileManager: DriveFileManager!
     var file: File?
     /// Disable category edition (can just add/remove).
@@ -72,6 +74,7 @@ class ManageCategoriesViewController: UITableViewController {
         searchController.searchResultsUpdater = self
         searchController.searchBar.searchTextField.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
+        createButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonCreate
         navigationItem.searchController = searchController
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
         if presentingViewController != nil && viewControllersCount < 2 {
