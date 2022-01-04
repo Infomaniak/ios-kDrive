@@ -894,11 +894,7 @@ final class DriveApiTests: XCTestCase {
     func testDeleteAllFilesDefinitely() {
         // TODO
     }
-    
-    func testDeleteFileDefinitely() {
-        // TODO
-    }
-    
+
     func testRenameFile() {
         let testName = "Rename file"
         let expectation = XCTestExpectation(description: testName)
@@ -947,9 +943,29 @@ final class DriveApiTests: XCTestCase {
         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
-    
+
     func testCopyFile() {
-        // TODO
+        let testName = "Copy file"
+        let expectation = XCTestExpectation(description: testName)
+
+        initOfficeFile(testName: testName) { rootFile, file in
+            self.currentApiFetcher.copyFile(file: file, newParent: rootFile) { copyResponse, copyError in
+                XCTAssertNotNil(copyResponse, "Reponse shouldn't be nil")
+                XCTAssertNil(copyError, "There should be no error")
+
+                let copiedFileId = copyResponse!.data!.id
+
+                self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: rootFile.id) { response, error in
+                    XCTAssertNotNil(response, "Reponse shouldn't be nil")
+                    XCTAssertNil(error, "There should be no error")
+                    let containsCopiedFile = response!.data!.children.contains { $0.id == copiedFileId }
+                    XCTAssertTrue(containsCopiedFile, "Copied file should be in root")
+                    expectation.fulfill()
+                }
+            }
+        }
+
+        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
     }
 
     func testMoveFile() {
@@ -1016,7 +1032,7 @@ final class DriveApiTests: XCTestCase {
     func testGetFilesActivities() {
         // TODO
     }
-    
+
     func testPostFavoriteFile() {
         let testName = "Post favorite file"
         let expectations = [
@@ -1064,7 +1080,7 @@ final class DriveApiTests: XCTestCase {
         wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
-    
+
     func testDeleteFavoriteFile() {
         // TODO
     }
@@ -1186,18 +1202,22 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testRequireFileAccess() {}
+    func testRequireFileAccess() {
+        // TODO
+    }
 
-    func testCancelAction() {}
-    
+    func testCancelAction() {
+        // TODO
+    }
+
     func testConvertFile() {
         // TODO
     }
-    
+
     func testGetFileCount() {
         // TODO
     }
-    
+
     func testGetDownloadArchiveLink() {
         // TODO
     }

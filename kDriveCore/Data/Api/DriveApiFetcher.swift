@@ -167,6 +167,7 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
+    // swiftlint:disable function_parameter_count
     public func setupDropBox(directory: File,
                              password: String?,
                              validUntil: Date?,
@@ -198,6 +199,7 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
+    // swiftlint:disable function_parameter_count
     public func updateDropBox(directory: File,
                               password: String?,
                               validUntil: Date?,
