@@ -1035,11 +1035,14 @@ public class DriveFileManager {
                 file.signalChanges(userId: self.drive.userId)
                 self.backgroundQueue.async { [self] in
                     let localRealm = getRealm()
+                    let savedFile = getCachedFile(id: fileId, using: localRealm)
                     removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: true, using: localRealm)
                     DispatchQueue.main.async {
                         completion(response?.data, error)
                     }
-                    self.notifyObserversWith(file: file)
+                    if let file = savedFile {
+                        self.notifyObserversWith(file: file)
+                    }
                     deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)
                 }
             } else {
