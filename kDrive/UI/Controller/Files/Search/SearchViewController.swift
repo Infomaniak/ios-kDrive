@@ -54,11 +54,9 @@ class SearchViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
+        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
         listStyle = .list
         sortType = .newer
-
-        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         collectionView.register(UINib(nibName: searchHeaderIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: searchHeaderIdentifier)
         collectionView.register(cellView: RecentSearchCollectionViewCell.self)
@@ -72,6 +70,7 @@ class SearchViewController: FileListViewController {
         searchController.searchBar.placeholder = KDriveResourcesStrings.Localizable.searchViewHint
 
         navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
         navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
 
         definesPresentationContext = true
