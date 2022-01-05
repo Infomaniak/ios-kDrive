@@ -106,6 +106,17 @@ final class DriveApiTests: XCTestCase {
         }
     }
 
+    func checkIfFileIsInDestination(file: File, directory: File, completion: @escaping () -> Void) {
+        self.currentApiFetcher.getFileListForDirectory(driveId: file.driveId, parentId: directory.id) { fileListResponse, fileListError in
+            XCTAssertNil(fileListError, TestsMessages.noError)
+            XCTAssertNotNil(fileListResponse?.data, TestsMessages.notNil("cancel response"))
+            let movedFile = fileListResponse!.data!.children.contains { $0.id == file.id }
+            XCTAssertTrue(movedFile, "File should be in destination")
+
+            completion()
+        }
+    }
+
     // MARK: - Test methods
 
     func testGetRootFile() {
@@ -978,12 +989,7 @@ final class DriveApiTests: XCTestCase {
                 self.currentApiFetcher.moveFile(file: file, newParent: destination) { moveResponse, moveError in
                     XCTAssertNotNil(moveResponse, TestsMessages.notNil("response"))
                     XCTAssertNil(moveError, TestsMessages.noError)
-
-                    self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: destination.id) { response, error in
-                        XCTAssertNotNil(response?.data, TestsMessages.notNil("response"))
-                        XCTAssertNil(error, TestsMessages.noError)
-                        let movedFile = response!.data!.children.contains { $0.id == file.id }
-                        XCTAssertTrue(movedFile, "File should be in destination")
+                    self.checkIfFileIsInDestination(file: file, directory: destination) {
                         expectation.fulfill()
                     }
                 }
@@ -1240,11 +1246,7 @@ final class DriveApiTests: XCTestCase {
                     self.currentApiFetcher.cancelAction(driveId: Env.driveId, cancelId: cancelMoveId) { cancelMoveResponse, cancelMoveError in
                         XCTAssertNil(cancelMoveError, TestsMessages.noError)
                         XCTAssertNotNil(cancelMoveResponse?.data, TestsMessages.notNil("cancel move response"))
-                        self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: rootFile.id) { fileListResponse, fileListError in
-                            XCTAssertNil(fileListError, TestsMessages.noError)
-                            XCTAssertNotNil(fileListResponse?.data, TestsMessages.notNil("cancel response"))
-                            let movedFile = fileListResponse!.data!.children.contains { $0.id == file.id }
-                            XCTAssertTrue(movedFile, "File should be in destination")
+                        self.checkIfFileIsInDestination(file: file, directory: rootFile) {
                             expectations[0].expectation.fulfill()
 
                             self.currentApiFetcher.deleteFile(file: file) { deleteFileResponse, deleteFileError in
@@ -1254,11 +1256,7 @@ final class DriveApiTests: XCTestCase {
                                 self.currentApiFetcher.cancelAction(driveId: Env.driveId, cancelId: cancelId) { cancelResponse, cancelError in
                                     XCTAssertNil(cancelError, TestsMessages.noError)
                                     XCTAssertNotNil(cancelResponse?.data, TestsMessages.notNil("cancel response"))
-                                    self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: rootFile.id) { fileListResponse, fileListError in
-                                        XCTAssertNil(fileListError, TestsMessages.noError)
-                                        XCTAssertNotNil(fileListResponse?.data, TestsMessages.notNil("cancel response"))
-                                        let movedFile = fileListResponse!.data!.children.contains { $0.id == file.id }
-                                        XCTAssertTrue(movedFile, "File should be in destination")
+                                    self.checkIfFileIsInDestination(file: file, directory: rootFile) {
                                         expectations[1].expectation.fulfill()
                                     }
                                 }
