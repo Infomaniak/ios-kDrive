@@ -1027,7 +1027,6 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // WIP
     func testGetFilesActivities() {
         let testName = "Get files activities"
         let expectation = XCTestExpectation(description: testName)
@@ -1035,9 +1034,24 @@ final class DriveApiTests: XCTestCase {
 
         initOfficeFile(testName: testName) { root, file in
             rootFile = root
-            self.currentApiFetcher.getFilesActivities(driveId: Env.driveId, files: [file], from: rootFile.id) { _, filesActivitiesError in
-                XCTAssertNil(filesActivitiesError, TestsMessages.noError)
-                expectation.fulfill()
+
+            self.currentApiFetcher.createOfficeFile(driveId: Env.driveId, parentDirectory: rootFile, name: "\(testName)-\(Date())", type: "docx") { officeFileResponse, officeFileError in
+                XCTAssertNil(officeFileError, TestsMessages.noError)
+                XCTAssertNotNil(officeFileResponse, TestsMessages.notNil("office response"))
+
+                let secondFile = officeFileResponse!.data!
+                self.currentApiFetcher.getFilesActivities(driveId: Env.driveId, files: [file, secondFile], from: rootFile.id) { filesActivitiesResponse, filesActivitiesError in
+                    XCTAssertNil(filesActivitiesError, TestsMessages.noError)
+                    XCTAssertNotNil(filesActivitiesResponse?.data, TestsMessages.notNil("files activities response"))
+                    print(filesActivitiesResponse!.data!.activities)
+
+                    let activities = filesActivitiesResponse!.data!.activities
+                    XCTAssertEqual(activities.count, 2, "Array should contain two activities")
+                    for activity in activities {
+                        XCTAssertNotNil(activity, TestsMessages.notNil("file activity"))
+                    }
+                    expectation.fulfill()
+                }
             }
         }
 
