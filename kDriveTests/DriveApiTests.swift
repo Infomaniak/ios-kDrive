@@ -32,7 +32,7 @@ class FakeTokenDelegate: RefreshTokenDelegate {
 
 final class DriveApiTests: XCTestCase {
     static let defaultTimeout = 30.0
-    
+
     var currentApiFetcher: DriveApiFetcher = {
         let token = ApiToken(accessToken: Env.token,
                              expiresIn: Int.max,
@@ -1036,8 +1036,11 @@ final class DriveApiTests: XCTestCase {
             rootFile = root
             self.currentApiFetcher.getFilesActivities(driveId: Env.driveId, files: [file], from: rootFile.id) { filesActivitiesResult, filesActivitiesError in
                 XCTAssertNil(filesActivitiesError, TestsMessages.noError)
+                expectation.fulfill()
             }
         }
+        
+        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
     }
 
     func testPostFavoriteFile() {

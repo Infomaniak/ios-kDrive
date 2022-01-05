@@ -22,15 +22,15 @@ import Foundation
 /// XCTAssert messages
 struct TestsMessages {
     static let noError = "There should be no error"
-    
+
     static func notNil(_ element: String) -> String {
         return "\(element.capitalized) shouldn't be nil"
     }
-    
+
     static func failedToCreate(_ element: String) -> String {
         "Failed to create \(element)"
     }
-    
+
     static func failedToDelete(_ element: String) -> String {
         return "Failed to delete \(element)"
     }
