@@ -1056,6 +1056,7 @@ final class DriveApiTests: XCTestCase {
         }
 
         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
     }
 
     func testPostFavoriteFile() {
@@ -1105,15 +1106,6 @@ final class DriveApiTests: XCTestCase {
         wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
-
-    // WIP
-    func testDeleteFavoriteFile() {}
-
-    // WIP
-    func testPerformAuthenticatedRequest() {}
-
-    // WIP
-    func testGetPublicUploadTokenWithToken() {}
 
     func testGetTrashedFiles() {
         let testName = "Get trashed file"
@@ -1237,8 +1229,34 @@ final class DriveApiTests: XCTestCase {
     // WIP
     func testConvertFile() {}
 
-    // WIP
-    func testGetFileCount() {}
+    func testGetFileCount() {
+        let testName = "Get file count"
+        let expectation = XCTestExpectation(description: testName)
+        var rootFile = File()
+
+        initOfficeFile(testName: testName) { root, _ in
+            rootFile = root
+            self.currentApiFetcher.createOfficeFile(driveId: Env.driveId, parentDirectory: rootFile, name: "secondFile-\(Date())", type: "docx") { secondFileResponse, secondFileError in
+                XCTAssertNil(secondFileError, TestsMessages.noError)
+                XCTAssertNotNil(secondFileResponse, TestsMessages.notNil("second office file"))
+                self.currentApiFetcher.createDirectory(parentDirectory: rootFile, name: "directory-\(Date())", onlyForMe: true) { directoryResponse, directoryError in
+                    XCTAssertNil(directoryError, TestsMessages.noError)
+                    XCTAssertNotNil(directoryResponse, TestsMessages.notNil("directory response"))
+                    self.currentApiFetcher.getFileCount(driveId: Env.driveId, fileId: rootFile.id) { countResponse, countError in
+                        XCTAssertNil(countError, TestsMessages.noError)
+                        XCTAssertNotNil(countResponse, TestsMessages.notNil("count response"))
+                        XCTAssertEqual(countResponse!.data!.count, 3, "Root file should contain 3 elements")
+                        XCTAssertEqual(countResponse!.data!.files, 2, "Root file should contain 2 files")
+                        XCTAssertEqual(countResponse!.data!.folders, 1, "Root file should contain 1 folder")
+                        expectation.fulfill()
+                    }
+                }
+            }
+        }
+
+        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
+    }
 
     // WIP
     func testGetDownloadArchiveLink() {}
