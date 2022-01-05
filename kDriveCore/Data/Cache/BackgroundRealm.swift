@@ -41,13 +41,8 @@ public class BackgroundRealm {
                 do {
                     realm = try Realm(configuration: configuration, queue: queue)
                 } catch {
-                    // We want to capture the error for further investigation ...
-                    SentrySDK.capture(error: error) { scope in
-                        scope.setContext(value: [
-                            "File URL": configuration.fileURL?.absoluteString ?? ""
-                        ], key: "Realm")
-                    }
-                    fatalError("Failed creating background realm")
+                    // We can't recover from this error but at least we report it correctly on Sentry
+                    Logging.reportRealmOpeningError(error, realmConfiguration: configuration)
                 }
             }
             let instance = BackgroundRealm(realm: realm, queue: queue)
