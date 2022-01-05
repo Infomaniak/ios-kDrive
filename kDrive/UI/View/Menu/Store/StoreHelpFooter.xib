@@ -15,7 +15,7 @@
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qvg-BY-dsk" customClass="IKButton" customModule="kDriveCore">
-                    <rect key="frame" x="133" y="8" width="54" height="34"/>
+                    <rect key="frame" x="133" y="24" width="54" height="26"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="Help"/>
                     <userDefinedRuntimeAttributes>
@@ -28,8 +28,8 @@
             </subviews>
             <viewLayoutGuide key="safeArea" id="VXr-Tz-HHm"/>
             <constraints>
-                <constraint firstItem="Qvg-BY-dsk" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="8" id="320-VE-pgV"/>
-                <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" secondItem="Qvg-BY-dsk" secondAttribute="bottom" constant="8" id="BmY-gW-t0D"/>
+                <constraint firstItem="Qvg-BY-dsk" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="24" id="320-VE-pgV"/>
+                <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" secondItem="Qvg-BY-dsk" secondAttribute="bottom" id="BmY-gW-t0D"/>
                 <constraint firstItem="Qvg-BY-dsk" firstAttribute="centerX" secondItem="U6b-Vx-4bR" secondAttribute="centerX" id="LkE-7j-jUK"/>
             </constraints>
             <point key="canvasLocation" x="132" y="77"/>

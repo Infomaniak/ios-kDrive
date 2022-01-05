@@ -19,12 +19,16 @@
 import kDriveCore
 import UIKit
 
-class StoreControlTableViewCell: UITableViewCell {
-    @IBOutlet weak var segmentedControl: IKSegmentedControl!
+protocol StoreNextCellDelegate: AnyObject {
+    func nextButtonTapped(_ button: IKLargeButton)
+}
 
-    var onChange: ((Int) -> Void)?
+class StoreNextCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var button: IKLargeButton!
 
-    @IBAction func segmentedControlValueChanged(_ sender: IKSegmentedControl) {
-        onChange?(sender.selectedSegmentIndex)
+    weak var delegate: StoreNextCellDelegate?
+
+    @IBAction func buttonTapped(_ sender: IKLargeButton) {
+        delegate?.nextButtonTapped(sender)
     }
 }

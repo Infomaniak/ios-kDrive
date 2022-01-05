@@ -77,11 +77,13 @@ class StoreViewController: UICollectionViewController {
 
         // Set up collection view
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
+        collectionView.register(cellView: StoreControlCollectionViewCell.self)
         collectionView.register(cellView: StoreCollectionViewCell.self)
+        collectionView.register(cellView: StoreNextCollectionViewCell.self)
         collectionView.register(supplementaryView: StoreHelpFooter.self, forSupplementaryViewOfKind: .footer)
         collectionView.collectionViewLayout = createLayout()
         collectionView.allowsSelection = false
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         // Set up delegates
         StoreManager.shared.delegate = self
@@ -124,6 +126,7 @@ class StoreViewController: UICollectionViewController {
         let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
         let footer = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: footerSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
         let config = UICollectionViewCompositionalLayoutConfiguration()
+        config.interSectionSpacing = 24
         config.boundarySupplementaryItems = [footer]
 
         return UICollectionViewCompositionalLayout(sectionProvider: { section, _ in
@@ -206,10 +209,10 @@ class StoreViewController: UICollectionViewController {
     }
 
     private func setNextButtonLoading(_ loading: Bool) {
-//        if let index = sections.firstIndex(of: .nextButton),
-//           let cell = tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? StoreNextTableViewCell {
-//            cell.button.setLoading(loading)
-//        }
+        if let index = sections.firstIndex(of: .nextButton),
+           let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: index)) as? StoreNextCollectionViewCell {
+            cell.button.setLoading(loading)
+        }
     }
 
     private func showSuccessView() {
@@ -236,11 +239,10 @@ class StoreViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         switch sections[indexPath.section] {
         case .segmentedControl:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
-            let tableCell = cell.initWith(cell: StoreControlTableViewCell.self)
+            let cell = collectionView.dequeueReusableCell(type: StoreControlCollectionViewCell.self, for: indexPath)
             let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
-            tableCell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
-            tableCell.onChange = { [weak self] index in
+            cell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
+            cell.onChange = { [weak self] index in
                 if let period = PeriodTab(rawValue: index) {
                     self?.selectedPeriod = period
                 }
@@ -258,14 +260,14 @@ class StoreViewController: UICollectionViewController {
             cell.delegate = self
             return cell
         case .storage:
+            // Will need to convert this to collection view cell when we actually use it
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
             let tableCell = cell.initWith(cell: StoreStorageTableViewCell.self)
             tableCell.delegate = self
             return cell
         case .nextButton:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
-            let tableCell = cell.initWith(cell: StoreNextTableViewCell.self)
-            tableCell.delegate = self
+            let cell = collectionView.dequeueReusableCell(type: StoreNextCollectionViewCell.self, for: indexPath)
+            cell.delegate = self
             return cell
         }
     }
@@ -320,7 +322,7 @@ extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNex
         }
         selectedPack = item.pack
         collectionView.reloadData()
-        collectionView.scrollToItem(at: IndexPath(row: 0, section: sections.count - 1), at: .bottom, animated: true)
+        collectionView.scrollToItem(at: IndexPath(item: 0, section: sections.count - 1), at: .bottom, animated: true)
     }
 
     func storageDidChange(_ newValue: Int) {
