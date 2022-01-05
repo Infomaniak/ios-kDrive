@@ -19,7 +19,7 @@
 import kDriveCore
 import UIKit
 
-class StoreControlCollectionViewCell: UICollectionViewCell {
+class StoreControlCollectionReusableView: UICollectionReusableView {
     @IBOutlet weak var segmentedControl: IKSegmentedControl!
 
     var onChange: ((Int) -> Void)?

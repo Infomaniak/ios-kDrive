@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionReusableView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="U6b-Vx-4bR" customClass="StoreControlCollectionReusableView" customModule="kDrive" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="64"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <subviews>
+                <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="BT3-em-naP" customClass="IKSegmentedControl" customModule="kDriveCore">
+                    <rect key="frame" x="24" y="0.0" width="272" height="41"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="lu5-kZ-C0l"/>
+                    </constraints>
+                    <segments>
+                        <segment title="First"/>
+                        <segment title="Second"/>
+                    </segments>
+                    <connections>
+                        <action selector="segmentedControlValueChanged:" destination="U6b-Vx-4bR" eventType="valueChanged" id="74B-MF-JyE"/>
+                    </connections>
+                </segmentedControl>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="VXr-Tz-HHm"/>
+            <constraints>
+                <constraint firstItem="BT3-em-naP" firstAttribute="leading" secondItem="VXr-Tz-HHm" secondAttribute="leading" constant="24" id="8WD-uC-7wt"/>
+                <constraint firstItem="BT3-em-naP" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" id="PgN-JH-zna"/>
+                <constraint firstItem="VXr-Tz-HHm" firstAttribute="trailing" secondItem="BT3-em-naP" secondAttribute="trailing" constant="24" id="WPc-DW-8jG"/>
+                <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" secondItem="BT3-em-naP" secondAttribute="bottom" constant="24" id="XXE-kH-5xh"/>
+            </constraints>
+            <connections>
+                <outlet property="segmentedControl" destination="BT3-em-naP" id="uM8-q0-YeP"/>
+            </connections>
+            <point key="canvasLocation" x="132" y="77"/>
+        </collectionReusableView>
+    </objects>
+    <designables>
+        <designable name="BT3-em-naP">
+            <size key="intrinsicContentSize" width="131" height="31"/>
+        </designable>
+    </designables>
+</document>

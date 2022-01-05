@@ -53,10 +53,10 @@ class StoreViewController: UICollectionViewController {
     }
 
     private enum Section: CaseIterable {
-        case segmentedControl, warning, offers, storage, nextButton
+        case warning, offers, storage, nextButton
     }
 
-    private var sections: [Section] = [.segmentedControl, .offers]
+    private var sections: [Section] = [.offers]
 
     var driveFileManager: DriveFileManager!
 
@@ -77,9 +77,9 @@ class StoreViewController: UICollectionViewController {
 
         // Set up collection view
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
-        collectionView.register(cellView: StoreControlCollectionViewCell.self)
         collectionView.register(cellView: StoreCollectionViewCell.self)
         collectionView.register(cellView: StoreNextCollectionViewCell.self)
+        collectionView.register(supplementaryView: StoreControlCollectionReusableView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: StoreHelpFooter.self, forSupplementaryViewOfKind: .footer)
         collectionView.collectionViewLayout = createLayout()
         collectionView.allowsSelection = false
@@ -123,11 +123,13 @@ class StoreViewController: UICollectionViewController {
     }
 
     private func createLayout() -> UICollectionViewLayout {
-        let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
-        let footer = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: footerSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
+        let headerFooterSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerFooterSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        header.pinToVisibleBounds = true
+        let footer = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerFooterSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
         let config = UICollectionViewCompositionalLayoutConfiguration()
         config.interSectionSpacing = 24
-        config.boundarySupplementaryItems = [footer]
+        config.boundarySupplementaryItems = [header, footer]
 
         return UICollectionViewCompositionalLayout(sectionProvider: { section, _ in
             switch self.sections[section] {
@@ -189,8 +191,12 @@ class StoreViewController: UICollectionViewController {
     }
 
     private func updateOffers() {
-        if let index = sections.firstIndex(of: .offers) {
-            collectionView.reloadSections([index])
+        if let sectionIndex = sections.firstIndex(of: .offers) {
+            collectionView.reloadSections([sectionIndex])
+            // Scroll to current pack
+            if let index = displayedItems.firstIndex(where: { $0.pack == self.selectedPack }) {
+                collectionView.scrollToItem(at: IndexPath(item: index, section: sectionIndex), at: .centeredVertically, animated: false)
+            }
         }
     }
 
@@ -238,16 +244,6 @@ class StoreViewController: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         switch sections[indexPath.section] {
-        case .segmentedControl:
-            let cell = collectionView.dequeueReusableCell(type: StoreControlCollectionViewCell.self, for: indexPath)
-            let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
-            cell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
-            cell.onChange = { [weak self] index in
-                if let period = PeriodTab(rawValue: index) {
-                    self?.selectedPeriod = period
-                }
-            }
-            return cell
         case .warning:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
             let tableCell = cell.initWith(cell: AlertTableViewCell.self)
@@ -273,9 +269,21 @@ class StoreViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: StoreHelpFooter.self, for: indexPath)
-        footerView.delegate = self
-        return footerView
+        if kind == UICollectionView.elementKindSectionHeader {
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: StoreControlCollectionReusableView.self, for: indexPath)
+            let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
+            headerView.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
+            headerView.onChange = { [weak self] index in
+                if let period = PeriodTab(rawValue: index) {
+                    self?.selectedPeriod = period
+                }
+            }
+            return headerView
+        } else {
+            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: StoreHelpFooter.self, for: indexPath)
+            footerView.delegate = self
+            return footerView
+        }
     }
 
     static func instantiate(driveFileManager: DriveFileManager) -> StoreViewController {
