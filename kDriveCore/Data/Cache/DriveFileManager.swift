@@ -70,8 +70,7 @@ public class DriveFileManager {
                 return try Realm(configuration: uploadsRealmConfiguration)
             } catch {
                 // We can't recover from this error but at least we report it correctly on Sentry
-                SentrySDK.capture(error: error)
-                fatalError(error.localizedDescription)
+                Logging.reportRealmOpeningError(error, realmConfiguration: uploadsRealmConfiguration)
             }
         }
 
@@ -249,8 +248,7 @@ public class DriveFileManager {
             return try Realm(configuration: realmConfiguration)
         } catch {
             // We can't recover from this error but at least we report it correctly on Sentry
-            SentrySDK.capture(error: error)
-            fatalError(error.localizedDescription)
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
         }
     }
 

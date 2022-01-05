@@ -21,6 +21,7 @@ import CocoaLumberjack
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakLogin
+import RealmSwift
 import Sentry
 
 public enum Logging {
@@ -37,6 +38,15 @@ public enum Logging {
         func format(message logMessage: DDLogMessage) -> String? {
             return "[Infomaniak] \(logMessage.message)"
         }
+    }
+
+    public static func reportRealmOpeningError(_ error: Error, realmConfiguration: Realm.Configuration) -> Never {
+        SentrySDK.capture(error: error) { scope in
+            scope.setContext(value: [
+                "File URL": realmConfiguration.fileURL?.absoluteString ?? ""
+            ], key: "Realm")
+        }
+        fatalError("Failed creating realm \(error.localizedDescription)")
     }
 
     private static func initLogger() {

@@ -84,8 +84,7 @@ public class UploadQueue {
                 realm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: dispatchQueue)
             } catch {
                 // We can't recover from this error but at least we report it correctly on Sentry
-                SentrySDK.capture(error: error)
-                fatalError(error.localizedDescription)
+                Logging.reportRealmOpeningError(error, realmConfiguration: DriveFileManager.constants.uploadsRealmConfiguration)
             }
         }
         // Initialize operation queue with files from Realm
