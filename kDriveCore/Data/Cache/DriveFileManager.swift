@@ -847,18 +847,6 @@ public class DriveFileManager {
                         updatedFiles.append(renamedFile)
                         pagedActions[fileId] = .fileUpdate
                     }
-                case .fileFavoriteCreate:
-                    if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
-                        file.isFavorite = true
-                        updatedFiles.append(file)
-                        pagedActions[fileId] = .fileUpdate
-                    }
-                case .fileFavoriteRemove:
-                    if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
-                        file.isFavorite = false
-                        updatedFiles.append(file)
-                        pagedActions[fileId] = .fileUpdate
-                    }
                 case .fileMoveIn, .fileRestore, .fileCreate:
                     if let newFile = activity.file {
                         keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
@@ -876,7 +864,7 @@ public class DriveFileManager {
                         insertedFiles.append(newFile)
                         pagedActions[fileId] = .fileCreate
                     }
-                case .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete:
+                case .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete:
                     if let newFile = activity.file {
                         keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                         realm.add(newFile, update: .modified)
