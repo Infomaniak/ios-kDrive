@@ -25,44 +25,45 @@ import RealmSwift
 protocol FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
-    /// SortType
-    typealias SortTypeUpdatedCallback = (SortType) -> Void
-    /// ListStyle
-    typealias ListStyleUpdatedCallback = (ListStyle) -> Void
-
     var isEmpty: Bool { get }
     var fileCount: Int { get }
     var sortType: SortType { get set }
+    var sortTypePublisher: Published<SortType>.Publisher { get }
     var listStyle: ListStyle { get set }
+    var listStylePublisher: Published<ListStyle>.Publisher { get }
+    var title: String { get set }
+    var titlePublisher: Published<String>.Publisher { get }
+    var isRefreshIndicatorHidden: Bool { get set }
+    var isRefreshIndicatorHiddenPublisher: Published<Bool>.Publisher { get }
 
     func getFile(at index: Int) -> File
     func setFile(_ file: File, at index: Int)
     func getAllFiles() -> [File]
 
-    func loadNextPages(_ page: Int)
-    func loadActivities()
+    func forceRefresh()
 
-    init(driveFileManager: DriveFileManager, currentDirectory: File?)
+    func onViewDidLoad()
+    func onViewWillAppear()
+
+    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?)
 
     var onFileListUpdated: FileListUpdatedCallback? { get set }
-    var onSortTypeUpdated: SortTypeUpdatedCallback? { get set }
-    var onListStyleUpdated: ListStyleUpdatedCallback? { get set }
 }
 
 class ManagedFileListViewModel: FileListViewModel {
     private var driveFileManager: DriveFileManager
-    var sortType: SortType {
-        didSet {
-            updateDataSource()
-            onSortTypeUpdated?(sortType)
-        }
-    }
 
-    var listStyle: ListStyle {
-        didSet {
-            onListStyleUpdated?(listStyle)
-        }
-    }
+    @Published var sortType: SortType
+    var sortTypePublisher: Published<SortType>.Publisher { $sortType }
+
+    @Published var listStyle: ListStyle
+    var listStylePublisher: Published<ListStyle>.Publisher { $listStyle }
+
+    @Published var title: String
+    var titlePublisher: Published<String>.Publisher { $title }
+
+    @Published var isRefreshIndicatorHidden: Bool
+    var isRefreshIndicatorHiddenPublisher: Published<Bool>.Publisher { $isRefreshIndicatorHidden }
 
     var currentDirectory: File
     var fileCount: Int {
@@ -74,16 +75,15 @@ class ManagedFileListViewModel: FileListViewModel {
     }
 
     var onFileListUpdated: FileListUpdatedCallback?
-    var onSortTypeUpdated: SortTypeUpdatedCallback?
-    var onListStyleUpdated: ListStyleUpdatedCallback?
 
     private var files: Results<File>
+    private var isLoading: Bool
 
     private var realmObservationToken: NotificationToken?
     private var sortTypeObservation: AnyCancellable?
     private var listStyleObservation: AnyCancellable?
 
-    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+    required init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.driveFileManager = driveFileManager
         if let currentDirectory = currentDirectory {
             self.currentDirectory = currentDirectory
@@ -93,15 +93,46 @@ class ManagedFileListViewModel: FileListViewModel {
         self.sortType = FileListOptions.instance.currentSortType
         self.listStyle = FileListOptions.instance.currentStyle
         self.files = driveFileManager.getRealm().objects(File.self).filter(NSPredicate(value: false))
+        self.isRefreshIndicatorHidden = true
+        self.isLoading = false
+
+        if self.currentDirectory.isRoot {
+            if let rootTitle = configuration.rootTitle {
+                self.title = rootTitle
+            } else {
+                self.title = driveFileManager.drive.name
+            }
+        } else {
+            self.title = self.currentDirectory.name
+        }
 
         setupObservation()
+    }
+
+    public func forceRefresh() {
+        isLoading = false
+        isRefreshIndicatorHidden = false
+        loadFiles(page: 1, forceRefresh: true)
+    }
+
+    public func onViewDidLoad() {
         updateDataSource()
+        loadFiles()
+    }
+
+    public func onViewWillAppear() {
+        if currentDirectory.fullyDownloaded && !files.isEmpty {
+            loadActivities()
+        }
     }
 
     private func setupObservation() {
         sortTypeObservation = FileListOptions.instance.$currentSortType
             .receive(on: RunLoop.main)
-            .assignNoRetain(to: \.sortType, on: self)
+            .sink { [weak self] sortType in
+                self?.sortType = sortType
+                self?.updateDataSource()
+            }
         listStyleObservation = FileListOptions.instance.$currentStyle
             .receive(on: RunLoop.main)
             .assignNoRetain(to: \.listStyle, on: self)
@@ -127,12 +158,31 @@ class ManagedFileListViewModel: FileListViewModel {
         }
     }
 
-    public func loadNextPages(_ page: Int) {
-        if !currentDirectory.fullyDownloaded {
-            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: false) { [weak self] file, _, _ in
+    private func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+        guard !isLoading || page > 1 else { return }
+
+        if currentDirectory.fullyDownloaded && !forceRefresh {
+            loadActivities()
+        } else {
+            isLoading = true
+            if page == 1 {
+                // Show refresh control if loading is slow
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    guard let self = self else { return }
+                    if self.isLoading && self.isRefreshIndicatorHidden {
+                        self.isRefreshIndicatorHidden = false
+                    }
+                }
+            }
+
+            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, _ in
+                self?.isLoading = false
+                self?.isRefreshIndicatorHidden = true
                 if let fetchedCurrentDirectory = file {
                     if !fetchedCurrentDirectory.fullyDownloaded {
-                        self?.loadNextPages(page + 1)
+                        self?.loadFiles(page: page + 1)
+                    } else {
+                        self?.loadActivities()
                     }
                 } else {
                     // TODO: report error
@@ -141,7 +191,14 @@ class ManagedFileListViewModel: FileListViewModel {
         }
     }
 
-    public func loadActivities() {}
+    private func loadActivities() {
+        driveFileManager.getFolderActivities(file: currentDirectory) { [weak self] _, _, error in
+            if let error = error {
+                if let error = error as? DriveError, error == .objectNotFound {
+                } else {}
+            }
+        }
+    }
 
     func getFile(at index: Int) -> File {
         return files[index]
@@ -161,5 +218,11 @@ extension Publisher where Self.Failure == Never {
         sink { [weak object] value in
             object?[keyPath: keyPath] = value
         }
+    }
+
+    func receiveOnMain(store: inout Set<AnyCancellable>, receiveValue: @escaping ((Self.Output) -> Void)) {
+        receive(on: RunLoop.main)
+            .sink(receiveValue: receiveValue)
+            .store(in: &store)
     }
 }

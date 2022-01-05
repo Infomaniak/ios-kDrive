@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import Combine
 import DifferenceKit
 import kDriveCore
 import kDriveResources
@@ -86,18 +87,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         return UIBarButtonItem(customView: activityView)
     }()
 
-    var currentDirectory: File! {
-        didSet {
-            setTitle()
-        }
-    }
+    var currentDirectory: File!
 
     lazy var configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true)
     private var uploadingFilesCount = 0
-    private var nextPage = 1
-    var isLoadingData = false
-    private var isReloading = false
-    private var isContentLoaded = false
 
     var currentDirectoryCount: FileCount?
     var selectAllMode = false
@@ -120,14 +113,15 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     var viewModel: FileListViewModel!
+    var bindStore = Set<AnyCancellable>()
 
     // MARK: - View controller lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = ManagedFileListViewModel(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-
-        setTitle()
+        viewModel = ManagedFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        bindViewModel()
+        viewModel.onViewDidLoad()
 
         navigationItem.hideBackButtonText()
 
@@ -169,16 +163,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             collectionView.dragDelegate = self
         }
 
-        // First load
-        reloadData()
-
         // Set up observers
         setUpObservers()
-        setupViewModelCallbacks()
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
 
-    private func setupViewModelCallbacks() {
+    private func bindViewModel() {
         viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, shouldReload in
             guard !shouldReload else {
                 self?.collectionView.reloadData()
@@ -193,10 +183,31 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         }
 
-        viewModel.onSortTypeUpdated = { _ in
+        headerView?.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
+        viewModel.sortTypePublisher.receiveOnMain(store: &bindStore) { [weak self] _ in }
+
+        navigationItem.title = viewModel.title
+        viewModel.titlePublisher.receiveOnMain(store: &bindStore) { [weak self] title in
+            self?.navigationItem.title = title
         }
 
-        viewModel.onListStyleUpdated = { [weak self] listStyle in
+        viewModel.isRefreshIndicatorHiddenPublisher.receiveOnMain(store: &bindStore) { [weak self] isRefreshIndicatorHidden in
+            guard let self = self,
+                  self.refreshControl.isRefreshing == isRefreshIndicatorHidden
+            else { return }
+
+            if isRefreshIndicatorHidden {
+                self.refreshControl.endRefreshing()
+
+            } else {
+                self.refreshControl.beginRefreshing()
+                let offsetPoint = CGPoint(x: 0, y: self.collectionView.contentOffset.y - self.refreshControl.frame.size.height)
+                self.collectionView.setContentOffset(offsetPoint, animated: true)
+            }
+        }
+
+        headerView?.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
+        viewModel.listStylePublisher.receiveOnMain(store: &bindStore) { [weak self] listStyle in
             guard let self = self else { return }
             self.headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
             UIView.transition(with: self.collectionView, duration: 0.25, options: .transitionCrossDissolve) {
@@ -223,10 +234,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.capabilities.canCreateFile ?? false
         #endif
 
-        // Refresh data
-        if isContentLoaded && !isLoadingData && currentDirectory != nil && currentDirectory.fullyDownloaded {
-            getNewChanges()
-        }
+        viewModel.onViewWillAppear()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -251,42 +259,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Overridable methods
 
-    func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        guard driveFileManager != nil && currentDirectory != nil else {
-            DispatchQueue.main.async {
-                completion(.success([]), false, true)
-            }
-            return
-        }
+    func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {}
 
-        Task {
-            do {
-                let (children, moreComing) = try await driveFileManager.files(in: currentDirectory, page: page, sortType: sortType, forceRefresh: forceRefresh)
-                completion(.success(children), moreComing, true)
-            } catch {
-                debugPrint(error)
-                completion(.failure(error), false, true)
-            }
-        }
-    }
-
-    override func getNewChanges() {
-        guard driveFileManager != nil && currentDirectory != nil else { return }
-        isLoadingData = true
-        Task {
-            do {
-                _ = try await driveFileManager.fileActivities(file: currentDirectory)
-                self.isLoadingData = false
-                self.reloadData(showRefreshControl: false, withActivities: false)
-            } catch {
-                self.isLoadingData = false
-                if let error = error as? DriveError, error == .objectNotFound {
-                    // Pop view controller
-                    self.navigationController?.popViewController(animated: true)
-                }
-            }
-        }
-    }
+    override func getNewChanges() {}
 
     func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
         headerView.delegate = self
@@ -320,27 +295,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Public methods
 
-    final func reloadData(page: Int = 1, forceRefresh: Bool = false, showRefreshControl: Bool = true, withActivities: Bool = true) {
-        guard !isLoadingData || page > 1 else { return }
-        isLoadingData = true
-        if page == 1 && configuration.isRefreshControlEnabled && showRefreshControl {
-            // Show refresh control if loading is slow
-            isReloading = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if self.isReloading && !self.refreshControl.isRefreshing {
-                    self.refreshControl.beginRefreshing()
-                    let offsetPoint = CGPoint(x: 0, y: self.collectionView.contentOffset.y - self.refreshControl.frame.size.height)
-                    self.collectionView.setContentOffset(offsetPoint, animated: true)
-                }
-            }
-        }
-
-        isReloading = false
-        viewModel.loadNextPages(1)
-    }
+    final func reloadData(page: Int = 1, forceRefresh: Bool = false, showRefreshControl: Bool = true, withActivities: Bool = true) {}
 
     @objc func forceRefresh() {
-        reloadData(forceRefresh: true, withActivities: false)
+        viewModel.forceRefresh()
     }
 
     final func setUpObservers() {
@@ -419,18 +377,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Private methods
 
-    private func setTitle() {
-        if currentDirectory?.isRoot ?? false {
-            if let rootTitle = configuration.rootTitle {
-                navigationItem.title = rootTitle
-            } else {
-                navigationItem.title = driveFileManager?.drive.name ?? ""
-            }
-        } else {
-            navigationItem.title = currentDirectory?.name ?? ""
-        }
-    }
-
     private func updateEmptyView() {
         if let emptyBackground = background {
             if UIDevice.current.orientation.isPortrait {
@@ -481,7 +427,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
-            setTitle()
+            navigationItem.title = viewModel.title
             navigationItem.rightBarButtonItems = rightBarButtonItems
             navigationItem.leftBarButtonItems = leftBarButtonItems
         }
@@ -675,7 +621,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if currentDirectory == nil && directoryId > DriveFileManager.constants.rootID {
             navigationController?.popViewController(animated: true)
         }
-        setTitle()
         if configuration.showUploadingFiles {
             updateUploadCount()
         }
@@ -1001,8 +946,9 @@ extension FileListViewController: SelectDelegate {
                 observeUploads()
             }
             if isDifferentDrive {
-                viewModel = ManagedFileListViewModel(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-                setupViewModelCallbacks()
+                viewModel = ManagedFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                bindViewModel()
+                viewModel.onViewDidLoad()
                 navigationController?.popToRootViewController(animated: false)
             }
         }

@@ -165,7 +165,6 @@ class SearchViewController: FileListViewController {
         collectionView.reloadData()
         currentTask?.cancel()
         currentTask = nil
-        isLoadingData = false
         if isDisplayingSearchResults {
             forceRefresh()
         }
