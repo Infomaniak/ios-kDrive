@@ -121,7 +121,7 @@ final class DriveFileManagerTests: XCTestCase {
     func testFavorites() {
         let testName = "Get favorites"
         let expectations = [
-            (name: "Get favorite", expectation: XCTestExpectation(description: "Get favorite")),
+            (name: "Set favorite", expectation: XCTestExpectation(description: "Get favorite")),
             (name: "Remove favorite", expectation: XCTestExpectation(description: "Remove favorite"))
         ]
         var rootFile = File()
@@ -154,10 +154,10 @@ final class DriveFileManagerTests: XCTestCase {
         initOfficeFile(testName: testName) { root, officeFile in
             rootFile = root
             DriveFileManagerTests.driveFileManager.searchFile(query: officeFile.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ) { root, fileList, _ in
-                XCTAssertNotNil(root, "Root shouldn't be nil")
-                XCTAssertNotNil(fileList, "Files list shouldn't be nil")
+                XCTAssertNotNil(root, TestsMessages.notNil("root"))
+                XCTAssertNotNil(fileList, TestsMessages.notNil("files list"))
                 let searchedFile = fileList!.contains { $0.id == officeFile.id }
-                XCTAssertTrue(searchedFile, "Searched file shouldn't be nil")
+                XCTAssertTrue(searchedFile, TestsMessages.notNil("searched file"))
                 expectation.fulfill()
             }
         }
@@ -190,27 +190,6 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testSetFavoriteFile() {
-        let testName = "Set favorite file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.setFavoriteFile(file: officeFile, favorite: true) { error in
-                XCTAssertNil(error, TestsMessages.noError)
-
-                let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-                XCTAssertNotNil(cached, "File shouldn't be nil")
-                XCTAssertTrue(cached!.isFavorite, "Cached file should be favorite")
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
-
     func testDeleteFile() {
         let testName = "Delete file"
         let expectation = XCTestExpectation(description: testName)
@@ -220,7 +199,7 @@ final class DriveFileManagerTests: XCTestCase {
             rootFile = root
 
             let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-            XCTAssertNotNil(cached, "Cached file shouldn't be nil")
+            XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
 
             DriveFileManagerTests.driveFileManager.deleteFile(file: officeFile) { _, error in
                 XCTAssertNil(error, TestsMessages.noError)
@@ -242,12 +221,12 @@ final class DriveFileManagerTests: XCTestCase {
             self.createTestDirectory(name: "Destination", parentDirectory: rootFile) { destination in
                 XCTAssertNotNil(destination, "Failed to create destination directory")
                 DriveFileManagerTests.driveFileManager.moveFile(file: officeFile, newParent: destination) { _, file, error in
-                    XCTAssertNotNil(file, "File shouldn't be nil")
+                    XCTAssertNotNil(file, TestsMessages.notNil("file"))
                     XCTAssertNil(error, TestsMessages.noError)
                     XCTAssertTrue(file?.parent?.id == destination.id, "New parent should be 'destination' directory")
 
                     let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-                    XCTAssertNotNil(cached, "Cached file shouldn't be nil")
+                    XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
                     XCTAssertTrue(cached!.parent?.id == destination.id, "New parent not updated in realm")
                     expectation.fulfill()
                 }
@@ -266,12 +245,12 @@ final class DriveFileManagerTests: XCTestCase {
         initOfficeFile(testName: testName) { root, officeFile in
             rootFile = root
             DriveFileManagerTests.driveFileManager.renameFile(file: officeFile, newName: testName) { file, error in
-                XCTAssertNotNil(file, "File shouldn't be nil")
+                XCTAssertNotNil(file, TestsMessages.notNil("file"))
                 XCTAssertNil(error, TestsMessages.noError)
                 XCTAssertTrue(file?.name == testName, "File name should have been renamed")
 
                 let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-                XCTAssertNotNil(cached, "Cached file shouldn't be nil")
+                XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
                 XCTAssertTrue(cached!.name == testName, "New name not updated in realm")
                 expectation.fulfill()
             }
@@ -289,11 +268,11 @@ final class DriveFileManagerTests: XCTestCase {
         initOfficeFile(testName: testName) { root, officeFile in
             rootFile = root
             DriveFileManagerTests.driveFileManager.duplicateFile(file: officeFile, duplicateName: "\(testName) - \(Date())") { file, error in
-                XCTAssertNotNil(file, "Duplicated file shouldn't be nil")
+                XCTAssertNotNil(file, TestsMessages.notNil("duplicated file"))
                 XCTAssertNil(error, TestsMessages.noError)
 
                 let cachedRoot = DriveFileManagerTests.driveFileManager.getCachedFile(id: rootFile.id)
-                XCTAssertNotNil(cachedRoot, "Cached root shouldn't be nil")
+                XCTAssertNotNil(cachedRoot, TestsMessages.notNil("cached root"))
                 XCTAssertTrue(cachedRoot!.children.count == 2, "Cached root should have 2 children")
 
                 let newFile = cachedRoot?.children.contains { $0.id == file!.id }
@@ -314,11 +293,11 @@ final class DriveFileManagerTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
             DriveFileManagerTests.driveFileManager.createDirectory(parentDirectory: rootFile, name: "\(testName) - \(Date())", onlyForMe: true) { file, error in
-                XCTAssertNotNil(file, "Directory created shouldn't be nil")
+                XCTAssertNotNil(file, TestsMessages.notNil("directory created"))
                 XCTAssertNil(error, TestsMessages.noError)
 
                 let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: file!.id)
-                XCTAssertNotNil(cached, "Cached root shouldn't be nil")
+                XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
                 expectation.fulfill()
             }
         }
@@ -333,12 +312,12 @@ final class DriveFileManagerTests: XCTestCase {
         var rootFile = File()
 
         DriveFileManagerTests.driveFileManager.createCommonDirectory(name: "\(testName) - \(Date())", forAllUser: false) { file, error in
-            XCTAssertNotNil(file, "Created common directory shouldn't be nil")
+            XCTAssertNotNil(file, TestsMessages.notNil("created common"))
             XCTAssertNil(error, TestsMessages.noError)
             rootFile = file!
 
             let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: rootFile.id)
-            XCTAssertNotNil(cached, "Cached root shouldn't be nil")
+            XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
             expectation.fulfill()
         }
 
@@ -354,12 +333,12 @@ final class DriveFileManagerTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
             DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: rootFile, name: "\(testName) - \(Date())", onlyForMe: true, password: "mot de passe", validUntil: nil, emailWhenFinished: true, limitFileSize: nil) { file, dropbox, error in
-                XCTAssertNotNil(file, "Created file shouldn't be nil")
-                XCTAssertNotNil(dropbox, "Dropbox settings shouldn't be nil")
+                XCTAssertNotNil(file, TestsMessages.notNil("created file"))
+                XCTAssertNotNil(dropbox, TestsMessages.notNil("dropbox settings"))
                 XCTAssertNil(error, TestsMessages.noError)
 
                 let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: file!.id)
-                XCTAssertNotNil(cached, "Cached dropbox shouldn't be nil")
+                XCTAssertNotNil(cached, TestsMessages.notNil("cached dropbox"))
                 XCTAssertTrue(cached!.collaborativeFolder?.count ?? 0 > 0, "Cached dropbox link should be set")
                 expectation.fulfill()
             }
@@ -377,11 +356,11 @@ final class DriveFileManagerTests: XCTestCase {
         setUpTest(testName: testName) { root in
             rootFile = root
             DriveFileManagerTests.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "\(testName) - \(Date())", type: "docx") { file, error in
-                XCTAssertNotNil(file, "Office file shouldn't be nil")
+                XCTAssertNotNil(file, TestsMessages.notNil("office file"))
                 XCTAssertNil(error, TestsMessages.noError)
 
                 let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: file!.id)
-                XCTAssertNotNil(cached, "Office file shouldn't be nil")
+                XCTAssertNotNil(cached, TestsMessages.notNil("office file"))
                 expectation.fulfill()
             }
         }
