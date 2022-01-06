@@ -1184,6 +1184,7 @@ public class DriveFileManager {
         }
     }
 
+    // swiftlint:disable function_parameter_count
     public func createDropBox(parentDirectory: File,
                               name: String,
                               onlyForMe: Bool,

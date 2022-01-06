@@ -1271,28 +1271,6 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // WIP
-    /*
-    func testConvertFile() {
-        let testName = "Convert file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            file.onlyOfficeConvertExtension = "xlsx"
-            self.currentApiFetcher.convertFile(file: file) { convertResponse, convertError in
-                XCTAssertNil(convertError, TestsMessages.noError)
-                XCTAssertNotNil(convertResponse?.data, TestsMessages.notNil("convert response"))
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
-     */
-
     func testGetFileCount() {
         let testName = "Get file count"
         let expectation = XCTestExpectation(description: testName)
