@@ -90,6 +90,13 @@ final class DriveFileManagerTests: XCTestCase {
         }
     }
 
+    func checkIfFileIsInDestination(file: File, destination: File, completion: @escaping () -> Void) {
+        let cachedFile = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
+        XCTAssertNotNil(cachedFile, TestsMessages.notNil("cached file"))
+        XCTAssertEqual(destination.id, cachedFile?.parentId, "Parent is different from expected destination")
+        completion()
+    }
+
     // MARK: - Test methods
 
     func testGetRootFile() {
@@ -216,7 +223,6 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // WIP
     func testGetLastModifiedFiles() {
         let testName = "Get last modified files"
         let expectation = XCTestExpectation(description: testName)
@@ -243,7 +249,36 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     // WIP
-    func testCancelAction() {}
+    func testCancelAction() {
+        let testName = "Cancel Action"
+        let expectations = [
+            (name: "Cancel file deleted", expectation: expectation(description: "Cancel file deleted")),
+            (name: "Cancel file moved", expectation: expectation(description: "Cancel file moved"))
+        ]
+        var rootFile = File()
+
+        initOfficeFile(testName: testName) { root, file in
+            rootFile = root
+            DriveFileManagerTests.driveFileManager.createDirectory(parentDirectory: rootFile, name: "directory", onlyForMe: true) { directory, error in
+                XCTAssertNil(error, TestsMessages.noError)
+                XCTAssertNotNil(directory, TestsMessages.notNil("created directory"))
+                DriveFileManagerTests.driveFileManager.moveFile(file: file, newParent: directory!) { moveResponse, file, moveError in
+                    XCTAssertNil(moveError, TestsMessages.noError)
+                    XCTAssertNotNil(moveResponse, TestsMessages.notNil("move response"))
+                    let moveCancelId = moveResponse!.id
+                    DriveFileManagerTests.driveFileManager.cancelAction(cancelId: moveCancelId) { cancelMoveError in
+                        XCTAssertNil(cancelMoveError, TestsMessages.noError)
+                        self.checkIfFileIsInDestination(file: file, destination: rootFile) {
+                            // WIP
+                        }
+                    }
+                }
+            }
+        }
+
+        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
+    }
 
     func testDeleteFile() {
         let testName = "Delete file"
