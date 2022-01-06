@@ -78,7 +78,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var popRecognizer: InteractivePopRecognizer?
     @IBOutlet weak var statusBarView: UIView!
     private var fullScreenPreview = false
-    private var heightToHide = CGFloat(0)
+    private var heightToHide = 0.0
 
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!

@@ -39,8 +39,8 @@ class MainTabBar: UITabBar {
 
     var centerButton: IKRoundButton!
 
-    private let extraHeight: CGFloat = 7
-    private let offsetY: CGFloat = -3
+    private let extraHeight = 7.0
+    private let offsetY = -3.0
     private var tabBarHeight: CGFloat {
         return frame.height - safeAreaInsets.bottom + extraHeight
     }
@@ -82,30 +82,30 @@ class MainTabBar: UITabBar {
     }
 
     func createPath() -> CGPath {
-        let buttonRadius: CGFloat = tabBarHeight / 2
-        let buttonMargin: CGFloat = 8
+        let buttonRadius = tabBarHeight / 2
+        let buttonMargin = 8.0
         let path = UIBezierPath()
         let centerWidth = frame.width / 2
 
         path.move(to: CGPoint(x: 45, y: 0))
         path.addArc(withCenter: CGPoint(x: centerWidth - (buttonRadius + buttonMargin + 3), y: 3),
                     radius: 3,
-                    startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180),
+                    startAngle: 270 * Double.pi / 180, endAngle: 0 * Double.pi / 180,
                     clockwise: true)
         path.addArc(withCenter: CGPoint(x: centerWidth, y: 10),
                     radius: buttonRadius + buttonMargin + 10 > tabBarHeight ? tabBarHeight - 10 : buttonRadius + buttonMargin,
-                    startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(0 * Double.pi / 180),
+                    startAngle: 180 * Double.pi / 180, endAngle: 0 * Double.pi / 180,
                     clockwise: false)
         path.addArc(withCenter: CGPoint(x: centerWidth + (buttonRadius + buttonMargin + 3), y: 3),
                     radius: 3,
-                    startAngle: CGFloat(180 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180),
+                    startAngle: 180 * Double.pi / 180, endAngle: 270 * Double.pi / 180,
                     clockwise: true)
         path.addArc(withCenter: CGPoint(x: frame.width - 40, y: tabBarHeight / 2),
                     radius: tabBarHeight / 2,
-                    startAngle: CGFloat(270 * Double.pi / 180), endAngle: CGFloat(90 * Double.pi / 180),
+                    startAngle: 270 * Double.pi / 180, endAngle: 90 * Double.pi / 180,
                     clockwise: true)
         path.addArc(withCenter: CGPoint(x: 40, y: tabBarHeight / 2), radius: tabBarHeight / 2,
-                    startAngle: CGFloat(90 * Double.pi / 180), endAngle: CGFloat(270 * Double.pi / 180),
+                    startAngle: 90 * Double.pi / 180, endAngle: 270 * Double.pi / 180,
                     clockwise: true)
         path.close()
         path.apply(CGAffineTransform(translationX: 0, y: offsetY))
@@ -122,7 +122,7 @@ class MainTabBar: UITabBar {
 
     private func setupBackgroundGradient() {
         let gradient = CAGradientLayer()
-        let height: CGFloat = 120
+        let height = 120.0
         let inset = (superview?.frame.height ?? 0) - frame.height - frame.minY
         gradient.frame = CGRect(x: 0, y: bounds.height + inset - height, width: bounds.width, height: height)
         gradient.colors = [KDriveResourcesAsset.backgroundColor.color.withAlphaComponent(0).cgColor, KDriveResourcesAsset.backgroundColor.color.cgColor]

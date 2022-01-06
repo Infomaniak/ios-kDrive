@@ -20,20 +20,20 @@ import SnackBar
 import UIKit
 
 public enum UIConstants {
-    public static let inputCornerRadius: CGFloat = 2
-    public static let imageCornerRadius: CGFloat = 3
-    public static let cornerRadius: CGFloat = 6
-    public static let alertCornerRadius: CGFloat = 8
-    public static let buttonCornerRadius: CGFloat = 10
-    public static let floatingPanelCornerRadius: CGFloat = 20
-    public static let listPaddingBottom: CGFloat = 50
-    public static let listFloatingButtonPaddingBottom: CGFloat = 75
-    public static let homeListPaddingTop: CGFloat = 16
-    public static let floatingPanelHeaderHeight: CGFloat = 70
-    public static let fileListCellHeight: CGFloat = 60
-    public static let largeTitleHeight: CGFloat = 96
-    public static let insufficientStorageMinimumPercentage: Double = 90.0
-    public static let dropDelay: Double = -1.0
+    public static let inputCornerRadius = 2.0
+    public static let imageCornerRadius = 3.0
+    public static let cornerRadius = 6.0
+    public static let alertCornerRadius = 8.0
+    public static let buttonCornerRadius = 10.0
+    public static let floatingPanelCornerRadius = 20.0
+    public static let listPaddingBottom = 50.0
+    public static let listFloatingButtonPaddingBottom = 75.0
+    public static let homeListPaddingTop = 16.0
+    public static let floatingPanelHeaderHeight = 70.0
+    public static let fileListCellHeight = 60.0
+    public static let largeTitleHeight = 96.0
+    public static let insufficientStorageMinimumPercentage = 90.0
+    public static let dropDelay = -1.0
 
     @discardableResult
     public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {

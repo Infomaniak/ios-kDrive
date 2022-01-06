@@ -28,7 +28,7 @@ public class AlertChoiceViewController: AlertViewController {
 
     static var emptyCheckmarkImage: UIImage = {
         let size = CGSize(width: 22, height: 22)
-        let lineWidth: CGFloat = 1
+        let lineWidth = 1.0
         let renderer = UIGraphicsImageRenderer(size: size)
 
         return renderer.image { ctx in
