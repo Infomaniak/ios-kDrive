@@ -193,10 +193,6 @@ class StoreViewController: UICollectionViewController {
     private func updateOffers() {
         if let sectionIndex = sections.firstIndex(of: .offers) {
             collectionView.reloadSections([sectionIndex])
-            // Scroll to current pack
-            if let index = displayedItems.firstIndex(where: { $0.pack == self.selectedPack }) {
-                collectionView.scrollToItem(at: IndexPath(item: index, section: sectionIndex), at: .centeredVertically, animated: false)
-            }
         }
     }
 
@@ -360,6 +356,11 @@ extension StoreViewController: StoreManagerDelegate {
             items[i].product = response.availableProducts.first { $0.productIdentifier == items[i].identifier }
         }
         updateOffers()
+        // Scroll to current pack
+        if let sectionIndex = sections.firstIndex(of: .offers),
+           let index = displayedItems.firstIndex(where: { $0.pack == self.selectedPack }) {
+            collectionView.scrollToItem(at: IndexPath(item: index, section: sectionIndex), at: .centeredVertically, animated: false)
+        }
     }
 
     func storeManagerDidReceiveMessage(_ message: String) {
