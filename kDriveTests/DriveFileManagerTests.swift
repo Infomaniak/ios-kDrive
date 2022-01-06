@@ -146,6 +146,32 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
+    func testShareLink() {
+        let testName = "Share link"
+        let expectations = [
+            (name: "Activate share link", expectation: XCTestExpectation(description: "Activate share link")),
+            (name: "Remove share link", expectation: XCTestExpectation(description: "Remove share link"))
+        ]
+        var rootFile = File()
+
+        setUpTest(testName: testName) { root in
+            rootFile = root
+            DriveFileManagerTests.driveFileManager.activateShareLink(for: rootFile) { shareLink, error in
+                XCTAssertNil(error, TestsMessages.noError)
+                XCTAssertNotNil(shareLink, TestsMessages.notNil("ShareLink"))
+                expectations[0].expectation.fulfill()
+
+                DriveFileManagerTests.driveFileManager.removeShareLink(for: rootFile) { error in
+                    XCTAssertNil(error, TestsMessages.noError)
+                    expectations[1].expectation.fulfill()
+                }
+            }
+        }
+
+        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
+    }
+
     func testSearchFile() {
         let testName = "Search file"
         let expectation = XCTestExpectation(description: testName)
@@ -189,6 +215,35 @@ final class DriveFileManagerTests: XCTestCase {
         wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
+
+    // WIP
+    func testGetLastModifiedFiles() {
+        let testName = "Get last modified files"
+        let expectation = XCTestExpectation(description: testName)
+        var rootFile = File()
+
+        setUpTest(testName: testName) { root in
+            rootFile = root
+            DriveFileManagerTests.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "test", type: "docx") { officeFile, officeError in
+                XCTAssertNil(officeError, TestsMessages.noError)
+                XCTAssertNotNil(officeFile, TestsMessages.notNil("Office file created"))
+
+                DriveFileManagerTests.driveFileManager.getLastModifiedFiles(page: 1) { files, error in
+                    XCTAssertNil(error, TestsMessages.noError)
+                    XCTAssertNotNil(files, TestsMessages.notNil("Last modified files"))
+                    let lastModifiedFile = files![0].id
+                    XCTAssertEqual(lastModifiedFile, officeFile!.id, "Last modified file should be root file")
+                    expectation.fulfill()
+                }
+            }
+        }
+
+        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout * 2) // DriveFileManagerTests.defaultTimeout is too short
+        tearDownTest(directory: rootFile)
+    }
+
+    // WIP
+    func testCancelAction() {}
 
     func testDeleteFile() {
         let testName = "Delete file"
@@ -368,4 +423,7 @@ final class DriveFileManagerTests: XCTestCase {
         wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
+
+    // WIP
+    func updateFolderColor() {}
 }
