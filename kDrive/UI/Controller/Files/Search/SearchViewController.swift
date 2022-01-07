@@ -55,7 +55,7 @@ class SearchViewController: FileListViewController {
     override func viewDidLoad() {
         // Set configuration
         configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
-        listStyle = .list
+        viewModel.listStyle = .list
         viewModel.sortType = .newer
 
         collectionView.register(UINib(nibName: searchHeaderIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: searchHeaderIdentifier)
