@@ -60,7 +60,6 @@
                         <segue destination="XvF-Yr-0F4" kind="show" identifier="toMySharedSegue" id="J1x-fu-5jd"/>
                         <segue destination="UJN-BO-Tu3" kind="show" identifier="toOfflineSegue" id="aEo-BZ-U5c"/>
                         <segue destination="6wp-0R-3mI" kind="show" identifier="toLastModificationsSegue" id="FXj-6K-uCY"/>
-                        <segue destination="pbx-ml-Jas" kind="show" identifier="toStoreSegue_old" id="W48-GL-f18"/>
                         <segue destination="EfG-kK-v5l" kind="show" identifier="toStoreSegue" id="Lg4-x4-Mse"/>
                     </connections>
                 </viewController>
@@ -195,7 +194,7 @@
         <!--Modifier votre offre-->
         <scene sceneID="Cfv-v2-dbY">
             <objects>
-                <collectionViewController storyboardIdentifier="StoreViewController2" useStoryboardIdentifierAsRestorationIdentifier="YES" id="EfG-kK-v5l" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="StoreViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="EfG-kK-v5l" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="vM7-1Z-EaT">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -228,66 +227,6 @@
                     </navigationItem>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Vh-I9-VxC" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-1352" y="921"/>
-        </scene>
-        <!--Modifier votre offre-->
-        <scene sceneID="28J-ds-J1E">
-            <objects>
-                <viewController storyboardIdentifier="StoreViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="pbx-ml-Jas" customClass="StoreViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="ET6-FM-j3T">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="xvl-Vm-CEP">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <connections>
-                                    <outlet property="dataSource" destination="pbx-ml-Jas" id="KEK-Gl-9Lu"/>
-                                    <outlet property="delegate" destination="pbx-ml-Jas" id="taK-he-BYC"/>
-                                </connections>
-                            </tableView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YYt-bI-RGT" customClass="IKRoundButton" customModule="kDriveCore">
-                                <rect key="frame" x="338" y="786" width="60" height="60"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="60" id="4mR-3m-toR"/>
-                                    <constraint firstAttribute="width" constant="60" id="oTP-pw-bZV"/>
-                                </constraints>
-                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                <state key="normal" title="?"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="elevated" value="YES"/>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="elevation">
-                                        <integer key="value" value="4"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="helpButtonPressed:" destination="pbx-ml-Jas" eventType="touchUpInside" id="rfH-CR-s55"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="BzV-cy-ZHy"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="xvl-Vm-CEP" firstAttribute="leading" secondItem="ET6-FM-j3T" secondAttribute="leading" id="AUg-Rc-wsl"/>
-                            <constraint firstItem="BzV-cy-ZHy" firstAttribute="trailing" secondItem="YYt-bI-RGT" secondAttribute="trailing" constant="16" id="HRa-4l-eWk"/>
-                            <constraint firstItem="BzV-cy-ZHy" firstAttribute="bottom" secondItem="YYt-bI-RGT" secondAttribute="bottom" constant="16" id="J7k-J2-7xq"/>
-                            <constraint firstItem="xvl-Vm-CEP" firstAttribute="top" secondItem="ET6-FM-j3T" secondAttribute="top" id="MBH-X4-J4W"/>
-                            <constraint firstAttribute="bottom" secondItem="xvl-Vm-CEP" secondAttribute="bottom" id="b32-JW-eF3"/>
-                            <constraint firstItem="xvl-Vm-CEP" firstAttribute="trailing" secondItem="ET6-FM-j3T" secondAttribute="trailing" id="mSt-Rv-zUK"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Modifier votre offre" id="cty-gf-vG9">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="storeTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="helpButton" destination="YYt-bI-RGT" id="1Mn-s8-61c"/>
-                        <outlet property="tableView" destination="xvl-Vm-CEP" id="nj1-Vj-O4t"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="izL-Dv-YQl" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-436" y="921"/>
         </scene>
@@ -670,7 +609,7 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Changer d'utilisateur" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Orz-m0-bIR" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="294" width="350" height="21.5"/>
+                                <rect key="frame" x="32" y="294" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -680,7 +619,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6cc-pK-yXN">
-                                <rect key="frame" x="32" y="331.5" width="46" height="2"/>
+                                <rect key="frame" x="32" y="334" width="46" height="2"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="2" id="0s8-rW-ZlD"/>
@@ -688,7 +627,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ahf-mt-ZbI" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="349.5" width="350" height="17"/>
+                                <rect key="frame" x="32" y="352" width="350" height="81.5"/>
                                 <string key="text">Consulter les notifications de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez. </string>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
@@ -699,7 +638,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="L3K-dK-zvk">
-                                <rect key="frame" x="0.0" y="382.5" width="414" height="513.5"/>
+                                <rect key="frame" x="0.0" y="449.5" width="414" height="446.5"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="180" id="Bqe-NE-eMP"/>
@@ -893,7 +832,7 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="318" width="350" height="21.5"/>
+                                <rect key="frame" x="32" y="318" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -903,7 +842,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M26-GT-YZh">
-                                <rect key="frame" x="32" y="355.5" width="46" height="2"/>
+                                <rect key="frame" x="32" y="358" width="46" height="2"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="46" id="EjK-HW-r8M"/>
@@ -911,7 +850,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="32" y="373.5" width="350" height="17"/>
+                                <rect key="frame" x="32" y="376" width="350" height="81.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -921,7 +860,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RCf-P4-yUy" customClass="ShadowView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="32" y="422.5" width="350" height="80"/>
+                                <rect key="frame" x="32" y="489.5" width="350" height="80"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activer le verouillage Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="xyY-1J-PGU" customClass="IKLabel" customModule="kDriveCore">
                                         <rect key="frame" x="16" y="30.5" width="261" height="19.5"/>
@@ -1102,15 +1041,12 @@
             <size key="intrinsicContentSize" width="161.5" height="17"/>
         </designable>
         <designable name="Let-jx-exJ">
-            <size key="intrinsicContentSize" width="174" height="29"/>
+            <size key="intrinsicContentSize" width="196" height="32"/>
         </designable>
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="130.5" height="21.5"/>
         </designable>
         <designable name="SeG-hp-Rwt"/>
-        <designable name="YYt-bI-RGT">
-            <size key="intrinsicContentSize" width="30" height="29"/>
-        </designable>
         <designable name="Yth-Zq-eKV">
             <size key="intrinsicContentSize" width="149.5" height="21.5"/>
         </designable>

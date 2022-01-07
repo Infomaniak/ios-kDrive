@@ -25,11 +25,6 @@ protocol StoreHelpFooterDelegate: AnyObject {
 class StoreHelpFooter: UICollectionReusableView {
     weak var delegate: StoreHelpFooterDelegate?
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-
     @IBAction func helpButtonTapped(_ sender: Any) {
         delegate?.helpButtonTapped()
     }
