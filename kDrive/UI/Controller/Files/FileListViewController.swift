@@ -219,6 +219,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.setSelectedCells()
             }
         }
+
+        viewModel.onDriveError = { [weak self] driveError in
+            if driveError == .objectNotFound {
+                self?.navigationController?.popViewController(animated: true)
+            } else if driveError != .searchCancelled {
+                UIConstants.showSnackBar(message: driveError.localizedDescription)
+            }
+        }
     }
 
     deinit {
