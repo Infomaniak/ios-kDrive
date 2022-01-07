@@ -25,7 +25,7 @@ import UIKit
 import Vision
 import VisionKit
 
-class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
+class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, FloatingPanelControllerDelegate {
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
 
@@ -52,12 +52,6 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         [.scanAction, .takePictureAction, .importMediaAction, .importAction, .folderAction],
         [.docsAction, .gridsAction, .pointsAction, .noteAction]
     ]
-
-    var contentHeight: CGFloat {
-        return content.reduce(CGFloat(100)) { last, section in
-            last + CGFloat(60 * section.count)
-        }
-    }
 
     init(driveFileManager: DriveFileManager, folder: File) {
         self.driveFileManager = driveFileManager
@@ -212,10 +206,6 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         default:
             break
         }
-    }
-
-    func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-        return PlusButtonFloatingPanelLayout(height: min(contentHeight + view.safeAreaInsets.bottom, UIScreen.main.bounds.size.height - 48))
     }
 
     override open func accessibilityPerformEscape() -> Bool {

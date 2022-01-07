@@ -36,7 +36,35 @@ protocol SelectDelegate: AnyObject {
     func didSelect(option: Selectable)
 }
 
-class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITableViewController, FloatingPanelControllerDelegate {
+class TableFloatingPanelViewController: UITableViewController {
+    weak var floatingPanelController: FloatingPanelController?
+
+    private var contentSizeObservation: NSKeyValueObservation?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        contentSizeObservation = tableView.observe(\.contentSize) { [weak self] _, _ in
+            guard let window = self?.view.window else { return }
+            self?.updateLayout(size: window.bounds.size)
+        }
+    }
+
+    deinit {
+        contentSizeObservation?.invalidate()
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        updateLayout(size: size)
+    }
+
+    func updateLayout(size: CGSize) {
+        floatingPanelController?.layout = PlusButtonFloatingPanelLayout(height: min(tableView.contentSize.height + view.safeAreaInsets.bottom, size.height - 48))
+        floatingPanelController?.invalidateLayout()
+    }
+}
+
+class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: TableFloatingPanelViewController {
     var headerTitle = ""
     var selectedOption: T?
     var options = [T]()
@@ -69,9 +97,9 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         viewController.options = options
         viewController.selectedOption = selectedOption
         viewController.delegate = delegate
+        viewController.floatingPanelController = floatingPanelViewController
 
         floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = viewController
 
         floatingPanelViewController.set(contentViewController: viewController)
         floatingPanelViewController.track(scrollView: viewController.tableView)
@@ -110,9 +138,5 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         dismiss(animated: true)
         delegate?.didSelect(option: options[indexPath.row - 1])
-    }
-
-    func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-        return PlusButtonFloatingPanelLayout(height: min(58 * CGFloat(options.count + 1) + 20, UIScreen.main.bounds.size.height - 48))
     }
 }
