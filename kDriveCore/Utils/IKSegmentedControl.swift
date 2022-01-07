@@ -36,7 +36,7 @@ import UIKit
     }
 
     private func setUpControl() {
-        var size: CGFloat = 14
+        var size = 14.0
         if UIScreen.main.bounds.width < 390 {
             size = ceil(size * UIScreen.main.bounds.width / 390)
         }

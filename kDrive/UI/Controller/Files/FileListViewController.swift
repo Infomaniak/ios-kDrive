@@ -39,8 +39,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Constants
 
-    private let leftRightInset: CGFloat = 12
-    private let gridInnerSpacing: CGFloat = 16
+    private let leftRightInset = 12.0
+    private let gridInnerSpacing = 16.0
     private let maxDiffChanges = DriveApiFetcher.itemPerPage
     private let headerViewIdentifier = "FilesHeaderView"
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)

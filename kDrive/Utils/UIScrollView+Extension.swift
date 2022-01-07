@@ -23,7 +23,7 @@ extension UIScrollView {
         // Add offset to expand large title
         let expandedBar = (navigationController?.navigationBar.frame.height ?? 64.0) > 44.0
         let largeTitle = navigationController?.navigationBar.prefersLargeTitles ?? false
-        let offset: CGFloat = (largeTitle && !expandedBar) ? 52 : 0
+        let offset = (largeTitle && !expandedBar) ? 52.0 : 0.0
 
         setContentOffset(CGPoint(x: -adjustedContentInset.left, y: -(adjustedContentInset.top + offset)), animated: animated)
     }

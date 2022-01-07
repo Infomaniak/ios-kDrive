@@ -117,7 +117,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 DispatchQueue.main.async { [weak self] in
                     guard self?.observationToken != nil else { return }
-                    self?.setProgress(CGFloat(progress))
+                    self?.setProgress(progress)
                     if progress >= 1 {
                         self?.configureDownload(with: file, action: action, progress: nil)
                     }

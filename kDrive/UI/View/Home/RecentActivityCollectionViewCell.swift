@@ -37,7 +37,7 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
     private var activities = [FileActivity]()
 
     private var isLoading = false
-    private let bottomViewCellHeight: CGFloat = 26
+    private let bottomViewCellHeight = 26.0
 
     override func awakeFromNib() {
         super.awakeFromNib()

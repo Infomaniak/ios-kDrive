@@ -117,7 +117,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         if showProgress {
             observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
                 DispatchQueue.main.async { [weak self] in
-                    self?.setProgress(CGFloat(progress))
+                    self?.setProgress(progress)
                 }
             }
         }
@@ -129,7 +129,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         if showProgress {
             observationToken = DownloadQueue.instance.observeArchiveDownloadProgress(self, archiveId: archiveId) { _, progress in
                 DispatchQueue.main.async { [weak self] in
-                    self?.setProgress(CGFloat(progress))
+                    self?.setProgress(progress)
                 }
             }
         }
