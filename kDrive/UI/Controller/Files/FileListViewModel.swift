@@ -25,6 +25,8 @@ import RealmSwift
 protocol FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
+    typealias DriveErrorCallback = (DriveError) -> Void
+
     var isEmpty: Bool { get }
     var fileCount: Int { get }
     var sortType: SortType { get set }
@@ -50,6 +52,7 @@ protocol FileListViewModel {
     init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?)
 
     var onFileListUpdated: FileListUpdatedCallback? { get set }
+    var onDriveError: DriveErrorCallback? { get set }
 }
 
 class ManagedFileListViewModel: FileListViewModel {
@@ -80,6 +83,7 @@ class ManagedFileListViewModel: FileListViewModel {
     }
 
     var onFileListUpdated: FileListUpdatedCallback?
+    var onDriveError: DriveErrorCallback?
 
     private var files: Results<File>
     private var isLoading: Bool
@@ -183,7 +187,7 @@ class ManagedFileListViewModel: FileListViewModel {
                 }
             }
 
-            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, _ in
+            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
                 self?.isLoading = false
                 self?.isRefreshIndicatorHidden = true
                 if let fetchedCurrentDirectory = file {
@@ -192,8 +196,8 @@ class ManagedFileListViewModel: FileListViewModel {
                     } else {
                         self?.loadActivities()
                     }
-                } else {
-                    // TODO: report error
+                } else if let error = error as? DriveError {
+                    self?.onDriveError?(error)
                 }
             }
         }
@@ -201,9 +205,8 @@ class ManagedFileListViewModel: FileListViewModel {
 
     private func loadActivities() {
         driveFileManager.getFolderActivities(file: currentDirectory) { [weak self] _, _, error in
-            if let error = error {
-                if let error = error as? DriveError, error == .objectNotFound {
-                } else {}
+            if let error = error as? DriveError {
+                self?.onDriveError?(error)
             }
         }
     }
