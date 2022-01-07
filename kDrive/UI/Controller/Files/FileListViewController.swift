@@ -23,6 +23,10 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+class ConcreteFileListViewModel: ManagedFileListViewModel, DraggableFileListViewModel, DroppableFileListViewModel {
+    var lastDropPosition: DropPosition?
+}
+
 extension SwipeCellAction {
     static let share = SwipeCellAction(identifier: "share", title: KDriveResourcesStrings.Localizable.buttonFileRights, backgroundColor: KDriveResourcesAsset.infomaniakColor.color, icon: KDriveResourcesAsset.share.image)
     static let delete = SwipeCellAction(identifier: "delete", title: KDriveResourcesStrings.Localizable.buttonDelete, backgroundColor: KDriveResourcesAsset.binColor.color, icon: KDriveResourcesAsset.delete.image)
@@ -101,8 +105,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     private var uploadsObserver: ObservationToken?
     private var networkObserver: ObservationToken?
 
-    private var lastDropPosition: DropPosition?
-
     var trashSort: Bool {
         #if ISEXTENSION
             return false
@@ -118,7 +120,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = ManagedFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        viewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         bindViewModel()
         viewModel.onViewDidLoad()
 
@@ -967,154 +969,22 @@ extension FileListViewController: TopScrollable {
 
 extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        guard indexPath.item < viewModel.fileCount else { return [] }
-
-        let draggedFile = viewModel.getFile(at: indexPath.item)
-        guard draggedFile.capabilities.canMove && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
-            return []
-        }
-
-        let dragAndDropFile = DragAndDropFile(file: draggedFile, userId: driveFileManager.drive.userId)
-        let itemProvider = NSItemProvider(object: dragAndDropFile)
-        itemProvider.suggestedName = draggedFile.name
-        let draggedItem = UIDragItem(itemProvider: itemProvider)
-        if let previewImageView = (collectionView.cellForItem(at: indexPath) as? FileCollectionViewCell)?.logoImage {
-            draggedItem.previewProvider = {
-                UIDragPreview(view: previewImageView)
-            }
-        }
-        session.localContext = draggedFile
-
-        return [draggedItem]
+        return (viewModel as? DraggableFileListViewModel)?.collectionView(collectionView, itemsForBeginning: session, at: indexPath) ?? []
     }
 }
 
 // MARK: - UICollectionViewDropDelegate
 
 extension FileListViewController: UICollectionViewDropDelegate {
-    private func handleDropOverDirectory(_ directory: File, at indexPath: IndexPath) -> UICollectionViewDropProposal {
-        guard directory.capabilities.canUpload && directory.capabilities.canMoveInto else {
-            return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
-        }
-
-        if let lastDropPosition = lastDropPosition {
-            if lastDropPosition.indexPath == indexPath {
-                collectionView.cellForItem(at: indexPath)?.isHighlighted = true
-                if UIConstants.dropDelay > lastDropPosition.time.timeIntervalSinceNow {
-                    self.lastDropPosition = nil
-                    collectionView.cellForItem(at: indexPath)?.isHighlighted = false
-                    #if !ISEXTENSION
-                        filePresenter.present(driveFileManager: driveFileManager, file: directory, files: viewModel.getAllFiles(), normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
-                    #endif
-                }
-            } else {
-                collectionView.cellForItem(at: lastDropPosition.indexPath)?.isHighlighted = false
-                self.lastDropPosition = DropPosition(indexPath: indexPath)
-            }
-        } else {
-            lastDropPosition = DropPosition(indexPath: indexPath)
-        }
-        return UICollectionViewDropProposal(operation: .copy, intent: .insertIntoDestinationIndexPath)
-    }
-
-    func handleLocalDrop(localItemProviders: [NSItemProvider], destinationDirectory: File) {
-        for localFile in localItemProviders {
-            localFile.loadObject(ofClass: DragAndDropFile.self) { [weak self] itemProvider, _ in
-                guard let self = self else { return }
-                if let itemProvider = itemProvider as? DragAndDropFile,
-                   let file = itemProvider.file {
-                    let destinationDriveFileManager = self.driveFileManager!
-                    if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
-                        if destinationDirectory.id == file.parentId { return }
-                        Task {
-                            do {
-                                let (response, _) = try await destinationDriveFileManager.move(file: file, to: destinationDirectory)
-                                UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name), cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled, cancelableResponse: response, driveFileManager: destinationDriveFileManager)
-                            } catch {
-                                UIConstants.showSnackBar(message: error.localizedDescription)
-                            }
-                        }
-                    } else {
-                        // TODO: enable copy from different driveFileManager
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
-                        }
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
-                    }
-                }
-            }
-        }
-    }
-
-    func handleExternalDrop(externalFiles: [NSItemProvider], destinationDirectory: File) {
-        if !externalFiles.isEmpty {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
-            _ = FileImportHelper.instance.importItems(externalFiles) { [weak self] importedFiles, errorCount in
-                guard let self = self else { return }
-                if errorCount > 0 {
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
-                    }
-                }
-                guard !importedFiles.isEmpty else {
-                    return
-                }
-                do {
-                    try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
-                } catch {
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
-                    }
-                }
-            }
-        }
-    }
-
     func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
-        if let indexPath = destinationIndexPath,
-           indexPath.item < viewModel.fileCount && viewModel.getFile(at: indexPath.item).isDirectory {
-            if let draggedFile = session.localDragSession?.localContext as? File,
-               draggedFile.id == viewModel.getFile(at: indexPath.item).id {
-                if let indexPath = lastDropPosition?.indexPath {
-                    collectionView.cellForItem(at: indexPath)?.isHighlighted = false
-                }
-                return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
-            } else {
-                return handleDropOverDirectory(viewModel.getFile(at: indexPath.item), at: indexPath)
-            }
+        if let droppableViewModel = (viewModel as? DroppableFileListViewModel) {
+            return droppableViewModel.collectionView(collectionView, dropSessionDidUpdate: session, withDestinationIndexPath: destinationIndexPath)
         } else {
-            if let indexPath = lastDropPosition?.indexPath {
-                collectionView.cellForItem(at: indexPath)?.isHighlighted = false
-            }
-            return UICollectionViewDropProposal(operation: .copy, intent: .insertAtDestinationIndexPath)
+            return UICollectionViewDropProposal(operation: .cancel, intent: .unspecified)
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
-        let itemProviders = coordinator.items.map(\.dragItem.itemProvider)
-        // We don't display iOS's progress indicator because we use our own snackbar
-        coordinator.session.progressIndicatorStyle = .none
-
-        let destinationDirectory: File
-        if let indexPath = coordinator.destinationIndexPath,
-           indexPath.item < viewModel.fileCount && viewModel.getFile(at: indexPath.item).isDirectory &&
-           viewModel.getFile(at: indexPath.item).capabilities.canUpload {
-            destinationDirectory = viewModel.getFile(at: indexPath.item)
-        } else {
-            destinationDirectory = currentDirectory
-        }
-
-        if let lastHighlightedPath = lastDropPosition?.indexPath {
-            collectionView.cellForItem(at: lastHighlightedPath)?.isHighlighted = false
-        }
-
-        let localFiles = itemProviders.filter { $0.canLoadObject(ofClass: DragAndDropFile.self) }
-        handleLocalDrop(localItemProviders: localFiles, destinationDirectory: destinationDirectory)
-
-        let externalFiles = itemProviders.filter { !$0.canLoadObject(ofClass: DragAndDropFile.self) }
-        handleExternalDrop(externalFiles: externalFiles, destinationDirectory: destinationDirectory)
+        (viewModel as? DroppableFileListViewModel)?.collectionView(collectionView, performDropWith: coordinator)
     }
 }

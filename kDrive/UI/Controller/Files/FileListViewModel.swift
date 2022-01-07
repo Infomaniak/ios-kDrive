@@ -27,6 +27,8 @@ protocol FileListViewModel {
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
 
+    var currentDirectory: File { get set }
+    var driveFileManager: DriveFileManager { get set }
     var isEmpty: Bool { get }
     var fileCount: Int { get }
     var sortType: SortType { get set }
@@ -56,7 +58,7 @@ protocol FileListViewModel {
 }
 
 class ManagedFileListViewModel: FileListViewModel {
-    private var driveFileManager: DriveFileManager
+    var driveFileManager: DriveFileManager
 
     @Published var sortType: SortType
     var sortTypePublisher: Published<SortType>.Publisher { $sortType }
