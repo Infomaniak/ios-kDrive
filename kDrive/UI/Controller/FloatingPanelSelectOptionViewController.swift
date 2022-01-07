@@ -41,10 +41,11 @@ class TableFloatingPanelViewController: UITableViewController {
 
     private var contentSizeObservation: NSKeyValueObservation?
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    override func viewDidLoad() {
+        super.viewDidLoad()
         contentSizeObservation = tableView.observe(\.contentSize) { [weak self] _, _ in
-            self?.updateLayout(size: UIScreen.main.bounds.size)
+            guard let window = self?.view.window else { return }
+            self?.updateLayout(size: window.bounds.size)
         }
     }
 
