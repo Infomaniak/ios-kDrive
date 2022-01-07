@@ -70,12 +70,12 @@ class TrashViewController: FileListViewController {
         forceRefresh()
     }
 
-    override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
-        super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
+    override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
+        super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
         // Hide move button in multiple selection
         headerView.selectView.moveButton.isHidden = true
         // Enable/disable empty trash button
-        emptyTrashBarButtonItem.isEnabled = !isListEmpty
+        emptyTrashBarButtonItem.isEnabled = !isEmptyViewHidden
     }
 
     // MARK: - Actions

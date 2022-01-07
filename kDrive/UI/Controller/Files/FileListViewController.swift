@@ -101,7 +101,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     private var uploadsObserver: ObservationToken?
     private var networkObserver: ObservationToken?
 
-    private var background: EmptyTableView?
     private var lastDropPosition: DropPosition?
 
     var trashSort: Bool {
@@ -198,12 +197,17 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
             if isRefreshIndicatorHidden {
                 self.refreshControl.endRefreshing()
-
             } else {
                 self.refreshControl.beginRefreshing()
                 let offsetPoint = CGPoint(x: 0, y: self.collectionView.contentOffset.y - self.refreshControl.frame.size.height)
                 self.collectionView.setContentOffset(offsetPoint, animated: true)
             }
+        }
+
+        showEmptyView(viewModel.isEmptyViewHidden)
+        viewModel.isEmptyViewHiddenPublisher.receiveOnMain(store: &bindStore) { [weak self] isEmptyViewHidden in
+            guard let self = self else { return }
+            self.showEmptyView(isEmptyViewHidden)
         }
 
         headerView?.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
@@ -244,8 +248,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        if viewModel.isEmpty {
-            updateEmptyView()
+        if let emptyView = collectionView?.backgroundView as? EmptyTableView {
+            updateEmptyView(emptyView)
         }
         coordinator.animate { _ in
             self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
@@ -263,10 +267,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     override func getNewChanges() {}
 
-    func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
+    func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         headerView.delegate = self
 
-        headerView.sortView.isHidden = isListEmpty
+        headerView.sortView.isHidden = !isEmptyViewHidden
 
         headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
         headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
@@ -350,22 +354,18 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: driveFileManager.drive.id).count
     }
 
-    final func showEmptyViewIfNeeded(type: EmptyTableView.EmptyTableViewType? = nil, files: [File]) {
-        let type = type ?? configuration.emptyViewType
-        if files.isEmpty {
-            background = EmptyTableView.instantiate(type: type, button: false)
-            updateEmptyView()
-            background?.actionHandler = { [weak self] _ in
-                self?.forceRefresh()
-            }
-            collectionView.backgroundView = background
-        } else {
-            collectionView.backgroundView = nil
+    private func showEmptyView(_ isHidden: Bool) {
+        let emptyView = EmptyTableView.instantiate(type: configuration.emptyViewType, button: false)
+        emptyView.actionHandler = { [weak self] _ in
+            self?.forceRefresh()
         }
+        collectionView.backgroundView = isHidden ? nil : emptyView
         if let headerView = headerView {
-            setUpHeaderView(headerView, isListEmpty: files.isEmpty)
+            setUpHeaderView(headerView, isEmptyViewHidden: isHidden)
         }
     }
+
+    final func showEmptyViewIfNeeded(type: EmptyTableView.EmptyTableViewType? = nil, files: [File]) {}
 
     final func removeFileFromList(id: Int) {}
 
@@ -377,16 +377,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Private methods
 
-    private func updateEmptyView() {
-        if let emptyBackground = background {
-            if UIDevice.current.orientation.isPortrait {
-                emptyBackground.emptyImageFrameViewHeightConstant.constant = 200
-            }
-            if UIDevice.current.orientation.isLandscape {
-                emptyBackground.emptyImageFrameViewHeightConstant.constant = 120
-            }
-            emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
+    private func updateEmptyView(_ emptyBackground: EmptyTableView) {
+        if UIDevice.current.orientation.isPortrait {
+            emptyBackground.emptyImageFrameViewHeightConstant.constant = 200
         }
+        if UIDevice.current.orientation.isLandscape {
+            emptyBackground.emptyImageFrameViewHeightConstant.constant = 120
+        }
+        emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
     }
 
     private func reloadCollectionView(with files: [File]) {}
@@ -481,7 +479,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
-        setUpHeaderView(headerView, isListEmpty: viewModel.isEmpty)
+        setUpHeaderView(headerView, isEmptyViewHidden: viewModel.isEmptyViewHidden)
         self.headerView = headerView
         return headerView
     }

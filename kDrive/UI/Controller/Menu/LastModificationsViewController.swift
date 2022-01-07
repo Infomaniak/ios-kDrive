@@ -67,8 +67,8 @@ class LastModificationsViewController: FileListViewController {
         forceRefresh()
     }
 
-    override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
-        super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
+    override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
+        super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
         // Hide sort button
         headerView.sortButton.isHidden = true
     }
