@@ -102,6 +102,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         collectionView.register(cellView: VideoCollectionViewCell.self)
         collectionView.register(cellView: OfficePreviewCollectionViewCell.self)
         collectionView.register(cellView: AudioCollectionViewCell.self)
+        collectionView.register(cellView: CodePreviewCollectionViewCell.self)
         collectionView.contentInsetAdjustmentBehavior = .never
 
         floatingPanelViewController = DriveFloatingPanelController()
@@ -603,6 +604,11 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
+                return cell
+            case .code:
+                let cell = collectionView.dequeueReusableCell(type: CodePreviewCollectionViewCell.self, for: indexPath)
+                cell.previewDelegate = self
+                cell.configure(with: file)
                 return cell
             default:
                 return getNoLocalPreviewCellFor(file: file, indexPath: indexPath)

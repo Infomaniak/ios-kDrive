@@ -81,7 +81,8 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/adam-fowler/mqtt-nio", .upToNextMajor(from: "2.4.0")),
                           .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "8.0.0")),
                           .package(url: "https://github.com/airbnb/HorizonCalendar.git", .upToNextMajor(from: "1.0.0")),
-                          .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0"))
+                          .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
+                          .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0"))
                       ],
                       targets: [
                           Target(name: "kDrive",
@@ -115,6 +116,7 @@ let project = Project(name: "kDrive",
                                      .package(product: "DropDown"),
                                      .package(product: "HorizonCalendar"),
                                      .package(product: "Kvitto"),
+                                     .package(product: "Highlightr"),
                                      .sdk(name: "StoreKit.framework", status: .required)
                                  ],
                                  settings: .settings(base: baseSettings)),

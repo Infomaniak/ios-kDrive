@@ -137,6 +137,15 @@
         }
       },
       {
+        "package": "Highlightr",
+        "repositoryURL": "https://github.com/raspu/Highlightr",
+        "state": {
+          "branch": null,
+          "revision": "93199b9e434f04bda956a613af8f571933f9f037",
+          "version": "2.1.2"
+        }
+      },
+      {
         "package": "HorizonCalendar",
         "repositoryURL": "https://github.com/airbnb/HorizonCalendar.git",
         "state": {

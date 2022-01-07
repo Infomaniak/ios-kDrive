@@ -133,7 +133,7 @@ public enum ConvertedType: String, CaseIterable {
         return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
 
-    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .pdf, .presentation, .spreadsheet, .text, .url)
+    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .pdf, .presentation, .spreadsheet, .text, .url, .code)
     public static let remotePlayableTypes = Set<ConvertedType>(arrayLiteral: .audio, .video)
     // Currently it's the same as the downloadableTypes but later this could change
     public static let ignoreThumbnailTypes = downloadableTypes
