@@ -35,6 +35,8 @@ protocol FileListViewModel {
     var titlePublisher: Published<String>.Publisher { get }
     var isRefreshIndicatorHidden: Bool { get set }
     var isRefreshIndicatorHiddenPublisher: Published<Bool>.Publisher { get }
+    var isEmptyViewHidden: Bool { get set }
+    var isEmptyViewHiddenPublisher: Published<Bool>.Publisher { get }
 
     func getFile(at index: Int) -> File
     func setFile(_ file: File, at index: Int)
@@ -65,6 +67,9 @@ class ManagedFileListViewModel: FileListViewModel {
     @Published var isRefreshIndicatorHidden: Bool
     var isRefreshIndicatorHiddenPublisher: Published<Bool>.Publisher { $isRefreshIndicatorHidden }
 
+    @Published var isEmptyViewHidden: Bool
+    var isEmptyViewHiddenPublisher: Published<Bool>.Publisher { $isEmptyViewHidden }
+
     var currentDirectory: File
     var fileCount: Int {
         return files.count
@@ -94,6 +99,7 @@ class ManagedFileListViewModel: FileListViewModel {
         self.listStyle = FileListOptions.instance.currentStyle
         self.files = driveFileManager.getRealm().objects(File.self).filter(NSPredicate(value: false))
         self.isRefreshIndicatorHidden = true
+        self.isEmptyViewHidden = true
         self.isLoading = false
 
         if self.currentDirectory.isRoot {
@@ -148,9 +154,11 @@ class ManagedFileListViewModel: FileListViewModel {
             switch change {
             case .initial(let results):
                 self?.files = results
+                self?.isEmptyViewHidden = !results.isEmpty
                 self?.onFileListUpdated?([], [], [], true)
             case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                 self?.files = results
+                self?.isEmptyViewHidden = !results.isEmpty
                 self?.onFileListUpdated?(deletions, insertions, modifications, false)
             case .error(let error):
                 DDLogError("[Realm Observation] Error \(error)")
