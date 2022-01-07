@@ -1114,6 +1114,34 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
+    func testPerformAuthenticatedRequest() {
+        let testName = "Perform authenticated request"
+        let expectation = XCTestExpectation(description: testName)
+
+        let token = self.currentApiFetcher.currentToken!
+        self.currentApiFetcher.performAuthenticatedRequest(token: token) { apiToken, error in
+            XCTAssertNil(error, TestsMessages.noError)
+            XCTAssertNotNil(apiToken, TestsMessages.notNil("API Token"))
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    }
+
+    func testGetPublicUploadTokenWithToken() {
+        let testName = "Get public upload token with token"
+        let expectation = XCTestExpectation(description: testName)
+
+        let token = self.currentApiFetcher.currentToken!
+        self.currentApiFetcher.getPublicUploadTokenWithToken(token, driveId: Env.driveId) { apiResponse, error in
+            XCTAssertNil(error, TestsMessages.noError)
+            XCTAssertNotNil(apiResponse?.data, TestsMessages.notNil("API Response"))
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    }
+
     func testGetTrashedFiles() {
         let testName = "Get trashed file"
         let expectation = XCTestExpectation(description: testName)

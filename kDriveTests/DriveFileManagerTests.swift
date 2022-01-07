@@ -392,6 +392,7 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
+    // swiftlint:disable empty_enum_arguments
     func testCategory() {
         let testName = "File categories"
         let expectations = [
@@ -433,8 +434,41 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // WIP
-    func testDeleteCategory() {}
+    // swiftlint:disable empty_enum_arguments
+    func testCategoriesAndFiles() {
+        let testName = "Categories and files"
+        let expectations = [
+            (name: "Add category", expectation: XCTestExpectation(description: "Add category")),
+            (name: "Remove category", expectation: XCTestExpectation(description: "Remove Category"))
+        ]
+        var rootFile = File()
+
+        initOfficeFile(testName: testName) { root, officeFile in
+            rootFile = root
+            DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227") { resultCategory in
+                switch resultCategory {
+                case .failure(_):
+                    XCTFail(TestsMessages.noError)
+                case .success(let category):
+                    DriveFileManagerTests.driveFileManager.addCategory(file: officeFile, category: category) { error in
+                        XCTAssertNil(error, TestsMessages.noError)
+                        expectations[0].expectation.fulfill()
+
+                        DriveFileManagerTests.driveFileManager.removeCategory(file: officeFile, category: category) { error in
+                            XCTAssertNil(error, TestsMessages.noError)
+                            DriveFileManagerTests.driveFileManager.deleteCategory(id: category.id) { error in
+                                XCTAssertNil(error, TestsMessages.noError)
+                                expectations[1].expectation.fulfill()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
+    }
 
     func testCreateCommonDirectory() {
         let testName = "Create common directory"
