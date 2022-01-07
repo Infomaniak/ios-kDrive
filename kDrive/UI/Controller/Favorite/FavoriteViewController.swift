@@ -27,6 +27,7 @@ class FavoriteViewController: FileListViewController {
     override func viewDidLoad() {
         // Set configuration
         configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
+        viewModel = ManagedFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
 
         super.viewDidLoad()
 

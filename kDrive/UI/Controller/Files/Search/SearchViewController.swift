@@ -115,8 +115,8 @@ class SearchViewController: FileListViewController {
         // We don't have incremental changes for search
     }
 
-    override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {
-        super.setUpHeaderView(headerView, isListEmpty: isListEmpty)
+    override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
+        super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
         // Set up filter header view
         if filters.hasFilters {
             headerView.filterView.isHidden = false
