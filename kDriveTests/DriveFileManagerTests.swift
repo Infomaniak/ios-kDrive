@@ -93,7 +93,7 @@ final class DriveFileManagerTests: XCTestCase {
     func checkIfFileIsInDestination(file: File, destination: File, completion: @escaping () -> Void) {
         let cachedFile = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
         XCTAssertNotNil(cachedFile, TestsMessages.notNil("cached file"))
-        XCTAssertEqual(destination.id, cachedFile?.parentId, "Parent is different from expected destination")
+        XCTAssertEqual(destination.id, cachedFile!.parentId, "Parent is different from expected destination")
         completion()
     }
 
@@ -248,13 +248,9 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // WIP
     func testCancelAction() {
         let testName = "Cancel Action"
-        let expectations = [
-            (name: "Cancel file deleted", expectation: expectation(description: "Cancel file deleted")),
-            (name: "Cancel file moved", expectation: expectation(description: "Cancel file moved"))
-        ]
+        let expectation = XCTestExpectation(description: testName)
         var rootFile = File()
 
         initOfficeFile(testName: testName) { root, file in
@@ -268,15 +264,15 @@ final class DriveFileManagerTests: XCTestCase {
                     let moveCancelId = moveResponse!.id
                     DriveFileManagerTests.driveFileManager.cancelAction(cancelId: moveCancelId) { cancelMoveError in
                         XCTAssertNil(cancelMoveError, TestsMessages.noError)
-                        self.checkIfFileIsInDestination(file: file, destination: rootFile) {
-                            // WIP
+                        self.checkIfFileIsInDestination(file: file!, destination: rootFile) {
+                            expectation.fulfill()
                         }
                     }
                 }
             }
         }
 
-        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
+        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
@@ -396,6 +392,50 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
+    func testCategory() {
+        let testName = "File categories"
+        let expectations = [
+            (name: "Create category", expectation: XCTestExpectation(description: "Create category")),
+            (name: "Edit category", expectation: XCTestExpectation(description: "Edit category")),
+            (name: "Delete category", expectation: XCTestExpectation(description: "Delete category"))
+        ]
+        var rootFile = File()
+
+        setUpTest(testName: testName) { root in
+            rootFile = root
+            DriveFileManagerTests.driveFileManager.createCategory(name: "Category-\(Date())", color: "#001227") { createResult in
+                switch createResult {
+                case .failure(_):
+                    XCTFail(TestsMessages.noError)
+                case .success(let createdCategory):
+                    expectations[0].expectation.fulfill()
+                    let categoryId = createdCategory.id
+
+                    DriveFileManagerTests.driveFileManager.editCategory(id: createdCategory.id, name: createdCategory.name, color: "#314159") { editResult in
+                        switch editResult {
+                        case .failure(_):
+                            XCTFail(TestsMessages.noError)
+                        case .success(let editedCategory):
+                            XCTAssertEqual(categoryId, editedCategory.id, "Category id should be the same")
+                            expectations[1].expectation.fulfill()
+
+                            DriveFileManagerTests.driveFileManager.deleteCategory(id: categoryId) { error in
+                                XCTAssertNil(error, TestsMessages.noError)
+                                expectations[2].expectation.fulfill()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
+    }
+
+    // WIP
+    func testDeleteCategory() {}
+
     func testCreateCommonDirectory() {
         let testName = "Create common directory"
         let expectation = XCTestExpectation(description: testName)
@@ -459,6 +499,22 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // WIP
-    func updateFolderColor() {}
+    func testUpdateFolderColor() {
+        let testName = "Update folder color"
+        let expectation = XCTestExpectation(description: testName)
+        var rootFile = File()
+
+        setUpTest(testName: testName) { file in
+            rootFile = file
+            let folderColor = "#001227"
+            DriveFileManagerTests.driveFileManager.updateFolderColor(file: file, color: folderColor) { error in
+                XCTAssertNil(error, TestsMessages.noError)
+                XCTAssertEqual(file.color, folderColor, "Folder color should be equal to \(folderColor)")
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
+        tearDownTest(directory: rootFile)
+    }
 }
