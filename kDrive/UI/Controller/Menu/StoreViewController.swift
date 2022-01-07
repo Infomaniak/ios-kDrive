@@ -16,15 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import StoreKit
 import UIKit
 
-class StoreViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var helpButton: IKRoundButton!
-
+class StoreViewController: UICollectionViewController {
     struct Item {
         let pack: DrivePack
         let identifier: String
@@ -54,11 +52,11 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         }
     }
 
-    private enum Row: CaseIterable {
-        case segmentedControl, warning, offers, storage, nextButton
+    private enum Section: CaseIterable {
+        case warning, offers, storage, nextButton
     }
 
-    private var rows: [Row] = [.segmentedControl, .offers]
+    private var sections: [Section] = [.offers]
 
     var driveFileManager: DriveFileManager!
 
@@ -77,13 +75,15 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Set up table view
-        tableView.register(cellView: StoreControlTableViewCell.self)
-        tableView.register(cellView: AlertTableViewCell.self)
-        tableView.register(cellView: StoreOffersTableViewCell.self)
-        tableView.register(cellView: StoreStorageTableViewCell.self)
-        tableView.register(cellView: StoreNextTableViewCell.self)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 92, right: 0)
+        // Set up collection view
+        collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
+        collectionView.register(cellView: StoreCollectionViewCell.self)
+        collectionView.register(cellView: StoreNextCollectionViewCell.self)
+        collectionView.register(supplementaryView: StoreControlCollectionReusableView.self, forSupplementaryViewOfKind: .header)
+        collectionView.register(supplementaryView: StoreHelpFooter.self, forSupplementaryViewOfKind: .footer)
+        collectionView.collectionViewLayout = createLayout()
+        collectionView.allowsSelection = false
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
 
         // Set up delegates
         StoreManager.shared.delegate = self
@@ -117,14 +117,37 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         dismiss(animated: true)
     }
 
-    @IBAction func helpButtonPressed(_ sender: Any) {
-        guard let url = URL(string: "https://faq.infomaniak.com/2631") else { return }
-        UIApplication.shared.open(url)
-    }
-
     @available(iOS 14.0, *)
     @objc func redeemButtonPressed() {
         SKPaymentQueue.default().presentCodeRedemptionSheet()
+    }
+
+    private func createLayout() -> UICollectionViewLayout {
+        let headerFooterSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerFooterSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        header.pinToVisibleBounds = true
+        let footer = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerFooterSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
+        let config = UICollectionViewCompositionalLayoutConfiguration()
+        config.interSectionSpacing = 24
+        config.boundarySupplementaryItems = [header, footer]
+
+        return UICollectionViewCompositionalLayout(sectionProvider: { section, _ in
+            switch self.sections[section] {
+            case .offers:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(360))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                let section = NSCollectionLayoutSection(group: group)
+                section.interGroupSpacing = 10
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+                return section
+            default:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                return NSCollectionLayoutSection(group: group)
+            }
+        }, configuration: config)
     }
 
     private func fetchProductInformation() {
@@ -162,14 +185,14 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
             purchaseEnabled = false
         } else if !driveFileManager.drive.productIsInApp && driveFileManager.drive.pack != .free {
             // Show a warning message to inform that they have a different subscription method
-            rows.insert(.warning, at: 1)
+            sections.insert(.warning, at: 1)
             purchaseEnabled = false
         }
     }
 
     private func updateOffers() {
-        if let index = rows.firstIndex(of: .offers) {
-            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        if let sectionIndex = sections.firstIndex(of: .offers) {
+            collectionView.reloadSections([sectionIndex])
         }
     }
 
@@ -188,8 +211,8 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
 
     private func setNextButtonLoading(_ loading: Bool) {
-        if let index = rows.firstIndex(of: .nextButton),
-           let cell = tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? StoreNextTableViewCell {
+        if let index = sections.firstIndex(of: .nextButton),
+           let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: index)) as? StoreNextCollectionViewCell {
             cell.button.setLoading(loading)
         }
     }
@@ -200,50 +223,62 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
         present(successViewController, animated: true)
     }
 
-    // MARK: - Table view data source
+    // MARK: - Collection view data source
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return driveFileManager == nil ? 1 : rows.count
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return sections.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch rows[indexPath.row] {
-        case .segmentedControl:
-            let cell = tableView.dequeueReusableCell(type: StoreControlTableViewCell.self, for: indexPath)
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch sections[section] {
+        case .offers:
+            return displayedItems.count
+        default:
+            return 1
+        }
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        switch sections[indexPath.section] {
+        case .warning:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let tableCell = cell.initWith(cell: AlertTableViewCell.self)
+            tableCell.configure(with: .warning, message: KDriveResourcesStrings.Localizable.storeBillingWarningDescription)
+            return cell
+        case .offers:
+            let cell = collectionView.dequeueReusableCell(type: StoreCollectionViewCell.self, for: indexPath)
+            let item = displayedItems[indexPath.row]
+            cell.configure(with: item, currentPack: selectedPack, enabled: purchaseEnabled)
+            cell.delegate = self
+            return cell
+        case .storage:
+            // Will need to convert this to collection view cell when we actually use it
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WrapperCollectionViewCell", for: indexPath) as! WrapperCollectionViewCell
+            let tableCell = cell.initWith(cell: StoreStorageTableViewCell.self)
+            tableCell.delegate = self
+            return cell
+        case .nextButton:
+            let cell = collectionView.dequeueReusableCell(type: StoreNextCollectionViewCell.self, for: indexPath)
+            cell.delegate = self
+            return cell
+        }
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionHeader {
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: StoreControlCollectionReusableView.self, for: indexPath)
             let selectedSegmentIndex = PeriodTab.allCases.firstIndex(of: selectedPeriod) ?? 0
-            cell.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
-            cell.onChange = { [weak self] index in
+            headerView.segmentedControl.setSegments(PeriodTab.allCases.map(\.title), selectedSegmentIndex: selectedSegmentIndex)
+            headerView.onChange = { [weak self] index in
                 if let period = PeriodTab(rawValue: index) {
                     self?.selectedPeriod = period
                 }
             }
-            return cell
-        case .warning:
-            let cell = tableView.dequeueReusableCell(type: AlertTableViewCell.self, for: indexPath)
-            cell.configure(with: .warning, message: KDriveResourcesStrings.Localizable.storeBillingWarningDescription)
-            return cell
-        case .offers:
-            let cell = tableView.dequeueReusableCell(type: StoreOffersTableViewCell.self, for: indexPath)
-            cell.purchaseEnabled = purchaseEnabled
-            cell.selectedPack = selectedPack
-            cell.items = displayedItems
-            cell.cellDelegate = self
-            cell.collectionView.reloadData()
-            DispatchQueue.main.async {
-                // Scroll to current pack
-                if let index = self.items.firstIndex(where: { $0.pack == self.selectedPack }) {
-                    cell.collectionView.scrollToItem(at: IndexPath(row: index, section: 0), at: .centeredHorizontally, animated: false)
-                }
-            }
-            return cell
-        case .storage:
-            let cell = tableView.dequeueReusableCell(type: StoreStorageTableViewCell.self, for: indexPath)
-            cell.delegate = self
-            return cell
-        case .nextButton:
-            let cell = tableView.dequeueReusableCell(type: StoreNextTableViewCell.self, for: indexPath)
-            cell.delegate = self
-            return cell
+            return headerView
+        } else {
+            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, view: StoreHelpFooter.self, for: indexPath)
+            footerView.delegate = self
+            return footerView
         }
     }
 
@@ -283,15 +318,15 @@ class StoreViewController: UIViewController, UITableViewDataSource, UITableViewD
 
 // MARK: - Cell delegates
 
-extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate {
+extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNextCellDelegate, StoreHelpFooterDelegate {
     func selectButtonTapped(item: StoreViewController.Item) {
         guard selectedPack != item.pack else { return }
-        if !rows.contains(.nextButton) {
-            rows.append(.nextButton)
+        if !sections.contains(.nextButton) {
+            sections.append(.nextButton)
         }
         selectedPack = item.pack
-        tableView.reloadData()
-        tableView.scrollToRow(at: IndexPath(row: rows.count - 1, section: 0), at: .bottom, animated: true)
+        collectionView.reloadData()
+        collectionView.scrollToItem(at: IndexPath(item: 0, section: sections.count - 1), at: .bottom, animated: true)
     }
 
     func storageDidChange(_ newValue: Int) {
@@ -305,6 +340,11 @@ extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNex
             button.setLoading(true)
         }
     }
+
+    func helpButtonTapped() {
+        guard let url = URL(string: "https://faq.infomaniak.com/2631") else { return }
+        UIApplication.shared.open(url)
+    }
 }
 
 // MARK: - Store manager delegate
@@ -316,6 +356,11 @@ extension StoreViewController: StoreManagerDelegate {
             items[i].product = response.availableProducts.first { $0.productIdentifier == items[i].identifier }
         }
         updateOffers()
+        // Scroll to current pack
+        if let sectionIndex = sections.firstIndex(of: .offers),
+           let index = displayedItems.firstIndex(where: { $0.pack == self.selectedPack }) {
+            collectionView.scrollToItem(at: IndexPath(item: index, section: sectionIndex), at: .centeredVertically, animated: false)
+        }
     }
 
     func storeManagerDidReceiveMessage(_ message: String) {

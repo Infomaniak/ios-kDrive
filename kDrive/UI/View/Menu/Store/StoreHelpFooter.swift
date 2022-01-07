@@ -16,19 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDriveCore
 import UIKit
 
-protocol StoreNextCellDelegate: AnyObject {
-    func nextButtonTapped(_ button: IKLargeButton)
+protocol StoreHelpFooterDelegate: AnyObject {
+    func helpButtonTapped()
 }
 
-class StoreNextTableViewCell: UITableViewCell {
-    @IBOutlet weak var button: IKLargeButton!
+class StoreHelpFooter: UICollectionReusableView {
+    weak var delegate: StoreHelpFooterDelegate?
 
-    weak var delegate: StoreNextCellDelegate?
-
-    @IBAction func buttonTapped(_ sender: IKLargeButton) {
-        delegate?.nextButtonTapped(sender)
+    @IBAction func helpButtonTapped(_ sender: Any) {
+        delegate?.helpButtonTapped()
     }
 }
