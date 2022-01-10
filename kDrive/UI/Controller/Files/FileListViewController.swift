@@ -271,7 +271,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.capabilities.canCreateFile ?? false
+        (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
         #endif
 
         viewModel.onViewWillAppear()
@@ -365,7 +365,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     final func updateUploadCount() {
-        guard driveFileManager != nil && currentDirectory != nil else { return }
     }
 
     private func showEmptyView(_ isHidden: Bool) {
@@ -589,9 +588,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         super.encodeRestorableState(with: coder)
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveID")
-        if let currentDirectory = currentDirectory {
-            coder.encode(currentDirectory.id, forKey: "DirectoryID")
-        }
+        coder.encode(viewModel.currentDirectory.id, forKey: "DirectoryID")
     }
 
     override func decodeRestorableState(with coder: NSCoder) {
@@ -939,7 +936,6 @@ extension FileListViewController: SelectDelegate {
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
             let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
             driveFileManager = newDriveFileManager
-            currentDirectory = driveFileManager.getCachedRootFile()
             if configuration.showUploadingFiles {
                 updateUploadCount()
                 // We stop observing the old directory and observe the new one instead
@@ -948,6 +944,7 @@ extension FileListViewController: SelectDelegate {
                 observeUploads()
             }
             if isDifferentDrive {
+                let currentDirectory = driveFileManager.getCachedRootFile()
                 viewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
                 uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
                 bindViewModel()
