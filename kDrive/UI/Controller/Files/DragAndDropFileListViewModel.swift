@@ -68,9 +68,7 @@ extension DroppableFileListViewModel {
                 if UIConstants.dropDelay > currentLastDropPosition.time.timeIntervalSinceNow {
                     lastDropPosition = nil
                     collectionView.cellForItem(at: indexPath)?.isHighlighted = false
-                    #if !ISEXTENSION
-                        // filePresenter.present(driveFileManager: driveFileManager, file: directory, files: getAllFiles(), normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
-                    #endif
+                    onFilePresented?(directory)
                 }
             } else {
                 collectionView.cellForItem(at: currentLastDropPosition.indexPath)?.isHighlighted = false
