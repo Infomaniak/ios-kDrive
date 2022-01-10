@@ -32,6 +32,13 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
                                                 enabledElements: .disabledAutomaticLink)
     private var isCode = true
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 3, bottom: 8, right: 3)
+        markdownParser.code.font = UIFont.monospacedSystemFont(ofSize: UIFontMetrics.default.scaledValue(for: MarkdownParser.defaultFont.pointSize), weight: .regular)
+        markdownParser.code.textBackgroundColor = KDriveResourcesAsset.backgroundColor.color
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if isCode {
@@ -73,8 +80,6 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
 
     @available(iOS 15.0, *)
     private func displayMarkdown(for content: String) {
-        markdownParser.code.font = UIFont.monospacedSystemFont(ofSize: UIFontMetrics.default.scaledValue(for: MarkdownParser.defaultFont.pointSize), weight: .regular)
-        markdownParser.code.textBackgroundColor = KDriveResourcesAsset.backgroundColor.color
         textView.attributedText = markdownParser.parse(content)
     }
 
