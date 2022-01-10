@@ -46,6 +46,9 @@ extension ConvertedType: Selectable {
 }
 
 class SearchFiltersViewController: UITableViewController {
+    class var storyboard: UIStoryboard { Storyboard.search }
+    class var storyboardIdentifier: String { "SearchFiltersViewController" }
+
     var driveFileManager: DriveFileManager!
     var filters = Filters()
 
@@ -80,6 +83,12 @@ class SearchFiltersViewController: UITableViewController {
                 tableView.selectRow(at: selectedIndexPath, animated: false, scrollPosition: .none)
             }
         }
+    }
+
+    static func instantiateInNavigationController(driveFileManager: DriveFileManager) -> UINavigationController {
+        let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
+        viewController.driveFileManager = driveFileManager
+        return UINavigationController(rootViewController: viewController)
     }
 
     // MARK: - Actions

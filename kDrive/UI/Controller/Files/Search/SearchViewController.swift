@@ -142,14 +142,18 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Actions
 
-    @IBAction func closeButtonPressed() {
+    @objc func closeButtonPressed() {
         searchController.dismiss(animated: true)
         dismiss(animated: true)
     }
 
     @objc func presentFilters() {
-        let vc = SearchViewController.storyboard.instantiateViewController(withIdentifier: "filter")
-        present(vc, animated: true)
+        let viewController = SearchFiltersViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+        let searchFiltersViewController = viewController.topViewController as? SearchFiltersViewController
+        searchFiltersViewController?.filters = filters
+        searchFiltersViewController?.delegate = self
+
+        present(viewController, animated: true)
     }
 
     // MARK: - Private methods
@@ -284,18 +288,6 @@ class SearchViewController: FileListViewController {
             filters.fileType = nil
         } else if let category = filter as? kDriveCore.Category {
             filters.categories.remove(category)
-        }
-    }
-
-    // MARK: - Navigation
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "filterSegue" {
-            let navigationController = segue.destination as? UINavigationController
-            let searchFiltersViewController = navigationController?.topViewController as? SearchFiltersViewController
-            searchFiltersViewController?.driveFileManager = driveFileManager
-            searchFiltersViewController?.filters = filters
-            searchFiltersViewController?.delegate = self
         }
     }
 }
