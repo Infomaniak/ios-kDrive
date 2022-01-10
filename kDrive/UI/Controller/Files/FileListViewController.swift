@@ -185,14 +185,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         headerView?.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
-        viewModel.sortTypePublisher.receiveOnMain(store: &bindStore) { [weak self] _ in }
+        viewModel.$sortType.receiveOnMain(store: &bindStore) { [weak self] _ in }
 
         navigationItem.title = viewModel.title
-        viewModel.titlePublisher.receiveOnMain(store: &bindStore) { [weak self] title in
+        viewModel.$title.receiveOnMain(store: &bindStore) { [weak self] title in
             self?.navigationItem.title = title
         }
 
-        viewModel.isRefreshIndicatorHiddenPublisher.receiveOnMain(store: &bindStore) { [weak self] isRefreshIndicatorHidden in
+        viewModel.$isRefreshIndicatorHidden.receiveOnMain(store: &bindStore) { [weak self] isRefreshIndicatorHidden in
             guard let self = self,
                   self.refreshControl.isRefreshing == isRefreshIndicatorHidden
             else { return }
@@ -207,13 +207,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         showEmptyView(viewModel.isEmptyViewHidden)
-        viewModel.isEmptyViewHiddenPublisher.receiveOnMain(store: &bindStore) { [weak self] isEmptyViewHidden in
+        viewModel.$isEmptyViewHidden.receiveOnMain(store: &bindStore) { [weak self] isEmptyViewHidden in
             guard let self = self else { return }
             self.showEmptyView(isEmptyViewHidden)
         }
 
         headerView?.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
-        viewModel.listStylePublisher.receiveOnMain(store: &bindStore) { [weak self] listStyle in
+        viewModel.$listStyle.receiveOnMain(store: &bindStore) { [weak self] listStyle in
             guard let self = self else { return }
             self.headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
             UIView.transition(with: self.collectionView, duration: 0.25, options: .transitionCrossDissolve) {
