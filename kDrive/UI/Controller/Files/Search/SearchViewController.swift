@@ -141,6 +141,11 @@ class SearchViewController: FileListViewController {
         dismiss(animated: true)
     }
 
+    @objc func presentFilters() {
+        let vc = SearchViewController.storyboard.instantiateViewController(withIdentifier: "filter")
+        present(vc, animated: true)
+    }
+
     // MARK: - Private methods
 
     private func addToRecentSearch(_ search: String) {
@@ -169,6 +174,9 @@ class SearchViewController: FileListViewController {
         if isDisplayingSearchResults {
             forceRefresh()
         }
+
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "filter")!, style: .plain, target: self, action: #selector(presentFilters))
     }
 
     // MARK: - Collection view data source
