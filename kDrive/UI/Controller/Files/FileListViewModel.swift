@@ -26,6 +26,7 @@ protocol FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
+    typealias FilePresentedCallback = (File) -> Void
 
     var currentDirectory: File { get set }
     var driveFileManager: DriveFileManager { get set }
@@ -42,6 +43,7 @@ protocol FileListViewModel {
     var isEmptyViewHidden: Bool { get set }
     var isEmptyViewHiddenPublisher: Published<Bool>.Publisher { get }
 
+    func didSelectFile(at index: Int)
     func getFile(at index: Int) -> File
     func setFile(_ file: File, at index: Int)
     func getAllFiles() -> [File]
@@ -55,6 +57,7 @@ protocol FileListViewModel {
 
     var onFileListUpdated: FileListUpdatedCallback? { get set }
     var onDriveError: DriveErrorCallback? { get set }
+    var onFilePresented: FilePresentedCallback? { get set }
 }
 
 class ManagedFileListViewModel: FileListViewModel {
@@ -86,6 +89,7 @@ class ManagedFileListViewModel: FileListViewModel {
 
     var onFileListUpdated: FileListUpdatedCallback?
     var onDriveError: DriveErrorCallback?
+    var onFilePresented: FilePresentedCallback?
 
     private var files: Results<File>
     private var isLoading: Bool
@@ -211,6 +215,14 @@ class ManagedFileListViewModel: FileListViewModel {
                 self?.onDriveError?(error)
             }
         }
+    }
+
+    func didSelectFile(at index: Int) {
+        let file = getFile(at: index)
+        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
+            return
+        }
+        onFilePresented?(file)
     }
 
     func getFile(at index: Int) -> File {
