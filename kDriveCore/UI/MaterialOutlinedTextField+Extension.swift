@@ -26,7 +26,7 @@ public extension MaterialOutlinedTextField {
         let normalLabelColor = UIColor.placeholderText
         let normalBorderColor = KDriveResourcesAsset.borderColor.color
         let editingColor = KDriveResourcesAsset.infomaniakColor.color
-        let disabledAlpha: CGFloat = 0.6
+        let disabledAlpha = 0.6
 
         let normalColorModel = ColorModel(textColor: textColor, floatingLabelColor: normalLabelColor, normalLabelColor: normalLabelColor, outlineColor: normalBorderColor)
         let editingColorModel = ColorModel(textColor: textColor, floatingLabelColor: editingColor, normalLabelColor: editingColor, outlineColor: editingColor)

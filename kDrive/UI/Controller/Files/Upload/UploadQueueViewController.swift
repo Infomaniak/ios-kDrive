@@ -47,9 +47,9 @@ class UploadQueueViewController: UIViewController {
         UploadQueue.instance.observeFileUploadProgress(self) { [weak self] fileId, progress in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                self.progressForFileId[fileId] = CGFloat(progress)
+                self.progressForFileId[fileId] = progress
                 for cell in self.tableView.visibleCells {
-                    (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: CGFloat(progress))
+                    (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: progress)
                 }
             }
         }

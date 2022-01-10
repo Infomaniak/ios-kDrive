@@ -16,15 +16,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 
-extension UIScrollView {
-    func scrollToTop(animated: Bool, navigationController: UINavigationController?) {
-        // Add offset to expand large title
-        let expandedBar = (navigationController?.navigationBar.frame.height ?? 64.0) > 44.0
-        let largeTitle = navigationController?.navigationBar.prefersLargeTitles ?? false
-        let offset = (largeTitle && !expandedBar) ? 52.0 : 0.0
+protocol StoreNextCellDelegate: AnyObject {
+    func nextButtonTapped(_ button: IKLargeButton)
+}
 
-        setContentOffset(CGPoint(x: -adjustedContentInset.left, y: -(adjustedContentInset.top + offset)), animated: animated)
+class StoreNextCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var button: IKLargeButton!
+
+    weak var delegate: StoreNextCellDelegate?
+
+    @IBAction func buttonTapped(_ sender: IKLargeButton) {
+        delegate?.nextButtonTapped(sender)
     }
 }

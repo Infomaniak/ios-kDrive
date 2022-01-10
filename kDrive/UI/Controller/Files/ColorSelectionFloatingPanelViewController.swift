@@ -62,7 +62,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
     weak var floatingPanelController: FloatingPanelController?
-    var width = CGFloat(0)
+    var width = 0.0
 
     // MARK: - Public methods
 
@@ -123,11 +123,11 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     func setUpHeight() {
-        let headerCellHeight = CGFloat(80)
-        let topInset = CGFloat(30)
-        let colorWidthAndHeight = CGFloat(40)
-        let colorSpacing = CGFloat(16)
-        let leadingTrailingPading = CGFloat(40)
+        let headerCellHeight = 80.0
+        let topInset = 30.0
+        let colorWidthAndHeight = 40.0
+        let colorSpacing = 16.0
+        let leadingTrailingPading = 40.0
         let numberOfColorInARow = ((width - leadingTrailingPading) / (colorWidthAndHeight + colorSpacing)).rounded(.down)
         let numberOfRow = (CGFloat(folderColors.count) / numberOfColorInARow).rounded(.up)
         let height = numberOfRow * (colorWidthAndHeight + colorSpacing) + headerCellHeight + topInset

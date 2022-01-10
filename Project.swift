@@ -38,7 +38,7 @@ public extension SettingsDictionary {
 
 let baseSettings = SettingsDictionary()
     .automaticCodeSigning(devTeam: "864VDCS2QY")
-    .currentProjectVersion("1")
+    .currentProjectVersion("2")
     .marketingVersion("4.1.2")
 
 let deploymentTarget = DeploymentTarget.iOS(targetVersion: "13.0", devices: [.iphone, .ipad])

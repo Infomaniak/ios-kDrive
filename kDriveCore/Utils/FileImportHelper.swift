@@ -108,7 +108,7 @@ public enum ImportError: LocalizedError {
 public class FileImportHelper {
     public static let instance = FileImportHelper()
 
-    private let imageCompression: CGFloat = 0.8
+    private let imageCompression = 0.8
 
     // MARK: - Public methods
 
@@ -126,7 +126,7 @@ public class FileImportHelper {
                     switch result {
                     case .success(let fileURL):
                         let name = (itemProvider.suggestedName ?? self.getDefaultFileName()).addingExtension("webloc")
-                        items.append(ImportedFile(name: name, path: fileURL, uti: .url))
+                        items.append(ImportedFile(name: name, path: fileURL, uti: .internetShortcut))
                     case .failure(let error):
                         DDLogError("[FileImportHelper] Error while getting URL: \(error)")
                         errorCount += 1

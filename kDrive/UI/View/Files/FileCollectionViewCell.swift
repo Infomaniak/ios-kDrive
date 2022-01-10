@@ -74,7 +74,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     static var emptyCheckmarkImage: UIImage = {
         let size = CGSize(width: 24, height: 24)
-        let lineWidth: CGFloat = 1
+        let lineWidth = 1.0
         let renderer = UIGraphicsImageRenderer(size: size)
 
         return renderer.image { ctx in
@@ -91,6 +91,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        favoriteImageView?.isAccessibilityElement = true
+        favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
+        availableOfflineImageView?.isAccessibilityElement = true
+        availableOfflineImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAvailableOffline
         moreButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
         downloadProgressView?.setInfomaniakStyle()
         collectionView?.delegate = self
@@ -177,6 +181,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         favoriteImageView?.isHidden = !file.isFavorite
         favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         logoImage.image = file.icon
+        logoImage.isAccessibilityElement = true
+        logoImage.accessibilityLabel = file.convertedType.title
         logoImage.tintColor = file.tintColor
         moreButton.isHidden = selectionMode
         if !selectionMode || checkmarkImage != logoImage {
@@ -189,7 +195,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
             DispatchQueue.main.async {
                 self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
-                self?.downloadProgressView?.updateProgress(CGFloat(progress))
+                self?.downloadProgressView?.updateProgress(progress)
                 self?.availableOfflineImageView?.isHidden = self?.file.isAvailableOffline != true || progress < 1
             }
         }
@@ -241,6 +247,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         guard selectionMode else { return }
         accessoryImage?.isHidden = true
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+        checkmarkImage?.isAccessibilityElement = true
+        checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
     }
 
     func configureLoading() {

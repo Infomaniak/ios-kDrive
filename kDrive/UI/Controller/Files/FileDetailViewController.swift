@@ -318,8 +318,8 @@ class FileDetailViewController: UIViewController {
     }
 
     func computeSizeForPopover(labels: [String]) -> CGSize {
-        var height: CGFloat = 0
-        var width: CGFloat = 0
+        var height = 0.0
+        var width = 0.0
 
         for label in labels {
             let cellSize = sizeForLabel(text: label)

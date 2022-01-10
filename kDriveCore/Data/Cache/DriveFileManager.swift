@@ -22,6 +22,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakLogin
 import RealmSwift
+import Sentry
 import SwiftRegex
 
 public class DriveFileManager {
@@ -65,8 +66,12 @@ public class DriveFileManager {
             objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
 
         public var uploadsRealm: Realm {
-            // swiftlint:disable force_try
-            return try! Realm(configuration: uploadsRealmConfiguration)
+            do {
+                return try Realm(configuration: uploadsRealmConfiguration)
+            } catch {
+                // We can't recover from this error but at least we report it correctly on Sentry
+                Logging.reportRealmOpeningError(error, realmConfiguration: uploadsRealmConfiguration)
+            }
         }
 
         init() {
@@ -192,8 +197,8 @@ public class DriveFileManager {
 
         // Only compact in the background
         /* if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
-            compactRealmsIfNeeded()
-        } */
+             compactRealmsIfNeeded()
+         } */
 
         // Get root file
         let realm = getRealm()
@@ -239,8 +244,12 @@ public class DriveFileManager {
     }
 
     public func getRealm() -> Realm {
-        // swiftlint:disable force_try
-        return try! Realm(configuration: realmConfiguration)
+        do {
+            return try Realm(configuration: realmConfiguration)
+        } catch {
+            // We can't recover from this error but at least we report it correctly on Sentry
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
+        }
     }
 
     /// Delete all drive data cache for a user
@@ -838,18 +847,6 @@ public class DriveFileManager {
                         updatedFiles.append(renamedFile)
                         pagedActions[fileId] = .fileUpdate
                     }
-                case .fileFavoriteCreate:
-                    if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
-                        file.isFavorite = true
-                        updatedFiles.append(file)
-                        pagedActions[fileId] = .fileUpdate
-                    }
-                case .fileFavoriteRemove:
-                    if let file = realm.object(ofType: File.self, forPrimaryKey: fileId) {
-                        file.isFavorite = false
-                        updatedFiles.append(file)
-                        pagedActions[fileId] = .fileUpdate
-                    }
                 case .fileMoveIn, .fileRestore, .fileCreate:
                     if let newFile = activity.file {
                         keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
@@ -867,7 +864,7 @@ public class DriveFileManager {
                         insertedFiles.append(newFile)
                         pagedActions[fileId] = .fileCreate
                     }
-                case .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete:
+                case .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete:
                     if let newFile = activity.file {
                         keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                         realm.add(newFile, update: .modified)

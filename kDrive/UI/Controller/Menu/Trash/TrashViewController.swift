@@ -43,9 +43,6 @@ class TrashViewController: FileListViewController {
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        if currentDirectory == nil {
-            currentDirectory = DriveFileManager.trashRootFile
-        }
         guard driveFileManager != nil && currentDirectory != nil else {
             DispatchQueue.main.async {
                 completion(.success([]), false, true)
@@ -75,6 +72,7 @@ class TrashViewController: FileListViewController {
 
     override func getNewChanges() {
         // We don't have incremental changes for trash
+        forceRefresh()
     }
 
     override func setUpHeaderView(_ headerView: FilesHeaderView, isListEmpty: Bool) {

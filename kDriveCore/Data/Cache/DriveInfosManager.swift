@@ -22,6 +22,7 @@ import Foundation
 import InfomaniakCore
 import Realm
 import RealmSwift
+import Sentry
 
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
@@ -75,8 +76,12 @@ public class DriveInfosManager {
     }
 
     public func getRealm() -> Realm {
-        // swiftlint:disable force_try
-        return try! Realm(configuration: realmConfiguration)
+        do {
+            return try Realm(configuration: realmConfiguration)
+        } catch {
+            // We can't recover from this error but at least we report it correctly on Sentry
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
+        }
     }
 
     private func initDriveForRealm(drive: Drive, userId: Int, sharedWithMe: Bool) {

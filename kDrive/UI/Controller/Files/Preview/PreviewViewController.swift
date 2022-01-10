@@ -21,6 +21,7 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import PDFKit
+import SafariServices
 import Sentry
 import UIKit
 
@@ -72,11 +73,12 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var titleWidthConstraint: NSLayoutConstraint?
     private var titleHeightConstraint: NSLayoutConstraint?
     private let editButton = UIButton(type: .custom)
+    private let openButton = UIButton(type: .custom)
     private let backButton = UIButton(type: .custom)
     private var popRecognizer: InteractivePopRecognizer?
     @IBOutlet weak var statusBarView: UIView!
     private var fullScreenPreview = false
-    private var heightToHide = CGFloat(0)
+    private var heightToHide = 0.0
 
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
@@ -135,6 +137,18 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         editButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(editButton)
 
+        openButton.tintColor = .white
+        openButton.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+        openButton.contentMode = .center
+        openButton.setImage(KDriveResourcesAsset.openWith.image, for: .normal)
+        openButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        openButton.imageEdgeInsets = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        openButton.cornerRadius = openButton.frame.width / 2
+        openButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
+        openButton.addTarget(self, action: #selector(openFile), for: .touchUpInside)
+        openButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(openButton)
+
         backButton.tintColor = .white
         backButton.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
         backButton.contentMode = .center
@@ -161,6 +175,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             editButton.heightAnchor.constraint(equalToConstant: 50),
             editButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
             editButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            openButton.widthAnchor.constraint(equalToConstant: 50),
+            openButton.heightAnchor.constraint(equalToConstant: 50),
+            openButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            openButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             pdfPageLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             pdfPageLabel.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
             pdfPageLabel.centerYAnchor.constraint(equalTo: editButton.centerYAnchor)
@@ -303,6 +321,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 } else {
                     setNavbarStandard()
                 }
+            case .url:
+                setNavbarForOpening()
             default:
                 setNavbarStandard()
             }
@@ -315,17 +335,27 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         backButton.isHidden = false
         pdfPageLabel.isHidden = true
         editButton.isHidden = true
+        openButton.isHidden = true
     }
 
     private func setNavbarForEditing() {
         backButton.isHidden = false
         pdfPageLabel.isHidden = true
         editButton.isHidden = false
+        openButton.isHidden = true
+    }
+
+    private func setNavbarForOpening() {
+        backButton.isHidden = false
+        pdfPageLabel.isHidden = true
+        editButton.isHidden = true
+        openButton.isHidden = false
     }
 
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
         backButton.isHidden = false
         editButton.isHidden = true
+        openButton.isHidden = false
         pdfPageLabel.text = KDriveResourcesStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
         titleWidthConstraint?.constant = pdfPageLabel.frame.width + 32
@@ -341,6 +371,19 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     @objc private func editFile() {
         floatingPanelViewController.dismiss(animated: true)
         OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
+    }
+
+    @objc private func openFile() {
+        if currentFile.isBookmark {
+            // Open bookmark URL
+            if let url = currentFile.getBookmarkURL() {
+                let safariViewController = SFSafariViewController(url: url)
+                floatingPanelViewController.dismiss(animated: true)
+                present(safariViewController, animated: true)
+            } else {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
+            }
+        }
     }
 
     @objc private func goBack() {
@@ -363,6 +406,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             self.backButton.transform = hideButton
             self.pdfPageLabel.transform = hideButton
             self.editButton.transform = hideButton
+            self.openButton.transform = hideButton
         }
         floatingPanelViewController.move(to: fullScreenPreview ? .hidden : .tip, animated: true)
     }
@@ -428,6 +472,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 },
                 completion: { error in
                     DispatchQueue.main.async { [weak self] in
+                        self?.currentDownloadOperation = nil
                         if self?.view.window != nil {
                             if let error = error {
                                 if error != .taskCancelled {

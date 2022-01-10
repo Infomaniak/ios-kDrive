@@ -39,8 +39,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Constants
 
-    private let leftRightInset: CGFloat = 12
-    private let gridInnerSpacing: CGFloat = 16
+    private let leftRightInset = 12.0
+    private let gridInnerSpacing = 16.0
     private let maxDiffChanges = DriveApiFetcher.itemPerPage
     private let headerViewIdentifier = "FilesHeaderView"
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
@@ -574,7 +574,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
-            navigationItem.title = currentDirectory.name
+            setTitle()
             navigationItem.rightBarButtonItems = rightBarButtonItems
             navigationItem.leftBarButtonItems = leftBarButtonItems
         }
@@ -761,7 +761,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             return
         }
         self.driveFileManager = driveFileManager
-        currentDirectory = driveFileManager.getCachedFile(id: directoryId)
+        let maybeCurrentDirectory = driveFileManager.getCachedFile(id: directoryId)
+        if let currentDirectory = maybeCurrentDirectory {
+            self.currentDirectory = currentDirectory
+        }
         if currentDirectory == nil && directoryId > DriveFileManager.constants.rootID {
             navigationController?.popViewController(animated: true)
         }

@@ -20,7 +20,7 @@ import UIKit
 
 class NewFolderShareRuleUserLayout: UICollectionViewFlowLayout {
 
-    var overlap: CGFloat = 10
+    var overlap = 10.0
 
     override init() {
         super.init()

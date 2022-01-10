@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import RealmSwift
+import Sentry
 
 public class UploadQueue {
     public static let instance = UploadQueue()
@@ -79,8 +80,12 @@ public class UploadQueue {
     private init() {
         // Create Realm
         dispatchQueue.sync {
-            // swiftlint:disable force_try
-            realm = try! Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: dispatchQueue)
+            do {
+                realm = try Realm(configuration: DriveFileManager.constants.uploadsRealmConfiguration, queue: dispatchQueue)
+            } catch {
+                // We can't recover from this error but at least we report it correctly on Sentry
+                Logging.reportRealmOpeningError(error, realmConfiguration: DriveFileManager.constants.uploadsRealmConfiguration)
+            }
         }
         // Initialize operation queue with files from Realm
         addToQueueFromRealm()

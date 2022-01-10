@@ -17,6 +17,7 @@
  */
 
 import UIKit
+import kDriveResources
 
 class ColorSelectionCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var checkmark: UIImageView!
@@ -24,6 +25,7 @@ class ColorSelectionCollectionViewCell: UICollectionViewCell {
     override var isSelected: Bool {
         didSet {
             checkmark.isHidden = !isSelected
+            setAccessibility()
         }
     }
 
@@ -32,9 +34,16 @@ class ColorSelectionCollectionViewCell: UICollectionViewCell {
         layer.cornerRadius = frame.height / 2
         clipsToBounds = true
         checkmark.isHidden = true
+        // Accessibility
+        isAccessibilityElement = true
+        setAccessibility()
     }
 
     func configureCell() {
         layer.cornerRadius = frame.height / 2
+    }
+
+    private func setAccessibility() {
+        accessibilityTraits = .allowsDirectInteraction
     }
 }
