@@ -79,6 +79,12 @@ class SearchViewController: FileListViewController {
         super.viewDidLoad()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: KDriveResourcesAsset.filter.image, style: .plain, target: self, action: #selector(presentFilters))
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         DispatchQueue.main.async {
@@ -174,9 +180,6 @@ class SearchViewController: FileListViewController {
         if isDisplayingSearchResults {
             forceRefresh()
         }
-
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "filter")!, style: .plain, target: self, action: #selector(presentFilters))
     }
 
     // MARK: - Collection view data source
