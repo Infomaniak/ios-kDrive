@@ -229,6 +229,17 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 UIConstants.showSnackBar(message: driveError.localizedDescription)
             }
         }
+
+        viewModel.onFilePresented = { [weak self] file in
+            guard let self = self else { return }
+            #if !ISEXTENSION
+            self.filePresenter.present(driveFileManager: self.driveFileManager,
+                                           file: file,
+                                           files: self.viewModel.getAllFiles(),
+                                           normalFolderHierarchy: self.configuration.normalFolderHierarchy,
+                                           fromActivities: self.configuration.fromActivities)
+            #endif
+        }
     }
 
     deinit {
@@ -529,17 +540,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Collection view delegate
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if selectionMode {
-            selectChild(at: indexPath)
-            return
-        }
-        let file = viewModel.getFile(at: indexPath.item)
-        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
-            return
-        }
-        #if !ISEXTENSION
-            filePresenter.present(driveFileManager: driveFileManager, file: file, files: viewModel.getAllFiles(), normalFolderHierarchy: configuration.normalFolderHierarchy, fromActivities: configuration.fromActivities)
-        #endif
+        viewModel.didSelectFile(at: indexPath.item)
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
