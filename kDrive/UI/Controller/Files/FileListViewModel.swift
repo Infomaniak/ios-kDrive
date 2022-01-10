@@ -22,83 +22,38 @@ import Foundation
 import kDriveCore
 import RealmSwift
 
-protocol FileListViewModel {
+class FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
     typealias FilePresentedCallback = (File) -> Void
 
-    var currentDirectory: File { get set }
-    var driveFileManager: DriveFileManager { get set }
-    var isEmpty: Bool { get }
-    var fileCount: Int { get }
-    var sortType: SortType { get set }
-    var sortTypePublisher: Published<SortType>.Publisher { get }
-    var listStyle: ListStyle { get set }
-    var listStylePublisher: Published<ListStyle>.Publisher { get }
-    var title: String { get set }
-    var titlePublisher: Published<String>.Publisher { get }
-    var isRefreshIndicatorHidden: Bool { get set }
-    var isRefreshIndicatorHiddenPublisher: Published<Bool>.Publisher { get }
-    var isEmptyViewHidden: Bool { get set }
-    var isEmptyViewHiddenPublisher: Published<Bool>.Publisher { get }
-
-    func didSelectFile(at index: Int)
-    func getFile(at index: Int) -> File
-    func setFile(_ file: File, at index: Int)
-    func getAllFiles() -> [File]
-
-    func forceRefresh()
-
-    func onViewDidLoad()
-    func onViewWillAppear()
-
-    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?)
-
-    var onFileListUpdated: FileListUpdatedCallback? { get set }
-    var onDriveError: DriveErrorCallback? { get set }
-    var onFilePresented: FilePresentedCallback? { get set }
-}
-
-class ManagedFileListViewModel: FileListViewModel {
+    var currentDirectory: File
     var driveFileManager: DriveFileManager
+    var isEmpty: Bool {
+        return true
+    }
+
+    var fileCount: Int {
+        return 0
+    }
+
+    var isLoading: Bool
 
     @Published var sortType: SortType
-    var sortTypePublisher: Published<SortType>.Publisher { $sortType }
-
     @Published var listStyle: ListStyle
-    var listStylePublisher: Published<ListStyle>.Publisher { $listStyle }
-
     @Published var title: String
-    var titlePublisher: Published<String>.Publisher { $title }
-
     @Published var isRefreshIndicatorHidden: Bool
-    var isRefreshIndicatorHiddenPublisher: Published<Bool>.Publisher { $isRefreshIndicatorHidden }
-
     @Published var isEmptyViewHidden: Bool
-    var isEmptyViewHiddenPublisher: Published<Bool>.Publisher { $isEmptyViewHidden }
-
-    var currentDirectory: File
-    var fileCount: Int {
-        return files.count
-    }
-
-    var isEmpty: Bool {
-        return files.isEmpty
-    }
 
     var onFileListUpdated: FileListUpdatedCallback?
     var onDriveError: DriveErrorCallback?
     var onFilePresented: FilePresentedCallback?
 
-    private var files: Results<File>
-    private var isLoading: Bool
-
-    private var realmObservationToken: NotificationToken?
     private var sortTypeObservation: AnyCancellable?
     private var listStyleObservation: AnyCancellable?
 
-    required init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.driveFileManager = driveFileManager
         if let currentDirectory = currentDirectory {
             self.currentDirectory = currentDirectory
@@ -107,7 +62,6 @@ class ManagedFileListViewModel: FileListViewModel {
         }
         self.sortType = FileListOptions.instance.currentSortType
         self.listStyle = FileListOptions.instance.currentStyle
-        self.files = driveFileManager.getRealm().objects(File.self).filter(NSPredicate(value: false))
         self.isRefreshIndicatorHidden = true
         self.isEmptyViewHidden = true
         self.isLoading = false
@@ -121,25 +75,7 @@ class ManagedFileListViewModel: FileListViewModel {
         } else {
             self.title = self.currentDirectory.name
         }
-
         setupObservation()
-    }
-
-    public func forceRefresh() {
-        isLoading = false
-        isRefreshIndicatorHidden = false
-        loadFiles(page: 1, forceRefresh: true)
-    }
-
-    public func onViewDidLoad() {
-        updateDataSource()
-        loadFiles()
-    }
-
-    public func onViewWillAppear() {
-        if currentDirectory.fullyDownloaded && !files.isEmpty {
-            loadActivities()
-        }
     }
 
     private func setupObservation() {
@@ -154,7 +90,58 @@ class ManagedFileListViewModel: FileListViewModel {
             .assignNoRetain(to: \.listStyle, on: self)
     }
 
-    private func updateDataSource() {
+    func didSelectFile(at index: Int) {}
+    func getFile(at index: Int) -> File {
+        fatalError(#function + " needs to be overridden")
+    }
+
+    func setFile(_ file: File, at index: Int) {}
+    func getAllFiles() -> [File] {
+        fatalError(#function + " needs to be overridden")
+    }
+
+    func forceRefresh() {}
+    func updateDataSource() {}
+
+    func onViewDidLoad() {}
+    func onViewWillAppear() {}
+}
+
+class ManagedFileListViewModel: FileListViewModel {
+    private var realmObservationToken: NotificationToken?
+
+    private var files: Results<File>
+    override var isEmpty: Bool {
+        return files.isEmpty
+    }
+
+    override var fileCount: Int {
+        return files.count
+    }
+
+    override required init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+        self.files = driveFileManager.getRealm().objects(File.self).filter(NSPredicate(value: false))
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+    }
+
+    override public func forceRefresh() {
+        isLoading = false
+        isRefreshIndicatorHidden = false
+        loadFiles(page: 1, forceRefresh: true)
+    }
+
+    override public func onViewDidLoad() {
+        updateDataSource()
+        loadFiles()
+    }
+
+    override public func onViewWillAppear() {
+        if currentDirectory.fullyDownloaded && !files.isEmpty {
+            loadActivities()
+        }
+    }
+
+    override func updateDataSource() {
         realmObservationToken?.invalidate()
         realmObservationToken = currentDirectory.children.sorted(by: [
             SortDescriptor(keyPath: \File.type, ascending: true),
@@ -217,7 +204,7 @@ class ManagedFileListViewModel: FileListViewModel {
         }
     }
 
-    func didSelectFile(at index: Int) {
+    override func didSelectFile(at index: Int) {
         let file = getFile(at: index)
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             return
@@ -225,15 +212,15 @@ class ManagedFileListViewModel: FileListViewModel {
         onFilePresented?(file)
     }
 
-    func getFile(at index: Int) -> File {
+    override func getFile(at index: Int) -> File {
         return files[index]
     }
 
-    func setFile(_ file: File, at index: Int) {
+    override func setFile(_ file: File, at index: Int) {
         // files[index] = file
     }
 
-    func getAllFiles() -> [File] {
+    override func getAllFiles() -> [File] {
         return Array(files.freeze())
     }
 }
