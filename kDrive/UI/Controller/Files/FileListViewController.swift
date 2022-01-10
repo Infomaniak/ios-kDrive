@@ -94,7 +94,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     var currentDirectory: File!
 
     lazy var configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true)
-    private var uploadingFilesCount = 0
 
     var currentDirectoryCount: FileCount?
     var selectAllMode = false
@@ -113,14 +112,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         #endif
     }
 
-    var viewModel: FileListViewModel!
+    lazy var viewModel: FileListViewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+    lazy var uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
     var bindStore = Set<AnyCancellable>()
 
     // MARK: - View controller lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         bindViewModel()
         viewModel.onViewDidLoad()
 
@@ -233,12 +232,28 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         viewModel.onFilePresented = { [weak self] file in
             guard let self = self else { return }
             #if !ISEXTENSION
-            self.filePresenter.present(driveFileManager: self.driveFileManager,
+                self.filePresenter.present(driveFileManager: self.driveFileManager,
                                            file: file,
                                            files: self.viewModel.getAllFiles(),
                                            normalFolderHierarchy: self.configuration.normalFolderHierarchy,
                                            fromActivities: self.configuration.fromActivities)
             #endif
+        }
+
+        uploadViewModel.$uploadCount.receiveOnMain(store: &bindStore) { [weak self] uploadCount in
+            guard let self = self else { return }
+            let shouldHideUploadCard: Bool
+            if uploadCount > 0 {
+                self.headerView?.uploadCardView.setUploadCount(uploadCount)
+                shouldHideUploadCard = false
+            } else {
+                shouldHideUploadCard = true
+            }
+            // Only perform reload if needed
+            if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
+                self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
+                self.collectionView.performBatchUpdates(nil)
+            }
         }
     }
 
@@ -297,9 +312,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
 
         if configuration.showUploadingFiles {
-            headerView.uploadCardView.isHidden = uploadingFilesCount == 0
+            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
             headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
-            headerView.uploadCardView.setUploadCount(uploadingFilesCount)
+            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
             headerView.uploadCardView.progressView.enableIndeterminate()
         }
     }
@@ -328,34 +343,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     final func setUpObservers() {
         // Upload files observer
-        observeUploads()
+        // observeUploads()
         // File observer
         // Network observer
         observeNetwork()
     }
 
     final func observeUploads() {
-        guard configuration.showUploadingFiles && currentDirectory != nil && uploadsObserver == nil else { return }
-
-        uploadCountThrottler.handler = { [weak self] uploadCount in
-            guard let self = self, self.isViewLoaded else { return }
-            self.uploadingFilesCount = uploadCount
-            let shouldHideUploadCard: Bool
-            if uploadCount > 0 {
-                self.headerView?.uploadCardView.setUploadCount(uploadCount)
-                shouldHideUploadCard = false
-            } else {
-                shouldHideUploadCard = true
-            }
-            // Only perform reload if needed
-            if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
-                self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
-                self.collectionView.performBatchUpdates(nil)
-            }
-        }
-        uploadsObserver = UploadQueue.instance.observeUploadCount(self, parentId: currentDirectory.id) { [unowned self] _, uploadCount in
-            self.uploadCountThrottler.call(uploadCount)
-        }
     }
 
     final func observeNetwork() {
@@ -372,7 +366,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     final func updateUploadCount() {
         guard driveFileManager != nil && currentDirectory != nil else { return }
-        uploadingFilesCount = UploadQueue.instance.getUploadingFiles(withParent: currentDirectory.id, driveId: driveFileManager.drive.id).count
     }
 
     private func showEmptyView(_ isHidden: Bool) {
@@ -955,7 +948,8 @@ extension FileListViewController: SelectDelegate {
                 observeUploads()
             }
             if isDifferentDrive {
-                viewModel = ManagedFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                viewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
                 bindViewModel()
                 viewModel.onViewDidLoad()
                 navigationController?.popToRootViewController(animated: false)
