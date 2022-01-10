@@ -19,18 +19,25 @@
 import CocoaLumberjackSwift
 import Highlightr
 import kDriveCore
+import kDriveResources
+import MarkdownKit
 import UIKit
 
 class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet weak var textView: UITextView!
 
     private let highlightr = Highlightr()
+    private let markdownParser = MarkdownParser(font: UIFontMetrics.default.scaledFont(for: MarkdownParser.defaultFont),
+                                                color: .label,
+                                                enabledElements: .disabledAutomaticLink)
+    private var isCode = true
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        setTheme()
-        // Update content
-        textView.attributedText = highlightr?.highlight(textView.text)
+        if isCode {
+            // Update content
+            displayCode(for: textView.text)
+        }
     }
 
     private func setTheme() {
@@ -51,11 +58,28 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             // Read file
             let content = try String(contentsOf: file.localUrl)
             // Display content
-            setTheme()
-            textView.attributedText = highlightr?.highlight(content)
+            if #available(iOS 15.0, *), file.extension == "md" || file.extension == "markdown" {
+                displayMarkdown(for: content)
+                isCode = false
+            } else {
+                displayCode(for: content)
+                isCode = true
+            }
         } catch {
             DDLogError("Failed to read file content: \(error)")
             previewDelegate?.errorWhilePreviewing(fileId: file.id, error: error)
         }
+    }
+
+    @available(iOS 15.0, *)
+    private func displayMarkdown(for content: String) {
+        markdownParser.code.font = UIFont.monospacedSystemFont(ofSize: UIFontMetrics.default.scaledValue(for: MarkdownParser.defaultFont.pointSize), weight: .regular)
+        markdownParser.code.textBackgroundColor = KDriveResourcesAsset.backgroundColor.color
+        textView.attributedText = markdownParser.parse(content)
+    }
+
+    private func displayCode(for content: String) {
+        setTheme()
+        textView.attributedText = highlightr?.highlight(content)
     }
 }
