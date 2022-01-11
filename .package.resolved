@@ -137,6 +137,15 @@
         }
       },
       {
+        "package": "Highlightr",
+        "repositoryURL": "https://github.com/raspu/Highlightr",
+        "state": {
+          "branch": null,
+          "revision": "93199b9e434f04bda956a613af8f571933f9f037",
+          "version": "2.1.2"
+        }
+      },
+      {
         "package": "HorizonCalendar",
         "repositoryURL": "https://github.com/airbnb/HorizonCalendar.git",
         "state": {
@@ -206,6 +215,15 @@
           "branch": null,
           "revision": "79a0b70547f7c40ea54c67487f935fa2f2eaaadc",
           "version": "3.2.3"
+        }
+      },
+      {
+        "package": "MarkdownKit",
+        "repositoryURL": "https://github.com/bmoliveira/MarkdownKit.git",
+        "state": {
+          "branch": null,
+          "revision": "5056f3305d3499f44d8815530d560b87082e0cf5",
+          "version": "1.7.1"
         }
       },
       {
