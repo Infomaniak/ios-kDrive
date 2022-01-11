@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DifferenceKit
 import InfomaniakCore
 import RealmSwift
 import UIKit
-import DifferenceKit
 
 public enum FileActivityType: String, Codable {
     case fileAccess = "file_access"
@@ -51,9 +51,11 @@ public enum FileActivityType: String, Codable {
     case collaborativeFolderCreate = "collaborative_folder_create"
     case collaborativeFolderUpdate = "collaborative_folder_update"
     case collaborativeFolderDelete = "collaborative_folder_delete"
+    case fileColorUpdate = "file_color_update"
+    case fileColorDelete = "file_color_delete"
 
     public static var fileActivities: [FileActivityType] {
-        return [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileCategorize, .fileUncategorize, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete]
+        return [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileCategorize, .fileUncategorize, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete]
     }
 }
 
