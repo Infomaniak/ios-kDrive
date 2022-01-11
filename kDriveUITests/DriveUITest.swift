@@ -91,6 +91,11 @@ class AppUITest: XCTestCase {
     }
 
     // MARK: - Tests methods
+
+    func testNothing() {
+        setUpTest(testName: "Nothing") { _ in }
+    }
+
     func testShareFile() {
         let testName = "UITest shareFile"
         let expectations = [
