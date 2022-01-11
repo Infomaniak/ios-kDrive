@@ -27,6 +27,7 @@ class MultipleSelectionViewController: UIViewController {
     var driveFileManager: DriveFileManager!
     var selectedItems = Set<File>()
     var rightBarButtonItems: [UIBarButtonItem]?
+    var leftBarButtonItems: [UIBarButtonItem]?
 
     var selectionMode = false {
         didSet {

@@ -169,8 +169,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if configuration.isMultipleSelectionEnabled {
             let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
             collectionView.addGestureRecognizer(longPressGesture)
-            rightBarButtonItems = navigationItem.rightBarButtonItems
         }
+        rightBarButtonItems = navigationItem.rightBarButtonItems
+        leftBarButtonItems = navigationItem.leftBarButtonItems
 
         if configuration.supportsDrop {
             collectionView.dropDelegate = self
@@ -574,8 +575,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
             setTitle()
-            navigationItem.leftBarButtonItem = nil
             navigationItem.rightBarButtonItems = rightBarButtonItems
+            navigationItem.leftBarButtonItems = leftBarButtonItems
         }
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
