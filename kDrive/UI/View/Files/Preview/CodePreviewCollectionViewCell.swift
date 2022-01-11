@@ -65,7 +65,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             // Read file
             let content = try String(contentsOf: file.localUrl)
             // Display content
-            if #available(iOS 15.0, *), file.extension == "md" || file.extension == "markdown" {
+            if file.extension == "md" || file.extension == "markdown" {
                 displayMarkdown(for: content)
                 isCode = false
             } else {
@@ -78,7 +78,6 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
-    @available(iOS 15.0, *)
     private func displayMarkdown(for content: String) {
         textView.attributedText = markdownParser.parse(content)
     }
