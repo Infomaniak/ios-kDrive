@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/Alamofire/Alamofire.git",
         "state": {
           "branch": null,
-          "revision": "d120af1e8638c7da36c8481fd61a66c0c08dc4fc",
-          "version": "5.4.4"
+          "revision": "f82c23a8a7ef8dc1a49a8bfc6a96883e79121864",
+          "version": "5.5.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/ProxymanApp/atlantis",
         "state": {
           "branch": null,
-          "revision": "507b49a18b7a19324d98a454dd3c0ababc101950",
-          "version": "1.13.0"
+          "revision": "0f79efcbad23ecb45525ca6e0b8f0721514535f9",
+          "version": "1.14.0"
         }
       },
       {
@@ -177,8 +177,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "318e319998bf555c3e914d5c3adb6da05af86a32",
-          "version": "7.1.1"
+          "revision": "0c02c46cfdc0656ce74fd0963a75e5000a0b7f23",
+          "version": "7.1.2"
         }
       },
       {
@@ -285,8 +285,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
         "state": {
           "branch": null,
-          "revision": "3dd1867f423c9f0dd241d0669d2563f091f805e9",
-          "version": "7.5.4"
+          "revision": "a68422852a7695a6ebb427a7d9ec5c1deae12fa4",
+          "version": "7.6.1"
         }
       },
       {
