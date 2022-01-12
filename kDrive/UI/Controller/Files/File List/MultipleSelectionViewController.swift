@@ -48,16 +48,6 @@ class MultipleSelectionViewController: UIViewController {
         selectionMode = false
     }
 
-    @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
-        guard !selectionMode else { return }
-        let pos = sender.location(in: collectionView)
-        if let indexPath = collectionView.indexPathForItem(at: pos) {
-            selectionMode = true
-            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init(rawValue: 0))
-            selectChild(at: indexPath)
-        }
-    }
-
     func toggleMultipleSelection() {}
 
     @objc func cancelMultipleSelection() {
