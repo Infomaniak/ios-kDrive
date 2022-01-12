@@ -20,9 +20,19 @@ import Foundation
 import kDriveCore
 
 class MultipleSelectionFileListViewModel {
-    @Published var isMultipleSelectionEnabled: Bool
+    @Published var isMultipleSelectionEnabled: Bool {
+        didSet {
+            selectedIndexes.removeAll()
+        }
+    }
+
+    private(set) var selectedIndexes = Set<Int>()
 
     init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
-        
+        isMultipleSelectionEnabled = false
+    }
+
+    func didSelectItem(at index: Int) {
+        selectedIndexes.insert(index)
     }
 }
