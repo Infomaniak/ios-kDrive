@@ -160,6 +160,7 @@ public enum SortType: String {
     case ext
     case olderDelete
     case newerDelete
+    case type
 
     public struct SortTypeValue {
         public let apiValue: String
@@ -192,6 +193,8 @@ public enum SortType: String {
             return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
         case .newerDelete:
             return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
+        case .type:
+            return SortTypeValue(apiValue: "type", order: "desc", translation: "", realmKeyPath: \.type)
         }
     }
 }
