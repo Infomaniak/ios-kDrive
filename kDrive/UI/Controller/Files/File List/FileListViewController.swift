@@ -114,6 +114,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     lazy var viewModel: FileListViewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     lazy var uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
+    lazy var multipleSelectionViewModel = MultipleSelectionFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+
     var bindStore = Set<AnyCancellable>()
 
     // MARK: - View controller lifecycle
@@ -255,6 +257,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.collectionView.performBatchUpdates(nil)
             }
         }
+        
+        multipleSelectionViewModel.$isMultipleSelectionEnabled.receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
+            
+        }
     }
 
     deinit {
@@ -290,6 +296,16 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         coordinator.animate { _ in
             self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
             self.setSelectedCells()
+        }
+    }
+    
+    @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
+        guard !multipleSelectionViewModel.isMultipleSelectionEnabled else { return }
+        let pos = sender.location(in: collectionView)
+        if let indexPath = collectionView.indexPathForItem(at: pos) {
+            multipleSelectionViewModel.isMultipleSelectionEnabled = true
+            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init(rawValue: 0))
+            selectChild(at: indexPath)
         }
     }
 
@@ -422,7 +438,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Multiple selection
 
     override final func toggleMultipleSelection() {
-        if selectionMode {
+        if multipleSelectionViewModel.isMultipleSelectionEnabled {
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
             collectionView.allowsMultipleSelection = true
@@ -532,7 +548,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Collection view delegate
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        viewModel.didSelectFile(at: indexPath.item)
+        if multipleSelectionViewModel.isMultipleSelectionEnabled {
+            multipleSelectionViewModel.didSelectItem(at: indexPath.item)
+        } else {
+            viewModel.didSelectFile(at: indexPath.item)
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {

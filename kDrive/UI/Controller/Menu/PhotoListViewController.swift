@@ -109,8 +109,8 @@ class PhotoListViewController: MultipleSelectionViewController {
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = true
 
         // Set up multiple selection gesture
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-        collectionView.addGestureRecognizer(longPressGesture)
+        /*let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        collectionView.addGestureRecognizer(longPressGesture)*/
         rightBarButtonItems = navigationItem.rightBarButtonItems
 
         fetchNextPage()
