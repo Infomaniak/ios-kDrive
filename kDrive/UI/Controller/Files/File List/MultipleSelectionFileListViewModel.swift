@@ -20,19 +20,65 @@ import Foundation
 import kDriveCore
 
 class MultipleSelectionFileListViewModel {
+    /// itemIndex
+    typealias ItemSelectedCallback = (Int) -> Void
+
     @Published var isMultipleSelectionEnabled: Bool {
         didSet {
-            selectedIndexes.removeAll()
+            if !isMultipleSelectionEnabled {
+                selectedIndexes.removeAll()
+                selectedCount = 0
+            }
         }
     }
 
+    @Published var selectedCount: Int
+
+    var onItemSelected: ItemSelectedCallback?
+    var onSelectAll: (() -> Void)?
+    var onDeselectAll: (() -> Void)?
+
     private(set) var selectedIndexes = Set<Int>()
+    var isSelectAllModeEnabled = false
 
     init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         isMultipleSelectionEnabled = false
+        selectedCount = 0
+    }
+
+    func selectAll() {
+        selectedIndexes.removeAll()
+        isSelectAllModeEnabled = true
+        onSelectAll?()
+        /*navigationItem.rightBarButtonItem = loadingBarButtonItem
+        driveFileManager.apiFetcher.getFileCount(driveId: driveFileManager.drive.id, fileId: currentDirectory.id) { [self] response, _ in
+            if let fileCount = response?.data {
+                currentDirectoryCount = fileCount
+                setSelectedCells()
+                updateSelectedCount()
+            } else {
+                updateSelectionButtons()
+                multipleSelectionViewModel.isSelectAllModeEnabled = false
+                updateSelectAllButton()
+            }
+        }*/
+    }
+
+    func deselectAll() {
+        selectedIndexes.removeAll()
+        isSelectAllModeEnabled = false
+        onDeselectAll?()
     }
 
     func didSelectItem(at index: Int) {
         selectedIndexes.insert(index)
+        selectedCount = selectedIndexes.count
+        onItemSelected?(index)
     }
+
+    func didDeselectItem(at index: Int) {
+        selectedIndexes.remove(index)
+        selectedCount = selectedIndexes.count
+    }
+
 }
