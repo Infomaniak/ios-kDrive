@@ -29,8 +29,7 @@ public enum Logging {
         UserDefaults.standard.set(true, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         initLogger()
         initNetworkLogging()
-        // TODO: Re-enable sentry for 4.1.2 release if needed
-        // initSentry()
+        initSentry()
         copyDebugInformations()
     }
 
