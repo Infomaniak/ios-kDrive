@@ -121,7 +121,7 @@ extension File: AbstractFile {}
 
 extension Endpoint {
     private static var base: Endpoint {
-        return Endpoint(path: "/2/drive", apiEnvironment: .preprod)
+        return Endpoint(path: "/2/drive", apiEnvironment: .prod)
     }
 
     // MARK: Action
