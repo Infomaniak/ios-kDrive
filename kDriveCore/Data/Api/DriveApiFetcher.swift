@@ -24,7 +24,7 @@ import Kingfisher
 import Sentry
 import UIKit
 
-public extension ApiFetcher {
+extension ApiFetcher {
     convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
         self.init()
         setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
@@ -43,6 +43,30 @@ public extension ApiFetcher {
                     }
                 }
             }
+    }
+
+    // MARK: - New request helpers
+
+    func authenticatedRequest(_ endpoint: Endpoint, method: HTTPMethod = .get, parameters: Parameters? = nil) -> DataRequest {
+        return authenticatedSession
+            .request(endpoint.url, method: method, parameters: parameters, encoding: JSONEncoding.default)
+    }
+
+    func authenticatedRequest<Parameters: Encodable>(_ endpoint: Endpoint, method: HTTPMethod = .get, parameters: Parameters? = nil) -> DataRequest {
+        return authenticatedSession
+            .request(endpoint.url, method: method, parameters: parameters, encoder: JSONParameterEncoder.convertToSnakeCase)
+    }
+
+    func perform<T: Codable>(request: DataRequest) async throws -> (T, Int?) {
+        let response = await request.serializingDecodable(ApiResponse<T>.self, automaticallyCancelling: true, decoder: ApiFetcher.decoder).response
+        let json = try response.result.get()
+        if let result = json.data {
+            return (result, json.responseAt)
+        } else if let apiError = json.error {
+            throw DriveError(apiError: apiError)
+        } else {
+            throw DriveError.serverError(statusCode: response.response?.statusCode ?? -1)
+        }
     }
 }
 
@@ -73,6 +97,8 @@ public class DriveApiFetcher: ApiFetcher {
         super.init()
         authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
+
+    // MARK: - Old request helpers
 
     override public func handleResponse<Type>(response: DataResponse<Type, AFError>, completion: @escaping (Type?, Error?) -> Void) {
         super.handleResponse(response: response) { res, error in
@@ -107,6 +133,8 @@ public class DriveApiFetcher: ApiFetcher {
                 self.handleResponse(response: response, completion: completion)
             }
     }
+
+    // MARK: - API methods
 
     public func createDirectory(parentDirectory: File, name: String, onlyForMe: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
         let url = ApiRoutes.createDirectory(driveId: parentDirectory.driveId, parentId: parentDirectory.id)
@@ -640,13 +668,8 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
-    public func updateFolderColor(file: File, color: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.updateFolderColor(file: file)
-        let body: [String: Any] = [
-            "color": color
-        ]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func updateColor(directory: File, color: String) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.directoryColor(file: directory), method: .post, parameters: ["color": color])).0
     }
 }
 

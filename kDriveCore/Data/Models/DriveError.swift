@@ -105,7 +105,7 @@ public struct DriveError: Error, Equatable {
         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
             self = error
         } else {
-            self = .errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: httpStatus)])
+            self = .serverError(statusCode: httpStatus)
         }
     }
 
@@ -133,6 +133,10 @@ public struct DriveError: Error, Equatable {
         var error = error
         error.userInfo = info
         return error
+    }
+
+    static func serverError(statusCode: Int) -> DriveError {
+        return errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: statusCode)])
     }
 
     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {
