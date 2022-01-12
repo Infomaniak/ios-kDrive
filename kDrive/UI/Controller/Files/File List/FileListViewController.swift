@@ -96,7 +96,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     lazy var configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true)
 
     var currentDirectoryCount: FileCount?
-    var selectAllMode = false
     #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
@@ -144,9 +143,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         // Set up current directory
         if currentDirectory == nil {
             currentDirectory = driveFileManager?.getCachedRootFile()
-        }
-        if configuration.showUploadingFiles {
-            updateUploadCount()
         }
 
         // Set up multiple selection gesture
@@ -257,9 +253,30 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.collectionView.performBatchUpdates(nil)
             }
         }
-        
-        multipleSelectionViewModel.$isMultipleSelectionEnabled.receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
-            
+
+        multipleSelectionViewModel.$isMultipleSelectionEnabled.receiveOnMain(store: &bindStore) { [weak self] _ in
+            // TODO: take bool as argument
+            self?.toggleMultipleSelection()
+        }
+
+        multipleSelectionViewModel.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
+            self?.headerView?.selectView.updateTitle(selectedCount)
+        }
+
+        multipleSelectionViewModel.onItemSelected = { [weak self] itemIndex in
+            self?.collectionView.selectItem(at: IndexPath(item: itemIndex, section: 0), animated: true, scrollPosition: .init(rawValue: 0))
+        }
+
+        multipleSelectionViewModel.onSelectAll = { [weak self] in
+            for indexPath in self?.collectionView.indexPathsForVisibleItems ?? [] {
+                self?.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            }
+        }
+
+        multipleSelectionViewModel.onDeselectAll = { [weak self] in
+            for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
+                self?.collectionView.deselectItem(at: indexPath, animated: false)
+            }
         }
     }
 
@@ -277,7 +294,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-        (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
         #endif
 
         viewModel.onViewWillAppear()
@@ -298,15 +315,21 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             self.setSelectedCells()
         }
     }
-    
+
     @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
         guard !multipleSelectionViewModel.isMultipleSelectionEnabled else { return }
         let pos = sender.location(in: collectionView)
         if let indexPath = collectionView.indexPathForItem(at: pos) {
             multipleSelectionViewModel.isMultipleSelectionEnabled = true
-            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init(rawValue: 0))
-            selectChild(at: indexPath)
+            // Necessary for events to trigger in the right order
+            DispatchQueue.main.async { [weak self] in
+                self?.multipleSelectionViewModel.didSelectItem(at: indexPath.item)
+            }
         }
+    }
+
+    @objc override func cancelMultipleSelection() {
+        multipleSelectionViewModel.isMultipleSelectionEnabled = false
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
@@ -365,8 +388,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         observeNetwork()
     }
 
-    final func observeUploads() {
-    }
+    final func observeUploads() {}
 
     final func observeNetwork() {
         guard networkObserver == nil else { return }
@@ -380,8 +402,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    final func updateUploadCount() {
-    }
+    final func updateUploadCount() {}
 
     private func showEmptyView(_ isHidden: Bool) {
         let emptyView = EmptyTableView.instantiate(type: configuration.emptyViewType, button: false)
@@ -470,7 +491,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     override final func setSelectedCells() {
-        if selectAllMode {
+        if multipleSelectionViewModel.isSelectAllModeEnabled {
             selectedItems = Set(viewModel.getAllFiles())
             for i in 0 ..< viewModel.fileCount {
                 collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: [])
@@ -491,12 +512,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     override final func updateSelectedCount() {
-        if let count = currentDirectoryCount?.count,
-           selectAllMode {
-            headerView?.selectView.updateTitle(count)
-        } else {
-            headerView?.selectView.updateTitle(selectedItems.count)
-        }
         updateSelectAllButton()
     }
 
@@ -525,7 +540,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         let file = viewModel.getFile(at: indexPath.item)
         cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.fileCount - 1)
-        cell.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
+        cell.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: multipleSelectionViewModel.isMultipleSelectionEnabled)
         cell.delegate = self
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             cell.setEnabled(false)
@@ -540,7 +555,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if selectAllMode {
+        if multipleSelectionViewModel.isSelectAllModeEnabled {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }
     }
@@ -556,15 +571,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        guard selectionMode else {
+        guard multipleSelectionViewModel.isMultipleSelectionEnabled else {
             return
         }
-        if selectAllMode {
-            deselectAllChildren()
-            selectChild(at: indexPath)
-            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init(rawValue: 0))
+        if multipleSelectionViewModel.isSelectAllModeEnabled {
+            multipleSelectionViewModel.deselectAll()
+            multipleSelectionViewModel.didSelectItem(at: indexPath.item)
         } else {
-            deselectChild(at: indexPath)
+            multipleSelectionViewModel.didDeselectItem(at: indexPath.item)
         }
     }
 
@@ -650,25 +664,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Bulk actions
 
     @objc override func selectAllChildren() {
-        updateSelectionButtons(selectAll: true)
-        selectAllMode = true
-        navigationItem.rightBarButtonItem = loadingBarButtonItem
-        Task {
-            do {
-                let fileCount = try await driveFileManager.apiFetcher.count(of: currentDirectory)
-                currentDirectoryCount = fileCount
-                setSelectedCells()
-                updateSelectedCount()
-            } catch {
-                updateSelectionButtons()
-                selectAllMode = false
-                updateSelectAllButton()
-            }
-        }
+        multipleSelectionViewModel.selectAll()
     }
 
     @objc override func deselectAllChildren() {
-        selectAllMode = false
+        multipleSelectionViewModel.deselectAll()
+        multipleSelectionViewModel.isSelectAllModeEnabled = false
         if let indexPaths = collectionView.indexPathsForSelectedItems {
             for indexPath in indexPaths {
                 collectionView.deselectItem(at: indexPath, animated: true)
@@ -683,7 +684,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if !configuration.selectAllSupported {
             // Select all not supported, don't show button
             navigationItem.rightBarButtonItem = nil
-        } else if selectedItems.count == viewModel.fileCount || selectAllMode {
+        } else if selectedItems.count == viewModel.fileCount || multipleSelectionViewModel.isSelectAllModeEnabled {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonDeselectAll, style: .plain, target: self, action: #selector(deselectAllChildren))
         } else {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
@@ -828,7 +829,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             if selectedItems.count > Constants.bulkActionThreshold {
                 let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: currentDirectory, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getCachedRootFile()]) { [weak self] selectedFolder in
                     guard let self = self else { return }
-                    if self.currentDirectoryCount?.count != nil && self.selectAllMode {
+                    if self.currentDirectoryCount?.count != nil && self.multipleSelectionViewModel.isSelectAllModeEnabled {
                         self.bulkMoveAll(destinationId: selectedFolder.id)
                     } else {
                         self.bulkMoveFiles(Array(self.selectedItems), destinationId: selectedFolder.id)
@@ -845,7 +846,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 let message: NSMutableAttributedString
                 let alert: AlertTextViewController
                 if let count = currentDirectoryCount?.count,
-                   selectAllMode {
+                   multipleSelectionViewModel.isSelectAllModeEnabled {
                     message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescriptionPlural(count))
                     alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true) {
                         self.bulkDeleteAll()
