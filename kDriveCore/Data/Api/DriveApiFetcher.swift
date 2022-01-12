@@ -25,7 +25,7 @@ import Sentry
 import UIKit
 
 extension ApiFetcher {
-    convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
+    public convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
         self.init()
         setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
     }

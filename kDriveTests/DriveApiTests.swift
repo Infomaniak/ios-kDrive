@@ -55,6 +55,14 @@ final class DriveApiTests: XCTestCase {
         }
     }
 
+    func setUpTest(testName: String) async -> File {
+        await withCheckedContinuation { continuation in
+            setUpTest(testName: testName) { file in
+                continuation.resume(returning: file)
+            }
+        }
+    }
+
     func tearDownTest(directory: File) {
         currentApiFetcher.deleteFile(file: directory) { response, _ in
             XCTAssertNotNil(response, "Failed to delete directory")
@@ -1534,21 +1542,14 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: folder)
     }
 
-    func testFolderColor() {
-        let expectation = XCTestExpectation(description: "Change folder color")
-
-        var folder = File()
-
-        setUpTest(testName: "FolderColor") { file in
-            folder = file
-
-            self.currentApiFetcher.updateFolderColor(file: folder, color: "#E91E63") { _, error in
-                XCTAssertNil(error, "There should be no error on changing folder color")
-                expectation.fulfill()
-            }
+    func testDirectoryColor() async {
+        let directory = await setUpTest(testName: "DirectoryColor")
+        do {
+            let result = try await currentApiFetcher.updateColor(directory: directory, color: "#E91E63")
+            XCTAssertEqual(result, true, "API should return true")
+        } catch {
+            XCTFail("There should be no error on changing directory color")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: folder)
+        tearDownTest(directory: directory)
     }
 }
