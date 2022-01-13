@@ -94,6 +94,11 @@ class AppUITest: XCTestCase {
         app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
     }
 
+    func openFileMenu(named name: String) {
+        let file = collectionViewsQuery.cells.containing(.staticText, identifier: name)
+        file.buttons["Menu"].tap()
+    }
+
     // MARK: - Tests methods
 
     func testRenameFile() {
@@ -103,8 +108,7 @@ class AppUITest: XCTestCase {
         tabBar.buttons["Fichiers"].tap()
 
         // Open sheet with file details
-        let rootFile = collectionViewsQuery.cells.containing(.staticText, identifier: root)
-        rootFile.buttons["Menu"].tap()
+        openFileMenu(named: root)
         app.swipeUp()
 
         // Rename file
@@ -127,70 +131,52 @@ class AppUITest: XCTestCase {
         tearDownTest(directoryName: newName)
     }
 
-//    func testShareFile() {
-//        let testName = "UITest shareFile"
-//        let expectations = [
-//            (name: "Share page shown", expectation: expectation(description: "Share page shown")),
-//            (name: "User added", expectation: expectation(description: "User added")),
-//            (name: "User deleted", expectation: expectation(description: "User deleted"))
-//        ]
-//        var rootFile = File()
-//        let tabBar = app.tabBars
-//        let tablesQuery = app.tables
-//        let collectionViewsQuery = app.collectionViews
-//
-//        setUpTest(testName: testName) { root in
-//            rootFile = root
-//
-//            // Go to ShareAndRights
-//            tabBar.buttons["Fichiers"].tap()
-//
-//            var element = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-//            XCTAssertTrue(element.buttons["Menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
-//            element.buttons["Menu"].tap()
-//            tablesQuery.buttons["Partage et droits"].tap()
-//
-//            XCTAssertTrue(self.app.navigationBars["Partage et droits du dossier \(testName)"].exists, "Should exist")
-//            expectations[0].expectation.fulfill()
-//
-//            let oldValue = self.app.tables.cells.count
-//
-//            // Add User
-//            tablesQuery.textFields["Invitez un utilisateur ou une adresse mail…"].tap()
-//            self.app.otherElements["drop_down"].tables.staticTexts["Kilian Périsset"].tap()
-//
-//            tablesQuery.buttons["Partager"].tap()
-//
-//            let newValue = self.app.tables.cells.count
-//            XCTAssertTrue(newValue > oldValue, "There should be one more cell")
-//            expectations[1].expectation.fulfill()
-//
-//            // Remove User
-//            let removeUser = tablesQuery.cells.containing(.staticText, identifier: "Kilian Périsset").element
-//            XCTAssertTrue(removeUser.waitForExistence(timeout: 10), "Added user should be visible in list")
-//            removeUser.tap()
-//
-//            tablesQuery.staticTexts["Supprimer"].tap()
-//            self.app.buttons["Supprimer"].tap()
-//            self.app.buttons["Fermer"].tap()
-//
-//            element = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-//            element.buttons["Menu"].tap()
-//            tablesQuery.buttons["Partage et droits"].tap()
-//
-//            XCTAssertTrue(self.app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should exist")
-//
-//            let afterDeleteValue = self.app.tables.cells.count
-//            XCTAssertTrue(afterDeleteValue == oldValue, "After deletion number of cell should be equal to old value")
-//            expectations[2].expectation.fulfill()
-//
-//            self.app.buttons["Fermer"].tap()
-//        }
-//
-//        wait(for: expectations.map(\.expectation), timeout: AppUITest.defaultTimeout)
-//        tearDownTest(directory: rootFile)
-//    }
-//
+    func testShareFile() {
+        let testName = "UITest - Share file"
+
+        let root = setUpTest(testName: testName)
+        tabBar.buttons["Fichiers"].tap()
+
+        openFileMenu(named: root)
+        collectionViewsQuery.cells.staticTexts["Partage et droits"].tap()
+        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(root)"].exists, "Share view should be displayed")
+
+        // Check number of cells
+        let cellsNumberBeforeSharing = tablesQuery.cells.count
+
+        // Share file by email
+        let emailTextField = tablesQuery/*@START_MENU_TOKEN@*/.textFields["Invitez un utilisateur ou une adresse mail…"]/*[[".cells.textFields[\"Invitez un utilisateur ou une adresse mail…\"]",".textFields[\"Invitez un utilisateur ou une adresse mail…\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        emailTextField.tap()
+        let userMail = "kdriveiostests+uitest@ik.me"
+        emailTextField.typeText(userMail)
+        XCTAssertTrue(app.otherElements["drop_down"].staticTexts[userMail].exists, "Dropdown with mail should be present")
+        app.otherElements.staticTexts[userMail].tap()
+        tablesQuery.buttons["Partager"].tap()
+
+        // Check number of cells
+        let cellsNumberAfterSharing = tablesQuery.cells.count
+        XCTAssertTrue(cellsNumberAfterSharing > cellsNumberBeforeSharing, "Number of cells should be greater after sharing")
+
+        // Remove user
+        XCTAssertTrue(tablesQuery.staticTexts["Peut consulter"].waitForExistence(timeout: 4), "Sharing choices should be displayed")
+        tablesQuery.staticTexts["Peut consulter"].tap()
+        app.staticTexts["Supprimer"].tap()
+        app.buttons["Supprimer"].tap()
+        sleep(2)
+        app.buttons["Fermer"].tap()
+
+        let fileCell = collectionViewsQuery.cells.containing(.staticText, identifier: root)
+        fileCell.element.swipeLeft()
+        collectionViewsQuery.buttons["Partage et droits"].tap()
+
+        // Check number of cells
+        let cellsNumberAfterRemoving = tablesQuery.cells.count
+        XCTAssertTrue(cellsNumberBeforeSharing == cellsNumberAfterRemoving, "Number of cells should be equals after remo")
+        app.buttons["Fermer"].tap()
+
+        tearDownTest(directoryName: root)
+    }
+
 //    func testComments() {
 //        let testName = "UITest Comment"
 //        let expectations = [
