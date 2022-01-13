@@ -64,7 +64,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     weak var floatingPanelController: FloatingPanelController?
     var width = 0.0
 
-    var bulkActionFinished: ((Bool) -> Void)?
+    var actionHandler: ((Bool) -> Void)?
 
     // MARK: - Public methods
 
@@ -192,7 +192,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         }
 
         group.notify(queue: .main) {
-            self.bulkActionFinished?(success)
+            self.actionHandler?(success)
         }
     }
 }

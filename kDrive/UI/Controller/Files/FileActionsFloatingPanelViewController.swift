@@ -417,6 +417,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
                 floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
                 colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
+                colorSelectionFloatingPanelViewController.actionHandler = { isSuccess in
+                    if isSuccess {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(1))
+                    }
+                }
                 dismiss(animated: true) {
                     self.presentingParent?.present(floatingPanelViewController, animated: true)
                 }
