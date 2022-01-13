@@ -177,63 +177,58 @@ class AppUITest: XCTestCase {
         tearDownTest(directoryName: root)
     }
 
-//    func testComments() {
-//        let testName = "UITest Comment"
-//        let expectations = [
-//            (name: "Grid mode", expectation: expectation(description: "Grid mode")),
-//            (name: "No comment", expectation: expectation(description: "No comment")),
-//            (name: "Comment added", expectation: expectation(description: "Comment added"))
-//        ]
-//        var rootFile = File()
-//        let tablesQuery = app.tables
-//        let collectionViewsQuery = app.collectionViews
-//        let tabBar = app.tabBars
-//
-//        setUpTest(testName: testName) { root in
-//            rootFile = root
-//
-//            // Find created file
-//            tabBar.buttons["Fichiers"].tap()
-//            let rootCell = collectionViewsQuery.cells.containing(.staticText, identifier: rootFile.name).element
-//            rootCell.tap()
-//
-//            tabBar.buttons["Ajouter"].tap()
-//            tablesQuery.cells.containing(.staticText, identifier: "Importer une photo ou une vidéo").element.tap()
-//
-//            self.app.scrollViews.otherElements.images["Photo, 09 octobre 2009, 11:09 PM"].tap() // "Photo"
-//            self.app.buttons["Add"].tap()
-//
-//            let imageCell = collectionViewsQuery.cells.firstMatch
-//            XCTAssertTrue(imageCell.waitForExistence(timeout: 10), "Wait for image importation")
-//
-//            // Go to comment
-//            XCTAssertTrue(imageCell.buttons["Menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
-//            expectations[0].expectation.fulfill()
-//            imageCell.buttons["Menu"].tap()
-//            tablesQuery.buttons["Informations"].tap()
-//            tablesQuery.buttons["Commentaires"].tap()
-//
-//            XCTAssertTrue(tablesQuery.staticTexts["Aucun commentaire pour le moment"].exists, "There shouldn't be any comment.")
-//            expectations[1].expectation.fulfill()
-//
-//            // Add comment
-//            self.app.buttons["Ajouter un commentaire"].tap()
-//            let comment = self.app.textFields["Votre commentaire"]
-//            comment.tap()
-//            comment.typeText("UITest comment")
-//            self.app.buttons["Envoyer"].tap()
-//
-//            XCTAssertTrue(tablesQuery.staticTexts["UITest comment"].waitForExistence(timeout: 5), "Comment should exist")
-//            expectations[2].expectation.fulfill()
-//
-//            self.app.navigationBars["kDrive.FileDetailView"].buttons["Drive de test dev infomaniak"].tap()
-//        }
-//
-//        wait(for: expectations.map(\.expectation), timeout: AppUITest.defaultTimeout)
-//        tearDownTest(directory: rootFile)
-//    }
-//
-//
+    func testComments() {
+        let testName = "UITest - Comment"
+
+        let root = setUpTest(testName: testName)
+        tabBar.buttons["Fichiers"].tap()
+
+        // Enter in folder
+        let rootCell = collectionViewsQuery.cells.containing(.staticText, identifier: root).element
+        rootCell.tap()
+
+        // Import photo from photo library
+        tabBar.buttons["Ajouter"].tap()
+        tablesQuery.staticTexts["Importer une photo ou une vidéo"].tap()
+        let imageToImport = app.scrollViews.images.element(boundBy: 0)
+        XCTAssertTrue(imageToImport.waitForExistence(timeout: 4), "Images should be displayed")
+        imageToImport.tap()
+        app.navigationBars["Photos"].buttons["Add"].tap()
+
+        // Open Information sheet about imported photo
+        let imageCell = collectionViewsQuery.cells.firstMatch
+        XCTAssertTrue(imageCell.waitForExistence(timeout: 10), "Image should be imported")
+        imageCell.buttons["Menu"].tap()
+        collectionViewsQuery.cells.staticTexts["Informations"].tap()
+
+        // Add new comment
+        tablesQuery.buttons["Commentaires"].tap()
+        app.buttons["Ajouter un commentaire"].tap()
+        let comment = "UITest comment"
+        app.typeText(comment)
+        app.buttons["Envoyer"].tap()
+
+        XCTAssertTrue(tablesQuery.staticTexts[comment].waitForExistence(timeout: 5), "Comment should exist")
+
+        // Update comment
+        tablesQuery.cells.containing(.staticText, identifier: "John Appleseed").element.swipeLeft()
+        tablesQuery.buttons["Éditer"].tap()
+        app.typeText("-Update")
+        app.buttons["Enregistrer"].tap()
+
+        XCTAssertTrue(tablesQuery.staticTexts["\(comment)-Update"].waitForExistence(timeout: 5), "New comment should exist")
+
+        // Back to drive's root
+        tablesQuery.buttons["Informations"].tap()
+        app.swipeUp()
+        tablesQuery.buttons["Emplacement"].tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        tearDownTest(directoryName: root)
+    }
+
 //    func testCreateSharedFolder() {
 //        let testName = "UITest CreateShareFolder"
 //
