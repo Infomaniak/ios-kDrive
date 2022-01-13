@@ -135,6 +135,22 @@ public class UploadFile: Object {
         }
     }
 
+    public var queryItems: [URLQueryItem] {
+        var queryItems = [
+            URLQueryItem(name: "conflict", value: conflictOption.rawValue),
+            URLQueryItem(name: "file_name", value: name),
+            URLQueryItem(name: "relative_path", value: relativePath),
+            URLQueryItem(name: "total_size", value: "\(size)")
+        ]
+        if let creationDate = creationDate {
+            queryItems.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))
+        }
+        if let modificationDate = modificationDate {
+            queryItems.append(URLQueryItem(name: "last_modified_at", value: "\(Int(modificationDate.timeIntervalSince1970))"))
+        }
+        return queryItems
+    }
+
     public init(id: String = UUID().uuidString, parentDirectoryId: Int, userId: Int, driveId: Int, url: URL, name: String? = nil, conflictOption: ConflictOption = .rename, shouldRemoveAfterUpload: Bool = true, priority: Operation.QueuePriority = .normal) {
         self.parentDirectoryId = parentDirectoryId
         self.userId = userId

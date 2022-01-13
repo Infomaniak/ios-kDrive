@@ -76,9 +76,7 @@ struct Endpoint {
         var sortQueryItems = [
             URLQueryItem(name: "order_by", value: sortTypes.map(\.value.apiValue).joined(separator: ","))
         ]
-        for sortType in sortTypes {
-            sortQueryItems.append(URLQueryItem(name: "order_for[\(sortType.value.apiValue)]", value: sortType.value.order))
-        }
+        sortQueryItems.append(contentsOf: sortTypes.map { URLQueryItem(name: "order_for[\($0.value.apiValue)]", value: $0.value.order) })
 
         return Endpoint(path: path, queryItems: (queryItems ?? []) + sortQueryItems, apiEnvironment: apiEnvironment)
     }
@@ -120,6 +118,8 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 extension Endpoint {
+    private static let withQueryItem = URLQueryItem(name: "with", value: "parents,capabilities,dropbox,is_favorite,mobile,sharelink,categories")
+
     private static var base: Endpoint {
         return Endpoint(path: "/2/drive", apiEnvironment: .prod)
     }
@@ -133,15 +133,29 @@ extension Endpoint {
     // MARK: Activities
 
     static func fileActivities(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/activities")
+        return .driveInfo(drive: drive).appending(path: "/files/activities", queryItems: [
+            URLQueryItem(name: "with", value: "file"),
+            URLQueryItem(name: "depth", value: "unlimited"),
+            URLQueryItem(name: "actions[]", value: "file_create"),
+            URLQueryItem(name: "actions[]", value: "file_update"),
+            URLQueryItem(name: "actions[]", value: "comment_create"),
+            URLQueryItem(name: "actions[]", value: "file_restore"),
+            URLQueryItem(name: "actions[]", value: "file_trash")
+        ])
     }
 
     static func notifications(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/notifications")
     }
 
-    static func fileActivities(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/activities")
+    static func fileActivities(file: AbstractFile, from date: Int) -> Endpoint {
+        var queryItems = [
+            URLQueryItem(name: "with", value: "file"),
+            URLQueryItem(name: "depth", value: "children"),
+            URLQueryItem(name: "from_date", value: "\(date)")
+        ]
+        queryItems.append(contentsOf: FileActivityType.fileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
+        return .fileInfo(file).appending(path: "/activities", queryItems: queryItems)
     }
 
     static func trashedFileActivities(file: AbstractFile) -> Endpoint {
@@ -207,7 +221,7 @@ extension Endpoint {
     // MARK: Favorite
 
     static func favorites(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/favorites")
+        return .driveInfo(drive: drive).appending(path: "/files/favorites", queryItems: [withQueryItem])
     }
 
     static func favorite(file: AbstractFile) -> Endpoint {
@@ -221,7 +235,9 @@ extension Endpoint {
     }
 
     static func access(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/access")
+        return .fileInfo(file).appending(path: "/access", queryItems: [
+            URLQueryItem(name: "with", value: "invitations,sharelink,teams")
+        ])
     }
 
     static func checkAccess(file: AbstractFile) -> Endpoint {
@@ -266,7 +282,7 @@ extension Endpoint {
         return .permissions(file: file).appending(path: "/user")
     }
 
-    static func teajPermission(file: AbstractFile) -> Endpoint {
+    static func teamPermission(file: AbstractFile) -> Endpoint {
         return .permissions(file: file).appending(path: "/team")
     }
 
@@ -299,19 +315,19 @@ extension Endpoint {
     // MARK: File/directory
 
     static func fileInfo(_ file: AbstractFile) -> Endpoint {
-        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)")
+        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)", queryItems: [withQueryItem])
     }
 
     static func files(of directory: AbstractFile) -> Endpoint {
-        return .fileInfo(directory).appending(path: "/files")
+        return .fileInfo(directory).appending(path: "/files", queryItems: [withQueryItem])
     }
 
     static func createDirectory(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/directory")
+        return .fileInfo(file).appending(path: "/directory", queryItems: [withQueryItem])
     }
 
     static func createFile(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/file")
+        return .fileInfo(file).appending(path: "/file", queryItems: [withQueryItem])
     }
 
     static func thumbnail(file: AbstractFile) -> Endpoint {
@@ -322,8 +338,14 @@ extension Endpoint {
         return .fileInfo(file).appending(path: "/preview")
     }
 
-    static func download(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/download")
+    static func download(file: AbstractFile, as asType: String? = nil) -> Endpoint {
+        let queryItems: [URLQueryItem]?
+        if let asType = asType {
+            queryItems = [URLQueryItem(name: "as", value: asType)]
+        } else {
+            queryItems = nil
+        }
+        return .fileInfo(file).appending(path: "/download", queryItems: queryItems)
     }
 
     static func convert(file: AbstractFile) -> Endpoint {
@@ -335,7 +357,7 @@ extension Endpoint {
     }
 
     static func duplicate(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/copy")
+        return .fileInfo(file).appending(path: "/copy", queryItems: [withQueryItem])
     }
 
     static func copy(file: AbstractFile, destinationId: Int) -> Endpoint {
@@ -389,7 +411,7 @@ extension Endpoint {
     }
 
     static func lastModifiedFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/last_modified")
+        return .driveInfo(drive: drive).appending(path: "/files/last_modified", queryItems: [withQueryItem])
     }
 
     static func largestFiles(drive: AbstractDrive) -> Endpoint {
@@ -405,7 +427,7 @@ extension Endpoint {
     }
 
     static func createTeamDirectory(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/team_directory")
+        return .driveInfo(drive: drive).appending(path: "/files/team_directory", queryItems: [withQueryItem])
     }
 
     static func existFiles(drive: AbstractDrive) -> Endpoint {
@@ -417,7 +439,7 @@ extension Endpoint {
     }
 
     static func mySharedFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/my_shared")
+        return .driveInfo(drive: drive).appending(path: "/files/my_shared", queryItems: [withQueryItem])
     }
 
     static func countInRoot(drive: AbstractDrive) -> Endpoint {
@@ -428,7 +450,7 @@ extension Endpoint {
 
     static func search(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool) -> Endpoint {
         // Query items
-        var queryItems = [URLQueryItem]()
+        var queryItems = [withQueryItem]
         if let query = query, !query.isBlank {
             queryItems.append(URLQueryItem(name: "query", value: query))
         }
@@ -496,8 +518,9 @@ extension Endpoint {
         return .fileInfo(file).appending(path: "/upload")
     }
 
-    static func directUpload(file: AbstractFile) -> Endpoint {
-        return .upload(file: file).appending(path: "/direct")
+    static func directUpload(file: UploadFile) -> Endpoint {
+        let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
+        return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
     }
 
     static func uploadStatus(file: AbstractFile, token: String) -> Endpoint {
