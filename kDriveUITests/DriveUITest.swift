@@ -88,8 +88,6 @@ class AppUITest: XCTestCase {
     }
 
     func removeDirectory(name: String) {
-        tabBar.buttons["Fichiers"].tap()
-
         let folder = collectionViewsQuery.cells.containing(.staticText, identifier: name).element
         folder.press(forDuration: 1)
         collectionViewsQuery.buttons["Supprimer"].tap()
@@ -99,7 +97,7 @@ class AppUITest: XCTestCase {
     // MARK: - Tests methods
 
     func testRenameFile() {
-        let testName = "Rename file"
+        let testName = "UITest - Rename file"
 
         let root = setUpTest(testName: testName)
         tabBar.buttons["Fichiers"].tap()
@@ -110,14 +108,23 @@ class AppUITest: XCTestCase {
         app.swipeUp()
 
         // Rename file
-        sleep(1)
+        sleep(2)
         collectionViewsQuery.staticTexts["Renommer"].tap()
-        app.textFields["Nom du dossier"].tap()
+        let fileNameTextField = app.textFields["Nom du dossier"]
+        fileNameTextField .tap()
+        fileNameTextField.typeText("_update")
+        let newName = "\(root)_update"
         app.buttons["Enregistrer"].tap()
-        app.swipeDown()
-        app.navigationBars["John Appleseed"].doubleTap()
+        sleep(1)
 
-        tearDownTest(directoryName: root)
+        // Check new name
+        collectionViewsQuery.cells.staticTexts["Informations"].tap()
+        XCTAssertTrue(app.staticTexts[newName].exists, "File must be renamed")
+
+        // Return to files list
+        tablesQuery.buttons["Emplacement"].tap()
+
+        tearDownTest(directoryName: newName)
     }
 
 //    func testShareFile() {
