@@ -1410,15 +1410,12 @@ public class DriveFileManager {
         }
     }
 
-    public func updateFolderColor(file: File, color: String, completion: @escaping (Error?) -> Void) {
-        apiFetcher.updateFolderColor(file: file, color: color) { [fileId = file.id] _, error in
-            if let error = error {
-                completion(error)
-            } else {
-                self.updateFileProperty(fileId: fileId) { file in
-                    file.color = color
-                }
-                completion(nil)
+    public func updateColor(directory: File, color: String) async throws {
+        let fileId = directory.id
+        let result = try await apiFetcher.updateColor(directory: directory, color: color)
+        if result {
+            updateFileProperty(fileId: fileId) { file in
+                file.color = color
             }
         }
     }

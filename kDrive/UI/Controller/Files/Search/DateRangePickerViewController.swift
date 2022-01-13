@@ -235,16 +235,16 @@ class DateRangePickerViewController: UIViewController {
             visibleDateRange: visibleDateRange,
             monthsLayout: .vertical(options: VerticalMonthsLayoutOptions(alwaysShowCompleteBoundaryMonths: false))
         )
-        .withInterMonthSpacing(24)
-        .withVerticalDayMargin(8)
-        .withHorizontalDayMargin(8)
-        .withDayItemModelProvider { [unowned self] day in
+        .interMonthSpacing(24)
+        .verticalDayMargin(8)
+        .horizontalDayMargin(8)
+        .dayItemProvider { [unowned self] day in
             self.configureDay(day)
         }
-        .withMonthHeaderItemModelProvider { [unowned self] month in
+        .monthHeaderItemProvider { [unowned self] month in
             self.configureMonthHeader(month)
         }
-        .withDayRangeItemModelProvider(for: dateRanges) { [unowned self] dayRangeLayoutContext in
+        .dayRangeItemProvider(for: dateRanges) { [unowned self] dayRangeLayoutContext in
             self.configureDayRange(dayRangeLayoutContext)
         }
     }

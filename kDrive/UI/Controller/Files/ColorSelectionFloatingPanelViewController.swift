@@ -91,7 +91,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         width = view.frame.width
         setUpHeight()
     }
-    
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         width = size.width
@@ -177,11 +177,12 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let color = folderColors[indexPath.row]
-        driveFileManager.updateFolderColor(file: file, color: color.hex) { error in
-            if let error = error {
-                UIConstants.showSnackBar(message: error.localizedDescription)
-            } else {
+        Task {
+            do {
+                try await driveFileManager.updateColor(directory: file, color: color.hex)
                 self.dismiss(animated: true)
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
         }
     }
