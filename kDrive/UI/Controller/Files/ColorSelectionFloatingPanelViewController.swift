@@ -60,15 +60,17 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     var driveFileManager: DriveFileManager!
-    var file: File!
+    var files = [File]()
     weak var floatingPanelController: FloatingPanelController?
     var width = 0.0
 
+    var bulkActionFinished: ((Bool) -> Void)?
+
     // MARK: - Public methods
 
-    init(file: File, driveFileManager: DriveFileManager) {
+    init(files: [File], driveFileManager: DriveFileManager) {
         super.init(collectionViewLayout: ColorSelectionFloatingPanelViewController.createLayout())
-        self.file = file
+        self.files = files
         self.driveFileManager = driveFileManager
     }
 
@@ -136,7 +138,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     func setSelectedColor() {
-        let selectedColorIndex = folderColors.firstIndex { $0.hex == file.color } ?? 0
+        let selectedColorIndex = folderColors.firstIndex { $0.hex == files.first?.color } ?? 0
         collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
     }
 
@@ -176,6 +178,9 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        var success = true
+        let group = DispatchGroup()
+
         let color = folderColors[indexPath.row]
         Task {
             do {
@@ -184,6 +189,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
             }
+        }
+
+        group.notify(queue: .main) {
+            self.bulkActionFinished?(success)
         }
     }
 }

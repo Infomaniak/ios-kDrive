@@ -102,6 +102,33 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                     group.leave()
                 }
             }
+        case .folderColor:
+            group.enter()
+            if driveFileManager.drive.pack == .free {
+                let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
+                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
+                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
+                floatingPanelViewController?.actionHandler = { _ in
+                    driveFloatingPanelController.dismiss(animated: true) {
+                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    }
+                }
+                present(driveFloatingPanelController, animated: true)
+            } else {
+                let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(files: files, driveFileManager: driveFileManager)
+                let floatingPanelViewController = DriveFloatingPanelController()
+                floatingPanelViewController.isRemovalInteractionEnabled = true
+                floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
+                floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
+                colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
+                colorSelectionFloatingPanelViewController.bulkActionFinished = { isSuccess in
+                    success = isSuccess
+                    group.leave()
+                }
+                dismiss(animated: true) {
+                    self.presentingParent?.present(floatingPanelViewController, animated: true)
+                }
+            }
         case .download:
             if files.count > Constants.bulkActionThreshold || !files.allSatisfy({ !$0.isDirectory }) {
                 if downloadInProgress,
