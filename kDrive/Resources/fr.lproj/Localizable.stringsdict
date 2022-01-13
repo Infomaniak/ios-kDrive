@@ -178,6 +178,22 @@
 			<string>%d fichiers disponibles hors ligne</string>
 		</dict>
 	</dict>
+	<key>fileListColorFolderConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un dossier coloré avec succès</string>
+			<key>other</key>
+			<string>%d dossiers colorés avec succès</string>
+		</dict>
+	</dict>
 	<key>fileListDuplicationConfirmationSnackbar</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

@@ -209,6 +209,8 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.count))
                 } else if action == .favorite && addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
+                } else if action == .folderColor {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.count))
                 } else if action == .duplicate && addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
                 }

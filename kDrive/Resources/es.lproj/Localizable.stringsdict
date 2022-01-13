@@ -178,6 +178,22 @@
 			<string>%d archivos disponibles sin conexión</string>
 		</dict>
 	</dict>
+	<key>fileListColorFolderConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Una carpeta coloreada con éxito</string>
+			<key>other</key>
+			<string>%d carpetas coloreadas con éxito</string>
+		</dict>
+	</dict>
 	<key>fileListDuplicationConfirmationSnackbar</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

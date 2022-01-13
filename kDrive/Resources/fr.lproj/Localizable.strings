@@ -5,7 +5,7 @@
  * Locale: fr, French
  * Tagged: ios
  * Exported by: elena willen
- * Exported at: Tue, 14 Dec 2021 13:35:44 +0100
+ * Exported at: Wed, 12 Jan 2022 16:31:19 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -884,6 +884,12 @@
 /* loco:618b844d3d601243cd6c52d2 */
 "fileDetailsActivityFileCategorize" = "a ajouté une catégorie à l’élément";
 
+/* loco:61dda9c2a380eb74010679e2 */
+"fileDetailsActivityFileColorDelete" = "a supprimé la couleur d’un dossier";
+
+/* loco:61dda9850be38655ce4d86d2 */
+"fileDetailsActivityFileColorUpdate" = "a modifié la couleur d’un dossier";
+
 /* loco:6049df4d5c2c3a04bc3979ad */
 "fileDetailsActivityFileCommentCreate" = "a commenté le fichier";
 
@@ -1058,6 +1064,12 @@
 /* loco:6049df4d5c2c3a04bc397aa1 */
 "fileListAddOfflineConfirmationSnackbar-plural" = "%d fichiers disponibles hors ligne";
 
+/* loco:61d70432a51b8045fd7fbd62 */
+"fileListColorFolderConfirmationSnackbar" = "Un dossier coloré avec succès";
+
+/* loco:61d704938b53ce4fd005f3d3 */
+"fileListColorFolderConfirmationSnackbar-plural" = "%d dossiers colorés avec succès";
+
 /* loco:614b15f40740a72bd13f4ff5 */
 "fileListCopyDoneSnackbar" = "Copies terminées avec succès";
 
@@ -1137,7 +1149,7 @@
 "fileShareFolderTitle" = "Partager le dossier";
 
 /* loco:6049df4d5c2c3a04bc3979eb */
-"fileShareLinkSettingsAccessRightTitle" = "Droits d‘édition";
+"fileShareLinkSettingsAccessRightTitle" = "Droits d’édition";
 
 /* loco:6049df4d5c2c3a04bc3979ec */
 "fileShareLinkSettingsTitle" = "Paramètres avancés du lien de partage";
@@ -1203,7 +1215,7 @@
 "inputExpirationDate" = "Date d’expiration";
 
 /* loco:617b99510ec1ee7d7e2accd2 */
-"inputExpirationTime" = "Heure d‘expiration";
+"inputExpirationTime" = "Heure d’expiration";
 
 /* loco:604a24e398f36a2fa97de36a */
 "ios12LimitationPhotoSyncDescription" = "La sauvegarde initiale de vos photos ne peut se faire correctement que lorsque l'application est en premier plan. La sauvegarde des futures photos sera faite en arrière-plan.";
@@ -1666,10 +1678,10 @@
 "snackBarCategoryDeleted" = "Catégorie supprimée avec succès";
 
 /* loco:619f6999f44e9d3a394a6d62 */
-"snackBarUploadError" = "Un fichier n‘a pas pu être importé";
+"snackBarUploadError" = "Un fichier n’a pas pu être importé";
 
 /* loco:619f6d4fa8936206e56afe32 */
-"snackBarUploadError-plural" = "%d fichiers n‘ont pas pu être importés";
+"snackBarUploadError-plural" = "%d fichiers n’ont pas pu être importés";
 
 /* loco:6049df4d5c2c3a04bc397a9c */
 "snackbarDeleteConfirmation" = "%@ supprimé définitivement";
@@ -1861,7 +1873,7 @@
 "syncSettingsSaveDateFromDateValue" = "à partir de la date";
 
 /* loco:61b87cfc3e2af8325337e394 */
-"syncSettingsSaveDateFromDateValue2" = "À partir d'une date";
+"syncSettingsSaveDateFromDateValue2" = "À partir d’une date";
 
 /* loco:6049df4d5c2c3a04bc397a6e */
 "syncSettingsSaveDateNowValue" = "à partir de maintenant";
