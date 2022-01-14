@@ -26,6 +26,7 @@ enum MultipleSelectionBarButtonType {
     case cancel
 }
 
+@MainActor
 class MultipleSelectionFileListViewModel {
     /// itemIndex
     typealias ItemSelectedCallback = (Int) -> Void
@@ -86,13 +87,17 @@ class MultipleSelectionFileListViewModel {
     func selectAll() {
         selectedIndexes.removeAll()
         isSelectAllModeEnabled = true
-        onSelectAll?()
         rightBarButtons = [.loading]
+        onSelectAll?()
         let frozenDirectory = currentDirectory.freeze()
         Task {
-            let directoryCount = try await driveFileManager.apiFetcher.directoryCount(for: frozenDirectory)
-            selectedCount = directoryCount.count
-            rightBarButtons = [.deselectAll]
+            do {
+                let directoryCount = try await driveFileManager.apiFetcher.directoryCount(for: frozenDirectory)
+                selectedCount = directoryCount.count
+                rightBarButtons = [.deselectAll]
+            } catch {
+                deselectAll()
+            }
         }
     }
 
