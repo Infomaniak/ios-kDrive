@@ -280,9 +280,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             self?.toggleMultipleSelection()
         }
 
-        multipleSelectionViewModel.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
+        multipleSelectionViewModel.$selectedCount.sink { [weak self] selectedCount in
             self?.headerView?.selectView.updateTitle(selectedCount)
-        }
+        }.store(in: &bindStore)
 
         multipleSelectionViewModel.onItemSelected = { [weak self] itemIndex in
             self?.collectionView.selectItem(at: IndexPath(item: itemIndex, section: 0), animated: true, scrollPosition: .init(rawValue: 0))
@@ -300,23 +300,23 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         }
 
-        multipleSelectionViewModel.$leftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
+        multipleSelectionViewModel.$leftBarButtons.sink { [weak self] leftBarButtons in
             guard let self = self else { return }
             if let leftBarButtons = leftBarButtons {
                 self.navigationItem.leftBarButtonItems = leftBarButtons.map { MultipleSelectionBarButton(type: $0, target: self, action: #selector(self.multipleSelectionBarButtonPressed(_:))) }
             } else {
                 self.navigationItem.leftBarButtonItems = self.leftBarButtonItems
             }
-        }
+        }.store(in: &bindStore)
 
-        multipleSelectionViewModel.$rightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
+        multipleSelectionViewModel.$rightBarButtons.sink { [weak self] rightBarButtons in
             guard let self = self else { return }
             if let rightBarButtons = rightBarButtons {
                 self.navigationItem.rightBarButtonItems = rightBarButtons.map { MultipleSelectionBarButton(type: $0, target: self, action: #selector(self.multipleSelectionBarButtonPressed(_:))) }
             } else {
                 self.navigationItem.rightBarButtonItems = self.rightBarButtonItems
             }
-        }
+        }.store(in: &bindStore)
     }
 
     deinit {
