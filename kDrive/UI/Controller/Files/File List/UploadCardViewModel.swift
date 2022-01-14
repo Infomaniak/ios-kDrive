@@ -26,7 +26,7 @@ class UploadCardViewModel {
     private var realmObservationToken: NotificationToken?
 
     init(uploadDirectory: File?, driveFileManager: DriveFileManager) {
-        let uploadDirectory = uploadDirectory ??  driveFileManager.getRootFile()
+        let uploadDirectory = uploadDirectory ?? driveFileManager.getRootFile()
         let driveId = driveFileManager.drive.id
         uploadCount = UploadQueue.instance.getUploadingFiles(withParent: uploadDirectory.id, driveId: driveId).count
         realmObservationToken = UploadQueue.instance.getUploadingFiles(withParent: uploadDirectory.id, driveId: driveId).observe(on: .main) { [weak self] change in
