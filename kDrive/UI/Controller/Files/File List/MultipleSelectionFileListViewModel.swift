@@ -19,20 +19,37 @@
 import Foundation
 import kDriveCore
 
+enum MultipleSelectionBarButtonType {
+    case selectAll
+    case deselectAll
+    case loading
+    case cancel
+}
+
 class MultipleSelectionFileListViewModel {
     /// itemIndex
     typealias ItemSelectedCallback = (Int) -> Void
 
     @Published var isMultipleSelectionEnabled: Bool {
         didSet {
-            if !isMultipleSelectionEnabled {
+            if isMultipleSelectionEnabled {
+                leftBarButtons = [.cancel]
+                if configuration.selectAllSupported {
+                    rightBarButtons = [.selectAll]
+                }
+            } else {
+                leftBarButtons = nil
+                rightBarButtons = nil
                 selectedIndexes.removeAll()
                 selectedCount = 0
+                isSelectAllModeEnabled = false
             }
         }
     }
 
     @Published var selectedCount: Int
+    @Published var leftBarButtons: [MultipleSelectionBarButtonType]?
+    @Published var rightBarButtons: [MultipleSelectionBarButtonType]?
 
     var onItemSelected: ItemSelectedCallback?
     var onSelectAll: (() -> Void)?
@@ -43,30 +60,47 @@ class MultipleSelectionFileListViewModel {
 
     private var driveFileManager: DriveFileManager
     private var currentDirectory: File
+    private var configuration: FileListViewController.Configuration
 
     init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         isMultipleSelectionEnabled = false
         selectedCount = 0
         self.driveFileManager = driveFileManager
         self.currentDirectory = currentDirectory
+        self.configuration = configuration
+    }
+
+    func barButtonPressed(type: MultipleSelectionBarButtonType) {
+        switch type {
+        case .selectAll:
+            selectAll()
+        case .deselectAll:
+            deselectAll()
+        case .loading:
+            break
+        case .cancel:
+            isMultipleSelectionEnabled = false
+        }
     }
 
     func selectAll() {
         selectedIndexes.removeAll()
         isSelectAllModeEnabled = true
         onSelectAll?()
-        /* navigationItem.rightBarButtonItem = loadingBarButtonItem */
-
+        rightBarButtons = [.loading]
         let frozenDirectory = currentDirectory.freeze()
         Task {
             let directoryCount = try await driveFileManager.apiFetcher.directoryCount(for: frozenDirectory)
             selectedCount = directoryCount.count
+            rightBarButtons = [.deselectAll]
         }
     }
 
     func deselectAll() {
+        selectedCount = 0
         selectedIndexes.removeAll()
         isSelectAllModeEnabled = false
+        rightBarButtons = [.selectAll]
         onDeselectAll?()
     }
 
@@ -77,7 +111,12 @@ class MultipleSelectionFileListViewModel {
     }
 
     func didDeselectItem(at index: Int) {
-        selectedIndexes.remove(index)
-        selectedCount = selectedIndexes.count
+        if isSelectAllModeEnabled {
+            deselectAll()
+            didSelectItem(at: index)
+        } else {
+            selectedIndexes.remove(index)
+            selectedCount = selectedIndexes.count
+        }
     }
 }
