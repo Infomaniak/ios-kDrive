@@ -22,6 +22,7 @@ import Foundation
 import kDriveCore
 import RealmSwift
 
+@MainActor
 class FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
@@ -53,6 +54,9 @@ class FileListViewModel {
     private var sortTypeObservation: AnyCancellable?
     private var listStyleObservation: AnyCancellable?
 
+    var uploadViewModel: UploadCardViewModel?
+    var multipleSelectionViewModel: MultipleSelectionFileListViewModel?
+
     init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.driveFileManager = driveFileManager
         if let currentDirectory = currentDirectory {
@@ -75,6 +79,15 @@ class FileListViewModel {
         } else {
             self.title = self.currentDirectory.name
         }
+
+        if configuration.showUploadingFiles {
+            self.uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
+        }
+
+        if configuration.isMultipleSelectionEnabled {
+            self.multipleSelectionViewModel = MultipleSelectionFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+        }
+
         setupObservation()
     }
 
