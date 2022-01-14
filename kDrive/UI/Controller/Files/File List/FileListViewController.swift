@@ -38,6 +38,27 @@ extension SortType: Selectable {
     }
 }
 
+class MultipleSelectionBarButton: UIBarButtonItem {
+    private(set) var type: MultipleSelectionBarButtonType = .cancel
+
+    convenience init(type: MultipleSelectionBarButtonType, target: Any?, action: Selector?) {
+        switch type {
+        case .selectAll:
+            self.init(title: KDriveResourcesStrings.Localizable.buttonSelectAll, style: .plain, target: target, action: action)
+        case .deselectAll:
+            self.init(title: KDriveResourcesStrings.Localizable.buttonDeselectAll, style: .plain, target: target, action: action)
+        case .loading:
+            let activityView = UIActivityIndicatorView(style: .medium)
+            activityView.startAnimating()
+            self.init(customView: activityView)
+        case .cancel:
+            self.init(barButtonSystemItem: .stop, target: target, action: action)
+            accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
+        }
+        self.type = type
+    }
+}
+
 class FileListViewController: MultipleSelectionViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
@@ -278,6 +299,24 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self?.collectionView.deselectItem(at: indexPath, animated: false)
             }
         }
+
+        multipleSelectionViewModel.$leftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
+            guard let self = self else { return }
+            if let leftBarButtons = leftBarButtons {
+                self.navigationItem.leftBarButtonItems = leftBarButtons.map { MultipleSelectionBarButton(type: $0, target: self, action: #selector(self.multipleSelectionBarButtonPressed(_:))) }
+            } else {
+                self.navigationItem.leftBarButtonItems = self.leftBarButtonItems
+            }
+        }
+
+        multipleSelectionViewModel.$rightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
+            guard let self = self else { return }
+            if let rightBarButtons = rightBarButtons {
+                self.navigationItem.rightBarButtonItems = rightBarButtons.map { MultipleSelectionBarButton(type: $0, target: self, action: #selector(self.multipleSelectionBarButtonPressed(_:))) }
+            } else {
+                self.navigationItem.rightBarButtonItems = self.rightBarButtonItems
+            }
+        }
     }
 
     deinit {
@@ -322,8 +361,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    @objc override func cancelMultipleSelection() {
-        multipleSelectionViewModel.isMultipleSelectionEnabled = false
+    @objc func multipleSelectionBarButtonPressed(_ sender: MultipleSelectionBarButton) {
+        multipleSelectionViewModel.barButtonPressed(type: sender.type)
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
@@ -458,9 +497,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             headerView?.selectView.isHidden = false
             collectionView.allowsMultipleSelection = true
             navigationController?.navigationBar.prefersLargeTitles = false
-            navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
-            navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
-            updateSelectAllButton()
             let generator = UIImpactFeedbackGenerator()
             generator.prepare()
             generator.impactOccurred()
@@ -505,9 +541,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         headerView?.selectView.moreButton.isEnabled = moreEnabled
     }
 
-    override final func updateSelectedCount() {
-        updateSelectAllButton()
-    }
+    override final func updateSelectedCount() {}
 
     // MARK: - Collection view data source
 
@@ -568,12 +602,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         guard multipleSelectionViewModel.isMultipleSelectionEnabled else {
             return
         }
-        if multipleSelectionViewModel.isSelectAllModeEnabled {
-            multipleSelectionViewModel.deselectAll()
-            multipleSelectionViewModel.didSelectItem(at: indexPath.item)
-        } else {
-            multipleSelectionViewModel.didDeselectItem(at: indexPath.item)
-        }
+        multipleSelectionViewModel.didDeselectItem(at: indexPath.item)
     }
 
     // MARK: - Swipe action collection view delegate
@@ -656,34 +685,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     // MARK: - Bulk actions
-
-    @objc override func selectAllChildren() {
-        multipleSelectionViewModel.selectAll()
-    }
-
-    @objc override func deselectAllChildren() {
-        multipleSelectionViewModel.deselectAll()
-        multipleSelectionViewModel.isSelectAllModeEnabled = false
-        if let indexPaths = collectionView.indexPathsForSelectedItems {
-            for indexPath in indexPaths {
-                collectionView.deselectItem(at: indexPath, animated: true)
-            }
-        }
-        selectedItems.removeAll()
-        updateSelectionButtons()
-        updateSelectedCount()
-    }
-
-    private func updateSelectAllButton() {
-        if !configuration.selectAllSupported {
-            // Select all not supported, don't show button
-            navigationItem.rightBarButtonItem = nil
-        } else if selectedItems.count == viewModel.fileCount || multipleSelectionViewModel.isSelectAllModeEnabled {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonDeselectAll, style: .plain, target: self, action: #selector(deselectAllChildren))
-        } else {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: KDriveResourcesStrings.Localizable.buttonSelectAll, style: .plain, target: self, action: #selector(selectAllChildren))
-        }
-    }
 
     private func bulkMoveFiles(_ files: [File], destinationId: Int) {
         let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
