@@ -178,21 +178,21 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        var success = true
-        let group = DispatchGroup()
-
         let color = folderColors[indexPath.row]
         Task {
             do {
-                try await driveFileManager.updateColor(directory: file, color: color.hex)
-                self.dismiss(animated: true)
+                let success = try await withThrowingTaskGroup(of: Bool.self, returning: Bool.self) { group in
+                    for file in files where file.isDirectory {
+                        group.addTask {
+                            try await self.driveFileManager.updateColor(directory: file, color: color.hex)
+                        }
+                    }
+                    return try await group.allSatisfy { $0 }
+                }
+                self.actionHandler?(success)
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                self.actionHandler?(false)
             }
-        }
-
-        group.notify(queue: .main) {
-            self.actionHandler?(success)
         }
     }
 }
