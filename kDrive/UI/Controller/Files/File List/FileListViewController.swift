@@ -113,7 +113,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     lazy var viewModel: FileListViewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     lazy var uploadViewModel = UploadCardViewModel(uploadDirectory: currentDirectory, driveFileManager: driveFileManager)
-    lazy var multipleSelectionViewModel = MultipleSelectionFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+    lazy var multipleSelectionViewModel = MultipleSelectionFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: viewModel.currentDirectory)
 
     var bindStore = Set<AnyCancellable>()
 
