@@ -21,6 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+@MainActor
 protocol DraggableFileListViewModel where Self: FileListViewModel {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem]
 }
@@ -49,6 +50,7 @@ extension DraggableFileListViewModel {
     }
 }
 
+@MainActor
 protocol DroppableFileListViewModel where Self: FileListViewModel {
     var lastDropPosition: DropPosition? { get set }
 
