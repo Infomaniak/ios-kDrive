@@ -20,6 +20,7 @@ import Foundation
 import kDriveCore
 import RealmSwift
 
+@MainActor
 class UploadCardViewModel {
     @Published var uploadCount: Int
 
