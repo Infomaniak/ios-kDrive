@@ -191,8 +191,11 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                     return try await group.allSatisfy { $0 }
                 }
                 self.actionHandler?(success)
+                self.dismiss(animated: true)
             } catch {
                 self.actionHandler?(false)
+                UIConstants.showSnackBar(message: error.localizedDescription)
+                self.dismiss(animated: true)
             }
         }
     }
