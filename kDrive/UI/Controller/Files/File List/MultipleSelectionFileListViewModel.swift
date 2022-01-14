@@ -41,27 +41,27 @@ class MultipleSelectionFileListViewModel {
     private(set) var selectedIndexes = Set<Int>()
     var isSelectAllModeEnabled = false
 
-    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    private var driveFileManager: DriveFileManager
+    private var currentDirectory: File
+
+    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         isMultipleSelectionEnabled = false
         selectedCount = 0
+        self.driveFileManager = driveFileManager
+        self.currentDirectory = currentDirectory
     }
 
     func selectAll() {
         selectedIndexes.removeAll()
         isSelectAllModeEnabled = true
         onSelectAll?()
-        /*navigationItem.rightBarButtonItem = loadingBarButtonItem
-        driveFileManager.apiFetcher.getFileCount(driveId: driveFileManager.drive.id, fileId: currentDirectory.id) { [self] response, _ in
-            if let fileCount = response?.data {
-                currentDirectoryCount = fileCount
-                setSelectedCells()
-                updateSelectedCount()
-            } else {
-                updateSelectionButtons()
-                multipleSelectionViewModel.isSelectAllModeEnabled = false
-                updateSelectAllButton()
-            }
-        }*/
+        /* navigationItem.rightBarButtonItem = loadingBarButtonItem */
+
+        let frozenDirectory = currentDirectory.freeze()
+        Task {
+            let directoryCount = try await driveFileManager.apiFetcher.directoryCount(for: frozenDirectory)
+            selectedCount = directoryCount.count
+        }
     }
 
     func deselectAll() {
@@ -80,5 +80,4 @@ class MultipleSelectionFileListViewModel {
         selectedIndexes.remove(index)
         selectedCount = selectedIndexes.count
     }
-
 }
