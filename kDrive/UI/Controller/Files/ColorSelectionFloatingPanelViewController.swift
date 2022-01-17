@@ -64,7 +64,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     weak var floatingPanelController: FloatingPanelController?
     var width = 0.0
 
-    var actionHandler: ((Bool) -> Void)?
+    var completionHandler: ((Bool) -> Void)?
 
     // MARK: - Public methods
 
@@ -138,7 +138,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     func setSelectedColor() {
-        let selectedColorIndex = folderColors.firstIndex { $0.hex == files.first?.color } ?? 0
+        let selectedColorIndex = files.count == 1 ? (folderColors.firstIndex { $0.hex == files.first?.color } ?? 0) : 0
         collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
     }
 
@@ -190,10 +190,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                     }
                     return try await group.allSatisfy { $0 }
                 }
-                self.actionHandler?(success)
+                self.completionHandler?(success)
                 self.dismiss(animated: true)
             } catch {
-                self.actionHandler?(false)
+                self.completionHandler?(false)
                 UIConstants.showSnackBar(message: error.localizedDescription)
                 self.dismiss(animated: true)
             }

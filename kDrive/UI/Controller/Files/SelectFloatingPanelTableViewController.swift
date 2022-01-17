@@ -121,7 +121,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
                 floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
                 colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
-                colorSelectionFloatingPanelViewController.actionHandler = { isSuccess in
+                colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
                     success = isSuccess
                     group.leave()
                 }
