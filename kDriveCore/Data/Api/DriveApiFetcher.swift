@@ -57,7 +57,7 @@ extension ApiFetcher {
             .request(endpoint.url, method: method, parameters: parameters, encoder: JSONParameterEncoder.convertToSnakeCase)
     }
 
-    func perform<T: Codable>(request: DataRequest) async throws -> (T, Int?) {
+    func perform<T: Codable>(request: DataRequest) async throws -> (data: T, responseAt: Int?) {
         let response = await request.serializingDecodable(ApiResponse<T>.self, automaticallyCancelling: true, decoder: ApiFetcher.decoder).response
         let json = try response.result.get()
         if let result = json.data {
@@ -669,7 +669,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func updateColor(directory: File, color: String) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.directoryColor(file: directory), method: .post, parameters: ["color": color])).0
+        try await perform(request: authenticatedRequest(.directoryColor(file: directory), method: .post, parameters: ["color": color])).data
     }
 }
 
