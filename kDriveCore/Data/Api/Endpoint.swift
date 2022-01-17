@@ -179,7 +179,9 @@ public extension Endpoint {
     // MARK: Comment
 
     static func comments(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/comments")
+        return .fileInfo(file).appending(path: "/comments", queryItems: [
+            URLQueryItem(name: "with", value: "user,likes,responses")
+        ])
     }
 
     static func comment(file: AbstractFile, comment: Comment) -> Endpoint {

@@ -367,43 +367,30 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
-    public func getFileDetailComment(file: File, page: Int, completion: @escaping (ApiResponse<[Comment]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileDetailComment(file: file))?with=like,response\(pagination(page: page))"
-
-        makeRequest(url, method: .get, completion: completion)
+    public func comments(file: File, page: Int) async throws -> [Comment] {
+        try await perform(request: authenticatedRequest(.comments(file: file).paginated(page: page))).data
     }
 
-    public func addCommentTo(file: File, comment: String, completion: @escaping (ApiResponse<Comment>?, Error?) -> Void) {
-        let url = ApiRoutes.getFileDetailComment(file: file)
-        let body: [String: Any] = ["body": comment]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func addComment(to file: File, body: String) async throws -> Comment {
+        try await perform(request: authenticatedRequest(.comments(file: file), method: .post, parameters: ["body": body])).data
     }
 
-    public func likeComment(file: File, liked: Bool, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = liked ? ApiRoutes.unlikeComment(file: file, comment: comment) : ApiRoutes.likeComment(file: file, comment: comment)
+    public func likeComment(file: File, liked: Bool, comment: Comment) async throws -> Bool {
+        let endpoint: Endpoint = liked ? .unlikeComment(file: file, comment: comment) : .likeComment(file: file, comment: comment)
 
-        makeRequest(url, method: .post, completion: completion)
+        return try await perform(request: authenticatedRequest(endpoint, method: .post)).data
     }
 
-    public func deleteComment(file: File, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.getComment(file: file, comment: comment)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func deleteComment(file: File, comment: Comment) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .delete)).data
     }
 
-    public func editComment(file: File, text: String, comment: Comment, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.getComment(file: file, comment: comment)
-        let body: [String: Any] = ["body": text]
-
-        makeRequest(url, method: .put, parameters: body, completion: completion)
+    public func editComment(file: File, body: String, comment: Comment) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .put, parameters: ["body": body])).data
     }
 
-    public func answerComment(file: File, text: String, comment: Comment, completion: @escaping (ApiResponse<Comment>?, Error?) -> Void) {
-        let url = ApiRoutes.getComment(file: file, comment: comment)
-        let body: [String: Any] = ["body": text]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func answerComment(file: File, body: String, comment: Comment) async throws -> Comment {
+        try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .post, parameters: ["body": body])).data
     }
 
     public func deleteFile(file: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
