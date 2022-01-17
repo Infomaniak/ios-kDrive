@@ -1408,10 +1408,8 @@ public class DriveFileManager {
         }
     }
 
-    public func cancelAction(cancelId: String, completion: @escaping (Error?) -> Void) {
-        apiFetcher.cancelAction(driveId: drive.id, cancelId: cancelId) { _, error in
-            completion(error)
-        }
+    public func undoAction(cancelId: String) async throws {
+        try await apiFetcher.undoAction(drive: drive, cancelId: cancelId)
     }
 
     public func updateColor(directory: File, color: String) async throws -> Bool {
