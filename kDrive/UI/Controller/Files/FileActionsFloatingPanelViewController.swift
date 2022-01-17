@@ -475,12 +475,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                            if let cancelId = response?.id {
-                                self.driveFileManager.cancelAction(cancelId: cancelId) { error in
-                                    if error == nil {
-                                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
-                                    }
-                                }
+                            guard let cancelId = response?.id else { return }
+                            Task {
+                                try await self.driveFileManager.undoAction(cancelId: cancelId)
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
                             }
                         })
                         // Close preview
@@ -597,12 +595,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         // Show snackbar (wait for panel dismissal)
                         group.notify(queue: .main) {
                             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                                if let cancelId = cancelId {
-                                    self.driveFileManager.cancelAction(cancelId: cancelId) { error in
-                                        if error == nil {
-                                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
-                                        }
-                                    }
+                                guard let cancelId = cancelId else { return }
+                                Task {
+                                    try await self.driveFileManager.undoAction(cancelId: cancelId)
+                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
                                 }
                             })
                         }

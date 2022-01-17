@@ -144,10 +144,15 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                     downloadInProgress = true
                     collectionView.reloadItems(at: [indexPath])
                     group.enter()
-                    downloadArchivedFiles(files: files, downloadCellPath: indexPath) { archiveUrl, error in
-                        self.downloadedArchiveUrl = archiveUrl
-                        success = archiveUrl != nil
-                        self.downloadError = error
+                    downloadArchivedFiles(files: files, downloadCellPath: indexPath) { result in
+                        switch result {
+                        case .success(let archiveUrl):
+                            self.downloadedArchiveUrl = archiveUrl
+                            success = true
+                        case .failure(let error):
+                            self.downloadError = error
+                            success = false
+                        }
                         group.leave()
                     }
                 }
@@ -270,19 +275,24 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    private func downloadArchivedFiles(files: [File], downloadCellPath: IndexPath, completion: @escaping (URL?, DriveError?) -> Void) {
-        driveFileManager.apiFetcher.getDownloadArchiveLink(driveId: driveFileManager.drive.id, for: files) { response, error in
-            if let archiveId = response?.data?.uuid {
-                self.currentArchiveId = archiveId
-                DownloadQueue.instance.observeArchiveDownloaded(self, archiveId: archiveId) { _, archiveUrl, error in
-                    completion(archiveUrl, error)
+    private func downloadArchivedFiles(files: [File], downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
+        Task {
+            do {
+                let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, for: files)
+                self.currentArchiveId = response.id
+                DownloadQueue.instance.observeArchiveDownloaded(self, archiveId: response.id) { _, archiveUrl, error in
+                    if let archiveUrl = archiveUrl {
+                        completion(.success(archiveUrl))
+                    } else {
+                        completion(.failure(error ?? .unknownError))
+                    }
                 }
-                DownloadQueue.instance.addToQueue(archiveId: archiveId, driveId: self.driveFileManager.drive.id)
+                DownloadQueue.instance.addToQueue(archiveId: response.id, driveId: self.driveFileManager.drive.id)
                 DispatchQueue.main.async {
                     self.collectionView.reloadItems(at: [downloadCellPath])
                 }
-            } else {
-                completion(nil, (error as? DriveError) ?? .serverError)
+            } catch {
+                completion(.failure(error as? DriveError ?? .unknownError))
             }
         }
     }
