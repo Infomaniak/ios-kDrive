@@ -62,22 +62,6 @@ public enum ApiRoutes {
         return "\(fileURL(file: file))activity"
     }
 
-    static func getFileDetailComment(file: File) -> String {
-        return "\(fileURL(file: file))comment"
-    }
-
-    static func likeComment(file: File, comment: Comment) -> String {
-        return "\(fileURL(file: file))comment/\(comment.id)/like"
-    }
-
-    static func unlikeComment(file: File, comment: Comment) -> String {
-        return "\(fileURL(file: file))comment/\(comment.id)/unlike"
-    }
-
-    static func getComment(file: File, comment: Comment) -> String {
-        return "\(fileURL(file: file))comment/\(comment.id)"
-    }
-
     static func getFavoriteFiles(driveId: Int, sortType: SortType) -> String {
         return "\(driveApiUrl)\(driveId)/file/favorite?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }

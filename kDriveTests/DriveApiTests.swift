@@ -106,6 +106,14 @@ final class DriveApiTests: XCTestCase {
         }
     }
 
+    func initOfficeFile(testName: String) async -> (File, File) {
+        return await withCheckedContinuation { continuation in
+            initOfficeFile(testName: testName) { result1, result2 in
+                continuation.resume(returning: (result1, result2))
+            }
+        }
+    }
+
     func checkIfFileIsInDestination(file: File, directory: File, completion: @escaping () -> Void) {
         self.currentApiFetcher.getFileListForDirectory(driveId: file.driveId, parentId: directory.id) { fileListResponse, fileListError in
             XCTAssertNil(fileListError, TestsMessages.noError)
@@ -231,7 +239,7 @@ final class DriveApiTests: XCTestCase {
 
         let password = "newPassword"
         let validUntil: Date? = Date()
-        let limitFileSize: Int? = 5368709120
+        let limitFileSize: Int? = 5_368_709_120
 
         initDropbox(testName: testName) { root, dropbox in
             rootFile = root
@@ -660,189 +668,98 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testGetFileDetailComment() {
-        let testName = "Get file detail comment"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.currentApiFetcher.getFileDetailComment(file: rootFile, page: 1) { response, error in
-                XCTAssertNotNil(response, TestsMessages.notNil("response"))
-                XCTAssertNil(error, TestsMessages.noError)
-                expectation.fulfill()
-            }
+    func testGetComments() async {
+        let rootFile = await setUpTest(testName: "Get comments")
+        do {
+            _ = try await currentApiFetcher.comments(file: rootFile, page: 1)
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
-    func testAddCommentTo() {
-        let testName = "Add comment"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("comment"))
-                XCTAssertNil(error, TestsMessages.noError)
-                let comment = response!.data!
-                XCTAssertTrue(comment.body == "Testing comment", "Comment body should be equal to 'Testing comment'")
-
-                self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
-                    XCTAssertNotNil(commentResponse?.data, TestsMessages.notNil("comment"))
-                    XCTAssertNil(commentError, TestsMessages.noError)
-                    let recievedComment = commentResponse!.data!.first {
-                        $0.id == comment.id
-                    }
-                    XCTAssertNotNil(recievedComment, TestsMessages.notNil("comment"))
-                    expectation.fulfill()
-                }
-            }
+    func testAddComment() async {
+        let (rootFile, file) = await initOfficeFile(testName: "Add comment")
+        do {
+            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+            XCTAssertEqual(comment.body, "Testing comment", "Comment body should be equal to 'Testing comment'")
+            let comments = try await currentApiFetcher.comments(file: file, page: 1)
+            XCTAssertNotNil(comments.first { $0.id == comment.id }, "Comment should exist")
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
-    func testLikeComment() {
-        let testName = "Like comment"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("comment"))
-                XCTAssertNil(error, TestsMessages.noError)
-                let comment = response!.data!
-
-                self.currentApiFetcher.likeComment(file: file, liked: false, comment: comment) { likeResponse, likeError in
-                    XCTAssertNotNil(likeResponse?.data, TestsMessages.notNil("like response"))
-                    XCTAssertNil(likeError, TestsMessages.noError)
-
-                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
-                        XCTAssertNotNil(commentResponse?.data, TestsMessages.notNil("comment"))
-                        XCTAssertNil(commentError, TestsMessages.noError)
-                        let recievedComment = commentResponse!.data!.first {
-                            $0.id == comment.id
-                        }
-                        XCTAssertNotNil(recievedComment, TestsMessages.notNil("comment"))
-                        XCTAssertTrue(recievedComment!.liked, "Comment should be liked")
-                        expectation.fulfill()
-                    }
-                }
+    func testLikeComment() async {
+        let (rootFile, file) = await initOfficeFile(testName: "Like comment")
+        do {
+            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+            let response = try await currentApiFetcher.likeComment(file: file, liked: false, comment: comment)
+            XCTAssertTrue(response, "API should return true")
+            let comments = try await currentApiFetcher.comments(file: file, page: 1)
+            guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
+                XCTFail("Comment should exist")
+                tearDownTest(directory: rootFile)
+                return
             }
+            XCTAssertTrue(fetchedComment.liked, "Comment should be liked")
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
-    func testDeleteComment() {
-        let testName = "Delete comment"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("comment"))
-                XCTAssertNil(error, TestsMessages.noError)
-                let comment = response!.data!
-
-                self.currentApiFetcher.deleteComment(file: file, comment: response!.data!) { deleteResponse, deleteError in
-                    XCTAssertNotNil(deleteResponse, TestsMessages.notNil("comment response"))
-                    XCTAssertNil(deleteError, TestsMessages.noError)
-
-                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
-                        XCTAssertNotNil(commentResponse, TestsMessages.notNil("comments"))
-                        XCTAssertNil(commentError, TestsMessages.noError)
-                        let deletedComment = commentResponse!.data?.first {
-                            $0.id == comment.id
-                        }
-                        XCTAssertNil(deletedComment, "Deleted comment should be nil")
-                        expectation.fulfill()
-                    }
-                }
-            }
+    func testDeleteComment() async {
+        let (rootFile, file) = await initOfficeFile(testName: "Delete comment")
+        do {
+            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+            let response = try await currentApiFetcher.deleteComment(file: file, comment: comment)
+            XCTAssertTrue(response, "API should return true")
+            let comments = try await currentApiFetcher.comments(file: file, page: 1)
+            XCTAssertNil(comments.first { $0.id == comment.id }, "Comment should be deleted")
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
-    func testEditComment() {
+    func testEditComment() async {
         let testName = "Edit comment"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("comment"))
-                XCTAssertNil(error, TestsMessages.noError)
-                let comment = response!.data!
-
-                self.currentApiFetcher.editComment(file: file, text: testName, comment: response!.data!) { editResponse, editError in
-                    XCTAssertNotNil(editResponse, TestsMessages.notNil("comment response"))
-                    XCTAssertNil(editError, TestsMessages.noError)
-
-                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
-                        XCTAssertNotNil(commentResponse?.data, TestsMessages.notNil("comments"))
-                        XCTAssertNil(commentError, TestsMessages.noError)
-                        let editedComment = commentResponse!.data?.first {
-                            $0.id == comment.id
-                        }
-                        XCTAssertNotNil(editedComment, TestsMessages.notNil("edited comment"))
-                        XCTAssertTrue(editedComment?.body == testName, "Edited comment body is wrong")
-                        expectation.fulfill()
-                    }
-                }
+        let (rootFile, file) = await initOfficeFile(testName: testName)
+        do {
+            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+            let response = try await currentApiFetcher.editComment(file: file, body: testName, comment: comment)
+            XCTAssertTrue(response, "API should return true")
+            let comments = try await currentApiFetcher.comments(file: file, page: 1)
+            guard let editedComment = comments.first(where: { $0.id == comment.id }) else {
+                XCTFail("Edited comment should exist")
+                tearDownTest(directory: rootFile)
+                return
             }
+            XCTAssertEqual(editedComment.body, testName, "Edited comment body is wrong")
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
-    func testAnswerComment() {
-        let testName = "Answer comment"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.addCommentTo(file: file, comment: "Testing comment") { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("comment"))
-                XCTAssertNil(error, TestsMessages.noError)
-                let comment = response!.data!
-
-                self.currentApiFetcher.answerComment(file: file, text: "Answer comment", comment: response!.data!) { answerResponse, answerError in
-                    XCTAssertNotNil(answerResponse?.data, TestsMessages.notNil("comment response"))
-                    XCTAssertNil(answerError, TestsMessages.noError)
-                    let answer = answerResponse!.data!
-
-                    self.currentApiFetcher.getFileDetailComment(file: file, page: 1) { commentResponse, commentError in
-                        XCTAssertNotNil(commentResponse, TestsMessages.notNil("comments"))
-                        XCTAssertNil(commentError, TestsMessages.noError)
-                        let firstComment = commentResponse!.data?.first {
-                            $0.id == comment.id
-                        }
-                        XCTAssertNotNil(firstComment, TestsMessages.notNil("comment"))
-                        let firstAnswer = firstComment!.responses?.first {
-                            $0.id == answer.id
-                        }
-                        XCTAssertNotNil(firstAnswer, TestsMessages.notNil("answer"))
-                        expectation.fulfill()
-                    }
-                }
+    func testAnswerComment() async {
+        let (rootFile, file) = await initOfficeFile(testName: "Answer comment")
+        do {
+            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+            let answer = try await currentApiFetcher.answerComment(file: file, body: "Answer comment", comment: comment)
+            let comments = try await currentApiFetcher.comments(file: file, page: 1)
+            guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
+                XCTFail("Comment should exist")
+                tearDownTest(directory: rootFile)
+                return
             }
+            XCTAssertNotNil(fetchedComment.responses?.first { $0.id == answer.id }, "Answer should exist")
+        } catch {
+            debugPrint(error)
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
@@ -1333,76 +1250,6 @@ final class DriveApiTests: XCTestCase {
 
     // MARK: - Complementary tests
 
-    func testComment() {
-        let testName = "Comment tests"
-        let expectations = [
-            (name: "Add comment", expectation: XCTestExpectation(description: "Add comment")),
-            (name: "Like comment", expectation: XCTestExpectation(description: "Like comment")),
-            (name: "Edit comment", expectation: XCTestExpectation(description: "Edit comment")),
-            (name: "Answer comment", expectation: XCTestExpectation(description: "Answer comment")),
-            (name: "All tests", expectation: XCTestExpectation(description: "All tests")),
-            (name: "Delete comment", expectation: XCTestExpectation(description: "Delete comment"))
-        ]
-        var rootFile = File()
-        var numberOfComment = 0
-
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-            self.currentApiFetcher.addCommentTo(file: officeFile, comment: expectations[0].name) { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("comment"))
-                XCTAssertNil(error, TestsMessages.noError)
-                let comment = response!.data!
-                XCTAssertTrue(comment.body == expectations[0].name, "Comment body is wrong")
-                expectations[0].expectation.fulfill()
-
-                self.currentApiFetcher.likeComment(file: officeFile, liked: false, comment: comment) { responseLike, errorLike in
-                    XCTAssertNotNil(responseLike, TestsMessages.notNil("response like"))
-                    XCTAssertNil(errorLike, TestsMessages.noError)
-                    expectations[1].expectation.fulfill()
-
-                    self.currentApiFetcher.editComment(file: officeFile, text: expectations[2].name, comment: comment) { responseEdit, errorEdit in
-                        XCTAssertNotNil(responseEdit, TestsMessages.notNil("response edit"))
-                        XCTAssertNil(errorEdit, TestsMessages.noError)
-                        XCTAssertTrue(responseEdit!.data!, "Response edit should be true")
-                        expectations[2].expectation.fulfill()
-
-                        self.currentApiFetcher.answerComment(file: officeFile, text: expectations[3].name, comment: comment) { responseAnswer, errorAnswer in
-                            XCTAssertNotNil(responseAnswer, TestsMessages.notNil("answer comment"))
-                            XCTAssertNil(errorAnswer, TestsMessages.noError)
-                            let answer = responseAnswer!.data!
-                            XCTAssertTrue(answer.body == expectations[3].name, "Answer body is wrong")
-                            expectations[3].expectation.fulfill()
-
-                            self.currentApiFetcher.getFileDetailComment(file: officeFile, page: 1) { responseAllComment, errorAllComment in
-                                XCTAssertNotNil(responseAllComment, TestsMessages.notNil("all comment file"))
-                                XCTAssertNil(errorAllComment, TestsMessages.noError)
-                                let allComment = responseAllComment!.data!
-                                numberOfComment = allComment.count
-                                expectations[4].expectation.fulfill()
-
-                                self.currentApiFetcher.deleteComment(file: officeFile, comment: comment) { responseDelete, errorDelete in
-                                    XCTAssertNotNil(responseDelete, TestsMessages.notNil("response delete"))
-                                    XCTAssertNil(errorDelete, TestsMessages.noError)
-                                    XCTAssertTrue(responseDelete!.data!, "Response delete should be true")
-
-                                    self.currentApiFetcher.getFileDetailComment(file: officeFile, page: 1) { finalResponse, finalError in
-                                        XCTAssertNotNil(finalResponse, TestsMessages.notNil("all comment file"))
-                                        XCTAssertNil(finalError, TestsMessages.noError)
-                                        XCTAssertTrue(numberOfComment - 1 == finalResponse!.data!.count, "Comment not deleted")
-                                        expectations[5].expectation.fulfill()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
-
     func testShareLink() {
         let testName = "Share link"
         let expectations = [
@@ -1707,7 +1554,7 @@ final class DriveApiTests: XCTestCase {
         let directory = await setUpTest(testName: "DirectoryColor")
         do {
             let result = try await currentApiFetcher.updateColor(directory: directory, color: "#E91E63")
-            XCTAssertEqual(result, true, "API should return true")
+            XCTAssertTrue(result, "API should return true")
         } catch {
             XCTFail("There should be no error on changing directory color")
         }
