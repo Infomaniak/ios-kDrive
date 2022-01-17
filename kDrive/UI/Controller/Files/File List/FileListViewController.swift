@@ -360,6 +360,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.present(floatingPanelViewController, animated: true)
             #endif
         }
+        
+        viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) {  [weak self] actions in
+            self?.headerView?.selectView.setActions(actions)
+        }
     }
 
     deinit {
