@@ -1173,37 +1173,35 @@ public class DriveFileManager {
     public func createDropBox(parentDirectory: File,
                               name: String,
                               onlyForMe: Bool,
-                              password: String?,
-                              validUntil: Date?,
-                              emailWhenFinished: Bool,
-                              limitFileSize: Int?,
-                              completion: @escaping (File?, DropBox?, Error?) -> Void) {
+                              settings: DropBoxSettings,
+                              completion: @MainActor @escaping (File?, DropBox?, Error?) -> Void) {
         let parentId = parentDirectory.id
         apiFetcher.createDirectory(parentDirectory: parentDirectory, name: name, onlyForMe: onlyForMe) { [self] response, error in
             if let createdDirectory = response?.data {
-                apiFetcher.setupDropBox(directory: createdDirectory, password: password, validUntil: validUntil, emailWhenFinished: emailWhenFinished, limitFileSize: limitFileSize) { response, error in
-                    if let dropbox = response?.data {
-                        do {
-                            let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
-                            let realm = createdDirectory.realm
+                Task {
+                    do {
+                        let dropbox = try await apiFetcher.createDropBox(directory: createdDirectory, settings: settings)
+                        let realm = getRealm()
+                        let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory, using: realm)
 
-                            let parent = realm?.object(ofType: File.self, forPrimaryKey: parentId)
-                            try realm?.write {
-                                createdDirectory.collaborativeFolder = dropbox.url
-                                parent?.children.append(createdDirectory)
-                            }
-                            if let parent = createdDirectory.parent {
-                                parent.signalChanges(userId: self.drive.userId)
-                                self.notifyObserversWith(file: parent)
-                            }
-                            completion(createdDirectory, dropbox, error)
-                        } catch {
-                            completion(nil, nil, error)
+                        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+                        try realm.write {
+                            createdDirectory.collaborativeFolder = dropbox.url
+                            parent?.children.append(createdDirectory)
                         }
+                        if let parent = createdDirectory.parent {
+                            parent.signalChanges(userId: self.drive.userId)
+                            self.notifyObserversWith(file: parent)
+                        }
+                        await completion(createdDirectory.freeze(), dropbox, error)
+                    } catch {
+                        await completion(nil, nil, error)
                     }
                 }
             } else {
-                completion(nil, nil, error)
+                Task {
+                    await completion(nil, nil, error)
+                }
             }
         }
     }
