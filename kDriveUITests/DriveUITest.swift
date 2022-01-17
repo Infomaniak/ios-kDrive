@@ -340,4 +340,45 @@ class AppUITest: XCTestCase {
         tabBar.buttons["Fichiers"].tap()
         tearDownTest(directoryName: root)
     }
+
+    func testCancelAction() {
+        let testName = "UITest - Cancel action"
+
+        let root = createDirectoryWithPhoto(name: testName)
+
+        // Remove image
+        let imageCell = collectionViewsQuery.cells.firstMatch
+        imageCell.swipeLeft()
+        app.buttons["Supprimer"].tap()
+        sleep(2)
+        let numberOfFiles = collectionViewsQuery.cells.count
+
+        app.buttons["Annuler"].tap()
+        sleep(2)
+        let numberOfFilesAfterCancel = collectionViewsQuery.cells.count
+        XCTAssertGreaterThan(numberOfFilesAfterCancel, numberOfFiles, "Photo should be back in directory")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        tearDownTest(directoryName: root)
+    }
+
+    func testAddFileToFavorites() {
+        let testName = "UITest - Add file to favorites"
+
+        let root = setUpTest(testName: testName)
+        app.tabBars.buttons["Fichiers"].tap()
+
+        // Add directory to favorites
+        let rootCell = collectionViewsQuery.cells.containing(.staticText, identifier: root).element
+        rootCell.press(forDuration: 1)
+        collectionViewsQuery.buttons["Menu"].tap()
+        collectionViewsQuery.staticTexts["Ajouter aux favoris"].tap()
+
+        // Check file in favorites page
+        app.tabBars.buttons["Favoris"].tap()
+        XCTAssertTrue(app.staticTexts[root].exists)
+
+        app.tabBars.buttons["Fichiers"].tap()
+        tearDownTest(directoryName: root)
+    }
 }
