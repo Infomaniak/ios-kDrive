@@ -99,6 +99,15 @@ class AppUITest: XCTestCase {
         file.buttons["Menu"].tap()
     }
 
+    func shareMailWithMail(address mail: String) {
+        let emailTextField = tablesQuery.textFields["Invitez un utilisateur ou une adresse mail…"]
+        emailTextField.tap()
+        emailTextField.typeText(mail)
+        XCTAssertTrue(app.otherElements["drop_down"].staticTexts[mail].exists, "Dropdown with mail should be present")
+        app.otherElements.staticTexts[mail].tap()
+        tablesQuery.buttons["Partager"].tap()
+    }
+
     // MARK: - Tests methods
 
     func testRenameFile() {
@@ -229,6 +238,38 @@ class AppUITest: XCTestCase {
         tearDownTest(directoryName: root)
     }
 
+    func testCreateSharedDirectory() {
+        let testName = "UITest - Create shared directory"
+
+        // Create shared directory
+        let root = "\(testName)-\(Date())"
+        tabBar.buttons["Fichiers"].tap()
+        tabBar.buttons["Ajouter"].tap()
+        let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
+        folderCell.tap()
+        folderCell.tap()
+        let folderTextField = tablesQuery.textFields["Nom du dossier"]
+        folderTextField.tap()
+        folderTextField.typeText(root)
+        tablesQuery.staticTexts["Certains utilisateurs"].tap()
+        tablesQuery.staticTexts["Certains utilisateurs"].tap()
+        app.buttons["Créer le dossier"].tap()
+
+        // Invite user with mail
+        let userMail = "kdriveiostests+uitest@ik.me"
+        shareMailWithMail(address: userMail)
+        app.buttons["Fermer"].tap()
+
+        // Check share rights
+        openFileMenu(named: root)
+        collectionViewsQuery.cells.staticTexts["Partage et droits"].tap()
+        XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: "John Appleseed").element.waitForExistence(timeout: 5), "John Appleseed should have access to file")
+        XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: userMail).element.exists, "Invited user should have access to file")
+        app.buttons["Fermer"].tap()
+
+        tearDownTest(directoryName: root)
+    }
+
 //    func testCreateSharedFolder() {
 //        let testName = "UITest CreateShareFolder"
 //
@@ -267,106 +308,7 @@ class AppUITest: XCTestCase {
 //        sleep(1)
 //        app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
 //    }
-//
-//    func testDropBox() {
-//        let testName = "UITest CreateDropBox"
-//
-//        let tablesQuery = app.tables
-//        let collectionViewsQuery = app.collectionViews
-//        let tabBar = app.tabBars
-//
-//        tabBar.buttons["Ajouter"].tap()
-//        tablesQuery.cells.containing(.staticText, identifier: "Dossier").element.tap()
-//        tablesQuery.cells.containing(.staticText, identifier: "Boîte de dépôt").element.tap()
-//
-//        let dropBoxTextField = tablesQuery.textFields["Nom de la boîte de dépôt"]
-//        dropBoxTextField.tap()
-//
-//        dropBoxTextField.typeText("UITest CreateDropBox")
-//
-//        let someUser = tablesQuery.staticTexts["Certains utilisateurs"]
-//        XCTAssertTrue(someUser.exists, "Some user cell should exist")
-//        someUser.tap()
-//        someUser.tap()
-//
-//        // Tests settings
-//        let settingsCell = tablesQuery.cells.containing(.staticText, identifier: "Options avancées").element
-//
-//        let emailSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Recevoir un email dès qu’un fichier a été importé").element
-//        let passwordSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Protéger avec un mot de passe").element
-//        let dateSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Ajouter une date d’expiration").element
-//        let storageSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Limiter l’espace de stockage").element
-//
-//        XCTAssertTrue(!emailSettingCell.exists &&
-//                !passwordSettingCell.exists &&
-//                !dateSettingCell.exists &&
-//                !storageSettingCell.exists, "Settings shouldn't exists")
-//
-//        settingsCell.tap()
-//
-//        XCTAssertTrue(emailSettingCell.exists, "Setting should exist")
-//        XCTAssertTrue(passwordSettingCell.exists, "Setting should exist")
-//        XCTAssertTrue(dateSettingCell.exists, "Setting should exist")
-//        XCTAssertTrue(storageSettingCell.exists, "Setting should exist")
-//
-//        XCTAssertFalse(passwordSettingCell.secureTextFields.firstMatch.exists, "TextField shouldn't exist")
-//        passwordSettingCell.switches.firstMatch.tap()
-//        XCTAssertTrue(passwordSettingCell.secureTextFields.firstMatch.exists, "TextField should exist")
-//
-//        if #available(iOS 13.4, *) {
-//            XCTAssertFalse(dateSettingCell.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-//            dateSettingCell.switches.firstMatch.tap()
-//            XCTAssertTrue(dateSettingCell.otherElements["Sélecteur de date"].waitForExistence(timeout: 5), "DatePicker should exist")
-//            dateSettingCell.otherElements["Sélecteur de date"].tap()
-//            XCTAssertTrue(app.datePickers.firstMatch.waitForExistence(timeout: 5), "DatePicker should appear")
-//            app.coordinate(withNormalizedOffset: CGVector(dx: 10, dy: 10)).tap() // Tap outside of datePicker
-//        } else {
-//            XCTAssertFalse(dateSettingCell.textFields.firstMatch.exists, "DatePicker textField shouldn't exist")
-//            XCTAssertFalse(app.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-//            dateSettingCell.switches.firstMatch.tap()
-//            XCTAssertTrue(dateSettingCell.textFields.firstMatch.waitForExistence(timeout: 5), "DatePicker textField should exist")
-//            XCTAssertFalse(dateSettingCell.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-//            dateSettingCell.textFields.firstMatch.tap()
-//            XCTAssertTrue(app.datePickers.firstMatch.waitForExistence(timeout: 5), "DatePicker should exist")
-//            app.toolbars.buttons["Fermer"].tap()
-//        }
-//
-//        XCTAssertFalse(storageSettingCell.textFields.firstMatch.exists, "TextField shouldn't exist")
-//        storageSettingCell.switches.firstMatch.tap()
-//        XCTAssertTrue(storageSettingCell.textFields.firstMatch.exists, "TextField should exist")
-//
-//        passwordSettingCell.switches.firstMatch.tap()
-//        XCTAssertFalse(passwordSettingCell.textFields.firstMatch.exists, "TextField shouldn't exist")
-//        dateSettingCell.switches.firstMatch.tap()
-//        if #available(iOS 13.4, *) {
-//            XCTAssertFalse(dateSettingCell.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-//        } else {
-//            XCTAssertFalse(dateSettingCell.textFields.firstMatch.exists, "DatePicker textField shouldn't exist")
-//        }
-//        storageSettingCell.switches.firstMatch.tap()
-//        XCTAssertFalse(storageSettingCell.textFields.firstMatch.exists, "TextField shouldn't exist")
-//
-//        tablesQuery.buttons["Créer le dossier"].tap()
-//
-//        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should redirect to Share file")
-//        app.buttons["Fermer"].tap()
-//
-//        XCTAssertTrue(app.staticTexts["Partager la boîte de dépôt \(testName)"].waitForExistence(timeout: 5), "Share link of dropbox should exist")
-//        app.buttons["Plus tard"].tap()
-//
-//        XCTAssertTrue(tabBar.buttons["Fichiers"].waitForExistence(timeout: 5), "Waiting for folder creation")
-//        tabBar.buttons["Fichiers"].tap()
-//
-//        let newFolder = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-//        XCTAssertTrue(newFolder.exists, "Created folder should be here")
-//
-//        newFolder.press(forDuration: 1)
-//        collectionViewsQuery.buttons["Supprimer"].tap()
-//
-//        sleep(1)
-//        app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
-//    }
-//
+
 //    func testCreateCommonDocument() {
 //        let testName = "UITest CreateCommonDocument"
 //
