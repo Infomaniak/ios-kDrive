@@ -87,6 +87,23 @@ class AppUITest: XCTestCase {
         return folderName
     }
 
+    func createDirectoryWithPhoto(name: String) -> String {
+        let directory = createDirectory(name: name)
+
+        tabBar.buttons["Fichiers"].tap()
+        enterInDirectory(named: directory)
+
+        // Import photo from photo library
+        tabBar.buttons["Ajouter"].tap()
+        tablesQuery.staticTexts["Importer une photo ou une vidéo"].tap()
+        let imageToImport = app.scrollViews.images.element(boundBy: 0)
+        XCTAssertTrue(imageToImport.waitForExistence(timeout: 4), "Images should be displayed")
+        imageToImport.tap()
+        app.navigationBars["Photos"].buttons["Add"].tap()
+
+        return directory
+    }
+
     func removeDirectory(name: String) {
         let folder = collectionViewsQuery.cells.containing(.staticText, identifier: name).element
         folder.press(forDuration: 1)
@@ -97,6 +114,10 @@ class AppUITest: XCTestCase {
     func openFileMenu(named name: String) {
         let file = collectionViewsQuery.cells.containing(.staticText, identifier: name)
         file.buttons["Menu"].tap()
+    }
+
+    func enterInDirectory(named name: String) {
+        collectionViewsQuery.cells.containing(.staticText, identifier: name).element.tap()
     }
 
     func shareMailWithMail(address mail: String) {
@@ -189,20 +210,7 @@ class AppUITest: XCTestCase {
     func testComments() {
         let testName = "UITest - Comment"
 
-        let root = setUpTest(testName: testName)
-        tabBar.buttons["Fichiers"].tap()
-
-        // Enter in folder
-        let rootCell = collectionViewsQuery.cells.containing(.staticText, identifier: root).element
-        rootCell.tap()
-
-        // Import photo from photo library
-        tabBar.buttons["Ajouter"].tap()
-        tablesQuery.staticTexts["Importer une photo ou une vidéo"].tap()
-        let imageToImport = app.scrollViews.images.element(boundBy: 0)
-        XCTAssertTrue(imageToImport.waitForExistence(timeout: 4), "Images should be displayed")
-        imageToImport.tap()
-        app.navigationBars["Photos"].buttons["Add"].tap()
+        let root = createDirectoryWithPhoto(name: testName)
 
         // Open Information sheet about imported photo
         let imageCell = collectionViewsQuery.cells.firstMatch
@@ -270,83 +278,66 @@ class AppUITest: XCTestCase {
         tearDownTest(directoryName: root)
     }
 
-//    func testCreateSharedFolder() {
-//        let testName = "UITest CreateShareFolder"
-//
-//        let tablesQuery = app.tables
-//        let collectionViewsQuery = app.collectionViews
-//        let tabBar = app.tabBars
-//
-//        tabBar.buttons["Ajouter"].tap()
-//        let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
-//        folderCell.tap()
-//        folderCell.tap()
-//
-//        let folderTextField = tablesQuery.textFields["Nom du dossier"]
-//        folderTextField.tap()
-//        folderTextField.typeText("UITest CreateShareFolder")
-//
-//        let someUser = tablesQuery.staticTexts["Certains utilisateurs"]
-//        XCTAssertTrue(someUser.exists, "Some user cell should exist")
-//        someUser.tap()
-//        someUser.tap()
-//        tablesQuery.buttons["Créer le dossier"].tap()
-//
-//        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should redirect to Share file")
-//
-//        app.buttons["Fermer"].tap()
-//
-//        XCTAssertTrue(tabBar.buttons["Fichiers"].waitForExistence(timeout: 5), "Waiting for folder creation")
-//        tabBar.buttons["Fichiers"].tap()
-//
-//        let newFolder = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-//        XCTAssertTrue(newFolder.exists, "Created folder should be here")
-//
-//        newFolder.press(forDuration: 1)
-//        collectionViewsQuery.buttons["Supprimer"].tap()
-//
-//        sleep(1)
-//        app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
-//    }
+    func testCreateOfficeFile() {
+        let testName = "UITest - Create office file"
 
-//    func testCreateCommonDocument() {
-//        let testName = "UITest CreateCommonDocument"
-//
-//        let tablesQuery = app.tables
-//        let collectionViewsQuery = app.collectionViews
-//        let tabBar = app.tabBars
-//
-//        tabBar.buttons["Ajouter"].tap()
-//        tablesQuery.cells.containing(.staticText, identifier: "Dossier").element.tap()
-//        tablesQuery.cells.containing(.staticText, identifier: "Dossier commun").element.tap()
-//
-//        let folderTextField = tablesQuery.textFields["Nom du dossier"]
-//        folderTextField.tap()
-//        folderTextField.typeText("UITest CreateCommonDocument")
-//
-//        let someUser = tablesQuery.staticTexts["Certains utilisateurs"]
-//        XCTAssertTrue(someUser.exists, "Some user cell should exist")
-//        someUser.tap()
-//        someUser.tap()
-//        tablesQuery.buttons["Créer le dossier"].tap()
-//
-//        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should redirect to Share file")
-//        app.buttons["Fermer"].tap()
-//
-//        XCTAssertTrue(tabBar.buttons["Fichiers"].waitForExistence(timeout: 5), "Waiting for folder creation")
-//        tabBar.buttons["Fichiers"].tap()
-//
-//        let commonDocumentsCell = collectionViewsQuery.cells.containing(.staticText, identifier: "Common documents").element
-//        XCTAssertTrue(commonDocumentsCell.exists, "Common documents should exist")
-//        commonDocumentsCell.tap()
-//
-//        let newFolder = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-//        XCTAssertTrue(newFolder.waitForExistence(timeout: 5), "Created folder should be here")
-//
-//        newFolder.press(forDuration: 1)
-//        collectionViewsQuery.buttons["Supprimer"].tap()
-//
-//        sleep(1)
-//        app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
-//    }
+        let root = setUpTest(testName: testName)
+
+        // Enter in root directory
+        tabBar.buttons["Fichiers"].tap()
+        enterInDirectory(named: root)
+
+        // Create office file
+        tabBar.buttons["Ajouter"].tap()
+        tablesQuery.staticTexts["Document"].tap()
+        let fileName = "UITest - Office file"
+        app.typeText(fileName)
+        app.buttons["Créer"].tap()
+
+        // Leave office edition page
+        let officeBackButton = app.webViews.staticTexts["chevron_left_ios"]
+        XCTAssertTrue(officeBackButton.waitForExistence(timeout: 5), "Edition page should be displayed")
+        sleep(5)
+        officeBackButton.tap()
+
+        tabBar.buttons["Fichiers"].tap()
+        tearDownTest(directoryName: root)
+    }
+
+    func testOfflineFiles() {
+        let testName = "UITest - Offline files"
+
+        // Get number of offline files
+        app.tabBars.buttons["Accueil"].tap()
+        collectionViewsQuery/*@START_MENU_TOKEN@*/.buttons["Hors ligne"]/*[[".cells",".segmentedControls.buttons[\"Hors ligne\"]",".buttons[\"Hors ligne\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
+        let numberOfCells = collectionViewsQuery.cells.count
+
+        let root = createDirectoryWithPhoto(name: testName)
+
+        // Open Information sheet about imported photo
+        let imageCell = collectionViewsQuery.cells.firstMatch
+        imageCell.buttons["Menu"].tap()
+        app.swipeUp()
+        collectionViewsQuery.switches["0"].tap()
+
+        // Close panel
+        collectionViewsQuery.cells["Partage et droits"].tap()
+        app.buttons["Fermer"].tap()
+
+        // Go to offline files
+        app.tabBars.buttons["Accueil"].tap()
+        collectionViewsQuery.buttons["Hors ligne"].tap()
+
+        // Refresh table
+        let firstCell = collectionViewsQuery.cells.firstMatch
+        let start = firstCell.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+        let finish = firstCell.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 10))
+        start.press(forDuration: 0, thenDragTo: finish)
+        let newNumberOfCells = collectionViewsQuery.cells.count
+        XCTAssertGreaterThan(newNumberOfCells, numberOfCells, "File should be available offline")
+
+        tabBar.buttons["Fichiers"].tap()
+        tabBar.buttons["Fichiers"].tap()
+        tearDownTest(directoryName: root)
+    }
 }
