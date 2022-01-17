@@ -84,12 +84,12 @@ struct Endpoint {
 
 // MARK: - Proxies
 
-protocol AbstractDrive {
+public protocol AbstractDrive {
     var id: Int { get set }
 }
 
-class ProxyDrive: AbstractDrive {
-    var id: Int
+public class ProxyDrive: AbstractDrive {
+    public var id: Int
 
     init(id: Int) {
         self.id = id
@@ -98,16 +98,16 @@ class ProxyDrive: AbstractDrive {
 
 extension Drive: AbstractDrive {}
 
-protocol AbstractFile {
+public protocol AbstractFile {
     var driveId: Int { get set }
     var id: Int { get set }
 }
 
-class ProxyFile: AbstractFile {
-    var driveId: Int
-    var id: Int
+public class ProxyFile: AbstractFile {
+    public var driveId: Int
+    public var id: Int
 
-    init(driveId: Int, id: Int) {
+    public init(driveId: Int, id: Int) {
         self.driveId = driveId
         self.id = id
     }
