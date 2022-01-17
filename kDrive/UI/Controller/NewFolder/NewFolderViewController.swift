@@ -431,8 +431,14 @@ extension NewFolderViewController: FooterButtonDelegate {
             let onlyForMe = tableView.indexPathForSelectedRow?.row == 0
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-            let limitFileSize: Int? = getSetting(for: .optionSize) ? (getValue(for: .optionSize) as? Int) : nil
-            driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { file, dropBox, error in
+            let limitFileSize: BinarySize?
+            if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Int {
+                limitFileSize = .gigabytes(size)
+            } else {
+                limitFileSize = nil
+            }
+            let settings = DropBoxSettings(alias: nil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize, password: password, validUntil: validUntil)
+            driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings) { file, dropBox, error in
                 footer.footerButton.setLoading(false)
                 if let createdFile = file {
                     if !onlyForMe {
