@@ -58,7 +58,7 @@
                             <rect key="frame" x="0.0" y="0.0" width="272" height="44"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ug6-Jg-W6r" customClass="IKLabel" customModule="kDriveCore">
-                                    <rect key="frame" x="0.0" y="12.5" width="132" height="19.5"/>
+                                    <rect key="frame" x="0.0" y="12.5" width="123" height="19.5"/>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -67,60 +67,34 @@
                                     </userDefinedRuntimeAttributes>
                                 </label>
                                 <stackView opaque="NO" contentMode="scaleToFill" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="2wa-8Z-vq0">
-                                    <rect key="frame" x="152" y="10" width="120" height="24"/>
+                                    <rect key="frame" x="248" y="10" width="24" height="24"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VbJ-2M-JT8">
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XsA-NE-QKL">
                                             <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
                                             <constraints>
-                                                <constraint firstAttribute="width" constant="24" id="2WS-ut-cBc"/>
-                                                <constraint firstAttribute="height" constant="24" id="wV7-hl-HST"/>
+                                                <constraint firstAttribute="width" constant="24" id="AGd-Ie-alj"/>
+                                                <constraint firstAttribute="height" constant="24" id="HjG-WL-njQ"/>
                                             </constraints>
-                                            <inset key="imageEdgeInsets" minX="2" minY="2" maxX="2" maxY="2"/>
-                                            <state key="normal" image="folder-select"/>
-                                            <connections>
-                                                <action selector="moveButtonPressed:" destination="e6M-e1-pOF" eventType="touchUpInside" id="Dbt-oI-iX9"/>
-                                            </connections>
-                                        </button>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mSq-v0-iqP">
-                                            <rect key="frame" x="48" y="0.0" width="24" height="24"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="24" id="Iii-sf-Vb0"/>
-                                                <constraint firstAttribute="width" constant="24" id="u7A-C1-scf"/>
-                                            </constraints>
-                                            <inset key="imageEdgeInsets" minX="2" minY="2" maxX="2" maxY="2"/>
-                                            <state key="normal" image="delete"/>
-                                            <connections>
-                                                <action selector="deleteButtonPressed:" destination="e6M-e1-pOF" eventType="touchUpInside" id="Y3w-4w-gpt"/>
-                                            </connections>
-                                        </button>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bBI-DP-3sD">
-                                            <rect key="frame" x="96" y="0.0" width="24" height="24"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="24" id="VkO-Tb-GpZ"/>
-                                                <constraint firstAttribute="height" constant="24" id="Ygu-fK-tmj"/>
-                                            </constraints>
-                                            <inset key="imageEdgeInsets" minX="2" minY="2" maxX="2" maxY="2"/>
-                                            <state key="normal" image="menu"/>
-                                            <connections>
-                                                <action selector="menuButtonPressed:" destination="e6M-e1-pOF" eventType="touchUpInside" id="7xx-77-DOv"/>
-                                            </connections>
+                                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                            <state key="normal" title="Button" image="menu"/>
                                         </button>
                                     </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="24" id="krO-TL-byr"/>
+                                    </constraints>
                                 </stackView>
                             </subviews>
                             <color key="backgroundColor" name="backgroundColor"/>
                             <constraints>
                                 <constraint firstItem="Ug6-Jg-W6r" firstAttribute="centerY" secondItem="e6M-e1-pOF" secondAttribute="centerY" id="E5N-Lt-Hh3"/>
-                                <constraint firstItem="2wa-8Z-vq0" firstAttribute="leading" secondItem="Ug6-Jg-W6r" secondAttribute="trailing" constant="20" id="ORe-ka-PYr"/>
+                                <constraint firstItem="2wa-8Z-vq0" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ug6-Jg-W6r" secondAttribute="trailing" constant="8" id="ORe-ka-PYr"/>
                                 <constraint firstItem="2wa-8Z-vq0" firstAttribute="centerY" secondItem="e6M-e1-pOF" secondAttribute="centerY" id="VyE-hd-0pA"/>
                                 <constraint firstAttribute="height" constant="44" id="l8a-Wt-PMq"/>
                                 <constraint firstAttribute="trailing" secondItem="2wa-8Z-vq0" secondAttribute="trailing" id="vhG-dF-7FR"/>
                                 <constraint firstItem="Ug6-Jg-W6r" firstAttribute="leading" secondItem="e6M-e1-pOF" secondAttribute="leading" id="zdT-zb-E4A"/>
                             </constraints>
                             <connections>
-                                <outlet property="deleteButton" destination="mSq-v0-iqP" id="KgT-98-Tuk"/>
-                                <outlet property="moreButton" destination="bBI-DP-3sD" id="4ds-v0-qKm"/>
-                                <outlet property="moveButton" destination="VbJ-2M-JT8" id="ZTE-7w-9iA"/>
+                                <outlet property="actionsView" destination="2wa-8Z-vq0" id="qyy-pa-hdf"/>
                                 <outlet property="titleLabel" destination="Ug6-Jg-W6r" id="dGT-sM-YZQ"/>
                             </connections>
                         </view>
@@ -322,10 +296,8 @@
                 <outlet property="activityAvatar" destination="jaF-Io-w5o" id="Lzh-Zn-774"/>
                 <outlet property="activityLabel" destination="ATr-sQ-1YC" id="PbY-91-QQR"/>
                 <outlet property="activityListView" destination="ZS5-h5-V8H" id="ch7-Cz-4uR"/>
-                <outlet property="deleteButton" destination="mSq-v0-iqP" id="Esh-LL-vK2"/>
                 <outlet property="filterView" destination="rqf-ue-Zdn" id="Cho-G7-C6L"/>
                 <outlet property="listOrGridButton" destination="Mhu-wK-ohw" id="sjM-LQ-jwD"/>
-                <outlet property="moveButton" destination="VbJ-2M-JT8" id="F85-cd-yvl"/>
                 <outlet property="offlineView" destination="ycy-fJ-CPK" id="Xt5-lX-ucd"/>
                 <outlet property="selectView" destination="e6M-e1-pOF" id="BO0-S2-nem"/>
                 <outlet property="sortButton" destination="bAx-uw-yHB" id="EtT-hC-zAS"/>
@@ -358,8 +330,6 @@
     <resources>
         <image name="chevron-down" width="24" height="24"/>
         <image name="chevron-right" width="24" height="24"/>
-        <image name="delete" width="24" height="24"/>
-        <image name="folder-select" width="24" height="24"/>
         <image name="list" width="24" height="24"/>
         <image name="menu" width="24" height="24"/>
         <image name="offline" width="24" height="24"/>
