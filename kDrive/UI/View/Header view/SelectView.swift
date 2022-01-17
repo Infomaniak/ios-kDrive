@@ -20,10 +20,32 @@ import kDriveResources
 import UIKit
 
 class SelectView: UIView {
+    class MultipleSelectionActionButton: UIButton {
+        private(set) var action: MultipleSelectionAction
+        private var onTap: () -> Void
+
+        init(action: MultipleSelectionAction, onTap: @escaping () -> Void) {
+            self.action = action
+            self.onTap = onTap
+            super.init(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
+            addTarget(self, action: #selector(didTap), for: .touchUpInside)
+            setImage(action.icon.image, for: .normal)
+            accessibilityLabel = action.name
+            isEnabled = action.enabled
+        }
+
+        @objc private func didTap() {
+            onTap()
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+    }
+
     @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var moveButton: UIButton!
-    @IBOutlet weak var deleteButton: UIButton!
-    @IBOutlet weak var moreButton: UIButton!
+    @IBOutlet weak var actionsView: UIStackView!
 
     weak var delegate: FilesHeaderViewDelegate?
 
@@ -31,24 +53,20 @@ class SelectView: UIView {
         super.awakeFromNib()
         titleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
         titleLabel.accessibilityTraits = .header
-        moveButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMove
-        deleteButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDelete
-        moreButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
+    }
+
+    func setActions(_ actions: [MultipleSelectionAction]) {
+        actionsView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for action in actions {
+            var actionButton: MultipleSelectionActionButton!
+            actionButton = MultipleSelectionActionButton(action: action) { [weak self] in
+                self?.delegate?.multipleSelectionActionButtonPressed(actionButton)
+            }
+            actionsView.addArrangedSubview(actionButton)
+        }
     }
 
     func updateTitle(_ count: Int) {
         titleLabel.text = KDriveResourcesStrings.Localizable.fileListMultiSelectedTitle(count)
-    }
-
-    @IBAction func moveButtonPressed(_ sender: UIButton) {
-        delegate?.moveButtonPressed()
-    }
-
-    @IBAction func deleteButtonPressed(_ sender: UIButton) {
-        delegate?.deleteButtonPressed()
-    }
-
-    @IBAction func menuButtonPressed(_ sender: UIButton) {
-        delegate?.menuButtonPressed()
     }
 }
