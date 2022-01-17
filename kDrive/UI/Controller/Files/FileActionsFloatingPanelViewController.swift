@@ -321,13 +321,14 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             if file.visibility == .isCollaborativeFolder {
                 // Copy drop box link
                 setLoading(true, action: action, at: indexPath)
-                driveFileManager.apiFetcher.getDropBoxSettings(directory: file) { [weak self] response, _ in
-                    self?.setLoading(false, action: action, at: indexPath)
-                    if let dropBox = response?.data {
-                        self?.copyShareLinkToPasteboard(dropBox.url)
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                Task {
+                    do {
+                        let dropBox = try await driveFileManager.apiFetcher.getDropBox(directory: file)
+                        self.copyShareLinkToPasteboard(dropBox.url)
+                    } catch {
+                        UIConstants.showSnackBar(message: error.localizedDescription)
                     }
+                    self.setLoading(false, action: action, at: indexPath)
                 }
             } else if let link = file.shareLink {
                 // Copy share link

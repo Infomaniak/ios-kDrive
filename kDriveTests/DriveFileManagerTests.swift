@@ -453,7 +453,7 @@ final class DriveFileManagerTests: XCTestCase {
 
         setUpTest(testName: testName) { root in
             rootFile = root
-            DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: rootFile, name: "\(testName) - \(Date())", onlyForMe: true, password: "mot de passe", validUntil: nil, emailWhenFinished: true, limitFileSize: nil) { file, dropbox, error in
+            DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: rootFile, name: "\(testName) - \(Date())", onlyForMe: true, settings: DropBoxSettings(alias: nil, emailWhenFinished: true, limitFileSize: nil, password: "mot de passe", validUntil: nil)) { file, dropbox, error in
                 XCTAssertNotNil(file, TestsMessages.notNil("created file"))
                 XCTAssertNotNil(dropbox, TestsMessages.notNil("dropbox settings"))
                 XCTAssertNil(error, TestsMessages.noError)
