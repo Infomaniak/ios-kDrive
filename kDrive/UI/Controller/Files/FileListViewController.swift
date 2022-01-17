@@ -869,12 +869,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
             }
             let progressSnack = UIConstants.showSnackBar(message: message, duration: .infinite, action: IKSnackBar.Action(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                if let cancelId = cancelId {
-                    self.driveFileManager.cancelAction(cancelId: cancelId) { error in
-                        if let error = error {
-                            DDLogError("Cancel error: \(error)")
-                        }
-                    }
+                guard let cancelId = cancelId else { return }
+                Task {
+                    try await self.driveFileManager.undoAction(cancelId: cancelId)
                 }
             })
             AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { [weak self] actionProgress in
@@ -1185,12 +1182,10 @@ extension FileListViewController: UICollectionViewDropDelegate {
                                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                             } else {
                                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                                    if let cancelId = response?.id {
-                                        self.driveFileManager.cancelAction(cancelId: cancelId) { error in
-                                            if error == nil {
-                                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
-                                            }
-                                        }
+                                    guard let cancelId = response?.id else { return }
+                                    Task {
+                                        try await self.driveFileManager.undoAction(cancelId: cancelId)
+                                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
                                     }
                                 })
                             }
