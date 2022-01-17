@@ -239,9 +239,10 @@ class FileDetailViewController: UIViewController {
 
     func fetchNextComments() {
         commentsInfo.isLoading = true
-        driveFileManager.apiFetcher.getFileDetailComment(file: file, page: commentsInfo.page) { response, _ in
-            if let data = response?.data {
-                for comment in data {
+        Task {
+            do {
+                let comments = try await driveFileManager.apiFetcher.comments(file: file, page: commentsInfo.page)
+                for comment in comments {
                     self.comments.append(comment)
                     if let responses = comment.responses {
                         for response in responses {
@@ -252,10 +253,12 @@ class FileDetailViewController: UIViewController {
                 }
 
                 self.commentsInfo.page += 1
-                self.commentsInfo.hasNextPage = data.count == DriveApiFetcher.itemPerPage
+                self.commentsInfo.hasNextPage = comments.count == DriveApiFetcher.itemPerPage
                 if self.currentTab == .comments {
                     self.reloadTableView()
                 }
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
             self.commentsInfo.isLoading = false
         }
@@ -301,24 +304,13 @@ class FileDetailViewController: UIViewController {
     }
 
     @IBAction func addComment(_ sender: UIButton) {
-        let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { comment in
-            let group = DispatchGroup()
-            var newComment: Comment?
-            group.enter()
-            self.driveFileManager.apiFetcher.addCommentTo(file: self.file, comment: comment) { response, _ in
-                if let data = response?.data {
-                    newComment = data
-                }
-                group.leave()
-            }
-            _ = group.wait(timeout: .now() + Constants.timeout)
-            DispatchQueue.main.async {
-                if let comment = newComment {
-                    self.comments.insert(comment, at: 0)
-                    self.tableView.reloadSections([1], with: .automatic)
-                } else {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorAddComment)
-                }
+        let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { body in
+            do {
+                let newComment = try await self.driveFileManager.apiFetcher.addComment(to: self.file, body: body)
+                self.comments.insert(newComment, at: 0)
+                self.tableView.reloadSections([1], with: .automatic)
+            } catch {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorAddComment)
             }
         }
         present(messageAlert, animated: true)
@@ -577,19 +569,11 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { _, _, completionHandler in
+            let comment = self.comments[indexPath.row]
             let deleteAlert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: KDriveResourcesStrings.Localizable.modalCommentDeleteDescription, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
-                let group = DispatchGroup()
-                var success = false
-                group.enter()
-                self.driveFileManager.apiFetcher.deleteComment(file: self.file, comment: self.comments[indexPath.row]) { response, _ in
-                    if let data = response?.data {
-                        success = data
-                    }
-                    group.leave()
-                }
-                _ = group.wait(timeout: .now() + Constants.timeout)
-                DispatchQueue.main.async {
-                    if success {
+                do {
+                    let response = try await self.driveFileManager.apiFetcher.deleteComment(file: self.file, comment: comment)
+                    if response {
                         let commentToDelete = self.comments[indexPath.row]
                         let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
                             return IndexPath(row: indexPath.row + index, section: indexPath.section)
@@ -604,10 +588,14 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                         } else {
                             self.tableView.reloadSections(IndexSet([1]), with: .automatic)
                         }
+                        completionHandler(true)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
+                        completionHandler(false)
                     }
-                    completionHandler(success)
+                } catch {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
+                    completionHandler(false)
                 }
             } cancelHandler: {
                 completionHandler(false)
@@ -616,25 +604,21 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let editAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
-            let editAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.modalCommentAddTitle, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { comment in
-                let group = DispatchGroup()
-                var success = false
-                group.enter()
-                self.driveFileManager.apiFetcher.editComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { response, _ in
-                    if let data = response?.data {
-                        success = data
-                    }
-                    group.leave()
-                }
-                _ = group.wait(timeout: .now() + Constants.timeout)
-                DispatchQueue.main.async {
-                    if success {
-                        self.comments[indexPath.row].body = comment
+            let comment = self.comments[indexPath.row]
+            let editAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.modalCommentAddTitle, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { body in
+                do {
+                    let response = try await self.driveFileManager.apiFetcher.editComment(file: self.file, body: body, comment: comment)
+                    if response {
+                        self.comments[indexPath.row].body = body
                         self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                        completionHandler(true)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+                        completionHandler(false)
                     }
-                    completionHandler(success)
+                } catch {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+                    completionHandler(false)
                 }
             } cancelHandler: {
                 completionHandler(false)
@@ -643,21 +627,23 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let answerAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
-            let answerAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { comment in
-                self.driveFileManager.apiFetcher.answerComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { response, _ in
-                    if let data = response?.data {
-                        data.isResponse = true
-                        self.comments.insert(data, at: indexPath.row + 1)
+            let answerAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { body in
+                let comment = self.comments[indexPath.row]
+                Task {
+                    do {
+                        let reply = try await self.driveFileManager.apiFetcher.answerComment(file: self.file, body: body, comment: comment)
+                        reply.isResponse = true
+                        self.comments.insert(reply, at: indexPath.row + 1)
                         let parentComment = self.comments[indexPath.row]
                         if parentComment.responses != nil {
-                            parentComment.responses?.insert(data, at: 0)
+                            parentComment.responses?.insert(reply, at: 0)
                         } else {
-                            parentComment.responses = [data]
+                            parentComment.responses = [reply]
                         }
                         parentComment.responsesCount += 1
                         self.tableView.insertRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .automatic)
                         completionHandler(true)
-                    } else {
+                    } catch {
                         completionHandler(false)
                     }
                 }
@@ -786,10 +772,17 @@ extension FileDetailViewController: FileLocationDelegate {
 
 extension FileDetailViewController: FileCommentDelegate {
     func didLikeComment(comment: Comment, index: Int) {
-        driveFileManager.apiFetcher.likeComment(file: file, liked: comment.liked, comment: comment) { _, _ in
-            self.comments[index].likesCount = !self.comments[index].liked ? self.comments[index].likesCount + 1 : self.comments[index].likesCount - 1
-            self.comments[index].liked = !self.comments[index].liked
-            self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)
+        Task {
+            do {
+                let response = try await driveFileManager.apiFetcher.likeComment(file: file, liked: comment.liked, comment: comment)
+                if response {
+                    self.comments[index].likesCount = !self.comments[index].liked ? self.comments[index].likesCount + 1 : self.comments[index].likesCount - 1
+                    self.comments[index].liked = !self.comments[index].liked
+                    self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)
+                }
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
+            }
         }
     }
 
