@@ -71,7 +71,12 @@ class MultipleSelectionFileListViewModel {
         }
     }
 
-    @Published var selectedCount: Int
+    @Published var selectedCount: Int {
+        didSet {
+            updateActionButtons()
+        }
+    }
+
     @Published var leftBarButtons: [MultipleSelectionBarButtonType]?
     @Published var rightBarButtons: [MultipleSelectionBarButtonType]?
     @Published var multipleSelectionActions: [MultipleSelectionAction]
@@ -129,6 +134,30 @@ class MultipleSelectionFileListViewModel {
             onMoreButtonPressed?(Array(selectedItems))
         default:
             break
+        }
+    }
+
+    private func updateActionButtons() {
+        let notEmpty = selectedCount > 0
+        let canMove = selectedItems.allSatisfy { $0.rights?.move ?? false }
+        let canDelete = selectedItems.allSatisfy { $0.rights?.delete ?? false }
+
+        for i in 0 ..< multipleSelectionActions.count {
+            var updatedAction: MultipleSelectionAction
+            switch multipleSelectionActions[i] {
+            case .move:
+                updatedAction = MultipleSelectionAction.move
+                updatedAction.enabled = notEmpty && canMove
+            case .delete:
+                updatedAction = MultipleSelectionAction.delete
+                updatedAction.enabled = notEmpty && canDelete
+            case .more:
+                updatedAction = MultipleSelectionAction.more
+                updatedAction.enabled = notEmpty
+            default:
+                updatedAction = multipleSelectionActions[i]
+            }
+            multipleSelectionActions[i] = updatedAction
         }
     }
 
