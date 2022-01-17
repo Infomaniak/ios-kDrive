@@ -242,7 +242,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
             let action = actions[indexPath.item]
-            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
             return cell
         default:
             return super.collectionView(collectionView, cellForItemAt: indexPath)

@@ -70,7 +70,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         }
     }
 
-    func configure(with action: FloatingPanelAction, filesAreFavorite: Bool, filesAvailableOffline: Bool, filesAreDirectory: Bool, showProgress: Bool, archiveId: String?) {
+    func configure(with action: FloatingPanelAction, filesAreFavorite: Bool, filesAvailableOffline: Bool, filesAreDirectory: Bool, containsDirectory: Bool, showProgress: Bool, archiveId: String?) {
         configure(with: action, file: nil, showProgress: false)
 
         if action == .favorite && filesAreFavorite {
@@ -90,6 +90,9 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
             } else {
                 setProgress(showProgress ? -1 : nil)
             }
+        } else if action == .folderColor {
+            // Disable cell if all selected items are files
+            setEnabled(containsDirectory)
         }
     }
 
