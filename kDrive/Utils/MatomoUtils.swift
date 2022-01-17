@@ -78,13 +78,13 @@ class MatomoUtils {
 
     // MARK: - DropBox
 
-    static func trackDropBoxSettings(emailEnabled: Bool, passwordEnabled: Bool, dateEnabled: Bool, sizeEnabled: Bool, size: Int?) {
-        track(eventWithCategory: .dropbox, name: "switchEmailOnFileImport", value: emailEnabled)
+    static func trackDropBoxSettings(_ settings: DropBoxSettings, passwordEnabled: Bool) {
+        track(eventWithCategory: .dropbox, name: "switchEmailOnFileImport", value: settings.emailWhenFinished)
         track(eventWithCategory: .dropbox, name: "switchProtectWithPassword", value: passwordEnabled)
-        track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: dateEnabled)
-        track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: sizeEnabled)
-        if sizeEnabled, let size = size {
-            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size))
+        track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: settings.validUntil != nil)
+        track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: settings.limitFileSize != nil)
+        if let size = settings.limitFileSize {
+            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size.toGigabytes))
         }
     }
 
