@@ -20,20 +20,98 @@ import Foundation
 
 public class DropBox: Codable {
     public var id: Int
-    public var alias: String
-    public var emailWhenFinished: Bool
-    public var limitFileSize: Int?
-    public var password: Bool
     public var url: String
-    public var validUntil: Date?
+    public var capabilities: DropBoxCapabilities
+}
+
+public class DropBoxCapabilities: Codable {
+    public var hasPassword: Bool
+    public var hasNotification: Bool
+    public var hasValidity: Bool
+    public var hasSizeLimit: Bool
+    public var validity: DropBoxValidity
+    public var size: DropBoxSize
 
     enum CodingKeys: String, CodingKey {
-        case id
-        case alias
-        case emailWhenFinished = "email_when_finished"
-        case limitFileSize = "limit_file_size"
-        case password
-        case url
-        case validUntil = "valid_until"
+        case hasPassword = "has_password"
+        case hasNotification = "has_notification"
+        case hasValidity = "has_validity"
+        case hasSizeLimit = "has_size_limit"
+        case validity
+        case size
+    }
+}
+
+public class DropBoxValidity: Codable {
+    public var date: Date?
+    public var hasExpired: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case hasExpired = "has_expired"
+    }
+}
+
+public class DropBoxSize: Codable {
+    public var limit: Int?
+    public var remaining: Int?
+}
+
+public enum BinarySize: Encodable {
+    case bytes(Int)
+    case kilobytes(Int)
+    case megabytes(Int)
+    case gigabytes(Int)
+
+    public var toBytes: Int {
+        switch self {
+        case .bytes(let bytes):
+            return bytes
+        case .kilobytes(let kilobytes):
+            return kilobytes * 1_024
+        case .megabytes(let megabytes):
+            return megabytes * 1_048_576
+        case .gigabytes(let gigabytes):
+            return gigabytes * 1_073_741_824
+        }
+    }
+
+    public var toGigabytes: Int {
+        switch self {
+        case .bytes(let bytes):
+            return bytes / 1_073_741_824
+        case .kilobytes(let kilobytes):
+            return kilobytes / 1_048_576
+        case .megabytes(let megabytes):
+            return megabytes / 1_024
+        case .gigabytes(let gigabytes):
+            return gigabytes
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(toBytes)
+    }
+}
+
+public struct DropBoxSettings: Encodable {
+    /// Alias of the dropbox
+    public var alias: String?
+    /// Send an email when done
+    public var emailWhenFinished: Bool
+    /// Limit total size of folder (bytes)
+    public var limitFileSize: BinarySize?
+    /// Password for protecting the dropbox
+    public var password: String?
+    /// Date of validity
+    public var validUntil: Date?
+
+    public init(alias: String?, emailWhenFinished: Bool, limitFileSize: BinarySize?, password: String?, validUntil: Date?) {
+        self.alias = alias
+        self.emailWhenFinished = emailWhenFinished
+        self.limitFileSize = limitFileSize
+        self.password = password
+        self.validUntil = validUntil
     }
 }
