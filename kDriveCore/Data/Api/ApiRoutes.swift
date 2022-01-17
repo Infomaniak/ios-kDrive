@@ -245,10 +245,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/1/upload/token"
     }
 
-    public static func cancelAction(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/cancel"
-    }
-
     public static func convertFile(file: File) -> String {
         return "\(fileURL(file: file))convert"
     }
@@ -259,14 +255,6 @@ public enum ApiRoutes {
 
     public static func fileCount(driveId: Int, fileId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/\(fileId)/count"
-    }
-
-    public static func downloadArchiveLink(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/archive"
-    }
-
-    public static func downloadArchive(driveId: Int, archiveId: String) -> String {
-        return "\(driveApiUrl)\(driveId)/file/archive/\(archiveId)/download"
     }
 
     public static func downloadFileAsPdf(file: File) -> String {

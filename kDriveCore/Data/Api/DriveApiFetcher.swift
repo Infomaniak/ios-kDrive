@@ -625,11 +625,9 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .post, completion: completion)
     }
 
-    public func cancelAction(driveId: Int, cancelId: String, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.cancelAction(driveId: driveId)
-        let body: [String: Any] = ["cancel_id": cancelId]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    @discardableResult
+    public func undoAction(drive: AbstractDrive, cancelId: String) async throws -> EmptyResponse {
+        try await perform(request: authenticatedRequest(.undoAction(drive: drive), method: .post, parameters: ["cancel_id": cancelId])).data
     }
 
     public func convertFile(file: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -658,11 +656,8 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
-    public func getDownloadArchiveLink(driveId: Int, for files: [File], completion: @escaping (ApiResponse<DownloadArchiveResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.downloadArchiveLink(driveId: driveId)
-        let body: [String: Any] = ["file_ids": files.map(\.id)]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func buildArchive(drive: AbstractDrive, for files: [File]) async throws -> DownloadArchiveResponse {
+        try await perform(request: authenticatedRequest(.buildArchive(drive: drive), method: .post, parameters: ["file_ids": files.map(\.id)])).data
     }
 
     public func updateColor(directory: File, color: String) async throws -> Bool {
