@@ -162,68 +162,20 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .post, parameters: body, completion: completion)
     }
 
-    // swiftlint:disable function_parameter_count
-    public func setupDropBox(directory: File,
-                             password: String?,
-                             validUntil: Date?,
-                             emailWhenFinished: Bool,
-                             limitFileSize: Int?,
-                             completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
-        let url = ApiRoutes.setupDropBox(directory: directory)
-        var sizeLimit: Int?
-        if let limitFileSize = limitFileSize {
-            // Convert gigabytes to bytes
-            let size = Double(limitFileSize) * 1_073_741_824
-            sizeLimit = Int(size)
-        }
-        var body: [String: Any] = [
-            "password": password ?? "",
-            "email_when_finished": emailWhenFinished,
-            "limit_file_size": sizeLimit ?? ""
-        ]
-        if let validUntil = validUntil?.timeIntervalSince1970 {
-            body.updateValue(Int(validUntil), forKey: "valid_until")
-        }
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func createDropBox(directory: File, settings: DropBoxSettings) async throws -> DropBox {
+        try await perform(request: authenticatedRequest(.dropbox(file: directory), method: .post, parameters: settings)).data
     }
 
-    public func getDropBoxSettings(directory: File, completion: @escaping (ApiResponse<DropBox>?, Error?) -> Void) {
-        let url = ApiRoutes.setupDropBox(directory: directory)
-
-        makeRequest(url, method: .get, completion: completion)
+    public func getDropBox(directory: File) async throws -> DropBox {
+        try await perform(request: authenticatedRequest(.dropbox(file: directory))).data
     }
 
-    // swiftlint:disable function_parameter_count
-    public func updateDropBox(directory: File,
-                              password: String?,
-                              validUntil: Date?,
-                              emailWhenFinished: Bool,
-                              limitFileSize: Int?,
-                              completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.setupDropBox(directory: directory)
-        var sizeLimit: Int?
-        if let limitFileSize = limitFileSize {
-            // Convert gigabytes to bytes
-            let size = Double(limitFileSize) * 1_073_741_824
-            sizeLimit = Int(size)
-        }
-        var timestamp: Int?
-        if let validUntil = validUntil?.timeIntervalSince1970 {
-            timestamp = Int(validUntil)
-        }
-        var body: [String: Any] = ["email_when_finished": emailWhenFinished, "limit_file_size": sizeLimit ?? "", "valid_until": timestamp ?? ""]
-        if let password = password {
-            body["password"] = password
-        }
-
-        makeRequest(url, method: .put, parameters: body, completion: completion)
+    public func updateDropBox(directory: File, settings: DropBoxSettings) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.dropbox(file: directory), method: .put, parameters: settings)).data
     }
 
-    public func disableDropBox(directory: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.setupDropBox(directory: directory)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func deleteDropBox(directory: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.dropbox(file: directory), method: .delete)).data
     }
 
     public func getFileListForDirectory(driveId: Int, parentId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -714,8 +666,8 @@ class SyncedAuthenticator: OAuthAuthenticator {
 class NetworkRequestRetrier: RequestInterceptor {
     let maxRetry: Int
     private var retriedRequests: [String: Int] = [:]
-    let timeout = -1001
-    let connectionLost = -1005
+    let timeout = -1_001
+    let connectionLost = -1_005
 
     init(maxRetry: Int = 3) {
         self.maxRetry = maxRetry
