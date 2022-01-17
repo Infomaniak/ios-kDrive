@@ -94,15 +94,14 @@ final class DriveApiTests: XCTestCase {
         }
     }
 
-    func initDropbox(testName: String, completion: @escaping (File, File) -> Void) {
-        setUpTest(testName: testName) { rootFile in
-            self.createTestDirectory(name: "dropbox-\(Date())", parentDirectory: rootFile) { dir in
-                self.currentApiFetcher.setupDropBox(directory: dir, password: "", validUntil: nil, emailWhenFinished: false, limitFileSize: nil) { response, _ in
-                    XCTAssertNotNil(response?.data, TestsMessages.failedToCreate("dropbox"))
-                    completion(rootFile, dir)
-                }
-            }
+    func initDropbox(testName: String) async -> (File, File) {
+        let rootFile = await setUpTest(testName: testName)
+        let dir = await createTestDirectory(name: "dropbox-\(Date())", parentDirectory: rootFile)
+        let dropBox = try? await currentApiFetcher.createDropBox(directory: dir, settings: DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: nil, password: nil, validUntil: nil))
+        guard dropBox != nil else {
+            fatalError("Failed to create dropbox")
         }
+        return (rootFile, dir)
     }
 
     func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
@@ -219,89 +218,47 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testSetupDrobBox() {
-        let testName = "Setup dropbox"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+    func testCreateDropBox() async {
+        let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: nil, password: "password", validUntil: nil)
 
-        let password = "password"
-        let validUntil: Date? = nil
-        let limitFileSize: Int? = nil
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.createTestDirectory(name: testName, parentDirectory: rootFile) { dir in
-                self.currentApiFetcher.setupDropBox(directory: dir, password: password, validUntil: validUntil, emailWhenFinished: false, limitFileSize: limitFileSize) { response, error in
-                    XCTAssertNotNil(response?.data, TestsMessages.notNil("dropbox"))
-                    XCTAssertNil(error, TestsMessages.noError)
-                    let dropbox = response!.data!
-                    XCTAssertTrue(dropbox.password, "Dropbox should have a password")
-                    expectation.fulfill()
-                }
-            }
+        let rootFile = await setUpTest(testName: "Create dropbox")
+        let dir = await createTestDirectory(name: "Create dropbox", parentDirectory: rootFile)
+        do {
+            let dropBox = try await currentApiFetcher.createDropBox(directory: dir, settings: settings)
+            XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropbox should have a password")
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
-    func testDropBoxSetting() {
-        let testName = "Dropbox settings"
-        let expectations = [
-            (name: "Get dropbox settings", expectation: XCTestExpectation(description: "Get dropbox settings")),
-            (name: "Update dropbox settings", expectation: XCTestExpectation(description: "Update dropbox settings"))
-        ]
-        var rootFile = File()
-
-        let password = "newPassword"
-        let validUntil: Date? = Date()
-        let limitFileSize: Int? = 5_368_709_120
-
-        initDropbox(testName: testName) { root, dropbox in
-            rootFile = root
-
-            self.currentApiFetcher.updateDropBox(directory: dropbox, password: password, validUntil: validUntil, emailWhenFinished: false, limitFileSize: limitFileSize) { _, error in
-                XCTAssertNil(error, TestsMessages.noError)
-                self.currentApiFetcher.getDropBoxSettings(directory: dropbox) { dropboxSetting, error in
-                    XCTAssertNotNil(dropboxSetting?.data, TestsMessages.notNil("dropbox"))
-                    XCTAssertNil(error, TestsMessages.noError)
-                    expectations[0].expectation.fulfill()
-
-                    let dropbox = dropboxSetting!.data!
-                    XCTAssertTrue(dropbox.password, "Password should be true")
-                    XCTAssertNotNil(dropbox.validUntil, TestsMessages.notNil("ValidUntil"))
-                    XCTAssertNotNil(dropbox.limitFileSize, TestsMessages.notNil("LimitFileSize"))
-                    expectations[1].expectation.fulfill()
-                }
-            }
+    func testGetDropBox() async {
+        let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: .gigabytes(5), password: "newPassword", validUntil: Date())
+        let (rootFile, dropBoxDir) = await initDropbox(testName: "Dropbox settings")
+        do {
+            let response = try await currentApiFetcher.updateDropBox(directory: dropBoxDir, settings: settings)
+            XCTAssertTrue(response, "API should return true")
+            let dropBox = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
+            XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropxbox should have a password")
+            XCTAssertTrue(dropBox.capabilities.hasValidity, "Dropbox should have a validity")
+            XCTAssertNotNil(dropBox.capabilities.validity.date, "Validity shouldn't be nil")
+            XCTAssertTrue(dropBox.capabilities.hasSizeLimit, "Dropbox should have a size limit")
+            XCTAssertNotNil(dropBox.capabilities.size.limit, "Size limit shouldn't be nil")
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
-    func testDisableDropBox() {
-        let testName = "Disable dropbox"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initDropbox(testName: testName) { root, dropbox in
-            rootFile = root
-            self.currentApiFetcher.getDropBoxSettings(directory: dropbox) { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("dropbox"))
-                XCTAssertNil(error, TestsMessages.noError)
-                self.currentApiFetcher.disableDropBox(directory: dropbox) { _, disableError in
-                    XCTAssertNil(disableError, TestsMessages.noError)
-                    self.currentApiFetcher.getDropBoxSettings(directory: dropbox) { invalidDropbox, invalidError in
-                        XCTAssertNil(invalidDropbox?.data, "There should be no dropbox")
-                        XCTAssertNil(invalidError, TestsMessages.noError)
-                        expectation.fulfill()
-                    }
-                }
-            }
+    func testDeleteDropBox() async {
+        let (rootFile, dropBoxDir) = await initDropbox(testName: "Delete dropbox")
+        do {
+            _ = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
+            let response = try await currentApiFetcher.deleteDropBox(directory: dropBoxDir)
+            XCTAssertTrue(response, "API should return true")
+        } catch {
+            XCTFail("There should be no error")
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
 
