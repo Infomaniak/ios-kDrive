@@ -99,7 +99,7 @@ public class DownloadArchiveOperation: Operation {
     override public func main() {
         DDLogInfo("[DownloadOperation] Downloading Archive of files \(archiveId) with session \(urlSession.identifier)")
 
-        let url = URL(string: ApiRoutes.downloadArchive(driveId: driveFileManager.drive.id, archiveId: archiveId))!
+        let url = Endpoint.getArchive(drive: driveFileManager.drive, uuid: archiveId).url
 
         if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, _ in
