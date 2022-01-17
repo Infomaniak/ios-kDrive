@@ -318,15 +318,12 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     @IBAction func moveButtonPressed(_ sender: Any) {
-        moveSelectedItems()
     }
 
     @IBAction func deleteButtonPressed(_ sender: Any) {
-        deleteSelectedItems()
     }
 
     @IBAction func moreButtonPressed(_ sender: Any) {
-        showMenuForSelection()
     }
 
     override func getNewChanges() {
