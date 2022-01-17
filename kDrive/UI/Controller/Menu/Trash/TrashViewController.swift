@@ -70,14 +70,6 @@ class TrashViewController: FileListViewController {
         forceRefresh()
     }
 
-    override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
-        super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
-        // Hide move button in multiple selection
-        headerView.selectView.moveButton.isHidden = true
-        // Enable/disable empty trash button
-        emptyTrashBarButtonItem.isEnabled = !isEmptyViewHidden
-    }
-
     // MARK: - Actions
 
     @IBAction func emptyTrash(_ sender: UIBarButtonItem) {
@@ -204,17 +196,6 @@ class TrashViewController: FileListViewController {
         showFloatingPanel(files: [file])
     }
 
-    // MARK: - Files header view delegate
-
-    #if !ISEXTENSION
-        override func deleteButtonPressed() {
-            deleteFiles(Array(selectedItems))
-        }
-
-        override func menuButtonPressed() {
-            showFloatingPanel(files: Array(selectedItems))
-        }
-    #endif
 }
 
 // MARK: - Trash options delegate
