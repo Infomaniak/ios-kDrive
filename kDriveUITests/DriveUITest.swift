@@ -130,6 +130,7 @@ class AppUITest: XCTestCase {
     }
 
     func closePanel() {
+        app.swipeDown()
         app.navigationBars.firstMatch.coordinate(withNormalizedOffset: .zero).tap()
     }
 
@@ -163,6 +164,27 @@ class AppUITest: XCTestCase {
         tablesQuery.buttons["Emplacement"].tap()
 
         tearDownTest(directoryName: newName)
+    }
+
+    func testDuplicateFile() {
+        let testName = "UITest - Duplicate file"
+
+        let root = setUpTest(testName: testName)
+        app.tabBars.buttons["Fichiers"].tap()
+
+        openFileMenu(named: root)
+        app.swipeUp()
+
+        collectionViewsQuery.staticTexts["Dupliquer"].tap()
+        app.buttons["Copier"].tap()
+        closePanel()
+
+        XCTAssertTrue(app.staticTexts[root].exists, "File should exist")
+        let duplicatedFile = "\(root) - Copie"
+        XCTAssertTrue(app.staticTexts[duplicatedFile].exists, "Duplicated file should exist")
+
+        removeDirectory(name: duplicatedFile)
+        tearDownTest(directoryName: root)
     }
 
     func testShareFile() {
