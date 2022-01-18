@@ -532,23 +532,4 @@ final class DriveFileManagerTests: XCTestCase {
         wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
         tearDownTest(directory: rootFile)
     }
-
-    func testUpdateFolderColor() {
-        let testName = "Update folder color"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { file in
-            rootFile = file
-            let folderColor = "#001227"
-            DriveFileManagerTests.driveFileManager.updateFolderColor(file: file, color: folderColor) { error in
-                XCTAssertNil(error, TestsMessages.noError)
-                XCTAssertEqual(file.color, folderColor, "Folder color should be equal to \(folderColor)")
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
 }

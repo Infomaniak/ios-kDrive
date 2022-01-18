@@ -33,7 +33,7 @@ public protocol AccountManagerDelegate: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate {
-    private static let appIdentifierPrefix = "864VDCS2QY." //Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
+    private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
     public static let appGroup = "group." + group
     public static let accessGroup: String = AccountManager.appIdentifierPrefix + AccountManager.group

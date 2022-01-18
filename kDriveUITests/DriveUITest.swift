@@ -25,6 +25,9 @@ class AppUITest: XCTestCase {
     var tabBar: XCUIElementQuery {
         return app.tabBars
     }
+    var navigationBars: XCUIElementQuery {
+        return app.navigationBars
+    }
     var tablesQuery: XCUIElementQuery {
         return app.tables
     }
@@ -69,7 +72,7 @@ class AppUITest: XCTestCase {
     // MARK: - Helping methods
 
     func createDirectory(name: String) -> String {
-        tabBar.buttons["Ajouter"].tap()
+        openTabBarElement(.Add)
         let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
         folderCell.tap()
         folderCell.tap()
@@ -90,16 +93,16 @@ class AppUITest: XCTestCase {
     func createDirectoryWithPhoto(name: String) -> String {
         let directory = createDirectory(name: name)
 
-        tabBar.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
         enterInDirectory(named: directory)
 
         // Import photo from photo library
-        tabBar.buttons["Ajouter"].tap()
+        openTabBarElement(.Add)
         tablesQuery.staticTexts["Importer une photo ou une vidéo"].tap()
         let imageToImport = app.scrollViews.images.element(boundBy: 0)
         XCTAssertTrue(imageToImport.waitForExistence(timeout: 4), "Images should be displayed")
         imageToImport.tap()
-        app.navigationBars["Photos"].buttons["Add"].tap()
+        navigationBars["Photos"].buttons["Add"].tap()
 
         return directory
     }
@@ -111,16 +114,24 @@ class AppUITest: XCTestCase {
         app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
     }
 
-    func openFileMenu(named name: String) {
+    func openFileMenu(named name: String, fullSize: Bool = false) {
         let file = collectionViewsQuery.cells.containing(.staticText, identifier: name)
         file.buttons["Menu"].tap()
+        if fullSize {
+            app.swipeUp()
+        }
+    }
+
+    func closeFileMenu() {
+        app.swipeDown()
+        app.navigationBars.firstMatch.coordinate(withNormalizedOffset: .zero).tap()
     }
 
     func enterInDirectory(named name: String) {
         collectionViewsQuery.cells.containing(.staticText, identifier: name).element.tap()
     }
 
-    func shareMailWithMail(address mail: String) {
+    func shareWithMail(address mail: String) {
         let emailTextField = tablesQuery.textFields["Invitez un utilisateur ou une adresse mail…"]
         emailTextField.tap()
         emailTextField.typeText(mail)
@@ -129,9 +140,25 @@ class AppUITest: XCTestCase {
         tablesQuery.buttons["Partager"].tap()
     }
 
-    func closePanel() {
-        app.swipeDown()
-        app.navigationBars.firstMatch.coordinate(withNormalizedOffset: .zero).tap()
+    func openTabBarElement(_ element: TabBarElement) {
+        let UIElement: XCUIElement
+        switch element {
+        case .Home:
+            UIElement = tabBar.buttons["Accueil"]
+        case .Files:
+            UIElement = tabBar.buttons["Fichiers"]
+        case .Add:
+            UIElement = tabBar.buttons["Ajouter"]
+        case .Favorites:
+            UIElement = tabBar.buttons["Favoris"]
+        }
+        UIElement.tap()
+    }
+
+    // MARK: - Helping structurs
+
+    enum TabBarElement {
+        case Home, Files, Add, Favorites
     }
 
     // MARK: - Tests methods
@@ -140,11 +167,10 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Rename file"
 
         let root = setUpTest(testName: testName)
-        tabBar.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
 
         // Open sheet with file details
-        openFileMenu(named: root)
-        app.swipeUp()
+        openFileMenu(named: root, fullSize: true)
 
         // Rename file
         sleep(2)
@@ -157,11 +183,8 @@ class AppUITest: XCTestCase {
         sleep(1)
 
         // Check new name
-        collectionViewsQuery.cells.staticTexts["Informations"].tap()
+        closeFileMenu()
         XCTAssertTrue(app.staticTexts[newName].exists, "File must be renamed")
-
-        // Return to files list
-        tablesQuery.buttons["Emplacement"].tap()
 
         tearDownTest(directoryName: newName)
     }
@@ -170,14 +193,14 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Duplicate file"
 
         let root = setUpTest(testName: testName)
-        app.tabBars.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
 
         openFileMenu(named: root)
         app.swipeUp()
 
         collectionViewsQuery.staticTexts["Dupliquer"].tap()
         app.buttons["Copier"].tap()
-        closePanel()
+        closeFileMenu()
 
         XCTAssertTrue(app.staticTexts[root].exists, "File should exist")
         let duplicatedFile = "\(root) - Copie"
@@ -191,7 +214,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Share file"
 
         let root = setUpTest(testName: testName)
-        tabBar.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
 
         openFileMenu(named: root)
         collectionViewsQuery.cells.staticTexts["Partage et droits"].tap()
@@ -265,9 +288,9 @@ class AppUITest: XCTestCase {
         tablesQuery.buttons["Informations"].tap()
         app.swipeUp()
         tablesQuery.buttons["Emplacement"].tap()
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        navigationBars.buttons.element(boundBy: 0).tap()
+        navigationBars.buttons.element(boundBy: 0).tap()
+        navigationBars.buttons.element(boundBy: 0).tap()
 
         tearDownTest(directoryName: root)
     }
@@ -277,8 +300,8 @@ class AppUITest: XCTestCase {
 
         // Create shared directory
         let root = "\(testName)-\(Date())"
-        tabBar.buttons["Fichiers"].tap()
-        tabBar.buttons["Ajouter"].tap()
+        openTabBarElement(.Files)
+        openTabBarElement(.Add)
         let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
         folderCell.tap()
         folderCell.tap()
@@ -291,7 +314,7 @@ class AppUITest: XCTestCase {
 
         // Invite user with mail
         let userMail = "kdriveiostests+uitest@ik.me"
-        shareMailWithMail(address: userMail)
+        shareWithMail(address: userMail)
         app.buttons["Fermer"].tap()
 
         // Check share rights
@@ -310,11 +333,11 @@ class AppUITest: XCTestCase {
         let root = setUpTest(testName: testName)
 
         // Enter in root directory
-        tabBar.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
         enterInDirectory(named: root)
 
         // Create office file
-        tabBar.buttons["Ajouter"].tap()
+        openTabBarElement(.Add)
         tablesQuery.staticTexts["Document"].tap()
         let fileName = "UITest - Office file"
         app.typeText(fileName)
@@ -326,7 +349,7 @@ class AppUITest: XCTestCase {
         sleep(5)
         officeBackButton.tap()
 
-        tabBar.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
         tearDownTest(directoryName: root)
     }
 
@@ -334,8 +357,8 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Offline files"
 
         // Get number of offline files
-        app.tabBars.buttons["Accueil"].tap()
-        collectionViewsQuery/*@START_MENU_TOKEN@*/.buttons["Hors ligne"]/*[[".cells",".segmentedControls.buttons[\"Hors ligne\"]",".buttons[\"Hors ligne\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
+        openTabBarElement(.Home)
+        collectionViewsQuery.buttons["Hors ligne"].tap()
         let numberOfCells = collectionViewsQuery.cells.count
 
         let root = createDirectoryWithPhoto(name: testName)
@@ -345,13 +368,10 @@ class AppUITest: XCTestCase {
         imageCell.buttons["Menu"].tap()
         app.swipeUp()
         collectionViewsQuery.switches["0"].tap()
-
-        // Close panel
-        collectionViewsQuery.cells["Partage et droits"].tap()
-        app.buttons["Fermer"].tap()
+        closeFileMenu()
 
         // Go to offline files
-        app.tabBars.buttons["Accueil"].tap()
+        openTabBarElement(.Home)
         collectionViewsQuery.buttons["Hors ligne"].tap()
 
         // Refresh table
@@ -359,11 +379,12 @@ class AppUITest: XCTestCase {
         let start = firstCell.coordinate(withNormalizedOffset: .zero)
         let finish = firstCell.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 10))
         start.press(forDuration: 0, thenDragTo: finish)
+        sleep(1)
         let newNumberOfCells = collectionViewsQuery.cells.count
         XCTAssertGreaterThan(newNumberOfCells, numberOfCells, "File should be available offline")
 
-        tabBar.buttons["Fichiers"].tap()
-        tabBar.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
+        openTabBarElement(.Files)
         tearDownTest(directoryName: root)
     }
 
@@ -384,7 +405,7 @@ class AppUITest: XCTestCase {
         let numberOfFilesAfterCancel = collectionViewsQuery.cells.count
         XCTAssertGreaterThan(numberOfFilesAfterCancel, numberOfFiles, "Photo should be back in directory")
 
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        navigationBars.buttons.element(boundBy: 0).tap()
         tearDownTest(directoryName: root)
     }
 
@@ -392,7 +413,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Add file to favorites"
 
         let root = setUpTest(testName: testName)
-        app.tabBars.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
 
         // Add directory to favorites
         let rootCell = collectionViewsQuery.cells.containing(.staticText, identifier: root).element
@@ -401,10 +422,10 @@ class AppUITest: XCTestCase {
         collectionViewsQuery.staticTexts["Ajouter aux favoris"].tap()
 
         // Check file in favorites page
-        app.tabBars.buttons["Favoris"].tap()
-        XCTAssertTrue(app.staticTexts[root].exists)
+        openTabBarElement(.Favorites)
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Directory should be in favorites")
 
-        app.tabBars.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
         tearDownTest(directoryName: root)
     }
 
@@ -413,15 +434,16 @@ class AppUITest: XCTestCase {
 
         let root = setUpTest(testName: testName)
 
+        openTabBarElement(.Home)
         collectionViewsQuery.staticTexts["Rechercher un fichier…"].tap()
         app.searchFields["Rechercher un fichier…"].tap()
         app.typeText(testName)
 
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory should be listed in results")
 
-        app.navigationBars["Rechercher"].buttons["Fermer"].tap()
+        navigationBars["Rechercher"].buttons["Fermer"].tap()
 
-        app.tabBars.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
         tearDownTest(directoryName: root)
     }
 
@@ -429,7 +451,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Add categories"
 
         let root = setUpTest(testName: testName)
-        app.tabBars.buttons["Fichiers"].tap()
+        openTabBarElement(.Files)
         sleep(2)
 
         // Add category
@@ -437,19 +459,19 @@ class AppUITest: XCTestCase {
         directoryCell.buttons["Menu"].tap()
         collectionViewsQuery.staticTexts["Gérer les catégories"].tap()
         tablesQuery.cells.firstMatch.tap()
-        app.navigationBars.buttons["Fermer"].tap()
-        closePanel()
+        navigationBars.buttons["Fermer"].tap()
+        closeFileMenu()
 
         // Search file with filter category
-        app.navigationBars.buttons["Rechercher"].tap()
-        app.navigationBars.buttons.element(boundBy: 1).tap()
+        navigationBars.buttons["Rechercher"].tap()
+        navigationBars.buttons.element(boundBy: 1).tap()
         tablesQuery.staticTexts["Ajouter des catégories"].tap()
         tablesQuery.cells.firstMatch.tap()
-        app.navigationBars.buttons["Filtres"].tap()
+        navigationBars.buttons["Filtres"].tap()
         tablesQuery.staticTexts["Appliquer les filtres"].tap()
 
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory with category should be in result")
-        app.navigationBars.buttons["Fermer"].tap()
+        navigationBars.buttons["Fermer"].tap()
 
         tearDownTest(directoryName: root)
     }
