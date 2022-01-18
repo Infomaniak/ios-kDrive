@@ -915,10 +915,7 @@ final class DriveApiTests: XCTestCase {
                 XCTAssertNil(renameError, TestsMessages.noError)
                 XCTAssertTrue(renameResponse!.data!.name == newName, "File name should have changed")
 
-                self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: file.id) { response, error in
-                    XCTAssertNotNil(response?.data, TestsMessages.notNil("renamed file"))
-                    XCTAssertNil(error, TestsMessages.noError)
-                    XCTAssertTrue(response!.data!.name == newName, "File name should have changed")
+                self.checkIfFileIsInDestination(file: renameResponse!.data!, directory: rootFile) {
                     expectation.fulfill()
                 }
             }
@@ -962,13 +959,7 @@ final class DriveApiTests: XCTestCase {
             self.currentApiFetcher.copyFile(file: file, newParent: rootFile) { copyResponse, copyError in
                 XCTAssertNotNil(copyResponse, TestsMessages.notNil("response"))
                 XCTAssertNil(copyError, TestsMessages.noError)
-
-                let copiedFileId = copyResponse!.data!.id
-                self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: rootFile.id) { response, error in
-                    XCTAssertNotNil(response, TestsMessages.notNil("reponse"))
-                    XCTAssertNil(error, TestsMessages.noError)
-                    let containsCopiedFile = response!.data!.children.contains { $0.id == copiedFileId }
-                    XCTAssertTrue(containsCopiedFile, "Copied file should be in root")
+                self.checkIfFileIsInDestination(file: copyResponse!.data!, directory: rootFile) {
                     expectation.fulfill()
                 }
             }
@@ -1186,11 +1177,7 @@ final class DriveApiTests: XCTestCase {
                     XCTAssertNotNil(restoreResponse, TestsMessages.notNil("response"))
                     XCTAssertNil(restoreError, TestsMessages.noError)
 
-                    self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: rootFile.id) { response, error in
-                        XCTAssertNotNil(response?.data, TestsMessages.notNil("root file"))
-                        XCTAssertNil(error, TestsMessages.noError)
-                        let restoreFile = response!.data!.children.contains { $0.id == file.id }
-                        XCTAssertTrue(restoreFile, "Restored file should be in root file children")
+                    self.checkIfFileIsInDestination(file: file, directory: rootFile) {
                         expectation.fulfill()
                     }
                 }
@@ -1217,11 +1204,7 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertNotNil(restoreResponse, TestsMessages.notNil("response"))
                         XCTAssertNil(restoreError, TestsMessages.noError)
 
-                        self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: directory.id) { response, error in
-                            XCTAssertNotNil(response?.data, TestsMessages.notNil("root file"))
-                            XCTAssertNil(error, TestsMessages.noError)
-                            let restoreFile = response!.data!.children.contains { $0.id == file.id }
-                            XCTAssertTrue(restoreFile, "Restored file should be in directory children")
+                        self.checkIfFileIsInDestination(file: file, directory: directory) {
                             expectation.fulfill()
                         }
                     }

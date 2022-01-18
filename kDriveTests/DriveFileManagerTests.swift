@@ -90,11 +90,10 @@ final class DriveFileManagerTests: XCTestCase {
         }
     }
 
-    func checkIfFileIsInDestination(file: File, destination: File, completion: @escaping () -> Void) {
+    func checkIfFileIsInDestination(file: File, destination: File) {
         let cachedFile = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
         XCTAssertNotNil(cachedFile, TestsMessages.notNil("cached file"))
         XCTAssertEqual(destination.id, cachedFile!.parentId, "Parent is different from expected destination")
-        completion()
     }
 
     // MARK: - Test methods
@@ -264,9 +263,8 @@ final class DriveFileManagerTests: XCTestCase {
                     let moveCancelId = moveResponse!.id
                     DriveFileManagerTests.driveFileManager.cancelAction(cancelId: moveCancelId) { cancelMoveError in
                         XCTAssertNil(cancelMoveError, TestsMessages.noError)
-                        self.checkIfFileIsInDestination(file: file!, destination: rootFile) {
-                            expectation.fulfill()
-                        }
+                        self.checkIfFileIsInDestination(file: file!, destination: rootFile)
+                        expectation.fulfill()
                     }
                 }
             }
@@ -392,7 +390,6 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // swiftlint:disable empty_enum_arguments
     func testCategory() {
         let testName = "File categories"
         let expectations = [
@@ -414,7 +411,7 @@ final class DriveFileManagerTests: XCTestCase {
 
                     DriveFileManagerTests.driveFileManager.editCategory(id: createdCategory.id, name: createdCategory.name, color: "#314159") { editResult in
                         switch editResult {
-                        case .failure(_):
+                        case .failure:
                             XCTFail(TestsMessages.noError)
                         case .success(let editedCategory):
                             XCTAssertEqual(categoryId, editedCategory.id, "Category id should be the same")
@@ -434,7 +431,6 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    // swiftlint:disable empty_enum_arguments
     func testCategoriesAndFiles() {
         let testName = "Categories and files"
         let expectations = [
@@ -447,7 +443,7 @@ final class DriveFileManagerTests: XCTestCase {
             rootFile = root
             DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227") { resultCategory in
                 switch resultCategory {
-                case .failure(_):
+                case .failure:
                     XCTFail(TestsMessages.noError)
                 case .success(let category):
                     DriveFileManagerTests.driveFileManager.addCategory(file: officeFile, category: category) { error in
