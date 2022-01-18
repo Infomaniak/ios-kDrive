@@ -178,6 +178,22 @@
 			<string>%d file sono disponibili offline</string>
 		</dict>
 	</dict>
+	<key>fileListColorFolderConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Una cartella colorata con successo</string>
+			<key>other</key>
+			<string>%d cartelle colorate con successo</string>
+		</dict>
+	</dict>
 	<key>fileListDuplicationConfirmationSnackbar</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

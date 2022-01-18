@@ -234,9 +234,10 @@ class MultipleSelectionViewController: UIViewController {
     func showMenuForSelection() {
         let floatingPanelViewController = DriveFloatingPanelController()
         let selectViewController = SelectFloatingPanelTableViewController()
+        selectViewController.presentingParent = self
         floatingPanelViewController.isRemovalInteractionEnabled = true
         selectViewController.files = Array(selectedItems)
-        floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 260)
+        floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 325)
         selectViewController.driveFileManager = driveFileManager
         selectViewController.reloadAction = { [unowned self] in
             selectionMode = false

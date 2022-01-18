@@ -60,15 +60,17 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     var driveFileManager: DriveFileManager!
-    var file: File!
+    var files = [File]()
     weak var floatingPanelController: FloatingPanelController?
     var width = 0.0
 
+    var completionHandler: ((Bool) -> Void)?
+
     // MARK: - Public methods
 
-    init(file: File, driveFileManager: DriveFileManager) {
+    init(files: [File], driveFileManager: DriveFileManager) {
         super.init(collectionViewLayout: ColorSelectionFloatingPanelViewController.createLayout())
-        self.file = file
+        self.files = files
         self.driveFileManager = driveFileManager
     }
 
@@ -136,8 +138,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     func setSelectedColor() {
-        let selectedColorIndex = folderColors.firstIndex { $0.hex == file.color } ?? 0
-        collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
+        if files.count == 1 {
+            let selectedColorIndex = folderColors.firstIndex { $0.hex == files.first?.color } ?? 0
+            collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
+        }
     }
 
     // MARK: - Collection view data source & delegate
@@ -177,12 +181,23 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let color = folderColors[indexPath.row]
+        let frozenFiles = files.map { $0.freeze() }
         Task {
             do {
-                try await driveFileManager.updateColor(directory: file, color: color.hex)
+                let success = try await withThrowingTaskGroup(of: Bool.self, returning: Bool.self) { group in
+                    for file in frozenFiles where file.isDirectory {
+                        group.addTask {
+                            try await self.driveFileManager.updateColor(directory: file, color: color.hex)
+                        }
+                    }
+                    return try await group.allSatisfy { $0 }
+                }
+                self.completionHandler?(success)
                 self.dismiss(animated: true)
             } catch {
+                self.completionHandler?(false)
                 UIConstants.showSnackBar(message: error.localizedDescription)
+                self.dismiss(animated: true)
             }
         }
     }

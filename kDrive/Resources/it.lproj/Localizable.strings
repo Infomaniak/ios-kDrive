@@ -5,7 +5,7 @@
  * Locale: it, Italian
  * Tagged: ios
  * Exported by: elena willen
- * Exported at: Tue, 14 Dec 2021 13:35:44 +0100
+ * Exported at: Wed, 12 Jan 2022 16:31:19 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -510,7 +510,7 @@
 "categoriesPanelDescription" = "kDrive ora ti permette di classificare i tuoi documenti con categorie personalizzate. La ricerca permette poi di trovare i file secondo le categorie di vostra scelta.";
 
 /* loco:6169abf4e96dee0ea6561f42 */
-"categoriesPanelTitle" = "Novità: semplificare l‘archiviazione con le categorie!";
+"categoriesPanelTitle" = "Novità: semplificare l’archiviazione con le categorie!";
 
 /* loco:6169612bb7bdcf38d1662b72 */
 "categoryBanking" = "Banca";
@@ -648,7 +648,7 @@
 "createPrivateFolderSucces" = "Cartella creata con successo";
 
 /* loco:60dc3f19352b5e75d37b8c23 */
-"deletePicturesDescription" = "L‘applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione";
+"deletePicturesDescription" = "L’applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione";
 
 /* loco:60dc3e2e5ea2965b1152dc03 */
 "deletePicturesTitle" = "Cancellare le foto (Beta)";
@@ -884,6 +884,12 @@
 /* loco:618b844d3d601243cd6c52d2 */
 "fileDetailsActivityFileCategorize" = "ha aggiunto una categoria all’elemento";
 
+/* loco:61dda9c2a380eb74010679e2 */
+"fileDetailsActivityFileColorDelete" = "rimosso il colore da una cartella";
+
+/* loco:61dda9850be38655ce4d86d2 */
+"fileDetailsActivityFileColorUpdate" = "ha cambiato il colore di una cartella";
+
 /* loco:6049df4d5c2c3a04bc3979ad */
 "fileDetailsActivityFileCommentCreate" = "ha commentato il file";
 
@@ -1057,6 +1063,12 @@
 
 /* loco:6049df4d5c2c3a04bc397aa1 */
 "fileListAddOfflineConfirmationSnackbar-plural" = "%d file sono disponibili offline";
+
+/* loco:61d70432a51b8045fd7fbd62 */
+"fileListColorFolderConfirmationSnackbar" = "Una cartella colorata con successo";
+
+/* loco:61d704938b53ce4fd005f3d3 */
+"fileListColorFolderConfirmationSnackbar-plural" = "%d cartelle colorate con successo";
 
 /* loco:614b15f40740a72bd13f4ff5 */
 "fileListCopyDoneSnackbar" = "Copie concluse con successo";

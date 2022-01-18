@@ -5,7 +5,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: elena willen
- * Exported at: Tue, 14 Dec 2021 13:35:44 +0100
+ * Exported at: Wed, 12 Jan 2022 16:31:19 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -884,6 +884,12 @@
 /* loco:618b844d3d601243cd6c52d2 */
 "fileDetailsActivityFileCategorize" = "dem Element eine Kategorie hinzugefügt";
 
+/* loco:61dda9c2a380eb74010679e2 */
+"fileDetailsActivityFileColorDelete" = "die Farbe aus einem Ordner entfernt hat";
+
+/* loco:61dda9850be38655ce4d86d2 */
+"fileDetailsActivityFileColorUpdate" = "die Farbe eines Ordners geändert hat";
+
 /* loco:6049df4d5c2c3a04bc3979ad */
 "fileDetailsActivityFileCommentCreate" = "hat die Datei kommentiert";
 
@@ -1057,6 +1063,12 @@
 
 /* loco:6049df4d5c2c3a04bc397aa1 */
 "fileListAddOfflineConfirmationSnackbar-plural" = "%d Dateien offline verfügbar";
+
+/* loco:61d70432a51b8045fd7fbd62 */
+"fileListColorFolderConfirmationSnackbar" = "Ordner erfolgreich eingefärbt";
+
+/* loco:61d704938b53ce4fd005f3d3 */
+"fileListColorFolderConfirmationSnackbar-plural" = "%d Ordner erfolgreich eingefärbt";
 
 /* loco:614b15f40740a72bd13f4ff5 */
 "fileListCopyDoneSnackbar" = "Kopian erfolgreich abgeschlossen";

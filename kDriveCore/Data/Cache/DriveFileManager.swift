@@ -1410,7 +1410,7 @@ public class DriveFileManager {
         }
     }
 
-    public func updateColor(directory: File, color: String) async throws {
+    public func updateColor(directory: File, color: String) async throws -> Bool {
         let fileId = directory.id
         let result = try await apiFetcher.updateColor(directory: directory, color: color)
         if result {
@@ -1418,6 +1418,7 @@ public class DriveFileManager {
                 file.color = color
             }
         }
+        return result
     }
 }
 
