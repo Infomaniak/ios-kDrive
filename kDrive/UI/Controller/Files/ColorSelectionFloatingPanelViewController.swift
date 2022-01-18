@@ -138,8 +138,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     func setSelectedColor() {
-        let selectedColorIndex = files.count == 1 ? (folderColors.firstIndex { $0.hex == files.first?.color } ?? 0) : 0
-        collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
+        if files.count == 1 {
+            let selectedColorIndex = folderColors.firstIndex { $0.hex == files.first?.color } ?? 0
+            collectionView.selectItem(at: IndexPath(row: selectedColorIndex, section: 1), animated: true, scrollPosition: .init(rawValue: 0))
+        }
     }
 
     // MARK: - Collection view data source & delegate
