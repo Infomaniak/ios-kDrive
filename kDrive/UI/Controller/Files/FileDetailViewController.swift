@@ -564,7 +564,9 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        guard currentTab == .comments && !comments.isEmpty else {
+        guard currentTab == .comments && !comments.isEmpty,
+              !(tableView.cellForRow(at: indexPath) is FileDetailHeaderTableViewCell)
+        else {
             return nil
         }
 
