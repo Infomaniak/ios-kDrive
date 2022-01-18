@@ -109,17 +109,31 @@ public class PhotoLibraryUploader {
         }
     }
 
+    class AsyncResult<T> {
+        private var result: T?
+        private let group = DispatchGroup()
+
+        init() {
+            group.enter()
+        }
+
+        func get() -> T {
+            group.wait()
+            return result!
+        }
+
+        func set(_ result: T) {
+            self.result = result
+            group.leave()
+        }
+    }
+
     func getUrlSync(for asset: PHAsset) -> URL? {
-        var url: URL?
-        let getUrlLock = DispatchGroup()
-        getUrlLock.enter()
-        // TODO: Find a way to achieve this
-        /* Task {
-            url = await getUrl(for: asset)
-            getUrlLock.leave()
-        } */
-        getUrlLock.wait()
-        return url
+        let result = AsyncResult<URL?>()
+        Task {
+            await result.set(getUrl(for: asset))
+        }
+        return result.get()
     }
 
     public func addNewPicturesToUploadQueue(using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Int {
