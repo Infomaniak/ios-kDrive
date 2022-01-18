@@ -129,6 +129,10 @@ class AppUITest: XCTestCase {
         tablesQuery.buttons["Partager"].tap()
     }
 
+    func closePanel() {
+        app.navigationBars.firstMatch.coordinate(withNormalizedOffset: .zero).tap()
+    }
+
     // MARK: - Tests methods
 
     func testRenameFile() {
@@ -330,7 +334,7 @@ class AppUITest: XCTestCase {
 
         // Refresh table
         let firstCell = collectionViewsQuery.cells.firstMatch
-        let start = firstCell.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+        let start = firstCell.coordinate(withNormalizedOffset: .zero)
         let finish = firstCell.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 10))
         start.press(forDuration: 0, thenDragTo: finish)
         let newNumberOfCells = collectionViewsQuery.cells.count
@@ -379,6 +383,52 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(app.staticTexts[root].exists)
 
         app.tabBars.buttons["Fichiers"].tap()
+        tearDownTest(directoryName: root)
+    }
+
+    func testSearchFile() {
+        let testName = "UITest - Search file"
+
+        let root = setUpTest(testName: testName)
+
+        collectionViewsQuery.staticTexts["Rechercher un fichier…"].tap()
+        app.searchFields["Rechercher un fichier…"].tap()
+        app.typeText(testName)
+
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory should be listed in results")
+
+        app.navigationBars["Rechercher"].buttons["Fermer"].tap()
+
+        app.tabBars.buttons["Fichiers"].tap()
+        tearDownTest(directoryName: root)
+    }
+
+    func testAddCategories() {
+        let testName = "UITest - Add categories"
+
+        let root = setUpTest(testName: testName)
+        app.tabBars.buttons["Fichiers"].tap()
+        sleep(2)
+
+        // Add category
+        let directoryCell = collectionViewsQuery.cells.containing(.staticText, identifier: root).element
+        directoryCell.buttons["Menu"].tap()
+        collectionViewsQuery.staticTexts["Gérer les catégories"].tap()
+        tablesQuery.cells.firstMatch.tap()
+        app.navigationBars.buttons["Fermer"].tap()
+        closePanel()
+
+        // Search file with filter category
+        app.navigationBars.buttons["Rechercher"].tap()
+        app.navigationBars.buttons.element(boundBy: 1).tap()
+        tablesQuery.staticTexts["Ajouter des catégories"].tap()
+        tablesQuery.cells.firstMatch.tap()
+        app.navigationBars.buttons["Filtres"].tap()
+        tablesQuery.staticTexts["Appliquer les filtres"].tap()
+
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory with category should be in result")
+        app.navigationBars.buttons["Fermer"].tap()
+
         tearDownTest(directoryName: root)
     }
 }
