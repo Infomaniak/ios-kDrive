@@ -180,12 +180,14 @@ extension Endpoint {
 
     static func comments(file: AbstractFile) -> Endpoint {
         return .fileInfo(file).appending(path: "/comments", queryItems: [
-            URLQueryItem(name: "with", value: "user,likes,responses")
+            URLQueryItem(name: "with", value: "user,likes,responses,responses.user,responses.likes")
         ])
     }
 
     static func comment(file: AbstractFile, comment: Comment) -> Endpoint {
-        return .comments(file: file).appending(path: "/\(comment.id)")
+        return .comments(file: file).appending(path: "/\(comment.id)", queryItems: [
+            URLQueryItem(name: "with", value: "user,likes,responses,responses.user,responses.likes")
+        ])
     }
 
     static func likeComment(file: AbstractFile, comment: Comment) -> Endpoint {
