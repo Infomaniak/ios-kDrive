@@ -23,6 +23,10 @@ public extension JSONParameterEncoder {
     static var convertToSnakeCase: JSONParameterEncoder {
         let encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            try container.encode(Int(date.timeIntervalSince1970))
+        }
         return JSONParameterEncoder(encoder: encoder)
     }
 }
