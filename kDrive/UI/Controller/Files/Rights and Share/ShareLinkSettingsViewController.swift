@@ -72,7 +72,7 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     var file: File!
-    var shareFile: SharedFile!
+    var shareLink: ShareLink!
     private var settings = [OptionsRow: Bool]()
     private var settingsValue = [OptionsRow: Any?]()
     var accessRightValue: String!
@@ -170,27 +170,23 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     private func initOptions() {
-        guard shareFile != nil else { return }
+        guard shareLink != nil else { return }
         // Access right
-        accessRightValue = shareFile.link!.permission
+        accessRightValue = shareLink.right
         // Edit right
-        editRightValue = shareFile.link!.canEdit ? EditPermission.write.rawValue : EditPermission.read.rawValue
+        editRightValue = (shareLink.capabilities.canEdit ? EditPermission.write : EditPermission.read).rawValue
         // Options
         settings = [
-            .optionPassword: shareFile.link!.permission == ShareLinkPermission.password.rawValue,
-            .optionDownload: !shareFile.link!.blockDownloads,
-            .optionDate: shareFile.link!.validUntil != nil
+            .optionPassword: shareLink.right == ShareLinkPermission.password.rawValue,
+            .optionDownload: shareLink.capabilities.canDownload,
+            .optionDate: shareLink.validUntil != nil
         ]
-        var date: Date?
-        if let timeInterval = shareFile.link!.validUntil {
-            date = Date(timeIntervalSince1970: Double(timeInterval))
-        }
         settingsValue = [
             .optionPassword: nil,
             .optionDownload: nil,
-            .optionDate: date
+            .optionDate: shareLink.validUntil
         ]
-        if shareFile.link!.permission == ShareLinkPermission.password.rawValue {
+        if shareLink.right == ShareLinkPermission.password.rawValue {
             newPassword = true
         }
     }
@@ -214,7 +210,7 @@ class ShareLinkSettingsViewController: UIViewController {
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
         coder.encode(file.id, forKey: "FileId")
-        coder.encode(shareFile, forKey: "ShareFile")
+        coder.encode(shareLink, forKey: "ShareLink")
     }
 
     override func decodeRestorableState(with coder: NSCoder) {
@@ -222,7 +218,7 @@ class ShareLinkSettingsViewController: UIViewController {
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
-        shareFile = coder.decodeObject(forKey: "ShareFile") as? SharedFile
+        shareLink = coder.decodeObject(forKey: "ShareLink") as? ShareLink
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
             return
         }
@@ -351,14 +347,19 @@ extension ShareLinkSettingsViewController: RightsSelectionDelegate {
 
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        let permission = getSetting(for: .optionPassword) ? ShareLinkPermission.password.rawValue : ShareLinkPermission.public.rawValue
-        let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
-        let date = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-        let validUntil = date?.timeIntervalSince1970
+        let right: ShareLinkPermission = getSetting(for: .optionPassword) ? .password : .public
+        let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
+        let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
         let canEdit = editRightValue == Right.onlyOfficeRights[1].key
-        driveFileManager.apiFetcher.updateShareLinkWith(file: file, canEdit: canEdit, permission: permission, password: password, date: validUntil, blockDownloads: !getSetting(for: .optionDownload), blockComments: !canEdit, isFree: driveFileManager.drive.pack == .free) { response, _ in
-            if response?.data == true {
-                self.navigationController?.popViewController(animated: true)
+        let settings = ShareLinkSettings(canComment: canEdit, canDownload: getSetting(for: .optionDownload), canEdit: canEdit, canSeeInfo: true, canSeeStats: true, password: password, right: right, validUntil: validUntil)
+        Task {
+            do {
+                let response = try await driveFileManager.apiFetcher.updateShareLink(for: file, settings: settings)
+                if response {
+                    self.navigationController?.popViewController(animated: true)
+                }
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
         }
         MatomoUtils.trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),

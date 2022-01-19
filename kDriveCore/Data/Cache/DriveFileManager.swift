@@ -1237,7 +1237,7 @@ public class DriveFileManager {
         }
     }
 
-    public func updateShareLink(for file: File, with sharedFile: SharedFile?, and value: String, completion: @escaping (ShareLink?, Error?) -> Void) {
+    /* public func updateShareLink(for file: File, with sharedFile: SharedFile?, and value: String, completion: @escaping (ShareLink?, Error?) -> Void) {
         if let sharedLink = sharedFile?.link {
             sharedLink.permission = value
             if value == ShareLinkPermission.restricted.rawValue {
@@ -1258,34 +1258,22 @@ public class DriveFileManager {
                 }
             }
         }
+    } */
+
+    public func createShareLink(for file: File) async throws -> ShareLink {
+        let shareLink = try await apiFetcher.createShareLink(for: file)
+        // Fix for API not returning share link activities
+        setFileShareLink(file: file, shareLink: shareLink.url)
+        return shareLink
     }
 
-    public func activateShareLink(for file: File, completion: @escaping (ShareLink?, Error?) -> Void) {
-        apiFetcher.activateShareLinkFor(file: file) { response, error in
-            if let link = response?.data {
-                // Fix for API not returning share link activities
-                self.setFileShareLink(file: file, shareLink: link.url)
-                completion(link, nil)
-            } else {
-                completion(nil, error)
-            }
+    public func removeShareLink(for file: File) async throws -> Bool {
+        let response = try await apiFetcher.removeShareLink(for: file)
+        if response {
+            // Fix for API not returning share link activities
+            setFileShareLink(file: file, shareLink: nil)
         }
-    }
-
-    public func removeShareLink(for file: File, completion: @escaping (Error?) -> Void) {
-        apiFetcher.removeShareLinkFor(file: file) { response, error in
-            if let data = response?.data {
-                if data {
-                    // Fix for API not returning share link activities
-                    self.setFileShareLink(file: file, shareLink: nil)
-                    completion(nil)
-                } else {
-                    completion(nil)
-                }
-            } else {
-                completion(error)
-            }
-        }
+        return response
     }
 
     private func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {
