@@ -22,15 +22,16 @@ import RealmSwift
 import UIKit
 
 public class Team: Object, Codable {
+    public static let allUsersId = 0
+
     @Persisted(primaryKey: true) public var id: Int
     @Persisted public var details: List<TeamDetail>
     @Persisted public var users: List<Int>
     @Persisted public var name: String
     @Persisted public var color: Int
-    public var right: UserPermission?
 
     public var isAllUsers: Bool {
-        return id == 0
+        return id == Team.allUsersId
     }
 
     public var colorHex: String {
@@ -80,28 +81,11 @@ public class Team: Object, Codable {
         users = try values.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
         name = try values.decode(String.self, forKey: .name)
         color = try values.decode(Int.self, forKey: .color)
-        right = try values.decodeIfPresent(UserPermission.self, forKey: .right)
     }
 
     public func usersCount(in drive: Drive) -> Int {
         let detail = details.first { $0.driveId == drive.id }
         return detail?.usersCount ?? users.filter { drive.users.internalUsers.contains($0) }.count
-    }
-}
-
-extension Team: Shareable {
-    public var userId: Int? {
-        return nil
-    }
-
-    public var shareableName: String {
-        return isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : name
-    }
-}
-
-extension Team: Comparable {
-    public static func < (lhs: Team, rhs: Team) -> Bool {
-        return lhs.isAllUsers || lhs.name.lowercased() < rhs.name.lowercased()
     }
 }
 

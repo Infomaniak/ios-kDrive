@@ -46,7 +46,7 @@ class InvitedUserTableViewCell: InsetTableViewCell {
     func configureWith(shareables: [Shareable], emails: [String], tableViewWidth: CGFloat) {
         self.shareables = shareables
         self.emails = emails
-        labels = shareables.map(\.shareableName) + emails
+        labels = shareables.map(\.name) + emails
         cellWidth = tableViewWidth - 48 - 8
 
         invitedCollectionView.reloadData()
@@ -98,7 +98,7 @@ extension InvitedUserTableViewCell: UICollectionViewDelegate, UICollectionViewDa
         cell.widthConstraint.constant = sizeForCellWith(text: labels[indexPath.row]).width
         if indexPath.row < shareables.count {
             let shareable = shareables[indexPath.row]
-            cell.usernameLabel.text = shareable.shareableName
+            cell.usernameLabel.text = shareable.name
             if let user = shareable as? DriveUser {
                 user.getAvatar { image in
                     cell.avatarImage.image = image

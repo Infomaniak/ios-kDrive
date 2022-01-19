@@ -23,7 +23,7 @@ import UIKit
 class MessageTableViewCell: InsetTableViewCell {
     @IBOutlet weak var messageTextView: UITextView!
 
-    var textDidChange: ((String) -> Void)?
+    var textDidChange: ((String?) -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
