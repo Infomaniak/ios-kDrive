@@ -27,6 +27,7 @@ class FileDetailViewController: UIViewController {
     var file: File!
     var driveFileManager: DriveFileManager!
     var sharedFile: SharedFile?
+    var shareLink: ShareLink?
 
     private var activities = [[FileDetailActivity]]()
     private var activitiesInfo = (page: 1, hasNextPage: true, isLoading: true)
@@ -201,6 +202,11 @@ class FileDetailViewController: UIViewController {
             self.sharedFile = response?.data
             group.leave()
         }
+        group.enter()
+        Task {
+            self.shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
+            group.leave()
+        }
         group.notify(queue: .main) {
             guard self.file != nil else { return }
             self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
@@ -346,7 +352,7 @@ class FileDetailViewController: UIViewController {
         if segue.identifier == "toShareLinkSettingsSegue" {
             let nextVC = segue.destination as! ShareLinkSettingsViewController
             nextVC.driveFileManager = driveFileManager
-            nextVC.shareFile = sharedFile
+            nextVC.shareLink = shareLink
             nextVC.file = file
         }
     }
@@ -372,7 +378,6 @@ class FileDetailViewController: UIViewController {
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
-        sharedFile = coder.decodeObject(forKey: "SharedFile") as? SharedFile
 
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
             return
@@ -384,8 +389,18 @@ class FileDetailViewController: UIViewController {
             navigationController?.popViewController(animated: true)
             return
         }
+        let group = DispatchGroup()
+        group.enter()
         driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
             self.sharedFile = response?.data
+            group.leave()
+        }
+        group.enter()
+        Task {
+            self.shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
+            group.leave()
+        }
+        group.notify(queue: .main) {
             self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
@@ -453,7 +468,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .share:
                     let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
                     cell.delegate = self
-                    cell.configureWith(sharedFile: sharedFile, file: file, insets: false)
+                    cell.configureWith(shareLink: shareLink, file: file, insets: false)
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
@@ -488,7 +503,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     if let drive = driveFileManager?.drive, let color = UIColor(hex: drive.preferences.color) {
                         cell.locationImage.tintColor = color
                     }
-                    cell.locationLabel.text = sharedFile?.path ?? file.path
+                    cell.locationLabel.text = file.path
                     cell.delegate = self
                     return cell
                 case .sizeAll:
@@ -546,11 +561,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
-                if let sharedFile = sharedFile, sharedFile.link != nil {
-                    rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
-                } else {
-                    rightsSelectionVC.selectedRight = ShareLinkPermission.restricted.rawValue
-                }
+                rightsSelectionVC.selectedRight = (shareLink == nil ? ShareLinkPermission.restricted : ShareLinkPermission.public).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
                 rightsSelectionVC.delegate = self
             }
@@ -812,13 +823,22 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
 
 extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
-        driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { shareLink, _ in
-            if let link = shareLink {
-                self.sharedFile?.link = link
+        let right = ShareLinkPermission(rawValue: value)!
+        Task {
+            let response: Bool
+            if right == .restricted {
+                // Remove share link
+                response = try await driveFileManager.removeShareLink(for: file)
+                if response {
+                    self.shareLink = nil
+                }
             } else {
-                self.sharedFile?.link = nil
+                // Update share link
+                response = try await driveFileManager.apiFetcher.updateShareLink(for: file, settings: .init(canComment: shareLink?.capabilities.canComment, canDownload: shareLink?.capabilities.canDownload, canEdit: shareLink?.capabilities.canEdit, canSeeInfo: shareLink?.capabilities.canSeeInfo, canSeeStats: shareLink?.capabilities.canSeeStats, right: right, validUntil: shareLink?.validUntil))
             }
-            self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
+            if response {
+                self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
+            }
         }
     }
 }
