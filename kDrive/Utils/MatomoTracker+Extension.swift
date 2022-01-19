@@ -20,5 +20,5 @@ import MatomoTracker
 import Foundation
 
 extension MatomoTracker {
-    static let shared = MatomoTracker(siteId: "42", baseURL: URL(string: "https://analytics.infomaniak.com/matomo.php")!)
+    static let shared = MatomoTracker(siteId: "8", baseURL: URL(string: "https://analytics.infomaniak.com/matomo.php")!)
 }

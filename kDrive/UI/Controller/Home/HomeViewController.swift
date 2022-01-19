@@ -197,7 +197,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
 
-        MatomoTracker.shared.track(view: ["home"])
+        MatomoTracker.shared.track(view: ["Home"])
     }
 
     override func viewWillAppear(_ animated: Bool) {
