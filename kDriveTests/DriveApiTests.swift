@@ -319,62 +319,36 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testActivateShareLinkFor() {
-        let testName = "Activate share link"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("share link"))
-                XCTAssertNil(error, TestsMessages.noError)
-
-                self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
-                    XCTAssertNotNil(shareResponse, TestsMessages.notNil("share response"))
-                    XCTAssertNil(shareError, TestsMessages.noError)
-                    let share = shareResponse!.data!
-                    XCTAssertNotNil(share.link?.url, TestsMessages.notNil("share link url"))
-                    XCTAssertTrue(response!.data!.url == share.link?.url, "Share link url should match")
-
-                    expectation.fulfill()
-                }
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    func testCreateShareLink() async throws {
+        let rootFile = await setUpTest(testName: "Create share link")
+        let shareLink1 = try await currentApiFetcher.createShareLink(for: rootFile)
+        let shareLink2 = try await currentApiFetcher.shareLink(for: rootFile)
+        XCTAssertEqual(shareLink1.url, shareLink2.url, "Share link url should match")
         tearDownTest(directory: rootFile)
     }
 
-    func testUpdateShareLinkWith() {
-        let testName = "Update share link"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+    func testUpdateShareLink() async throws {
+        let rootFile = await setUpTest(testName: "Update share link")
+        _ = try await currentApiFetcher.createShareLink(for: rootFile)
+        let updatedSettings = ShareLinkSettings(canComment: true, canDownload: false, canEdit: true, canSeeInfo: true, canSeeStats: true, password: "password", right: .password, validUntil: nil)
+        let response = try await currentApiFetcher.updateShareLink(for: rootFile, settings: updatedSettings)
+        XCTAssertTrue(response, "API should return true")
+        let updatedShareLink = try await currentApiFetcher.shareLink(for: rootFile)
+        XCTAssertTrue(updatedShareLink.capabilities.canComment, "canComment should be true")
+        XCTAssertFalse(updatedShareLink.capabilities.canDownload, "canDownload should be false")
+        XCTAssertTrue(updatedShareLink.capabilities.canEdit, "canEdit should be true")
+        XCTAssertTrue(updatedShareLink.capabilities.canSeeInfo, "canSeeInfo should be true")
+        XCTAssertTrue(updatedShareLink.capabilities.canSeeStats, "canSeeStats should be true")
+        XCTAssertTrue(updatedShareLink.right == ShareLinkPermission.password.rawValue, "Right should be equal to 'password'")
+        XCTAssertNil(updatedShareLink.validUntil, "validUntil should be nil")
+        tearDownTest(directory: rootFile)
+    }
 
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { _, _ in
-                self.currentApiFetcher.updateShareLinkWith(file: rootFile, canEdit: true, permission: ShareLinkPermission.password.rawValue, password: "password", date: nil, blockDownloads: true, blockComments: false, isFree: false) { updateResponse, updateError in
-                    XCTAssertNotNil(updateResponse, TestsMessages.notNil("reponse"))
-                    XCTAssertNil(updateError, TestsMessages.noError)
-
-                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
-                        XCTAssertNotNil(shareResponse?.data, TestsMessages.notNil("share response"))
-                        XCTAssertNil(shareError, TestsMessages.noError)
-                        let share = shareResponse!.data!
-                        XCTAssertNotNil(share.link, TestsMessages.notNil("share link"))
-                        XCTAssertTrue(share.link!.canEdit, TestsMessages.notNil("canEdit"))
-                        XCTAssertTrue(share.link!.permission == ShareLinkPermission.password.rawValue, "Permission should be equal to 'password'")
-                        XCTAssertTrue(share.link!.blockDownloads, "blockDownloads should be true")
-                        XCTAssertTrue(!share.link!.blockComments, "blockComments should be false")
-
-                        expectation.fulfill()
-                    }
-                }
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    func testRemoveShareLink() async throws {
+        let rootFile = await setUpTest(testName: "Remove share link")
+        _ = try await currentApiFetcher.createShareLink(for: rootFile)
+        let response = try await currentApiFetcher.removeShareLink(for: rootFile)
+        XCTAssertTrue(response, "API should return true")
         tearDownTest(directory: rootFile)
     }
 
@@ -555,33 +529,6 @@ final class DriveApiTests: XCTestCase {
                         XCTAssertNil(shareError, TestsMessages.noError)
                         let deletedInvitation = shareResponse?.data?.users.first { $0.id == Env.inviteUserId }
                         XCTAssertNil(deletedInvitation, TestsMessages.notNil("deleted invitation"))
-                        expectation.fulfill()
-                    }
-                }
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
-
-    func testRemoveShareLinkFor() {
-        let testName = "Remove share link"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { _, error in
-                XCTAssertNil(error, TestsMessages.noError)
-                self.currentApiFetcher.removeShareLinkFor(file: rootFile) { removeResponse, removeError in
-                    XCTAssertNotNil(removeResponse, TestsMessages.notNil("response"))
-                    XCTAssertNil(removeError, TestsMessages.noError)
-
-                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
-                        XCTAssertNotNil(shareResponse?.data, TestsMessages.notNil("share file"))
-                        XCTAssertNil(shareError, TestsMessages.noError)
-                        XCTAssertNil(shareResponse?.data?.link, TestsMessages.notNil("share link"))
                         expectation.fulfill()
                     }
                 }
@@ -1160,56 +1107,6 @@ final class DriveApiTests: XCTestCase {
     }
 
     // MARK: - Complementary tests
-
-    func testShareLink() {
-        let testName = "Share link"
-        let expectations = [
-            (name: "Activate share link", expectation: XCTestExpectation(description: "Activate share link")),
-            (name: "Update share link", expectation: XCTestExpectation(description: "Update share link")),
-            (name: "Remove share link", expectation: XCTestExpectation(description: "Remove share link"))
-        ]
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.currentApiFetcher.activateShareLinkFor(file: rootFile) { activateResponse, activateError in
-                XCTAssertNotNil(activateResponse?.data, TestsMessages.notNil("share link"))
-                XCTAssertNil(activateError, TestsMessages.noError)
-                XCTAssertNotNil(activateResponse!.data!.url, TestsMessages.notNil("share link url"))
-                expectations[0].expectation.fulfill()
-
-                self.currentApiFetcher.updateShareLinkWith(file: rootFile, canEdit: true, permission: ShareLinkPermission.password.rawValue, password: "password", date: nil, blockDownloads: true, blockComments: false, isFree: false) { updateResponse, updateError in
-                    XCTAssertNotNil(updateResponse, TestsMessages.notNil("response"))
-                    XCTAssertNil(updateError, TestsMessages.noError)
-                    self.currentApiFetcher.getShareListFor(file: rootFile) { shareResponse, shareError in
-                        XCTAssertNotNil(shareResponse?.data, TestsMessages.notNil("share response"))
-                        XCTAssertNil(shareError, TestsMessages.noError)
-                        let share = shareResponse!.data!
-                        XCTAssertNotNil(share.link, TestsMessages.notNil("share link"))
-                        XCTAssertTrue(share.link!.canEdit, "canEdit should be true")
-                        XCTAssertTrue(share.link!.permission == ShareLinkPermission.password.rawValue, "Permission should be equal to 'password'")
-                        XCTAssertTrue(share.link!.blockDownloads, "blockDownloads should be true")
-                        XCTAssertTrue(!share.link!.blockComments, "blockComments should be false")
-                        expectations[1].expectation.fulfill()
-
-                        self.currentApiFetcher.removeShareLinkFor(file: rootFile) { removeResponse, removeError in
-                            XCTAssertNotNil(removeResponse, TestsMessages.notNil("response"))
-                            XCTAssertNil(removeError, TestsMessages.noError)
-                            self.currentApiFetcher.getShareListFor(file: rootFile) { finalResponse, finalError in
-                                XCTAssertNotNil(finalResponse?.data, TestsMessages.notNil("share file"))
-                                XCTAssertNil(finalError, TestsMessages.noError)
-                                XCTAssertNil(finalResponse?.data?.link, TestsMessages.notNil("share link"))
-                                expectations[2].expectation.fulfill()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
 
     func testUserRights() {
         let testName = "User rights"
