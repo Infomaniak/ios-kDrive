@@ -30,17 +30,8 @@ class FileInformationUsersTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var shareButton: ImageButton!
 
-    var sharedFile: SharedFile?
-    var fallbackUsers = [DriveUser]()
+    var shareables = [Shareable]()
     weak var delegate: FileUsersDelegate?
-
-    var shareables: [Shareable] {
-        if let sharedFile = sharedFile {
-            return sharedFile.teams + sharedFile.users
-        } else {
-            return fallbackUsers
-        }
-    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
