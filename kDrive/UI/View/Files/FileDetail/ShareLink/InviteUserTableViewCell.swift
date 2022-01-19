@@ -48,13 +48,13 @@ class InviteUserTableViewCell: InsetTableViewCell {
     var drive: Drive! {
         didSet {
             guard drive != nil else { return }
-            let realm = DriveInfosManager.instance.getRealm()
+            /*let realm = DriveInfosManager.instance.getRealm()
             let users = DriveInfosManager.instance.getUsers(for: drive.id, userId: drive.userId, using: realm)
             shareables = users.sorted { $0.displayName < $1.displayName }
             if canUseTeam {
                 let teams = DriveInfosManager.instance.getTeams(for: drive.id, userId: drive.userId, using: realm)
                 shareables = teams.sorted() + shareables
-            }
+            }*/
             results = shareables.filter { shareable in
                 !ignoredShareables.contains { $0.id == shareable.id }
             }
@@ -90,7 +90,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
             selectItem(at: index)
         }
 
-        dropDown.dataSource = results.map(\.shareableName)
+        dropDown.dataSource = results.map(\.name)
     }
 
     @IBAction func editingDidChanged(_ sender: UITextField) {
@@ -109,7 +109,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         } else {
             // Filter the users based on the text
             results = shareables.filter { shareable in
-                !ignoredShareables.contains { $0.id == shareable.id } && (shareable.shareableName.lowercased().contains(text) || (shareable as? DriveUser)?.email.contains(text) ?? false)
+                !ignoredShareables.contains { $0.id == shareable.id } && (shareable.name.lowercased().contains(text) || (shareable as? DriveUser)?.email.contains(text) ?? false)
             }
         }
         dropDown.dataSource.removeAll()
@@ -119,7 +119,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         } else {
             email = nil
         }
-        dropDown.dataSource.append(contentsOf: results.map(\.shareableName))
+        dropDown.dataSource.append(contentsOf: results.map(\.name))
     }
 
     private func isValidEmail(_ email: String) -> Bool {

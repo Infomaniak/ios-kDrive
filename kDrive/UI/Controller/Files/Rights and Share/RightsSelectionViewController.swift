@@ -209,7 +209,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let right = rights[indexPath.row]
         if right.key == UserPermission.delete.rawValue {
-            let deleteUser = shareable?.shareableName ?? ""
+            let deleteUser = shareable?.name ?? ""
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser), boldText: deleteUser)
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: attrString, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true) {
                 self.delegate?.didDeleteUserRight()
