@@ -438,6 +438,10 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.bulkFiles(drive: drive), method: .post, parameters: action)).data
     }
 
+    public func bulkAction(drive: Drive, action: BulkAction) async throws -> CancelableResponseV2 {
+        try await perform(request: authenticatedRequest(.bulkFiles(drive: drive), method: .post, parameters: action)).data
+    }
+
     public func directoryCount(for directory: File) async throws -> FileCount {
         try await perform(request: authenticatedRequest(.count(of: directory))).data
     }

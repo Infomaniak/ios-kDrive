@@ -189,12 +189,12 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [unowned self, fileIds = files.map(\.id)] selectedFolder in
                 if self.files.count > Constants.bulkActionThreshold {
                     addAction = false // Prevents the snackbar to be displayed
+
                     let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedFolder.id)
+                    let tabBarController = presentingViewController as? MainTabViewController
+                    let navigationController = tabBarController?.selectedViewController as? UINavigationController
                     Task {
-                        let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
-                        let tabBarController = presentingViewController as? MainTabViewController
-                        let navigationController = tabBarController?.selectedViewController as? UINavigationController
-                        (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?.bulkObservation(action: .copy, response: response, error: error)
+                        await (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?.performAndObserve(bulkAction: action)
                     }
                 } else {
                     Task {
