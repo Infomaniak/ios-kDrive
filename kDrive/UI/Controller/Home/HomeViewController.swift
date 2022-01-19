@@ -21,6 +21,7 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
+import MatomoTracker
 
 class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
@@ -195,6 +196,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
+
+        MatomoTracker.shared.track(view: ["home"])
     }
 
     override func viewWillAppear(_ animated: Bool) {
