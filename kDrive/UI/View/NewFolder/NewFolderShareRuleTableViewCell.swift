@@ -68,10 +68,10 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureParentsRights(folderName: String, sharedFile: SharedFile?) {
+    func configureParentsRights(folderName: String, fileAccess: FileAccess?) {
         rights = true
-        if let sharedFile = sharedFile {
-            shareables = sharedFile.teams + sharedFile.users
+        if let fileAccess = fileAccess {
+            shareables = fileAccess.teams + fileAccess.users
         } else {
             shareables = []
         }
