@@ -38,7 +38,7 @@ class NewFolderViewController: UIViewController {
     var dropBoxUrl: String?
     var folderName: String?
 
-    private var sharedFile: SharedFile?
+    private var fileAccess: FileAccess?
     private var showSettings = false
     private var settings: [OptionsRow: Bool] = [
         .optionMail: true,
@@ -96,10 +96,8 @@ class NewFolderViewController: UIViewController {
         navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.createFolderTitle
         navigationItem.hideBackButtonText()
 
-        driveFileManager.apiFetcher.getShareListFor(file: currentDirectory) { response, _ in
-            if let sharedFile = response?.data {
-                self.sharedFile = sharedFile
-            }
+        Task {
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: currentDirectory)
             self.setupTableViewRows()
         }
         setupTableViewRows()
@@ -130,8 +128,8 @@ class NewFolderViewController: UIViewController {
             if permissionSelection {
                 sections.append(.permissions)
                 permissionsRows = [.meOnly]
-                if let sharedFile = sharedFile {
-                    permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+                if let fileAccess = fileAccess {
+                    permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
                 }
             }
         case .commonFolder:
@@ -140,15 +138,15 @@ class NewFolderViewController: UIViewController {
         case .dropbox:
             sections = [.header, .permissions, .options]
             permissionsRows = [.meOnly]
-            if let sharedFile = sharedFile {
-                permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+            if let fileAccess = fileAccess {
+                permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
             }
         }
         tableView.reloadData()
     }
 
-    private func canInherit(sharedFile: SharedFile) -> Bool {
-        return sharedFile.users.count > 1 || !sharedFile.teams.isEmpty
+    private func canInherit(fileAccess: FileAccess) -> Bool {
+        return fileAccess.users.count > 1 || !fileAccess.teams.isEmpty
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {
@@ -318,7 +316,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             case .someUser:
                 cell.configureSomeUser()
             case .parentsRights:
-                cell.configureParentsRights(folderName: currentDirectory.name, sharedFile: sharedFile)
+                cell.configureParentsRights(folderName: currentDirectory.name, fileAccess: fileAccess)
             }
             return cell
         case .location:

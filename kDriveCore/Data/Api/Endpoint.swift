@@ -257,9 +257,7 @@ public extension Endpoint {
     }
 
     static func access(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/access", queryItems: [
-            URLQueryItem(name: "with", value: "invitations,sharelink,teams")
-        ])
+        return .fileInfo(file).appending(path: "/access")
     }
 
     static func checkAccess(file: AbstractFile) -> Endpoint {

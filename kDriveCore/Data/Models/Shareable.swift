@@ -21,6 +21,6 @@ import Foundation
 public protocol Shareable {
     var id: Int { get set }
     var userId: Int? { get }
-    var shareableName: String { get }
-    var right: UserPermission? { get set }
+    var name: String { get }
+    var right: UserPermission { get set }
 }

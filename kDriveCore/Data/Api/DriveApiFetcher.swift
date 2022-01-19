@@ -275,67 +275,40 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.shareLink(file: file), method: .delete)).data
     }
 
-    public func getShareListFor(file: File, completion: @escaping (ApiResponse<SharedFile>?, Error?) -> Void) {
-        let url = ApiRoutes.getShareListFor(file: file)
-
-        makeRequest(url, method: .get, completion: completion)
+    public func access(for file: File) async throws -> FileAccess {
+        try await perform(request: authenticatedRequest(.access(file: file))).data
     }
 
-    public func addUserRights(file: File, users: [Int], teams: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
-        let url = ApiRoutes.addUserRights(file: file)
-        var lang = "en"
-        if let languageCode = Locale.current.languageCode, ["fr", "de", "it", "en", "es"].contains(languageCode) {
-            lang = languageCode
-        }
-        let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission, "lang": lang, "message": message]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func checkAccessChange(to file: File, settings: FileAccessSettings) async throws -> [CheckChangeAccessFeedbackResource] {
+        try await perform(request: authenticatedRequest(.checkAccess(file: file), method: .post, parameters: settings)).data
     }
 
-    public func checkUserRights(file: File, users: [Int], teams: [Int], emails: [String], permission: String, completion: @escaping (ApiResponse<[FileCheckResult]>?, Error?) -> Void) {
-        let url = ApiRoutes.checkUserRights(file: file)
-        let body: [String: Any] = ["user_ids": users, "team_ids": teams, "emails": emails, "permission": permission]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func addAccess(to file: File, settings: FileAccessSettings) async throws -> AccessResponse {
+        try await perform(request: authenticatedRequest(.access(file: file), method: .post, parameters: settings)).data
     }
 
-    public func updateUserRights(file: File, user: DriveUser, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.updateUserRights(file: file, user: user)
-        let body: [String: Any] = ["permission": permission]
-
-        makeRequest(url, method: .put, parameters: body, completion: completion)
+    public func updateUserAccess(to file: File, user: UserFileAccess, right: UserPermission) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.userAccess(file: file, id: user.id), method: .put, parameters: ["right": right])).data
     }
 
-    public func deleteUserRights(file: File, user: DriveUser, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.updateUserRights(file: file, user: user)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func removeUserAccess(to file: File, user: UserFileAccess) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.userAccess(file: file, id: user.id), method: .delete)).data
     }
 
-    public func updateInvitationRights(driveId: Int, invitation: Invitation, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.updateInvitationRights(driveId: driveId, invitation: invitation)
-        let body: [String: Any] = ["permission": permission]
-
-        makeRequest(url, method: .put, parameters: body, completion: completion)
+    public func updateTeamAccess(to file: File, team: TeamFileAccess, right: UserPermission) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.teamAccess(file: file, id: team.id), method: .put, parameters: ["right": right])).data
     }
 
-    public func deleteInvitationRights(driveId: Int, invitation: Invitation, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteInvitationRights(driveId: driveId, invitation: invitation)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func removeTeamAccess(to file: File, team: TeamFileAccess) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.teamAccess(file: file, id: team.id), method: .delete)).data
     }
 
-    public func updateTeamRights(file: File, team: Team, permission: String, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.updateTeamRights(file: file, team: team)
-        let body: [String: Any] = ["permission": permission]
-
-        makeRequest(url, method: .put, parameters: body, completion: completion)
+    public func updateInvitationAccess(drive: AbstractDrive, invitation: ExternInvitationFileAccess, right: UserPermission) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .put, parameters: ["right": right])).data
     }
 
-    public func deleteTeamRights(file: File, team: Team, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteTeamRights(file: file, team: team)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func deleteInvitation(drive: AbstractDrive, invitation: ExternInvitationFileAccess) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .delete)).data
     }
 
     public func getFileDetail(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {

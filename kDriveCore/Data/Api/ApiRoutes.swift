@@ -74,39 +74,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/search?order=desc&order_by=last_modified_at&\(with)&converted_type=image"
     }
 
-    static func getShareListFor(file: File) -> String {
-        return "\(fileURL(file: file))share?with=invitation,link,teams"
-    }
-
-
-    static func updateUserRights(file: File, user: DriveUser) -> String {
-        return "\(fileURL(file: file))share/\(user.id)"
-    }
-
-    static func addUserRights(file: File) -> String {
-        return "\(fileURL(file: file))share"
-    }
-
-    static func checkUserRights(file: File) -> String {
-        return "\(fileURL(file: file))share/check"
-    }
-
-    static func updateInvitationRights(driveId: Int, invitation: Invitation) -> String {
-        return "\(driveApiUrl)\(driveId)/user/invitation/\(invitation.id)"
-    }
-
-    static func deleteInvitationRights(driveId: Int, invitation: Invitation) -> String {
-        return "\(driveApiUrl)\(driveId)/file/invitation/\(invitation.id)"
-    }
-
-    static func updateTeamRights(file: File, team: Team) -> String {
-        return "\(fileURL(file: file))share/team/\(team.id)"
-    }
-
-    static func deleteTeamRights(file: File, team: Team) -> String {
-        return "\(fileURL(file: file))share/team/\(team.id)"
-    }
-
     static func deleteFile(file: File) -> String {
         return fileURL(file: file)
     }
