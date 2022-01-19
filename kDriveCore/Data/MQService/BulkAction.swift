@@ -19,7 +19,7 @@
 import Foundation
 
 public struct BulkAction: Encodable {
-    let action: BulkActionType
+    public let action: BulkActionType
     let fileIds: [Int]?
     let parentId: Int?
     let destinationDirectoryId: Int?
