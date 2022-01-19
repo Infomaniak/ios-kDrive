@@ -74,17 +74,6 @@ public enum ApiRoutes {
         return "\(fileURL(file: file))share?with=invitation,link,teams"
     }
 
-    static func activateShareLinkFor(file: File) -> String {
-        return "\(fileURL(file: file))link?permission=public"
-    }
-
-    static func updateShareLinkWith(file: File) -> String {
-        return "\(fileURL(file: file))link"
-    }
-
-    static func removeShareLinkFor(file: File) -> String {
-        return "\(fileURL(file: file))link"
-    }
 
     static func updateUserRights(file: File, user: DriveUser) -> String {
         return "\(fileURL(file: file))share/\(user.id)"

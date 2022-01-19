@@ -38,6 +38,7 @@ class ShareAndRightsViewController: UIViewController {
     private var shareLinkRights = false
     private var initialLoading = true
     private var sharedFile: SharedFile?
+    private var shareLink: ShareLink?
     private var shareables: [Shareable] = []
     private var selectedShareable: Shareable?
 
@@ -92,6 +93,9 @@ class ShareAndRightsViewController: UIViewController {
                 }
             }
         }
+        Task {
+            self.shareLink = try? await driveFileManager?.apiFetcher.shareLink(for: file)
+        }
     }
 
     private func showRightsSelection(userAccess: Bool) {
@@ -105,11 +109,7 @@ class ShareAndRightsViewController: UIViewController {
                 rightsSelectionVC.selectedRight = (shareable.right ?? .read).rawValue
                 rightsSelectionVC.shareable = shareable
             } else {
-                if let sharedFile = sharedFile, sharedFile.link != nil {
-                    rightsSelectionVC.selectedRight = ShareLinkPermission.public.rawValue
-                } else {
-                    rightsSelectionVC.selectedRight = ShareLinkPermission.restricted.rawValue
-                }
+                rightsSelectionVC.selectedRight = (shareLink == nil ? ShareLinkPermission.restricted : ShareLinkPermission.public).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
             }
         }
@@ -200,7 +200,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.canUseTeam = sharedFile?.canUseTeam ?? false
+            // cell.canUseTeam = sharedFile?.canUseTeam ?? false
             cell.drive = driveFileManager?.drive
             cell.ignoredShareables = shareables
             cell.ignoredEmails = ignoredEmails
@@ -210,7 +210,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(sharedFile: sharedFile, file: file)
+            cell.configureWith(shareLink: shareLink, file: file)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
@@ -256,40 +256,54 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
 
 extension ShareAndRightsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
-        guard let sharedFile = sharedFile else { return }
         if shareLinkRights {
-            driveFileManager.updateShareLink(for: file, with: sharedFile, and: value) { shareLink, _ in
-                if let link = shareLink {
-                    self.sharedFile?.link = link
-                } else {
-                    self.sharedFile?.link = nil
+            let right = ShareLinkPermission(rawValue: value)!
+            Task {
+                do {
+                    let response: Bool
+                    if right == .restricted {
+                        // Remove share link
+                        response = try await driveFileManager.removeShareLink(for: file)
+                        if response {
+                            self.shareLink = nil
+                        }
+                    } else {
+                        // Update share link
+                        response = try await driveFileManager.apiFetcher.updateShareLink(for: file, settings: .init(canComment: shareLink?.capabilities.canComment, canDownload: shareLink?.capabilities.canDownload, canEdit: shareLink?.capabilities.canEdit, canSeeInfo: shareLink?.capabilities.canSeeInfo, canSeeStats: shareLink?.capabilities.canSeeStats, right: right, validUntil: shareLink?.validUntil))
+                    }
+                    if response {
+                        self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
+                    }
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
-                self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
             }
-        } else if let user = selectedShareable as? DriveUser {
-            driveFileManager.apiFetcher.updateUserRights(file: file, user: user, permission: value) { response, _ in
-                if response?.data != nil {
-                    user.permission = UserPermission(rawValue: value)
-                    if let index = self.shareables.firstIndex(where: { $0.id == user.id }) {
-                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+        } else {
+            if let user = selectedShareable as? DriveUser {
+                driveFileManager.apiFetcher.updateUserRights(file: file, user: user, permission: value) { response, _ in
+                    if response?.data != nil {
+                        user.permission = UserPermission(rawValue: value)
+                        if let index = self.shareables.firstIndex(where: { $0.id == user.id }) {
+                            self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+                        }
                     }
                 }
-            }
-        } else if let invitation = selectedShareable as? Invitation {
-            driveFileManager.apiFetcher.updateInvitationRights(driveId: driveFileManager.drive.id, invitation: invitation, permission: value) { response, _ in
-                if response?.data != nil {
-                    invitation.permission = UserPermission(rawValue: value)!
-                    if let index = self.shareables.firstIndex(where: { $0.id == invitation.id }) {
-                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+            } else if let invitation = selectedShareable as? Invitation {
+                driveFileManager.apiFetcher.updateInvitationRights(driveId: driveFileManager.drive.id, invitation: invitation, permission: value) { response, _ in
+                    if response?.data != nil {
+                        invitation.permission = UserPermission(rawValue: value)!
+                        if let index = self.shareables.firstIndex(where: { $0.id == invitation.id }) {
+                            self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+                        }
                     }
                 }
-            }
-        } else if let team = selectedShareable as? Team {
-            driveFileManager.apiFetcher.updateTeamRights(file: file, team: team, permission: value) { response, _ in
-                if response?.data != nil {
-                    team.right = UserPermission(rawValue: value)
-                    if let index = self.shareables.firstIndex(where: { $0.id == team.id }) {
-                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+            } else if let team = selectedShareable as? Team {
+                driveFileManager.apiFetcher.updateTeamRights(file: file, team: team, permission: value) { response, _ in
+                    if response?.data != nil {
+                        team.right = UserPermission(rawValue: value)
+                        if let index = self.shareables.firstIndex(where: { $0.id == team.id }) {
+                            self.tableView.reloadRows(at: [IndexPath(row: index, section: 2)], with: .automatic)
+                        }
                     }
                 }
             }
@@ -333,7 +347,7 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
         let shareLinkSettingsViewController = ShareLinkSettingsViewController.instantiate()
         shareLinkSettingsViewController.driveFileManager = driveFileManager
         shareLinkSettingsViewController.file = file
-        shareLinkSettingsViewController.shareFile = sharedFile
+        shareLinkSettingsViewController.shareLink = shareLink
         navigationController?.pushViewController(shareLinkSettingsViewController, animated: true)
     }
 }
