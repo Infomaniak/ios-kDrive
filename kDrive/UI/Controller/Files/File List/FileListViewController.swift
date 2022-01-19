@@ -118,7 +118,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     private var networkObserver: ObservationToken?
 
-    lazy var viewModel: FileListViewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+    lazy var viewModel = getViewModel()
 
     var bindStore = Set<AnyCancellable>()
 
@@ -169,6 +169,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         // Set up observers
         observeNetwork()
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+
+    func getViewModel() -> FileListViewModel {
+        return ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
     private func bindViewModels() {
@@ -815,8 +819,8 @@ extension FileListViewController: SelectDelegate {
             let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
             driveFileManager = newDriveFileManager
             if isDifferentDrive {
-                let currentDirectory = driveFileManager.getCachedRootFile()
-                viewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                currentDirectory = driveFileManager.getCachedRootFile()
+                viewModel = getViewModel()
                 bindViewModels()
                 viewModel.onViewDidLoad()
                 navigationController?.popToRootViewController(animated: false)

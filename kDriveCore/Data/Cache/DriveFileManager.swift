@@ -140,6 +140,19 @@ public class DriveFileManager {
         }
     }
 
+    public func getLiveRootFile(_ root: File, using realm: Realm? = nil) -> File {
+        if let root = getCachedFile(id: root.id, freeze: false, using: realm) {
+            return root
+        } else {
+            let newRoot = File(id: DriveFileManager.constants.rootID, name: drive.name)
+            let realm = realm ?? getRealm()
+            try? realm.safeWrite {
+                realm.add(newRoot)
+            }
+            return newRoot
+        }
+    }
+
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public var realmConfiguration: Realm.Configuration
     public var drive: Drive
