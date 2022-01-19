@@ -215,7 +215,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
-            cell.canUseTeam = sharedFile.canUseTeam
+            // cell.canUseTeam = sharedFile.canUseTeam
             cell.drive = driveFileManager.drive
             cell.textField.text = savedText
             cell.textField.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail

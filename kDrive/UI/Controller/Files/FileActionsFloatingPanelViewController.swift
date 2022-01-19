@@ -344,22 +344,24 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             } else {
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
-                driveFileManager.activateShareLink(for: file) { [weak self] shareLink, error in
-                    if let link = shareLink {
-                        self?.setLoading(false, action: action, at: indexPath)
-                        self?.copyShareLinkToPasteboard(link.url)
-                    } else if let error = error as? DriveError, let file = self?.file, error == .shareLinkAlreadyExists {
-                        // This should never happen
-                        self?.driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
-                            if let data = response?.data, let link = data.link?.url {
-                                _ = self?.driveFileManager.setFileShareLink(file: file, shareLink: link)
-                                self?.copyShareLinkToPasteboard(link)
+                Task {
+                    do {
+                        let shareLink = try await driveFileManager.createShareLink(for: file)
+                        setLoading(false, action: action, at: indexPath)
+                        copyShareLinkToPasteboard(shareLink.url)
+                    } catch {
+                        if let error = error as? DriveError, error == .shareLinkAlreadyExists {
+                            // This should never happen
+                            let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
+                            setLoading(false, action: action, at: indexPath)
+                            if let shareLink = shareLink {
+                                driveFileManager.setFileShareLink(file: file, shareLink: shareLink.url)
+                                copyShareLinkToPasteboard(shareLink.url)
                             }
-                            self?.setLoading(false, action: action, at: indexPath)
+                        } else {
+                            setLoading(false, action: action, at: indexPath)
+                            UIConstants.showSnackBar(message: error.localizedDescription)
                         }
-                    } else {
-                        self?.setLoading(false, action: action, at: indexPath)
-                        UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorShareLink)
                     }
                 }
             }
