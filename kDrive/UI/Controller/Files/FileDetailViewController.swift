@@ -825,20 +825,8 @@ extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         let right = ShareLinkPermission(rawValue: value)!
         Task {
-            let response: Bool
-            if right == .restricted {
-                // Remove share link
-                response = try await driveFileManager.removeShareLink(for: file)
-                if response {
-                    self.shareLink = nil
-                }
-            } else {
-                // Update share link
-                response = try await driveFileManager.apiFetcher.updateShareLink(for: file, settings: .init(canComment: shareLink?.capabilities.canComment, canDownload: shareLink?.capabilities.canDownload, canEdit: shareLink?.capabilities.canEdit, canSeeInfo: shareLink?.capabilities.canSeeInfo, canSeeStats: shareLink?.capabilities.canSeeStats, right: right, validUntil: shareLink?.validUntil))
-            }
-            if response {
-                self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
-            }
+            self.shareLink = try await driveFileManager.createOrRemoveShareLink(for: file, right: right)
+            self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
         }
     }
 }
