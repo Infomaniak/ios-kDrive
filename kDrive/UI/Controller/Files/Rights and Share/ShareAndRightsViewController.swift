@@ -79,12 +79,13 @@ class ShareAndRightsViewController: UIViewController {
     }
 
     private func updateShareList() {
+        let group = DispatchGroup()
+        group.enter()
         driveFileManager?.apiFetcher.getShareListFor(file: file) { response, error in
             if let sharedFile = response?.data {
                 self.sharedFile = sharedFile
                 self.shareables = sharedFile.shareables
                 self.ignoredEmails = sharedFile.invitations.compactMap { $0?.userId != nil ? nil : $0?.email }
-                self.tableView.reloadData()
             } else {
                 if let error = response?.error ?? error {
                     DDLogError("Cannot get shared file: \(error)")
@@ -92,9 +93,15 @@ class ShareAndRightsViewController: UIViewController {
                     DDLogError("Cannot get shared file (unknown error)")
                 }
             }
+            group.leave()
         }
+        group.enter()
         Task {
             self.shareLink = try? await driveFileManager?.apiFetcher.shareLink(for: file)
+            group.leave()
+        }
+        group.notify(queue: .main) {
+            self.tableView.reloadData()
         }
     }
 
@@ -260,20 +267,8 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
             let right = ShareLinkPermission(rawValue: value)!
             Task {
                 do {
-                    let response: Bool
-                    if right == .restricted {
-                        // Remove share link
-                        response = try await driveFileManager.removeShareLink(for: file)
-                        if response {
-                            self.shareLink = nil
-                        }
-                    } else {
-                        // Update share link
-                        response = try await driveFileManager.apiFetcher.updateShareLink(for: file, settings: .init(canComment: shareLink?.capabilities.canComment, canDownload: shareLink?.capabilities.canDownload, canEdit: shareLink?.capabilities.canEdit, canSeeInfo: shareLink?.capabilities.canSeeInfo, canSeeStats: shareLink?.capabilities.canSeeStats, right: right, validUntil: shareLink?.validUntil))
-                    }
-                    if response {
-                        self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
-                    }
+                    self.shareLink = try await driveFileManager.createOrRemoveShareLink(for: file, right: right)
+                    self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }
