@@ -176,7 +176,11 @@ class ManagedFileListViewModel: FileListViewModel {
         }
     }
 
-    private func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+    func getFile(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
+        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
+    }
+
+    final func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
         guard !isLoading || page > 1 else { return }
 
         if currentDirectory.fullyDownloaded && !forceRefresh {
@@ -193,13 +197,13 @@ class ManagedFileListViewModel: FileListViewModel {
                 }
             }
 
-            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
+            getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
                 self?.isLoading = false
                 self?.isRefreshIndicatorHidden = true
                 if let fetchedCurrentDirectory = file {
                     if !fetchedCurrentDirectory.fullyDownloaded {
-                        self?.loadFiles(page: page + 1)
-                    } else {
+                        self?.loadFiles(page: page + 1, forceRefresh: forceRefresh)
+                    } else if !forceRefresh {
                         self?.loadActivities()
                     }
                 } else if let error = error as? DriveError {
@@ -209,7 +213,7 @@ class ManagedFileListViewModel: FileListViewModel {
         }
     }
 
-    private func loadActivities() {
+    func loadActivities() {
         driveFileManager.getFolderActivities(file: currentDirectory) { [weak self] _, _, error in
             if let error = error as? DriveError {
                 self?.onDriveError?(error)
