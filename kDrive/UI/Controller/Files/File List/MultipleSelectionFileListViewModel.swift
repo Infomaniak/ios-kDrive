@@ -278,41 +278,40 @@ class MultipleSelectionFileListViewModel {
     // MARK: - Bulk actions
 
     private func bulkMoveFiles(_ files: [File], destinationId: Int) {
-        let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
-            self.bulkObservation(action: .move, response: response, error: error)
+        Task {
+            let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
+            await performAndObserve(bulkAction: action)
         }
     }
 
     private func bulkMoveAll(destinationId: Int) {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, destinationDirectoryId: destinationId)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
-            self.bulkObservation(action: .move, response: response, error: error)
+        Task {
+            let action = BulkAction(action: .move, parentId: currentDirectory.id, destinationDirectoryId: destinationId)
+            await performAndObserve(bulkAction: action)
         }
     }
 
     private func bulkDeleteFiles(_ files: [File]) {
-        let action = BulkAction(action: .trash, fileIds: files.map(\.id))
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
-            self.bulkObservation(action: .trash, response: response, error: error)
+        Task {
+            let action = BulkAction(action: .trash, fileIds: files.map(\.id))
+            await performAndObserve(bulkAction: action)
         }
     }
 
     private func bulkDeleteAll() {
-        let action = BulkAction(action: .trash, parentId: currentDirectory.id)
-        driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
-            self.bulkObservation(action: .trash, response: response, error: error)
+        Task {
+            let action = BulkAction(action: .trash, parentId: currentDirectory.id)
+            await performAndObserve(bulkAction: action)
         }
     }
 
-    public func bulkObservation(action: BulkActionType, response: ApiResponse<CancelableResponse>?, error: Error?) {
-        isMultipleSelectionEnabled = false
-        let cancelId = response?.data?.id
-        if let error = error {
-            DDLogError("Error while deleting file: \(error)")
-        } else {
+    public func performAndObserve(bulkAction: BulkAction) async {
+        do {
+            isMultipleSelectionEnabled = false
+            let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
+
             let message: String
-            switch action {
+            switch bulkAction.action {
             case .trash:
                 message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
             case .move:
@@ -321,21 +320,20 @@ class MultipleSelectionFileListViewModel {
                 message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
             }
             let progressSnack = UIConstants.showSnackBar(message: message, duration: .infinite, action: IKSnackBar.Action(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                if let cancelId = cancelId {
-                    self.driveFileManager.cancelAction(cancelId: cancelId) { error in
-                        if let error = error {
-                            DDLogError("Cancel error: \(error)")
-                        }
+                // TODO: rebase on #524 for async
+                self.driveFileManager.cancelAction(cancelId: cancelableResponse.id) { error in
+                    if let error = error {
+                        DDLogError("Cancel error: \(error)")
                     }
                 }
             })
-            AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelId) { actionProgress in
+            AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelableResponse.id) { actionProgress in
                 DispatchQueue.main.async { [weak self] in
                     switch actionProgress.progress.message {
                     case .starting:
                         break
                     case .processing:
-                        switch action {
+                        switch bulkAction.action {
                         case .trash:
                             progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                         case .move:
@@ -345,7 +343,7 @@ class MultipleSelectionFileListViewModel {
                         }
                         self?.notifyObserversForCurrentDirectory()
                     case .done:
-                        switch action {
+                        switch bulkAction.action {
                         case .trash:
                             progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
                         case .move:
@@ -359,7 +357,7 @@ class MultipleSelectionFileListViewModel {
                         self?.notifyObserversForCurrentDirectory()
                     case .canceled:
                         let message: String
-                        switch action {
+                        switch bulkAction.action {
                         case .trash:
                             message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
                         case .move:
@@ -372,6 +370,8 @@ class MultipleSelectionFileListViewModel {
                     }
                 }
             }
+        } catch {
+            DDLogError("Error while performing bulk action: \(error)")
         }
     }
 
