@@ -156,10 +156,10 @@ class TrashViewController: FileListViewController {
     // MARK: - Collection view delegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if selectionMode {
+        /*if selectionMode {
             selectChild(at: indexPath)
             return
-        }
+        }*/
 
         let file = viewModel.getFile(at: indexPath.item)
         if file.isDirectory {
@@ -237,7 +237,7 @@ extension TrashViewController: TrashOptionsDelegate {
                 }
                 if self.selectionMode {
                     self.selectionMode = false
-                }
+                }*/
             }
         case .delete:
             deleteFiles(files)
@@ -269,7 +269,7 @@ extension TrashViewController: SelectFolderDelegate {
             }
             if self.selectionMode {
                 self.selectionMode = false
-            }
+            }*/
         }
     }
 }
