@@ -26,7 +26,7 @@ class FileDetailViewController: UIViewController {
 
     var file: File!
     var driveFileManager: DriveFileManager!
-    var sharedFile: SharedFile?
+    var fileAccess: FileAccess?
     var shareLink: ShareLink?
 
     private var activities = [[FileDetailActivity]]()
@@ -54,11 +54,11 @@ class FileDetailViewController: UIViewController {
         /// Build an array of row based on given file available information.
         /// - Parameters:
         ///   - file: File for which to build the array
-        ///   - sharedFile: Shared file related to `file`
+        ///   - fileAccess: Shared file related to `file`
         /// - Returns: Array of row
-        static func getRows(for file: File, sharedFile: SharedFile?, categoryRights: CategoryRights) -> [FileInformationRow] {
+        static func getRows(for file: File, fileAccess: FileAccess?, categoryRights: CategoryRights) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
-            if sharedFile != nil || !file.users.isEmpty {
+            if fileAccess != nil || !file.users.isEmpty {
                 rows.append(.users)
             }
             if file.rights?.share ?? false {
@@ -74,7 +74,7 @@ class FileDetailViewController: UIViewController {
             if file.createdAtDate != nil {
                 rows.append(.added)
             }
-            if sharedFile != nil || !file.path.isEmpty {
+            if fileAccess != nil || !file.path.isEmpty {
                 rows.append(.location)
             }
             if file.size != 0 {
@@ -169,7 +169,7 @@ class FileDetailViewController: UIViewController {
         guard file != nil else { return }
 
         // Set initial rows
-        fileInformationRows = FileInformationRow.getRows(for: file, sharedFile: sharedFile, categoryRights: driveFileManager.drive.categoryRights)
+        fileInformationRows = FileInformationRow.getRows(for: file, fileAccess: fileAccess, categoryRights: driveFileManager.drive.categoryRights)
 
         // Load file informations
         loadFileInformation()
@@ -198,18 +198,14 @@ class FileDetailViewController: UIViewController {
             group.leave()
         }
         group.enter()
-        driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
-            self.sharedFile = response?.data
-            group.leave()
-        }
-        group.enter()
         Task {
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: file)
             self.shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
             group.leave()
         }
         group.notify(queue: .main) {
             guard self.file != nil else { return }
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, categoryRights: self.driveFileManager.drive.categoryRights)
             self.reloadTableView()
         }
     }
@@ -389,19 +385,10 @@ class FileDetailViewController: UIViewController {
             navigationController?.popViewController(animated: true)
             return
         }
-        let group = DispatchGroup()
-        group.enter()
-        driveFileManager.apiFetcher.getShareListFor(file: file) { response, _ in
-            self.sharedFile = response?.data
-            group.leave()
-        }
-        group.enter()
         Task {
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: file)
             self.shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
-            group.leave()
-        }
-        group.notify(queue: .main) {
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, sharedFile: self.sharedFile, categoryRights: self.driveFileManager.drive.categoryRights)
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
@@ -458,9 +445,9 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 switch fileInformationRows[indexPath.row] {
                 case .users:
                     let cell = tableView.dequeueReusableCell(type: FileInformationUsersTableViewCell.self, for: indexPath)
-                    cell.sharedFile = sharedFile
-                    let userIds = file.users.isEmpty ? [file.createdBy] : Array(file.users)
-                    cell.fallbackUsers = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0) }
+                    if let fileAccess = fileAccess {
+                        cell.shareables = fileAccess.teams + fileAccess.users
+                    }
                     cell.shareButton.isHidden = !(file.rights?.share ?? false)
                     cell.delegate = self
                     cell.collectionView.reloadData()

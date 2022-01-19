@@ -67,20 +67,10 @@ public class DriveUser: Object, Codable, InfomaniakUser {
     @Persisted private var _avatar: String = ""
     @Persisted private var _avatarUrl: String?
     @Persisted public var displayName: String = ""
-    @Persisted private var _permission: String?
     public var type: DriveUserType?
 
     public var avatar: String {
         return !_avatar.isBlank ? _avatar : (_avatarUrl ?? "")
-    }
-
-    public var permission: UserPermission? {
-        get {
-            return UserPermission(rawValue: _permission ?? "")
-        }
-        set {
-            _permission = newValue?.rawValue
-        }
     }
 
     enum CodingKeys: String, CodingKey {
@@ -89,26 +79,6 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _avatar = "avatar"
         case _avatarUrl = "avatar_url"
         case displayName = "display_name"
-        case _permission = "permission"
         case type
-    }
-}
-
-extension DriveUser: Shareable {
-    public var right: UserPermission? {
-        get {
-            return permission
-        }
-        set {
-            permission = newValue
-        }
-    }
-
-    public var userId: Int? {
-        return id
-    }
-
-    public var shareableName: String {
-        return displayName
     }
 }
