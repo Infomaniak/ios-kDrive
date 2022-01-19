@@ -194,7 +194,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                         let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
                         let tabBarController = presentingViewController as? MainTabViewController
                         let navigationController = tabBarController?.selectedViewController as? UINavigationController
-                        (navigationController?.topViewController as? FileListViewController)?.bulkObservation(action: .copy, response: response)
+                        (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?.bulkObservation(action: .copy, response: response, error: error)
                     }
                 } else {
                     Task {
