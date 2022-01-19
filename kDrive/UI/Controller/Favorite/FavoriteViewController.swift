@@ -20,6 +20,16 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+class FavoritesViewModel: ManagedFileListViewModel {
+    override func getFile(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
+        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
+    }
+
+    override func loadActivities() {
+        loadFiles(page: 1, forceRefresh: true)
+    }
+}
+
 class FavoriteViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.favorite }
     override class var storyboardIdentifier: String { "FavoriteViewController" }
@@ -27,67 +37,13 @@ class FavoriteViewController: FileListViewController {
     override func viewDidLoad() {
         // Set configuration
         configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
-        viewModel = ManagedFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        currentDirectory = driveFileManager.getLiveRootFile(DriveFileManager.favoriteRootFile)
 
         super.viewDidLoad()
-
-        // If we didn't get any directory, use the fake root
-        if currentDirectory == nil {
-            currentDirectory = DriveFileManager.favoriteRootFile
-        }
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Favorite"])
-    }
-
-    override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        guard driveFileManager != nil else {
-            DispatchQueue.main.async {
-                completion(.success([]), false, true)
-            }
-            return
-        }
-
-        Task {
-            do {
-                let (files, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType)
-                completion(.success(files), moreComing, true)
-            } catch {
-                completion(.failure(error), false, true)
-            }
-        }
-    }
-
-    override func getNewChanges() {
-        // We don't have incremental changes for favorites so we just fetch everything again
-        // But maybe we shouldn't?
-        forceRefresh()
-    }
-
-    override func updateChild(_ file: File, at index: Int) {
-        // Remove file from list if it was unfavorited
-        if !file.isFavorite {
-            let fileId = viewModel.getFile(at: index).id
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.removeFileFromList(id: fileId)
-            }
-            return
-        }
-
-        let oldFile = viewModel.getFile(at: index)
-        viewModel.setFile(file, at: index)
-
-        // We don't need to call reload data if only the children were updated
-        if oldFile.isContentEqual(to: file) {
-            return
-        }
-
-        DispatchQueue.main.async { [weak self] in
-            self?.collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
-        }
+    override func getViewModel() -> FileListViewModel {
+        return FavoritesViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
     // MARK: - State restoration
