@@ -564,7 +564,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        guard currentTab == .comments && !comments.isEmpty else {
+        // Only the cells of the "comments" view can be slid, and this behavior concerns only the content cells, not the header
+        guard currentTab == .comments && !comments.isEmpty && indexPath.section >= 1 else {
             return nil
         }
 
