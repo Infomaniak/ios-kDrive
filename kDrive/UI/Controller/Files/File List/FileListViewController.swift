@@ -99,38 +99,24 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Properties
 
+    var rightBarButtonItems: [UIBarButtonItem]?
+    var leftBarButtonItems: [UIBarButtonItem]?
+
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
     private var floatingPanelViewController: DriveFloatingPanelController!
     #if !ISEXTENSION
         private var fileInformationsViewController: FileActionsFloatingPanelViewController!
-    #endif
-    private var loadingBarButtonItem: UIBarButtonItem = {
-        let activityView = UIActivityIndicatorView(style: .medium)
-        activityView.startAnimating()
-        return UIBarButtonItem(customView: activityView)
-    }()
-
-    var currentDirectory: File!
-
-    lazy var configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true)
-
-    var currentDirectoryCount: FileCount?
-    #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
 
-    private var uploadsObserver: ObservationToken?
-    private var networkObserver: ObservationToken?
+    var currentDirectory: File!
+    var driveFileManager: DriveFileManager!
 
-    var trashSort: Bool {
-        #if ISEXTENSION
-            return false
-        #else
-            return self is TrashViewController && currentDirectory.isRoot
-        #endif
-    }
+    lazy var configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true)
+
+    private var networkObserver: ObservationToken?
 
     lazy var viewModel: FileListViewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
 
@@ -181,7 +167,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         // Set up observers
-        setUpObservers()
+        observeNetwork()
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
 
@@ -360,8 +346,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.present(floatingPanelViewController, animated: true)
             #endif
         }
-        
-        viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) {  [weak self] actions in
+
+        viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
             self?.headerView?.selectView.setActions(actions)
         }
     }
@@ -429,7 +415,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {}
 
-    override func getNewChanges() {}
+    func getNewChanges() {}
 
     func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         headerView.delegate = self
@@ -469,16 +455,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         viewModel.forceRefresh()
     }
 
-    final func setUpObservers() {
-        // Upload files observer
-        // observeUploads()
-        // File observer
-        // Network observer
-        observeNetwork()
-    }
-
-    final func observeUploads() {}
-
     final func observeNetwork() {
         guard networkObserver == nil else { return }
         networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
@@ -491,8 +467,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    final func updateUploadCount() {}
-
     private func showEmptyView(_ isHidden: Bool) {
         let emptyView = EmptyTableView.instantiate(type: configuration.emptyViewType, button: false)
         emptyView.actionHandler = { [weak self] _ in
@@ -503,8 +477,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             setUpHeaderView(headerView, isEmptyViewHidden: isHidden)
         }
     }
-
-    final func showEmptyViewIfNeeded(type: EmptyTableView.EmptyTableViewType? = nil, files: [File]) {}
 
     final func removeFileFromList(id: Int) {}
 
@@ -547,8 +519,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Multiple selection
 
-    override final func toggleMultipleSelection() {}
-
     func toggleMultipleSelection(_ on: Bool) {
         if on {
             navigationItem.title = nil
@@ -560,7 +530,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             generator.prepare()
             generator.impactOccurred()
         } else {
-            deselectAllChildren()
             headerView?.selectView.isHidden = true
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
@@ -571,15 +540,15 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
 
-    override func getItem(at indexPath: IndexPath) -> File? {
+    func getItem(at indexPath: IndexPath) -> File? {
         return viewModel.getFile(at: indexPath.item)
     }
 
-    override func getAllItems() -> [File] {
+    func getAllItems() -> [File] {
         return viewModel.getAllFiles()
     }
 
-    override final func setSelectedCells() {
+    func setSelectedCells() {
         guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
         if multipleSelectionViewModel.isSelectAllModeEnabled {
             for i in 0 ..< viewModel.fileCount {
@@ -593,10 +562,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         }
     }
-
-    override final func setSelectionButtonsEnabled(moveEnabled: Bool, deleteEnabled: Bool, moreEnabled: Bool) {}
-
-    override final func updateSelectedCount() {}
 
     // MARK: - Collection view data source
 
@@ -732,132 +697,16 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if currentDirectory == nil && directoryId > DriveFileManager.constants.rootID {
             navigationController?.popViewController(animated: true)
         }
-        if configuration.showUploadingFiles {
-            updateUploadCount()
-        }
-        observeUploads()
         reloadData()
-    }
-
-    // MARK: - Bulk actions
-
-    private func bulkMoveFiles(_ files: [File], destinationId: Int) {
-        let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
-        Task {
-            do {
-                let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
-                bulkObservation(action: .move, response: response)
-            } catch {
-                DDLogError("Error while moving files: \(error)")
-            }
-        }
-    }
-
-    private func bulkMoveAll(destinationId: Int) {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, destinationDirectoryId: destinationId)
-        Task {
-            do {
-                let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
-                bulkObservation(action: .move, response: response)
-            } catch {
-                DDLogError("Error while moving files: \(error)")
-            }
-        }
-    }
-
-    private func bulkDeleteFiles(_ files: [File]) {
-        let action = BulkAction(action: .trash, fileIds: files.map(\.id))
-        Task {
-            do {
-                let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
-                bulkObservation(action: .trash, response: response)
-            } catch {
-                DDLogError("Error while deleting files: \(error)")
-            }
-        }
-    }
-
-    private func bulkDeleteAll() {
-        let action = BulkAction(action: .trash, parentId: currentDirectory.id)
-        Task {
-            do {
-                let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
-                bulkObservation(action: .trash, response: response)
-            } catch {
-                DDLogError("Error while deleting files: \(error)")
-            }
-        }
-    }
-
-    public func bulkObservation(action: BulkActionType, response: CancelableResponse) {
-        selectionMode = false
-        let message: String
-        switch action {
-        case .trash:
-            message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
-        case .move:
-            message = KDriveResourcesStrings.Localizable.fileListMoveStartedSnackbar
-        case .copy:
-            message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
-        }
-        let progressSnack = UIConstants.showSnackBar(message: message, duration: .infinite, action: IKSnackBar.Action(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-            Task {
-                try await self.driveFileManager.undoAction(cancelId: response.id)
-            }
-        })
-        AccountManager.instance.mqService.observeActionProgress(self, actionId: response.id) { [weak self] actionProgress in
-            DispatchQueue.main.async {
-                switch actionProgress.progress.message {
-                case .starting:
-                    break
-                case .processing:
-                    switch action {
-                    case .trash:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    case .move:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    case .copy:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    }
-                    self?.notifyObserversForCurrentDirectory()
-                case .done:
-                    switch action {
-                    case .trash:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
-                    case .move:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveDoneSnackbar
-                    case .copy:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyDoneSnackbar
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        progressSnack?.dismiss()
-                    }
-                    self?.notifyObserversForCurrentDirectory()
-                case .canceled:
-                    let message: String
-                    switch action {
-                    case .trash:
-                        message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
-                    case .move:
-                        message = KDriveResourcesStrings.Localizable.allFileMoveCancelled
-                    case .copy:
-                        message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-                    }
-                    UIConstants.showSnackBar(message: message)
-                    self?.notifyObserversForCurrentDirectory()
-                }
-            }
-        }
-    }
-
-    private func notifyObserversForCurrentDirectory() {
-        driveFileManager.notifyObserversWith(file: currentDirectory)
     }
 
     // MARK: - Files header view delegate
 
     func sortButtonPressed() {
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: trashSort ? [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest] : [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest], selectedOption: viewModel.sortType, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest],
+                                                                                                             selectedOption: viewModel.sortType,
+                                                                                                             headerTitle: KDriveResourcesStrings.Localizable.sortTitle,
+                                                                                                             delegate: self)
         present(floatingPanelViewController, animated: true)
     }
 
@@ -875,10 +724,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             navigationController?.pushViewController(uploadViewController, animated: true)
         }
 
-        override func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton) {
-            viewModel.multipleSelectionViewModel?.actionButtonPressed(action: button.action)
-        }
     #endif
+    func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton) {
+        viewModel.multipleSelectionViewModel?.actionButtonPressed(action: button.action)
+    }
 
     func removeFilterButtonPressed(_ filter: Filterable) {}
 }
@@ -953,12 +802,8 @@ extension FileListViewController: SelectDelegate {
     func didSelect(option: Selectable) {
         guard let type = option as? SortType else { return }
         MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
-        if !trashSort {
-            FileListOptions.instance.currentSortType = type
-            // Collection view will be reloaded via the observer
-        } else {
-            reloadData(showRefreshControl: false)
-        }
+        // Collection view will be reloaded via the observer
+        FileListOptions.instance.currentSortType = type
     }
 }
 
@@ -969,19 +814,16 @@ extension FileListViewController: SelectDelegate {
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
             let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
             driveFileManager = newDriveFileManager
-            if configuration.showUploadingFiles {
-                updateUploadCount()
-                // We stop observing the old directory and observe the new one instead
-                uploadsObserver?.cancel()
-                uploadsObserver = nil
-                observeUploads()
-            }
             if isDifferentDrive {
                 let currentDirectory = driveFileManager.getCachedRootFile()
                 viewModel = ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
                 bindViewModels()
                 viewModel.onViewDidLoad()
                 navigationController?.popToRootViewController(animated: false)
+            } else if configuration.showUploadingFiles {
+                let newUploadViewModel = UploadCardViewModel(uploadDirectory: viewModel.currentDirectory, driveFileManager: driveFileManager)
+                viewModel.uploadViewModel = newUploadViewModel
+                bindUploadCardViewModel()
             }
         }
     }
