@@ -40,9 +40,9 @@ class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
         if moreValue > 0 {
             moreLabel.isHidden = false
             moreLabel.text = "+\(moreValue)"
-            accessibilityLabel = "\(shareable.shareableName) +\(moreValue)"
+            accessibilityLabel = "\(shareable.name) +\(moreValue)"
         } else {
-            accessibilityLabel = shareable.shareableName
+            accessibilityLabel = shareable.name
         }
         isAccessibilityElement = true
 
