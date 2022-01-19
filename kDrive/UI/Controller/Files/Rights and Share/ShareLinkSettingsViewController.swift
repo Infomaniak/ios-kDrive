@@ -349,7 +349,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
         let right: ShareLinkPermission = getSetting(for: .optionPassword) ? .password : .public
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-        let canEdit = editRightValue == Right.onlyOfficeRights[1].key
+        let canEdit = editRightValue == EditPermission.write.rawValue
         let settings = ShareLinkSettings(canComment: canEdit, canDownload: getSetting(for: .optionDownload), canEdit: canEdit, canSeeInfo: true, canSeeStats: true, password: password, right: right, validUntil: validUntil)
         Task {
             do {
