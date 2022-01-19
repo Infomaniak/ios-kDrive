@@ -18,106 +18,17 @@
 
 import Foundation
 
-public enum ShareLinkPermission: String {
-    case restricted, `public`, password
-}
-
 public enum EditPermission: String {
     case read, write
 }
 
-public class SharedFile: NSObject, NSCoding, Codable {
-    public var id: Int = 0
-    public var path: String
-    public var canUseTeam: Bool
+public class SharedFile: Codable {
     public var users: [DriveUser]
-    public var link: ShareLink?
     public var invitations: [Invitation?]
     public var teams: [Team]
 
     public var shareables: [Shareable] {
         return teams.sorted() + users + invitations.compactMap { $0 }
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case path
-        case canUseTeam = "can_use_team"
-        case users
-        case link
-        case invitations
-        case teams
-    }
-
-    public func encode(with coder: NSCoder) {
-        coder.encode(id, forKey: "Id")
-        coder.encode(path, forKey: "Path")
-        coder.encode(canUseTeam, forKey: "CanUseTeam")
-        coder.encode(users.map(\.id), forKey: "Users")
-        coder.encode(link, forKey: "Link")
-        // coder.encode(invitations, forKey: "Invitations")
-        coder.encode(teams, forKey: "Teams")
-    }
-
-    public required init?(coder: NSCoder) {
-        guard let path = coder.decodeObject(forKey: "Path") as? String,
-              let users = coder.decodeObject(forKey: "Users") as? [Int],
-              // let invitations = coder.decodeObject(forKey: "Invitations") as? [Invitation?],
-              let teams = coder.decodeObject(forKey: "Teams") as? [Team] else {
-            return nil
-        }
-        self.id = coder.decodeInteger(forKey: "Id")
-        self.path = path
-        self.canUseTeam = coder.decodeBool(forKey: "CanUseTeam")
-        let realm = DriveInfosManager.instance.getRealm()
-        self.users = users.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
-        self.link = coder.decodeObject(forKey: "Link") as? ShareLink
-        self.invitations = []
-        self.teams = teams
-    }
-}
-
-public class ShareLink: NSObject, NSCoding, Codable {
-    public var canEdit: Bool
-    public var url: String
-    public var permission: String
-    public var blockComments: Bool
-    public var blockDownloads: Bool
-    public var blockInformation: Bool
-    public var validUntil: Int?
-
-    enum CodingKeys: String, CodingKey {
-        case canEdit = "can_edit"
-        case url
-        case permission
-        case blockComments = "block_comments"
-        case blockDownloads = "block_downloads"
-        case blockInformation = "block_information"
-        case validUntil = "valid_until"
-    }
-
-    public func encode(with coder: NSCoder) {
-        coder.encode(canEdit, forKey: "CanEdit")
-        coder.encode(url, forKey: "URL")
-        coder.encode(permission, forKey: "Permission")
-        coder.encode(blockComments, forKey: "BlockComments")
-        coder.encode(blockDownloads, forKey: "BlockDownloads")
-        coder.encode(blockInformation, forKey: "BlockInformation")
-        coder.encode(validUntil, forKey: "ValidUntil")
-    }
-
-    public required init?(coder: NSCoder) {
-        guard let url = coder.decodeObject(forKey: "URL") as? String,
-              let permission = coder.decodeObject(forKey: "Permission") as? String else {
-            return nil
-        }
-        self.canEdit = coder.decodeBool(forKey: "CanEdit")
-        self.url = url
-        self.permission = permission
-        self.blockComments = coder.decodeBool(forKey: "BlockComments")
-        self.blockDownloads = coder.decodeBool(forKey: "BlockDownloads")
-        self.blockInformation = coder.decodeBool(forKey: "BlockInformation")
-        self.validUntil = coder.decodeObject(forKey: "ValidUntil") as? Int
     }
 }
 
