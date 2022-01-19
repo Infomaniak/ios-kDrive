@@ -503,7 +503,9 @@ public extension Endpoint {
     }
 
     static func shareLink(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/link")
+        return .fileInfo(file).appending(path: "/link", queryItems: [
+            URLQueryItem(name: "with", value: "capabilities")
+        ])
     }
 
     // MARK: Trash

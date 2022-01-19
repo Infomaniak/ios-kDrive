@@ -211,37 +211,26 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
+    public func shareLink(for file: File) async throws -> ShareLink {
+        try await perform(request: authenticatedRequest(.shareLink(file: file))).data
+    }
+
+    public func createShareLink(for file: File) async throws -> ShareLink {
+        try await perform(request: authenticatedRequest(.shareLink(file: file), method: .post, parameters: ShareLinkSettings(right: .public))).data
+    }
+
+    public func updateShareLink(for file: File, settings: ShareLinkSettings) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.shareLink(file: file), method: .put, parameters: settings)).data
+    }
+
+    public func removeShareLink(for file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.shareLink(file: file), method: .delete)).data
+    }
+
     public func getShareListFor(file: File, completion: @escaping (ApiResponse<SharedFile>?, Error?) -> Void) {
         let url = ApiRoutes.getShareListFor(file: file)
 
         makeRequest(url, method: .get, completion: completion)
-    }
-
-    public func activateShareLinkFor(file: File, completion: @escaping (ApiResponse<ShareLink>?, Error?) -> Void) {
-        let url = ApiRoutes.activateShareLinkFor(file: file)
-
-        makeRequest(url, method: .post, completion: completion)
-    }
-
-    // swiftlint:disable function_parameter_count
-    public func updateShareLinkWith(file: File, canEdit: Bool, permission: String, password: String? = "", date: TimeInterval?, blockDownloads: Bool, blockComments: Bool, isFree: Bool, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.updateShareLinkWith(file: file)
-
-        var body: [String: Any]
-        if isFree {
-            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads]
-        } else {
-            let intValidUntil = (date != nil) ? Int(date!) : nil
-            body = ["can_edit": canEdit, "permission": permission, "block_comments": blockComments, "block_downloads": blockDownloads, "valid_until": intValidUntil as Any]
-        }
-        if permission == ShareLinkPermission.password.rawValue {
-            if let password = password {
-                body.updateValue(password, forKey: "password")
-            } else {
-                body.removeValue(forKey: "permission")
-            }
-        }
-        makeRequest(url, method: .put, parameters: body, completion: completion)
     }
 
     public func addUserRights(file: File, users: [Int], teams: [Int], emails: [String], message: String, permission: String, completion: @escaping (ApiResponse<SharedUsers>?, Error?) -> Void) {
@@ -297,12 +286,6 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func deleteTeamRights(file: File, team: Team, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
         let url = ApiRoutes.deleteTeamRights(file: file, team: team)
-
-        makeRequest(url, method: .delete, completion: completion)
-    }
-
-    public func removeShareLinkFor(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.removeShareLinkFor(file: file)
 
         makeRequest(url, method: .delete, completion: completion)
     }
