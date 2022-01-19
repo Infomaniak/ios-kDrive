@@ -103,6 +103,7 @@ public struct ShareLinkSettings: Encodable {
     /// Permission of the shared link: no restriction (public), access by authenticate and authorized user (inherit) or public but protected by a password (password).
     public var right: ShareLinkPermission
     /// Validity of the link.
+    @NullEncodable
     public var validUntil: Date?
 
     public init(canComment: Bool? = nil, canDownload: Bool? = nil, canEdit: Bool? = nil, canSeeInfo: Bool? = nil, canSeeStats: Bool? = nil, password: String? = nil, right: ShareLinkPermission, validUntil: Date? = nil) {
@@ -114,5 +115,22 @@ public struct ShareLinkSettings: Encodable {
         self.password = password
         self.right = right
         self.validUntil = validUntil
+    }
+}
+
+@propertyWrapper
+public struct NullEncodable<T>: Encodable where T: Encodable {
+    public var wrappedValue: T?
+
+    public init(wrappedValue: T?) {
+        self.wrappedValue = wrappedValue
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch wrappedValue {
+        case .some(let value): try container.encode(value)
+        case .none: try container.encodeNil()
+        }
     }
 }
