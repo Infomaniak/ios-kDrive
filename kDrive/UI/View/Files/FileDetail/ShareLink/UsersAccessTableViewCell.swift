@@ -43,68 +43,37 @@ class UsersAccessTableViewCell: InsetTableViewCell {
         avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
-    func configure(with shareable: Shareable, drive: Drive) {
-        if let user = shareable as? UserFileAccess {
-            configure(with: user, blocked: AccountManager.instance.currentUserId == user.id)
-        } else if let invitation = shareable as? ExternInvitationFileAccess {
-            configure(with: invitation)
-        } else if let team = shareable as? TeamFileAccess {
-            configure(with: team, drive: drive)
-        }
-    }
-
-    func configure(with user: UserFileAccess, blocked: Bool) {
-        notAcceptedView.isHidden = true
-        // externalUserView.isHidden = user.type != .shared
-        accessoryImageView.isHidden = blocked
-
-        titleLabel.text = user.name
-        detailLabel.text = user.email
-        rightsLabel.text = user.right.title
-        rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor.color
-        user.user.getAvatar { image in
-            self.avatarImage.image = image
-                .resize(size: CGSize(width: 35, height: 35))
-                .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
-                .withRenderingMode(.alwaysOriginal)
-        }
-    }
-
-    func configure(with invitation: ExternInvitationFileAccess) {
-        notAcceptedView.isHidden = false
-        externalUserView.isHidden = true
-
-        titleLabel.text = invitation.name
-        detailLabel.text = invitation.email
-        rightsLabel.text = invitation.right.title
-        avatarImage.image = KDriveResourcesAsset.circleSend.image
-        if let avatar = invitation.user?.avatar, let url = URL(string: avatar) {
-            KingfisherManager.shared.retrieveImage(with: url) { result in
-                if let image = try? result.get().image {
-                    self.avatarImage.image = image
-                        .resize(size: CGSize(width: 35, height: 35))
-                        .maskImageWithRoundedRect(cornerRadius: CGFloat(35 / 2), borderWidth: 0, borderColor: .clear)
-                        .withRenderingMode(.alwaysOriginal)
-                }
-            }
-        } else {
-            avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
-        }
-    }
-
-    func configure(with team: TeamFileAccess, drive: Drive) {
-        notAcceptedView.isHidden = true
-        externalUserView.isHidden = true
-
-        titleLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
-        if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id) {
-            avatarImage.image = savedTeam.icon
-            detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
-        } else {
-            avatarImage.image = nil
-            detailLabel.text = nil
-        }
-        rightsLabel.text = team.right.title
+    func configure(with element: FileAccessElement, drive: Drive) {
+        titleLabel.text = element.name
+        rightsLabel.text = element.right.title
         rightsLabel.textColor = KDriveResourcesAsset.titleColor.color
+        accessoryImageView.isHidden = false
+
+        Task {
+            avatarImage.image = await element.icon
+        }
+
+        if let user = element as? UserFileAccess {
+            let blocked = AccountManager.instance.currentUserId == user.id
+            rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor.color
+            detailLabel.text = user.email
+            notAcceptedView.isHidden = true
+            // FIXME: Wait to API v2 to return this value
+            externalUserView.isHidden = true // user.type != .shared
+            accessoryImageView.isHidden = blocked
+        } else if let invitation = element as? ExternInvitationFileAccess {
+            detailLabel.text = invitation.email
+            notAcceptedView.isHidden = false
+            externalUserView.isHidden = true
+        } else if let team = element as? TeamFileAccess {
+            titleLabel.text = team.isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : team.name
+            if let savedTeam = DriveInfosManager.instance.getTeam(id: team.id) {
+                detailLabel.text = KDriveResourcesStrings.Localizable.shareUsersCount(savedTeam.usersCount(in: drive))
+            } else {
+                detailLabel.text = nil
+            }
+            notAcceptedView.isHidden = true
+            externalUserView.isHidden = true
+        }
     }
 }
