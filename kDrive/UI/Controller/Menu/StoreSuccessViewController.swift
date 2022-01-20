@@ -17,9 +17,15 @@
  */
 
 import kDriveCore
+import MatomoTracker
 import UIKit
 
 class StoreSuccessViewController: UIViewController {
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "Store", "Success"])
+    }
+
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {
         if let rootViewController = sender.window?.rootViewController as? MainTabViewController {
             rootViewController.dismiss(animated: true)

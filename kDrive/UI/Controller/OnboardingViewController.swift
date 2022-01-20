@@ -22,6 +22,7 @@ import kDriveCore
 import kDriveResources
 import Lottie
 import Sentry
+import MatomoTracker
 import UIKit
 
 class OnboardingViewController: UIViewController {
@@ -65,6 +66,11 @@ class OnboardingViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         signInButton.setLoading(false)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Onboarding"])
     }
 
     override func viewDidLayoutSubviews() {

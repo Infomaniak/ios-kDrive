@@ -18,6 +18,7 @@
 
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class SecurityTableViewController: UITableViewController {
@@ -38,6 +39,7 @@ class SecurityTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         tableView.reloadData()
         navigationController?.setInfomaniakAppearanceNavigationBar()
+        MatomoTracker.shared.track(view: ["Menu", "Settings", "Security"])
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

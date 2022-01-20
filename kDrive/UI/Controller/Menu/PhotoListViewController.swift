@@ -21,6 +21,7 @@ import DifferenceKit
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 extension PhotoSortMode: Selectable {}
@@ -122,6 +123,11 @@ class PhotoListViewController: MultipleSelectionViewController {
         setPhotosNavigationBar()
         navigationItem.title = KDriveResourcesStrings.Localizable.allPictures
         applyGradient(view: headerImageView)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "PhotoList"])
     }
 
     override func viewWillLayoutSubviews() {

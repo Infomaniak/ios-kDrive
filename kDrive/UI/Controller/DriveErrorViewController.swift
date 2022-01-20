@@ -20,6 +20,7 @@ import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class DriveErrorViewController: UIViewController {
@@ -58,6 +59,7 @@ class DriveErrorViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
+        MatomoTracker.shared.track(view: ["DriveError"])
     }
 
     @IBAction func testButtonPressed(_ sender: Any) {

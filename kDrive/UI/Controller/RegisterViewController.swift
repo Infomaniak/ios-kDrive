@@ -19,6 +19,7 @@
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 import WebKit
 
@@ -40,6 +41,11 @@ class RegisterViewController: UIViewController {
         setupEstimatedProgressObserver()
         webView.load(URLRequest(url: URLConstants.signUp.url))
         webView.navigationDelegate = self
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Register"])
     }
 
     private func setupProgressView() {

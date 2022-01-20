@@ -18,6 +18,7 @@
 
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class OfflineViewController: FileListViewController {
@@ -29,6 +30,11 @@ class OfflineViewController: FileListViewController {
         configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
 
         super.viewDidLoad()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "Offline"])
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {

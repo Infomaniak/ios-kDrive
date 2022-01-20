@@ -18,6 +18,7 @@
 
 import kDriveResources
 import LocalAuthentication
+import MatomoTracker
 import UIKit
 
 class LockedAppViewController: UIViewController {
@@ -28,6 +29,7 @@ class LockedAppViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         tryToUnlock()
+        MatomoTracker.shared.track(view: ["LockedApp"])
     }
 
     func tryToUnlock() {

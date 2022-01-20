@@ -18,6 +18,7 @@
 
 import kDriveResources
 import LocalAuthentication
+import MatomoTracker
 import UIKit
 
 struct AppLockHelper {
@@ -49,6 +50,11 @@ class AppLockSettingsViewController: UIViewController {
         navigationBar.setBackgroundImage(UIImage(), for: .default)
 
         faceIdSwitch.setOn(UserDefaults.shared.isAppLockEnabled, animated: false)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "Settings", "Security", "AppLock"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

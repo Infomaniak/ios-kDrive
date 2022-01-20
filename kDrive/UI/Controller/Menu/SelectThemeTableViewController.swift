@@ -18,6 +18,7 @@
 
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class SelectThemeTableViewController: UITableViewController {
@@ -34,6 +35,11 @@ class SelectThemeTableViewController: UITableViewController {
         tableView.allowsMultipleSelection = false
 
         selectedTheme = UserDefaults.shared.theme
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "Settings", "SelectTheme"])
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {

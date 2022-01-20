@@ -19,6 +19,7 @@
 import FirebaseMessaging
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class NotificationsSettingsTableViewController: UITableViewController {
@@ -46,6 +47,11 @@ class NotificationsSettingsTableViewController: UITableViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewContent), name: UIApplication.willEnterForegroundNotification, object: nil)
 
         navigationItem.hideBackButtonText()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "Settings", "Notifications"])
     }
 
     deinit {

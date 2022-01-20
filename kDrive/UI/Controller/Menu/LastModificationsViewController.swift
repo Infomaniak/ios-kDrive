@@ -18,6 +18,7 @@
 
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class LastModificationsViewController: FileListViewController {
@@ -33,6 +34,11 @@ class LastModificationsViewController: FileListViewController {
         }
 
         super.viewDidLoad()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "LastModifications"])
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {

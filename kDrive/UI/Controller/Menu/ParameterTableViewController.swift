@@ -18,6 +18,7 @@
 
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class ParameterTableViewController: UITableViewController {
@@ -87,6 +88,11 @@ class ParameterTableViewController: UITableViewController {
         super.viewWillAppear(animated)
 
         tableView.reloadData()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Menu", "Settings"])
     }
 
     private func getNotificationText() -> String {
