@@ -684,98 +684,73 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testGetComments() async {
+    func testGetComments() async throws {
         let rootFile = await setUpTest(testName: "Get comments")
-        do {
-            _ = try await currentApiFetcher.comments(file: rootFile, page: 1)
-        } catch {
-            XCTFail("There should be no error")
-        }
+        _ = try await currentApiFetcher.comments(file: rootFile, page: 1)
         tearDownTest(directory: rootFile)
     }
 
-    func testAddComment() async {
+    func testAddComment() async throws {
         let (rootFile, file) = await initOfficeFile(testName: "Add comment")
-        do {
-            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
-            XCTAssertEqual(comment.body, "Testing comment", "Comment body should be equal to 'Testing comment'")
-            let comments = try await currentApiFetcher.comments(file: file, page: 1)
-            XCTAssertNotNil(comments.first { $0.id == comment.id }, "Comment should exist")
-        } catch {
-            XCTFail("There should be no error")
-        }
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        XCTAssertEqual(comment.body, "Testing comment", "Comment body should be equal to 'Testing comment'")
+        let comments = try await currentApiFetcher.comments(file: file, page: 1)
+        XCTAssertNotNil(comments.first { $0.id == comment.id }, "Comment should exist")
         tearDownTest(directory: rootFile)
     }
 
-    func testLikeComment() async {
+    func testLikeComment() async throws {
         let (rootFile, file) = await initOfficeFile(testName: "Like comment")
-        do {
-            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
-            let response = try await currentApiFetcher.likeComment(file: file, liked: false, comment: comment)
-            XCTAssertTrue(response, "API should return true")
-            let comments = try await currentApiFetcher.comments(file: file, page: 1)
-            guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
-                XCTFail("Comment should exist")
-                tearDownTest(directory: rootFile)
-                return
-            }
-            XCTAssertTrue(fetchedComment.liked, "Comment should be liked")
-        } catch {
-            XCTFail("There should be no error")
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        let response = try await currentApiFetcher.likeComment(file: file, liked: false, comment: comment)
+        XCTAssertTrue(response, "API should return true")
+        let comments = try await currentApiFetcher.comments(file: file, page: 1)
+        guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
+            XCTFail("Comment should exist")
+            tearDownTest(directory: rootFile)
+            return
         }
+        XCTAssertTrue(fetchedComment.liked, "Comment should be liked")
         tearDownTest(directory: rootFile)
     }
 
-    func testDeleteComment() async {
+    func testDeleteComment() async throws {
         let (rootFile, file) = await initOfficeFile(testName: "Delete comment")
-        do {
-            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
-            let response = try await currentApiFetcher.deleteComment(file: file, comment: comment)
-            XCTAssertTrue(response, "API should return true")
-            let comments = try await currentApiFetcher.comments(file: file, page: 1)
-            XCTAssertNil(comments.first { $0.id == comment.id }, "Comment should be deleted")
-        } catch {
-            XCTFail("There should be no error")
-        }
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        let response = try await currentApiFetcher.deleteComment(file: file, comment: comment)
+        XCTAssertTrue(response, "API should return true")
+        let comments = try await currentApiFetcher.comments(file: file, page: 1)
+        XCTAssertNil(comments.first { $0.id == comment.id }, "Comment should be deleted")
         tearDownTest(directory: rootFile)
     }
 
-    func testEditComment() async {
-        let testName = "Edit comment"
-        let (rootFile, file) = await initOfficeFile(testName: testName)
-        do {
-            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
-            let response = try await currentApiFetcher.editComment(file: file, body: testName, comment: comment)
-            XCTAssertTrue(response, "API should return true")
-            let comments = try await currentApiFetcher.comments(file: file, page: 1)
-            guard let editedComment = comments.first(where: { $0.id == comment.id }) else {
-                XCTFail("Edited comment should exist")
-                tearDownTest(directory: rootFile)
-                return
-            }
-            XCTAssertEqual(editedComment.body, testName, "Edited comment body is wrong")
-        } catch {
-            XCTFail("There should be no error")
+    func testEditComment() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Edit comment")
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        let editedBody = "Edited comment"
+        let response = try await currentApiFetcher.editComment(file: file, body: editedBody, comment: comment)
+        XCTAssertTrue(response, "API should return true")
+        let comments = try await currentApiFetcher.comments(file: file, page: 1)
+        guard let editedComment = comments.first(where: { $0.id == comment.id }) else {
+            XCTFail("Edited comment should exist")
+            tearDownTest(directory: rootFile)
+            return
         }
+        XCTAssertEqual(editedComment.body, editedBody, "Edited comment body is wrong")
         tearDownTest(directory: rootFile)
     }
 
-    func testAnswerComment() async {
+    func testAnswerComment() async throws {
         let (rootFile, file) = await initOfficeFile(testName: "Answer comment")
-        do {
-            let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
-            let answer = try await currentApiFetcher.answerComment(file: file, body: "Answer comment", comment: comment)
-            let comments = try await currentApiFetcher.comments(file: file, page: 1)
-            guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
-                XCTFail("Comment should exist")
-                tearDownTest(directory: rootFile)
-                return
-            }
-            XCTAssertNotNil(fetchedComment.responses?.first { $0.id == answer.id }, "Answer should exist")
-        } catch {
-            debugPrint(error)
-            XCTFail("There should be no error")
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        let answer = try await currentApiFetcher.answerComment(file: file, body: "Answer comment", comment: comment)
+        let comments = try await currentApiFetcher.comments(file: file, page: 1)
+        guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
+            XCTFail("Comment should exist")
+            tearDownTest(directory: rootFile)
+            return
         }
+        XCTAssertNotNil(fetchedComment.responses?.first { $0.id == answer.id }, "Answer should exist")
         tearDownTest(directory: rootFile)
     }
 
