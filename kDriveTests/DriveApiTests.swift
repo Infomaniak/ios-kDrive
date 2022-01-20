@@ -218,47 +218,34 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testCreateDropBox() async {
+    func testCreateDropBox() async throws {
         let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: nil, password: "password", validUntil: nil)
-
         let rootFile = await setUpTest(testName: "Create dropbox")
         let dir = await createTestDirectory(name: "Create dropbox", parentDirectory: rootFile)
-        do {
-            let dropBox = try await currentApiFetcher.createDropBox(directory: dir, settings: settings)
-            XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropbox should have a password")
-        } catch {
-            XCTFail("There should be no error")
-        }
+        let dropBox = try await currentApiFetcher.createDropBox(directory: dir, settings: settings)
+        XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropbox should have a password")
         tearDownTest(directory: rootFile)
     }
 
-    func testGetDropBox() async {
+    func testGetDropBox() async throws {
         let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: .gigabytes(5), password: "newPassword", validUntil: Date())
         let (rootFile, dropBoxDir) = await initDropbox(testName: "Dropbox settings")
-        do {
-            let response = try await currentApiFetcher.updateDropBox(directory: dropBoxDir, settings: settings)
-            XCTAssertTrue(response, "API should return true")
-            let dropBox = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
-            XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropxbox should have a password")
-            XCTAssertTrue(dropBox.capabilities.hasValidity, "Dropbox should have a validity")
-            XCTAssertNotNil(dropBox.capabilities.validity.date, "Validity shouldn't be nil")
-            XCTAssertTrue(dropBox.capabilities.hasSizeLimit, "Dropbox should have a size limit")
-            XCTAssertNotNil(dropBox.capabilities.size.limit, "Size limit shouldn't be nil")
-        } catch {
-            XCTFail("There should be no error")
-        }
+        let response = try await currentApiFetcher.updateDropBox(directory: dropBoxDir, settings: settings)
+        XCTAssertTrue(response, "API should return true")
+        let dropBox = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
+        XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropxbox should have a password")
+        XCTAssertTrue(dropBox.capabilities.hasValidity, "Dropbox should have a validity")
+        XCTAssertNotNil(dropBox.capabilities.validity.date, "Validity shouldn't be nil")
+        XCTAssertTrue(dropBox.capabilities.hasSizeLimit, "Dropbox should have a size limit")
+        XCTAssertNotNil(dropBox.capabilities.size.limit, "Size limit shouldn't be nil")
         tearDownTest(directory: rootFile)
     }
 
-    func testDeleteDropBox() async {
+    func testDeleteDropBox() async throws {
         let (rootFile, dropBoxDir) = await initDropbox(testName: "Delete dropbox")
-        do {
-            _ = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
-            let response = try await currentApiFetcher.deleteDropBox(directory: dropBoxDir)
-            XCTAssertTrue(response, "API should return true")
-        } catch {
-            XCTFail("There should be no error")
-        }
+        _ = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
+        let response = try await currentApiFetcher.deleteDropBox(directory: dropBoxDir)
+        XCTAssertTrue(response, "API should return true")
         tearDownTest(directory: rootFile)
     }
 
