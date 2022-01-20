@@ -19,6 +19,7 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -71,6 +72,11 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["ManageDropBox"])
     }
 
     deinit {

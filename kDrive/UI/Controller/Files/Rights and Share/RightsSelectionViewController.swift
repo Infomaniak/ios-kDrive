@@ -19,6 +19,7 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 enum RightsSelectionType {
@@ -112,6 +113,11 @@ class RightsSelectionViewController: UIViewController {
         super.viewWillAppear(animated)
         // Necessary for the large display to show up on initial view display, but why ?
         navigationController?.navigationBar.sizeToFit()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["ShareAndRights", "RightSelection"])
     }
 
     private func setupView() {

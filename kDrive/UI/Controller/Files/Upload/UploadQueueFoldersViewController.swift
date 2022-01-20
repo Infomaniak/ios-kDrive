@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import kDriveCore
 import RealmSwift
+import MatomoTracker
 import UIKit
 
 class UploadQueueFoldersViewController: UITableViewController {
@@ -41,6 +42,11 @@ class UploadQueueFoldersViewController: UITableViewController {
         tableView.register(cellView: UploadFolderTableViewCell.self)
 
         setUpObserver()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["UploadQueue", "Folders"])
     }
 
     deinit {

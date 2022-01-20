@@ -21,6 +21,7 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import PhotosUI
+import MatomoTracker
 import UIKit
 
 class SaveFileViewController: UIViewController {
@@ -91,6 +92,11 @@ class SaveFileViewController: UIViewController {
 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Save", "SaveFile"])
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {

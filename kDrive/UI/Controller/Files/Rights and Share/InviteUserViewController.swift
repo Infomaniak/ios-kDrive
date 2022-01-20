@@ -19,6 +19,7 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 class InviteUserViewController: UIViewController {
@@ -61,6 +62,11 @@ class InviteUserViewController: UIViewController {
 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["ShareAndRights", "InviteUser"])
     }
 
     deinit {

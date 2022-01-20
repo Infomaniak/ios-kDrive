@@ -19,6 +19,7 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 enum FolderType {
@@ -121,6 +122,7 @@ class NewFolderViewController: UIViewController {
                 dismissAndRefreshDataSource()
             }
         }
+        MatomoTracker.shared.track(view: ["NewFolder"])
     }
 
     private func setupTableViewRows() {

@@ -19,6 +19,7 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 protocol SelectFolderDelegate: AnyObject {
@@ -53,6 +54,11 @@ class SelectFolderViewController: FileListViewController {
 
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         setUpDirectory()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Save", "SelectFolder"])
     }
 
     private func setUpDirectory() {

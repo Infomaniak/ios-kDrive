@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
 import RealmSwift
+import MatomoTracker
 import UIKit
 
 class UploadQueueViewController: UIViewController {
@@ -61,6 +62,11 @@ class UploadQueueViewController: UIViewController {
                 self?.tableView.reloadData()
             }
         }
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["UploadQueue", "Main"])
     }
 
     deinit {

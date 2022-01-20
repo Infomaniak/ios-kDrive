@@ -162,7 +162,7 @@ class ShareLinkSettingsViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         tableView.reloadData()
-        MatomoTracker.shared.track(view: ["ShareAndRights", "Settings"])
+        MatomoTracker.shared.track(view: ["ShareAndRights", "ShareLinkSettings"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

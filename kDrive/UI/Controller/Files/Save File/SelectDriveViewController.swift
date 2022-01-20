@@ -19,6 +19,7 @@
 import DropDown
 import InfomaniakCore
 import kDriveCore
+import MatomoTracker
 import UIKit
 
 protocol SelectDriveDelegate: AnyObject {
@@ -68,6 +69,11 @@ class SelectDriveViewController: UIViewController {
         } else {
             sections = [.noAccount]
         }
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["Save", "SelectDrive"])
     }
 
     private func initForCurrentAccount(_ account: Account) {
