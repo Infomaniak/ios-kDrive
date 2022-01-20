@@ -55,7 +55,7 @@ public class PdfPreviewCache {
             }
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 if let token = token {
-                    var urlRequest = URLRequest(url: URL(string: ApiRoutes.downloadFileAsPdf(file: file))!)
+                    var urlRequest = URLRequest(url: Endpoint.download(file: file, as: "pdf").url)
                     urlRequest.addValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
                     let task = URLSession.shared.downloadTask(with: urlRequest) { url, _, error in
                         if let url = url {

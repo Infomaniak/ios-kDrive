@@ -143,7 +143,7 @@ public class DownloadOperation: Operation {
     override public func main() {
         DDLogInfo("[DownloadOperation] Downloading \(file.id) with session \(urlSession.identifier)")
 
-        let url = URL(string: ApiRoutes.downloadFile(file: file))!
+        let url = Endpoint.download(file: file).url
 
         // Add download task to Realm
         let downloadTask = DownloadTask(fileId: file.id, isDirectory: file.isDirectory, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionId: urlSession.identifier, sessionUrl: url.absoluteString)
