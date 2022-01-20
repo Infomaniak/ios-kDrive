@@ -79,6 +79,7 @@ class AppUITest: XCTestCase {
 
         let folderTextField = tablesQuery.textFields["Nom du dossier"]
         folderTextField.tap()
+        folderTextField.tap()
         let folderName = "\(name)-\(Date())"
         folderTextField.typeText(folderName)
 
@@ -103,19 +104,22 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(imageToImport.waitForExistence(timeout: 4), "Images should be displayed")
         imageToImport.tap()
         navigationBars["Photos"].buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 10), "Image should be imported")
 
         return directory
     }
 
     func removeDirectory(name: String) {
-        let folder = collectionViewsQuery.cells.containing(.staticText, identifier: name).element
-        folder.press(forDuration: 1)
-        collectionViewsQuery.buttons["Supprimer"].tap()
+        collectionViewsQuery.cells.containing(.staticText, identifier: name).element.press(forDuration: 1)
+        let deleteButton = collectionViewsQuery.buttons["Supprimer"]
+        XCTAssertTrue(deleteButton.waitForExistence(timeout: 3), "Delete button should be displayed")
+        deleteButton.tap()
         app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
     }
 
     func openFileMenu(named name: String, fullSize: Bool = false) {
         let file = collectionViewsQuery.cells.containing(.staticText, identifier: name)
+        XCTAssertTrue(file.element.waitForExistence(timeout: 5), "File should be displayed")
         file.buttons["Menu"].tap()
         if fullSize {
             app.swipeUp()
@@ -133,11 +137,15 @@ class AppUITest: XCTestCase {
 
     func shareWithMail(address mail: String) {
         let emailTextField = tablesQuery.textFields["Invitez un utilisateur ou une adresse mail…"]
+        XCTAssertTrue(emailTextField.waitForExistence(timeout: 3), "Email text field should be displayed")
         emailTextField.tap()
         emailTextField.typeText(mail)
-        XCTAssertTrue(app.otherElements["drop_down"].staticTexts[mail].exists, "Dropdown with mail should be present")
-        app.otherElements.staticTexts[mail].tap()
-        tablesQuery.buttons["Partager"].tap()
+        let dropdownMail = app.otherElements["drop_down"].staticTexts[mail]
+        XCTAssertTrue(dropdownMail.waitForExistence(timeout: 3), "Dropdown mail should be displayed")
+        dropdownMail.tap()
+        let shareButton = tablesQuery.buttons["Partager"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 3), "Share button should be displayed")
+        shareButton.tap()
     }
 
     func open(tab element: TabBarElement) {
@@ -165,14 +173,16 @@ class AppUITest: XCTestCase {
         openFileMenu(named: root, fullSize: true)
 
         // Rename file
-        sleep(1)
-        collectionViewsQuery.staticTexts["Renommer"].tap()
+        let rename = collectionViewsQuery.staticTexts["Renommer"]
+        XCTAssertTrue(rename.waitForExistence(timeout: 4), "Rename text should be displayed")
+        rename.tap()
         let fileNameTextField = app.textFields["Nom du dossier"]
+        XCTAssertTrue(fileNameTextField.waitForExistence(timeout: 3), "Filename textfield should be displayed")
         fileNameTextField.tap()
         fileNameTextField.typeText("_update")
         let newName = "\(root)_update"
         app.buttons["Enregistrer"].tap()
-        sleep(3)
+        XCTAssertTrue(rename.waitForExistence(timeout: 4), "Rename should be visible after closing the dialog box")
 
         // Check new name
         closeFileMenu()
@@ -187,18 +197,21 @@ class AppUITest: XCTestCase {
         let root = setUpTest(testName: testName)
         open(tab: .files)
 
-        openFileMenu(named: root)
-        app.swipeUp()
+        openFileMenu(named: root, fullSize: true)
 
-        collectionViewsQuery.staticTexts["Dupliquer"].tap()
-        app.buttons["Copier"].tap()
+        let duplicateButton = collectionViewsQuery.staticTexts["Dupliquer"]
+        XCTAssertTrue(duplicateButton.waitForExistence(timeout: 2), "Duplicate button should be displayed")
+        duplicateButton.tap()
+        let copyButton = app.buttons["Copier"]
+        XCTAssertTrue(copyButton.waitForExistence(timeout: 2), "Copy button should be displayed")
+        copyButton.tap()
         closeFileMenu()
-
         XCTAssertTrue(app.staticTexts[root].exists, "File should exist")
         let duplicatedFile = "\(root) - Copie"
         XCTAssertTrue(app.staticTexts[duplicatedFile].exists, "Duplicated file should exist")
 
         removeDirectory(name: duplicatedFile)
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Dialog box should be dismissed")
         tearDownTest(directoryName: root)
     }
 
@@ -209,40 +222,39 @@ class AppUITest: XCTestCase {
         open(tab: .files)
 
         openFileMenu(named: root)
-        collectionViewsQuery.cells.staticTexts["Partage et droits"].tap()
-        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(root)"].exists, "Share view should be displayed")
-
-        // Check number of cells
-        let cellsNumberBeforeSharing = tablesQuery.cells.count
+        let shareAndRights = collectionViewsQuery.cells.staticTexts["Partage et droits"]
+        shareAndRights.tap()
+        let directoryShareAndRights = app.navigationBars["Partage et droits du dossier \(root)"]
+        XCTAssertTrue(directoryShareAndRights.waitForExistence(timeout: 3), "Share view should be displayed")
 
         // Share file by email
-        let emailTextField = tablesQuery.textFields["Invitez un utilisateur ou une adresse mail…"]
-        emailTextField.tap()
         let userMail = "kdriveiostests+uitest@ik.me"
-        emailTextField.typeText(userMail)
-        XCTAssertTrue(app.otherElements["drop_down"].staticTexts[userMail].exists, "Dropdown with mail should be present")
-        app.otherElements.staticTexts[userMail].tap()
-        tablesQuery.buttons["Partager"].tap()
+        shareWithMail(address: userMail)
+        let closeButton = app.buttons["Fermer"]
+        XCTAssertTrue(closeButton.waitForExistence(timeout: 3), "Close button should be visible")
+        closeButton.tap()
 
-        // Check number of cells
-        let cellsNumberAfterSharing = tablesQuery.cells.count
-        XCTAssertTrue(cellsNumberAfterSharing > cellsNumberBeforeSharing, "Number of cells should be greater after sharing")
+        // Check rights
+        openFileMenu(named: root)
+        shareAndRights.tap()
+        XCTAssertTrue(directoryShareAndRights.waitForExistence(timeout: 3), "Share view should be displayed")
+        XCTAssertTrue(app.staticTexts[userMail].exists, "Invited user should be displayed")
 
         // Remove user
-        XCTAssertTrue(tablesQuery.staticTexts["Peut consulter"].waitForExistence(timeout: 4), "Sharing choices should be displayed")
-        tablesQuery.staticTexts["Peut consulter"].tap()
+        let canAccessButton = tablesQuery.staticTexts["Peut consulter"]
+        XCTAssertTrue(canAccessButton.waitForExistence(timeout: 10), "Sharing choices should be displayed")
+        canAccessButton.tap()
         app.staticTexts["Supprimer"].tap()
         app.buttons["Supprimer"].tap()
-        sleep(2)
-        app.buttons["Fermer"].tap()
+        XCTAssertTrue(closeButton.waitForExistence(timeout: 3), "Close button should be visible")
+        closeButton.tap()
 
         collectionViewsQuery.cells.containing(.staticText, identifier: root).element.swipeLeft()
         collectionViewsQuery.buttons["Partage et droits"].tap()
 
         // Check number of cells
-        sleep(1)
-        let cellsNumberAfterRemoving = tablesQuery.cells.count
-        XCTAssertTrue(cellsNumberBeforeSharing == cellsNumberAfterRemoving, "Number of cells should be equals after remo")
+        XCTAssertTrue(tablesQuery.cells.firstMatch.waitForExistence(timeout: 3), "Cells should be displayed")
+        XCTAssertFalse(app.staticTexts[userMail].exists, "Invited user should not be displayed")
         app.buttons["Fermer"].tap()
 
         tearDownTest(directoryName: root)
@@ -311,7 +323,9 @@ class AppUITest: XCTestCase {
 
         // Check share rights
         openFileMenu(named: root)
-        collectionViewsQuery.cells.staticTexts["Partage et droits"].tap()
+        let shareButton = collectionViewsQuery.cells.staticTexts["Partage et droits"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 3), "Share button sould be displayed")
+        shareButton.tap()
         XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: "John Appleseed").element.waitForExistence(timeout: 5), "John Appleseed should have access to file")
         XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: userMail).element.exists, "Invited user should have access to file")
         app.buttons["Fermer"].tap()
@@ -336,8 +350,8 @@ class AppUITest: XCTestCase {
 
         // Leave office edition page
         let officeBackButton = app.webViews.staticTexts["chevron_left_ios"]
-        XCTAssertTrue(officeBackButton.waitForExistence(timeout: 5), "Edition page should be displayed")
-        sleep(5)
+        XCTAssertTrue(officeBackButton.waitForExistence(timeout: 4), "back button should be displayed")
+        sleep(6)
         officeBackButton.tap()
 
         open(tab: .files)
@@ -350,14 +364,15 @@ class AppUITest: XCTestCase {
         // Get number of offline files
         open(tab: .home)
         collectionViewsQuery.buttons["Hors ligne"].tap()
-        let numberOfCells = collectionViewsQuery.cells.count
 
         let root = createDirectoryWithPhoto(name: testName)
 
         // Open Information sheet about imported photo
         collectionViewsQuery.cells.firstMatch.buttons["Menu"].tap()
         app.swipeUp()
-        collectionViewsQuery.switches["0"].tap()
+        let switchOffline = collectionViewsQuery.switches["0"]
+        XCTAssertTrue(switchOffline.waitForExistence(timeout: 3), "Switch should be displayed")
+        switchOffline.tap()
         closeFileMenu()
 
         // Go to offline files
@@ -369,9 +384,7 @@ class AppUITest: XCTestCase {
         let start = firstCell.coordinate(withNormalizedOffset: .zero)
         let finish = firstCell.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 10))
         start.press(forDuration: 0, thenDragTo: finish)
-        sleep(2)
-        let newNumberOfCells = collectionViewsQuery.cells.count
-        XCTAssertGreaterThan(newNumberOfCells, numberOfCells, "File should be available offline")
+        XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 10), "Image should be available offline")
 
         open(tab: .files)
         open(tab: .files)
@@ -386,15 +399,12 @@ class AppUITest: XCTestCase {
         // Remove image
         collectionViewsQuery.cells.firstMatch.swipeLeft()
         app.buttons["Supprimer"].tap()
-        sleep(2)
-        let numberOfFiles = collectionViewsQuery.cells.count
+        XCTAssertTrue(app.staticTexts["Annuler"].waitForExistence(timeout: 2), "Cancel button should be displayed")
 
         app.buttons["Annuler"].tap()
-        sleep(2)
-        let numberOfFilesAfterCancel = collectionViewsQuery.cells.count
-        XCTAssertGreaterThan(numberOfFilesAfterCancel, numberOfFiles, "Photo should be back in directory")
+        XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 3), "Photo should be back in directory")
 
-        navigationBars.buttons.element(boundBy: 0).tap()
+        open(tab: .files)
         tearDownTest(directoryName: root)
     }
 
@@ -407,7 +417,9 @@ class AppUITest: XCTestCase {
         // Add directory to favorites
         collectionViewsQuery.cells.containing(.staticText, identifier: root).element.press(forDuration: 1)
         collectionViewsQuery.buttons["Menu"].tap()
-        collectionViewsQuery.staticTexts["Ajouter aux favoris"].tap()
+        let favoriteButton = collectionViewsQuery.staticTexts["Ajouter aux favoris"]
+        XCTAssertTrue(favoriteButton.waitForExistence(timeout: 3), "Favorite button should be displayed")
+        favoriteButton.tap()
 
         // Check file in favorites page
         open(tab: .favorites)
@@ -440,11 +452,12 @@ class AppUITest: XCTestCase {
 
         let root = setUpTest(testName: testName)
         open(tab: .files)
-        sleep(2)
 
         // Add category
-        collectionViewsQuery.cells.containing(.staticText, identifier: root).element.buttons["Menu"].tap()
-        collectionViewsQuery.staticTexts["Gérer les catégories"].tap()
+        openFileMenu(named: root, fullSize: true)
+        let categoriesButton = collectionViewsQuery.staticTexts["Gérer les catégories"]
+        XCTAssertTrue(categoriesButton.waitForExistence(timeout: 3), "Categories button should be displayed")
+        categoriesButton.tap()
         tablesQuery.cells.firstMatch.tap()
         navigationBars.buttons["Fermer"].tap()
         closeFileMenu()
