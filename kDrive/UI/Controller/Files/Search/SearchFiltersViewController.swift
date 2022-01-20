@@ -18,6 +18,7 @@
 
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 protocol SearchFiltersDelegate: AnyObject {
@@ -72,6 +73,7 @@ class SearchFiltersViewController: UITableViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+        MatomoTracker.shared.track(view: ["Search", "Filters"])
     }
 
     private func reloadSection(_ filterType: FilterType) {

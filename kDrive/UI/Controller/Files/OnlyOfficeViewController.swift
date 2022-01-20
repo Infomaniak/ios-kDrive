@@ -134,7 +134,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["FilePreview", "OnlyOffice"])
+        MatomoTracker.shared.track(view: ["Preview", "OnlyOffice"])
     }
 
     deinit {

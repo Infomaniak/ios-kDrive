@@ -23,6 +23,7 @@ import kDriveResources
 import PDFKit
 import SafariServices
 import Sentry
+import MatomoTracker
 import UIKit
 
 protocol PreviewContentCellDelegate: AnyObject {
@@ -247,6 +248,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         becomeFirstResponder()
 
         heightToHide = backButton.frame.minY
+        MatomoTracker.shared.track(view: ["Preview", "File"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
