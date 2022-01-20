@@ -446,7 +446,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .users:
                     let cell = tableView.dequeueReusableCell(type: FileInformationUsersTableViewCell.self, for: indexPath)
                     if let fileAccess = fileAccess {
-                        cell.shareables = fileAccess.teams + fileAccess.users
+                        cell.fileAccessElements = fileAccess.teams + fileAccess.users
                     }
                     cell.shareButton.isHidden = !(file.rights?.share ?? false)
                     cell.delegate = self
