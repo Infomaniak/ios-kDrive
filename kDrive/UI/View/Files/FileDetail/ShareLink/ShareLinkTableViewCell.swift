@@ -42,10 +42,42 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     weak var delegate: ShareLinkTableViewCellDelegate?
     var url = ""
 
+    private var contentBackgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+
     override func awakeFromNib() {
         super.awakeFromNib()
         copyButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonShare
         selectionStyle = .default
+    }
+
+    override open func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+        if selectionStyle != .none {
+            if animated {
+                UIView.animate(withDuration: 0.1) {
+                    self.contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : self.contentBackgroundColor
+                }
+            } else {
+                contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : contentBackgroundColor
+            }
+        } else {
+            contentInsetView.backgroundColor = contentBackgroundColor
+        }
+    }
+
+    override open func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        if selectionStyle != .none {
+            if animated {
+                UIView.animate(withDuration: 0.1) {
+                    self.contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : self.contentBackgroundColor
+                }
+            } else {
+                contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : contentBackgroundColor
+            }
+        } else {
+            contentInsetView.backgroundColor = contentBackgroundColor
+        }
     }
 
     func configureWith(sharedFile: SharedFile?, file: File, insets: Bool = true) {
@@ -91,6 +123,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         leadingInnerConstraint.constant = 24
         trailingInnerConstraint.constant = 24
         separatorView.isHidden = false
+        contentBackgroundColor = UIColor.systemBackground
     }
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
