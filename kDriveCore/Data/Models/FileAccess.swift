@@ -77,6 +77,7 @@ public class UserFileAccess: FileAccessElement {
     public var status: UserFileAccessStatus
     public var email: String
     public var user: DriveUser?
+    public var type: DriveUserType
 
     public var shareable: Shareable? {
         return user
