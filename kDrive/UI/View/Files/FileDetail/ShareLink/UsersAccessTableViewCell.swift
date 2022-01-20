@@ -58,8 +58,7 @@ class UsersAccessTableViewCell: InsetTableViewCell {
             rightsLabel.textColor = blocked ? KDriveResourcesAsset.secondaryTextColor.color : KDriveResourcesAsset.titleColor.color
             detailLabel.text = user.email
             notAcceptedView.isHidden = true
-            // FIXME: Wait to API v2 to return this value
-            externalUserView.isHidden = true // user.type != .shared
+            externalUserView.isHidden = user.type != .shared
             accessoryImageView.isHidden = blocked
         } else if let invitation = element as? ExternInvitationFileAccess {
             detailLabel.text = invitation.email
