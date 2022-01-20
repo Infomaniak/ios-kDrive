@@ -154,10 +154,6 @@ public enum ApiRoutes {
         return "\(fileURL(file: file))move/\(newParentId)"
     }
 
-    public static func downloadFile(file: File) -> String {
-        return "\(fileURL(file: file))download"
-    }
-
     static func uploadFile(file: UploadFile) -> String {
         var url = "\(driveApiUrl)\(file.driveId)/public/file/\(file.parentDirectoryId)/upload?file_name=\(file.urlEncodedName)&conflict=\(file.conflictOption.rawValue)&relative_path=\(file.urlEncodedRelativePath)\(file.urlEncodedName)&with=parent,children,rights,collaborative_folder,favorite,share_link"
         if let creationDate = file.creationDate {
@@ -255,9 +251,5 @@ public enum ApiRoutes {
 
     public static func fileCount(driveId: Int, fileId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/\(fileId)/count"
-    }
-
-    public static func downloadFileAsPdf(file: File) -> String {
-        return "\(fileURL(file: file))download?as=pdf"
     }
 }
