@@ -245,7 +245,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .edit:
                 return file.isOfficeFile && file.rights?.write == true
             case .manageCategories:
-                return driveFileManager.drive.categoryRights.canPutCategoryOnFile
+                return driveFileManager.drive.categoryRights.canPutCategoryOnFile && !file.isDisabled
             case .favorite:
                 return file.rights?.canFavorite == true && !sharedWithMe
             case .convertToDropbox:

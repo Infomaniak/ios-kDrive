@@ -32,6 +32,12 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
     @IBOutlet weak var collectionViewBottomConstraint: NSLayoutConstraint!
 
     var categories = [kDriveCore.Category]()
+    var canManage = true {
+        didSet {
+            selectionStyle = canManage ? .default : .none
+            accessoryImageView.isHidden = !canManage
+        }
+    }
 
     private var contentSizeObservation: NSKeyValueObservation?
 
@@ -51,12 +57,12 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
 
     func configure(with categories: [kDriveCore.Category]) {
         if categories.isEmpty {
-            label.text = KDriveResourcesStrings.Localizable.addCategoriesTitle
+            label.text = canManage ? KDriveResourcesStrings.Localizable.addCategoriesTitle : KDriveResourcesStrings.Localizable.categoriesFilterTitle
             collectionViewBottomConstraint.constant = 0
             viewCenterConstraint.isActive = true
             contentViewHeightConstraint.isActive = true
         } else {
-            label.text = KDriveResourcesStrings.Localizable.manageCategoriesTitle
+            label.text = canManage ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable.categoriesFilterTitle
             collectionViewBottomConstraint.constant = 16
             viewCenterConstraint.isActive = false
             contentViewHeightConstraint.isActive = false
