@@ -89,6 +89,12 @@ public class Team: Object, Codable {
     }
 }
 
+extension Team: Comparable {
+    public static func < (lhs: Team, rhs: Team) -> Bool {
+        return lhs.isAllUsers || lhs.name.lowercased() < rhs.name.lowercased()
+    }
+}
+
 public class TeamDetail: EmbeddedObject, Codable {
     @Persisted public var driveId: Int
     @Persisted public var usersCount: Int
