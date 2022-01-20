@@ -143,7 +143,7 @@ let project = Project(name: "kDrive",
                                      .package(product: "SwiftRegex"),
                                      .package(product: "Sentry"),
                                      .package(product: "FirebaseMessaging"),
-                                     .package(product: "MatomoTracker"),
+									 .package(product: "MatomoTracker")
                                  ]),
                           Target(name: "kDriveFileProvider",
                                  platform: .iOS,

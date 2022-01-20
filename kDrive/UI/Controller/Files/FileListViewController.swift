@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import DifferenceKit
 import kDriveCore
 import kDriveResources
+import MatomoTracker
 import UIKit
 
 extension SwipeCellAction {
@@ -211,6 +212,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if isContentLoaded && !isLoadingData && currentDirectory != nil && currentDirectory.fullyDownloaded {
             getNewChanges()
         }
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["FileList"])
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

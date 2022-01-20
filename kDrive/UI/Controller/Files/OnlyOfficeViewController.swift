@@ -19,6 +19,7 @@
 import kDriveCore
 import kDriveResources
 import Sentry
+import MatomoTracker
 import UIKit
 import WebKit
 
@@ -129,6 +130,11 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         } else {
             showErrorMessage(context: ["URL": "nil"])
         }
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoTracker.shared.track(view: ["FilePreview", "OnlyOffice"])
     }
 
     deinit {
