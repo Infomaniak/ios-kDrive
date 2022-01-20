@@ -182,7 +182,7 @@ class InviteUserViewController: UIViewController {
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
         let realm = DriveInfosManager.instance.getRealm()
-        // shareables = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) } + teamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
+        shareables = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) } + teamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
         // Update UI
         setTitle()
         reloadInvited()
@@ -219,7 +219,8 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
-            // cell.canUseTeam = fileAccess.canUseTeam
+            // TODO: Update with new `canUseTeam` capability
+            cell.canUseTeam = true // fileAccess?.canUseTeam ?? false
             cell.drive = driveFileManager.drive
             cell.textField.text = savedText
             cell.textField.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail
