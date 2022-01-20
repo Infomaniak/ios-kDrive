@@ -16,7 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
+import kDriveResources
+import UIKit
 
 public enum EditPermission: String {
     case read, write
@@ -47,26 +48,52 @@ public struct FileAccessSettings: Encodable {
     }
 }
 
+public protocol FileAccessElement: Codable {
+    var id: Int { get }
+    var name: String { get }
+    var right: UserPermission { get set }
+    var color: Int? { get }
+    var user: DriveUser? { get }
+
+    var shareable: Shareable? { get }
+    var icon: UIImage { get async }
+}
+
 public class FileAccess: Codable {
     public var users: [UserFileAccess]
     public var invitations: [ExternInvitationFileAccess]
     public var teams: [TeamFileAccess]
 
-    public var shareables: [Shareable] {
+    public var elements: [FileAccessElement] {
         return teams.sorted() + users + invitations
     }
 }
 
-public class UserFileAccess: Codable, Shareable {
+public class UserFileAccess: FileAccessElement {
     public var id: Int
     public var name: String
     public var right: UserPermission
-    public var email: String
+    public var color: Int?
     public var status: UserFileAccessStatus
-    public var user: DriveUser
+    public var email: String
+    public var user: DriveUser?
 
-    public var userId: Int? {
-        return id
+    public var shareable: Shareable? {
+        return user
+    }
+
+    public var icon: UIImage {
+        get async {
+            if let user = user {
+                return await withCheckedContinuation { continuation in
+                    user.getAvatar { image in
+                        continuation.resume(returning: image)
+                    }
+                }
+            } else {
+                return KDriveResourcesAsset.placeholderAvatar.image
+            }
+        }
     }
 }
 
@@ -74,18 +101,30 @@ public enum UserFileAccessStatus: String, Codable {
     case active, deletedKept = "deleted_kept", deletedRemoved = "deleted_removed", deletedTransferred = "deleted_transferred", locked, pending
 }
 
-public class TeamFileAccess: Codable, Shareable {
+public class TeamFileAccess: FileAccessElement {
     public var id: Int
     public var name: String
     public var right: UserPermission
+    public var color: Int?
     public var status: FileAccessStatus
+
+    public var user: DriveUser? {
+        return nil
+    }
 
     public var isAllUsers: Bool {
         return id == Team.allUsersId
     }
 
-    public var userId: Int? {
-        return nil
+    public var shareable: Shareable? {
+        return DriveInfosManager.instance.getTeam(id: id)
+    }
+
+    public var icon: UIImage {
+        get async {
+            // Improve this
+            DriveInfosManager.instance.getTeam(id: id)?.icon ?? UIImage()
+        }
     }
 }
 
@@ -99,10 +138,11 @@ extension TeamFileAccess: Comparable {
     }
 }
 
-public class ExternInvitationFileAccess: Codable, Shareable {
+public class ExternInvitationFileAccess: FileAccessElement {
     public var id: Int
     public var name: String
     public var right: UserPermission
+    public var color: Int?
     public var status: FileAccessStatus
     public var email: String
     public var user: DriveUser?
@@ -118,8 +158,22 @@ public class ExternInvitationFileAccess: Codable, Shareable {
         case invitationDriveId = "invitation_drive_id"
     }
 
-    public var userId: Int? {
-        return user?.id
+    public var shareable: Shareable? {
+        return nil
+    }
+
+    public var icon: UIImage {
+        get async {
+            if let user = user {
+                return await withCheckedContinuation { continuation in
+                    user.getAvatar { image in
+                        continuation.resume(returning: image)
+                    }
+                }
+            } else {
+                return KDriveResourcesAsset.circleSend.image
+            }
+        }
     }
 }
 

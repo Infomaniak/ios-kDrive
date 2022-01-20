@@ -30,7 +30,7 @@ class FileInformationUsersTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var shareButton: ImageButton!
 
-    var shareables = [Shareable]()
+    var fileAccessElements = [FileAccessElement]()
     weak var delegate: FileUsersDelegate?
 
     override func awakeFromNib() {
@@ -55,12 +55,12 @@ extension FileInformationUsersTableViewCell: UICollectionViewDelegate, UICollect
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return shareables.count
+        return fileAccessElements.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: FileDetailInformationUserCollectionViewCell.self, for: indexPath)
-        cell.configureWith(moreValue: 0, shareable: shareables[indexPath.row])
+        cell.configureWith(moreValue: 0, fileAccessElement: fileAccessElements[indexPath.row])
         return cell
     }
 
