@@ -22,6 +22,7 @@ import InfomaniakCore
 import InfomaniakLogin
 import RealmSwift
 import Sentry
+import MatomoTracker
 
 public protocol SwitchAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)
@@ -250,6 +251,11 @@ public class AccountManager: RefreshTokenDelegate {
     public func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?) {
         guard account.isConnected else {
             throw DriveError.unknownToken
+        }
+
+		if MatomoTracker.shared.userId != String(account.userId) {
+            MatomoTracker.shared.userId = String(account.userId)
+            MatomoTracker.shared.startNewSession()
         }
 
         let apiFetcher = await AccountActor.run {

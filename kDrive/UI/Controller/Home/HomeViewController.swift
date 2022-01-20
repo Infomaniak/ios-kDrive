@@ -196,8 +196,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
-
-        MatomoTracker.shared.track(view: ["Home"])
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -214,6 +212,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateNavbarAppearance()
+
+        MatomoTracker.shared.track(view: ["Home"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
