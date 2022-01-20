@@ -117,7 +117,7 @@ extension File: AbstractFile {}
 
 // MARK: - Endpoints
 
-extension Endpoint {
+public extension Endpoint {
     private static let withQueryItem = URLQueryItem(name: "with", value: "parents,capabilities,dropbox,is_favorite,mobile,sharelink,categories")
 
     private static var base: Endpoint {
