@@ -157,10 +157,6 @@ public enum ApiRoutes {
         return "https://manager.infomaniak.com/v3/mobile_login?url=\(url)"
     }
 
-    static func requireFileAccess(file: File) -> String {
-        return "\(fileURL(file: file))share/access"
-    }
-
     public static func getUploadToken(driveId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/1/upload/token"
     }
