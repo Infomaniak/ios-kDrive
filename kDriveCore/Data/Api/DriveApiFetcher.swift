@@ -239,6 +239,10 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.access(file: file), method: .post, parameters: settings)).data
     }
 
+    public func forceAccess(to file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.forceAccess(file: file), method: .post)).data
+    }
+
     public func updateUserAccess(to file: File, user: UserFileAccess, right: UserPermission) async throws -> Bool {
         try await perform(request: authenticatedRequest(.userAccess(file: file, id: user.id), method: .put, parameters: ["right": right])).data
     }
@@ -501,12 +505,6 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func deleteCategory(drive: AbstractDrive, category: Category) async throws -> Bool {
         try await perform(request: authenticatedRequest(.category(drive: drive, category: category), method: .delete)).data
-    }
-
-    public func requireFileAccess(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.requireFileAccess(file: file)
-
-        makeRequest(url, method: .post, completion: completion)
     }
 
     @discardableResult
