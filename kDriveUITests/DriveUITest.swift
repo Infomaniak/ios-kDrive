@@ -20,9 +20,23 @@ import XCTest
 import kDriveCore
 
 class AppUITest: XCTestCase {
-
     var app: XCUIApplication!
-    static var driveFileManager: DriveFileManager!
+
+    var tabBar: XCUIElementQuery {
+        return app.tabBars
+    }
+    var navigationBars: XCUIElementQuery {
+        return app.navigationBars
+    }
+    var tablesQuery: XCUIElementQuery {
+        return app.tables
+    }
+    var collectionViewsQuery: XCUIElementQuery {
+        return app.collectionViews
+    }
+    var buttons: XCUIElementQuery {
+        return app.buttons
+    }
 
     static let defaultTimeout = 50.0
 
@@ -39,388 +53,426 @@ class AppUITest: XCTestCase {
         app.launchArguments += ["-AppleLanguages", "(fr)"]
         app.launchArguments += ["-AppleLocale", "fr_FR"]
         app.launch()
-        sleep(1)
-
-        AppUITest.driveFileManager = AccountManager.instance.currentDriveFileManager
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
     override func tearDown() {
         super.tearDown()
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     // MARK: - Tests setup
-    func setUpTest(testName: String, completion: @escaping (File) -> Void) {
-        getRootDirectory { rootFile in
-            self.createTestDirectory(name: "UITest - \(testName)", parentDirectory: rootFile) { file in
-                XCTAssertNotNil(file, "Failed to create UnitTest directory")
-                completion(file)
-            }
-        }
+
+    func setUpTest(testName: String) -> String {
+        return createDirectory(name: testName)
     }
 
-    func tearDownTest(directory: File) {
-        AppUITest.driveFileManager.deleteFile(file: directory) { response, _ in
-            XCTAssertNotNil(response, "Failed to delete directory")
-        }
+    func tearDownTest(directoryName: String) {
+        removeDirectory(name: directoryName)
     }
 
     // MARK: - Helping methods
-    func getRootDirectory(completion: @escaping (File) -> Void) {
-        AppUITest.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
-            XCTAssertNotNil(file, "Failed to get root directory")
-            completion(file!)
-        }
-    }
 
-    func createTestDirectory(name: String, parentDirectory: File, completion: @escaping (File) -> Void) {
-        AppUITest.driveFileManager.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { directory, _ in
-            XCTAssertNotNil(directory, "Failed to create test directory")
-            completion(directory!)
-        }
-    }
-
-    func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
-        setUpTest(testName: testName) { rootFile in
-            AppUITest.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { file, _ in
-                XCTAssertNotNil(file, "Failed to create office file")
-                completion(rootFile, file!)
-            }
-        }
-    }
-
-    // MARK: - Tests methods
-    func testShareFile() {
-        let testName = "UITest shareFile"
-        let expectations = [
-            (name: "Share page shown", expectation: expectation(description: "Share page shown")),
-            (name: "User added", expectation: expectation(description: "User added")),
-            (name: "User deleted", expectation: expectation(description: "User deleted"))
-        ]
-        var rootFile = File()
-        let tabBar = app.tabBars
-        let tablesQuery = app.tables
-        let collectionViewsQuery = app.collectionViews
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-
-            // Go to ShareAndRights
-            tabBar.buttons["Fichiers"].tap()
-
-            var element = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-            XCTAssertTrue(element.buttons["Menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
-            element.buttons["Menu"].tap()
-            tablesQuery.buttons["Partage et droits"].tap()
-
-            XCTAssertTrue(self.app.navigationBars["Partage et droits du dossier \(testName)"].exists, "Should exist")
-            expectations[0].expectation.fulfill()
-
-            let oldValue = self.app.tables.cells.count
-
-            // Add User
-            tablesQuery.textFields["Invitez un utilisateur ou une adresse mail…"].tap()
-            self.app.otherElements["drop_down"].tables.staticTexts["Kilian Périsset"].tap()
-
-            tablesQuery.buttons["Partager"].tap()
-
-            let newValue = self.app.tables.cells.count
-            XCTAssertTrue(newValue > oldValue, "There should be one more cell")
-            expectations[1].expectation.fulfill()
-
-            // Remove User
-            let removeUser = tablesQuery.cells.containing(.staticText, identifier: "Kilian Périsset").element
-            XCTAssertTrue(removeUser.waitForExistence(timeout: 10), "Added user should be visible in list")
-            removeUser.tap()
-
-            tablesQuery.staticTexts["Supprimer"].tap()
-            self.app.buttons["Supprimer"].tap()
-            self.app.buttons["Fermer"].tap()
-
-            element = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-            element.buttons["Menu"].tap()
-            tablesQuery.buttons["Partage et droits"].tap()
-
-            XCTAssertTrue(self.app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should exist")
-
-            let afterDeleteValue = self.app.tables.cells.count
-            XCTAssertTrue(afterDeleteValue == oldValue, "After deletion number of cell should be equal to old value")
-            expectations[2].expectation.fulfill()
-
-            self.app.buttons["Fermer"].tap()
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: AppUITest.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
-
-    func testComments() {
-        let testName = "UITest Comment"
-        let expectations = [
-            (name: "Grid mode", expectation: expectation(description: "Grid mode")),
-            (name: "No comment", expectation: expectation(description: "No comment")),
-            (name: "Comment added", expectation: expectation(description: "Comment added"))
-        ]
-        var rootFile = File()
-        let tablesQuery = app.tables
-        let collectionViewsQuery = app.collectionViews
-        let tabBar = app.tabBars
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-
-            // Find created file
-            tabBar.buttons["Fichiers"].tap()
-            let rootCell = collectionViewsQuery.cells.containing(.staticText, identifier: rootFile.name).element
-            rootCell.tap()
-
-            tabBar.buttons["Ajouter"].tap()
-            tablesQuery.cells.containing(.staticText, identifier: "Importer une photo ou une vidéo").element.tap()
-
-            self.app.scrollViews.otherElements.images["Photo, 09 octobre 2009, 11:09 PM"].tap() // "Photo"
-            self.app.buttons["Add"].tap()
-
-            let imageCell = collectionViewsQuery.cells.firstMatch
-            XCTAssertTrue(imageCell.waitForExistence(timeout: 10), "Wait for image importation")
-
-            // Go to comment
-            XCTAssertTrue(imageCell.buttons["Menu"].waitForExistence(timeout: 5), "Waiting for menu button existence")
-            expectations[0].expectation.fulfill()
-            imageCell.buttons["Menu"].tap()
-            tablesQuery.buttons["Informations"].tap()
-            tablesQuery.buttons["Commentaires"].tap()
-
-            XCTAssertTrue(tablesQuery.staticTexts["Aucun commentaire pour le moment"].exists, "There shouldn't be any comment.")
-            expectations[1].expectation.fulfill()
-
-            // Add comment
-            self.app.buttons["Ajouter un commentaire"].tap()
-            let comment = self.app.textFields["Votre commentaire"]
-            comment.tap()
-            comment.typeText("UITest comment")
-            self.app.buttons["Envoyer"].tap()
-
-            XCTAssertTrue(tablesQuery.staticTexts["UITest comment"].waitForExistence(timeout: 5), "Comment should exist")
-            expectations[2].expectation.fulfill()
-
-            self.app.navigationBars["kDrive.FileDetailView"].buttons["Drive de test dev infomaniak"].tap()
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: AppUITest.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
-
-    func testCreateFolder() {
-        let testName = "UITest CreateFolder"
-
-        let tablesQuery = app.tables
-        let collectionViewsQuery = app.collectionViews
-        let tabBar = app.tabBars
-
-        tabBar.buttons["Ajouter"].tap()
+    func createDirectory(name: String) -> String {
+        open(tab: .add)
         let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
         folderCell.tap()
         folderCell.tap()
 
         let folderTextField = tablesQuery.textFields["Nom du dossier"]
         folderTextField.tap()
-        folderTextField.typeText("UITest CreateFolder")
+        folderTextField.tap()
+        let folderName = "\(name)-\(Date())"
+        folderTextField.typeText(folderName)
 
         let meOnly = tablesQuery.staticTexts["Moi uniquement"]
         meOnly.tap()
-        meOnly.tap()
         tablesQuery.buttons["Créer le dossier"].tap()
 
         XCTAssertTrue(tabBar.buttons["Fichiers"].waitForExistence(timeout: 5), "Waiting for folder creation")
-        tabBar.buttons["Fichiers"].tap()
+        return folderName
+    }
 
-        let newFolder = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-        XCTAssertTrue(newFolder.exists, "Created folder should be here")
+    func createDirectoryWithPhoto(name: String) -> String {
+        let directory = createDirectory(name: name)
 
-        newFolder.press(forDuration: 1)
-        collectionViewsQuery.buttons["Supprimer"].tap()
+        open(tab: .files)
+        enterInDirectory(named: directory)
 
-        sleep(1)
+        // Import photo from photo library
+        open(tab: .add)
+        tablesQuery.staticTexts["Importer une photo ou une vidéo"].tap()
+        let imageToImport = app.scrollViews.images.element(boundBy: 0)
+        XCTAssertTrue(imageToImport.waitForExistence(timeout: 4), "Images should be displayed")
+        imageToImport.tap()
+        navigationBars["Photos"].buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 10), "Image should be imported")
+
+        return directory
+    }
+
+    func removeDirectory(name: String) {
+        collectionViewsQuery.cells.containing(.staticText, identifier: name).element.press(forDuration: 1)
+        let deleteButton = collectionViewsQuery.buttons["Supprimer"]
+        XCTAssertTrue(deleteButton.waitForExistence(timeout: 3), "Delete button should be displayed")
+        deleteButton.tap()
         app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
     }
 
-    func testCreateSharedFolder() {
-        let testName = "UITest CreateShareFolder"
+    func openFileMenu(named name: String, fullSize: Bool = false) {
+        let file = collectionViewsQuery.cells.containing(.staticText, identifier: name)
+        XCTAssertTrue(file.element.waitForExistence(timeout: 5), "File should be displayed")
+        file.buttons["Menu"].tap()
+        if fullSize {
+            app.swipeUp()
+        }
+    }
 
-        let tablesQuery = app.tables
-        let collectionViewsQuery = app.collectionViews
-        let tabBar = app.tabBars
+    func closeFileMenu() {
+        app.swipeDown()
+        app.navigationBars.firstMatch.coordinate(withNormalizedOffset: .zero).tap()
+    }
 
-        tabBar.buttons["Ajouter"].tap()
+    func enterInDirectory(named name: String) {
+        collectionViewsQuery.cells.containing(.staticText, identifier: name).element.tap()
+    }
+
+    func shareWithMail(address mail: String) {
+        let emailTextField = tablesQuery.textFields["Invitez un utilisateur ou une adresse mail…"]
+        XCTAssertTrue(emailTextField.waitForExistence(timeout: 3), "Email text field should be displayed")
+        emailTextField.tap()
+        emailTextField.typeText(mail)
+        let dropdownMail = app.otherElements["drop_down"].staticTexts[mail]
+        XCTAssertTrue(dropdownMail.waitForExistence(timeout: 3), "Dropdown mail should be displayed")
+        dropdownMail.tap()
+        let shareButton = tablesQuery.buttons["Partager"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 3), "Share button should be displayed")
+        shareButton.tap()
+    }
+
+    func open(tab element: TabBarElement) {
+        tabBar.buttons[element.rawValue].tap()
+    }
+
+    // MARK: - Structures
+
+    enum TabBarElement: String {
+        case home = "Accueil"
+        case files = "Fichiers"
+        case add = "Ajouter"
+        case favorites = "Favoris"
+    }
+
+    // MARK: - Tests methods
+
+    func testRenameFile() {
+        let testName = "UITest - Rename file"
+
+        let root = setUpTest(testName: testName)
+        open(tab: .files)
+
+        // Open sheet with file details
+        openFileMenu(named: root, fullSize: true)
+
+        // Rename file
+        let rename = collectionViewsQuery.staticTexts["Renommer"]
+        XCTAssertTrue(rename.waitForExistence(timeout: 4), "Rename text should be displayed")
+        rename.tap()
+        let fileNameTextField = app.textFields["Nom du dossier"]
+        XCTAssertTrue(fileNameTextField.waitForExistence(timeout: 3), "Filename textfield should be displayed")
+        fileNameTextField.tap()
+        fileNameTextField.typeText("_update")
+        let newName = "\(root)_update"
+        app.buttons["Enregistrer"].tap()
+        XCTAssertTrue(rename.waitForExistence(timeout: 4), "Rename should be visible after closing the dialog box")
+
+        // Check new name
+        closeFileMenu()
+        XCTAssertTrue(app.staticTexts[newName].exists, "File must be renamed")
+
+        tearDownTest(directoryName: newName)
+    }
+
+    func testDuplicateFile() {
+        let testName = "UITest - Duplicate file"
+
+        let root = setUpTest(testName: testName)
+        open(tab: .files)
+
+        openFileMenu(named: root, fullSize: true)
+
+        let duplicateButton = collectionViewsQuery.staticTexts["Dupliquer"]
+        XCTAssertTrue(duplicateButton.waitForExistence(timeout: 2), "Duplicate button should be displayed")
+        duplicateButton.tap()
+        let copyButton = app.buttons["Copier"]
+        XCTAssertTrue(copyButton.waitForExistence(timeout: 2), "Copy button should be displayed")
+        copyButton.tap()
+        closeFileMenu()
+        XCTAssertTrue(app.staticTexts[root].exists, "File should exist")
+        let duplicatedFile = "\(root) - Copie"
+        XCTAssertTrue(app.staticTexts[duplicatedFile].exists, "Duplicated file should exist")
+
+        removeDirectory(name: duplicatedFile)
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Dialog box should be dismissed")
+        tearDownTest(directoryName: root)
+    }
+
+    func testShareFile() {
+        let testName = "UITest - Share file"
+
+        let root = setUpTest(testName: testName)
+        open(tab: .files)
+
+        openFileMenu(named: root)
+        let shareAndRights = collectionViewsQuery.cells.staticTexts["Partage et droits"]
+        shareAndRights.tap()
+        let directoryShareAndRights = app.navigationBars["Partage et droits du dossier \(root)"]
+        XCTAssertTrue(directoryShareAndRights.waitForExistence(timeout: 3), "Share view should be displayed")
+
+        // Share file by email
+        let userMail = "kdriveiostests+uitest@ik.me"
+        shareWithMail(address: userMail)
+        let closeButton = app.buttons["Fermer"]
+        XCTAssertTrue(closeButton.waitForExistence(timeout: 3), "Close button should be visible")
+        closeButton.tap()
+
+        // Check rights
+        openFileMenu(named: root)
+        shareAndRights.tap()
+        XCTAssertTrue(directoryShareAndRights.waitForExistence(timeout: 3), "Share view should be displayed")
+        XCTAssertTrue(app.staticTexts[userMail].exists, "Invited user should be displayed")
+
+        // Remove user
+        let canAccessButton = tablesQuery.staticTexts["Peut consulter"]
+        XCTAssertTrue(canAccessButton.waitForExistence(timeout: 10), "Sharing choices should be displayed")
+        canAccessButton.tap()
+        app.staticTexts["Supprimer"].tap()
+        app.buttons["Supprimer"].tap()
+        XCTAssertTrue(closeButton.waitForExistence(timeout: 3), "Close button should be visible")
+        closeButton.tap()
+
+        collectionViewsQuery.cells.containing(.staticText, identifier: root).element.swipeLeft()
+        collectionViewsQuery.buttons["Partage et droits"].tap()
+
+        // Check number of cells
+        XCTAssertTrue(tablesQuery.cells.firstMatch.waitForExistence(timeout: 3), "Cells should be displayed")
+        XCTAssertFalse(app.staticTexts[userMail].exists, "Invited user should not be displayed")
+        app.buttons["Fermer"].tap()
+
+        tearDownTest(directoryName: root)
+    }
+
+    func testComments() {
+        let testName = "UITest - Comment"
+
+        let root = createDirectoryWithPhoto(name: testName)
+
+        // Open Information sheet about imported photo
+        let imageCell = collectionViewsQuery.cells.firstMatch
+        XCTAssertTrue(imageCell.waitForExistence(timeout: 10), "Image should be imported")
+        imageCell.buttons["Menu"].tap()
+        collectionViewsQuery.cells.staticTexts["Informations"].tap()
+
+        // Add new comment
+        tablesQuery.buttons["Commentaires"].tap()
+        app.buttons["Ajouter un commentaire"].tap()
+        let comment = "UITest comment"
+        app.typeText(comment)
+        app.buttons["Envoyer"].tap()
+
+        XCTAssertTrue(tablesQuery.staticTexts[comment].waitForExistence(timeout: 5), "Comment should exist")
+
+        // Update comment
+        tablesQuery.cells.containing(.staticText, identifier: "John Appleseed").element.swipeLeft()
+        tablesQuery.buttons["Éditer"].tap()
+        app.typeText("-Update")
+        app.buttons["Enregistrer"].tap()
+
+        XCTAssertTrue(tablesQuery.staticTexts["\(comment)-Update"].waitForExistence(timeout: 5), "New comment should exist")
+
+        // Back to drive's root
+        tablesQuery.buttons["Informations"].tap()
+        app.swipeUp()
+        tablesQuery.buttons["Emplacement"].tap()
+        navigationBars.buttons.element(boundBy: 0).tap()
+        navigationBars.buttons.element(boundBy: 0).tap()
+        navigationBars.buttons.element(boundBy: 0).tap()
+
+        tearDownTest(directoryName: root)
+    }
+
+    func testCreateSharedDirectory() {
+        let testName = "UITest - Create shared directory"
+
+        // Create shared directory
+        let root = "\(testName)-\(Date())"
+        open(tab: .files)
+        open(tab: .add)
         let folderCell = tablesQuery.cells.containing(.staticText, identifier: "Dossier").element
         folderCell.tap()
         folderCell.tap()
-
         let folderTextField = tablesQuery.textFields["Nom du dossier"]
         folderTextField.tap()
-        folderTextField.typeText("UITest CreateShareFolder")
+        folderTextField.typeText(root)
+        tablesQuery.staticTexts["Certains utilisateurs"].tap()
+        tablesQuery.staticTexts["Certains utilisateurs"].tap()
+        app.buttons["Créer le dossier"].tap()
 
-        let someUser = tablesQuery.staticTexts["Certains utilisateurs"]
-        XCTAssertTrue(someUser.exists, "Some user cell should exist")
-        someUser.tap()
-        someUser.tap()
-        tablesQuery.buttons["Créer le dossier"].tap()
-
-        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should redirect to Share file")
-
+        // Invite user with mail
+        let userMail = "kdriveiostests+uitest@ik.me"
+        shareWithMail(address: userMail)
         app.buttons["Fermer"].tap()
 
-        XCTAssertTrue(tabBar.buttons["Fichiers"].waitForExistence(timeout: 5), "Waiting for folder creation")
-        tabBar.buttons["Fichiers"].tap()
+        // Check share rights
+        openFileMenu(named: root)
+        let shareButton = collectionViewsQuery.cells.staticTexts["Partage et droits"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 3), "Share button sould be displayed")
+        shareButton.tap()
+        XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: "John Appleseed").element.waitForExistence(timeout: 5), "John Appleseed should have access to file")
+        XCTAssertTrue(tablesQuery.cells.containing(.staticText, identifier: userMail).element.exists, "Invited user should have access to file")
+        app.buttons["Fermer"].tap()
 
-        let newFolder = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-        XCTAssertTrue(newFolder.exists, "Created folder should be here")
-
-        newFolder.press(forDuration: 1)
-        collectionViewsQuery.buttons["Supprimer"].tap()
-
-        sleep(1)
-        app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
+        tearDownTest(directoryName: root)
     }
 
-    func testDropBox() {
-        let testName = "UITest CreateDropBox"
+    func testCreateOfficeFile() {
+        let testName = "UITest - Create office file"
 
-        let tablesQuery = app.tables
-        let collectionViewsQuery = app.collectionViews
-        let tabBar = app.tabBars
+        let root = setUpTest(testName: testName)
 
-        tabBar.buttons["Ajouter"].tap()
-        tablesQuery.cells.containing(.staticText, identifier: "Dossier").element.tap()
-        tablesQuery.cells.containing(.staticText, identifier: "Boîte de dépôt").element.tap()
+        // Enter in root directory
+        open(tab: .files)
+        enterInDirectory(named: root)
 
-        let dropBoxTextField = tablesQuery.textFields["Nom de la boîte de dépôt"]
-        dropBoxTextField.tap()
+        // Create office file
+        open(tab: .add)
+        tablesQuery.staticTexts["Document"].tap()
+        app.typeText("UITest - Office file")
+        app.buttons["Créer"].tap()
 
-        dropBoxTextField.typeText("UITest CreateDropBox")
+        // Leave office edition page
+        let officeBackButton = app.webViews.staticTexts["chevron_left_ios"]
+        XCTAssertTrue(officeBackButton.waitForExistence(timeout: 4), "back button should be displayed")
+        sleep(6)
+        officeBackButton.tap()
 
-        let someUser = tablesQuery.staticTexts["Certains utilisateurs"]
-        XCTAssertTrue(someUser.exists, "Some user cell should exist")
-        someUser.tap()
-        someUser.tap()
-
-        // Tests settings
-        let settingsCell = tablesQuery.cells.containing(.staticText, identifier: "Options avancées").element
-
-        let emailSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Recevoir un email dès qu’un fichier a été importé").element
-        let passwordSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Protéger avec un mot de passe").element
-        let dateSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Ajouter une date d’expiration").element
-        let storageSettingCell = tablesQuery.cells.containing(.staticText, identifier: "Limiter l’espace de stockage").element
-
-        XCTAssertTrue(!emailSettingCell.exists &&
-                !passwordSettingCell.exists &&
-                !dateSettingCell.exists &&
-                !storageSettingCell.exists, "Settings shouldn't exists")
-
-        settingsCell.tap()
-
-        XCTAssertTrue(emailSettingCell.exists, "Setting should exist")
-        XCTAssertTrue(passwordSettingCell.exists, "Setting should exist")
-        XCTAssertTrue(dateSettingCell.exists, "Setting should exist")
-        XCTAssertTrue(storageSettingCell.exists, "Setting should exist")
-
-        XCTAssertFalse(passwordSettingCell.secureTextFields.firstMatch.exists, "TextField shouldn't exist")
-        passwordSettingCell.switches.firstMatch.tap()
-        XCTAssertTrue(passwordSettingCell.secureTextFields.firstMatch.exists, "TextField should exist")
-
-        if #available(iOS 13.4, *) {
-            XCTAssertFalse(dateSettingCell.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-            dateSettingCell.switches.firstMatch.tap()
-            XCTAssertTrue(dateSettingCell.otherElements["Sélecteur de date"].waitForExistence(timeout: 5), "DatePicker should exist")
-            dateSettingCell.otherElements["Sélecteur de date"].tap()
-            XCTAssertTrue(app.datePickers.firstMatch.waitForExistence(timeout: 5), "DatePicker should appear")
-            app.coordinate(withNormalizedOffset: CGVector(dx: 10, dy: 10)).tap() // Tap outside of datePicker
-        } else {
-            XCTAssertFalse(dateSettingCell.textFields.firstMatch.exists, "DatePicker textField shouldn't exist")
-            XCTAssertFalse(app.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-            dateSettingCell.switches.firstMatch.tap()
-            XCTAssertTrue(dateSettingCell.textFields.firstMatch.waitForExistence(timeout: 5), "DatePicker textField should exist")
-            XCTAssertFalse(dateSettingCell.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-            dateSettingCell.textFields.firstMatch.tap()
-            XCTAssertTrue(app.datePickers.firstMatch.waitForExistence(timeout: 5), "DatePicker should exist")
-            app.toolbars.buttons["Fermer"].tap()
-        }
-
-        XCTAssertFalse(storageSettingCell.textFields.firstMatch.exists, "TextField shouldn't exist")
-        storageSettingCell.switches.firstMatch.tap()
-        XCTAssertTrue(storageSettingCell.textFields.firstMatch.exists, "TextField should exist")
-
-        passwordSettingCell.switches.firstMatch.tap()
-        XCTAssertFalse(passwordSettingCell.textFields.firstMatch.exists, "TextField shouldn't exist")
-        dateSettingCell.switches.firstMatch.tap()
-        if #available(iOS 13.4, *) {
-            XCTAssertFalse(dateSettingCell.datePickers.firstMatch.exists, "DatePicker shouldn't exist")
-        } else {
-            XCTAssertFalse(dateSettingCell.textFields.firstMatch.exists, "DatePicker textField shouldn't exist")
-        }
-        storageSettingCell.switches.firstMatch.tap()
-        XCTAssertFalse(storageSettingCell.textFields.firstMatch.exists, "TextField shouldn't exist")
-
-        tablesQuery.buttons["Créer le dossier"].tap()
-
-        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should redirect to Share file")
-        app.buttons["Fermer"].tap()
-
-        XCTAssertTrue(app.staticTexts["Partager la boîte de dépôt \(testName)"].waitForExistence(timeout: 5), "Share link of dropbox should exist")
-        app.buttons["Plus tard"].tap()
-
-        XCTAssertTrue(tabBar.buttons["Fichiers"].waitForExistence(timeout: 5), "Waiting for folder creation")
-        tabBar.buttons["Fichiers"].tap()
-
-        let newFolder = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-        XCTAssertTrue(newFolder.exists, "Created folder should be here")
-
-        newFolder.press(forDuration: 1)
-        collectionViewsQuery.buttons["Supprimer"].tap()
-
-        sleep(1)
-        app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
+        open(tab: .files)
+        tearDownTest(directoryName: root)
     }
 
-    func testCreateCommonDocument() {
-        let testName = "UITest CreateCommonDocument"
+    func testOfflineFiles() {
+        let testName = "UITest - Offline files"
 
-        let tablesQuery = app.tables
-        let collectionViewsQuery = app.collectionViews
-        let tabBar = app.tabBars
+        // Get number of offline files
+        open(tab: .home)
+        collectionViewsQuery.buttons["Hors ligne"].tap()
 
-        tabBar.buttons["Ajouter"].tap()
-        tablesQuery.cells.containing(.staticText, identifier: "Dossier").element.tap()
-        tablesQuery.cells.containing(.staticText, identifier: "Dossier commun").element.tap()
+        let root = createDirectoryWithPhoto(name: testName)
 
-        let folderTextField = tablesQuery.textFields["Nom du dossier"]
-        folderTextField.tap()
-        folderTextField.typeText("UITest CreateCommonDocument")
+        // Open Information sheet about imported photo
+        collectionViewsQuery.cells.firstMatch.buttons["Menu"].tap()
+        app.swipeUp()
+        let switchOffline = collectionViewsQuery.switches["0"]
+        XCTAssertTrue(switchOffline.waitForExistence(timeout: 3), "Switch should be displayed")
+        switchOffline.tap()
+        closeFileMenu()
 
-        let someUser = tablesQuery.staticTexts["Certains utilisateurs"]
-        XCTAssertTrue(someUser.exists, "Some user cell should exist")
-        someUser.tap()
-        someUser.tap()
-        tablesQuery.buttons["Créer le dossier"].tap()
+        // Go to offline files
+        open(tab: .home)
+        collectionViewsQuery.buttons["Hors ligne"].tap()
 
-        XCTAssertTrue(app.navigationBars["Partage et droits du dossier \(testName)"].waitForExistence(timeout: 5), "Should redirect to Share file")
-        app.buttons["Fermer"].tap()
+        // Refresh table
+        let firstCell = collectionViewsQuery.cells.firstMatch
+        let start = firstCell.coordinate(withNormalizedOffset: .zero)
+        let finish = firstCell.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 10))
+        start.press(forDuration: 0, thenDragTo: finish)
+        XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 10), "Image should be available offline")
 
-        XCTAssertTrue(tabBar.buttons["Fichiers"].waitForExistence(timeout: 5), "Waiting for folder creation")
-        tabBar.buttons["Fichiers"].tap()
+        open(tab: .files)
+        open(tab: .files)
+        tearDownTest(directoryName: root)
+    }
 
-        let commonDocumentsCell = collectionViewsQuery.cells.containing(.staticText, identifier: "Common documents").element
-        XCTAssertTrue(commonDocumentsCell.exists, "Common documents should exist")
-        commonDocumentsCell.tap()
+    func testCancelAction() {
+        let testName = "UITest - Cancel action"
 
-        let newFolder = collectionViewsQuery.cells.containing(.staticText, identifier: testName).element
-        XCTAssertTrue(newFolder.waitForExistence(timeout: 5), "Created folder should be here")
+        let root = createDirectoryWithPhoto(name: testName)
 
-        newFolder.press(forDuration: 1)
-        collectionViewsQuery.buttons["Supprimer"].tap()
+        // Remove image
+        collectionViewsQuery.cells.firstMatch.swipeLeft()
+        app.buttons["Supprimer"].tap()
+        XCTAssertTrue(app.staticTexts["Annuler"].waitForExistence(timeout: 2), "Cancel button should be displayed")
 
-        sleep(1)
-        app.buttons.containing(.staticText, identifier: "Déplacer").element.tap()
+        app.buttons["Annuler"].tap()
+        XCTAssertTrue(app.staticTexts["IMG_0111.heic"].waitForExistence(timeout: 3), "Photo should be back in directory")
+
+        open(tab: .files)
+        tearDownTest(directoryName: root)
+    }
+
+    func testAddFileToFavorites() {
+        let testName = "UITest - Add file to favorites"
+
+        let root = setUpTest(testName: testName)
+        open(tab: .files)
+
+        // Add directory to favorites
+        collectionViewsQuery.cells.containing(.staticText, identifier: root).element.press(forDuration: 1)
+        collectionViewsQuery.buttons["Menu"].tap()
+        let favoriteButton = collectionViewsQuery.staticTexts["Ajouter aux favoris"]
+        XCTAssertTrue(favoriteButton.waitForExistence(timeout: 3), "Favorite button should be displayed")
+        favoriteButton.tap()
+
+        // Check file in favorites page
+        open(tab: .favorites)
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Directory should be in favorites")
+
+        open(tab: .files)
+        tearDownTest(directoryName: root)
+    }
+
+    func testSearchFile() {
+        let testName = "UITest - Search file"
+
+        let root = setUpTest(testName: testName)
+
+        open(tab: .home)
+        collectionViewsQuery.staticTexts["Rechercher un fichier…"].tap()
+        app.searchFields["Rechercher un fichier…"].tap()
+        app.typeText(testName)
+
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory should be listed in results")
+
+        navigationBars["Rechercher"].buttons["Fermer"].tap()
+
+        open(tab: .files)
+        tearDownTest(directoryName: root)
+    }
+
+    func testAddCategories() {
+        let testName = "UITest - Add categories"
+
+        let root = setUpTest(testName: testName)
+        open(tab: .files)
+
+        // Add category
+        openFileMenu(named: root, fullSize: true)
+        let categoriesButton = collectionViewsQuery.staticTexts["Gérer les catégories"]
+        XCTAssertTrue(categoriesButton.waitForExistence(timeout: 3), "Categories button should be displayed")
+        categoriesButton.tap()
+        tablesQuery.cells.firstMatch.tap()
+        navigationBars.buttons["Fermer"].tap()
+        closeFileMenu()
+
+        // Search file with filter category
+        navigationBars.buttons["Rechercher"].tap()
+        navigationBars.buttons.element(boundBy: 1).tap()
+        tablesQuery.staticTexts["Ajouter des catégories"].tap()
+        tablesQuery.cells.firstMatch.tap()
+        navigationBars.buttons["Filtres"].tap()
+        tablesQuery.staticTexts["Appliquer les filtres"].tap()
+
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory with category should be in result")
+        navigationBars.buttons["Fermer"].tap()
+
+        tearDownTest(directoryName: root)
     }
 }
