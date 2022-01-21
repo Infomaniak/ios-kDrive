@@ -22,7 +22,7 @@ import RealmSwift
 import UIKit
 
 class FavoritesViewModel: ManagedFileListViewModel {
-    required override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager) {
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
     }
@@ -47,7 +47,7 @@ class FavoriteViewController: FileListViewController {
     }
 
     override func getViewModel() -> FileListViewModel {
-        return FavoritesViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        return FavoritesViewModel(configuration: configuration, driveFileManager: driveFileManager)
     }
 
     // MARK: - State restoration
