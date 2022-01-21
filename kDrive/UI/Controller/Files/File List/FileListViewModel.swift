@@ -49,13 +49,19 @@ class FileListViewModel {
 
     var onFileListUpdated: FileListUpdatedCallback?
     var onDriveError: DriveErrorCallback?
-    var onFilePresented: FilePresentedCallback?
+    var onFilePresented: FilePresentedCallback? {
+        didSet {
+            droppableFileListViewModel?.onFilePresented = onFilePresented
+        }
+    }
 
     private var sortTypeObservation: AnyCancellable?
     private var listStyleObservation: AnyCancellable?
 
     var uploadViewModel: UploadCardViewModel?
     var multipleSelectionViewModel: MultipleSelectionFileListViewModel?
+    var draggableFileListViewModel: DraggableFileListViewModel?
+    var droppableFileListViewModel: DroppableFileListViewModel?
 
     init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.driveFileManager = driveFileManager
@@ -88,6 +94,14 @@ class FileListViewModel {
             self.multipleSelectionViewModel = MultipleSelectionFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
         }
 
+        if configuration.supportDrag {
+            self.draggableFileListViewModel = DraggableFileListViewModel(driveFileManager: driveFileManager)
+        }
+
+        if configuration.supportsDrop {
+            self.droppableFileListViewModel = DroppableFileListViewModel(driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+        }
+
         setupObservation()
     }
 
@@ -104,7 +118,8 @@ class FileListViewModel {
     }
 
     func didSelectFile(at index: Int) {}
-    func getFile(at index: Int) -> File {
+
+    func getFile(at index: Int) -> File? {
         fatalError(#function + " needs to be overridden")
     }
 
@@ -222,15 +237,15 @@ class ManagedFileListViewModel: FileListViewModel {
     }
 
     override func didSelectFile(at index: Int) {
-        let file = getFile(at: index)
+        guard let file: File = getFile(at: index) else { return }
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             return
         }
         onFilePresented?(file)
     }
 
-    override func getFile(at index: Int) -> File {
-        return files[index]
+    override func getFile(at index: Int) -> File? {
+        return index < fileCount ? files[index] : nil
     }
 
     override func setFile(_ file: File, at index: Int) {
