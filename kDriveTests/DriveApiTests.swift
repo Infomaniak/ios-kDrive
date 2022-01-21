@@ -86,6 +86,14 @@ final class DriveApiTests: XCTestCase {
         }
     }
 
+    func createTestDirectory(name: String, parentDirectory: File) async -> File {
+        return await withCheckedContinuation { continuation in
+            createTestDirectory(name: name, parentDirectory: parentDirectory) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
     func initDropbox(testName: String, completion: @escaping (File, File) -> Void) {
         setUpTest(testName: testName) { rootFile in
             self.createTestDirectory(name: "dropbox-\(Date())", parentDirectory: rootFile) { dir in
@@ -106,14 +114,30 @@ final class DriveApiTests: XCTestCase {
         }
     }
 
+    func initOfficeFile(testName: String) async -> (File, File) {
+        return await withCheckedContinuation { continuation in
+            initOfficeFile(testName: testName) { result1, result2 in
+                continuation.resume(returning: (result1, result2))
+            }
+        }
+    }
+
     func checkIfFileIsInDestination(file: File, directory: File, completion: @escaping () -> Void) {
-        self.currentApiFetcher.getFileListForDirectory(driveId: file.driveId, parentId: directory.id) { fileListResponse, fileListError in
+        currentApiFetcher.getFileListForDirectory(driveId: file.driveId, parentId: directory.id) { fileListResponse, fileListError in
             XCTAssertNil(fileListError, TestsMessages.noError)
             XCTAssertNotNil(fileListResponse?.data, TestsMessages.notNil("cancel response"))
             let movedFile = fileListResponse!.data!.children.contains { $0.id == file.id }
             XCTAssertTrue(movedFile, "File should be in destination")
 
             completion()
+        }
+    }
+
+    func checkIfFileIsInDestination(file: File, directory: File) async {
+        return await withCheckedContinuation { continuation in
+            checkIfFileIsInDestination(file: file, directory: directory) {
+                continuation.resume(returning: ())
+            }
         }
     }
 
@@ -1109,8 +1133,8 @@ final class DriveApiTests: XCTestCase {
         let testName = "Perform authenticated request"
         let expectation = XCTestExpectation(description: testName)
 
-        let token = self.currentApiFetcher.currentToken!
-        self.currentApiFetcher.performAuthenticatedRequest(token: token) { apiToken, error in
+        let token = currentApiFetcher.currentToken!
+        currentApiFetcher.performAuthenticatedRequest(token: token) { apiToken, error in
             XCTAssertNil(error, TestsMessages.noError)
             XCTAssertNotNil(apiToken, TestsMessages.notNil("API Token"))
             expectation.fulfill()
@@ -1123,8 +1147,8 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get public upload token with token"
         let expectation = XCTestExpectation(description: testName)
 
-        let token = self.currentApiFetcher.currentToken!
-        self.currentApiFetcher.getPublicUploadTokenWithToken(token, driveId: Env.driveId) { apiResponse, error in
+        let token = currentApiFetcher.currentToken!
+        currentApiFetcher.getPublicUploadTokenWithToken(token, driveId: Env.driveId) { apiResponse, error in
             XCTAssertNil(error, TestsMessages.noError)
             XCTAssertNotNil(apiResponse?.data, TestsMessages.notNil("API Response"))
             expectation.fulfill()
@@ -1238,47 +1262,37 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testCancelAction() {
-        let testName = "Cancel action"
-        let expectations = [
-            (name: "Cancel file deleted", expectation: expectation(description: "Cancel file deleted")),
-            (name: "Cancel file moved", expectation: expectation(description: "Cancel file moved"))
-        ]
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-
-            self.createTestDirectory(name: "test", parentDirectory: rootFile) { directory in
-                self.currentApiFetcher.moveFile(file: file, newParent: directory) { moveResponse, moveError in
-                    XCTAssertNil(moveError, TestsMessages.noError)
-                    XCTAssertNotNil(moveResponse?.data, TestsMessages.notNil("move file response"))
-                    let cancelMoveId = moveResponse!.data!.id
-                    self.currentApiFetcher.cancelAction(driveId: Env.driveId, cancelId: cancelMoveId) { cancelMoveResponse, cancelMoveError in
-                        XCTAssertNil(cancelMoveError, TestsMessages.noError)
-                        XCTAssertNotNil(cancelMoveResponse?.data, TestsMessages.notNil("cancel move response"))
-                        self.checkIfFileIsInDestination(file: file, directory: rootFile) {
-                            expectations[0].expectation.fulfill()
-
-                            self.currentApiFetcher.deleteFile(file: file) { deleteFileResponse, deleteFileError in
-                                XCTAssertNil(deleteFileError, TestsMessages.noError)
-                                XCTAssertNotNil(deleteFileResponse?.data, TestsMessages.notNil("delete file response"))
-                                let cancelId = deleteFileResponse!.data!.id
-                                self.currentApiFetcher.cancelAction(driveId: Env.driveId, cancelId: cancelId) { cancelResponse, cancelError in
-                                    XCTAssertNil(cancelError, TestsMessages.noError)
-                                    XCTAssertNotNil(cancelResponse?.data, TestsMessages.notNil("cancel response"))
-                                    self.checkIfFileIsInDestination(file: file, directory: rootFile) {
-                                        expectations[1].expectation.fulfill()
-                                    }
-                                }
-                            }
-                        }
-                    }
+    func testUndoAction() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Undo action")
+        let directory = await createTestDirectory(name: "test", parentDirectory: rootFile)
+        // Move & cancel
+        let moveResponse: CancelableResponse = try await withCheckedThrowingContinuation { continuation in
+            currentApiFetcher.moveFile(file: file, newParent: directory) { response, error in
+                if let response = response?.data {
+                    continuation.resume(returning: response)
+                } else if let error = response?.error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
                 }
             }
         }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
+        try await currentApiFetcher.undoAction(drive: ProxyDrive(id: Env.driveId), cancelId: moveResponse.id)
+        await checkIfFileIsInDestination(file: file, directory: rootFile)
+        // Delete & cancel
+        let deleteResponse: CancelableResponse = try await withCheckedThrowingContinuation { continuation in
+            currentApiFetcher.deleteFile(file: file) { response, error in
+                if let response = response?.data {
+                    continuation.resume(returning: response)
+                } else if let error = response?.error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+        try await currentApiFetcher.undoAction(drive: ProxyDrive(id: Env.driveId), cancelId: deleteResponse.id)
+        await checkIfFileIsInDestination(file: file, directory: rootFile)
         tearDownTest(directory: rootFile)
     }
 
@@ -1311,23 +1325,9 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testGetDownloadArchiveLink() {
-        let testName = "Get download archive link"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.getDownloadArchiveLink(driveId: Env.driveId, for: [file]) { downloadArchiveResponse, downloadArchiveError in
-                XCTAssertNil(downloadArchiveError, TestsMessages.noError)
-                XCTAssertNotNil(downloadArchiveResponse?.data, TestsMessages.notNil("download archive response"))
-
-                print(downloadArchiveResponse!.data!.uuid)
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    func testBuildArchive() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Build archive")
+        _ = try await currentApiFetcher.buildArchive(drive: ProxyDrive(id: Env.driveId), for: [file])
         tearDownTest(directory: rootFile)
     }
 
