@@ -18,9 +18,15 @@
 
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
 
 class FavoritesViewModel: ManagedFileListViewModel {
+    required override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
+        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
+    }
+
     override func getFile(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
         driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
     }
@@ -37,8 +43,6 @@ class FavoriteViewController: FileListViewController {
     override func viewDidLoad() {
         // Set configuration
         configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
-        currentDirectory = driveFileManager.getLiveRootFile(DriveFileManager.favoriteRootFile)
-
         super.viewDidLoad()
     }
 
