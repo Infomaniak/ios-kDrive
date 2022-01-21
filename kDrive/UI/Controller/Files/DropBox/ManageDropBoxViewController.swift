@@ -318,7 +318,8 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                     let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url
                     floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.folder.name)
-                    self.present(driveFloatingPanelController, animated: true)
+                    self.navigationController?.popViewController(animated: true)
+                    self.navigationController?.topViewController?.present(driveFloatingPanelController, animated: true)
                     self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: dropBox.url)
                 } else {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
