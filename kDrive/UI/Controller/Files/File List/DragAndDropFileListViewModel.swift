@@ -22,15 +22,14 @@ import kDriveResources
 import UIKit
 
 @MainActor
-protocol DraggableFileListViewModel where Self: FileListViewModel {
-    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem]
-}
+class DraggableFileListViewModel {
+    private var driveFileManager: DriveFileManager
 
-extension DraggableFileListViewModel {
-    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        guard indexPath.item < fileCount else { return [] }
+    init(driveFileManager: DriveFileManager) {
+        self.driveFileManager = driveFileManager
+    }
 
-        let draggedFile = getFile(at: indexPath.item)
+    func dragItems(for draggedFile: File, in collectionView: UICollectionView, at indexPath: IndexPath, with session: UIDragSession) -> [UIDragItem] {
         guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
         }
@@ -51,14 +50,17 @@ extension DraggableFileListViewModel {
 }
 
 @MainActor
-protocol DroppableFileListViewModel where Self: FileListViewModel {
-    var lastDropPosition: DropPosition? { get set }
+class DroppableFileListViewModel {
+    private var driveFileManager: DriveFileManager
+    private var currentDirectory: File
+    private var lastDropPosition: DropPosition?
+    var onFilePresented: FileListViewModel.FilePresentedCallback?
 
-    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal
-    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator)
-}
+    init(driveFileManager: DriveFileManager, currentDirectory: File) {
+        self.driveFileManager = driveFileManager
+        self.currentDirectory = currentDirectory
+    }
 
-extension DroppableFileListViewModel {
     private func handleDropOverDirectory(_ directory: File, in collectionView: UICollectionView, at indexPath: IndexPath) -> UICollectionViewDropProposal {
         guard directory.rights?.uploadNewFile == true && directory.rights?.moveInto == true else {
             return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
@@ -145,17 +147,18 @@ extension DroppableFileListViewModel {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+    func updateDropSession(_ session: UIDropSession, in collectionView: UICollectionView, with destinationIndexPath: IndexPath?, destinationFile: File?) -> UICollectionViewDropProposal {
         if let indexPath = destinationIndexPath,
-           indexPath.item < fileCount && getFile(at: indexPath.item).isDirectory {
+           let destinationFile = destinationFile,
+           destinationFile.isDirectory {
             if let draggedFile = session.localDragSession?.localContext as? File,
-               draggedFile.id == getFile(at: indexPath.item).id {
+               draggedFile.id == destinationFile.id {
                 if let indexPath = lastDropPosition?.indexPath {
                     collectionView.cellForItem(at: indexPath)?.isHighlighted = false
                 }
                 return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
             } else {
-                return handleDropOverDirectory(getFile(at: indexPath.item), in: collectionView, at: indexPath)
+                return handleDropOverDirectory(destinationFile, in: collectionView, at: indexPath)
             }
         } else {
             if let indexPath = lastDropPosition?.indexPath {
@@ -165,19 +168,10 @@ extension DroppableFileListViewModel {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
+    func performDrop(with coordinator: UICollectionViewDropCoordinator, in collectionView: UICollectionView, destinationDirectory: File) {
         let itemProviders = coordinator.items.map(\.dragItem.itemProvider)
         // We don't display iOS's progress indicator because we use our own snackbar
         coordinator.session.progressIndicatorStyle = .none
-
-        let destinationDirectory: File
-        if let indexPath = coordinator.destinationIndexPath,
-           indexPath.item < fileCount && getFile(at: indexPath.item).isDirectory &&
-           getFile(at: indexPath.item).rights?.uploadNewFile == true {
-            destinationDirectory = getFile(at: indexPath.item)
-        } else {
-            destinationDirectory = currentDirectory
-        }
 
         if let lastHighlightedPath = lastDropPosition?.indexPath {
             collectionView.cellForItem(at: lastHighlightedPath)?.isHighlighted = false
