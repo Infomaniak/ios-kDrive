@@ -216,9 +216,11 @@ public class AccountManager: RefreshTokenDelegate {
         let newAccount = Account(apiToken: token)
         addAccount(account: newAccount)
         setCurrentAccount(account: newAccount)
+
         let apiFetcher = ApiFetcher(token: token, delegate: self)
         let user = try await apiFetcher.userProfile()
         newAccount.user = user
+
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.main.isEmpty else {
             removeAccount(toDeleteAccount: newAccount)
@@ -229,9 +231,11 @@ public class AccountManager: RefreshTokenDelegate {
             removeAccount(toDeleteAccount: newAccount)
             throw DriveError.maintenance
         }
+
         setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
         saveAccounts()
         mqService.registerForNotifications(with: driveResponse.ipsToken)
+
         return newAccount
     }
 
@@ -243,11 +247,13 @@ public class AccountManager: RefreshTokenDelegate {
         let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
         let user = try await apiFetcher.userProfile()
         account.user = user
+
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.main.isEmpty else {
             removeAccount(toDeleteAccount: account)
             throw DriveError.noDrive
         }
+
         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
         clearDriveFileManagers()
         var switchedDrive: Drive?
@@ -261,10 +267,12 @@ public class AccountManager: RefreshTokenDelegate {
             }
             DriveFileManager.deleteUserDriveFiles(userId: user.id, driveId: driveRemoved.id)
         }
+
         saveAccounts()
         if registerToken {
             mqService.registerForNotifications(with: driveResponse.ipsToken)
         }
+
         return (account, switchedDrive)
     }
 
