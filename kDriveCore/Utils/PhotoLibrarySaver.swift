@@ -27,10 +27,6 @@ public class PhotoLibrarySaver: NSObject {
 
     override private init() {
         super.init()
-
-        if let assetCollection = fetchAssetCollectionForAlbum() {
-            self.assetCollection = assetCollection
-        }
     }
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
