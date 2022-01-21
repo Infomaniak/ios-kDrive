@@ -138,18 +138,13 @@ class FileListViewModel {
 class ManagedFileListViewModel: FileListViewModel {
     private var realmObservationToken: NotificationToken?
 
-    private var files: Results<File>
+    internal var files: AnyRealmCollection<File>!
     override var isEmpty: Bool {
         return files.isEmpty
     }
 
     override var fileCount: Int {
         return files.count
-    }
-
-    override required init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
-        self.files = driveFileManager.getRealm().objects(File.self).filter(NSPredicate(value: false))
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
     override public func forceRefresh() {
@@ -171,18 +166,18 @@ class ManagedFileListViewModel: FileListViewModel {
 
     override func updateDataSource() {
         realmObservationToken?.invalidate()
-        realmObservationToken = currentDirectory.children.sorted(by: [
+        realmObservationToken = files.sorted(by: [
             SortDescriptor(keyPath: \File.type, ascending: true),
             SortDescriptor(keyPath: \File.rawVisibility, ascending: false),
             sortType.value.sortDescriptor
         ]).observe(on: .main) { [weak self] change in
             switch change {
             case .initial(let results):
-                self?.files = results
+                self?.files = AnyRealmCollection(results)
                 self?.isEmptyViewHidden = !results.isEmpty
                 self?.onFileListUpdated?([], [], [], true)
             case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                self?.files = results
+                self?.files = AnyRealmCollection(results)
                 self?.isEmptyViewHidden = !results.isEmpty
                 self?.onFileListUpdated?(deletions, insertions, modifications, false)
             case .error(let error):

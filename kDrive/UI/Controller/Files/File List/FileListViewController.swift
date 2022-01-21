@@ -21,6 +21,7 @@ import Combine
 import DifferenceKit
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
 
 extension SwipeCellAction {
@@ -52,6 +53,13 @@ class MultipleSelectionBarButton: UIBarButtonItem {
             accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         }
         self.type = type
+    }
+}
+
+class ConcreteFileListViewModel: ManagedFileListViewModel {
+    override required init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        self.files = AnyRealmCollection(self.currentDirectory.children)
     }
 }
 
@@ -168,7 +176,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func getViewModel() -> FileListViewModel {
-        return ManagedFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        return ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
     private func bindViewModels() {
