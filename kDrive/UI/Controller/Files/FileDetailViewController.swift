@@ -91,6 +91,10 @@ class FileDetailViewController: UIViewController {
     private var fileInformationRows: [FileInformationRow] = []
     private var oldSections = 2
 
+    private var canManageCategories: Bool {
+        return driveFileManager.drive.categoryRights.canPutCategoryOnFile && !file.isDisabled
+    }
+
     override var preferredStatusBarStyle: UIStatusBarStyle {
         if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.hasThumbnail {
             return .default
@@ -458,7 +462,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 case .categories:
                     let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
-                    cell.selectionStyle = driveFileManager.drive.categoryRights.canPutCategoryOnFile ? .default : .none
+                    cell.canManage = canManageCategories
                     cell.initWithoutInsets()
                     cell.configure(with: driveFileManager.drive.categories(for: file))
                     return cell
@@ -557,7 +561,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
             }
             present(rightsSelectionViewController, animated: true)
         }
-        if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && driveFileManager.drive.categoryRights.canPutCategoryOnFile {
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .categories && canManageCategories {
             let manageCategoriesViewController = ManageCategoriesViewController.instantiate(file: file, driveFileManager: driveFileManager)
             navigationController?.pushViewController(manageCategoriesViewController, animated: true)
         }

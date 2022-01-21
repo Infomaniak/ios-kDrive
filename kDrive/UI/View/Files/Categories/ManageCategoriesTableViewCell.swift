@@ -32,7 +32,14 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
     @IBOutlet weak var collectionViewBottomConstraint: NSLayoutConstraint!
 
     var categories = [kDriveCore.Category]()
+    var canManage = true {
+        didSet {
+            selectionStyle = canManage ? .default : .none
+            accessoryImageView.isHidden = !canManage
+        }
+    }
 
+    private var contentBackgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     private var contentSizeObservation: NSKeyValueObservation?
 
     override func awakeFromNib() {
@@ -49,14 +56,44 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
         contentSizeObservation?.invalidate()
     }
 
+    override open func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+        if selectionStyle != .none {
+            if animated {
+                UIView.animate(withDuration: 0.1) {
+                    self.contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : self.contentBackgroundColor
+                }
+            } else {
+                contentInsetView.backgroundColor = selected ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : contentBackgroundColor
+            }
+        } else {
+            contentInsetView.backgroundColor = contentBackgroundColor
+        }
+    }
+
+    override open func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        if selectionStyle != .none {
+            if animated {
+                UIView.animate(withDuration: 0.1) {
+                    self.contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : self.contentBackgroundColor
+                }
+            } else {
+                contentInsetView.backgroundColor = highlighted ? KDriveResourcesAsset.backgroundCardViewSelectedColor.color : contentBackgroundColor
+            }
+        } else {
+            contentInsetView.backgroundColor = contentBackgroundColor
+        }
+    }
+
     func configure(with categories: [kDriveCore.Category]) {
         if categories.isEmpty {
-            label.text = KDriveResourcesStrings.Localizable.addCategoriesTitle
+            label.text = canManage ? KDriveResourcesStrings.Localizable.addCategoriesTitle : KDriveResourcesStrings.Localizable.categoriesFilterTitle
             collectionViewBottomConstraint.constant = 0
             viewCenterConstraint.isActive = true
             contentViewHeightConstraint.isActive = true
         } else {
-            label.text = KDriveResourcesStrings.Localizable.manageCategoriesTitle
+            label.text = canManage ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable.categoriesFilterTitle
             collectionViewBottomConstraint.constant = 16
             viewCenterConstraint.isActive = false
             contentViewHeightConstraint.isActive = false
@@ -70,6 +107,7 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
         initWithPositionAndShadow()
         leadingConstraint.constant = 0
         trailingConstraint.constant = 0
+        contentBackgroundColor = UIColor.systemBackground
     }
 }
 
