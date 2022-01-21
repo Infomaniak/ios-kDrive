@@ -170,7 +170,10 @@ class NewFolderViewController: UIViewController {
         let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
         floatingPanelViewController?.copyTextField.text = url
         floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(fileName)
-        present(driveFloatingPanelController, animated: true)
+        let viewController = presentingViewController
+        dismiss(animated: true) {
+            viewController?.present(driveFloatingPanelController, animated: true)
+        }
     }
 
     private func getSetting(for option: OptionsRow) -> Bool {
