@@ -150,12 +150,11 @@ class TrashViewController: FileListViewController {
     // MARK: - Collection view delegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        /*if selectionMode {
-            selectChild(at: indexPath)
-            return
-        }*/
-
-        let file = viewModel.getFile(at: indexPath.item)
+        /* if selectionMode {
+             selectChild(at: indexPath)
+             return
+         } */
+        let file = viewModel.getFile(at: indexPath.item)!
         if file.isDirectory {
             let trashCV = TrashViewController.instantiate(driveFileManager: driveFileManager)
             trashCV.currentDirectory = file
@@ -168,7 +167,7 @@ class TrashViewController: FileListViewController {
     // MARK: - Swipe action collection view delegate
 
     override func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
-        let file = viewModel.getFile(at: indexPath.item)
+        let file = viewModel.getFile(at: indexPath.item)!
         switch action {
         case .delete:
             deleteFiles([file])
@@ -192,10 +191,9 @@ class TrashViewController: FileListViewController {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
         }
-        let file = viewModel.getFile(at: indexPath.item)
+        let file = viewModel.getFile(at: indexPath.item)!
         showFloatingPanel(files: [file])
     }
-
 }
 
 // MARK: - Trash options delegate
