@@ -91,7 +91,7 @@ public protocol AbstractDrive {
 public class ProxyDrive: AbstractDrive {
     public var id: Int
 
-    init(id: Int) {
+    public init(id: Int) {
         self.id = id
     }
 }
