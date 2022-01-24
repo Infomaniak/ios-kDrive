@@ -609,15 +609,8 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(file, TestsMessages.notNil("deleted file"))
         if let file = file {
             // Delete definitely
-            let _: kDriveCore.EmptyResponse = try await withCheckedThrowingContinuation { continuation in
-                currentApiFetcher.deleteFileDefinitely(file: file) { response, error in
-                    if let response = response?.data {
-                        continuation.resume(returning: response)
-                    } else {
-                        continuation.resume(throwing: error ?? DriveError.unknownError)
-                    }
-                }
-            }
+            let response = try await currentApiFetcher.deleteDefinitely(file: file)
+            XCTAssertTrue(response, "API should return true")
             // Check that file is not in trash anymore
             let trashedFiles: [File] = try await withCheckedThrowingContinuation { continuation in
                 self.currentApiFetcher.getTrashedFiles(driveId: Env.driveId, sortType: .newerDelete) { response, error in
@@ -883,15 +876,7 @@ final class DriveApiTests: XCTestCase {
     func testRestoreTrashedFile() async throws {
         let (rootFile, file) = await initOfficeFile(testName: "Restore trashed file")
         _ = try await currentApiFetcher.delete(file: file)
-        let _: kDriveCore.EmptyResponse = try await withCheckedThrowingContinuation { continuation in
-            self.currentApiFetcher.restoreTrashedFile(file: file) { response, error in
-                if let file = response?.data {
-                    continuation.resume(returning: file)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        _ = try await currentApiFetcher.restore(file: file)
         await checkIfFileIsInDestination(file: file, directory: rootFile)
         tearDownTest(directory: rootFile)
     }
@@ -900,15 +885,7 @@ final class DriveApiTests: XCTestCase {
         let (rootFile, file) = await initOfficeFile(testName: "Restore trashed file in folder")
         _ = try await currentApiFetcher.delete(file: file)
         let directory = await createTestDirectory(name: "restore destination - \(Date())", parentDirectory: rootFile)
-        let _: kDriveCore.EmptyResponse = try await withCheckedThrowingContinuation { continuation in
-            self.currentApiFetcher.restoreTrashedFile(file: file, in: directory.id) { response, error in
-                if let file = response?.data {
-                    continuation.resume(returning: file)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        _ = try await currentApiFetcher.restore(file: file, in: directory)
         await checkIfFileIsInDestination(file: file, directory: directory)
         tearDownTest(directory: rootFile)
     }
