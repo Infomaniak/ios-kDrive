@@ -64,8 +64,8 @@ final class DriveApiTests: XCTestCase {
     }
 
     func tearDownTest(directory: File) {
-        currentApiFetcher.deleteFile(file: directory) { response, _ in
-            XCTAssertNotNil(response, TestsMessages.failedToDelete("directory"))
+        Task {
+            _ = try await currentApiFetcher.delete(file: directory)
         }
     }
 
@@ -579,59 +579,58 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testDeleteFile() {
-        let testName = "Delete file"
-        let expectations = [
-            (name: "Delete file", expectation: XCTestExpectation(description: "Delete file")),
-            (name: "Delete file definitely", expectation: XCTestExpectation(description: "Delete file definitely"))
-        ]
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.createTestDirectory(name: testName, parentDirectory: rootFile) { directory in
-                self.currentApiFetcher.deleteFile(file: directory) { response, error in
-                    XCTAssertNotNil(response?.data, TestsMessages.notNil("deleted file response"))
-                    XCTAssertNil(error, TestsMessages.noError)
-
-                    self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: rootFile.id) { rootResponse, rootError in
-                        XCTAssertNotNil(rootResponse?.data, TestsMessages.notNil("root file"))
-                        XCTAssertNil(rootError, TestsMessages.noError)
-                        let deletedFile = rootResponse?.data?.children.first {
-                            $0.id == directory.id
-                        }
-                        XCTAssertNil(deletedFile, TestsMessages.notNil("deleted file"))
-
-                        self.currentApiFetcher.getTrashedFiles(driveId: Env.driveId, sortType: .newerDelete) { trashResponse, trashError in
-                            XCTAssertNotNil(trashResponse, TestsMessages.notNil("trashed files"))
-                            XCTAssertNil(trashError, TestsMessages.noError)
-                            let fileInTrash = trashResponse!.data!.first {
-                                $0.id == directory.id
-                            }
-                            XCTAssertNotNil(fileInTrash, TestsMessages.notNil("deleted file"))
-                            expectations[0].expectation.fulfill()
-                            guard let file = fileInTrash else { return }
-                            self.currentApiFetcher.deleteFileDefinitely(file: file) { definitelyResponse, definitelyError in
-                                XCTAssertNotNil(definitelyResponse, TestsMessages.notNil("response"))
-                                XCTAssertNil(definitelyError, TestsMessages.noError)
-
-                                self.currentApiFetcher.getTrashedFiles(driveId: Env.driveId, sortType: .newerDelete) { finalResponse, finalError in
-                                    XCTAssertNotNil(finalResponse, TestsMessages.notNil("trashed files"))
-                                    XCTAssertNil(finalError, TestsMessages.noError)
-                                    let deletedFile = finalResponse?.data?.first {
-                                        $0.id == file.id
-                                    }
-                                    XCTAssertNil(deletedFile, "Deleted file should be nil")
-                                    expectations[1].expectation.fulfill()
-                                }
-                            }
-                        }
-                    }
+    func testDeleteFile() async throws {
+        let rootFile = await setUpTest(testName: "Delete file")
+        let directory = await createTestDirectory(name: "Delete file", parentDirectory: rootFile)
+        _ = try await currentApiFetcher.delete(file: directory)
+        // Check that file has been deleted
+        let fetchedDirectory: File = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: rootFile.id) { response, error in
+                if let file = response?.data {
+                    continuation.resume(returning: file)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
                 }
             }
         }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
+        let deletedFile = fetchedDirectory.children.first { $0.id == directory.id }
+        XCTAssertNil(deletedFile, TestsMessages.notNil("deleted file"))
+        // Check that file is in trash
+        let trashedFiles: [File] = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.getTrashedFiles(driveId: Env.driveId, sortType: .newerDelete) { response, error in
+                if let files = response?.data {
+                    continuation.resume(returning: files)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+        let file = trashedFiles.first { $0.id == directory.id }
+        XCTAssertNotNil(file, TestsMessages.notNil("deleted file"))
+        if let file = file {
+            // Delete definitely
+            let _: kDriveCore.EmptyResponse = try await withCheckedThrowingContinuation { continuation in
+                currentApiFetcher.deleteFileDefinitely(file: file) { response, error in
+                    if let response = response?.data {
+                        continuation.resume(returning: response)
+                    } else {
+                        continuation.resume(throwing: error ?? DriveError.unknownError)
+                    }
+                }
+            }
+            // Check that file is not in trash anymore
+            let trashedFiles: [File] = try await withCheckedThrowingContinuation { continuation in
+                self.currentApiFetcher.getTrashedFiles(driveId: Env.driveId, sortType: .newerDelete) { response, error in
+                    if let files = response?.data {
+                        continuation.resume(returning: files)
+                    } else {
+                        continuation.resume(throwing: error ?? DriveError.unknownError)
+                    }
+                }
+            }
+            let file = trashedFiles.first { $0.id == directory.id }
+            XCTAssertNil(file, TestsMessages.notNil("deleted file"))
+        }
         tearDownTest(directory: rootFile)
     }
 
@@ -702,25 +701,11 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testMoveFile() {
-        let testName = "Move file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.createTestDirectory(name: "destination-\(Date())", parentDirectory: rootFile) { destination in
-                self.currentApiFetcher.moveFile(file: file, newParent: destination) { moveResponse, moveError in
-                    XCTAssertNotNil(moveResponse, TestsMessages.notNil("response"))
-                    XCTAssertNil(moveError, TestsMessages.noError)
-                    self.checkIfFileIsInDestination(file: file, directory: destination) {
-                        expectation.fulfill()
-                    }
-                }
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    func testMoveFile() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Move file")
+        let destination = await createTestDirectory(name: "destination-\(Date())", parentDirectory: rootFile)
+        _ = try await currentApiFetcher.move(file: file, to: destination)
+        await checkIfFileIsInDestination(file: file, directory: destination)
         tearDownTest(directory: rootFile)
     }
 
@@ -879,73 +864,52 @@ final class DriveApiTests: XCTestCase {
         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
     }
 
-    func testGetChildrenTrashedFiles() {
-        let testName = "Get children trashed file"
-        let expectation = XCTestExpectation(description: testName)
-
-        initOfficeFile(testName: testName) { root, _ in
-            self.currentApiFetcher.deleteFile(file: root) { response, error in
-                XCTAssertNil(error, TestsMessages.noError)
-                self.currentApiFetcher.getChildrenTrashedFiles(driveId: Env.driveId, fileId: root.id) { response, error in
-                    XCTAssertNotNil(response?.data, TestsMessages.notNil("children trashed file"))
-                    XCTAssertNil(error, TestsMessages.noError)
-                    expectation.fulfill()
+    func testGetChildrenTrashedFiles() async throws {
+        let (rootFile, _) = await initOfficeFile(testName: "Get children trashed file")
+        _ = try await currentApiFetcher.delete(file: rootFile)
+        let trashedFile: File = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.getChildrenTrashedFiles(driveId: Env.driveId, fileId: rootFile.id) { response, error in
+                if let file = response?.data {
+                    continuation.resume(returning: file)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
                 }
             }
         }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-    }
-
-    func testRestoreTrashedFile() {
-        let testName = "Restore trashed file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.deleteFile(file: file) { _, deleteError in
-                XCTAssertNil(deleteError, TestsMessages.noError)
-                self.currentApiFetcher.restoreTrashedFile(file: file) { restoreResponse, restoreError in
-                    XCTAssertNotNil(restoreResponse, TestsMessages.notNil("response"))
-                    XCTAssertNil(restoreError, TestsMessages.noError)
-
-                    self.checkIfFileIsInDestination(file: file, directory: rootFile) {
-                        expectation.fulfill()
-                    }
-                }
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+        XCTAssertEqual(trashedFile.children.count, 1, "Trashed file should have one child")
         tearDownTest(directory: rootFile)
     }
 
-    func testRestoreTrashedFileInFolder() {
-        let testName = "Restore trashed file in folder"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.deleteFile(file: file) { _, deleteError in
-                XCTAssertNil(deleteError, TestsMessages.noError)
-
-                self.createTestDirectory(name: "restore destination - \(Date())", parentDirectory: rootFile) { directory in
-
-                    self.currentApiFetcher.restoreTrashedFile(file: file, in: directory.id) { restoreResponse, restoreError in
-                        XCTAssertNotNil(restoreResponse, TestsMessages.notNil("response"))
-                        XCTAssertNil(restoreError, TestsMessages.noError)
-
-                        self.checkIfFileIsInDestination(file: file, directory: directory) {
-                            expectation.fulfill()
-                        }
-                    }
+    func testRestoreTrashedFile() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Restore trashed file")
+        _ = try await currentApiFetcher.delete(file: file)
+        let _: kDriveCore.EmptyResponse = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.restoreTrashedFile(file: file) { response, error in
+                if let file = response?.data {
+                    continuation.resume(returning: file)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
                 }
             }
         }
+        await checkIfFileIsInDestination(file: file, directory: rootFile)
+        tearDownTest(directory: rootFile)
+    }
 
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    func testRestoreTrashedFileInFolder() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Restore trashed file in folder")
+        _ = try await currentApiFetcher.delete(file: file)
+        let directory = await createTestDirectory(name: "restore destination - \(Date())", parentDirectory: rootFile)
+        let _: kDriveCore.EmptyResponse = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.restoreTrashedFile(file: file, in: directory.id) { response, error in
+                if let file = response?.data {
+                    continuation.resume(returning: file)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+        await checkIfFileIsInDestination(file: file, directory: directory)
         tearDownTest(directory: rootFile)
     }
 
@@ -975,31 +939,11 @@ final class DriveApiTests: XCTestCase {
         let (rootFile, file) = await initOfficeFile(testName: "Undo action")
         let directory = await createTestDirectory(name: "test", parentDirectory: rootFile)
         // Move & cancel
-        let moveResponse: CancelableResponse = try await withCheckedThrowingContinuation { continuation in
-            currentApiFetcher.moveFile(file: file, newParent: directory) { response, error in
-                if let response = response?.data {
-                    continuation.resume(returning: response)
-                } else if let error = response?.error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        let moveResponse = try await currentApiFetcher.move(file: file, to: directory)
         try await currentApiFetcher.undoAction(drive: ProxyDrive(id: Env.driveId), cancelId: moveResponse.id)
         await checkIfFileIsInDestination(file: file, directory: rootFile)
         // Delete & cancel
-        let deleteResponse: CancelableResponse = try await withCheckedThrowingContinuation { continuation in
-            currentApiFetcher.deleteFile(file: file) { response, error in
-                if let response = response?.data {
-                    continuation.resume(returning: response)
-                } else if let error = response?.error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        let deleteResponse = try await currentApiFetcher.delete(file: file)
         try await currentApiFetcher.undoAction(drive: ProxyDrive(id: Env.driveId), cancelId: deleteResponse.id)
         await checkIfFileIsInDestination(file: file, directory: rootFile)
         tearDownTest(directory: rootFile)
