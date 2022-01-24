@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import SnackBar
 import UIKit
 
@@ -44,6 +45,21 @@ public enum UIConstants {
             snackbar?.show()
         }
         return snackbar
+    }
+
+    public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, cancelableResponse: CancelableResponse, driveFileManager: DriveFileManager) {
+        UIConstants.showSnackBar(message: message, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
+            Task {
+                do {
+                    try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: cancelSuccessMessage)
+                    }
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                }
+            }
+        })
     }
 
     public static func openUrl(_ string: String, from viewController: UIViewController) {

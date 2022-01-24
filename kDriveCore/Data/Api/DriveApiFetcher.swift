@@ -305,10 +305,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .post, parameters: ["body": body])).data
     }
 
-    public func deleteFile(file: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteFile(file: file)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func delete(file: File) async throws -> CancelableResponse {
+        try await perform(request: authenticatedRequest(.fileInfo(file), method: .delete)).data
     }
 
     public func deleteAllFilesDefinitely(driveId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
@@ -346,10 +344,8 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
-    public func moveFile(file: File, newParent: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.moveFile(file: file, newParentId: newParent.id)
-
-        makeRequest(url, method: .post, completion: completion)
+    public func move(file: File, to destination: File) async throws -> CancelableResponse {
+        try await perform(request: authenticatedRequest(.move(file: file, destinationId: destination.id), method: .post)).data
     }
 
     public func getRecentActivity(driveId: Int, page: Int = 1, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
