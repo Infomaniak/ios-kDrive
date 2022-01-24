@@ -465,21 +465,16 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .move:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent, fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getRootFile()]) { [unowned self] selectedFolder in
-                self.driveFileManager.moveFile(file: self.file, newParent: selectedFolder) { response, _, error in
-                    if error != nil {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                            guard let cancelId = response?.id else { return }
-                            Task {
-                                try await self.driveFileManager.undoAction(cancelId: cancelId)
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
-                            }
-                        })
+                Task {
+                    do {
+                        let (response, _) = try await driveFileManager.move(file: file, to: selectedFolder)
+                        UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled, cancelableResponse: response, driveFileManager: driveFileManager)
                         // Close preview
                         if self.presentingParent is PreviewViewController {
                             self.presentingParent?.navigationController?.popViewController(animated: true)
                         }
+                    } catch {
+                        UIConstants.showSnackBar(message: error.localizedDescription)
                     }
                 }
             }
@@ -557,49 +552,23 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
             let file = self.file.freeze()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
-                let group = DispatchGroup()
-                var success = false
-                var cancelId: String?
-                group.enter()
-                self.driveFileManager.deleteFile(file: file) { response, error in
-                    success = error == nil
-                    cancelId = response?.id
-                    group.leave()
-                }
-                _ = group.wait(timeout: .now() + Constants.timeout)
-                DispatchQueue.main.async {
-                    if success {
-                        let group = DispatchGroup()
-                        if let presentingParent = self.presentingParent {
-                            // Update file list
-                            (presentingParent as? FileListViewController)?.getNewChanges()
-                            // Close preview
-                            if presentingParent is PreviewViewController {
-                                presentingParent.navigationController?.popViewController(animated: true)
-                            }
-                            // Dismiss panel
-                            group.enter()
-                            self.dismiss(animated: true) {
-                                group.leave()
-                            }
-                            group.enter()
-                            presentingParent.dismiss(animated: true) {
-                                group.leave()
-                            }
+                do {
+                    let response = try await self.driveFileManager.delete(file: file)
+                    if let presentingParent = self.presentingParent {
+                        // Update file list
+                        (presentingParent as? FileListViewController)?.getNewChanges()
+                        // Close preview
+                        if presentingParent is PreviewViewController {
+                            presentingParent.navigationController?.popViewController(animated: true)
                         }
-                        // Show snackbar (wait for panel dismissal)
-                        group.notify(queue: .main) {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                                guard let cancelId = cancelId else { return }
-                                Task {
-                                    try await self.driveFileManager.undoAction(cancelId: cancelId)
-                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
-                                }
-                            })
-                        }
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
+                        // Dismiss panel
+                        self.dismiss(animated: true)
+                        presentingParent.dismiss(animated: true)
                     }
+                    // Show snackbar
+                    UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled, cancelableResponse: response, driveFileManager: self.driveFileManager)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
             present(alert, animated: true)
@@ -611,22 +580,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)
             let file = self.file.freeze()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalLeaveShareTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonLeaveShare, loading: true) {
-                let group = DispatchGroup()
-                var success = false
-                group.enter()
-                self.driveFileManager.deleteFile(file: file) { _, error in
-                    success = error == nil
-                    group.leave()
-                }
-                _ = group.wait(timeout: .now() + Constants.timeout)
-                DispatchQueue.main.async {
-                    if success {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarLeaveShareConfirmation)
-                        self.presentingParent?.navigationController?.popViewController(animated: true)
-                        self.dismiss(animated: true)
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorLeaveShare)
-                    }
+                do {
+                    _ = try await self.driveFileManager.delete(file: file)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarLeaveShareConfirmation)
+                    self.presentingParent?.navigationController?.popViewController(animated: true)
+                    self.dismiss(animated: true)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
             present(alert, animated: true)
