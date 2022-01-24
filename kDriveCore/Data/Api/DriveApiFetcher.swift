@@ -514,18 +514,8 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .post, completion: completion)
     }
 
-    public func bulkAction(driveId: Int, action: BulkAction, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.bulkAction(driveId: driveId)
-
-        // Create encoder
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        let parameterEncoder = JSONParameterEncoder(encoder: encoder)
-
-        authenticatedSession.request(url, method: .post, parameters: action, encoder: parameterEncoder)
-            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+    public func bulkAction(drive: AbstractDrive, action: BulkAction) async throws -> CancelableResponse {
+        try await perform(request: authenticatedRequest(.bulkFiles(drive: drive), method: .post, parameters: action)).data
     }
 
     public func getFileCount(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<FileCount>?, Error?) -> Void) {
