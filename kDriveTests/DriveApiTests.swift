@@ -768,51 +768,48 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testPostFavoriteFile() {
-        let testName = "Post favorite file"
-        let expectations = [
-            (name: "Post favorite file", expectation: XCTestExpectation(description: "Post favorite file")),
-            (name: "Delete favorite file", expectation: XCTestExpectation(description: "Delete favorite file"))
-        ]
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.postFavoriteFile(file: file) { postResponse, postError in
-                XCTAssertNotNil(postResponse, TestsMessages.notNil("response"))
-                XCTAssertNil(postError, TestsMessages.noError)
-
-                self.currentApiFetcher.getFavoriteFiles(driveId: Env.driveId, page: 1, sortType: .newer) { favoriteResponse, favoriteError in
-                    XCTAssertNotNil(favoriteResponse?.data, TestsMessages.notNil("favorite files"))
-                    XCTAssertNil(favoriteError, TestsMessages.noError)
-                    let favoriteFile = favoriteResponse!.data!.first { $0.id == file.id }
-                    XCTAssertNotNil(favoriteFile, "File should be in Favorite files")
-                    XCTAssertTrue(favoriteFile!.isFavorite, "File should be favorite")
-                    expectations[0].expectation.fulfill()
-
-                    self.currentApiFetcher.deleteFavoriteFile(file: file) { deleteResponse, deleteError in
-                        XCTAssertNotNil(deleteResponse, TestsMessages.notNil("response"))
-                        XCTAssertNil(deleteError, TestsMessages.noError)
-
-                        self.currentApiFetcher.getFavoriteFiles(driveId: Env.driveId, page: 1, sortType: .newer) { response, error in
-                            XCTAssertNotNil(response?.data, TestsMessages.notNil("favorite files"))
-                            XCTAssertNil(error, TestsMessages.noError)
-                            let favoriteFile = response!.data!.contains { $0.id == file.id }
-                            XCTAssertFalse(favoriteFile, "File shouldn't be in Favorite files")
-
-                            self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: file.id) { finalResponse, finalError in
-                                XCTAssertNotNil(finalResponse?.data, TestsMessages.notNil("file"))
-                                XCTAssertNil(finalError, TestsMessages.noError)
-                                XCTAssertFalse(finalResponse!.data!.isFavorite, "File shouldn't be favorite")
-                                expectations[1].expectation.fulfill()
-                            }
-                        }
-                    }
+    func testFavoriteFile() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Favorite file")
+        // Favorite
+        let favoriteResponse = try await currentApiFetcher.favorite(file: file)
+        XCTAssertTrue(favoriteResponse, "API should return true")
+        let files: [File] = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.getFavoriteFiles(driveId: Env.driveId, page: 1, sortType: .newer) { response, error in
+                if let files = response?.data {
+                    continuation.resume(returning: files)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
                 }
             }
         }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveApiTests.defaultTimeout)
+        let favoriteFile = files.first { $0.id == file.id }
+        XCTAssertNotNil(favoriteFile, "File should be in Favorite files")
+        XCTAssertTrue(favoriteFile?.isFavorite == true, "File should be favorite")
+        // Unfavorite
+        let unfavoriteResponse = try await currentApiFetcher.unfavorite(file: file)
+        XCTAssertTrue(unfavoriteResponse, "API should return true")
+        let files2: [File] = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.getFavoriteFiles(driveId: Env.driveId, page: 1, sortType: .newer) { response, error in
+                if let files = response?.data {
+                    continuation.resume(returning: files)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+        let unfavoriteFile = files2.first { $0.id == file.id }
+        XCTAssertNil(unfavoriteFile, "File should be in Favorite files")
+        // Check file
+        let finalFile: File = try await withCheckedThrowingContinuation { continuation in
+            self.currentApiFetcher.getFileListForDirectory(driveId: Env.driveId, parentId: file.id) { response, error in
+                if let file = response?.data {
+                    continuation.resume(returning: file)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+        XCTAssertFalse(finalFile.isFavorite, "File shouldn't be favorite")
         tearDownTest(directory: rootFile)
     }
 
