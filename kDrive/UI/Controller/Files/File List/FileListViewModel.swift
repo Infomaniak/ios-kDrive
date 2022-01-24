@@ -55,8 +55,8 @@ class FileListViewModel {
         }
     }
 
-    private var sortTypeObservation: AnyCancellable?
-    private var listStyleObservation: AnyCancellable?
+    internal var sortTypeObservation: AnyCancellable?
+    internal var listStyleObservation: AnyCancellable?
 
     var uploadViewModel: UploadCardViewModel?
     var multipleSelectionViewModel: MultipleSelectionFileListViewModel?
@@ -110,14 +110,38 @@ class FileListViewModel {
             .receive(on: RunLoop.main)
             .sink { [weak self] sortType in
                 self?.sortType = sortType
-                self?.updateDataSource()
+                self?.sortingChanged()
             }
         listStyleObservation = FileListOptions.instance.$currentStyle
             .receive(on: RunLoop.main)
             .assignNoRetain(to: \.listStyle, on: self)
     }
 
-    func didSelectFile(at index: Int) {}
+    func sortingChanged() {}
+
+    func showLoadingIndicatorIfNeeded() {
+        // Show refresh control if loading is slow
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self else { return }
+            if self.isLoading && self.isRefreshIndicatorHidden {
+                self.isRefreshIndicatorHidden = false
+            }
+        }
+    }
+
+    func fetchFiles(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {}
+
+    func loadActivities() {}
+
+    func loadFiles(page: Int = 1, forceRefresh: Bool = false) {}
+
+    func didSelectFile(at index: Int) {
+        guard let file: File = getFile(at: index) else { return }
+        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
+            return
+        }
+        onFilePresented?(file)
+    }
 
     func getFile(at index: Int) -> File? {
         fatalError(#function + " needs to be overridden")
@@ -128,11 +152,21 @@ class FileListViewModel {
         fatalError(#function + " needs to be overridden")
     }
 
-    func forceRefresh() {}
-    func updateDataSource() {}
+    func forceRefresh() {
+        isLoading = false
+        isRefreshIndicatorHidden = false
+        loadFiles(page: 1, forceRefresh: true)
+    }
 
-    func onViewDidLoad() {}
-    func onViewWillAppear() {}
+    func onViewDidLoad() {
+        loadFiles()
+    }
+
+    func onViewWillAppear() {
+        if currentDirectory.fullyDownloaded && fileCount > 0 {
+            loadActivities()
+        }
+    }
 }
 
 class ManagedFileListViewModel: FileListViewModel {
@@ -147,24 +181,11 @@ class ManagedFileListViewModel: FileListViewModel {
         return files.count
     }
 
-    override public func forceRefresh() {
-        isLoading = false
-        isRefreshIndicatorHidden = false
-        loadFiles(page: 1, forceRefresh: true)
-    }
-
-    override public func onViewDidLoad() {
+    override func sortingChanged() {
         updateDataSource()
-        loadFiles()
     }
 
-    override public func onViewWillAppear() {
-        if currentDirectory.fullyDownloaded && !files.isEmpty {
-            loadActivities()
-        }
-    }
-
-    override func updateDataSource() {
+    func updateDataSource() {
         realmObservationToken?.invalidate()
         realmObservationToken = files.sorted(by: [
             SortDescriptor(keyPath: \File.type, ascending: true),
@@ -184,59 +205,6 @@ class ManagedFileListViewModel: FileListViewModel {
                 DDLogError("[Realm Observation] Error \(error)")
             }
         }
-    }
-
-    func getFile(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
-    }
-
-    final func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
-        guard !isLoading || page > 1 else { return }
-
-        if currentDirectory.fullyDownloaded && !forceRefresh {
-            loadActivities()
-        } else {
-            isLoading = true
-            if page == 1 {
-                // Show refresh control if loading is slow
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                    guard let self = self else { return }
-                    if self.isLoading && self.isRefreshIndicatorHidden {
-                        self.isRefreshIndicatorHidden = false
-                    }
-                }
-            }
-
-            getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
-                self?.isLoading = false
-                self?.isRefreshIndicatorHidden = true
-                if let fetchedCurrentDirectory = file {
-                    if !fetchedCurrentDirectory.fullyDownloaded {
-                        self?.loadFiles(page: page + 1, forceRefresh: forceRefresh)
-                    } else if !forceRefresh {
-                        self?.loadActivities()
-                    }
-                } else if let error = error as? DriveError {
-                    self?.onDriveError?(error)
-                }
-            }
-        }
-    }
-
-    func loadActivities() {
-        driveFileManager.getFolderActivities(file: currentDirectory) { [weak self] _, _, error in
-            if let error = error as? DriveError {
-                self?.onDriveError?(error)
-            }
-        }
-    }
-
-    override func didSelectFile(at index: Int) {
-        guard let file: File = getFile(at: index) else { return }
-        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
-            return
-        }
-        onFilePresented?(file)
     }
 
     override func getFile(at index: Int) -> File? {
