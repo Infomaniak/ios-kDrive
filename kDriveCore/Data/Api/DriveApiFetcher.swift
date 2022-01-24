@@ -362,16 +362,12 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
-    public func postFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.favorite(file: file)
-
-        makeRequest(url, method: .post, completion: completion)
+    public func favorite(file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.favorite(file: file), method: .post)).data
     }
 
-    public func deleteFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.favorite(file: file)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func unfavorite(file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.favorite(file: file), method: .delete)).data
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
