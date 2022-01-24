@@ -22,32 +22,41 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class TrashViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.menu }
-    override class var storyboardIdentifier: String { "TrashViewController" }
-
-    @IBOutlet weak var emptyTrashBarButtonItem: UIBarButtonItem!
-
-    private var filesToRestore: [File] = []
-    private var selectFolderViewController: TitleSizeAdjustingNavigationController!
-
-    override func viewDidLoad() {
-        // Set configuration
-        configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash)
-        viewModel.sortType = .newerDelete
+class TrashListViewModel: UnmanagedFileListViewModel {
+    override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+        var currentDirectory = currentDirectory
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile
         }
-
-        super.viewDidLoad()
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        sortTypeObservation?.cancel()
+        sortTypeObservation = nil
+        sortType = .newerDelete
     }
 
-    override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        guard driveFileManager != nil && currentDirectory != nil else {
-            DispatchQueue.main.async {
-                completion(.success([]), false, true)
+    private func handleNewChildren(_ children: [File]?, page: Int, error: Error?) {
+        isLoading = false
+        isRefreshIndicatorHidden = true
+
+        if let children = children {
+            let startIndex = fileCount
+            files.append(contentsOf: children)
+            onFileListUpdated?([], Array(startIndex ..< files.count), [], false)
+            if children.count == DriveApiFetcher.itemPerPage {
+                loadFiles(page: page + 1)
             }
-            return
+            isEmptyViewHidden = fileCount > 0
+        } else {
+            onDriveError?((error as? DriveError) ?? DriveError.localError)
+        }
+    }
+
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+        guard !isLoading || page > 1 else { return }
+
+        isLoading = true
+        if page == 1 {
+            showLoadingIndicatorIfNeeded()
         }
 
         Task {
@@ -65,9 +74,29 @@ class TrashViewController: FileListViewController {
         }
     }
 
-    override func getNewChanges() {
-        // We don't have incremental changes for trash
+    override func loadActivities() {
         forceRefresh()
+    }
+}
+
+class TrashViewController: FileListViewController {
+    override class var storyboard: UIStoryboard { Storyboard.menu }
+    override class var storyboardIdentifier: String { "TrashViewController" }
+
+    @IBOutlet weak var emptyTrashBarButtonItem: UIBarButtonItem!
+
+    private var filesToRestore: [File] = []
+    private var selectFolderViewController: TitleSizeAdjustingNavigationController!
+
+    override func viewDidLoad() {
+        // Set configuration
+        configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash)
+
+        super.viewDidLoad()
+    }
+
+    override func getViewModel() -> FileListViewModel {
+        return TrashListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
     // MARK: - Actions
