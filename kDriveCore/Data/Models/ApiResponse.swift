@@ -40,7 +40,7 @@ public class CancelableResponse: Codable {
 
     enum CodingKeys: String, CodingKey {
         case id = "cancel_id"
-        case validUntil = "cancel_valid_until"
+        case validUntil = "valid_until"
     }
 }
 

@@ -134,21 +134,20 @@ class MultipleSelectionViewController: UIViewController {
     #if !ISEXTENSION
     func moveSelectedItems() {
         let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getRootFile()]) { [unowned self] selectedFolder in
-            let group = DispatchGroup()
-            var success = true
-            for file in self.selectedItems {
-                group.enter()
-                driveFileManager.moveFile(file: file, newParent: selectedFolder) { _, _, error in
-                    if let error = error {
-                        success = false
-                        DDLogError("Error while moving file: \(error)")
+            Task {
+                do {
+                    try await withThrowingTaskGroup(of: Void.self) { group in
+                        for file in self.selectedItems {
+                            group.addTask {
+                                _ = try await driveFileManager.move(file: file, to: selectedFolder)
+                            }
+                        }
+                        try await group.waitForAll()
                     }
-                    group.leave()
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedItems.count, selectedFolder.name))
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
-            }
-            group.notify(queue: DispatchQueue.main) {
-                let message = success ? KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(self.selectedItems.count, selectedFolder.name) : KDriveResourcesStrings.Localizable.errorMove
-                UIConstants.showSnackBar(message: message)
                 self.selectionMode = false
                 self.getNewChanges()
             }
@@ -165,68 +164,49 @@ class MultipleSelectionViewController: UIViewController {
         }
 
         let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
-            let message: String
-            if let success = self.deleteFiles(Array(self.selectedItems), async: false), success {
+            do {
+                try await self.delete(files: Array(self.selectedItems))
+                let message: String
                 if self.selectedItems.count == 1 {
                     message = KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(self.selectedItems.first!.name)
                 } else {
                     message = KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmationPlural(self.selectedItems.count)
                 }
-            } else {
-                message = KDriveResourcesStrings.Localizable.errorMove
-            }
-            DispatchQueue.main.async {
                 UIConstants.showSnackBar(message: message)
-                self.selectionMode = false
-                self.getNewChanges()
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
+            self.selectionMode = false
+            self.getNewChanges()
         }
         present(alert, animated: true)
     }
 
     @discardableResult
-    func deleteFiles(_ files: [File], async: Bool = true) -> Bool? {
-        let group = DispatchGroup()
-        var success = true
-        var cancelId: String?
-        for file in files {
-            group.enter()
-            driveFileManager.deleteFile(file: file) { response, error in
-                cancelId = response?.id
-                if let error = error {
-                    success = false
-                    DDLogError("Error while deleting file: \(error)")
+    func delete(files: [File]) async throws -> [CancelableResponse] {
+        return try await withThrowingTaskGroup(of: CancelableResponse.self, returning: [CancelableResponse].self) { group in
+            for file in files {
+                group.addTask {
+                    try await self.driveFileManager.delete(file: file)
                 }
-                group.leave()
             }
+
+            var responses = [CancelableResponse]()
+            for try await response in group {
+                responses.append(response)
+            }
+            return responses
         }
-        if async {
-            group.notify(queue: DispatchQueue.main) {
-                if success {
-                    if files.count == 1 {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(files[0].name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                            guard let cancelId = cancelId else { return }
-                            Task {
-                                try await self.driveFileManager.undoAction(cancelId: cancelId)
-                                self.getNewChanges()
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
-                            }
-                        })
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmationPlural(files.count))
-                    }
-                } else {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
-                }
-                if self.selectionMode {
-                    self.selectionMode = false
-                }
-                self.getNewChanges()
+    }
+
+    func delete(file: File) {
+        Task {
+            do {
+                let responses = try await delete(files: [file])
+                UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled, cancelableResponse: responses.first!, driveFileManager: driveFileManager)
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
-            return nil
-        } else {
-            let result = group.wait(timeout: .now() + Constants.timeout)
-            return success && result != .timedOut
         }
     }
 
