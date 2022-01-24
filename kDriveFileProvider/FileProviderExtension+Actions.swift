@@ -156,10 +156,11 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.moveFile(file: file, newParent: parent) { _, file, error in
-            if let file = file {
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
-            } else {
+        Task {
+            do {
+                let (_, file) = try await driveFileManager.move(file: file, to: parent)
+                completionHandler(FileProviderItem(file: file.freeze(), domain: domain), nil)
+            } catch {
                 completionHandler(nil, error)
             }
         }
@@ -202,12 +203,13 @@ extension FileProviderExtension {
         let item = FileProviderItem(file: deletedFile, domain: domain)
         item.isTrashed = true
 
-        driveFileManager.deleteFile(file: file) { _, error in
-            FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
-            if let error = error {
-                completionHandler(nil, error)
-            } else {
+        Task {
+            do {
+                _ = try await driveFileManager.delete(file: file)
+                FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
                 completionHandler(item, nil)
+            } catch {
+                completionHandler(nil, error)
             }
         }
     }
