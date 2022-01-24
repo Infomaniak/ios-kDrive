@@ -27,8 +27,25 @@ class FavoritesViewModel: ManagedFileListViewModel {
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
     }
 
-    override func getFile(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+        guard !isLoading || page > 1 else { return }
+
+        isLoading = true
+        if page == 1 {
+            showLoadingIndicatorIfNeeded()
+        }
+
+        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
+            self?.isLoading = false
+            self?.isRefreshIndicatorHidden = true
+            if let fetchedCurrentDirectory = file {
+                if !fetchedCurrentDirectory.fullyDownloaded {
+                    self?.loadFiles(page: page + 1, forceRefresh: forceRefresh)
+                }
+            } else if let error = error as? DriveError {
+                self?.onDriveError?(error)
+            }
+        }
     }
 
     override func loadActivities() {
