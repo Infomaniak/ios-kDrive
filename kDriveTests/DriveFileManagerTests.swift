@@ -114,6 +114,14 @@ final class DriveFileManagerTests: XCTestCase {
         }
     }
 
+    func checkIfFileIsInFavorites(file: File, shouldBePresent: Bool = true) async {
+        return await withCheckedContinuation { continuation in
+            checkIfFileIsInFavorites(file: file, shouldBePresent: shouldBePresent) {
+                continuation.resume(returning: ())
+            }
+        }
+    }
+
     func checkIfFileIsInDestination(file: File, destination: File) {
         let cachedFile = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
         XCTAssertNotNil(cachedFile, TestsMessages.notNil("cached file"))
@@ -148,31 +156,12 @@ final class DriveFileManagerTests: XCTestCase {
         wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
     }
 
-    func testFavorites() {
-        let testName = "Get favorites"
-        let expectations = [
-            (name: "Set favorite", expectation: XCTestExpectation(description: "Get favorite")),
-            (name: "Remove favorite", expectation: XCTestExpectation(description: "Remove favorite"))
-        ]
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.setFavoriteFile(file: rootFile, favorite: true) { error in
-                XCTAssertNil(error, "Failed to set favorite")
-                self.checkIfFileIsInFavorites(file: rootFile) {
-                    expectations[0].expectation.fulfill()
-                    DriveFileManagerTests.driveFileManager.setFavoriteFile(file: rootFile, favorite: false) { error in
-                        XCTAssertNil(error, "Failed to remove favorite")
-                        self.checkIfFileIsInFavorites(file: rootFile, shouldBePresent: false) {
-                            expectations[1].expectation.fulfill()
-                        }
-                    }
-                }
-            }
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
+    func testFavorites() async throws {
+        let rootFile = await setUpTest(testName: "Set favorite")
+        try await DriveFileManagerTests.driveFileManager.setFavorite(file: rootFile, favorite: true)
+        await checkIfFileIsInFavorites(file: rootFile)
+        try await DriveFileManagerTests.driveFileManager.setFavorite(file: rootFile, favorite: false)
+        await checkIfFileIsInFavorites(file: rootFile, shouldBePresent: false)
         tearDownTest(directory: rootFile)
     }
 

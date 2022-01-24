@@ -996,25 +996,21 @@ public class DriveFileManager {
         return response
     }
 
-    public func setFavoriteFile(file: File, favorite: Bool, completion: @escaping (Error?) -> Void) {
+    public func setFavorite(file: File, favorite: Bool) async throws {
         let fileId = file.id
         if favorite {
-            apiFetcher.postFavoriteFile(file: file) { _, error in
-                if error == nil {
-                    self.updateFileProperty(fileId: fileId) { file in
-                        file.isFavorite = true
-                    }
+            let response = try await apiFetcher.favorite(file: file)
+            if response {
+                updateFileProperty(fileId: fileId) { file in
+                    file.isFavorite = true
                 }
-                completion(error)
             }
         } else {
-            apiFetcher.deleteFavoriteFile(file: file) { _, error in
-                if error == nil {
-                    self.updateFileProperty(fileId: fileId) { file in
-                        file.isFavorite = false
-                    }
+            let response = try await apiFetcher.unfavorite(file: file)
+            if response {
+                updateFileProperty(fileId: fileId) { file in
+                    file.isFavorite = false
                 }
-                completion(error)
             }
         }
     }
@@ -1022,8 +1018,8 @@ public class DriveFileManager {
     public func delete(file: File) async throws -> CancelableResponse {
         let fileId = file.id
         let response = try await apiFetcher.delete(file: file)
-        file.signalChanges(userId: self.drive.userId)
-        self.backgroundQueue.async { [self] in
+        file.signalChanges(userId: drive.userId)
+        backgroundQueue.async { [self] in
             let localRealm = getRealm()
             let savedFile = getCachedFile(id: fileId, using: localRealm)
             removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: true, using: localRealm)
