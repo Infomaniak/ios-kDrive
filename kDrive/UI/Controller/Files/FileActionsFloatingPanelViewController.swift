@@ -636,6 +636,17 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
+    private func track(action: FloatingPanelAction) {
+        switch action {
+        case .favorite:
+            MatomoUtils.track(eventWithCategory: .favorite, value: !file.isFavorite)
+        case .offline:
+            MatomoUtils.track(eventWithCategory: .offline, value: !file.isAvailableOffline)
+        default:
+            break
+        }
+    }
+
     private func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
         action.isLoading = isLoading
         DispatchQueue.main.async { [weak self] in
@@ -773,6 +784,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             action = actions[indexPath.item]
         }
+        track(action: action)
         handleAction(action, at: indexPath)
     }
 }

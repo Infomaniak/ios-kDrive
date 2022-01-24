@@ -278,6 +278,8 @@ class ManageCategoriesViewController: UITableViewController {
             }
         }
         delegate?.didSelect(category: category)
+
+        MatomoUtils.track(eventWithCategory: .categories, name: "assign")
     }
 
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -294,6 +296,8 @@ class ManageCategoriesViewController: UITableViewController {
             }
         }
         delegate?.didDeselect(category: category)
+
+        MatomoUtils.track(eventWithCategory: .categories, name: "assign")
     }
 
     // MARK: - Navigation

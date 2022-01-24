@@ -142,6 +142,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
                     }
                 }
+                MatomoUtils.track(eventWithCategory: .categories, name: "delete")
             }
             present(alert, animated: true)
         default:

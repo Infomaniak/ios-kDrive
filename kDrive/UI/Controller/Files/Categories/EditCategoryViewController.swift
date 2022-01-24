@@ -226,5 +226,6 @@ extension EditCategoryViewController: FooterButtonDelegate {
                 }
             }
         }
+        MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
     }
 }

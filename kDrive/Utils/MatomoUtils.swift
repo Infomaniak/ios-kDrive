@@ -23,7 +23,7 @@ class MatomoUtils {
     static let shared = MatomoTracker(siteId: "8", baseURL: URL(string: "https://analytics.infomaniak.com/matomo.php")!)
 
     enum EventCategory: String {
-        case newElement, offline, favorite, colorFolder, search, fileList, comment, drive, account, settings, home
+        case newElement, offline, favorite, colorFolder, categories, search, fileList, comment, drive, account, settings, home
     }
 
     enum UserAction: String {
@@ -34,7 +34,11 @@ class MatomoUtils {
         shared.track(view: view)
     }
 
-    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String, value: Float? = nil) {
+    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String? = nil, value: Float? = nil) {
         shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: value)
+    }
+
+    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String? = nil, value: Bool) {
+        track(eventWithCategory: category, action: action, name: name, value: value ? 1 : 0)
     }
 }

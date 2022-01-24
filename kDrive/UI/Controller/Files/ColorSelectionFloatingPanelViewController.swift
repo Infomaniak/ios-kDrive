@@ -182,6 +182,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let color = folderColors[indexPath.row]
         let frozenFiles = files.map { $0.freeze() }
+        MatomoUtils.track(eventWithCategory: .colorFolder)
         Task {
             do {
                 let success = try await withThrowingTaskGroup(of: Bool.self, returning: Bool.self) { group in
