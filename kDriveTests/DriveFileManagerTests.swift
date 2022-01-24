@@ -56,8 +56,8 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     func tearDownTest(directory: File) {
-        DriveFileManagerTests.driveFileManager.deleteFile(file: directory) { response, _ in
-            XCTAssertNotNil(response, "Failed to delete directory")
+        Task {
+            _ = try await DriveFileManagerTests.driveFileManager.delete(file: directory)
         }
     }
 
@@ -74,6 +74,14 @@ final class DriveFileManagerTests: XCTestCase {
         DriveFileManagerTests.driveFileManager.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { directory, _ in
             XCTAssertNotNil(directory, "Failed to create test directory")
             completion(directory!)
+        }
+    }
+
+    func createTestDirectory(name: String, parentDirectory: File) async -> File {
+        return await withCheckedContinuation { continuation in
+            createTestDirectory(name: name, parentDirectory: parentDirectory) { result in
+                continuation.resume(returning: result.freeze())
+            }
         }
     }
 
@@ -256,64 +264,29 @@ final class DriveFileManagerTests: XCTestCase {
                 }
             }
         }
-        let moveResponse: CancelableResponse = try await withCheckedThrowingContinuation { continuation in
-            DriveFileManagerTests.driveFileManager.moveFile(file: file, newParent: directory) { response, _, error in
-                if let response = response {
-                    continuation.resume(returning: response)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        let (moveResponse, _) = try await DriveFileManagerTests.driveFileManager.move(file: file, to: directory)
         try await DriveFileManagerTests.driveFileManager.undoAction(cancelId: moveResponse.id)
         checkIfFileIsInDestination(file: file, destination: rootFile)
         tearDownTest(directory: rootFile)
     }
 
-    func testDeleteFile() {
-        let testName = "Delete file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-
-            let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-            XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
-
-            DriveFileManagerTests.driveFileManager.deleteFile(file: officeFile) { _, error in
-                XCTAssertNil(error, TestsMessages.noError)
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
+    func testDeleteFile() async throws {
+        let (rootFile, officeFile) = await initOfficeFile(testName: "Delete file")
+        let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
+        XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
+        _ = try await DriveFileManagerTests.driveFileManager.delete(file: officeFile)
         tearDownTest(directory: rootFile)
     }
 
-    func testMoveFile() {
-        let testName = "Move file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+    func testMoveFile() async throws {
+        let (rootFile, officeFile) = await initOfficeFile(testName: "Move file")
+        let destination = await createTestDirectory(name: "Destination", parentDirectory: rootFile)
+        let (_, file) = try await DriveFileManagerTests.driveFileManager.move(file: officeFile, to: destination)
+        XCTAssertEqual(file.parent?.id, destination.id, "New parent should be 'destination' directory")
 
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-            self.createTestDirectory(name: "Destination", parentDirectory: rootFile) { destination in
-                XCTAssertNotNil(destination, "Failed to create destination directory")
-                DriveFileManagerTests.driveFileManager.moveFile(file: officeFile, newParent: destination) { _, file, error in
-                    XCTAssertNotNil(file, TestsMessages.notNil("file"))
-                    XCTAssertNil(error, TestsMessages.noError)
-                    XCTAssertTrue(file?.parent?.id == destination.id, "New parent should be 'destination' directory")
-
-                    let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-                    XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
-                    XCTAssertTrue(cached!.parent?.id == destination.id, "New parent not updated in realm")
-                    expectation.fulfill()
-                }
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
+        let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
+        XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
+        XCTAssertEqual(cached?.parent?.id, destination.id, "New parent not updated in realm")
         tearDownTest(directory: rootFile)
     }
 
