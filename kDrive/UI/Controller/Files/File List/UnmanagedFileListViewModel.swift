@@ -1,0 +1,48 @@
+/*
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2021 Infomaniak Network SA
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import Foundation
+import kDriveCore
+
+class UnmanagedFileListViewModel: FileListViewModel {
+    internal var files: [File]
+    override var isEmpty: Bool {
+        return files.isEmpty
+    }
+
+    override var fileCount: Int {
+        return files.count
+    }
+
+    override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+        self.files = [File]()
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+    }
+
+    override func getFile(at index: Int) -> File? {
+        return index < fileCount ? files[index] : nil
+    }
+
+    override func setFile(_ file: File, at index: Int) {
+        files[index] = file
+    }
+
+    override func getAllFiles() -> [File] {
+        return files
+    }
+}
