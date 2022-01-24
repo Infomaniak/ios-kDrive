@@ -19,7 +19,6 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -76,7 +75,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["ManageDropBox"])
+        MatomoUtils.track(view: ["ManageDropBox"])
     }
 
     deinit {

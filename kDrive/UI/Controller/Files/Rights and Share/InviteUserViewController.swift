@@ -19,7 +19,6 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class InviteUserViewController: UIViewController {
@@ -66,7 +65,7 @@ class InviteUserViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["ShareAndRights", "InviteUser"])
+        MatomoUtils.track(view: ["ShareAndRights", "InviteUser"])
     }
 
     deinit {

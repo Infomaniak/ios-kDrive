@@ -19,7 +19,6 @@
 import kDriveCore
 import kDriveResources
 import Sentry
-import MatomoTracker
 import UIKit
 import WebKit
 
@@ -134,7 +133,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Preview", "OnlyOffice"])
+        MatomoUtils.track(view: ["Preview", "OnlyOffice"])
     }
 
     deinit {

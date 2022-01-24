@@ -19,7 +19,6 @@
 import kDriveCore
 import kDriveResources
 import Lottie
-import MatomoTracker
 import UIKit
 
 class MigrationViewController: UIViewController {
@@ -42,7 +41,7 @@ class MigrationViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Migration"])
+        MatomoUtils.track(view: ["Migration"])
     }
 
     private func setupViewForMigration() {

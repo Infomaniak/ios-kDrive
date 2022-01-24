@@ -18,7 +18,6 @@
 
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class FileDetailViewController: UIViewController {
@@ -127,7 +126,7 @@ class FileDetailViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["FileDetail"])
+        MatomoUtils.track(view: ["FileDetail"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

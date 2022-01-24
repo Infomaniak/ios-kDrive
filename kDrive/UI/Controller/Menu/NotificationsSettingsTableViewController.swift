@@ -19,7 +19,6 @@
 import FirebaseMessaging
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class NotificationsSettingsTableViewController: UITableViewController {
@@ -51,7 +50,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Menu", "Settings", "Notifications"])
+        MatomoUtils.track(view: ["Menu", "Settings", "Notifications"])
     }
 
     deinit {

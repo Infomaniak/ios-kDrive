@@ -19,7 +19,6 @@
 import Alamofire
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class SearchViewController: FileListViewController {
@@ -84,7 +83,7 @@ class SearchViewController: FileListViewController {
         DispatchQueue.main.async {
             self.searchController.searchBar.becomeFirstResponder()
         }
-        MatomoTracker.shared.track(view: ["Search", "Main"])
+        MatomoUtils.track(view: ["Search", "Main"])
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {

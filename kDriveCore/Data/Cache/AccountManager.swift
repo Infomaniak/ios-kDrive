@@ -22,7 +22,6 @@ import InfomaniakCore
 import InfomaniakLogin
 import RealmSwift
 import Sentry
-import MatomoTracker
 
 public protocol SwitchAccountDelegate: AnyObject {
     func didUpdateCurrentAccountInformations(_ currentAccount: Account)

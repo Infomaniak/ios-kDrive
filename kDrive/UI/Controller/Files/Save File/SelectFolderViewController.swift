@@ -19,7 +19,6 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 protocol SelectFolderDelegate: AnyObject {
@@ -58,7 +57,7 @@ class SelectFolderViewController: FileListViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Save", "SelectFolder"])
+        MatomoUtils.track(view: ["Save", "SelectFolder"])
     }
 
     private func setUpDirectory() {

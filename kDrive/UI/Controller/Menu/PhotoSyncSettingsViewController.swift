@@ -21,7 +21,6 @@ import kDriveCore
 import kDriveResources
 import Photos
 import RealmSwift
-import MatomoTracker
 import UIKit
 
 class PhotoSyncSettingsViewController: UIViewController {
@@ -129,7 +128,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationController?.navigationBar.isTranslucent = false
 
-        MatomoTracker.shared.track(view: ["Menu", "Settings", "PhotoSync"])
+        MatomoUtils.track(view: ["Menu", "Settings", "PhotoSync"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

@@ -17,13 +17,12 @@
  */
 
 import kDriveCore
-import MatomoTracker
 import UIKit
 
 class StoreSuccessViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Menu", "Store", "Success"])
+        MatomoUtils.track(view: ["Menu", "Store", "Success"])
     }
 
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {

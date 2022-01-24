@@ -20,7 +20,6 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import StoreKit
-import MatomoTracker
 import UIKit
 
 class StoreViewController: UICollectionViewController {
@@ -112,7 +111,7 @@ class StoreViewController: UICollectionViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        MatomoTracker.shared.track(view: ["Menu", "Store", "Main"])
+        MatomoUtils.track(view: ["Menu", "Store", "Main"])
     }
 
     @objc func closeButtonPressed() {

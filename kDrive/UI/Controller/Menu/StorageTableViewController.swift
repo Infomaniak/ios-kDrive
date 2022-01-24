@@ -19,7 +19,6 @@
 import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class StorageTableViewController: UITableViewController {
@@ -80,7 +79,7 @@ class StorageTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Menu", "Settings", "Storage"])
+        MatomoUtils.track(view: ["Menu", "Settings", "Storage"])
     }
 
     private func reload() {

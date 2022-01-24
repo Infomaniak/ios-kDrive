@@ -19,7 +19,6 @@
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 import WebKit
 
@@ -45,7 +44,7 @@ class RegisterViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Register"])
+        MatomoUtils.track(view: ["Register"])
     }
 
     private func setupProgressView() {

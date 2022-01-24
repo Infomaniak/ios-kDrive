@@ -21,7 +21,6 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
-import MatomoTracker
 
 class HomeViewController: UICollectionViewController, SwitchDriveDelegate, SwitchAccountDelegate, TopScrollable, SelectSwitchDriveDelegate {
     private static let loadingCellCount = 12
@@ -212,8 +211,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateNavbarAppearance()
-
-        MatomoTracker.shared.track(view: ["Home"])
+        MatomoUtils.track(view: ["Home"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

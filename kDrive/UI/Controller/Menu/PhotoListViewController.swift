@@ -21,7 +21,6 @@ import DifferenceKit
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 extension PhotoSortMode: Selectable {}
@@ -127,7 +126,7 @@ class PhotoListViewController: MultipleSelectionViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Menu", "PhotoList"])
+        MatomoUtils.track(view: ["Menu", "PhotoList"])
     }
 
     override func viewWillLayoutSubviews() {

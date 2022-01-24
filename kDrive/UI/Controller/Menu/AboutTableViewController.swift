@@ -17,7 +17,6 @@
  */
 
 import kDriveResources
-import MatomoTracker
 import UIKit
 import kDriveCore
 
@@ -57,7 +56,7 @@ class AboutTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Menu", "Settings", "About"])
+        MatomoUtils.track(view: ["Menu", "Settings", "About"])
     }
 
     // MARK: - Table view data source

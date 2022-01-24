@@ -20,7 +20,6 @@ import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import Sentry
-import MatomoTracker
 import UIKit
 
 class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
@@ -102,7 +101,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateContentIfNeeded()
-        MatomoTracker.shared.track(view: ["Menu"])
+        MatomoUtils.track(view: ["Menu"])
     }
 
     func updateContentIfNeeded() {

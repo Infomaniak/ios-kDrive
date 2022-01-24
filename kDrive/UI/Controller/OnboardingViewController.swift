@@ -22,7 +22,6 @@ import kDriveCore
 import kDriveResources
 import Lottie
 import Sentry
-import MatomoTracker
 import UIKit
 
 class OnboardingViewController: UIViewController {
@@ -70,7 +69,7 @@ class OnboardingViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Onboarding"])
+        MatomoUtils.track(view: ["Onboarding"])
     }
 
     override func viewDidLayoutSubviews() {

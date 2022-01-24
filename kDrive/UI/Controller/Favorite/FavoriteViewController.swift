@@ -18,7 +18,6 @@
 
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class FavoriteViewController: FileListViewController {
@@ -39,7 +38,7 @@ class FavoriteViewController: FileListViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["Favorite"])
+        MatomoUtils.track(view: ["Favorite"])
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {

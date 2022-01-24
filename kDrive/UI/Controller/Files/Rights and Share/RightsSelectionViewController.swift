@@ -19,7 +19,6 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 enum RightsSelectionType {
@@ -117,7 +116,7 @@ class RightsSelectionViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["ShareAndRights", "RightSelection"])
+        MatomoUtils.track(view: ["ShareAndRights", "RightSelection"])
     }
 
     private func setupView() {

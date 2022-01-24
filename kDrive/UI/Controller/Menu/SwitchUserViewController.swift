@@ -19,7 +19,6 @@
 import InfomaniakLogin
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class SwitchUserViewController: UIViewController {
@@ -54,7 +53,7 @@ class SwitchUserViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setTransparentStandardAppearanceNavigationBar()
-        MatomoTracker.shared.track(view: ["Menu", "SwitchUser"])
+        MatomoUtils.track(view: ["Menu", "SwitchUser"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

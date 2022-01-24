@@ -19,7 +19,6 @@
 import kDriveCore
 import kDriveResources
 import RealmSwift
-import MatomoTracker
 import UIKit
 
 protocol ManageCategoriesDelegate: AnyObject {
@@ -104,7 +103,7 @@ class ManageCategoriesViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoTracker.shared.track(view: ["ManageCategories"])
+        MatomoUtils.track(view: ["ManageCategories"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

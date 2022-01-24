@@ -20,7 +20,6 @@ import CocoaLumberjackSwift
 import DropDown
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class ShareAndRightsViewController: UIViewController {
@@ -70,7 +69,7 @@ class ShareAndRightsViewController: UIViewController {
             updateShareList()
         }
         initialLoading = false
-        MatomoTracker.shared.track(view: ["ShareAndRights", "Main"])
+        MatomoUtils.track(view: ["ShareAndRights", "Main"])
     }
 
     private func setTitle() {

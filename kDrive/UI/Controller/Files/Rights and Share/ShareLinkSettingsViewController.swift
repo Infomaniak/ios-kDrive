@@ -18,7 +18,6 @@
 
 import kDriveCore
 import kDriveResources
-import MatomoTracker
 import UIKit
 
 class ShareLinkSettingsViewController: UIViewController {
@@ -162,7 +161,7 @@ class ShareLinkSettingsViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         tableView.reloadData()
-        MatomoTracker.shared.track(view: ["ShareAndRights", "ShareLinkSettings"])
+        MatomoUtils.track(view: ["ShareAndRights", "ShareLinkSettings"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
