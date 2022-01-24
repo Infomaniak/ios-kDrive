@@ -27,7 +27,7 @@ class OfflineFilesViewModel: ManagedFileListViewModel {
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isAvailableOffline = true")))
     }
 
-    override func getFile(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {}
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {}
 
     override func loadActivities() {}
 }

@@ -61,6 +61,41 @@ class ConcreteFileListViewModel: ManagedFileListViewModel {
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         self.files = AnyRealmCollection(self.currentDirectory.children)
     }
+
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+        guard !isLoading || page > 1 else { return }
+
+        if currentDirectory.fullyDownloaded && !forceRefresh {
+            loadActivities()
+        } else {
+            isLoading = true
+            if page == 1 {
+                showLoadingIndicatorIfNeeded()
+            }
+
+            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
+                self?.isLoading = false
+                self?.isRefreshIndicatorHidden = true
+                if let fetchedCurrentDirectory = file {
+                    if !fetchedCurrentDirectory.fullyDownloaded {
+                        self?.loadFiles(page: page + 1, forceRefresh: forceRefresh)
+                    } else if !forceRefresh {
+                        self?.loadActivities()
+                    }
+                } else if let error = error as? DriveError {
+                    self?.onDriveError?(error)
+                }
+            }
+        }
+    }
+
+    override func loadActivities() {
+        driveFileManager.getFolderActivities(file: currentDirectory) { [weak self] _, _, error in
+            if let error = error as? DriveError {
+                self?.onDriveError?(error)
+            }
+        }
+    }
 }
 
 class FileListViewController: MultipleSelectionViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
