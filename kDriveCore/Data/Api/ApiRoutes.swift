@@ -121,18 +121,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/trash/\(fileId)?with=children,parent&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }
 
-    static func deleteAllFilesDefinitely(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/trash"
-    }
-
-    static func deleteFileDefinitely(file: File) -> String {
-        return "\(driveApiUrl)\(file.driveId)/file/trash/\(file.id)"
-    }
-
-    static func restoreTrashedFile(file: File) -> String {
-        return "\(driveApiUrl)\(file.driveId)/file/trash/\(file.id)/restore"
-    }
-
     static func searchFiles(driveId: Int, sortType: SortType) -> String {
         return "\(driveApiUrl)\(driveId)/file/search?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }

@@ -309,16 +309,12 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.fileInfo(file), method: .delete)).data
     }
 
-    public func deleteAllFilesDefinitely(driveId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteAllFilesDefinitely(driveId: driveId)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func emptyTrash(drive: AbstractDrive) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.trash(drive: drive), method: .delete)).data
     }
 
-    public func deleteFileDefinitely(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteFileDefinitely(file: file)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func deleteDefinitely(file: AbstractFile) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.trashedInfo(file: file), method: .delete)).data
     }
 
     public func renameFile(file: File, newName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -434,17 +430,14 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
-    public func restoreTrashedFile(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.restoreTrashedFile(file: file)
-
-        makeRequest(url, method: .post, completion: completion)
-    }
-
-    public func restoreTrashedFile(file: File, in folderId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.restoreTrashedFile(file: file)
-        let body: [String: Any] = ["destination_directory_id": folderId as Any]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func restore(file: AbstractFile, in directory: AbstractFile? = nil) async throws -> CancelableResponse {
+        let parameters: Parameters?
+        if let directory = directory {
+            parameters = ["destination_directory_id": directory.id]
+        } else {
+            parameters = nil
+        }
+        return try await perform(request: authenticatedRequest(.restore(file: file), method: .post, parameters: parameters)).data
     }
 
     @discardableResult

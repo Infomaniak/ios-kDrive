@@ -87,23 +87,17 @@ class TrashViewController: FileListViewController {
 
     @IBAction func emptyTrash(_ sender: UIBarButtonItem) {
         let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalEmptyTrashTitle, message: KDriveResourcesStrings.Localizable.modalEmptyTrashDescription, action: KDriveResourcesStrings.Localizable.buttonEmpty, destructive: true, loading: true) { [self] in
-            let group = DispatchGroup()
-            var success = false
-            group.enter()
-            driveFileManager.apiFetcher.deleteAllFilesDefinitely(driveId: driveFileManager.drive.id) { _, error in
-                if let error = error {
-                    success = false
-                    DDLogError("Error while emptying trash: \(error)")
+            do {
+                let response = try await driveFileManager.apiFetcher.emptyTrash(drive: driveFileManager.drive)
+                if response {
+                    forceRefresh()
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation)
                 } else {
-                    self.forceRefresh()
-                    success = true
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
                 }
-                group.leave()
-            }
-            _ = group.wait(timeout: .now() + Constants.timeout)
-            DispatchQueue.main.async {
-                let message = success ? KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveResourcesStrings.Localizable.errorDelete
-                UIConstants.showSnackBar(message: message)
+            } catch {
+                DDLogError("Error while emptying trash: \(error)")
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
         }
         present(alert, animated: true)
@@ -131,26 +125,20 @@ class TrashViewController: FileListViewController {
             message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescriptionPlural(files.count))
         }
         let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.trashActionDelete, message: message, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
-            let group = DispatchGroup()
-            var success = true
-            for file in files {
-                group.enter()
-                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
-                    file.signalChanges(userId: self.driveFileManager.drive.userId)
-                    if let error = error {
-                        success = false
-                        DDLogError("Error while deleting file: \(error)")
-                    } else {
-                        self.removeFileFromList(id: file.id)
+            do {
+                let success = try await withThrowingTaskGroup(of: Bool.self, returning: Bool.self) { group in
+                    for file in files {
+                        group.addTask {
+                            let response = try await self.driveFileManager.apiFetcher.deleteDefinitely(file: file)
+                            if response {
+                                await file.signalChanges(userId: self.driveFileManager.drive.userId)
+                                await self.removeFileFromList(id: file.id)
+                            }
+                            return response
+                        }
                     }
-                    group.leave()
+                    return try await group.allSatisfy { $0 }
                 }
-            }
-            let result = group.wait(timeout: .now() + Constants.timeout)
-            if result == .timedOut {
-                success = false
-            }
-            DispatchQueue.main.async {
                 let message: String
                 if success {
                     if files.count == 1 {
@@ -162,9 +150,11 @@ class TrashViewController: FileListViewController {
                     message = KDriveResourcesStrings.Localizable.errorDelete
                 }
                 UIConstants.showSnackBar(message: message)
-                if self.selectionMode {
-                    self.selectionMode = false
-                }
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
+            }
+            if self.selectionMode {
+                self.selectionMode = false
             }
         }
         present(alert, animated: true)
@@ -242,22 +232,25 @@ extension TrashViewController: TrashOptionsDelegate {
             selectFolderViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, delegate: self)
             present(selectFolderViewController, animated: true)
         case .restore:
-            let group = DispatchGroup()
-            for file in files {
-                group.enter()
-                driveFileManager.apiFetcher.restoreTrashedFile(file: file) { [self] _, error in
-                    // TODO: Find parent to signal changes
-                    file.signalChanges(userId: self.driveFileManager.drive.userId)
-                    if error == nil {
-                        removeFileFromList(id: file.id)
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
-                    } else {
-                        UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorRestore)
+            Task {
+                do {
+                    try await withThrowingTaskGroup(of: Void.self) { group in
+                        for file in files {
+                            group.addTask {
+                                _ = try await self.driveFileManager.apiFetcher.restore(file: file)
+                                // TODO: Find parent to signal changes
+                                await file.signalChanges(userId: self.driveFileManager.drive.userId)
+                                await self.removeFileFromList(id: file.id)
+                                _ = await MainActor.run {
+                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
+                                }
+                            }
+                        }
+                        try await group.waitForAll()
                     }
-                    group.leave()
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
-            }
-            group.notify(queue: DispatchQueue.main) {
                 if self.selectionMode {
                     self.selectionMode = false
                 }
@@ -272,22 +265,24 @@ extension TrashViewController: TrashOptionsDelegate {
 
 extension TrashViewController: SelectFolderDelegate {
     func didSelectFolder(_ folder: File) {
-        let group = DispatchGroup()
-        for file in filesToRestore {
-            group.enter()
-            driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: folder.id) { [self] _, error in
-                folder.signalChanges(userId: driveFileManager.drive.userId)
-                if error == nil {
-                    removeFileFromList(id: file.id)
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, folder.name))
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorRestore)
+        Task {
+            do {
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    for file in filesToRestore {
+                        group.addTask {
+                            _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: folder)
+                            await folder.signalChanges(userId: self.driveFileManager.drive.userId)
+                            await self.removeFileFromList(id: file.id)
+                            _ = await MainActor.run {
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, folder.name))
+                            }
+                        }
+                    }
+                    try await group.waitForAll()
                 }
-                group.leave()
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
-        }
-        group.notify(queue: DispatchQueue.main) {
-            self.selectFolderViewController.dismiss(animated: true)
             if self.selectionMode {
                 self.selectionMode = false
             }

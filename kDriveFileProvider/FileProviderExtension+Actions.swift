@@ -51,17 +51,19 @@ extension FileProviderExtension {
             return
         }
 
-        // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
-            if let file = response?.data {
-                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
+        Task {
+            do {
+                let response = try await driveFileManager.apiFetcher.deleteDefinitely(file: ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
+                if response {
                     FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
                     self.manager.signalEnumerator(for: .workingSet) { _ in }
                     self.manager.signalEnumerator(for: itemIdentifier) { _ in }
-                    completionHandler(error)
+                    completionHandler(nil)
+                } else {
+                    completionHandler(self.nsError(code: .serverUnreachable))
                 }
-            } else {
-                completionHandler(self.nsError(code: .noSuchItem))
+            } catch {
+                completionHandler(error)
             }
         }
     }
@@ -223,35 +225,26 @@ extension FileProviderExtension {
         // Trashed items are not cached so we call the API
         driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
             if let file = response?.data {
-                if let parentItemIdentifier = parentItemIdentifier,
-                   let parentId = parentItemIdentifier.toFileId() {
-                    // Restore in given parent
-                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: parentId) { _, error in
-                        let item = FileProviderItem(file: file, domain: self.domain)
-                        item.parentItemIdentifier = parentItemIdentifier
-                        item.isTrashed = false
-                        FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                        self.manager.signalEnumerator(for: .workingSet) { _ in }
-                        self.manager.signalEnumerator(for: parentItemIdentifier) { _ in }
-                        if let error = error {
-                            completionHandler(nil, error)
-                        } else {
-                            completionHandler(item, nil)
-                        }
-                    }
+                let parent: ProxyFile?
+                if let id = parentItemIdentifier?.toFileId() {
+                    parent = ProxyFile(driveId: self.driveFileManager.drive.id, id: id)
                 } else {
-                    // Restore in original parent
-                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file) { _, error in
+                    parent = nil
+                }
+                Task {
+                    do {
+                        _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: parent)
                         let item = FileProviderItem(file: file, domain: self.domain)
+                        if let parentItemIdentifier = parentItemIdentifier {
+                            item.parentItemIdentifier = parentItemIdentifier
+                        }
                         item.isTrashed = false
                         FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
                         self.manager.signalEnumerator(for: .workingSet) { _ in }
                         self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-                        if let error = error {
-                            completionHandler(nil, error)
-                        } else {
-                            completionHandler(item, nil)
-                        }
+                        completionHandler(item, nil)
+                    } catch {
+                        completionHandler(nil, error)
                     }
                 }
             } else {
