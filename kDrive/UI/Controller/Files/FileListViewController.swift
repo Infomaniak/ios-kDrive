@@ -710,7 +710,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
                 navigationController?.pushViewController(shareVC, animated: true)
             case .delete:
-                deleteFiles([file])
+                delete(file: file)
             default:
                 break
             }
@@ -1177,17 +1177,12 @@ extension FileListViewController: UICollectionViewDropDelegate {
                     let destinationDriveFileManager = self.driveFileManager!
                     if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
                         if destinationDirectory.id == file.parentId { return }
-                        destinationDriveFileManager.moveFile(file: file, newParent: destinationDirectory) { response, _, error in
-                            if error != nil {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
-                            } else {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                                    guard let cancelId = response?.id else { return }
-                                    Task {
-                                        try await self.driveFileManager.undoAction(cancelId: cancelId)
-                                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
-                                    }
-                                })
+                        Task {
+                            do {
+                                let (response, _) = try await destinationDriveFileManager.move(file: file, to: destinationDirectory)
+                                UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name), cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled, cancelableResponse: response, driveFileManager: destinationDriveFileManager)
+                            } catch {
+                                UIConstants.showSnackBar(message: error.localizedDescription)
                             }
                         }
                     } else {
