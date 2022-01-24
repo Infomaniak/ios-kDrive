@@ -71,7 +71,7 @@ class SelectFolderViewController: FileListViewController {
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager, startDirectory: File? = nil, fileToMove: Int? = nil, disabledDirectoriesSelection: [File] = [], delegate: SelectFolderDelegate? = nil, selectHandler: ((File) -> Void)? = nil) -> TitleSizeAdjustingNavigationController {
         var viewControllers = [SelectFolderViewController]()
-        if startDirectory == nil {
+        if startDirectory == nil || startDirectory?.isRoot == true {
             let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
             selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
             selectFolderViewController.fileToMove = fileToMove
