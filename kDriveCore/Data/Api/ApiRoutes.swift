@@ -70,10 +70,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/search?order=desc&order_by=last_modified_at&\(with)&converted_type=image"
     }
 
-    static func deleteFile(file: File) -> String {
-        return fileURL(file: file)
-    }
-
     static func renameFile(file: File) -> String {
         return "\(fileURL(file: file))rename?\(with)"
     }
@@ -84,10 +80,6 @@ public enum ApiRoutes {
 
     static func copyFile(file: File, newParentId: Int) -> String {
         return "\(fileURL(file: file))copy/\(newParentId)"
-    }
-
-    static func moveFile(file: File, newParentId: Int) -> String {
-        return "\(fileURL(file: file))move/\(newParentId)"
     }
 
     static func uploadFile(file: UploadFile) -> String {
