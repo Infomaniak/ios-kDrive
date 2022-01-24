@@ -372,12 +372,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             (manageCategoriesViewController.topViewController as? ManageCategoriesViewController)?.fileListViewController = presentingParent as? FileListViewController
             present(manageCategoriesViewController, animated: true)
         case .favorite:
-            driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { [wasFavorited = file.isFavorite] error in
-                if error == nil {
+            Task { [wasFavorited = file.isFavorite] in
+                do {
+                    try await driveFileManager.setFavorite(file: file, favorite: !file.isFavorite)
                     if !wasFavorited {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
                     }
-                } else {
+                } catch {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorAddFavorite)
                 }
             }
