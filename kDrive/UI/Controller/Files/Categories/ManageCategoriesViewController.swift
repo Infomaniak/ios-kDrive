@@ -59,6 +59,10 @@ class ManageCategoriesViewController: UITableViewController {
         return category
     }()
 
+    private var userCanCreateAndEditCategories: Bool {
+        return driveFileManager?.drive.categoryRights.canCreateCategory == true && canEdit
+    }
+
     private let searchController = UISearchController(searchResultsController: nil)
 
     override func viewDidLoad() {
@@ -139,7 +143,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     private func updateNavigationItem() {
-        if driveFileManager?.drive.categoryRights.canCreateCategory == false || !canEdit {
+        if !userCanCreateAndEditCategories {
             navigationItem.rightBarButtonItem = nil
         }
     }
@@ -305,7 +309,7 @@ extension ManageCategoriesViewController: UISearchResultsUpdating {
         if let searchText = searchText {
             filteredCategories = categories.filter { $0.localizedName.range(of: searchText, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
             // Append dummy category to show creation cell if the category doesn't exist yet
-            if canEdit && !categories.contains(where: { $0.localizedName.caseInsensitiveCompare(searchText) == .orderedSame }) {
+            if userCanCreateAndEditCategories && !categories.contains(where: { $0.localizedName.caseInsensitiveCompare(searchText) == .orderedSame }) {
                 filteredCategories.append(dummyCategory)
             }
             tableView.reloadData()
