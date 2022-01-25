@@ -193,22 +193,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/search?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }
 
-    public static func addCategory(file: File) -> String {
-        return "\(fileURL(file: file))category"
-    }
-
-    public static func removeCategory(file: File, categoryId: Int) -> String {
-        return "\(fileURL(file: file))category/\(categoryId)"
-    }
-
-    public static func createCategory(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/category"
-    }
-
-    public static func editCategory(driveId: Int, categoryId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/category/\(categoryId)"
-    }
-
     public static func showOffice(file: File) -> String {
         return "\(officeApiUrl)\(file.driveId)/\(file.id)"
     }
