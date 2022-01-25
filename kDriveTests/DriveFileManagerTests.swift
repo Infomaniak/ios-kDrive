@@ -47,6 +47,14 @@ final class DriveFileManagerTests: XCTestCase {
         }
     }
 
+    func setUpTest(testName: String) async -> File {
+        return await withCheckedContinuation { continuation in
+            setUpTest(testName: testName) { result in
+                continuation.resume(returning: result.freeze())
+            }
+        }
+    }
+
     func tearDownTest(directory: File) {
         DriveFileManagerTests.driveFileManager.deleteFile(file: directory) { response, _ in
             XCTAssertNotNil(response, "Failed to delete directory")
@@ -396,79 +404,26 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testCategory() {
-        let testName = "File categories"
-        let expectations = [
-            (name: "Create category", expectation: XCTestExpectation(description: "Create category")),
-            (name: "Edit category", expectation: XCTestExpectation(description: "Edit category")),
-            (name: "Delete category", expectation: XCTestExpectation(description: "Delete category"))
-        ]
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.createCategory(name: "Category-\(Date())", color: "#001227") { createResult in
-                switch createResult {
-                case .failure:
-                    XCTFail(TestsMessages.noError)
-                case .success(let createdCategory):
-                    expectations[0].expectation.fulfill()
-                    let categoryId = createdCategory.id
-
-                    DriveFileManagerTests.driveFileManager.editCategory(id: createdCategory.id, name: createdCategory.name, color: "#314159") { editResult in
-                        switch editResult {
-                        case .failure:
-                            XCTFail(TestsMessages.noError)
-                        case .success(let editedCategory):
-                            XCTAssertEqual(categoryId, editedCategory.id, "Category id should be the same")
-                            expectations[1].expectation.fulfill()
-
-                            DriveFileManagerTests.driveFileManager.deleteCategory(id: categoryId) { error in
-                                XCTAssertNil(error, TestsMessages.noError)
-                                expectations[2].expectation.fulfill()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testCategory() async throws {
+        let category = try await DriveFileManagerTests.driveFileManager.createCategory(name: "Category-\(Date())", color: "#001227").freeze()
+        let categoryId = category.id
+        let editedCategory = try await DriveFileManagerTests.driveFileManager.edit(category: category, name: category.name, color: "#314159")
+        XCTAssertEqual(categoryId, editedCategory.id, "Category id should be the same")
+        let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)
+        XCTAssertTrue(response, "API should return true")
     }
 
-    func testCategoriesAndFiles() {
-        let testName = "Categories and files"
-        let expectations = [
-            (name: "Add category", expectation: XCTestExpectation(description: "Add category")),
-            (name: "Remove category", expectation: XCTestExpectation(description: "Remove Category"))
-        ]
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227") { resultCategory in
-                switch resultCategory {
-                case .failure:
-                    XCTFail(TestsMessages.noError)
-                case .success(let category):
-                    DriveFileManagerTests.driveFileManager.addCategory(file: officeFile, category: category) { error in
-                        XCTAssertNil(error, TestsMessages.noError)
-                        expectations[0].expectation.fulfill()
-
-                        DriveFileManagerTests.driveFileManager.removeCategory(file: officeFile, category: category) { error in
-                            XCTAssertNil(error, TestsMessages.noError)
-                            DriveFileManagerTests.driveFileManager.deleteCategory(id: category.id) { error in
-                                XCTAssertNil(error, TestsMessages.noError)
-                                expectations[1].expectation.fulfill()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
+    func testCategoriesAndFiles() async throws {
+        let (rootFile, officeFile) = await initOfficeFile(testName: "Categories and files")
+        let category = try await DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227").freeze()
+        try await DriveFileManagerTests.driveFileManager.add(category: category, to: officeFile)
+        let fileWithCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
+        XCTAssertTrue(fileWithCategory!.categories.contains { $0.id == category.id }, "File should contain category")
+        try await DriveFileManagerTests.driveFileManager.remove(category: category, from: officeFile)
+        let fileWithoutCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
+        XCTAssertFalse(fileWithoutCategory!.categories.contains { $0.id == category.id }, "File should not contain category")
+        let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)
+        XCTAssertTrue(response, "API should return true")
         tearDownTest(directory: rootFile)
     }
 

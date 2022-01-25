@@ -570,40 +570,29 @@ public class DriveApiFetcher: ApiFetcher {
         return makeRequest(url, method: .get, completion: completion)
     }
 
-    public func addCategory(file: File, category: Category, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.addCategory(file: file)
-        let body = ["id": category.id]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func add(category: Category, to file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .post)).data
     }
 
-    public func removeCategory(file: File, category: Category, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.removeCategory(file: file, categoryId: category.id)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func remove(category: Category, from file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .delete)).data
     }
 
-    public func createCategory(driveId: Int, name: String, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
-        let url = ApiRoutes.createCategory(driveId: driveId)
-        let body = ["name": name, "color": color]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func createCategory(drive: AbstractDrive, name: String, color: String) async throws -> Category {
+        try await perform(request: authenticatedRequest(.categories(drive: drive), method: .post, parameters: ["name": name, "color": color])).data
     }
 
-    public func editCategory(driveId: Int, id: Int, name: String?, color: String, completion: @escaping (ApiResponse<Category>?, Error?) -> Void) {
-        let url = ApiRoutes.editCategory(driveId: driveId, categoryId: id)
+    public func editCategory(drive: AbstractDrive, category: Category, name: String?, color: String) async throws -> Category {
         var body = ["color": color]
         if let name = name {
             body["name"] = name
         }
 
-        makeRequest(url, method: .patch, parameters: body, completion: completion)
+        return try await perform(request: authenticatedRequest(.category(drive: drive, category: category), method: .put, parameters: body)).data
     }
 
-    public func deleteCategory(driveId: Int, id: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.editCategory(driveId: driveId, categoryId: id)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func deleteCategory(drive: AbstractDrive, category: Category) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.category(drive: drive, category: category), method: .delete)).data
     }
 
     public func requireFileAccess(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
