@@ -122,18 +122,9 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         case .delete:
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteCategoryDescription(category.name), boldText: category.name)
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: attrString, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
-                let group = DispatchGroup()
-                var success = false
-                group.enter()
-                self.driveFileManager.deleteCategory(id: self.category.id) { error in
-                    if error == nil {
-                        success = true
-                    }
-                    group.leave()
-                }
-                _ = group.wait(timeout: .now() + Constants.timeout)
-                DispatchQueue.main.async {
-                    if success {
+                do {
+                    let response = try await self.driveFileManager.delete(category: self.category)
+                    if response {
                         // Dismiss panel
                         (self.presentingParent as? ManageCategoriesViewController)?.reloadCategories()
                         self.presentingParent?.dismiss(animated: true)
@@ -141,6 +132,8 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
                     }
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
             present(alert, animated: true)
