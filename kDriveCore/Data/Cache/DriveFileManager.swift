@@ -916,99 +916,84 @@ public class DriveFileManager {
         return result
     }
 
-    public func addCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
-        apiFetcher.addCategory(file: file, category: category) { [fileId = file.id, categoryId = category.id] response, error in
-            if response?.data == nil {
-                completion(response?.error ?? error ?? DriveError.unknownError)
-            } else {
-                self.updateFileProperty(fileId: fileId) { file in
-                    let newCategory = FileCategory(id: categoryId, userId: self.drive.userId)
-                    file.categories.append(newCategory)
-                }
-                completion(nil)
+    public func add(category: Category, to file: File) async throws {
+        let fileId = file.id
+        let categoryId = category.id
+        let response = try await apiFetcher.add(category: category, to: file)
+        if response {
+            updateFileProperty(fileId: fileId) { file in
+                let newCategory = FileCategory(id: categoryId, userId: self.drive.userId)
+                file.categories.append(newCategory)
             }
         }
     }
 
-    public func removeCategory(file: File, category: Category, completion: @escaping (Error?) -> Void) {
-        apiFetcher.removeCategory(file: file, category: category) { [fileId = file.id, categoryId = category.id] response, error in
-            if response?.data == nil {
-                completion(error ?? DriveError.unknownError)
-            } else {
-                self.updateFileProperty(fileId: fileId) { file in
-                    if let index = file.categories.firstIndex(where: { $0.id == categoryId }) {
-                        file.categories.remove(at: index)
+    public func remove(category: Category, from file: File) async throws {
+        let fileId = file.id
+        let categoryId = category.id
+        let response = try await apiFetcher.remove(category: category, from: file)
+        if response {
+            updateFileProperty(fileId: fileId) { file in
+                if let index = file.categories.firstIndex(where: { $0.id == categoryId }) {
+                    file.categories.remove(at: index)
+                }
+            }
+        }
+    }
+
+    public func createCategory(name: String, color: String) async throws -> Category {
+        let category = try await apiFetcher.createCategory(drive: drive, name: name, color: color)
+        // Add category to drive
+        let realm = DriveInfosManager.instance.getRealm()
+        let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
+        try? realm.write {
+            drive?.categories.append(category)
+        }
+        if let drive = drive {
+            self.drive = drive.freeze()
+        }
+        return category
+    }
+
+    public func edit(category: Category, name: String?, color: String) async throws -> Category {
+        let categoryId = category.id
+        let category = try await apiFetcher.editCategory(drive: drive, category: category, name: name, color: color)
+        // Update category on drive
+        let realm = DriveInfosManager.instance.getRealm()
+        if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm) {
+            try? realm.write {
+                if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
+                    drive.categories[index] = category
+                }
+            }
+            self.drive = drive.freeze()
+        }
+        return category
+    }
+
+    public func delete(category: Category) async throws -> Bool {
+        let categoryId = category.id
+        let response = try await apiFetcher.deleteCategory(drive: drive, category: category)
+        if response {
+            // Delete category from drive
+            let realmDrive = DriveInfosManager.instance.getRealm()
+            if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realmDrive) {
+                try? realmDrive.write {
+                    if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
+                        drive.categories.remove(at: index)
                     }
                 }
-                completion(nil)
+                self.drive = drive.freeze()
             }
-        }
-    }
-
-    public func createCategory(name: String, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
-        apiFetcher.createCategory(driveId: drive.id, name: name, color: color) { response, error in
-            if let category = response?.data {
-                // Add category to drive
-                let realm = DriveInfosManager.instance.getRealm()
-                let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm)
+            // Delete category from files
+            let realm = getRealm()
+            for file in realm.objects(File.self).filter(NSPredicate(format: "ANY categories.id = %d", categoryId)) {
                 try? realm.write {
-                    drive?.categories.append(category)
+                    realm.delete(file.categories.filter("id = %d", categoryId))
                 }
-                if let drive = drive {
-                    self.drive = drive.freeze()
-                }
-                completion(.success(category))
-            } else {
-                completion(.failure(error ?? DriveError.unknownError))
             }
         }
-    }
-
-    public func editCategory(id: Int, name: String?, color: String, completion: @escaping (Result<Category, Error>) -> Void) {
-        apiFetcher.editCategory(driveId: drive.id, id: id, name: name, color: color) { response, error in
-            if let category = response?.data {
-                // Update category on drive
-                let realm = DriveInfosManager.instance.getRealm()
-                if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm) {
-                    try? realm.write {
-                        if let index = drive.categories.firstIndex(where: { $0.id == id }) {
-                            drive.categories[index] = category
-                        }
-                    }
-                    self.drive = drive.freeze()
-                }
-                completion(.success(category))
-            } else {
-                completion(.failure(error ?? DriveError.unknownError))
-            }
-        }
-    }
-
-    public func deleteCategory(id: Int, completion: @escaping (Error?) -> Void) {
-        apiFetcher.deleteCategory(driveId: drive.id, id: id) { response, error in
-            if response?.data == nil {
-                completion(error ?? DriveError.unknownError)
-            } else {
-                // Delete category from drive
-                let realmDrive = DriveInfosManager.instance.getRealm()
-                if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realmDrive) {
-                    try? realmDrive.write {
-                        if let index = drive.categories.firstIndex(where: { $0.id == id }) {
-                            drive.categories.remove(at: index)
-                        }
-                    }
-                    self.drive = drive.freeze()
-                }
-                // Delete category from files
-                let realm = self.getRealm()
-                for file in realm.objects(File.self).filter(NSPredicate(format: "ANY categories.id = %d", id)) {
-                    try? realm.write {
-                        realm.delete(file.categories.filter("id = %d", id))
-                    }
-                }
-                completion(nil)
-            }
-        }
+        return response
     }
 
     public func setFavoriteFile(file: File, favorite: Bool, completion: @escaping (Error?) -> Void) {
