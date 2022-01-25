@@ -65,6 +65,8 @@ class SwitchUserViewController: UIViewController {
         let nextViewController = OnboardingViewController.instantiate()
         nextViewController.addUser = true
         present(nextViewController, animated: true)
+
+        MatomoUtils.track(eventWithCategory: .account, name: "add")
     }
 
     class func instantiate() -> SwitchUserViewController {
@@ -107,6 +109,8 @@ extension SwitchUserViewController: UITableViewDelegate {
             } else {
                 navigationController?.popViewController(animated: true)
             }
+
+            MatomoUtils.track(eventWithCategory: .account, name: "switch")
         }
     }
 }

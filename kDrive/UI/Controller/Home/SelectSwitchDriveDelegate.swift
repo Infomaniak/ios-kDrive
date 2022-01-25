@@ -40,6 +40,8 @@ extension SelectSwitchDriveDelegate {
             currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { [weak self] _, _, _ in
                 (self?.tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
             }
+
+            MatomoUtils.track(eventWithCategory: .drive)
         }
     }
 }
