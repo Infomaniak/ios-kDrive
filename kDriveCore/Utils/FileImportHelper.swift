@@ -22,6 +22,7 @@ import kDriveResources
 import PDFKit
 import Photos
 import VisionKit
+import QuickLookThumbnailing
 
 public class ImportedFile {
     public var name: String
@@ -32,6 +33,22 @@ public class ImportedFile {
         self.name = name
         self.path = path
         self.uti = uti
+    }
+
+    public func getThumbnail(completion: @escaping (UIImage) -> Void) {
+        let thumbnailSize = CGSize(width: 38, height: 38)
+
+        let request = QLThumbnailGenerator.Request(
+            fileAt: path,
+            size: thumbnailSize,
+            scale: UIScreen.main.scale,
+            representationTypes: [.lowQualityThumbnail, .thumbnail]
+        )
+        QLThumbnailGenerator.shared.generateRepresentations(for: request) { image, _, _ in
+            if let image = image {
+                completion(image.uiImage)
+            }
+        }
     }
 }
 

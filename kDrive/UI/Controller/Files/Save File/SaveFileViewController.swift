@@ -209,6 +209,9 @@ extension SaveFileViewController: UITableViewDataSource {
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
                 cell.accessoryImageView.image = KDriveResourcesAsset.edit.image
                 cell.logoImage.image = ConvertedType.fromUTI(item.uti).icon
+                item.getThumbnail { image in
+                    cell.logoImage.image = image
+                }
                 cell.titleLabel.text = item.name
                 return cell
             } else {
