@@ -234,7 +234,7 @@ public class UploadOperation: Operation {
         if file.type == .phAsset && file.pathURL == nil {
             DDLogInfo("[UploadOperation] Need to fetch photo asset")
             if let asset = file.getPHAsset(),
-               let url = PhotoLibraryUploader.instance.getUrlForPHAssetSync(asset) {
+               let url = PhotoLibraryUploader.instance.getUrlSync(for: asset) {
                 DDLogInfo("[UploadOperation] Got photo asset, writing URL")
                 file.pathURL = url
             } else {

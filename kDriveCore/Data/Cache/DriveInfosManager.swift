@@ -91,47 +91,41 @@ public class DriveInfosManager {
 
     private func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
         let updatedDomains = drives.map { NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier($0.objectId), displayName: "\($0.name) (\(user.email))", pathRelativeToDocumentStorage: "\($0.id)") }
-        NSFileProviderManager.getDomainsWithCompletionHandler { allDomains, error in
-            if let error = error {
-                DDLogError("Error while getting domains: \(error)")
-            }
-
-            var domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(user.id)") }
-            for newDomain in updatedDomains {
-                // Check if domain already added
-                if let existingDomainIndex = domainsForCurrentUser.firstIndex(where: { $0.identifier == newDomain.identifier }) {
-                    let existingDomain = domainsForCurrentUser.remove(at: existingDomainIndex)
-                    // Domain exists but its name could have changed
-                    if existingDomain.displayName != newDomain.displayName {
-                        NSFileProviderManager.remove(existingDomain) { error in
-                            if let error = error {
-                                DDLogError("Error while removing domain \(existingDomain.displayName): \(error)")
-                            } else {
-                                NSFileProviderManager.add(newDomain) { error in
-                                    if let error = error {
-                                        DDLogError("Error while adding domain \(newDomain.displayName): \(error)")
-                                    }
+        Task {
+            do {
+                let allDomains = try await NSFileProviderManager.domains()
+                var domainsForCurrentUser = allDomains.filter { $0.identifier.rawValue.hasSuffix("_\(user.id)") }
+                await withThrowingTaskGroup(of: Void.self) { group in
+                    for newDomain in updatedDomains {
+                        // Check if domain already added
+                        if let existingDomainIndex = domainsForCurrentUser.firstIndex(where: { $0.identifier == newDomain.identifier }) {
+                            let existingDomain = domainsForCurrentUser.remove(at: existingDomainIndex)
+                            // Domain exists but its name could have changed
+                            if existingDomain.displayName != newDomain.displayName {
+                                group.addTask {
+                                    try await NSFileProviderManager.remove(existingDomain)
+                                    try await NSFileProviderManager.add(newDomain)
                                 }
+                            }
+                        } else {
+                            // Domain didn't exist we have to add it
+                            group.addTask {
+                                try await NSFileProviderManager.add(newDomain)
                             }
                         }
                     }
-                } else {
-                    // Domain didn't exist we have to add it
-                    NSFileProviderManager.add(newDomain) { error in
-                        if let error = error {
-                            DDLogError("Error while adding domain \(newDomain.displayName): \(error)")
+                }
+
+                // Remove left domains
+                await withThrowingTaskGroup(of: Void.self) { group in
+                    for domain in domainsForCurrentUser {
+                        group.addTask {
+                            try await NSFileProviderManager.remove(domain)
                         }
                     }
                 }
-            }
-
-            // Remove left domains
-            for domain in domainsForCurrentUser {
-                NSFileProviderManager.remove(domain) { error in
-                    if let error = error {
-                        DDLogError("Error while removing domain \(domain.displayName): \(error)")
-                    }
-                }
+            } catch {
+                DDLogError("Error while updating file provider domains: \(error)")
             }
         }
     }

@@ -235,7 +235,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        present(floatingPanelViewController, animated: true, completion: nil)
+        present(floatingPanelViewController, animated: true)
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -267,7 +267,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         centerIndexPathBeforeRotate = currentIndex
         coordinator.animate { _ in
             self.collectionView?.collectionViewLayout.invalidateLayout()
-        } completion: { _ in
         }
     }
 

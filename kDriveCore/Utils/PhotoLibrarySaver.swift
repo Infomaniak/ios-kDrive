@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import UIKit
 import Photos
+import UIKit
 
 public class PhotoLibrarySaver: NSObject {
     private let albumName = "kDrive"
@@ -25,59 +25,45 @@ public class PhotoLibrarySaver: NSObject {
 
     public private(set) var assetCollection: PHAssetCollection?
 
-    private override init() {
+    override private init() {
         super.init()
-
-        if let assetCollection = fetchAssetCollectionForAlbum() {
-            self.assetCollection = assetCollection
-        }
     }
 
-    private func requestAuthorization(completion: @escaping (PHAuthorizationStatus) -> Void) {
+    private func requestAuthorization() async -> PHAuthorizationStatus {
         if #available(iOS 14, *) {
-            PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
-                completion(status)
-            }
+            return await PHPhotoLibrary.requestAuthorization(for: .addOnly)
         } else {
-            PHPhotoLibrary.requestAuthorization { status in
-                completion(status)
-            }
-        }
-    }
-
-    private func requestAuthorizationAndCreateAlbum(completion: @escaping ((_ success: Bool) -> Void)) {
-        requestAuthorization { status in
-            let authorized: Bool
-            if #available(iOS 14, *) {
-                authorized = status == .authorized || status == .limited
-            } else {
-                authorized = status == .authorized
-            }
-            if authorized {
-                self.createAlbumIfNeeded { _ in
-                    completion(true)
+            return await withCheckedContinuation { continuation in
+                PHPhotoLibrary.requestAuthorization { status in
+                    continuation.resume(returning: status)
                 }
-            } else {
-                completion(false)
             }
         }
     }
 
-    private func createAlbumIfNeeded(completion: @escaping ((_ success: Bool) -> Void)) {
+    private func requestAuthorizationAndCreateAlbum() async throws {
+        let status = await requestAuthorization()
+        let authorized: Bool
+        if #available(iOS 14, *) {
+            authorized = status == .authorized || status == .limited
+        } else {
+            authorized = status == .authorized
+        }
+        if authorized {
+            try await createAlbumIfNeeded()
+        } else {
+            throw DriveError.localError
+        }
+    }
+
+    private func createAlbumIfNeeded() async throws {
         if let assetCollection = fetchAssetCollectionForAlbum() {
             self.assetCollection = assetCollection
-            completion(true)
         } else {
-            PHPhotoLibrary.shared().performChanges { [self] in
+            try await PHPhotoLibrary.shared().performChanges { [albumName] in
                 PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
-            } completionHandler: { success, _ in
-                if success {
-                    self.assetCollection = self.fetchAssetCollectionForAlbum()
-                    completion(true)
-                } else {
-                    completion(false)
-                }
             }
+            assetCollection = fetchAssetCollectionForAlbum()
         }
     }
 
@@ -92,34 +78,29 @@ public class PhotoLibrarySaver: NSObject {
         return nil
     }
 
-    public func save(image: UIImage, completion: @escaping (Bool, Error?) -> Void) {
-        self.requestAuthorizationAndCreateAlbum { success in
-            guard success else { return }
-            PHPhotoLibrary.shared().performChanges({
-                let assetChangeRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
-                let assetPlaceHolder = assetChangeRequest.placeholderForCreatedAsset
+    public func save(image: UIImage) async throws {
+        try await requestAuthorizationAndCreateAlbum()
+        try await PHPhotoLibrary.shared().performChanges {
+            let assetChangeRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
+            let assetPlaceHolder = assetChangeRequest.placeholderForCreatedAsset
 
+            if let assetCollection = self.assetCollection, let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection) {
+                let enumeration: NSArray = [assetPlaceHolder!]
+                albumChangeRequest.addAssets(enumeration)
+            }
+        }
+    }
+
+    public func save(videoUrl: URL) async throws {
+        try await requestAuthorizationAndCreateAlbum()
+        try await PHPhotoLibrary.shared().performChanges {
+            if let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl) {
+                let assetPlaceHolder = assetChangeRequest.placeholderForCreatedAsset
                 if let assetCollection = self.assetCollection, let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection) {
                     let enumeration: NSArray = [assetPlaceHolder!]
                     albumChangeRequest.addAssets(enumeration)
                 }
-            }, completionHandler: completion)
+            }
         }
     }
-
-    public func save(videoUrl: URL, completion: @escaping (Bool, Error?) -> Void) {
-        self.requestAuthorizationAndCreateAlbum { success in
-            guard success else { return }
-            PHPhotoLibrary.shared().performChanges({
-                if let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl) {
-                    let assetPlaceHolder = assetChangeRequest.placeholderForCreatedAsset
-                    if let assetCollection = self.assetCollection, let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection) {
-                        let enumeration: NSArray = [assetPlaceHolder!]
-                        albumChangeRequest.addAssets(enumeration)
-                    }
-                }
-            }, completionHandler: completion)
-        }
-    }
-
 }

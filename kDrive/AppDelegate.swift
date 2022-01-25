@@ -320,11 +320,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             }
         }
 
-        accountManager.updateUserForAccount(currentAccount, registerToken: true) { [self] _, switchedDrive, error in
-            if let error = error {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
-                DDLogError("Error while updating user account: \(error)")
-            } else {
+        Task {
+            do {
+                let (_, switchedDrive) = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 // if isSwitching {
                 rootViewController?.didSwitchCurrentAccount(currentAccount)
                 /* } else {
@@ -359,6 +357,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 DispatchQueue.global(qos: .utility).async {
                     _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
                 }
+            } catch {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                DDLogError("Error while updating user account: \(error)")
             }
         }
     }

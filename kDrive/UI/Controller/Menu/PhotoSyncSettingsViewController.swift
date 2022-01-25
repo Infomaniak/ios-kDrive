@@ -219,14 +219,14 @@ class PhotoSyncSettingsViewController: UIViewController {
         }
     }
 
-    private func requestAuthorization(completion: @escaping (PHAuthorizationStatus) -> Void) {
+    private func requestAuthorization() async -> PHAuthorizationStatus {
         if #available(iOS 14, *) {
-            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-                completion(status)
-            }
+            return await PHPhotoLibrary.requestAuthorization(for: .readWrite)
         } else {
-            PHPhotoLibrary.requestAuthorization { status in
-                completion(status)
+            return await withCheckedContinuation { continuation in
+                PHPhotoLibrary.requestAuthorization { status in
+                    continuation.resume(returning: status)
+                }
             }
         }
     }
@@ -286,7 +286,8 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 cell.switchHandler = { [weak self] sender in
                     guard let self = self else { return }
                     if sender.isOn {
-                        self.requestAuthorization { status in
+                        Task {
+                            let status = await self.requestAuthorization()
                             DispatchQueue.main.async {
                                 self.driveFileManager = AccountManager.instance.currentDriveFileManager
                                 if status == .authorized {

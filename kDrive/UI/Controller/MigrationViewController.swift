@@ -29,7 +29,7 @@ class MigrationViewController: UIViewController {
     @IBOutlet weak var retryButton: UIButton!
     @IBOutlet weak var migrationFailedLabel: UILabel!
 
-    private var migrationResult: MigrationResult?
+    private var photoSyncEnabled: Bool?
     private var slides: [Slide] = []
 
     override func viewDidLoad() {
@@ -52,14 +52,20 @@ class MigrationViewController: UIViewController {
                                    description: KDriveResourcesStrings.Localizable.migrationDescription)
 
         slides = [migrationSlide]
-        MigrationHelper.migrate { result in
+        Task(priority: .userInitiated) {
+            let success: Bool
+            do {
+                photoSyncEnabled = try await MigrationHelper.migrate()
+                success = true
+            } catch {
+                success = false
+            }
             DispatchQueue.main.async { [self] in
-                migrationResult = result
                 buttonView.alpha = 0
                 buttonView.isHidden = false
-                retryButton.isHidden = result.success
-                migrationFailedLabel.isHidden = result.success
-                migrationDoneButton.setTitle(result.success ? KDriveResourcesStrings.Localizable.buttonMigrationDone : KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
+                retryButton.isHidden = success
+                migrationFailedLabel.isHidden = success
+                migrationDoneButton.setTitle(success ? KDriveResourcesStrings.Localizable.buttonMigrationDone : KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
 
                 UIView.animate(withDuration: 0.5) {
                     self.buttonView.alpha = 1
@@ -83,12 +89,12 @@ class MigrationViewController: UIViewController {
     }
 
     @IBAction func migrationDoneButtonPressed(_ sender: Any) {
-        if migrationResult?.success == true {
+        if let photoSyncEnabled = photoSyncEnabled {
             UserDefaults.shared.isFirstLaunch = false
             UserDefaults.shared.numberOfConnections = 1
             let mainTabBarViewController = MainTabViewController.instantiate()
             (UIApplication.shared.delegate as! AppDelegate).setRootViewController(mainTabBarViewController, animated: true)
-            if migrationResult?.photoSyncEnabled == true && AccountManager.instance.currentDriveFileManager != nil {
+            if photoSyncEnabled && AccountManager.instance.currentDriveFileManager != nil {
                 let driveFloatingPanelController = MigratePhotoSyncSettingsFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? MigratePhotoSyncSettingsFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in

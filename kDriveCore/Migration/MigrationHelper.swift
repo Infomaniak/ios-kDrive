@@ -17,32 +17,12 @@
  */
 
 import Foundation
+import InfomaniakCore
+import InfomaniakLogin
 import RealmSwift
 import Sentry
-import InfomaniakLogin
-import InfomaniakCore
 
-public class MigrationResult {
-
-    public enum MigrationError: Error {
-        case noAccount
-        case authFailed
-        case unknown
-    }
-
-    public let success: Bool
-    public let error: MigrationError?
-    public let photoSyncEnabled: Bool
-
-    init(success: Bool, error: MigrationError?, photoSyncEnabled: Bool) {
-        self.success = success
-        self.error = error
-        self.photoSyncEnabled = photoSyncEnabled
-    }
-}
-
-public class MigrationHelper {
-
+public enum MigrationHelper {
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.Crypto-Cloud"
     private static let accessGroup = appIdentifierPrefix + group
@@ -50,45 +30,40 @@ public class MigrationHelper {
     private static let nextcloudRealmUrl = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup)?.appendingPathComponent("Library/Application Support/Nextcloud/nextcloud.realm")
     private static let databaseSchemaVersion: UInt64 = 153
 
-    public static func migrate(completion: @escaping (MigrationResult) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async { [self] in
-            let savedAccounts = getKeychainAccounts()
-            if savedAccounts.isEmpty {
-                SentrySDK.capture(message: "[Migration] No keychain account")
-                completion(MigrationResult(success: false, error: .noAccount, photoSyncEnabled: false))
-                return
-            }
+    public enum MigrationError: Error {
+        case noAccount
+        case authFailed
+        case unknown
+    }
 
-            var successful = true
-            let group = DispatchGroup()
+    /// Try to migrate accounts from keychain
+    /// - Returns: A boolean indicating if the photo sync was enabled
+    public static func migrate() async throws -> Bool {
+        let savedAccounts = getKeychainAccounts()
+        if savedAccounts.isEmpty {
+            SentrySDK.capture(message: "[Migration] No keychain account")
+            throw MigrationError.noAccount
+        }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
             for (account, password) in savedAccounts {
-                group.enter()
-                InfomaniakLogin.getApiToken(username: account, applicationPassword: password) { token, _ in
-                    if let token = token {
-                        AccountManager.instance.createAndSetCurrentAccount(token: token) { account, _ in
-                            if account == nil {
-                                successful = false
-                            }
-                            group.leave()
-                        }
-                    } else {
-                        successful = false
-                        group.leave()
+                group.addTask {
+                    do {
+                        let token = try await InfomaniakLogin.apiToken(username: account, applicationPassword: password)
+                        _ = try await AccountManager.instance.createAndSetCurrentAccount(token: token)
+                    } catch {
+                        SentrySDK.capture(message: "[Migration] Auth failed")
+                        throw MigrationError.authFailed
                     }
                 }
             }
-            group.wait()
-            if !successful {
-                SentrySDK.capture(message: "[Migration] Auth failed")
-                completion(MigrationResult(success: false, error: .authFailed, photoSyncEnabled: false))
-                return
-            }
-
-            let photoSyncEnabled = isPhotoSyncEnabled()
-            UserDefaults.shared.isMigrated = true
-            UserDefaults.shared.wasPhotoSyncEnabledBeforeMigration = photoSyncEnabled
-            completion(MigrationResult(success: true, error: nil, photoSyncEnabled: photoSyncEnabled))
+            try await group.waitForAll()
         }
+
+        let photoSyncEnabled = isPhotoSyncEnabled()
+        UserDefaults.shared.isMigrated = true
+        UserDefaults.shared.wasPhotoSyncEnabledBeforeMigration = photoSyncEnabled
+        return photoSyncEnabled
     }
 
     private static func getKeychainAccounts() -> [String: String] {
@@ -110,10 +85,9 @@ public class MigrationHelper {
         var values = [String: String]()
         if lastResultCode == noErr,
            let array = result as? [[String: Any]] {
-
             for item in array {
                 if let key = item[kSecAttrAccount as String] as? String,
-                    let value = item[kSecValueData as String] as? Data {
+                   let value = item[kSecValueData as String] as? Data {
                     values[key] = String(data: value, encoding: .utf8)
                 }
             }
@@ -160,8 +134,7 @@ public class MigrationHelper {
         DispatchQueue.global(qos: .background).async {
             let fileManager = FileManager.default
             if let documentBaseUrl = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first,
-                let groupBaseUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup) {
-
+               let groupBaseUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: nextcloudGroup) {
                 if let groupFiles = try? fileManager.contentsOfDirectory(atPath: groupBaseUrl.path) {
                     for filePath in groupFiles {
                         try? fileManager.removeItem(atPath: groupBaseUrl.appendingPathComponent(filePath).path)
@@ -186,8 +159,6 @@ public class MigrationHelper {
                 kSecAttrAccessGroup as String: accessGroup
             ]
             _ = SecItemDelete(queryDelete as CFDictionary)
-
         }
     }
-
 }

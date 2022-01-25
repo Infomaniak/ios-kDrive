@@ -30,19 +30,14 @@ extension ApiFetcher {
         setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
     }
 
-    func getUserDrives(completion: @escaping (ApiResponse<DriveResponse>?, Error?) -> Void) {
-        authenticatedSession.request(ApiRoutes.getAllDrivesData(), method: .get)
-            .validate()
-            .responseDecodable(of: ApiResponse<DriveResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response) { response, error in
-                    if let driveResponse = response?.data,
-                       driveResponse.drives.main.isEmpty {
-                        completion(nil, DriveError.noDrive)
-                    } else {
-                        completion(response, error)
-                    }
-                }
-            }
+    // MARK: - User methods
+
+    func userProfile() async throws -> UserProfile {
+        try await perform(request: authenticatedSession.request("\(apiURL)profile?with=avatar,phones,emails")).data
+    }
+
+    func userDrives() async throws -> DriveResponse {
+        try await perform(request: authenticatedSession.request(ApiRoutes.getAllDrivesData())).data
     }
 
     // MARK: - New request helpers

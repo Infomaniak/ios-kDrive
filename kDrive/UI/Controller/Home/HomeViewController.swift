@@ -575,7 +575,6 @@ extension HomeViewController {
                     button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveResourcesAsset.largelist.image : KDriveResourcesAsset.grid.image, for: .normal)
                     collectionView.performBatchUpdates {
                         collectionView.reloadSections([1])
-                    } completion: { _ in
                     }
                 }
                 return headerView
