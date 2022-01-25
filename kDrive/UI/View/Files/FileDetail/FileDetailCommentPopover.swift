@@ -50,6 +50,7 @@ extension FileDetailCommentPopover: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FileDetailCommentListTableViewCell.self, for: indexPath)
         cell.userLabel.text = users[indexPath.row]
+        cell.selectionStyle = .none
         return cell
     }
 
