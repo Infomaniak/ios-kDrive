@@ -211,6 +211,8 @@ extension SaveFileViewController: UITableViewDataSource {
                 cell.logoImage.image = ConvertedType.fromUTI(item.uti).icon
                 item.getThumbnail { image in
                     cell.logoImage.image = image
+                    cell.logoImage.contentMode = .scaleAspectFill
+                    cell.logoImage.cornerRadius = 3
                 }
                 cell.titleLabel.text = item.name
                 return cell
