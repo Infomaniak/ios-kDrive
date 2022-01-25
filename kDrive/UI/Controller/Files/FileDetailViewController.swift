@@ -327,6 +327,7 @@ class FileDetailViewController: UIViewController {
             }
         }
         present(messageAlert, animated: true)
+        MatomoUtils.track(eventWithCategory: .comment, name: "add")
     }
 
     func computeSizeForPopover(labels: [String]) -> CGSize {
@@ -614,6 +615,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                     completionHandler(success)
                 }
+                MatomoUtils.track(eventWithCategory: .comment, name: "delete")
             } cancelHandler: {
                 completionHandler(false)
             }
@@ -641,6 +643,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                     completionHandler(success)
                 }
+                MatomoUtils.track(eventWithCategory: .comment, name: "edit")
             } cancelHandler: {
                 completionHandler(false)
             }
@@ -666,6 +669,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                         completionHandler(false)
                     }
                 }
+                MatomoUtils.track(eventWithCategory: .comment, name: "answer")
             } cancelHandler: {
                 completionHandler(false)
             }
@@ -796,6 +800,7 @@ extension FileDetailViewController: FileCommentDelegate {
             self.comments[index].liked = !self.comments[index].liked
             self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)
         }
+        MatomoUtils.track(eventWithCategory: .comment, name: "like")
     }
 
     func showLikesPopover(comment: Comment, index: Int) {
