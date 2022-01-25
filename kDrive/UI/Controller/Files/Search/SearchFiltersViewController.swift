@@ -170,12 +170,14 @@ class SearchFiltersViewController: UITableViewController {
             let allCases: [DateOption] = [.today, .yesterday, .last7days, customDateOption]
             let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: allCases, selectedOption: filters.date, headerTitle: filterType.title, delegate: self)
             present(floatingPanelController, animated: true)
+            MatomoUtils.track(eventWithCategory: .search, name: "filterDate")
             return nil
         case .type:
             var fileTypes = ConvertedType.allCases
             fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
             let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: filterType.title, delegate: self)
             present(floatingPanelController, animated: true)
+            MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
             return nil
         case .categories:
             if indexPath.row == 0 {
@@ -184,6 +186,7 @@ class SearchFiltersViewController: UITableViewController {
                 manageCategoriesViewController.selectedCategories = Array(filters.categories)
                 manageCategoriesViewController.delegate = self
                 navigationController?.pushViewController(manageCategoriesViewController, animated: true)
+                MatomoUtils.track(eventWithCategory: .search, name: "filterCategory")
                 return nil
             } else {
                 return indexPath

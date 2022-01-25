@@ -941,6 +941,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             listStyle = .grid
         }
         FileListOptions.instance.currentStyle = listStyle
+        MatomoUtils.track(eventWithCategory: .fileList, name: listStyle == .grid ? "viewGrid" : "viewList")
         // Collection view will be reloaded via the observer
     }
 
@@ -1073,6 +1074,7 @@ extension FileListViewController: SelectDelegate {
         } else {
             reloadData(showRefreshControl: false)
         }
+        MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
     }
 }
 

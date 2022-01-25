@@ -297,7 +297,7 @@ class ManageCategoriesViewController: UITableViewController {
         }
         delegate?.didDeselect(category: category)
 
-        MatomoUtils.track(eventWithCategory: .categories, name: "assign")
+        MatomoUtils.track(eventWithCategory: .categories, name: "remove")
     }
 
     // MARK: - Navigation
