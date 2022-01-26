@@ -61,9 +61,7 @@ class DriveErrorViewController: UIViewController {
     }
 
     @IBAction func testButtonPressed(_ sender: Any) {
-        if let url = URL(string: ApiRoutes.orderDrive()) {
-            UIApplication.shared.open(url)
-        }
+        UIApplication.shared.open(URLConstants.shop.url)
     }
 
     @IBAction func otherProfileButtonPressed(_ sender: Any) {

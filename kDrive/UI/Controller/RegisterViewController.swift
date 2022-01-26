@@ -38,7 +38,7 @@ class RegisterViewController: UIViewController {
         title = KDriveResourcesStrings.Localizable.buttonSignIn
         setupProgressView()
         setupEstimatedProgressObserver()
-        webView.load(URLRequest(url: URL(string: ApiRoutes.registerIkDriveUser())!))
+        webView.load(URLRequest(url: URLConstants.signUp.url))
         webView.navigationDelegate = self
     }
 

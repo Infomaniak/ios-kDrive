@@ -18,24 +18,23 @@
 
 import kDriveResources
 import UIKit
+import kDriveCore
 
 class AboutTableViewController: UITableViewController {
     private enum AboutRow: CaseIterable {
         case privacy, sourceCode, license, version
 
         var url: URL? {
-            let link: String
             switch self {
             case .privacy:
-                link = "https://infomaniak.com/gtl/rgpd"
+                return URLConstants.rgpd.url
             case .sourceCode:
-                link = "https://github.com/Infomaniak/ios-kDrive"
+                return URLConstants.sourceCode.url
             case .license:
-                link = "https://www.gnu.org/licenses/gpl-3.0.html"
+                return URLConstants.gpl.url
             default:
-                link = String()
+                return nil
             }
-            return URL(string: link)
         }
     }
 

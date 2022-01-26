@@ -19,6 +19,28 @@
 import Foundation
 import kDriveResources
 
+public struct URLConstants {
+    public static let signUp = URLConstants(urlString: "https://welcome.infomaniak.com/signup/ikdrive/steps")
+    public static let shop = URLConstants(urlString: "https://shop.infomaniak.com/order/drive")
+    public static let appVersion = URLConstants(urlString: "https://itunes.apple.com/lookup?bundleId=com.infomaniak.drive")
+    public static let appStore = URLConstants(urlString: "https://apps.apple.com/app/infomaniak-kdrive/id1482778676")
+    public static let testFlight = URLConstants(urlString: "https://testflight.apple.com/join/qZHSGy5B")
+    public static let rgpd = URLConstants(urlString: "https://infomaniak.com/gtl/rgpd")
+    public static let sourceCode = URLConstants(urlString: "https://github.com/Infomaniak/ios-kDrive")
+    public static let gpl = URLConstants(urlString: "https://www.gnu.org/licenses/gpl-3.0.html")
+    public static let support = URLConstants(urlString: "https://support.infomaniak.com")
+    public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2631")
+
+    private var urlString: String
+
+    public var url: URL {
+        guard let url = URL(string: urlString) else {
+            fatalError("Invalid URL")
+        }
+        return url
+    }
+}
+
 public enum Constants {
     public static let isInExtension: Bool = {
         let bundleUrl: URL = Bundle.main.bundleURL
@@ -28,8 +50,6 @@ public enum Constants {
 
     public static let backgroundRefreshIdentifier = "com.infomaniak.background.refresh"
     public static let longBackgroundRefreshIdentifier = "com.infomaniak.background.long-refresh"
-
-    public static let helpURL = "https://support.infomaniak.com"
 
     public static let notificationTopicUpload = "uploadTopic"
     public static let notificationTopicShared = "sharedTopic"

@@ -33,14 +33,14 @@ enum ApiEnvironment {
     }
 }
 
-struct Endpoint {
+public struct Endpoint {
     static let itemsPerPage = 200
 
     let path: String
     let queryItems: [URLQueryItem]?
     let apiEnvironment: ApiEnvironment
 
-    var url: URL {
+    public var url: URL {
         var components = URLComponents()
         components.scheme = "https"
         components.host = apiEnvironment.host
@@ -122,6 +122,10 @@ extension Endpoint {
 
     private static var base: Endpoint {
         return Endpoint(path: "/2/drive", apiEnvironment: .prod)
+    }
+
+    public static var inAppReceipt: Endpoint {
+        return Endpoint(path: "/invoicing/inapp/apple/link_receipt", apiEnvironment: .prod)
     }
 
     // MARK: Action

@@ -42,9 +42,6 @@ struct LaunchPanel: Comparable {
 }
 
 class LaunchPanelsController {
-    private static let appStoreLink = "https://apps.apple.com/app/infomaniak-kdrive/id1482778676"
-    private static let testFlightInviteLink = "https://testflight.apple.com/join/qZHSGy5B"
-
     private var panels: [LaunchPanel] = [
         // Update available
         LaunchPanel(
@@ -53,11 +50,9 @@ class LaunchPanelsController {
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UpdateFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
                     // If app was downloaded in TestFlight, open TestFlight. Else, open App Store
-                    let link = Bundle.main.isRunningInTestFlight ? testFlightInviteLink : appStoreLink
-                    if let url = URL(string: link) {
-                        UserDefaults.shared.updateLater = false
-                        UIApplication.shared.open(url)
-                    }
+                    let url: URLConstants = Bundle.main.isRunningInTestFlight ? .testFlight : .appStore
+                    UserDefaults.shared.updateLater = false
+                    UIApplication.shared.open(url.url)
                 }
                 return driveFloatingPanelController
             },
@@ -107,10 +102,8 @@ class LaunchPanelsController {
                 let driveFloatingPanelController = BetaInviteFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? BetaInviteFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
-                    if let url = URL(string: testFlightInviteLink) {
-                        UIApplication.shared.open(url)
-                        driveFloatingPanelController.dismiss(animated: true)
-                    }
+                    UIApplication.shared.open(URLConstants.testFlight.url)
+                    driveFloatingPanelController.dismiss(animated: true)
                 }
                 return driveFloatingPanelController
             },
