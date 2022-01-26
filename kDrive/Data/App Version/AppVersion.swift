@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import kDriveCore
 
 struct Response: Codable {
     var results: [AppVersion]
@@ -32,11 +33,7 @@ struct AppVersion: Codable {
     }
 
     func loadVersionData(handler: @escaping (_ resultList: AppVersion) -> Void) {
-        guard let url = URL(string: "https://itunes.apple.com/lookup?bundleId=com.infomaniak.drive") else {
-            return
-        }
-
-        let request = URLRequest(url: url)
+        let request = URLRequest(url: URLConstants.appVersion.url)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
 

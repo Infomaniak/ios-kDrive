@@ -235,9 +235,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             }
             present(alert, animated: true)
         case .help:
-            if let url = URL(string: Constants.helpURL) {
-                UIApplication.shared.open(url)
-            }
+            UIApplication.shared.open(URLConstants.support.url)
         default:
             if let segue = action.segue {
                 performSegue(withIdentifier: segue, sender: nil)

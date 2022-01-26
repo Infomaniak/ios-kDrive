@@ -34,13 +34,12 @@ struct ReceiptInfo: Encodable {
 class StoreRequest {
     static let shared = StoreRequest()
 
-    let url = "https://api.infomaniak.com/invoicing/inapp/apple/link_receipt"
     let jsonDecoder = JSONDecoder()
 
     private init() {}
 
     func sendReceipt(body: ReceiptInfo) {
-        AF.request(url, method: .post, parameters: body, encoder: JSONParameterEncoder.convertToSnakeCase)
+        AF.request(Endpoint.inAppReceipt.url, method: .post, parameters: body, encoder: JSONParameterEncoder.convertToSnakeCase)
             .validate()
             .responseDecodable(of: ApiResponse<Bool>.self, decoder: jsonDecoder) { response in
                 switch response.result {

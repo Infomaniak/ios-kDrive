@@ -342,8 +342,7 @@ extension StoreViewController: StoreCellDelegate, StoreStorageDelegate, StoreNex
     }
 
     func helpButtonTapped() {
-        guard let url = URL(string: "https://faq.infomaniak.com/2631") else { return }
-        UIApplication.shared.open(url)
+        UIApplication.shared.open(URLConstants.faqIAP.url)
     }
 }
 

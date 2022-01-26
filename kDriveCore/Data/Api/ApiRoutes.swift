@@ -241,10 +241,6 @@ public enum ApiRoutes {
         return "\(fileURL(file: file))share/access"
     }
 
-    public static func orderDrive() -> String {
-        return "\(shopUrl)drive"
-    }
-
     public static func getUploadToken(driveId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/1/upload/token"
     }
@@ -255,10 +251,6 @@ public enum ApiRoutes {
 
     public static func convertFile(file: File) -> String {
         return "\(fileURL(file: file))convert"
-    }
-
-    public static func registerIkDriveUser() -> String {
-        return "https://welcome.infomaniak.com/signup/ikdrive/steps"
     }
 
     public static func bulkAction(driveId: Int) -> String {
