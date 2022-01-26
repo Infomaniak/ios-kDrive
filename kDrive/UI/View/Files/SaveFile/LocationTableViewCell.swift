@@ -66,10 +66,11 @@ class LocationTableViewCell: InsetTableViewCell {
                 logoImage.tintColor = KDriveResourcesAsset.infomaniakColor.color
             default:
                 logoImage.tintColor = KDriveResourcesAsset.iconColor.color
-            } case .categories:
+            }
+        case .categories:
             titleLabel.text = ""
             logoImage.image = KDriveResourcesAsset.categories.image
-            logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+            logoImage.tintColor = KDriveResourcesAsset.iconColor.color
         }
     }
 }
