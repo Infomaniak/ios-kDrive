@@ -61,7 +61,7 @@ public enum ConvertedType: String, CaseIterable {
 
     public var tintColor: UIColor? {
         switch self {
-        case .folder, .url:
+        case .folder, .url, .font, .unknown:
             return KDriveResourcesAsset.secondaryTextColor.color
         default:
             return nil

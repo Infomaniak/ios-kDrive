@@ -57,12 +57,16 @@ class LocationTableViewCell: InsetTableViewCell {
         case .date:
             titleLabel.text = filters.date?.localizedName ?? KDriveResourcesStrings.Localizable.searchFiltersSelectDate
             logoImage.image = KDriveResourcesAsset.calendar.image
-            logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+            logoImage.tintColor = KDriveResourcesAsset.iconColor.color
         case .type:
             titleLabel.text = filters.fileType?.title ?? KDriveResourcesStrings.Localizable.searchFiltersSelectType
             logoImage.image = filters.fileType?.icon ?? KDriveResourcesAsset.fileDefault.image
-            logoImage.tintColor = KDriveResourcesAsset.infomaniakColor.color
-        case .categories:
+            switch filters.fileType {
+            case .text:
+                logoImage.tintColor = KDriveResourcesAsset.infomaniakColor.color
+            default:
+                logoImage.tintColor = KDriveResourcesAsset.iconColor.color
+            } case .categories:
             titleLabel.text = ""
             logoImage.image = KDriveResourcesAsset.categories.image
             logoImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
