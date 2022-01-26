@@ -54,7 +54,7 @@ class SearchViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
+        let configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.searchTitle, emptyViewType: .noSearchResults)
         viewModel.listStyle = .list
         viewModel.sortType = .newer
 

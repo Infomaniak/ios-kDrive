@@ -47,7 +47,7 @@ class SelectFolderViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        configuration = Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
+        let configuration = Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
 
         super.viewDidLoad()
 

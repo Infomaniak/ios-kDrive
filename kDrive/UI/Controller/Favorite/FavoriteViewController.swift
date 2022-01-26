@@ -22,7 +22,8 @@ import RealmSwift
 import UIKit
 
 class FavoritesViewModel: ManagedFileListViewModel {
-    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager) {
+    init(driveFileManager: DriveFileManager) {
+        let configuration = FileListViewController.Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
     }
@@ -57,14 +58,8 @@ class FavoriteViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.favorite }
     override class var storyboardIdentifier: String { "FavoriteViewController" }
 
-    override func viewDidLoad() {
-        // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
-        super.viewDidLoad()
-    }
-
     override func getViewModel() -> FileListViewModel {
-        return FavoritesViewModel(configuration: configuration, driveFileManager: driveFileManager)
+        return FavoritesViewModel(driveFileManager: driveFileManager)
     }
 
     // MARK: - State restoration
