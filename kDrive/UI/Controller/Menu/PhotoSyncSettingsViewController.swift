@@ -470,7 +470,16 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             }
             _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
-        MatomoUtils.track(eventWithCategory: .settings, name: "photoSync", value: photoSyncEnabled)
+
+        MatomoUtils.track(eventWithCategory: .photoSync, name: photoSyncEnabled ? "enabled" : "disabled")
+        if photoSyncEnabled {
+            MatomoUtils.track(eventWithCategory: .photoSync, name: "sync\(["New", "All", "FromDate"][newSyncSettings.syncMode.rawValue])")
+            MatomoUtils.track(eventWithCategory: .photoSync, name: "importDCIM", value: newSyncSettings.syncPicturesEnabled)
+            MatomoUtils.track(eventWithCategory: .photoSync, name: "importVideos", value: newSyncSettings.syncVideosEnabled)
+            MatomoUtils.track(eventWithCategory: .photoSync, name: "importScreenshots", value: newSyncSettings.syncScreenshotsEnabled)
+            MatomoUtils.track(eventWithCategory: .photoSync, name: "createDatedFolders", value: newSyncSettings.createDatedSubFolders)
+            MatomoUtils.track(eventWithCategory: .photoSync, name: "deleteAfterImport", value: newSyncSettings.deleteAssetsAfterImport)
+        }
     }
 }
 

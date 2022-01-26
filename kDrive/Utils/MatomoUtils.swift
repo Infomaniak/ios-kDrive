@@ -24,7 +24,7 @@ class MatomoUtils {
     static let shared = MatomoTracker(siteId: "8", baseURL: URL(string: "https://analytics.infomaniak.com/matomo.php")!)
 
     enum EventCategory: String {
-        case newElement, offline, favorite, colorFolder, categories, search, fileList, comment, drive, account, settings, home
+        case newElement, offline, favorite, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home
     }
 
     enum UserAction: String {
