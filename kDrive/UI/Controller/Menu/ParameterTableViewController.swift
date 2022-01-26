@@ -133,6 +133,7 @@ class ParameterTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
             cell.switchHandler = { sender in
                 UserDefaults.shared.isWifiOnly = sender.isOn
+                MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
             }
             return cell
         case .security, .storage, .about:

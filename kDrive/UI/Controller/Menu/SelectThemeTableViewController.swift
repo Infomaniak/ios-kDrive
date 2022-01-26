@@ -60,8 +60,10 @@ class SelectThemeTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        UserDefaults.shared.theme = tableContent[indexPath.row]
+        let theme = tableContent[indexPath.row]
+        UserDefaults.shared.theme = theme
         (UIApplication.shared.delegate as? AppDelegate)?.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         navigationController?.popViewController(animated: true)
+        MatomoUtils.track(eventWithCategory: .settings, name: "theme\(theme.rawValue.capitalized)")
     }
 }

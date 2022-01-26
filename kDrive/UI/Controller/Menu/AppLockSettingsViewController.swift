@@ -84,6 +84,7 @@ class AppLockSettingsViewController: UIViewController {
                 sender.setOn(!sender.isOn, animated: true)
             }
         }
+        MatomoUtils.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
     }
 
     class func instantiate() -> AppLockSettingsViewController {

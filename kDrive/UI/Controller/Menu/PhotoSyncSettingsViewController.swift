@@ -470,6 +470,7 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             }
             _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
+        MatomoUtils.track(eventWithCategory: .settings, name: "photoSync", value: photoSyncEnabled)
     }
 }
 
