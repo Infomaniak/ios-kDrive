@@ -21,13 +21,6 @@ import Foundation
 import kDriveCore
 import kDriveResources
 
-enum MultipleSelectionBarButtonType {
-    case selectAll
-    case deselectAll
-    case loading
-    case cancel
-}
-
 struct MultipleSelectionAction: Equatable {
     let id: Int
     let name: String
@@ -77,8 +70,8 @@ class MultipleSelectionFileListViewModel {
         }
     }
 
-    @Published var leftBarButtons: [MultipleSelectionBarButtonType]?
-    @Published var rightBarButtons: [MultipleSelectionBarButtonType]?
+    @Published var leftBarButtons: [FileListBarButtonType]?
+    @Published var rightBarButtons: [FileListBarButtonType]?
     @Published var multipleSelectionActions: [MultipleSelectionAction]
 
     var onItemSelected: ItemSelectedCallback?
@@ -104,7 +97,7 @@ class MultipleSelectionFileListViewModel {
         self.configuration = configuration
     }
 
-    func barButtonPressed(type: MultipleSelectionBarButtonType) {
+    func barButtonPressed(type: FileListBarButtonType) {
         switch type {
         case .selectAll:
             selectAll()
@@ -114,6 +107,8 @@ class MultipleSelectionFileListViewModel {
             break
         case .cancel:
             isMultipleSelectionEnabled = false
+        default:
+            break
         }
     }
 

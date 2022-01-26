@@ -36,14 +36,8 @@ class OfflineViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "OfflineViewController" }
 
-    override func viewDidLoad() {
-        // Set configuration
-        configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isRefreshControlEnabled: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
-
-        super.viewDidLoad()
-    }
-
     override func getViewModel() -> FileListViewModel {
+        let configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isRefreshControlEnabled: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
         return OfflineFilesViewModel(configuration: configuration, driveFileManager: driveFileManager)
     }
 }

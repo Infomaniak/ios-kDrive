@@ -22,6 +22,15 @@ import Foundation
 import kDriveCore
 import RealmSwift
 
+enum FileListBarButtonType {
+    case selectAll
+    case deselectAll
+    case loading
+    case cancel
+    case search
+    case emptyTrash
+}
+
 @MainActor
 class FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
@@ -46,6 +55,8 @@ class FileListViewModel {
     @Published var title: String
     @Published var isRefreshIndicatorHidden: Bool
     @Published var isEmptyViewHidden: Bool
+    @Published var currentLeftBarButtons: [FileListBarButtonType]?
+    @Published var currentRightBarButtons: [FileListBarButtonType]?
 
     var onFileListUpdated: FileListUpdatedCallback?
     var onDriveError: DriveErrorCallback?
@@ -57,13 +68,17 @@ class FileListViewModel {
 
     internal var sortTypeObservation: AnyCancellable?
     internal var listStyleObservation: AnyCancellable?
+    internal var bindStore = Set<AnyCancellable>()
 
     var uploadViewModel: UploadCardViewModel?
     var multipleSelectionViewModel: MultipleSelectionFileListViewModel?
     var draggableFileListViewModel: DraggableFileListViewModel?
     var droppableFileListViewModel: DroppableFileListViewModel?
 
+    var configuration: FileListViewController.Configuration
+
     init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+        self.configuration = configuration
         self.driveFileManager = driveFileManager
         if let currentDirectory = currentDirectory {
             self.currentDirectory = currentDirectory
@@ -75,6 +90,8 @@ class FileListViewModel {
         self.isRefreshIndicatorHidden = true
         self.isEmptyViewHidden = true
         self.isLoading = false
+        self.currentLeftBarButtons = configuration.leftBarButtons
+        self.currentRightBarButtons = configuration.rightBarButtons
 
         if self.currentDirectory.isRoot {
             if let rootTitle = configuration.rootTitle {
@@ -115,6 +132,33 @@ class FileListViewModel {
         listStyleObservation = FileListOptions.instance.$currentStyle
             .receive(on: RunLoop.main)
             .assignNoRetain(to: \.listStyle, on: self)
+
+        multipleSelectionViewModel?.$leftBarButtons.sink { [weak self] leftBarButtons in
+            if self?.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+                self?.currentLeftBarButtons = leftBarButtons
+            } else {
+                self?.currentLeftBarButtons = self?.configuration.leftBarButtons
+            }
+        }.store(in: &bindStore)
+
+        multipleSelectionViewModel?.$rightBarButtons.sink { [weak self] rightBarButtons in
+            if self?.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+                self?.currentRightBarButtons = rightBarButtons
+            } else {
+                self?.currentRightBarButtons = self?.configuration.rightBarButtons
+            }
+        }.store(in: &bindStore)
+    }
+
+    func barButtonPressed(type: FileListBarButtonType) {
+        if multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+            multipleSelectionViewModel?.barButtonPressed(type: type)
+        } else {
+            switch type {
+            default:
+                break
+            }
+        }
     }
 
     func sortingChanged() {}

@@ -23,10 +23,12 @@ import kDriveResources
 import UIKit
 
 class TrashListViewModel: UnmanagedFileListViewModel {
-    override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+        var configuration = FileListViewController.Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash)
         var currentDirectory = currentDirectory
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile
+            configuration.rightBarButtons = [.emptyTrash]
         }
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         sortTypeObservation?.cancel()
@@ -88,15 +90,8 @@ class TrashViewController: FileListViewController {
     private var filesToRestore: [File] = []
     private var selectFolderViewController: TitleSizeAdjustingNavigationController!
 
-    override func viewDidLoad() {
-        // Set configuration
-        configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash)
-
-        super.viewDidLoad()
-    }
-
     override func getViewModel() -> FileListViewModel {
-        return TrashListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        return TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
     // MARK: - Actions
@@ -214,7 +209,7 @@ class TrashViewController: FileListViewController {
     // MARK: - Swipe action collection view data source
 
     override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if configuration.fromActivities || viewModel.listStyle == .grid {
+        if viewModel.configuration.fromActivities || viewModel.listStyle == .grid {
             return nil
         }
         return [.delete]
