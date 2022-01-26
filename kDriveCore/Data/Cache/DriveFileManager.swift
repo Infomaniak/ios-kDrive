@@ -53,7 +53,7 @@ public class DriveFileManager {
                 // Migration from version 9 to version 10
                 if oldSchemaVersion < 10 {
                     migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
-                        newObject!["conflictOption"] = ConflictOption.replace
+                        newObject!["conflictOption"] = ConflictOption.replace.rawValue
                     }
                 }
             }
