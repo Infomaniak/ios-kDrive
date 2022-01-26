@@ -161,10 +161,8 @@ open class AlertViewController: UIViewController {
             setLoading(true)
             Task(priority: .userInitiated) {
                 await handler?()
-                DispatchQueue.main.async {
-                    self.setLoading(false)
-                    self.dismiss(animated: true)
-                }
+                self.setLoading(false)
+                self.dismiss(animated: true)
             }
         } else {
             dismiss(animated: true)
