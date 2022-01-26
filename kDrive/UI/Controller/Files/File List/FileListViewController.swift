@@ -35,10 +35,10 @@ extension SortType: Selectable {
     }
 }
 
-class MultipleSelectionBarButton: UIBarButtonItem {
-    private(set) var type: MultipleSelectionBarButtonType = .cancel
+class FileListBarButton: UIBarButtonItem {
+    private(set) var type: FileListBarButtonType = .cancel
 
-    convenience init(type: MultipleSelectionBarButtonType, target: Any?, action: Selector?) {
+    convenience init(type: FileListBarButtonType, target: Any?, action: Selector?) {
         switch type {
         case .selectAll:
             self.init(title: KDriveResourcesStrings.Localizable.buttonSelectAll, style: .plain, target: target, action: action)
@@ -51,6 +51,10 @@ class MultipleSelectionBarButton: UIBarButtonItem {
         case .cancel:
             self.init(barButtonSystemItem: .stop, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
+        case .search:
+            self.init(barButtonSystemItem: .search, target: target, action: action)
+        case .emptyTrash:
+            self.init(title: KDriveResourcesStrings.Localizable.buttonEmptyTrash, style: .plain, target: target, action: action)
         }
         self.type = type
     }
@@ -134,6 +138,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         var supportsDrop = false
         /// Does this folder support importing files with drag from external app
         var supportDrag = true
+        /// Bar buttons showed in the file list
+        var leftBarButtons: [FileListBarButtonType]?
+        var rightBarButtons: [FileListBarButtonType]?
     }
 
     // MARK: - Properties
@@ -152,8 +159,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
-
-    lazy var configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true)
 
     private var networkObserver: ObservationToken?
 
@@ -174,7 +179,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.register(UINib(nibName: headerViewIdentifier, bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier)
-        if configuration.isRefreshControlEnabled {
+        if viewModel.configuration.isRefreshControlEnabled {
             refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
             collectionView.refreshControl = refreshControl
         }
@@ -190,18 +195,18 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         // Set up multiple selection gesture
-        if configuration.isMultipleSelectionEnabled {
+        if viewModel.multipleSelectionViewModel != nil {
             let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
             collectionView.addGestureRecognizer(longPressGesture)
         }
         rightBarButtonItems = navigationItem.rightBarButtonItems
         leftBarButtonItems = navigationItem.leftBarButtonItems
 
-        if configuration.supportsDrop {
+        if viewModel.droppableFileListViewModel != nil {
             collectionView.dropDelegate = self
         }
 
-        if configuration.supportDrag {
+        if viewModel.draggableFileListViewModel != nil {
             collectionView.dragDelegate = self
         }
 
@@ -211,6 +216,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func getViewModel() -> FileListViewModel {
+        let configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true, rightBarButtons: [.search])
         return ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
@@ -286,9 +292,20 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self.filePresenter.present(driveFileManager: self.driveFileManager,
                                            file: file,
                                            files: self.viewModel.getAllFiles(),
-                                           normalFolderHierarchy: self.configuration.normalFolderHierarchy,
-                                           fromActivities: self.configuration.fromActivities)
+                                           normalFolderHierarchy: self.viewModel.configuration.normalFolderHierarchy,
+                                           fromActivities: self.viewModel.configuration.fromActivities)
             #endif
+        }
+
+        viewModel.$currentLeftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
+            guard let self = self else { return }
+            self.navigationItem.leftBarButtonItems = leftBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+        }
+
+        navigationItem.rightBarButtonItems = viewModel.currentRightBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+        viewModel.$currentRightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
+            guard let self = self else { return }
+            self.navigationItem.rightBarButtonItems = rightBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
     }
 
@@ -332,24 +349,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         viewModel.multipleSelectionViewModel?.onDeselectAll = { [weak self] in
             for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
                 self?.collectionView.deselectItem(at: indexPath, animated: false)
-            }
-        }
-
-        viewModel.multipleSelectionViewModel?.$leftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
-            guard let self = self else { return }
-            if let leftBarButtons = leftBarButtons {
-                self.navigationItem.leftBarButtonItems = leftBarButtons.map { MultipleSelectionBarButton(type: $0, target: self, action: #selector(self.multipleSelectionBarButtonPressed(_:))) }
-            } else {
-                self.navigationItem.leftBarButtonItems = self.leftBarButtonItems
-            }
-        }
-
-        viewModel.multipleSelectionViewModel?.$rightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
-            guard let self = self else { return }
-            if let rightBarButtons = rightBarButtons {
-                self.navigationItem.rightBarButtonItems = rightBarButtons.map { MultipleSelectionBarButton(type: $0, target: self, action: #selector(self.multipleSelectionBarButtonPressed(_:))) }
-            } else {
-                self.navigationItem.rightBarButtonItems = self.rightBarButtonItems
             }
         }
 
@@ -448,8 +447,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    @objc func multipleSelectionBarButtonPressed(_ sender: MultipleSelectionBarButton) {
-        viewModel.multipleSelectionViewModel?.barButtonPressed(type: sender.type)
+    @objc func barButtonPressed(_ sender: FileListBarButton) {
+        viewModel.barButtonPressed(type: sender.type)
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
@@ -513,7 +512,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     private func showEmptyView(_ isHidden: Bool) {
-        let emptyView = EmptyTableView.instantiate(type: configuration.emptyViewType, button: false)
+        let emptyView = EmptyTableView.instantiate(type: viewModel.configuration.emptyViewType, button: false)
         emptyView.actionHandler = { [weak self] _ in
             self?.forceRefresh()
         }
@@ -550,7 +549,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             if fileInformationsViewController == nil {
                 fileInformationsViewController = FileActionsFloatingPanelViewController()
                 fileInformationsViewController.presentingParent = self
-                fileInformationsViewController.normalFolderHierarchy = configuration.normalFolderHierarchy
+                fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
                 floatingPanelViewController = DriveFloatingPanelController()
                 floatingPanelViewController.isRemovalInteractionEnabled = true
                 floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
@@ -640,7 +639,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         } else {
             cell.setEnabled(true)
         }
-        if configuration.fromActivities {
+        if viewModel.configuration.fromActivities {
             cell.moreButton.isHidden = true
         }
 
@@ -691,7 +690,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Swipe action collection view data source
 
     func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if configuration.fromActivities || viewModel.listStyle == .grid {
+        if viewModel.configuration.fromActivities || viewModel.listStyle == .grid {
             return nil
         }
         var actions = [SwipeCellAction]()
@@ -868,7 +867,7 @@ extension FileListViewController: SelectDelegate {
                 bindViewModels()
                 viewModel.onViewDidLoad()
                 navigationController?.popToRootViewController(animated: false)
-            } else if configuration.showUploadingFiles {
+            } else if viewModel.configuration.showUploadingFiles {
                 let newUploadViewModel = UploadCardViewModel(uploadDirectory: viewModel.currentDirectory, driveFileManager: driveFileManager)
                 viewModel.uploadViewModel = newUploadViewModel
                 bindUploadCardViewModel()
