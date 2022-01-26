@@ -210,9 +210,10 @@ extension SaveFileViewController: UITableViewDataSource {
                 cell.accessoryImageView.image = KDriveResourcesAsset.edit.image
                 cell.logoImage.image = ConvertedType.fromUTI(item.uti).icon
                 item.getThumbnail { image in
-                    cell.logoImage.image = image
+                    cell.logoImage.layer.cornerRadius = UIConstants.imageCornerRadius
                     cell.logoImage.contentMode = .scaleAspectFill
-                    cell.logoImage.cornerRadius = 3
+                    cell.logoImage.layer.masksToBounds = true
+                    cell.logoImage.image = image
                 }
                 cell.titleLabel.text = item.name
                 return cell
