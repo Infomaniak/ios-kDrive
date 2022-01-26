@@ -639,9 +639,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     private func track(action: FloatingPanelAction) {
         switch action {
         case .favorite:
-            MatomoUtils.track(eventWithCategory: .favorite, value: !file.isFavorite)
+            MatomoUtils.track(eventWithCategory: .favorite, name: "toggle", value: !file.isFavorite)
         case .offline:
-            MatomoUtils.track(eventWithCategory: .offline, value: !file.isAvailableOffline)
+            MatomoUtils.track(eventWithCategory: .offline, name: "toggle", value: !file.isAvailableOffline)
         default:
             break
         }

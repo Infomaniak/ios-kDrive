@@ -72,6 +72,9 @@ class SearchFiltersViewController: UITableViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
         MatomoUtils.track(view: ["Search", "Filters"])
     }
 

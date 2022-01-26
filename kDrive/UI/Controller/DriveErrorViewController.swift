@@ -58,6 +58,9 @@ class DriveErrorViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
         MatomoUtils.track(view: ["DriveError"])
     }
 

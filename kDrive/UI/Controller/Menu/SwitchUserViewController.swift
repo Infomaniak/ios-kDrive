@@ -53,6 +53,9 @@ class SwitchUserViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setTransparentStandardAppearanceNavigationBar()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
         MatomoUtils.track(view: ["Menu", "SwitchUser"])
     }
 
@@ -111,6 +114,7 @@ extension SwitchUserViewController: UITableViewDelegate {
             }
 
             MatomoUtils.track(eventWithCategory: .account, name: "switch")
+            MatomoUtils.connectUser()
         }
     }
 }

@@ -18,6 +18,7 @@
 
 import Foundation
 import MatomoTracker
+import kDriveCore
 
 class MatomoUtils {
     static let shared = MatomoTracker(siteId: "8", baseURL: URL(string: "https://analytics.infomaniak.com/matomo.php")!)
@@ -30,15 +31,23 @@ class MatomoUtils {
         case click
     }
 
+    private init() {
+        MatomoUtils.connectUser()
+    }
+
+    static func connectUser() {
+        shared.userId = String(AccountManager.instance.currentUserId)
+    }
+
     static func track(view: [String]) {
         shared.track(view: view)
     }
 
-    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String? = nil, value: Float? = nil) {
-        shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: value)
-    }
-
-    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String? = nil, value: Bool) {
-        track(eventWithCategory: category, action: action, name: name, value: value ? 1 : 0)
+    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String, value: Bool? = nil) {
+        var floatValue: Float?
+        if let value = value {
+            floatValue = value ? 1.0 : 0.0
+        }
+        shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: floatValue)
     }
 }

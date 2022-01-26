@@ -41,7 +41,7 @@ extension SelectSwitchDriveDelegate {
                 (self?.tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
             }
 
-            MatomoUtils.track(eventWithCategory: .drive)
+            MatomoUtils.track(eventWithCategory: .drive, name: "switch")
         }
     }
 }

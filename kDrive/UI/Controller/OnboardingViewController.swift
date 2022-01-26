@@ -112,6 +112,7 @@ class OnboardingViewController: UIViewController {
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
+        MatomoUtils.track(eventWithCategory: .account, name: "create")
         present(RegisterViewController.instantiateInNavigationController(delegate: self), animated: true)
     }
 
