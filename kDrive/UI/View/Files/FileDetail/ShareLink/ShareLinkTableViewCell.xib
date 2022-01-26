@@ -40,7 +40,7 @@
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="lock" translatesAutoresizingMaskIntoConstraints="NO" id="CK7-c2-fMN">
                                                         <rect key="frame" x="0.0" y="13" width="20" height="20"/>
-                                                        <color key="tintColor" name="secondaryTextColor"/>
+                                                        <color key="tintColor" name="iconColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="20" id="3cx-dc-xhf"/>
                                                             <constraint firstAttribute="width" constant="20" id="HBa-jP-pSM"/>
