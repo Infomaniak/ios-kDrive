@@ -84,7 +84,7 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
     }
 
     public convenience init(title: String, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
-        self.init(title: title, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
+        self.init(title: title, label: placeholder, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
     }
 
     /**
@@ -165,10 +165,8 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
             setLoading(true)
             Task(priority: .userInitiated) {
                 await handler?(name)
-                DispatchQueue.main.async {
-                    self.setLoading(false)
-                    self.dismiss(animated: true)
-                }
+                self.setLoading(false)
+                self.dismiss(animated: true)
             }
         } else {
             Task {
