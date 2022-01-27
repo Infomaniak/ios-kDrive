@@ -67,8 +67,10 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 forceRefresh = lastResponseAt < anchorExpireTimestamp
             }
 
-            driveFileManager.getFile(id: fileId, withExtras: !isDirectory, page: pageIndex, forceRefresh: forceRefresh) { containerFile, childrenFiles, error in
-                if let folder = containerFile, let children = childrenFiles {
+            Task { [forceRefresh = forceRefresh] in
+                do {
+                    let file = try await driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
+                    let children = try await driveFileManager.files(in: file, page: pageIndex, forceRefresh: forceRefresh)
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
                     for child in children {
@@ -77,15 +79,15 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         }
                     }
                     containerItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
-                    containerItems.append(FileProviderItem(file: folder, domain: self.domain))
+                    containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     observer.didEnumerate(containerItems)
 
-                    if self.isDirectory && !folder.fullyDownloaded {
+                    if self.isDirectory && !file.fullyDownloaded {
                         observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
                     } else {
                         observer.finishEnumerating(upTo: nil)
                     }
-                } else {
+                } catch {
                     // Maybe this is a trashed file
                     self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: fileId, page: pageIndex) { response, error in
                         if let file = response?.data {
@@ -99,7 +101,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             }
                             containerItems.append(FileProviderItem(file: file, domain: self.domain))
                             observer.didEnumerate(containerItems)
-                            if self.isDirectory && file.children.count == DriveApiFetcher.itemPerPage {
+                            if self.isDirectory && file.children.count == Endpoint.itemsPerPage {
                                 observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
                             } else {
                                 observer.finishEnumerating(upTo: nil)
@@ -125,8 +127,9 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 return
             }
 
-            driveFileManager.getFile(id: directoryIdentifier) { file, _, _ in
-                if let file = file {
+            Task {
+                do {
+                    let file = try await driveFileManager.file(id: directoryIdentifier)
                     self.driveFileManager.getFolderActivities(file: file, date: lastTimestamp) { results, timestamp, error in
                         if let results = results, let timestamp = timestamp {
                             let updated = results.inserted + results.updated
@@ -150,7 +153,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
                         }
                     }
-                } else {
+                } catch {
                     // Maybe this is a trashed file
                     self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: directoryIdentifier) { response, error in
                         if let file = response?.data {
