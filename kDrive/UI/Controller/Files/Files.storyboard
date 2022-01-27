@@ -164,7 +164,6 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="d4X-ri-Z8j">
-                        <barButtonItem key="backBarButtonItem" title=" " id="rsh-g3-Qqo"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadInProgressTitle"/>
                         </userDefinedRuntimeAttributes>
@@ -230,7 +229,6 @@
                     </tableView>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Gérer les catégories" largeTitleDisplayMode="never" id="QCT-zO-BPw">
-                        <barButtonItem key="backBarButtonItem" title=" " id="ykU-tK-MNV"/>
                         <barButtonItem key="rightBarButtonItem" image="add" style="done" id="X6o-db-xKo">
                             <connections>
                                 <segue destination="PRb-bx-VPS" kind="show" identifier="createCategory" id="fVU-FL-9Kf"/>
@@ -259,9 +257,7 @@
                             <outlet property="delegate" destination="PRb-bx-VPS" id="GEO-vt-H2h"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Créer une catégorie" id="DGU-n7-MDg">
-                        <barButtonItem key="backBarButtonItem" title=" " id="5Xn-go-63g"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Créer une catégorie" id="DGU-n7-MDg"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dvR-Wy-EhA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -415,9 +411,7 @@
                             <constraint firstAttribute="bottom" secondItem="qGi-Yx-e8m" secondAttribute="bottom" constant="32" id="iPz-0s-sF7"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Partage et droits du dossier Name" largeTitleDisplayMode="always" id="bq4-3D-Tsx">
-                        <barButtonItem key="backBarButtonItem" title=" " id="KLl-M5-zCh"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Partage et droits du dossier Name" largeTitleDisplayMode="always" id="bq4-3D-Tsx"/>
                     <connections>
                         <outlet property="tableView" destination="FwV-k9-Mfz" id="cRg-N7-IkH"/>
                     </connections>
@@ -511,7 +505,6 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Partager le dossier" largeTitleDisplayMode="always" id="WPm-Tw-wPJ">
-                        <barButtonItem key="backBarButtonItem" title=" " id="A8c-xu-nNu"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileShareFileTitle"/>
                         </userDefinedRuntimeAttributes>

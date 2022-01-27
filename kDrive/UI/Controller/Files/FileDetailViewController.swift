@@ -142,6 +142,9 @@ class FileDetailViewController: UIViewController {
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
 
+        navigationItem.title = file.name
+        navigationItem.dontShowBackButtonText()
+
         tableView.scrollIndicatorInsets = UIEdgeInsets(top: -90, left: 0, bottom: 0, right: 0)
 
         tableView.register(cellView: FileDetailHeaderTableViewCell.self)

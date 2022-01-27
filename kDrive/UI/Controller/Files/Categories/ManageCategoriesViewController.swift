@@ -68,6 +68,8 @@ class ManageCategoriesViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.dontShowBackButtonText()
+
         tableView.register(cellView: CategoryTableViewCell.self)
         tableView.keyboardDismissMode = .onDrag
 
