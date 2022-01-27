@@ -201,7 +201,7 @@ extension FileProviderExtension {
 
         // Make deleted file copy
         let deletedFile = File(value: file)
-        deletedFile.rights = Rights(value: file.rights as Any)
+        deletedFile.capabilities = Rights(value: file.capabilities as Any)
         let item = FileProviderItem(file: deletedFile, domain: domain)
         item.isTrashed = true
 

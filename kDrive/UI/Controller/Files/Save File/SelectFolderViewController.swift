@@ -56,9 +56,9 @@ class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
-        addFolderButton.isEnabled = currentDirectory.rights?.createNewFolder ?? false
+        addFolderButton.isEnabled = currentDirectory.capabilities.canCreateDirectory
         addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
-        selectFolderButton.isEnabled = !disabledDirectoriesSelection.map(\.id).contains(currentDirectory.id) && (currentDirectory.rights?.moveInto ?? false || currentDirectory.rights?.createNewFile ?? false)
+        selectFolderButton.isEnabled = !disabledDirectoriesSelection.map(\.id).contains(currentDirectory.id) && (currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile)
         if currentDirectory.id == DriveFileManager.constants.rootID {
             // Root directory: set back button if the view controller is presented modally
             let viewControllersCount = navigationController?.viewControllers.count ?? 0

@@ -85,7 +85,6 @@ public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
 
 public class DriveApiFetcher: ApiFetcher {
     public static let clientId = "9473D73C-C20F-4971-9E10-D957C563FA68"
-    public static let itemPerPage = 200
     public var authenticatedKF: AuthenticatedImageRequestModifier!
 
     override public init() {
@@ -106,7 +105,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     private func pagination(page: Int) -> String {
-        return "&page=\(page)&per_page=\(DriveApiFetcher.itemPerPage)"
+        return "&page=\(page)&per_page=\(Endpoint.itemsPerPage)"
     }
 
     @discardableResult
@@ -178,10 +177,16 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.dropbox(file: directory), method: .delete)).data
     }
 
-    public func getFileListForDirectory(driveId: Int, parentId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileListForDirectory(driveId: driveId, parentId: parentId, sortType: sortType))\(pagination(page: page))"
+    public func rootFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
+        try await perform(request: authenticatedRequest(.rootFiles(drive: drive).paginated(page: page).sorted(by: [.type, sortType])))
+    }
 
-        makeRequest(url, method: .get, completion: completion)
+    public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ) async throws -> (data: [File], responseAt: Int?) {
+        try await perform(request: authenticatedRequest(.files(of: directory).paginated(page: page).sorted(by: [.type, sortType])))
+    }
+
+    public func fileInfo(_ file: AbstractFile) async throws -> (data: File, responseAt: Int?) {
+        try await perform(request: authenticatedRequest(.fileInfo(file)))
     }
 
     public func getFavoriteFiles(driveId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
@@ -265,12 +270,6 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func deleteInvitation(drive: AbstractDrive, invitation: ExternInvitationFileAccess) async throws -> Bool {
         try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .delete)).data
-    }
-
-    public func getFileDetail(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.getFileDetail(driveId: driveId, fileId: fileId)
-
-        makeRequest(url, method: .get, completion: completion)
     }
 
     public func getFileDetailActivity(file: File, page: Int, completion: @escaping (ApiResponse<[FileDetailActivity]>?, Error?) -> Void) {
