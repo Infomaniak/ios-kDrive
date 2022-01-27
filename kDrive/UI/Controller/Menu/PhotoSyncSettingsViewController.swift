@@ -84,6 +84,8 @@ class PhotoSyncSettingsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.dontShowBackButtonText()
+
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
