@@ -327,7 +327,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                     setNavbarStandard()
                 }
             case .text, .presentation, .spreadsheet:
-                if currentFile.rights?.write ?? false {
+                if currentFile.capabilities.canWrite {
                     setNavbarForEditing()
                 } else {
                     setNavbarStandard()
@@ -681,7 +681,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.previewDelegate = self
                 return cell
             }
-        } else if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
+        } else if file.hasThumbnail == true && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             if let downloadOperation = currentDownloadOperation,
                let progress = downloadOperation.task?.progress,
