@@ -340,9 +340,7 @@
                             <constraint firstItem="hzs-gF-i3p" firstAttribute="top" secondItem="Hjz-3J-y1V" secondAttribute="bottom" id="s4g-Ag-twL"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="0f8-nc-6CP">
-                        <barButtonItem key="backBarButtonItem" title=" " id="m0Y-zd-9KL"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="0f8-nc-6CP"/>
                     <connections>
                         <outlet property="collectionView" destination="qIU-Hu-Zbx" id="ToR-sc-C7Q"/>
                         <outlet property="statusBarView" destination="Hjz-3J-y1V" id="xvj-CC-mlT"/>

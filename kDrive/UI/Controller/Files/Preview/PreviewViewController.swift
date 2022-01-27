@@ -95,6 +95,9 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.title = currentFile.name
+        navigationItem.dontShowBackButtonText()
+
         collectionView.register(cellView: NoPreviewCollectionViewCell.self)
         collectionView.register(cellView: DownloadingPreviewCollectionViewCell.self)
         collectionView.register(cellView: ImagePreviewCollectionViewCell.self)
