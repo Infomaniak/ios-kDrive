@@ -155,7 +155,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func setThumbnailFor(file: File) {
         let fileId = file.id
-        if (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail {
+        if (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail == true {
             logoImage.image = nil
             logoImage.contentMode = .scaleAspectFill
             logoImage.layer.cornerRadius = UIConstants.imageCornerRadius
@@ -206,10 +206,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
 
         let formattedDate: String
-        if let deletedAtDate = file.deletedAtDate {
-            formattedDate = Constants.formatFileDeletionRelativeDate(deletedAtDate)
+        if let deletedAt = file.deletedAt {
+            formattedDate = Constants.formatFileDeletionRelativeDate(deletedAt)
         } else {
-            formattedDate = Constants.formatFileLastModifiedRelativeDate(file.lastModifiedDate)
+            formattedDate = Constants.formatFileLastModifiedRelativeDate(file.lastModifiedAt)
         }
 
         if file.type == "file" {
@@ -230,7 +230,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         logoImage.image = trashedFile.icon
         logoImage.tintColor = trashedFile.tintColor
 
-        let formattedDate = Constants.formatFileLastModifiedDate(trashedFile.lastModifiedDate)
+        let formattedDate = Constants.formatFileLastModifiedDate(trashedFile.lastModifiedAt)
 
         if trashedFile.type == "file" {
             accessoryImage?.isHidden = true

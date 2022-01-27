@@ -112,14 +112,14 @@ class MultipleSelectionViewController: UIViewController {
 
     final func updateSelectionButtons(selectAll: Bool = false) {
         let notEmpty = !selectedItems.isEmpty || selectAll
-        let canMove = selectedItems.allSatisfy { $0.rights?.move ?? false }
+        let canMove = selectedItems.allSatisfy { $0.capabilities.canMove }
         let isInTrash: Bool
         #if ISEXTENSION
         isInTrash = false
         #else
         isInTrash = self is TrashViewController
         #endif
-        let canDelete = isInTrash || selectedItems.allSatisfy { $0.rights?.delete ?? false }
+        let canDelete = isInTrash || selectedItems.allSatisfy { $0.capabilities.canDelete }
         setSelectionButtonsEnabled(moveEnabled: notEmpty && canMove, deleteEnabled: notEmpty && canDelete, moreEnabled: notEmpty)
     }
 
