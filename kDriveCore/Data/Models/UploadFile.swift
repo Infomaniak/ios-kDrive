@@ -198,15 +198,8 @@ public class UploadFile: Object {
                 }
             }
         } else if let url = pathURL {
-            let request = QLThumbnailGenerator.Request(
-                fileAt: url,
-                size: thumbnailSize,
-                scale: UIScreen.main.scale,
-                representationTypes: [.lowQualityThumbnail, .thumbnail])
-            QLThumbnailGenerator.shared.generateRepresentations(for: request) { image, _, _ in
-                if let image = image {
-                    completion(image.uiImage)
-                }
+            FileHelper.instance.getThumbnail(url: url, thumbnailSize: thumbnailSize) { image in
+                completion(image)
             }
         }
     }
