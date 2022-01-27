@@ -38,8 +38,9 @@ extension SelectSwitchDriveDelegate {
                 return
             }
 
-            currentDriveFileManager.getFile(id: DriveFileManager.constants.rootID) { [weak self] _, _, _ in
-                (self?.tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
+            Task {
+                _ = try await currentDriveFileManager.file(id: DriveFileManager.constants.rootID)
+                await (tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
             }
         }
     }

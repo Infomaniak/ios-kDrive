@@ -57,7 +57,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
     override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
         super.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
         iconImageView.isHidden = file.isDirectory
-        if file.isDirectory || !file.hasThumbnail {
+        if file.isDirectory || file.hasThumbnail == false {
             logoImage.isHidden = true
             largeIconImageView.isHidden = false
             moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
@@ -82,7 +82,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
                 self.largeIconImageView.image = image
             }
         }
-        timeLabel.text = Constants.formatDate(file.lastModifiedDate, style: .datetime, relative: true)
+        timeLabel.text = Constants.formatDate(file.lastModifiedAt, style: .datetime, relative: true)
     }
 
     override func setThumbnailFor(file: File) {

@@ -93,7 +93,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             Task {
                 do {
                     try await withThrowingTaskGroup(of: Void.self) { group in
-                        for file in files where file.rights?.canFavorite ?? false {
+                        for file in files where file.capabilities.canUseFavorite {
                             group.addTask {
                                 try await self.driveFileManager.setFavorite(file: file, favorite: !isFavorite)
                                 await MainActor.run {

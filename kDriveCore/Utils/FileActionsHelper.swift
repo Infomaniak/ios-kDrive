@@ -45,7 +45,7 @@ public class FileActionsHelper {
             if FileManager.default.fileExists(atPath: fileUrl.path) {
                 let attributes = try FileManager.default.attributesOfItem(atPath: fileUrl.path)
                 let modificationDate = attributes[.modificationDate] as? Date ?? Date(timeIntervalSince1970: 0)
-                if file.lastModifiedDate > modificationDate {
+                if file.lastModifiedAt > modificationDate {
                     try FileManager.default.removeItem(at: fileUrl)
                 } else {
                     shouldCopy = false

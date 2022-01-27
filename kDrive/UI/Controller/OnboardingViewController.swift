@@ -235,7 +235,8 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
             do {
                 _ = try await AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
                 // Download root file
-                AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
+                Task {
+                    _ = try await AccountManager.instance.currentDriveFileManager?.file(id: DriveFileManager.constants.rootID)
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
                     MatomoUtils.connectUser()

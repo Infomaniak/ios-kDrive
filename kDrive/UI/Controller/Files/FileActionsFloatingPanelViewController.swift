@@ -222,15 +222,15 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         quickActions.forEach { action in
             switch action {
             case .shareAndRights:
-                if file.rights?.share != true || offline {
+                if !file.capabilities.canShare || offline {
                     action.isEnabled = false
                 }
             case .shareLink:
-                if (file.rights?.canBecomeLink != true || offline) && file.shareLink == nil && file.visibility != .isCollaborativeFolder {
+                if (!file.capabilities.canBecomeSharelink || offline) /* && file.shareLink == nil && file.visibility != .isCollaborativeFolder */ {
                     action.isEnabled = false
                 }
             case .add:
-                if file.rights?.createNewFile != true || file.rights?.createNewFolder != true {
+                if !file.capabilities.canCreateFile || !file.capabilities.canCreateDirectory {
                     action.isEnabled = false
                 }
             default:
@@ -241,35 +241,35 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         actions = (file.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions).filter { action in
             switch action {
             case .openWith:
-                return file.rights?.write == true
+                return file.capabilities.canWrite
             case .edit:
-                return file.isOfficeFile && file.rights?.write == true
+                return file.isOfficeFile && file.capabilities.canWrite
             case .manageCategories:
                 return driveFileManager.drive.categoryRights.canPutCategoryOnFile && !file.isDisabled
             case .favorite:
-                return file.rights?.canFavorite == true && !sharedWithMe
+                return file.capabilities.canUseFavorite && !sharedWithMe
             case .convertToDropbox:
-                return file.rights?.canBecomeCollab == true
+                return file.capabilities.canBecomeDropbox
             case .manageDropbox:
-                return file.visibility == .isCollaborativeFolder
+                return false // file.visibility == .isCollaborativeFolder
             case .folderColor:
-                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace && !file.isDisabled
+                return !sharedWithMe && file.visibilityType != .isSharedSpace && file.visibilityType != .isTeamSpace && !file.isDisabled
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
                 return !sharedWithMe
             case .download:
-                return file.rights?.read == true
+                return file.capabilities.canRead
             case .move:
-                return file.rights?.move == true && !sharedWithMe
+                return file.capabilities.canMove && !sharedWithMe
             case .duplicate:
-                return !sharedWithMe && file.rights?.read == true && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
+                return !sharedWithMe && file.capabilities.canRead && file.visibilityType != .isSharedSpace && file.visibilityType != .isTeamSpace
             case .rename:
-                return file.rights?.rename == true && !sharedWithMe
+                return file.capabilities.canRename && !sharedWithMe
             case .delete:
-                return file.rights?.delete == true
+                return file.capabilities.canDelete
             case .leaveShare:
-                return file.rights?.leave == true
+                return file.capabilities.canLeave
             default:
                 return true
             }
@@ -319,7 +319,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(shareVC, animated: true)
             dismiss(animated: true)
         case .shareLink:
-            if file.visibility == .isCollaborativeFolder {
+            /* if file.visibility == .isCollaborativeFolder {
                 // Copy drop box link
                 setLoading(true, action: action, at: indexPath)
                 Task {
@@ -334,7 +334,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             } else if let link = file.shareLink {
                 // Copy share link
                 copyShareLinkToPasteboard(link)
-            } else {
+            } else { */
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
                 Task {
@@ -357,7 +357,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         }
                     }
                 }
-            }
+            // }
         case .openWith:
             let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
             if file.isMostRecentDownloaded {
@@ -774,7 +774,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
 
 extension FileActionsFloatingPanelViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        guard Self.sections[indexPath.section] == .header, file.rights?.move == true && !sharedWithMe else {
+        guard Self.sections[indexPath.section] == .header, file.capabilities.canMove && !sharedWithMe else {
             return []
         }
 

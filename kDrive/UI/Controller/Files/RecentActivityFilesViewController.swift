@@ -100,9 +100,9 @@ class RecentActivityFilesViewController: FileListViewController {
             case .newer:
                 return firstFile.lastModifiedAt > secondFile.lastModifiedAt
             case .biggest:
-                return firstFile.size > secondFile.size
+                return firstFile.size ?? 0 > secondFile.size ?? 0
             case .smallest:
-                return firstFile.size < secondFile.size
+                return firstFile.size ?? 0 < secondFile.size ?? 0
             default:
                 return true
             }
