@@ -81,7 +81,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
     }
 
     func configureWith(shareLink: ShareLink?, file: File, insets: Bool = true) {
-        selectionStyle = file.visibility == .isCollaborativeFolder ? .none : .default
+        // selectionStyle = file.visibility == .isCollaborativeFolder ? .none : .default
         if insets {
             leadingConstraint.constant = 24
             trailingConstraint.constant = 24
@@ -102,13 +102,13 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareLinkStackView.isHidden = false
             url = link.url
             shareIconImageView.image = KDriveResourcesAsset.unlock.image
-        } else if file.visibility == .isCollaborativeFolder {
+        } /* else if file.visibility == .isCollaborativeFolder {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkDescription
             shareLinkStackView.isHidden = true
             rightArrow.isHidden = true
             shareIconImageView.image = KDriveResourcesAsset.folderDropBox.image
-        } else {
+        } */ else {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
             shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort
             shareLinkStackView.isHidden = true

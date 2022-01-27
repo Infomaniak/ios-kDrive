@@ -18,7 +18,6 @@
 
 import Foundation
 
-enum FileType: String, Codable {
-    case file
-    case dir
+public enum FileType: String {
+    case file, dir
 }

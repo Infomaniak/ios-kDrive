@@ -21,77 +21,78 @@ import Foundation
 import RealmSwift
 
 public class Rights: EmbeddedObject, Codable {
-    @Persisted public var show: Bool
-    @Persisted public var read: Bool
-    @Persisted public var write: Bool
-    @Persisted public var share: Bool
-    @Persisted public var leave: Bool
-    @Persisted public var delete: Bool
-    @Persisted public var rename: Bool
-    @Persisted public var move: Bool
-    @Persisted public var createNewFolder: Bool
-    @Persisted public var createNewFile: Bool
-    @Persisted public var uploadNewFile: Bool
-    @Persisted public var moveInto: Bool
-    @Persisted public var canBecomeCollab: Bool
-    @Persisted public var canBecomeLink: Bool
-    @Persisted public var canFavorite: Bool
+    /// Right to see information
+    @Persisted public var canShow: Bool
+    /// Right to read content
+    @Persisted public var canRead: Bool
+    /// Right to write
+    @Persisted public var canWrite: Bool
+    /// Right to share or manage access
+    @Persisted public var canShare: Bool
+    /// Right to leave shared file
+    @Persisted public var canLeave: Bool
+    /// Right to delete
+    @Persisted public var canDelete: Bool
+    /// Right to rename
+    @Persisted public var canRename: Bool
+    /// Right to move
+    @Persisted public var canMove: Bool
+    /// Right to share file by link
+    @Persisted public var canBecomeSharelink: Bool
+    /// Right to set file as favorite
+    @Persisted public var canUseFavorite: Bool
+    /// Right to use and give team access
+    @Persisted public var canUseTeam: Bool
 
-    public required init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        show = try values.decodeIfPresent(Bool.self, forKey: .show) ?? false
-        read = try values.decodeIfPresent(Bool.self, forKey: .read) ?? false
-        write = try values.decodeIfPresent(Bool.self, forKey: .write) ?? false
-        share = try values.decodeIfPresent(Bool.self, forKey: .share) ?? false
-        leave = try values.decodeIfPresent(Bool.self, forKey: .leave) ?? false
-        delete = try values.decodeIfPresent(Bool.self, forKey: .delete) ?? false
-        rename = try values.decodeIfPresent(Bool.self, forKey: .rename) ?? false
-        move = try values.decodeIfPresent(Bool.self, forKey: .move) ?? false
-        createNewFolder = try values.decodeIfPresent(Bool.self, forKey: .createNewFolder) ?? false
-        createNewFile = try values.decodeIfPresent(Bool.self, forKey: .createNewFile) ?? false
-        uploadNewFile = try values.decodeIfPresent(Bool.self, forKey: .uploadNewFile) ?? false
-        moveInto = try values.decodeIfPresent(Bool.self, forKey: .moveInto) ?? false
-        canBecomeCollab = try values.decodeIfPresent(Bool.self, forKey: .canBecomeCollab) ?? false
-        canBecomeLink = try values.decodeIfPresent(Bool.self, forKey: .canBecomeLink) ?? false
-        canFavorite = try values.decodeIfPresent(Bool.self, forKey: .canFavorite) ?? false
-    }
-
-    override public init() {}
+    // Directory capabilities
+    /// Right to add new child directory
+    @Persisted public var canCreateDirectory: Bool
+    /// Right to add new child file
+    @Persisted public var canCreateFile: Bool
+    /// Right to upload a child file
+    @Persisted public var canUpload: Bool
+    /// Right to move directory
+    @Persisted public var canMoveInto: Bool
+    /// Right to use convert directory into dropbox
+    @Persisted public var canBecomeDropbox: Bool
 
     enum CodingKeys: String, CodingKey {
-        case show
-        case read
-        case write
-        case share
-        case leave
-        case delete
-        case rename
-        case move
-        case createNewFolder = "new_folder"
-        case createNewFile = "new_file"
-        case uploadNewFile = "upload_new_file"
-        case moveInto = "move_into"
-        case canBecomeCollab = "can_become_collab"
-        case canBecomeLink = "can_become_link"
-        case canFavorite = "can_favorite"
+        case canShow = "can_show"
+        case canRead = "can_read"
+        case canWrite = "can_write"
+        case canShare = "can_share"
+        case canLeave = "can_leave"
+        case canDelete = "can_delete"
+        case canRename = "can_rename"
+        case canMove = "can_move"
+        case canBecomeSharelink = "can_become_sharelink"
+        case canUseFavorite = "can_use_favorite"
+        case canUseTeam = "can_use_team"
+        case canCreateDirectory = "can_create_directory"
+        case canCreateFile = "can_create_file"
+        case canUpload = "can_upload"
+        case canMoveInto = "can_move_into"
+        case canBecomeDropbox = "can_become_dropbox"
     }
 }
 
 extension Rights: ContentEquatable {
     public func isContentEqual(to source: Rights) -> Bool {
-        return show == source.show
-            && read == source.read
-            && write == source.write
-            && share == source.share
-            && leave == source.leave
-            && delete == source.delete
-            && rename == source.rename
-            && move == source.move
-            && createNewFolder == source.createNewFolder
-            && createNewFile == source.createNewFile
-            && uploadNewFile == source.uploadNewFile
-            && moveInto == source.moveInto
-            && canBecomeCollab == source.canBecomeCollab
-            && canBecomeLink == source.canBecomeLink
+        return canShow == source.canShow
+            && canRead == source.canRead
+            && canWrite == source.canWrite
+            && canShare == source.canShare
+            && canLeave == source.canLeave
+            && canDelete == source.canDelete
+            && canRename == source.canRename
+            && canMove == source.canMove
+            && canBecomeSharelink == source.canBecomeSharelink
+            && canUseFavorite == source.canUseFavorite
+            && canUseTeam == source.canUseTeam
+            && canCreateDirectory == source.canCreateDirectory
+            && canCreateFile == source.canCreateFile
+            && canUpload == source.canUpload
+            && canMoveInto == source.canMoveInto
+            && canBecomeDropbox == source.canBecomeDropbox
     }
 }

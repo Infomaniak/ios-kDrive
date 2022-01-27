@@ -187,7 +187,7 @@ public class FileImportHelper {
     }
 
     public func upload(files: [ImportedFile], in directory: File, drive: Drive) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
+        guard directory.capabilities.canUpload else {
             throw ImportError.accessDenied
         }
 
@@ -204,7 +204,7 @@ public class FileImportHelper {
     }
 
     public func upload(photo: UIImage, name: String, format: PhotoFileFormat, in directory: File, drive: Drive) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
+        guard directory.capabilities.canUpload else {
             throw ImportError.accessDenied
         }
 
@@ -232,7 +232,7 @@ public class FileImportHelper {
     }
 
     public func upload(videoUrl: URL, name: String, in directory: File, drive: Drive) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
+        guard directory.capabilities.canUpload else {
             throw ImportError.accessDenied
         }
 
@@ -243,7 +243,7 @@ public class FileImportHelper {
     }
 
     public func upload(scan: VNDocumentCameraScan, name: String, scanType: ScanFileFormat, in directory: File, drive: Drive) throws {
-        if let uploadNewFile = directory.rights?.uploadNewFile, !uploadNewFile {
+        if !directory.capabilities.canUpload {
             throw ImportError.accessDenied
         }
 
