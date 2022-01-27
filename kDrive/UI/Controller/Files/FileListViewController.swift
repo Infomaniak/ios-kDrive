@@ -141,11 +141,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         setTitle()
 
-        if #available(iOS 14.0, *) {
-            navigationItem.backButtonDisplayMode = .minimal
-        } else {
-            navigationItem.backButtonTitle = ""
-        }
+        navigationItem.dontShowBackButtonText()
 
         // Set up collection view
         collectionView.register(cellView: FileCollectionViewCell.self)
