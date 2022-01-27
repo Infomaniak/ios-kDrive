@@ -61,28 +61,26 @@ class FileDetailViewController: UIViewController {
             if fileAccess != nil || !file.users.isEmpty {
                 rows.append(.users)
             }
-            if file.rights?.share ?? false {
+            if file.capabilities.canShare {
                 rows.append(.share)
             }
             if categoryRights.canReadCategoryOnFile {
                 rows.append(.categories)
             }
             rows.append(.owner)
-            if file.fileCreatedAtDate != nil {
+            if file.createdAt != nil {
                 rows.append(.creation)
             }
-            if file.createdAtDate != nil {
-                rows.append(.added)
-            }
-            if fileAccess != nil || !file.path.isEmpty {
+            rows.append(.added)
+            if file.path?.isEmpty == false {
                 rows.append(.location)
             }
             if file.size != 0 {
                 rows.append(.size)
             }
-            if file.sizeWithVersion != 0 {
+            /* if file.sizeWithVersion != 0 {
                 rows.append(.sizeAll)
-            }
+            } */
             return rows
         }
     }
@@ -97,7 +95,7 @@ class FileDetailViewController: UIViewController {
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || !file.hasThumbnail {
+        if (tableView != nil && tableView.contentOffset.y > 0) || UIDevice.current.orientation.isLandscape || file.hasThumbnail == false {
             return .default
         } else {
             return .lightContent
@@ -106,7 +104,7 @@ class FileDetailViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.navigationBar.tintColor = tableView.contentOffset.y == 0 && UIDevice.current.orientation.isPortrait && file.hasThumbnail ? .white : nil
+        navigationController?.navigationBar.tintColor = tableView.contentOffset.y == 0 && UIDevice.current.orientation.isPortrait && file.hasThumbnail == true ? .white : nil
         let navigationBarAppearanceStandard = UINavigationBarAppearance()
         navigationBarAppearanceStandard.configureWithTransparentBackground()
         navigationBarAppearanceStandard.backgroundColor = KDriveResourcesAsset.backgroundColor.color
@@ -191,10 +189,8 @@ class FileDetailViewController: UIViewController {
     private func loadFileInformation() {
         let group = DispatchGroup()
         group.enter()
-        driveFileManager.getFile(id: file.id, withExtras: true) { file, _, _ in
-            if let file = file {
-                self.file = file
-            }
+        Task {
+            self.file = try await driveFileManager.file(id: file.id, forceRefresh: true)
             group.leave()
         }
         group.enter()
@@ -233,7 +229,7 @@ class FileDetailViewController: UIViewController {
             if let data = response?.data {
                 self.orderActivities(data: data)
                 self.activitiesInfo.page += 1
-                self.activitiesInfo.hasNextPage = data.count == DriveApiFetcher.itemPerPage
+                self.activitiesInfo.hasNextPage = data.count == Endpoint.itemsPerPage
             }
             self.activitiesInfo.isLoading = false
         }
@@ -255,7 +251,7 @@ class FileDetailViewController: UIViewController {
                 }
 
                 self.commentsInfo.page += 1
-                self.commentsInfo.hasNextPage = comments.count == DriveApiFetcher.itemPerPage
+                self.commentsInfo.hasNextPage = comments.count == Endpoint.itemsPerPage
                 if self.currentTab == .comments {
                     self.reloadTableView()
                 }
@@ -428,7 +424,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            if !file.hasThumbnail {
+            if file.hasThumbnail == false {
                 let cell = tableView.dequeueReusableCell(type: FileDetailHeaderAltTableViewCell.self, for: indexPath)
                 cell.delegate = self
                 cell.configureWith(file: file)
@@ -448,7 +444,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     if let fileAccess = fileAccess {
                         cell.fileAccessElements = fileAccess.teams + fileAccess.users
                     }
-                    cell.shareButton.isHidden = !(file.rights?.share ?? false)
+                    cell.shareButton.isHidden = !file.capabilities.canShare
                     cell.delegate = self
                     cell.collectionView.reloadData()
                     return cell
@@ -470,7 +466,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .creation:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosCreationDateTitle
-                    if let creationDate = file.fileCreatedAtDate {
+                    if let creationDate = file.createdAt {
                         cell.creationLabel.text = Constants.formatDate(creationDate)
                     } else {
                         cell.creationLabel.text = nil
@@ -479,11 +475,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .added:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosAddedDateTitle
-                    if let creationDate = file.createdAtDate {
-                        cell.creationLabel.text = Constants.formatDate(creationDate)
-                    } else {
-                        cell.creationLabel.text = nil
-                    }
+                    cell.creationLabel.text = Constants.formatDate(file.addedAt)
                     return cell
                 case .location:
                     let cell = tableView.dequeueReusableCell(type: FileInformationLocationTableViewCell.self, for: indexPath)
@@ -543,8 +535,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let canBecomeLink = file?.rights?.canBecomeLink ?? false
-        if currentTab == .informations && fileInformationRows[indexPath.row] == .share && (file.visibility != .isCollaborativeFolder) && (canBecomeLink || file.shareLink != nil) {
+        let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .share /* && (file.visibility != .isCollaborativeFolder) && (canBecomeLink || file.shareLink != nil) */ {
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
@@ -670,7 +662,7 @@ extension FileDetailViewController {
                 navigationController?.navigationBar.tintColor = nil
             } else {
                 title = ""
-                navigationController?.navigationBar.tintColor = file.hasThumbnail ? .white : nil
+                navigationController?.navigationBar.tintColor = file.hasThumbnail == true ? .white : nil
             }
         } else {
             title = scrollView.contentOffset.y > 200 ? file.name : ""

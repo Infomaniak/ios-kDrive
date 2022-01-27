@@ -42,14 +42,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/file/\(parentId)?\(with)"
     }
 
-    static func getFileListForDirectory(driveId: Int, parentId: Int, sortType: SortType) -> String {
-        return "\(driveApiUrl)\(driveId)/file/\(parentId)?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
-    }
-
-    static func getFileDetail(driveId: Int, fileId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/\(fileId)?with=parent,extras,user,rights,collaborative_folder,share_link,mobile,categories"
-    }
-
     static func getMyShared(driveId: Int, sortType: SortType) -> String {
         return "\(driveApiUrl)\(driveId)/file/my_shared?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }

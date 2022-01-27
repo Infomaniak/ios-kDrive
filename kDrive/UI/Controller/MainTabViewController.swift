@@ -142,10 +142,9 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
            directory.id >= DriveFileManager.constants.rootID {
             completion(driveFileManager, directory)
         } else {
-            driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
-                if let file = file {
-                    completion(self.driveFileManager, file)
-                }
+            Task {
+                let file = try await driveFileManager.file(id: DriveFileManager.constants.rootID)
+                completion(self.driveFileManager, file)
             }
         }
     }
@@ -188,7 +187,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         getCurrentDirectory { _, currentDirectory in
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.rights?.createNewFile ?? false
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.capabilities.canCreateFile
         }
     }
 }

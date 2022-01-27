@@ -44,11 +44,12 @@ class FilePresenter {
             }
             present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
         } else if file.parentId != 0 {
-            driveFileManager.getFile(id: file.parentId) { parent, _, error in
-                if let parent = parent {
-                    self.present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
+            Task {
+                do {
+                    let parent = try await driveFileManager.file(id: file.parentId)
+                    present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
         } else {

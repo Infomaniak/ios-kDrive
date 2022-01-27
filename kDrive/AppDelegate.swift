@@ -393,7 +393,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     // Compare modification date
                     let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
                     let modificationDate = attributes?[.modificationDate] as? Date ?? Date(timeIntervalSince1970: 0)
-                    if modificationDate > file.lastModifiedDate {
+                    if modificationDate > file.lastModifiedAt {
                         // Copy and upload file
                         let uploadFile = UploadFile(parentDirectoryId: file.parentId,
                                                     userId: accountManager.currentUserId,
@@ -410,10 +410,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                 DDLogError("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)")
                             } else {
                                 // Update file to get the new modification date
-                                driveFileManager.getFile(id: fileId, forceRefresh: true) { file, _, _ in
-                                    if let file = file {
-                                        driveFileManager.notifyObserversWith(file: file)
-                                    }
+                                Task {
+                                    let file = try await driveFileManager.file(id: fileId, forceRefresh: true)
+                                    driveFileManager.notifyObserversWith(file: file)
                                 }
                             }
                             group.leave()
@@ -459,10 +458,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                 switch activity.action {
                                 case .fileRename:
                                     // Rename file
-                                    driveFileManager.getFile(id: file.id, withExtras: true) { newFile, _, _ in
-                                        if let newFile = newFile {
-                                            try? driveFileManager.renameCachedFile(updatedFile: newFile, oldFile: file)
-                                        }
+                                    Task {
+                                        let newFile = try await driveFileManager.file(id: file.id, forceRefresh: true)
+                                        try? driveFileManager.renameCachedFile(updatedFile: newFile, oldFile: file)
                                     }
                                 case .fileUpdate:
                                     // Download new version

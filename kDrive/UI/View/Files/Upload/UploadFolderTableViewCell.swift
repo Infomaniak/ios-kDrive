@@ -43,8 +43,8 @@ class UploadFolderTableViewCell: InsetTableViewCell {
             iconImageView.image = KDriveResourcesAsset.folderFilled.image
             iconImageView.tintColor = nil
             folderLabel.text = folder.name
-            subtitleLabel.text = folder.path.isEmpty ? nil : folder.path
-            subtitleLabel.isHidden = folder.path.isEmpty
+            subtitleLabel.text = folder.path
+            subtitleLabel.isHidden = folder.path?.isEmpty != false
         }
         progressView.enableIndeterminate()
     }

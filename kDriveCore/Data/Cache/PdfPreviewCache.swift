@@ -30,7 +30,7 @@ public class PdfPreviewCache {
     private func isLocalVersionOlderThanRemote(for file: File) -> Bool {
         do {
             if let modifiedDate = try FileManager.default.attributesOfItem(atPath: pdfPreviewUrl(for: file).path)[.modificationDate] as? Date {
-                if modifiedDate >= Date(timeIntervalSince1970: TimeInterval(file.lastModifiedAt)) {
+                if modifiedDate >= file.lastModifiedAt {
                     return false
                 }
             }
