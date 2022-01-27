@@ -23,13 +23,13 @@ import UIKit
 public enum IconUtils {
     public static func getIcon(for file: File) -> UIImage {
         if file.isDirectory {
-            switch file.visibility {
+            switch file.visibilityType {
             case .isTeamSpace:
                 return KDriveResourcesAsset.folderCommonDocuments.image
             case .isSharedSpace:
                 return KDriveResourcesAsset.folderShared.image
-            case .isCollaborativeFolder:
-                return KDriveResourcesAsset.folderDropBox1.image
+            // case .isCollaborativeFolder:
+            //     return KDriveResourcesAsset.folderDropBox1.image
             default:
                 return (file.isDisabled ? KDriveResourcesAsset.folderDisable : KDriveResourcesAsset.folderFill).image
             }
@@ -40,13 +40,13 @@ public enum IconUtils {
 
     public static func getThumbnail(for file: File, completion: @escaping ((UIImage, Bool) -> Void)) {
         if file.isDirectory {
-            switch file.visibility {
+            switch file.visibilityType {
             case .isTeamSpace:
                 completion(KDriveResourcesAsset.folderCommonDocuments.image, false)
             case .isSharedSpace:
                 completion(KDriveResourcesAsset.folderShared.image, false)
-            case .isCollaborativeFolder:
-                completion(KDriveResourcesAsset.folderDropBox1.image, false)
+            // case .isCollaborativeFolder:
+            //     completion(KDriveResourcesAsset.folderDropBox1.image, false)
             default:
                 if file.isDisabled {
                     completion(KDriveResourcesAsset.folderDisable.image, false)
@@ -55,7 +55,7 @@ public enum IconUtils {
                 }
             }
         } else {
-            if file.hasThumbnail, let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
+            if file.hasThumbnail == true, let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
                 KingfisherManager.shared.retrieveImage(with: file.thumbnailURL, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
                     if let image = try? result.get().image {
                         completion(image, true)

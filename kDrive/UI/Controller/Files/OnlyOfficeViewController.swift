@@ -35,7 +35,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
     class func open(driveFileManager: DriveFileManager, file: File, viewController: UIViewController) {
         guard file.isOfficeFile else { return }
 
-        if let newExtension = file.onlyOfficeConvertExtension {
+        if let newExtension = file.conversion?.onylofficeExtension {
             let driveFloatingPanelController = UnsupportedExtensionFloatingPanelViewController.instantiatePanel()
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.notSupportedExtensionDescription(file.name), boldText: file.name, color: KDriveResourcesAsset.titleColor.color)
             guard let floatingPanelViewController = driveFloatingPanelController.contentViewController as? UnsupportedExtensionFloatingPanelViewController else { return }

@@ -34,7 +34,7 @@ enum ApiEnvironment {
 }
 
 public struct Endpoint {
-    static let itemsPerPage = 200
+    public static let itemsPerPage = 200
 
     let path: String
     let queryItems: [URLQueryItem]?
@@ -118,7 +118,8 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static let withQueryItem = URLQueryItem(name: "with", value: "parents,capabilities,dropbox,is_favorite,mobile,sharelink,categories")
+    private static let fileMinimalWithQueryItems = URLQueryItem(name: "with", value: "capabilities,dropbox,conversion,sorted_name,parent_id,is_favorite,sharelink,categories")
+    private static let fileExtraWithQueryItems = URLQueryItem(name: "with", value: "capabilities,dropbox,version,conversion,path,sorted_name,parent_id,users,is_favorite,sharelink,categories")
 
     private static var base: Endpoint {
         return Endpoint(path: "/2/drive", apiEnvironment: .preprod)
@@ -245,7 +246,7 @@ public extension Endpoint {
     // MARK: Favorite
 
     static func favorites(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/favorites", queryItems: [withQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files/favorites", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func favorite(file: AbstractFile) -> Endpoint {
@@ -339,27 +340,34 @@ public extension Endpoint {
     // MARK: File/directory
 
     static func fileInfo(_ file: AbstractFile) -> Endpoint {
-        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)", queryItems: [withQueryItem])
+        return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)", queryItems: [fileExtraWithQueryItems])
     }
 
     static func files(of directory: AbstractFile) -> Endpoint {
-        return .fileInfo(directory).appending(path: "/files", queryItems: [withQueryItem])
+        return .fileInfo(directory).appending(path: "/files", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func createDirectory(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/directory", queryItems: [withQueryItem])
+        return .fileInfo(file).appending(path: "/directory", queryItems: [fileExtraWithQueryItems])
     }
 
     static func createFile(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/file", queryItems: [withQueryItem])
+        return .fileInfo(file).appending(path: "/file", queryItems: [fileExtraWithQueryItems])
     }
 
-    static func thumbnail(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/thumbnail")
+    static func thumbnail(file: AbstractFile, at date: Date) -> Endpoint {
+        return .fileInfo(file).appending(path: "/thumbnail", queryItems: [
+            URLQueryItem(name: "t", value: "\(date.timeIntervalSince1970)")
+        ])
     }
 
-    static func preview(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/preview")
+    static func preview(file: AbstractFile, at date: Date) -> Endpoint {
+        return .fileInfo(file).appending(path: "/preview", queryItems: [
+            URLQueryItem(name: "width", value: "2500"),
+            URLQueryItem(name: "height", value: "1500"),
+            URLQueryItem(name: "quality", value: "80"),
+            URLQueryItem(name: "t", value: "\(date.timeIntervalSince1970)")
+        ])
     }
 
     static func download(file: AbstractFile, as asType: String? = nil) -> Endpoint {
@@ -381,7 +389,7 @@ public extension Endpoint {
     }
 
     static func duplicate(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/copy", queryItems: [withQueryItem])
+        return .fileInfo(file).appending(path: "/copy", queryItems: [fileExtraWithQueryItems])
     }
 
     static func copy(file: AbstractFile, destinationId: Int) -> Endpoint {
@@ -427,7 +435,7 @@ public extension Endpoint {
     }
 
     static func rootFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files")
+        return .driveInfo(drive: drive).appending(path: "/files", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func bulkFiles(drive: AbstractDrive) -> Endpoint {
@@ -435,7 +443,7 @@ public extension Endpoint {
     }
 
     static func lastModifiedFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/last_modified", queryItems: [withQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files/last_modified", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func largestFiles(drive: AbstractDrive) -> Endpoint {
@@ -451,7 +459,7 @@ public extension Endpoint {
     }
 
     static func createTeamDirectory(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/team_directory", queryItems: [withQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files/team_directory", queryItems: [fileExtraWithQueryItems])
     }
 
     static func existFiles(drive: AbstractDrive) -> Endpoint {
@@ -463,7 +471,7 @@ public extension Endpoint {
     }
 
     static func mySharedFiles(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/my_shared", queryItems: [withQueryItem])
+        return .driveInfo(drive: drive).appending(path: "/files/my_shared", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func countInRoot(drive: AbstractDrive) -> Endpoint {
@@ -474,7 +482,7 @@ public extension Endpoint {
 
     static func search(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool) -> Endpoint {
         // Query items
-        var queryItems = [withQueryItem]
+        var queryItems = [fileMinimalWithQueryItems]
         if let query = query, !query.isBlank {
             queryItems.append(URLQueryItem(name: "query", value: query))
         }
@@ -528,8 +536,10 @@ public extension Endpoint {
         return .trashedInfo(file: file).appending(path: "/restore")
     }
 
-    static func trashThumbnail(file: AbstractFile) -> Endpoint {
-        return .trashedInfo(file: file).appending(path: "/thumbnail")
+    static func trashThumbnail(file: AbstractFile, at date: Date) -> Endpoint {
+        return .trashedInfo(file: file).appending(path: "/thumbnail", queryItems: [
+            URLQueryItem(name: "t", value: "\(date.timeIntervalSince1970)")
+        ])
     }
 
     static func trashCount(of directory: AbstractFile) -> Endpoint {
