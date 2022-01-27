@@ -55,7 +55,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
             self.loading = false
             if let activities = response?.data {
                 self.empty = self.page == 1 && activities.isEmpty
-                self.moreComing = activities.count == DriveApiFetcher.itemPerPage
+                self.moreComing = activities.count == Endpoint.itemsPerPage
                 self.page += 1
 
                 DispatchQueue.global(qos: .utility).async {

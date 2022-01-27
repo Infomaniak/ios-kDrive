@@ -61,7 +61,7 @@ class NewFolderViewController: UIViewController {
     }
 
     private var permissionSelection: Bool {
-        return currentDirectory?.rights?.share == true
+        return currentDirectory?.capabilities.canShare == true
     }
 
     private enum Section: CaseIterable {
