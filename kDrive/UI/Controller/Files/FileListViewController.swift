@@ -41,7 +41,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     private let leftRightInset = 12.0
     private let gridInnerSpacing = 16.0
-    private let maxDiffChanges = DriveApiFetcher.itemPerPage
+    private let maxDiffChanges = Endpoint.itemsPerPage
     private let headerViewIdentifier = "FilesHeaderView"
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
     private let fileObserverThrottler = Throttler<File>(timeInterval: 5, queue: .global())
@@ -204,7 +204,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.rights?.createNewFile ?? false
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = currentDirectory?.capabilities.canCreateFile ?? false
         #endif
 
         // Refresh data
@@ -243,12 +243,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             return
         }
 
-        driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, children, error in
-            if let fetchedCurrentDirectory = file, let fetchedChildren = children {
-                self?.currentDirectory = fetchedCurrentDirectory.isFrozen ? fetchedCurrentDirectory : fetchedCurrentDirectory.freeze()
-                completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, true)
-            } else {
-                completion(.failure(error ?? DriveError.localError), false, true)
+        Task {
+            do {
+                let children = try await driveFileManager.files(in: currentDirectory, page: page, sortType: sortType, forceRefresh: forceRefresh)
+                completion(.success(children), children.count == Endpoint.itemsPerPage, true)
+            } catch {
+                debugPrint(error)
+                completion(.failure(error), false, true)
             }
         }
     }
@@ -724,11 +725,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             return nil
         }
         var actions = [SwipeCellAction]()
-        let rights = sortedFiles[indexPath.row].rights
-        if rights?.share ?? false {
+        let rights = sortedFiles[indexPath.row].capabilities
+        if rights.canShare {
             actions.append(.share)
         }
-        if rights?.delete ?? false {
+        if rights.canDelete {
             actions.append(.delete)
         }
         return actions
@@ -1135,7 +1136,7 @@ extension FileListViewController: UICollectionViewDragDelegate {
         guard indexPath.item < sortedFiles.count else { return [] }
 
         let draggedFile = sortedFiles[indexPath.item]
-        guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
+        guard draggedFile.capabilities.canMove && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
         }
 
@@ -1158,7 +1159,7 @@ extension FileListViewController: UICollectionViewDragDelegate {
 
 extension FileListViewController: UICollectionViewDropDelegate {
     private func handleDropOverDirectory(_ directory: File, at indexPath: IndexPath) -> UICollectionViewDropProposal {
-        guard directory.rights?.uploadNewFile == true && directory.rights?.moveInto == true else {
+        guard directory.capabilities.canUpload && directory.capabilities.canMoveInto else {
             return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
         }
 
@@ -1266,7 +1267,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
         let destinationDirectory: File
         if let indexPath = coordinator.destinationIndexPath,
            indexPath.row < sortedFiles.count && sortedFiles[indexPath.item].isDirectory &&
-           sortedFiles[indexPath.item].rights?.uploadNewFile == true {
+           sortedFiles[indexPath.item].capabilities.canUpload {
             destinationDirectory = sortedFiles[indexPath.item]
         } else {
             destinationDirectory = currentDirectory

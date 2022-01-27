@@ -193,7 +193,7 @@ class PhotoListViewController: MultipleSelectionViewController {
                 self.pictures += fetchedPictures
                 self.showEmptyView(.noImages)
                 self.page += 1
-                self.hasNextPage = fetchedPictures.count == DriveApiFetcher.itemPerPage
+                self.hasNextPage = fetchedPictures.count == Endpoint.itemsPerPage
             }
             self.isLoading = false
             if self.sections.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
@@ -219,7 +219,7 @@ class PhotoListViewController: MultipleSelectionViewController {
         let sortMode = self.sortMode
         var newSections = replace ? PhotoListViewController.emptySections : sections
         for picture in pictures {
-            let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedDate)
+            let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedAt)
 
             var currentSectionIndex: Int!
             if newSections.last?.model.dateComponents == currentDateComponents {
@@ -227,7 +227,7 @@ class PhotoListViewController: MultipleSelectionViewController {
             } else if let yearMonthIndex = newSections.firstIndex(where: { $0.model.dateComponents == currentDateComponents }) {
                 currentSectionIndex = yearMonthIndex
             } else {
-                newSections.append(Section(model: Group(referenceDate: picture.lastModifiedDate, sortMode: sortMode), elements: []))
+                newSections.append(Section(model: Group(referenceDate: picture.lastModifiedAt, sortMode: sortMode), elements: []))
                 currentSectionIndex = newSections.count - 1
             }
             newSections[currentSectionIndex].elements.append(picture)

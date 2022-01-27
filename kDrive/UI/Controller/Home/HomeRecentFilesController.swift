@@ -108,7 +108,7 @@ class HomeRecentFilesController {
             if let fetchedFiles = fetchedFiles {
                 self.files.append(contentsOf: fetchedFiles)
                 self.empty = self.page == 1 && fetchedFiles.isEmpty
-                self.moreComing = fetchedFiles.count == DriveApiFetcher.itemPerPage
+                self.moreComing = fetchedFiles.count == Endpoint.itemsPerPage
                 self.page += 1
 
                 guard !self.invalidated else {
