@@ -102,7 +102,7 @@ extension DragAndDropFile: NSItemProviderWriting {
             }
             return nil
         } else {
-            if !file.isLocalVersionOlderThanRemote() {
+            if !file.isLocalVersionOlderThanRemote {
                 loadLocalData(for: file.localUrl, completionHandler: completionHandler)
                 return nil
             } else {
