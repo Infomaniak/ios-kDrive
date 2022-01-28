@@ -101,7 +101,7 @@ class FilePresenter {
             }
         } else if file.isBookmark {
             // Open bookmark URL
-            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
+            if file.isDownloaded && !file.isLocalVersionOlderThanRemote {
                 if let url = file.getBookmarkURL() {
                     presentSafariViewController(url: url)
                 } else {
