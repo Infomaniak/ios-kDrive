@@ -47,17 +47,17 @@ class NewFolderTypeTableViewController: UITableViewController {
     func setupFolderType() {
         content = []
         // We can create a private folder if we are not in a team space
-        // if currentDirectory.visibility != .isTeamSpace {
+        if currentDirectory.visibilityType != .isTeamSpace {
             content.append(.folder)
-        // }
+        }
         // We can create a common folder if we have a pro or team drive and the create team folder right
-        // if driveFileManager.drive.isProOrTeam && driveFileManager.drive.canCreateTeamFolder && currentDirectory.visibility != .isTeamSpaceFolder && currentDirectory.visibility != .isInTeamSpaceFolder {
+        if driveFileManager.drive.isProOrTeam && driveFileManager.drive.canCreateTeamFolder && currentDirectory.visibilityType != .isTeamSpaceFolder && currentDirectory.visibilityType != .isInTeamSpaceFolder {
             content.append(.commonFolder)
-        // }
+        }
         // We can create a dropbox if we are not in a team space and not in a shared with me or the drive supports dropboxes
-        // if currentDirectory.visibility != .isTeamSpace && (!driveFileManager.drive.sharedWithMe || driveFileManager.drive.packFunctionality?.dropbox == true) {
+        if currentDirectory.visibilityType != .isTeamSpace && (!driveFileManager.drive.sharedWithMe || driveFileManager.drive.packFunctionality?.dropbox == true) {
             content.append(.dropbox)
-        // }
+        }
         tableView.reloadData()
     }
 
