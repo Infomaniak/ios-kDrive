@@ -540,7 +540,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false
-        if currentTab == .informations && fileInformationRows[indexPath.row] == .share /* && (file.visibility != .isCollaborativeFolder) && (canBecomeLink || file.shareLink != nil) */ {
+        if currentTab == .informations && fileInformationRows[indexPath.row] == .share && !file.isDropbox && (canBecomeLink || file.hasSharelink) {
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
             rightsSelectionViewController.modalPresentationStyle = .fullScreen
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
