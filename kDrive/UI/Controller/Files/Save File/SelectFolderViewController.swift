@@ -47,17 +47,15 @@ class SelectFolderViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        let configuration = Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
-
         super.viewDidLoad()
 
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         setUpDirectory()
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SelectFolder"])
+    override func getViewModel() -> FileListViewModel {
+        let configuration = Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
+        return ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
     private func setUpDirectory() {
