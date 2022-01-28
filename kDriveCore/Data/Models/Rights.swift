@@ -74,6 +74,28 @@ public class Rights: EmbeddedObject, Codable {
         case canMoveInto = "can_move_into"
         case canBecomeDropbox = "can_become_dropbox"
     }
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        canShow = try container.decode(Bool.self, forKey: .canShow)
+        canRead = try container.decode(Bool.self, forKey: .canRead)
+        canWrite = try container.decode(Bool.self, forKey: .canWrite)
+        canShare = try container.decode(Bool.self, forKey: .canShare)
+        canLeave = try container.decode(Bool.self, forKey: .canLeave)
+        canDelete = try container.decode(Bool.self, forKey: .canDelete)
+        canRename = try container.decode(Bool.self, forKey: .canRename)
+        canMove = try container.decode(Bool.self, forKey: .canMove)
+        canBecomeSharelink = try container.decode(Bool.self, forKey: .canBecomeSharelink)
+        canUseFavorite = try container.decode(Bool.self, forKey: .canUseFavorite)
+        canUseTeam = try container.decode(Bool.self, forKey: .canUseTeam)
+        canCreateDirectory = try container.decodeIfPresent(Bool.self, forKey: .canCreateDirectory) ?? false
+        canCreateFile = try container.decodeIfPresent(Bool.self, forKey: .canCreateFile) ?? false
+        canUpload = try container.decodeIfPresent(Bool.self, forKey: .canUpload) ?? false
+        canMoveInto = try container.decodeIfPresent(Bool.self, forKey: .canMoveInto) ?? false
+        canBecomeDropbox = try container.decodeIfPresent(Bool.self, forKey: .canBecomeDropbox) ?? false
+    }
+
+    public override init() {}
 }
 
 extension Rights: ContentEquatable {
