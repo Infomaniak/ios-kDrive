@@ -59,11 +59,11 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
         configure(name: action.name, icon: action.image, tintColor: action.tintColor, isEnabled: action.isEnabled, isLoading: action.isLoading)
         // Configuration
         if action == .shareLink {
-            /* if file.visibility == .isCollaborativeFolder {
+            if file.isDropbox {
                 actionLabel.text = KDriveResourcesStrings.Localizable.buttonCopyLink
-            } else if file.shareLink != nil {
+            } else if file.hasSharelink {
                 actionLabel.text = action.reverseName
-            } */
+            }
         } else if action == .sendCopy {
             configureDownload(with: file, action: action, progress: action.isLoading ? -1 : nil)
         }
