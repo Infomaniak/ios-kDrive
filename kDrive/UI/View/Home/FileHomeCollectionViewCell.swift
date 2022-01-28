@@ -57,7 +57,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
     override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
         super.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
         iconImageView.isHidden = file.isDirectory
-        if file.isDirectory || file.hasThumbnail == false {
+        if file.isDirectory || !file.hasThumbnail {
             logoImage.isHidden = true
             largeIconImageView.isHidden = false
             moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
