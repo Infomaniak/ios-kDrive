@@ -212,9 +212,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
             formattedDate = Constants.formatFileLastModifiedRelativeDate(file.lastModifiedAt)
         }
 
-        if file.type == "file" {
+        if let fileSize = file.getFileSize() {
             stackViewTrailingConstraint?.constant = -12
-            detailLabel?.text = file.getFileSize() + " • " + formattedDate
+            detailLabel?.text = fileSize + " • " + formattedDate
         } else {
             stackViewTrailingConstraint?.constant = 16
             detailLabel?.text = formattedDate
@@ -232,11 +232,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
         let formattedDate = Constants.formatFileLastModifiedDate(trashedFile.lastModifiedAt)
 
-        if trashedFile.type == "file" {
-            accessoryImage?.isHidden = true
-            detailLabel?.text = trashedFile.getFileSize() + " • " + formattedDate
+        accessoryImage?.isHidden = !file.isDirectory
+        if let fileSize = trashedFile.getFileSize() {
+            detailLabel?.text = fileSize + " • " + formattedDate
         } else {
-            accessoryImage?.isHidden = false
             detailLabel?.text = formattedDate
         }
 
