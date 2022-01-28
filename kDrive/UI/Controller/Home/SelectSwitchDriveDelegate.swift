@@ -38,7 +38,9 @@ extension SelectSwitchDriveDelegate {
             }
 
             Task {
-                _ = try await currentDriveFileManager.file(id: DriveFileManager.constants.rootID)
+                // Download root files
+                let root = currentDriveFileManager.getRootFile()
+                _ = try await currentDriveFileManager.files(in: root)
                 await (tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
             }
         }
