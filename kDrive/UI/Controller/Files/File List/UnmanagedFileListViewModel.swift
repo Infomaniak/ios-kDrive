@@ -32,14 +32,26 @@ class UnmanagedFileListViewModel: FileListViewModel {
     override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.files = [File]()
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        driveFileManager.observeFileUpdated(self, fileId: self.currentDirectory.id) { [weak self] _ in
+            // FIXME: this suboptimal, we need to improve observation
+            self?.forceRefresh()
+        }
+    }
+
+    override func forceRefresh() {
+        files.removeAll()
+        super.forceRefresh()
     }
 
     override func getFile(at index: Int) -> File? {
         return index < fileCount ? files[index] : nil
     }
 
-    override func setFile(_ file: File, at index: Int) {
-        files[index] = file
+    func removeFile(file: File) {
+        if let fileIndex = files.firstIndex(where: { $0.id == file.id }) {
+            files.remove(at: fileIndex)
+            onFileListUpdated?([fileIndex], [], [], false)
+        }
     }
 
     override func getAllFiles() -> [File] {

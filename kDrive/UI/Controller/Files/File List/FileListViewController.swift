@@ -112,8 +112,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     private let gridInnerSpacing = 16.0
     private let maxDiffChanges = Endpoint.itemsPerPage
     private let headerViewIdentifier = "FilesHeaderView"
-    private let uploadCountThrottler = Throttler<Int>(timeInterval: 0.5, queue: .main)
-    private let fileObserverThrottler = Throttler<File>(timeInterval: 5, queue: .global())
 
     // MARK: - Configuration
 
@@ -151,9 +149,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
-    private var floatingPanelViewController: DriveFloatingPanelController!
+    private lazy var floatingPanelViewController = DriveFloatingPanelController()
+    private var quickActionsViewController: UIViewController!
+
     #if !ISEXTENSION
-        private var fileInformationsViewController: FileActionsFloatingPanelViewController!
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
 
@@ -307,6 +306,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             guard let self = self else { return }
             self.navigationItem.rightBarButtonItems = rightBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
+
+        viewModel.onPresentViewController = { [weak self] viewController in
+            self?.present(viewController, animated: true)
+        }
+
+        viewModel.onPresentQuickActionPanel = { [weak self] files, type in
+            self?.showQuickActionsPanel(files: files, type: type)
+        }
     }
 
     private func bindUploadCardViewModel() {
@@ -350,43 +357,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
                 self?.collectionView.deselectItem(at: indexPath, animated: false)
             }
-        }
-
-        viewModel.multipleSelectionViewModel?.onSelectMoveDestination = { [weak self] driveFileManager, startDirectory, disabledDirectories in
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager,
-                                                                                                                startDirectory: startDirectory,
-                                                                                                                disabledDirectoriesSelection: disabledDirectories) { [weak self] selectedFolder in
-                self?.viewModel.multipleSelectionViewModel?.moveSelectedItems(to: selectedFolder)
-            }
-            self?.present(selectFolderNavigationController, animated: true)
-        }
-
-        viewModel.multipleSelectionViewModel?.onDeleteConfirmation = { [weak self] message in
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle,
-                                                message: message,
-                                                action: KDriveResourcesStrings.Localizable.buttonMove,
-                                                destructive: true, loading: true) {
-                self?.viewModel.multipleSelectionViewModel?.deleteSelectedItems()
-            }
-            self?.present(alert, animated: true)
-        }
-
-        viewModel.multipleSelectionViewModel?.onMoreButtonPressed = { [weak self] selectedItems in
-            #if !ISEXTENSION
-                guard let self = self else { return }
-                let floatingPanelViewController = DriveFloatingPanelController()
-                let selectViewController = SelectFloatingPanelTableViewController()
-                floatingPanelViewController.isRemovalInteractionEnabled = true
-                selectViewController.files = Array(selectedItems)
-                floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 260)
-                selectViewController.driveFileManager = self.driveFileManager
-                selectViewController.reloadAction = { [unowned self] in
-                    self.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
-                }
-                floatingPanelViewController.set(contentViewController: selectViewController)
-                floatingPanelViewController.track(scrollView: selectViewController.collectionView)
-                self.present(floatingPanelViewController, animated: true)
-            #endif
         }
 
         viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
@@ -451,10 +421,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         viewModel.barButtonPressed(type: sender.type)
     }
 
-    @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
-    }
-
     // MARK: - Overridable methods
 
     func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {}
@@ -474,20 +440,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
             headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
             headerView.uploadCardView.progressView.enableIndeterminate()
-        }
-    }
-
-    func updateChild(_ file: File, at index: Int) {
-        let oldFile = viewModel.getFile(at: index)
-        viewModel.setFile(file, at: index)
-
-        // We don't need to call reload data if only the children were updated
-        if oldFile.isContentEqual(to: file) {
-            return
-        }
-
-        DispatchQueue.main.async { [weak self] in
-            self?.collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
         }
     }
 
@@ -544,22 +496,56 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     private func reloadCollectionView(with files: [File]) {}
 
-    #if !ISEXTENSION
-        private func showQuickActionsPanel(file: File) {
-            if fileInformationsViewController == nil {
-                fileInformationsViewController = FileActionsFloatingPanelViewController()
-                fileInformationsViewController.presentingParent = self
-                fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
-                floatingPanelViewController = DriveFloatingPanelController()
-                floatingPanelViewController.isRemovalInteractionEnabled = true
-                floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
-                floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-                floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
+    func showQuickActionsPanel(files: [File], type: FileListQuickActionType) {
+        #if !ISEXTENSION
+            floatingPanelViewController.isRemovalInteractionEnabled = true
+            switch type {
+            case .file:
+                var fileInformationsViewController = quickActionsViewController as? FileActionsFloatingPanelViewController
+                if fileInformationsViewController == nil {
+                    fileInformationsViewController = FileActionsFloatingPanelViewController()
+                    fileInformationsViewController!.presentingParent = self
+                    fileInformationsViewController!.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
+
+                    floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
+                    floatingPanelViewController.set(contentViewController: fileInformationsViewController!)
+
+                    floatingPanelViewController.track(scrollView: fileInformationsViewController!.collectionView)
+                }
+                if let file = files.first {
+                    fileInformationsViewController?.setFile(file, driveFileManager: driveFileManager)
+                }
+                quickActionsViewController = fileInformationsViewController
+            case .trash:
+                var trashFloatingPanelTableViewController = quickActionsViewController as? TrashFloatingPanelTableViewController
+                if trashFloatingPanelTableViewController == nil {
+                    trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
+                    trashFloatingPanelTableViewController!.delegate = (viewModel as? TrashListViewModel)
+
+                    floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
+                    floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController!)
+                }
+                trashFloatingPanelTableViewController?.trashedFiles = files
+                quickActionsViewController = trashFloatingPanelTableViewController
+            case .multipleSelection:
+                var selectViewController = quickActionsViewController as? SelectFloatingPanelTableViewController
+                if selectViewController == nil {
+                    selectViewController = SelectFloatingPanelTableViewController()
+                    floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 260)
+                    selectViewController!.reloadAction = { [weak self] in
+                        self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+                    }
+
+                    floatingPanelViewController.set(contentViewController: selectViewController!)
+                    floatingPanelViewController.track(scrollView: selectViewController!.collectionView)
+                }
+                selectViewController?.files = files
+                selectViewController?.driveFileManager = driveFileManager
+                quickActionsViewController = selectViewController
             }
-            fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
             present(floatingPanelViewController, animated: true)
-        }
-    #endif
+        #endif
+    }
 
     // MARK: - Multiple selection
 
@@ -833,13 +819,10 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
 
 extension FileListViewController: FileCellDelegate {
     @objc func didTapMoreButton(_ cell: FileCollectionViewCell) {
-        #if !ISEXTENSION
-            guard let indexPath = collectionView.indexPath(for: cell),
-                  let file = viewModel.getFile(at: indexPath.item) else {
-                return
-            }
-            showQuickActionsPanel(file: file)
-        #endif
+        guard let indexPath = collectionView.indexPath(for: cell) else {
+            return
+        }
+        viewModel.didTapMore(at: indexPath.item)
     }
 }
 
