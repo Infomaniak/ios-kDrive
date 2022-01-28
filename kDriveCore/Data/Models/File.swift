@@ -225,6 +225,21 @@ public class FileConversion: EmbeddedObject, Codable {
     }
 }
 
+public class FileVersion: EmbeddedObject, Codable {
+    /// File has multi-version
+    @Persisted public var isMultiple: Bool
+    /// Get number of version
+    @Persisted public var number: Int
+    /// Size of the file with all version (byte unit)
+    @Persisted public var totalSize: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case isMultiple = "is_multiple"
+        case number
+        case totalSize = "total_size"
+    }
+}
+
 public class File: Object, Codable {
     @Persisted(primaryKey: true) public var id: Int = 0
     @Persisted public var parentId: Int
@@ -283,7 +298,7 @@ public class File: Object, Codable {
     /// File type
     @Persisted public var extensionType: String? // ConvertedType
     /// Information when file has multi-version
-    // @Persisted public var version: FileVersion? // Extra property
+    @Persisted public var version: FileVersion? // Extra property
     /// File can be converted to another extension
     @Persisted public var conversion: FileConversion?
 
@@ -325,7 +340,7 @@ public class File: Object, Codable {
         case hasThumbnail = "has_thumbnail"
         case hasOnlyoffice = "has_onlyoffice"
         case extensionType = "extension_type"
-        // case version
+        case version
         case conversion
     }
 
@@ -474,12 +489,12 @@ public class File: Object, Codable {
         IconUtils.getThumbnail(for: self, completion: completion)
     }
 
-    public func getFileSize(withVersion: Bool = false) -> String {
-        var value = size ?? 0
-        /* if withVersion {
-             value = sizeWithVersion
-         } */
-        return Constants.formatFileSize(Int64(value))
+    public func getFileSize(withVersion: Bool = false) -> String? {
+        let value = withVersion ? version?.totalSize : size
+        if let value = value {
+            return Constants.formatFileSize(Int64(value))
+        }
+        return nil
     }
 
     @discardableResult
@@ -570,7 +585,7 @@ public class File: Object, Codable {
         hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail)
         hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice)
         extensionType = try container.decodeIfPresent(String.self, forKey: .extensionType)
-        // version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
+        version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
         conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)
     }
 
