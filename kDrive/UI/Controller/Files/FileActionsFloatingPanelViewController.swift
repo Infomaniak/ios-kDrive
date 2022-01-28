@@ -253,7 +253,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .manageDropbox:
                 return file.isDropbox
             case .folderColor:
-                return !sharedWithMe && file.visibilityType != .isSharedSpace && file.visibilityType != .isTeamSpace && !file.isDisabled
+                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace && !file.isDisabled
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:
@@ -263,7 +263,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .move:
                 return file.capabilities.canMove && !sharedWithMe
             case .duplicate:
-                return !sharedWithMe && file.capabilities.canRead && file.visibilityType != .isSharedSpace && file.visibilityType != .isTeamSpace
+                return !sharedWithMe && file.capabilities.canRead && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
             case .rename:
                 return file.capabilities.canRename && !sharedWithMe
             case .delete:
