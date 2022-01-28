@@ -53,7 +53,7 @@ class FileDetailHeaderTableViewCell: UITableViewCell {
 
     func configureWith(file: File) {
         fileNameLabel.text = file.name
-        fileDetailLabel.text = file.getFileSize() + " • " + Constants.formatFileLastModifiedDate(file.lastModifiedAt)
+        fileDetailLabel.text = file.getFileSize()! + " • " + Constants.formatFileLastModifiedDate(file.lastModifiedAt)
         darkLayer.isHidden = true
 
         fileNameLabel.textColor = .white
