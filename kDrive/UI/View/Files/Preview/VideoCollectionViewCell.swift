@@ -64,7 +64,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
-        if !file.isLocalVersionOlderThanRemote() {
+        if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
