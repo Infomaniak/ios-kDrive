@@ -1366,11 +1366,11 @@ public class DriveFileManager {
                 newFile.responseAt = savedChild.responseAt
             }
             if keepExtras {
-                // TODO: Update this
-                newFile.createdBy = savedChild.createdBy
                 newFile.path = savedChild.path
-                newFile.version = savedChild.version?.freeze()
                 newFile.users = savedChild.users.freeze()
+                if let version = savedChild.version {
+                    newFile.version = FileVersion(value: version)
+                }
             }
             if keepRights {
                 newFile.capabilities = savedChild.capabilities
