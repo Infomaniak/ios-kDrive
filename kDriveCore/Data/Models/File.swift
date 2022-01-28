@@ -226,7 +226,7 @@ public class FileConversion: EmbeddedObject, Codable {
 }
 
 public class File: Object, Codable {
-    @Persisted(primaryKey: true) public var id: Int
+    @Persisted(primaryKey: true) public var id: Int = 0
     @Persisted public var parentId: Int
     /// Drive identifier
     @Persisted public var driveId: Int
@@ -544,6 +544,38 @@ public class File: Object, Codable {
             manager.signalEnumerator(for: .workingSet) { _ in }
             manager.signalEnumerator(for: identifier) { _ in }
         }
+    }
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        parentId = try container.decode(Int.self, forKey: .parentId)
+        driveId = try container.decode(Int.self, forKey: .driveId)
+        name = try container.decode(String.self, forKey: .name)
+        sortedName = try container.decode(String.self, forKey: .sortedName)
+        path = try container.decodeIfPresent(String.self, forKey: .path)
+        type = try container.decode(String.self, forKey: .type)
+        status = try container.decodeIfPresent(String.self, forKey: .status)
+        visibility = try container.decode(String.self, forKey: .visibility)
+        createdBy = try container.decodeIfPresent(Int.self, forKey: .createdBy)
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
+        addedAt = try container.decode(Date.self, forKey: .addedAt)
+        lastModifiedAt = try container.decode(Date.self, forKey: .lastModifiedAt)
+        deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedAt)
+        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedBy)
+        users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
+        isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
+        // sharelink = try container.decodeIfPresent(ShareLink.self, forKey: .sharelink)
+        _capabilities = try container.decode(Rights.self, forKey: ._capabilities)
+        categories = try container.decodeIfPresent(List<FileCategory>.self, forKey: .categories) ?? List<FileCategory>()
+        color = try container.decodeIfPresent(String.self, forKey: .color)
+        // dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
+        size = try container.decodeIfPresent(Int.self, forKey: .size)
+        hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail)
+        hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice)
+        extensionType = try container.decodeIfPresent(String.self, forKey: .extensionType)
+        // version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
+        conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)
     }
 
     // We have to keep it for Realm
