@@ -21,6 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+@MainActor
 protocol TrashOptionsDelegate: AnyObject {
     func didClickOnTrashOption(option: TrashOption, files: [File])
 }

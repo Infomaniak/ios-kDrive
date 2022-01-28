@@ -561,9 +561,6 @@
                             <userDefinedRuntimeAttributes>
                                 <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonEmptyTrash"/>
                             </userDefinedRuntimeAttributes>
-                            <connections>
-                                <action selector="emptyTrash:" destination="Qoj-Kl-8FL" id="idY-17-Xeh"/>
-                            </connections>
                         </barButtonItem>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="trashTitle"/>
@@ -571,7 +568,6 @@
                     </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="jSV-9q-qG1" id="nEm-m1-ETN"/>
-                        <outlet property="emptyTrashBarButtonItem" destination="tWj-xq-ysG" id="Mi4-PH-gfT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mFt-Qj-UYH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

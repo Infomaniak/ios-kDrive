@@ -31,12 +31,20 @@ enum FileListBarButtonType {
     case emptyTrash
 }
 
+enum FileListQuickActionType {
+    case file
+    case trash
+    case multipleSelection
+}
+
 @MainActor
 class FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
     typealias FilePresentedCallback = (File) -> Void
+    typealias PresentViewControllerCallback = (UIViewController) -> Void
+    typealias PresentQuickActionPanelCallback = ([File], FileListQuickActionType) -> Void
 
     var currentDirectory: File
     var driveFileManager: DriveFileManager
@@ -60,9 +68,21 @@ class FileListViewModel {
 
     var onFileListUpdated: FileListUpdatedCallback?
     var onDriveError: DriveErrorCallback?
+    var onPresentQuickActionPanel: PresentQuickActionPanelCallback? {
+        didSet {
+            multipleSelectionViewModel?.onPresentQuickActionPanel = onPresentQuickActionPanel
+        }
+    }
+
     var onFilePresented: FilePresentedCallback? {
         didSet {
             droppableFileListViewModel?.onFilePresented = onFilePresented
+        }
+    }
+
+    var onPresentViewController: PresentViewControllerCallback? {
+        didSet {
+            multipleSelectionViewModel?.onPresentViewController = onPresentViewController
         }
     }
 
@@ -155,6 +175,9 @@ class FileListViewModel {
             multipleSelectionViewModel?.barButtonPressed(type: type)
         } else {
             switch type {
+            case .search:
+                let searchViewController = SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+                onPresentViewController?(searchViewController)
             default:
                 break
             }
@@ -187,11 +210,15 @@ class FileListViewModel {
         onFilePresented?(file)
     }
 
+    func didTapMore(at index: Int) {
+        guard let file: File = getFile(at: index) else { return }
+        onPresentQuickActionPanel?([file], .file)
+    }
+
     func getFile(at index: Int) -> File? {
         fatalError(#function + " needs to be overridden")
     }
 
-    func setFile(_ file: File, at index: Int) {}
     func getAllFiles() -> [File] {
         fatalError(#function + " needs to be overridden")
     }
@@ -253,10 +280,6 @@ class ManagedFileListViewModel: FileListViewModel {
 
     override func getFile(at index: Int) -> File? {
         return index < fileCount ? files[index] : nil
-    }
-
-    override func setFile(_ file: File, at index: Int) {
-        // files[index] = file
     }
 
     override func getAllFiles() -> [File] {
