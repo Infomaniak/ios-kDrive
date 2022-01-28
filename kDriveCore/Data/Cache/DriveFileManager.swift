@@ -193,6 +193,11 @@ public class DriveFileManager {
                     migration.deleteData(forType: FileCategory.className())
                 }
                 if oldSchemaVersion < 7 {
+                    // Migrate file category
+                    migration.enumerateObjects(ofType: FileCategory.className()) { oldObject, newObject in
+                        newObject?["isGeneratedByAI"] = oldObject?["isGeneratedByIA"]
+                        newObject?["userValidation"] = oldObject?["IACategoryUserValidation"]
+                    }
                     // Migrate rights
                     migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
                         newObject?["canShow"] = oldObject?["show"] ?? false
@@ -341,8 +346,12 @@ public class DriveFileManager {
                     if children.count < Endpoint.itemsPerPage {
                         managedParent.fullyDownloaded = true
                     }
-                    managedParent.children.append(objectsIn: children)
                     realm.add(children, update: .modified)
+                    // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with the first page will result in an undefined behavior.
+                    if page == 1 {
+                        managedParent.children.removeAll()
+                    }
+                    managedParent.children.append(objectsIn: children)
                 }
 
                 return getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType)
