@@ -222,7 +222,8 @@ public class DriveFileManager {
                         newObject?["sortedName"] = oldObject?["nameNaturalSorting"]
                         newObject?["extensionType"] = oldObject?["rawConvertedType"]
                         newObject?["_capabilities"] = oldObject?["rights"] as? Rights
-                        newObject?["visibility"] = oldObject?["rawVisibility"]
+                        newObject?["rawType"] = oldObject?["type"]
+                        newObject?["rawStatus"] = oldObject?["status"]
                         newObject?["hasOnlyoffice"] = oldObject?["onlyOffice"]
                         newObject?["addedAt"] = Date(timeIntervalSince1970: TimeInterval(oldObject?["createdAt"] as? Int ?? 0))
                         newObject?["lastModifiedAt"] = Date(timeIntervalSince1970: TimeInterval(oldObject?["lastModifiedAt"] as? Int ?? 0))
@@ -573,7 +574,7 @@ public class DriveFileManager {
         if file.isDirectory {
             completion(nil, nil)
         } else {
-            if !file.isLocalVersionOlderThanRemote() {
+            if !file.isLocalVersionOlderThanRemote {
                 // Already up to date, not downloading
                 completion(file, nil)
             } else {
@@ -592,7 +593,7 @@ public class DriveFileManager {
             return
         }
         let oldUrl = file.localUrl
-        let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote()
+        let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
         if available {
             try? realm.safeWrite {
                 file.isAvailableOffline = true

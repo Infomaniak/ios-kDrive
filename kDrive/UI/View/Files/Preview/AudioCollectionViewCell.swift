@@ -88,7 +88,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     override func configureWith(file: File) {
         setUpPlayButtons()
         self.file = file
-        if !file.isLocalVersionOlderThanRemote() {
+        if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {

@@ -320,7 +320,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func updateNavigationBar() {
-        if !currentFile.isLocalVersionOlderThanRemote() {
+        if !currentFile.isLocalVersionOlderThanRemote {
             switch currentFile.convertedType {
             case .pdf:
                 if let pdfCell = (collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
@@ -477,7 +477,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     func openWith(from: UIView) {
         let frame = from.convert(from.bounds, to: view)
         floatingPanelViewController.dismiss(animated: true)
-        if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
+        if currentFile.isMostRecentDownloaded {
             FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
         } else {
             downloadToOpenWith { [weak self] in
@@ -510,7 +510,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         previewErrors.values.forEach { $0.downloadTask?.cancel() }
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
-        if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
+        if currentFile.isLocalVersionOlderThanRemote && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
             DownloadQueue.instance.temporaryDownload(
                 file: currentFile,
                 onOperationCreated: { operation in
@@ -622,7 +622,7 @@ extension PreviewViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
         // File is already downloaded and up to date OR we can remote play it (audio / video)
-        if previewErrors[file.id] == nil && (!file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
+        if previewErrors[file.id] == nil && (!file.isLocalVersionOlderThanRemote || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
             switch file.convertedType {
             case .image:
                 if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -687,7 +687,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.previewDelegate = self
                 return cell
             }
-        } else if file.hasThumbnail == true && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
+        } else if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             if let downloadOperation = currentDownloadOperation,
                let progress = downloadOperation.task?.progress,
