@@ -155,7 +155,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func setThumbnailFor(file: File) {
         let fileId = file.id
-        if (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail == true {
+        if (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail {
             logoImage.image = nil
             logoImage.contentMode = .scaleAspectFill
             logoImage.layer.cornerRadius = UIConstants.imageCornerRadius

@@ -108,7 +108,7 @@ class FilePresenter {
             completion?(true)
         } else if file.isBookmark {
             // Open bookmark URL
-            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
+            if file.isDownloaded && !file.isLocalVersionOlderThanRemote {
                 presentBookmark(for: file, completion: completion)
             } else {
                 // Download file

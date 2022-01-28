@@ -171,11 +171,11 @@ class FileProviderExtension: NSFileProviderExtension {
     }
 
     private func fileStorageIsCurrent(item: FileProviderItem, file: File) -> Bool {
-        return !file.isLocalVersionOlderThanRemote() && FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path)
+        return !file.isLocalVersionOlderThanRemote && FileManager.default.contentsEqual(atPath: item.storageUrl.path, andPath: file.localUrl.path)
     }
 
     private func downloadRemoteFile(file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
-        if file.isLocalVersionOlderThanRemote() {
+        if file.isLocalVersionOlderThanRemote {
             // Prevent observing file multiple times
             guard !DownloadQueue.instance.hasOperation(for: file) else {
                 completion(nil)

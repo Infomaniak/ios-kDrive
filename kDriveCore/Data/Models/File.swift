@@ -139,17 +139,6 @@ public enum ConvertedType: String, CaseIterable {
     public static let ignoreThumbnailTypes = downloadableTypes
 }
 
-public enum VisibilityType: String {
-    case root = "is_root"
-    // case isPrivate = "is_private"
-    // case isCollaborativeFolder = "is_collaborative_folder"
-    // case isShared = "is_shared"
-    case isSharedSpace = "is_shared_space"
-    case isTeamSpace = "is_team_space"
-    case isTeamSpaceFolder = "is_team_space_folder"
-    case isInTeamSpaceFolder = "is_in_team_space_folder"
-}
-
 public enum SortType: String {
     case nameAZ
     case nameZA
@@ -199,7 +188,15 @@ public enum SortType: String {
     }
 }
 
-public enum FileStatus: String, Codable, PersistableEnum {
+public enum FileVisibility: String {
+    case root = "is_root"
+    case isSharedSpace = "is_shared_space"
+    case isTeamSpace = "is_team_space"
+    case isTeamSpaceFolder = "is_team_space_folder"
+    case isInTeamSpaceFolder = "is_in_team_space_folder"
+}
+
+public enum FileStatus: String {
     case erasing
     case locked
     case trashInherited = "trash_inherited"
@@ -248,12 +245,12 @@ public class File: Object, Codable {
     @Persisted public var name: String
     @Persisted public var sortedName: String
     @Persisted public var path: String? // Extra property
-    /// Type of returned object either dir (Directory) or file (File)
-    @Persisted public var type: String // FileType
-    /// Current state, null if no action
-    @Persisted public var status: String? // FileStatus
-    /// Visibility of File, empty string if no specific visibility
-    @Persisted public var visibility: String // VisibilityType
+    /// Use `type` instead
+    @Persisted private var rawType: String
+    /// Use `status` instead
+    @Persisted private var rawStatus: String?
+    /// Use `visibility`
+    @Persisted private var rawVisibility: String
     /// User identifier of upload
     @Persisted public var createdBy: Int?
     /// Date of  creation
@@ -292,11 +289,11 @@ public class File: Object, Codable {
     /// Size of File (byte unit)
     @Persisted public var size: Int?
     /// File has thumbnail, if so you can request thumbnail route
-    @Persisted public var hasThumbnail: Bool?
+    @Persisted public var hasThumbnail: Bool
     /// File can be handled by only-office
-    @Persisted public var hasOnlyoffice: Bool?
+    @Persisted public var hasOnlyoffice: Bool
     /// File type
-    @Persisted public var extensionType: String? // ConvertedType
+    @Persisted public var extensionType: String?
     /// Information when file has multi-version
     @Persisted public var version: FileVersion? // Extra property
     /// File can be converted to another extension
@@ -320,9 +317,9 @@ public class File: Object, Codable {
         case name
         case sortedName = "sorted_name"
         case path
-        case type
-        case status
-        case visibility
+        case rawType = "type"
+        case rawStatus = "status"
+        case rawVisibility = "visibility"
         case createdBy = "created_by"
         case createdAt = "created_at"
         case addedAt = "added_at"
@@ -361,11 +358,11 @@ public class File: Object, Codable {
     }
 
     public var isDirectory: Bool {
-        return type == "dir"
+        return type == .dir
     }
 
     public var isTrashed: Bool {
-        return status == "trashed" || status == "trash_inherited"
+        return status == .trashed || status == .trashInherited
     }
 
     public var isDisabled: Bool {
@@ -404,7 +401,7 @@ public class File: Object, Codable {
     }
 
     public var isOfficeFile: Bool {
-        return hasOnlyoffice == true || conversion?.whenOnlyoffice == true
+        return hasOnlyoffice || conversion?.whenOnlyoffice == true
     }
 
     public var isBookmark: Bool {
@@ -443,21 +440,11 @@ public class File: Object, Codable {
         }
     }
 
-    public func applyLastModifiedDateToLocalFile() {
-        try? FileManager.default.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
-    }
-
-    public func isLocalVersionOlderThanRemote() -> Bool {
-        do {
-            if let modifiedDate = try FileManager.default.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date {
-                if modifiedDate >= lastModifiedAt {
-                    return false
-                }
-            }
-            return true
-        } catch {
-            return true
+    public var isLocalVersionOlderThanRemote: Bool {
+        if let modificationDate = try? FileManager.default.attributesOfItem(atPath: localUrl.path)[.modificationDate] as? Date, modificationDate >= lastModifiedAt {
+            return false
         }
+        return true
     }
 
     public var convertedType: ConvertedType {
@@ -472,7 +459,7 @@ public class File: Object, Codable {
 
     public var icon: UIImage {
         if isDirectory {
-            switch visibilityType {
+            switch visibility {
             case .isTeamSpace:
                 return KDriveResourcesAsset.folderCommonDocuments.image
             case .isSharedSpace:
@@ -491,27 +478,26 @@ public class File: Object, Codable {
         }
     }
 
-    public var visibilityType: VisibilityType? {
-        get {
-            /* if let type = VisibilityType(rawValue: visibility),
-                type == .root || type == .isTeamSpace || type == .isTeamSpaceFolder || type == .isInTeamSpaceFolder || type == .isSharedSpace {
-                 return type
-             } else if let collaborativeFolder = collaborativeFolder, !collaborativeFolder.isBlank {
-                 return VisibilityType.isCollaborativeFolder
-             } else if users.count > 1 {
-                 return VisibilityType.isShared
-             } else {
-                 return VisibilityType.isPrivate
-             } */
-            return VisibilityType(rawValue: visibility)
-        }
-        set {
-            visibility = newValue?.rawValue ?? ""
-        }
+    /// Type of returned object either dir (Directory) or file (File)
+    public var type: FileType? {
+        return FileType(rawValue: rawType)
     }
 
-    public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) {
-        IconUtils.getThumbnail(for: self, completion: completion)
+    /// Current state, null if no action
+    public var status: FileStatus? {
+        if let status = rawStatus {
+            return FileStatus(rawValue: status)
+        }
+        return nil
+    }
+
+    /// Visibility of File, null if no specific visibility
+    public var visibility: FileVisibility? {
+        return FileVisibility(rawValue: rawVisibility)
+    }
+
+    public func applyLastModifiedDateToLocalFile() {
+        try? FileManager.default.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
     }
 
     public func getFileSize(withVersion: Bool = false) -> String? {
@@ -520,6 +506,20 @@ public class File: Object, Codable {
             return Constants.formatFileSize(Int64(value))
         }
         return nil
+    }
+
+    public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) {
+        if hasThumbnail, let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
+            KingfisherManager.shared.retrieveImage(with: thumbnailURL, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
+                if let image = try? result.get().image {
+                    completion(image, true)
+                } else {
+                    completion(self.icon, false)
+                }
+            }
+        } else {
+            completion(icon, false)
+        }
     }
 
     @discardableResult
@@ -590,9 +590,9 @@ public class File: Object, Codable {
         name = try container.decode(String.self, forKey: .name)
         sortedName = try container.decode(String.self, forKey: .sortedName)
         path = try container.decodeIfPresent(String.self, forKey: .path)
-        type = try container.decode(String.self, forKey: .type)
-        status = try container.decodeIfPresent(String.self, forKey: .status)
-        visibility = try container.decode(String.self, forKey: .visibility)
+        rawType = try container.decode(String.self, forKey: .rawType)
+        rawStatus = try container.decodeIfPresent(String.self, forKey: .rawStatus)
+        rawVisibility = try container.decode(String.self, forKey: .rawVisibility)
         createdBy = try container.decodeIfPresent(Int.self, forKey: .createdBy)
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
         addedAt = try container.decode(Date.self, forKey: .addedAt)
@@ -607,8 +607,8 @@ public class File: Object, Codable {
         color = try container.decodeIfPresent(String.self, forKey: .color)
         // dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
         size = try container.decodeIfPresent(Int.self, forKey: .size)
-        hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail)
-        hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice)
+        hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail) ?? false
+        hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice) ?? false
         extensionType = try container.decodeIfPresent(String.self, forKey: .extensionType)
         version = try container.decodeIfPresent(FileVersion.self, forKey: .version)
         conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)
@@ -621,7 +621,7 @@ public class File: Object, Codable {
         self.init()
         self.id = id
         self.name = name
-        type = "dir"
+        rawType = "dir"
         children = List<File>()
     }
 }
