@@ -235,7 +235,7 @@ public class DriveFileManager {
                     }
                 }
             },
-            objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self])
+            objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self, FileVersion.self])
 
         // Only compact in the background
         /* if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
@@ -1360,13 +1360,10 @@ public class DriveFileManager {
                 newFile.responseAt = savedChild.responseAt
             }
             if keepExtras {
-                // TODO: Fix this
-                // newFile.canUseTag = savedChild.canUseTag
-                // newFile.hasVersion = savedChild.hasVersion
-                // newFile.nbVersion = savedChild.nbVersion
+                // TODO: Update this
                 newFile.createdBy = savedChild.createdBy
                 newFile.path = savedChild.path
-                // newFile.sizeWithVersion = savedChild.sizeWithVersion
+                newFile.version = savedChild.version?.freeze()
                 newFile.users = savedChild.users.freeze()
             }
             if keepRights {
