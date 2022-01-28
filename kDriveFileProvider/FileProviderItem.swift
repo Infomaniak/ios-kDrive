@@ -89,7 +89,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         self.creationDate = file.createdAt
         self.contentModificationDate = file.lastModifiedAt
         self.versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-        self.isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote()
+        self.isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
         let storageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         if DownloadQueue.instance.hasOperation(for: file) {
             self.isDownloading = true
