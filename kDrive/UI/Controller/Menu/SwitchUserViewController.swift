@@ -140,9 +140,12 @@ extension SwitchUserViewController: InfomaniakLoginDelegate {
         Task {
             do {
                 _ = try await AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
-                // Download root file
                 Task {
-                    _ = try await AccountManager.instance.currentDriveFileManager?.file(id: DriveFileManager.constants.rootID)
+                    // Download root files
+                    if let driveFileManager = AccountManager.instance.currentDriveFileManager {
+                        let root = driveFileManager.getRootFile()
+                        _ = try await driveFileManager.files(in: root)
+                    }
                     (UIApplication.shared.delegate as! AppDelegate).setRootViewController(MainTabViewController.instantiate())
                 }
             } catch {
