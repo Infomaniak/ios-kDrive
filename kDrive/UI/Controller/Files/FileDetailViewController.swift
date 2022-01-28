@@ -78,9 +78,9 @@ class FileDetailViewController: UIViewController {
             if file.size != 0 {
                 rows.append(.size)
             }
-            /* if file.sizeWithVersion != 0 {
+            if file.version != nil {
                 rows.append(.sizeAll)
-            } */
+            }
             return rows
         }
     }
@@ -190,7 +190,11 @@ class FileDetailViewController: UIViewController {
         let group = DispatchGroup()
         group.enter()
         Task {
+            do {
             self.file = try await driveFileManager.file(id: file.id, forceRefresh: true)
+            } catch {
+                debugPrint(error)
+            }
             group.leave()
         }
         group.enter()
