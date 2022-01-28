@@ -155,11 +155,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        reload(animated: true)
-    }
-
     func setFile(_ newFile: File, driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
 
@@ -187,9 +182,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                 }
             }
-            // Reload
-            reload(animated: false)
         }
+        // Reload
+        reload(animated: false)
     }
 
     // MARK: - Private methods
