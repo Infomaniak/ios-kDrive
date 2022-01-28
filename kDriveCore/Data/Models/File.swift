@@ -415,6 +415,14 @@ public class File: Object, Codable {
         return self.extension == "url" || self.extension == "webloc"
     }
 
+    public var isDropbox: Bool {
+        return false // dropbox != nil
+    }
+
+    public var hasSharelink: Bool {
+        return false // sharelink != nil
+    }
+
     public var `extension`: String {
         return localUrl.pathExtension
     }
@@ -467,7 +475,24 @@ public class File: Object, Codable {
     }
 
     public var icon: UIImage {
-        return IconUtils.getIcon(for: self)
+        if isDirectory {
+            switch visibilityType {
+            case .isTeamSpace:
+                return KDriveResourcesAsset.folderCommonDocuments.image
+            case .isSharedSpace:
+                return KDriveResourcesAsset.folderShared.image
+            default:
+                if isDisabled {
+                    return KDriveResourcesAsset.folderDisable.image
+                } else if isDropbox {
+                    return KDriveResourcesAsset.folderDropBox1.image
+                } else {
+                    return KDriveResourcesAsset.folderFill.image
+                }
+            }
+        } else {
+            return convertedType.icon
+        }
     }
 
     public var visibilityType: VisibilityType? {
@@ -611,7 +636,6 @@ extension File: Differentiable {
     }
 
     public func isContentEqual(to source: File) -> Bool {
-        // TODO: Update this
         autoreleasepool {
             lastModifiedAt == source.lastModifiedAt
                 && sortedName == source.sortedName
@@ -620,7 +644,8 @@ extension File: Differentiable {
                 && isFirstInCollection == source.isFirstInCollection
                 && isLastInCollection == source.isLastInCollection
                 && visibility == source.visibility
-                // && shareLisnk == source.shareLink
+                && hasSharelink == source.hasSharelink
+                && isDropbox == source.isDropbox
                 && capabilities.isContentEqual(to: source.capabilities)
                 && Array(categories).isContentEqual(to: Array(source.categories))
                 && color == source.color

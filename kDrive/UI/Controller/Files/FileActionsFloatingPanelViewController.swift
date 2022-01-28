@@ -226,7 +226,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     action.isEnabled = false
                 }
             case .shareLink:
-                if (!file.capabilities.canBecomeSharelink || offline) /* && file.shareLink == nil && file.visibility != .isCollaborativeFolder */ {
+                if (!file.capabilities.canBecomeSharelink || offline) && !file.hasSharelink && !file.isDropbox {
                     action.isEnabled = false
                 }
             case .add:
@@ -251,7 +251,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .convertToDropbox:
                 return file.capabilities.canBecomeDropbox
             case .manageDropbox:
-                return false // file.visibility == .isCollaborativeFolder
+                return file.isDropbox
             case .folderColor:
                 return !sharedWithMe && file.visibilityType != .isSharedSpace && file.visibilityType != .isTeamSpace && !file.isDisabled
             case .seeFolder:
@@ -319,7 +319,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(shareVC, animated: true)
             dismiss(animated: true)
         case .shareLink:
-            /* if file.visibility == .isCollaborativeFolder {
+            if file.isDropbox {
                 // Copy drop box link
                 setLoading(true, action: action, at: indexPath)
                 Task {
@@ -331,10 +331,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                     self.setLoading(false, action: action, at: indexPath)
                 }
-            } else if let link = file.shareLink {
+            } /* else if let link = file.shareLink {
                 // Copy share link
                 copyShareLinkToPasteboard(link)
-            } else { */
+            } */else {
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
                 Task {
@@ -357,7 +357,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         }
                     }
                 }
-            // }
+            }
         case .openWith:
             let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
             if file.isMostRecentDownloaded {
