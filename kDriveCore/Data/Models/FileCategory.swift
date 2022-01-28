@@ -22,8 +22,8 @@ import RealmSwift
 
 public class FileCategory: EmbeddedObject, Codable, ContentEquatable {
     @Persisted public var id: Int
-    @Persisted public var isGeneratedByIA: Bool
-    @Persisted public var IACategoryUserValidation: String
+    @Persisted public var isGeneratedByAI: Bool
+    @Persisted public var userValidation: String
     @Persisted public var userId: Int?
     @Persisted public var addedToFileAt: Date
 
@@ -31,19 +31,19 @@ public class FileCategory: EmbeddedObject, Codable, ContentEquatable {
         return id == source.id
     }
 
-    convenience init(id: Int, isGeneratedByIA: Bool = false, IACategoryUserValidation: String = "CORRECT", userId: Int?, addedToFileAt: Date = Date()) {
+    convenience init(id: Int, isGeneratedByAI: Bool = false, userValidation: String = "CORRECT", userId: Int?, addedToFileAt: Date = Date()) {
         self.init()
         self.id = id
-        self.isGeneratedByIA = isGeneratedByIA
-        self.IACategoryUserValidation = IACategoryUserValidation
+        self.isGeneratedByAI = isGeneratedByAI
+        self.userValidation = userValidation
         self.userId = userId
         self.addedToFileAt = addedToFileAt
     }
 
     enum CodingKeys: String, CodingKey {
         case id
-        case isGeneratedByIA = "is_generated_by_ia"
-        case IACategoryUserValidation = "ia_category_user_validation"
+        case isGeneratedByAI = "is_generated_by_ai"
+        case userValidation = "user_validation"
         case userId = "user_id"
         case addedToFileAt = "added_to_file_at"
     }
