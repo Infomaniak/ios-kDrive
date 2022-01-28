@@ -69,7 +69,7 @@ class FilePresenter {
             let nextVC: FileListViewController
             if driveFileManager.drive.sharedWithMe {
                 nextVC = SharedWithMeViewController.instantiate(driveFileManager: driveFileManager)
-            } else if file.isTrashed {
+            } else if file.isTrashed || file.deletedAt > 0 {
                 nextVC = TrashViewController.instantiate(driveFileManager: driveFileManager)
             } else {
                 nextVC = listType.instantiate(driveFileManager: driveFileManager)

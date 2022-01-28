@@ -32,18 +32,15 @@ struct MultipleSelectionAction: Equatable {
     }
 
     static let move = MultipleSelectionAction(id: 0, name: KDriveResourcesStrings.Localizable.buttonMove, icon: KDriveResourcesAsset.folderSelect)
-    static let delete = MultipleSelectionAction(id: 1, name: KDriveResourcesStrings.Localizable.buttonMove, icon: KDriveResourcesAsset.delete)
-    static let more = MultipleSelectionAction(id: 2, name: KDriveResourcesStrings.Localizable.buttonMove, icon: KDriveResourcesAsset.menu)
+    static let delete = MultipleSelectionAction(id: 1, name: KDriveResourcesStrings.Localizable.buttonDelete, icon: KDriveResourcesAsset.delete)
+    static let more = MultipleSelectionAction(id: 2, name: KDriveResourcesStrings.Localizable.buttonMenu, icon: KDriveResourcesAsset.menu)
+    static let deletePermanently = MultipleSelectionAction(id: 3, name: KDriveResourcesStrings.Localizable.buttonDelete, icon: KDriveResourcesAsset.delete)
 }
 
 @MainActor
 class MultipleSelectionFileListViewModel {
     /// itemIndex
     typealias ItemSelectedCallback = (Int) -> Void
-    /// driveFileManager, startDirectory, disabledDirectories
-    typealias SelectMoveDestinationCallback = (DriveFileManager, File, [File]) -> Void
-    /// deleteMessage
-    typealias DeleteConfirmationCallback = (NSMutableAttributedString) -> Void
     /// selectedFiles
     typealias MoreButtonPressedCallback = ([File]) -> Void
 
@@ -77,9 +74,8 @@ class MultipleSelectionFileListViewModel {
     var onItemSelected: ItemSelectedCallback?
     var onSelectAll: (() -> Void)?
     var onDeselectAll: (() -> Void)?
-    var onSelectMoveDestination: SelectMoveDestinationCallback?
-    var onDeleteConfirmation: DeleteConfirmationCallback?
-    var onMoreButtonPressed: MoreButtonPressedCallback?
+    var onPresentViewController: FileListViewModel.PresentViewControllerCallback?
+    var onPresentQuickActionPanel: FileListViewModel.PresentQuickActionPanelCallback?
 
     private(set) var selectedItems = Set<File>()
     var isSelectAllModeEnabled = false
@@ -115,7 +111,13 @@ class MultipleSelectionFileListViewModel {
     func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .move:
-            onSelectMoveDestination?(driveFileManager, currentDirectory, [selectedItems.first?.parent ?? driveFileManager.getRootFile()])
+            let selectFolderNavigationController = SelectFolderViewController
+                .instantiateInNavigationController(driveFileManager: driveFileManager,
+                                                   startDirectory: currentDirectory,
+                                                   disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getRootFile()]) { [weak self] selectedFolder in
+                    self?.moveSelectedItems(to: selectedFolder)
+                }
+            onPresentViewController?(selectFolderNavigationController)
         case .delete:
             var message: NSMutableAttributedString
             if selectedCount == 1,
@@ -124,9 +126,15 @@ class MultipleSelectionFileListViewModel {
             } else {
                 message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescriptionPlural(selectedCount))
             }
-            onDeleteConfirmation?(message)
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle,
+                                                message: message,
+                                                action: KDriveResourcesStrings.Localizable.buttonMove,
+                                                destructive: true, loading: true) { [weak self] in
+                self?.deleteSelectedItems()
+            }
+            onPresentViewController?(alert)
         case .more:
-            onMoreButtonPressed?(Array(selectedItems))
+            onPresentQuickActionPanel?(Array(selectedItems), .multipleSelection)
         default:
             break
         }
@@ -148,6 +156,9 @@ class MultipleSelectionFileListViewModel {
                 updatedAction.enabled = notEmpty && canDelete
             case .more:
                 updatedAction = MultipleSelectionAction.more
+                updatedAction.enabled = notEmpty
+            case .deletePermanently:
+                updatedAction = MultipleSelectionAction.deletePermanently
                 updatedAction.enabled = notEmpty
             default:
                 updatedAction = multipleSelectionActions[i]
