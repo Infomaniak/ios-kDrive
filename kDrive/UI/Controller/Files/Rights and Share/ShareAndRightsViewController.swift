@@ -223,8 +223,8 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             break
         case .link:
-            let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false // || file.shareLink != nil
-            if /* file.visibility == .isCollaborativeFolder || */ !canBecomeLink {
+            let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false || file.hasSharelink
+            if file.isDropbox || !canBecomeLink {
                 return
             }
             shareLinkRights = true
