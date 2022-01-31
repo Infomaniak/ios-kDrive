@@ -224,31 +224,27 @@ extension FileProviderExtension {
         }
 
         // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
-            if let file = response?.data {
+        Task {
+            do {
+                let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
                 let parent: ProxyFile?
                 if let id = parentItemIdentifier?.toFileId() {
                     parent = ProxyFile(driveId: self.driveFileManager.drive.id, id: id)
                 } else {
                     parent = nil
                 }
-                Task {
-                    do {
-                        _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: parent)
-                        let item = FileProviderItem(file: file, domain: self.domain)
-                        if let parentItemIdentifier = parentItemIdentifier {
-                            item.parentItemIdentifier = parentItemIdentifier
-                        }
-                        item.isTrashed = false
-                        FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                        self.manager.signalEnumerator(for: .workingSet) { _ in }
-                        self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-                        completionHandler(item, nil)
-                    } catch {
-                        completionHandler(nil, error)
-                    }
+                // Restore in given parent
+                _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: parent)
+                let item = FileProviderItem(file: file, domain: self.domain)
+                if let parentItemIdentifier = parentItemIdentifier {
+                    item.parentItemIdentifier = parentItemIdentifier
                 }
-            } else {
+                item.isTrashed = false
+                FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
+                self.manager.signalEnumerator(for: .workingSet) { _ in }
+                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                completionHandler(item, nil)
+            } catch {
                 completionHandler(nil, self.nsError(code: .noSuchItem))
             }
         }
