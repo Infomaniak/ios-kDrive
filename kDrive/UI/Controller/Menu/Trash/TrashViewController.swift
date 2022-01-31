@@ -50,22 +50,17 @@ class TrashViewController: FileListViewController {
             return
         }
 
-        if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            driveFileManager.apiFetcher.getTrashedFiles(driveId: driveFileManager.drive.id, page: page, sortType: sortType) { response, error in
-                if let trashedList = response?.data {
-                    completion(.success(trashedList), trashedList.count == Endpoint.itemsPerPage, false)
+        Task {
+            do {
+                let files: [File]
+                if currentDirectory.id == DriveFileManager.trashRootFile.id {
+                    files = try await driveFileManager.apiFetcher.trashedFiles(drive: driveFileManager.drive, page: page, sortType: sortType)
                 } else {
-                    completion(.failure(error ?? DriveError.localError), false, false)
+                    files = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory, page: page, sortType: sortType)
                 }
-            }
-        } else {
-            driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: currentDirectory?.id, page: page, sortType: sortType) { response, error in
-                if let file = response?.data {
-                    let children = file.children
-                    completion(.success(Array(children)), children.count == Endpoint.itemsPerPage, false)
-                } else {
-                    completion(.failure(error ?? DriveError.localError), false, false)
-                }
+                completion(.success(Array(files)), files.count == Endpoint.itemsPerPage, false)
+            } catch {
+                completion(.failure(error), false, false)
             }
         }
     }
