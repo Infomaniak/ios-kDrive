@@ -409,6 +409,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         headerView.sortView.isHidden = !isEmptyViewHidden
 
+        headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
         headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
         headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
 
