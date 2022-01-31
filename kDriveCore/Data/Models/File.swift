@@ -179,9 +179,9 @@ public enum SortType: String {
         case .ext:
             return SortTypeValue(apiValue: "files", order: "asc", translation: KDriveResourcesStrings.Localizable.sortExtension, realmKeyPath: \.name)
         case .olderDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
+            return SortTypeValue(apiValue: "files.deleted_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
         case .newerDelete:
-            return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
+            return SortTypeValue(apiValue: "files.deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
         case .type:
             return SortTypeValue(apiValue: "type", order: "desc", translation: "", realmKeyPath: \.type)
         }
@@ -601,8 +601,8 @@ public class File: Object, Codable {
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
         addedAt = try container.decode(Date.self, forKey: .addedAt)
         lastModifiedAt = try container.decode(Date.self, forKey: .lastModifiedAt)
-        deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedAt)
-        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedBy)
+        deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedBy)
+        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
         isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
         // sharelink = try container.decodeIfPresent(ShareLink.self, forKey: .sharelink)
