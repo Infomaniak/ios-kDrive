@@ -76,11 +76,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&actions[]=file_rename&actions[]=file_delete&actions[]=file_update&from_date=\(date)"
     }
 
-    static func getTrashFiles(driveId: Int, fileId: Int? = nil, sortType: SortType) -> String {
-        let fileId = fileId == nil ? "" : "\(fileId!)"
-        return "\(driveApiUrl)\(driveId)/file/trash/\(fileId)?with=children,parent&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
-    }
-
     public static func showOffice(file: File) -> String {
         return "\(officeApiUrl)\(file.driveId)/\(file.id)"
     }
