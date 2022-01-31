@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Combine
 import Foundation
 import kDriveCore
+import kDriveResources
 import RealmSwift
 
 enum FileListBarButtonType {
@@ -37,13 +38,20 @@ enum FileListQuickActionType {
     case multipleSelection
 }
 
+enum ControllerPresentationType {
+    case push
+    case modal
+}
+
 @MainActor
 class FileListViewModel {
     /// deletions, insertions, modifications, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
     typealias FilePresentedCallback = (File) -> Void
-    typealias PresentViewControllerCallback = (UIViewController) -> Void
+    /// presentation type, presented viewcontroller, animated
+    typealias PresentViewControllerCallback = (ControllerPresentationType, UIViewController, Bool) -> Void
+    /// files sent to the panel, panel type
     typealias PresentQuickActionPanelCallback = ([File], FileListQuickActionType) -> Void
 
     var currentDirectory: File
@@ -177,7 +185,7 @@ class FileListViewModel {
             switch type {
             case .search:
                 let searchViewController = SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-                onPresentViewController?(searchViewController)
+                onPresentViewController?(.modal, searchViewController, true)
             default:
                 break
             }
@@ -215,12 +223,59 @@ class FileListViewModel {
         onPresentQuickActionPanel?([file], .file)
     }
 
+    func didSelectSwipeAction(_ action: SwipeCellAction, at index: Int) {
+        #if !ISEXTENSION
+        if let file = getFile(at: index) {
+            switch action {
+            case .share:
+                let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
+                onPresentViewController?(.push, shareVC, true)
+            case .delete:
+                driveFileManager.deleteFile(file: file) { cancelAction, error in
+                    if let error = error {
+                        UIConstants.showSnackBar(message: error.localizedDescription)
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
+                            guard let cancelId = cancelAction?.id else { return }
+                            self.driveFileManager.cancelAction(cancelId: cancelId) { error in
+                                if error == nil {
+                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
+                                }
+                            }
+                        })
+                    }
+                }
+            default:
+                break
+            }
+        }
+        #endif
+    }
+
     func getFile(at index: Int) -> File? {
         fatalError(#function + " needs to be overridden")
     }
 
     func getAllFiles() -> [File] {
         fatalError(#function + " needs to be overridden")
+    }
+
+    func getSwipeActions(at index: Int) -> [SwipeCellAction]? {
+        if configuration.fromActivities || listStyle == .grid {
+            return nil
+        }
+        var actions = [SwipeCellAction]()
+        if let file = getFile(at: index),
+           let rights = file.rights {
+            if rights.share {
+                actions.append(.share)
+            }
+            if rights.delete {
+                actions.append(.delete)
+            }
+        }
+
+        return actions
     }
 
     func forceRefresh() {
