@@ -84,7 +84,15 @@ class FileListViewModel {
     }
 
     var currentDirectory: File
-    var driveFileManager: DriveFileManager
+    var driveFileManager: DriveFileManager {
+        didSet {
+            multipleSelectionViewModel?.driveFileManager = driveFileManager
+            uploadViewModel?.driveFileManager = driveFileManager
+            draggableFileListViewModel?.driveFileManager = driveFileManager
+            droppableFileListViewModel?.driveFileManager = driveFileManager
+        }
+    }
+
     var isEmpty: Bool {
         return true
     }

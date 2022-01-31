@@ -80,7 +80,7 @@ class MultipleSelectionFileListViewModel {
     private(set) var selectedItems = Set<File>()
     var isSelectAllModeEnabled = false
 
-    private var driveFileManager: DriveFileManager
+    internal var driveFileManager: DriveFileManager
     private var currentDirectory: File
     private var configuration: FileListViewModel.Configuration
 
