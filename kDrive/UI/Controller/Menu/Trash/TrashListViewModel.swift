@@ -24,7 +24,7 @@ import UIKit
 
 class TrashListViewModel: UnmanagedFileListViewModel {
     init(driveFileManager: DriveFileManager, currentDirectory: File?) {
-        var configuration = FileListViewController.Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash)
+        var configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash, sortingOptions: [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest])
         var currentDirectory = currentDirectory
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile
@@ -249,7 +249,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
 }
 
 class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
-    override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
+    override init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         multipleSelectionActions = [.deletePermanently, .more]
     }
