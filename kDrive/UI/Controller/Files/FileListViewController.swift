@@ -245,8 +245,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         Task {
             do {
-                let children = try await driveFileManager.files(in: currentDirectory, page: page, sortType: sortType, forceRefresh: forceRefresh)
-                completion(.success(children), children.count == Endpoint.itemsPerPage, true)
+                let (children, moreComing) = try await driveFileManager.files(in: currentDirectory, page: page, sortType: sortType, forceRefresh: forceRefresh)
+                completion(.success(children), moreComing, true)
             } catch {
                 debugPrint(error)
                 completion(.failure(error), false, true)

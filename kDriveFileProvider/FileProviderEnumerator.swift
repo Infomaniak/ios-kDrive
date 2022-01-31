@@ -70,7 +70,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             Task { [forceRefresh = forceRefresh] in
                 do {
                     let file = try await driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
-                    let children = try await driveFileManager.files(in: file, page: pageIndex, forceRefresh: forceRefresh)
+                    let (children, moreComing) = try await driveFileManager.files(in: file, page: pageIndex, forceRefresh: forceRefresh)
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
                     for child in children {
@@ -82,7 +82,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     observer.didEnumerate(containerItems)
 
-                    if self.isDirectory && !file.fullyDownloaded {
+                    if self.isDirectory && moreComing {
                         observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
                     } else {
                         observer.finishEnumerating(upTo: nil)
