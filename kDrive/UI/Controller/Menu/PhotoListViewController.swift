@@ -185,15 +185,19 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     func fetchNextPage() {
+        guard driveFileManager != nil else { return }
         isLoading = true
-        driveFileManager?.getLastPictures(page: page) { response, _ in
-            if let fetchedPictures = response {
-                self.insertAndSort(pictures: fetchedPictures, replace: self.page == 1)
+        Task {
+            do {
+                let (pictures, moreComing) = try await driveFileManager.lastPictures(page: page)
+                self.insertAndSort(pictures: pictures, replace: self.page == 1)
 
-                self.pictures += fetchedPictures
+                self.pictures += pictures
                 self.showEmptyView(.noImages)
                 self.page += 1
-                self.hasNextPage = fetchedPictures.count == Endpoint.itemsPerPage
+                self.hasNextPage = moreComing
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
             self.isLoading = false
             if self.sections.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
