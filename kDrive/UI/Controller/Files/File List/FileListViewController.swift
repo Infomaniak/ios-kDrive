@@ -797,10 +797,8 @@ extension FileListViewController: SelectDelegate {
                 bindViewModels()
                 viewModel.onViewDidLoad()
                 navigationController?.popToRootViewController(animated: false)
-            } else if viewModel.configuration.showUploadingFiles {
-                let newUploadViewModel = UploadCardViewModel(uploadDirectory: viewModel.currentDirectory, driveFileManager: driveFileManager)
-                viewModel.uploadViewModel = newUploadViewModel
-                bindUploadCardViewModel()
+            } else {
+                viewModel.driveFileManager = driveFileManager
             }
         }
     }
