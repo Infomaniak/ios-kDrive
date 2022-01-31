@@ -130,35 +130,16 @@ public class DriveApiFetcher: ApiFetcher {
 
     // MARK: - API methods
 
-    public func createDirectory(parentDirectory: File, name: String, onlyForMe: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.createDirectory(driveId: parentDirectory.driveId, parentId: parentDirectory.id)
-        let body: [String: Any] = [
-            "name": name,
-            "only_for_me": onlyForMe,
-            "share": false
-        ]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func createDirectory(in parentDirectory: File, name: String, onlyForMe: Bool) async throws -> File {
+        try await perform(request: authenticatedRequest(.createDirectory(in: parentDirectory), method: .post, parameters: ["name": name, "only_for_me": onlyForMe])).data
     }
 
-    public func createCommonDirectory(driveId: Int, name: String, forAllUser: Bool, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.createCommonDirectory(driveId: driveId)
-        let body: [String: Any] = [
-            "name": name,
-            "for_all_user": forAllUser
-        ]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func createCommonDirectory(drive: AbstractDrive, name: String, forAllUser: Bool) async throws -> File {
+        try await perform(request: authenticatedRequest(.createTeamDirectory(drive: drive), method: .post, parameters: ["name": name, "for_all_user": forAllUser])).data
     }
 
-    public func createOfficeFile(driveId: Int, parentDirectory: File, name: String, type: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.createOfficeFile(driveId: driveId, parentId: parentDirectory.id)
-        let body: [String: Any] = [
-            "name": name,
-            "type": type
-        ]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func createFile(in parentDirectory: File, name: String, type: String) async throws -> File {
+        try await perform(request: authenticatedRequest(.createFile(in: parentDirectory), method: .post, parameters: ["name": name, "type": type])).data
     }
 
     public func createDropBox(directory: File, settings: DropBoxSettings) async throws -> DropBox {
