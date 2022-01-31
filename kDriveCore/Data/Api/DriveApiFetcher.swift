@@ -379,16 +379,16 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func getTrashedFiles(driveId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getTrashFiles(driveId: driveId, sortType: sortType))\(pagination(page: page))"
-
-        makeRequest(url, method: .get, completion: completion)
+    public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.trash(drive: drive).paginated(page: page).sorted(by: [sortType]))).data
     }
 
-    public func getChildrenTrashedFiles(driveId: Int, fileId: Int?, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getTrashFiles(driveId: driveId, fileId: fileId, sortType: sortType))\(pagination(page: page))"
+    public func trashedFile(_ file: AbstractFile) async throws -> File {
+        try await perform(request: authenticatedRequest(.trashedInfo(file: file))).data
+    }
 
-        makeRequest(url, method: .get, completion: completion)
+    public func trashedFiles(of directory: File, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.trashedFiles(of: directory).paginated(page: page).sorted(by: [sortType]))).data
     }
 
     public func restore(file: AbstractFile, in directory: AbstractFile? = nil) async throws -> CancelableResponse {
