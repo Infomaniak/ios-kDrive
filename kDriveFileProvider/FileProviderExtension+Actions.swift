@@ -36,10 +36,11 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.createDirectory(parentDirectory: file, name: directoryName, onlyForMe: false) { file, error in
-            if let file = file {
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
-            } else {
+        Task {
+            do {
+                let directory = try await driveFileManager.createDirectory(in: file, name: directoryName, onlyForMe: false)
+                completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
+            } catch {
                 completionHandler(nil, error)
             }
         }

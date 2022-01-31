@@ -119,7 +119,7 @@ extension File: AbstractFile {}
 
 public extension Endpoint {
     private static let fileMinimalWithQueryItems = URLQueryItem(name: "with", value: "capabilities,dropbox,conversion,sorted_name,parent_id,is_favorite,sharelink,categories")
-    private static let fileExtraWithQueryItems = URLQueryItem(name: "with", value: "capabilities,dropbox,version,conversion,path,sorted_name,parent_id,users,is_favorite,sharelink,categories")
+    private static let fileExtraWithQueryItems = URLQueryItem(name: "with", value: fileMinimalWithQueryItems.value?.appending(",version,path,users"))
 
     private static var base: Endpoint {
         return Endpoint(path: "/2/drive", apiEnvironment: .preprod)
@@ -348,11 +348,11 @@ public extension Endpoint {
     }
 
     static func createDirectory(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/directory", queryItems: [fileExtraWithQueryItems])
+        return .fileInfo(file).appending(path: "/directory", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func createFile(in file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/file", queryItems: [fileExtraWithQueryItems])
+        return .fileInfo(file).appending(path: "/file", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func thumbnail(file: AbstractFile, at date: Date) -> Endpoint {
@@ -381,7 +381,7 @@ public extension Endpoint {
     }
 
     static func convert(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/convert")
+        return .fileInfo(file).appending(path: "/convert", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func move(file: AbstractFile, destinationId: Int) -> Endpoint {
@@ -389,15 +389,15 @@ public extension Endpoint {
     }
 
     static func duplicate(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/copy", queryItems: [fileExtraWithQueryItems])
+        return .fileInfo(file).appending(path: "/copy", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func copy(file: AbstractFile, destinationId: Int) -> Endpoint {
-        return .duplicate(file: file).appending(path: "/\(destinationId)")
+        return .duplicate(file: file).appending(path: "/\(destinationId)", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func rename(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/rename")
+        return .fileInfo(file).appending(path: "/rename", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func count(of directory: AbstractFile) -> Endpoint {
@@ -459,7 +459,7 @@ public extension Endpoint {
     }
 
     static func createTeamDirectory(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/files/team_directory", queryItems: [fileExtraWithQueryItems])
+        return .driveInfo(drive: drive).appending(path: "/files/team_directory", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func existFiles(drive: AbstractDrive) -> Endpoint {
