@@ -135,7 +135,9 @@ public class DriveFileManager {
             }
             return root.freeze()
         } else {
-            return File(id: DriveFileManager.constants.rootID, name: drive.name)
+            let root = File(id: DriveFileManager.constants.rootID, name: drive.name)
+            root.driveId = drive.id
+            return root
         }
     }
 
@@ -245,7 +247,13 @@ public class DriveFileManager {
 
         // Get root file
         let realm = getRealm()
-        if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
+        if let rootFile = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) {
+            // Update root
+            try? realm.safeWrite {
+                rootFile.driveId = drive.id
+            }
+        } else {
+            // Create root
             let rootFile = getRootFile(using: realm)
             try? realm.safeWrite {
                 realm.add(rootFile)
@@ -978,7 +986,7 @@ public class DriveFileManager {
         let category = try await apiFetcher.editCategory(drive: drive, category: category, name: name, color: color)
         // Update category on drive
         let realm = DriveInfosManager.instance.getRealm()
-        if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realm) {
+        if let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: realm) {
             try? realm.write {
                 if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
                     drive.categories[index] = category
@@ -995,7 +1003,7 @@ public class DriveFileManager {
         if response {
             // Delete category from drive
             let realmDrive = DriveInfosManager.instance.getRealm()
-            if let drive = DriveInfosManager.instance.getDrive(objectId: self.drive.objectId, freeze: false, using: realmDrive) {
+            if let drive = DriveInfosManager.instance.getDrive(objectId: drive.objectId, freeze: false, using: realmDrive) {
                 try? realmDrive.write {
                     if let index = drive.categories.firstIndex(where: { $0.id == categoryId }) {
                         drive.categories.remove(at: index)
@@ -1131,111 +1139,72 @@ public class DriveFileManager {
         }
     }
 
-    public func createDirectory(parentDirectory: File, name: String, onlyForMe: Bool, completion: @escaping (File?, Error?) -> Void) {
+    public func createDirectory(in parentDirectory: File, name: String, onlyForMe: Bool) async throws -> File {
         let parentId = parentDirectory.id
-        apiFetcher.createDirectory(parentDirectory: parentDirectory, name: name, onlyForMe: onlyForMe) { response, error in
-            if let createdDirectory = response?.data {
-                do {
-                    let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
-                    let realm = createdDirectory.realm
-                    // Add directory to parent
-                    let parent = realm?.object(ofType: File.self, forPrimaryKey: parentId)
-                    try realm?.safeWrite {
-                        parent?.children.append(createdDirectory)
-                    }
-                    if let parent = createdDirectory.parent {
-                        parent.signalChanges(userId: self.drive.userId)
-                        self.notifyObserversWith(file: parent)
-                    }
-                    completion(createdDirectory, error)
-                } catch {
-                    completion(nil, error)
-                }
-            } else {
-                completion(nil, error)
-            }
+        let directory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
+        let realm = getRealm()
+        let createdDirectory = try updateFileInDatabase(updatedFile: directory, using: realm)
+        // Add directory to parent
+        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        try realm.safeWrite {
+            parent?.children.append(createdDirectory)
         }
+        if let parent = createdDirectory.parent {
+            parent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: parent)
+        }
+        return createdDirectory.freeze()
     }
 
-    public func createCommonDirectory(name: String, forAllUser: Bool, completion: @escaping (File?, Error?) -> Void) {
-        apiFetcher.createCommonDirectory(driveId: drive.id, name: name, forAllUser: forAllUser) { response, error in
-            if let createdDirectory = response?.data {
-                do {
-                    let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory)
-                    if let parent = createdDirectory.parent {
-                        parent.signalChanges(userId: self.drive.userId)
-                        self.notifyObserversWith(file: parent)
-                    }
-                    completion(createdDirectory, error)
-                } catch {
-                    completion(nil, error)
-                }
-            } else {
-                completion(nil, error)
-            }
+    public func createCommonDirectory(name: String, forAllUser: Bool) async throws -> File {
+        let directory = try await apiFetcher.createCommonDirectory(drive: drive, name: name, forAllUser: forAllUser)
+        let createdDirectory = try updateFileInDatabase(updatedFile: directory)
+        if let parent = createdDirectory.parent {
+            parent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: parent)
         }
+        return createdDirectory.freeze()
     }
 
-    // swiftlint:disable function_parameter_count
-    public func createDropBox(parentDirectory: File,
-                              name: String,
-                              onlyForMe: Bool,
-                              settings: DropBoxSettings,
-                              completion: @MainActor @escaping (File?, DropBox?, Error?) -> Void) {
+    public func createDropBox(parentDirectory: File, name: String, onlyForMe: Bool, settings: DropBoxSettings) async throws -> (File, DropBox) {
         let parentId = parentDirectory.id
-        apiFetcher.createDirectory(parentDirectory: parentDirectory, name: name, onlyForMe: onlyForMe) { [self] response, error in
-            if let createdDirectory = response?.data {
-                Task {
-                    do {
-                        let dropbox = try await apiFetcher.createDropBox(directory: createdDirectory, settings: settings)
-                        let realm = getRealm()
-                        let createdDirectory = try self.updateFileInDatabase(updatedFile: createdDirectory, using: realm)
+        // Create directory
+        let createdDirectory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
+        // Set up dropbox
+        let dropbox = try await apiFetcher.createDropBox(directory: createdDirectory, settings: settings)
+        let realm = getRealm()
+        let directory = try updateFileInDatabase(updatedFile: createdDirectory, using: realm)
 
-                        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
-                        try realm.write {
-                            // createdDirectory.collaborativeFolder = dropbox.url
-                            parent?.children.append(createdDirectory)
-                        }
-                        if let parent = createdDirectory.parent {
-                            parent.signalChanges(userId: self.drive.userId)
-                            self.notifyObserversWith(file: parent)
-                        }
-                        await completion(createdDirectory.freeze(), dropbox, error)
-                    } catch {
-                        await completion(nil, nil, error)
-                    }
-                }
-            } else {
-                Task {
-                    await completion(nil, nil, error)
-                }
-            }
+        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        try realm.write {
+            // directory.collaborativeFolder = dropbox.url
+            parent?.children.append(directory)
         }
+        if let parent = directory.parent {
+            parent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: parent)
+        }
+        return (directory.freeze(), dropbox)
     }
 
-    public func createOfficeFile(parentDirectory: File, name: String, type: String, completion: @escaping (File?, Error?) -> Void) {
+    public func createFile(in parentDirectory: File, name: String, type: String) async throws -> File {
         let parentId = parentDirectory.id
-        apiFetcher.createOfficeFile(driveId: drive.id, parentDirectory: parentDirectory, name: name, type: type) { response, error in
-            let realm = self.getRealm()
-            if let file = response?.data,
-               let createdFile = try? self.updateFileInDatabase(updatedFile: file, using: realm) {
-                // Add file to parent
-                let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
-                try? realm.write {
-                    parent?.children.append(createdFile)
-                }
-                createdFile.signalChanges(userId: self.drive.userId)
-
-                if let parent = createdFile.parent {
-                    parent.signalChanges(userId: self.drive.userId)
-                    self.notifyObserversWith(file: parent)
-                }
-
-                completion(createdFile, error)
-            } else {
-                completion(nil, error)
-            }
+        let file = try await apiFetcher.createFile(in: parentDirectory, name: name, type: type)
+        let realm = getRealm()
+        let createdFile = try updateFileInDatabase(updatedFile: file, using: realm)
+        // Add file to parent
+        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        try realm.write {
+            parent?.children.append(createdFile)
         }
+        createdFile.signalChanges(userId: drive.userId)
+
+        if let parent = createdFile.parent {
+            parent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: parent)
+        }
+
+        return createdFile.freeze()
     }
 
     public func createOrRemoveShareLink(for file: File, right: ShareLinkPermission) async throws -> ShareLink? {
