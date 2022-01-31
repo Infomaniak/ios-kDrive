@@ -18,34 +18,25 @@
 
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
 
-class LastModificationsViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.menu }
-    override class var storyboardIdentifier: String { "LastModificationsViewController" }
-
-    override func viewDidLoad() {
-        // Set configuration
-        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo)
-        filePresenter.listType = LastModificationsViewController.self
-        if currentDirectory == nil {
-            currentDirectory = DriveFileManager.lastModificationsRootFile
-        }
-
-        super.viewDidLoad()
+class LastModificationsViewModel: ManagedFileListViewModel {
+    init(driveFileManager: DriveFileManager) {
+        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo, sortingOptions: [])
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.lastModificationsRootFile)
+        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "type != \"dir\"")))
+        sortTypeObservation?.cancel()
+        sortTypeObservation = nil
+        sortType = .newer
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, "LastModifications"])
-    }
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+        guard !isLoading || page > 1 else { return }
 
-    override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        guard driveFileManager != nil && currentDirectory != nil else {
-            DispatchQueue.main.async {
-                completion(.success([]), false, true)
-            }
-            return
+        isLoading = true
+        if page == 1 {
+            showLoadingIndicatorIfNeeded()
         }
 
         if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
@@ -56,20 +47,22 @@ class LastModificationsViewController: FileListViewController {
                 } catch {
                     completion(.failure(error), false, false)
                 }
+            } else if let error = error as? DriveError {
+                self?.onDriveError?(error)
             }
-        } else {
-            super.getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
         }
     }
 
-    override func getNewChanges() {
-        // We don't have incremental changes for Last Modifications so we just fetch everything again
-        forceRefresh()
+    override func loadActivities() {
+        loadFiles(page: 1, forceRefresh: true)
     }
+}
 
-    override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
-        super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
-        // Hide sort button
-        headerView.sortButton.isHidden = true
+class LastModificationsViewController: FileListViewController {
+    override class var storyboard: UIStoryboard { Storyboard.menu }
+    override class var storyboardIdentifier: String { "LastModificationsViewController" }
+
+    override func getViewModel() -> FileListViewModel {
+        return LastModificationsViewModel(driveFileManager: driveFileManager)
     }
 }
