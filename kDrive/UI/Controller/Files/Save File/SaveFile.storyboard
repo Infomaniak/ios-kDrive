@@ -157,7 +157,6 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Enregistrer sur le kDrive" id="iJx-Zg-O5e">
-                        <barButtonItem key="backBarButtonItem" title=" " id="chg-xO-IDp"/>
                         <barButtonItem key="leftBarButtonItem" systemItem="stop" id="vpq-hw-OF9">
                             <connections>
                                 <action selector="close:" destination="IIc-LF-U4I" id="Yci-gy-i0j"/>

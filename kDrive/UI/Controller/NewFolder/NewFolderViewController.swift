@@ -93,6 +93,9 @@ class NewFolderViewController: UIViewController {
         tableView.separatorColor = .clear
         hideKeyboardWhenTappedAround()
 
+        navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.createFolderTitle
+        navigationItem.hideBackButtonText()
+
         driveFileManager.apiFetcher.getShareListFor(file: currentDirectory) { response, _ in
             if let sharedFile = response?.data {
                 self.sharedFile = sharedFile

@@ -254,9 +254,7 @@
                             <constraint firstItem="qcp-PP-32U" firstAttribute="top" secondItem="Wnk-0e-vBU" secondAttribute="top" id="f8U-UV-a4s"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Lhp-9h-vfB">
-                        <barButtonItem key="backBarButtonItem" title=" " id="w90-lb-7Is"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Lhp-9h-vfB"/>
                     <connections>
                         <outlet property="tableView" destination="qcp-PP-32U" id="HLr-hT-sg8"/>
                         <segue destination="5uZ-j3-nnx" kind="show" identifier="toSharedWithMeSegue" id="y6f-7m-haP"/>
