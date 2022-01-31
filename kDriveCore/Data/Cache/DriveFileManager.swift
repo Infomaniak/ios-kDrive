@@ -327,12 +327,12 @@ public class DriveFileManager {
         return freeze ? file?.freeze() : file
     }
 
-    public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> [File] {
+    public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
         let parentId = directory.id
         if let cachedParent = getCachedFile(id: parentId, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
            (cachedParent.fullyDownloaded && !forceRefresh && cachedParent.responseAt > 0) || ReachabilityListener.instance.currentStatus == .offline {
-            return getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType)
+            return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
         } else {
             // Get children from API
             let children: [File]
@@ -363,7 +363,7 @@ public class DriveFileManager {
                     managedParent.children.append(objectsIn: children)
                 }
 
-                return getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType)
+                return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
             } else {
                 throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: parentId)])
             }
@@ -393,93 +393,40 @@ public class DriveFileManager {
         }
     }
 
-    public func getFavorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        apiFetcher.getFavoriteFiles(driveId: drive.id, page: page) { [self] response, error in
-            if let favorites = response?.data {
-                backgroundQueue.async {
-                    autoreleasepool {
-                        let localRealm = getRealm()
-                        for favorite in favorites {
-                            keepCacheAttributesForFile(newFile: favorite, keepStandard: true, keepExtras: true, keepRights: false, using: localRealm)
-                        }
+    typealias FileApiSignature = (AbstractDrive, Int, SortType) async throws -> [File]
 
-                        let favoritesRoot = DriveFileManager.favoriteRootFile
-                        if favorites.count < Endpoint.itemsPerPage {
-                            favoritesRoot.fullyDownloaded = true
-                        }
+    private func files(at root: File, apiMethod: FileApiSignature, page: Int, sortType: SortType) async throws -> (files: [File], moreComing: Bool) {
+        do {
+            let files = try await apiMethod(drive, page, sortType)
 
-                        do {
-                            var updatedFile: File!
+            let localRealm = getRealm()
+            for file in files {
+                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: localRealm)
+            }
 
-                            favoritesRoot.children.append(objectsIn: favorites)
-                            updatedFile = try self.updateFileInDatabase(updatedFile: favoritesRoot, using: localRealm)
+            if files.count < Endpoint.itemsPerPage {
+                root.fullyDownloaded = true
+            }
 
-                            let safeFile = ThreadSafeReference(to: updatedFile)
-                            let sortedChildren = getLocalSortedDirectoryFiles(directory: updatedFile, sortType: sortType)
-                            DispatchQueue.main.async {
-                                completion(getRealm().resolve(safeFile), sortedChildren, nil)
-                            }
-                        } catch {
-                            DispatchQueue.main.async {
-                                completion(nil, nil, error)
-                            }
-                        }
-                    }
-                }
+            root.children.append(objectsIn: files)
+            let updatedFile = try updateFileInDatabase(updatedFile: root, using: localRealm)
+
+            return (getLocalSortedDirectoryFiles(directory: updatedFile, sortType: sortType), files.count == Endpoint.itemsPerPage)
+        } catch {
+            if page == 1 {
+                return (getLocalSortedDirectoryFiles(directory: root, sortType: sortType), false)
             } else {
-                completion(nil, nil, error)
+                throw error
             }
         }
     }
 
-    public func getMyShared(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {
-        apiFetcher.getMyShared(driveId: drive.id, page: page, sortType: sortType) { [self] response, error in
-            let realm = getRealm()
-            let mySharedRoot = DriveFileManager.mySharedRootFile
-            if let sharedFiles = response?.data {
-                backgroundQueue.async {
-                    autoreleasepool {
-                        let localRealm = getRealm()
-                        for sharedFile in sharedFiles {
-                            keepCacheAttributesForFile(newFile: sharedFile, keepStandard: true, keepExtras: true, keepRights: false, using: localRealm)
-                        }
+    public func favorites(page: Int = 1, sortType: SortType = .nameAZ) async throws -> (files: [File], moreComing: Bool) {
+        try await files(at: DriveFileManager.favoriteRootFile, apiMethod: apiFetcher.favorites, page: page, sortType: sortType)
+    }
 
-                        if sharedFiles.count < Endpoint.itemsPerPage {
-                            mySharedRoot.fullyDownloaded = true
-                        }
-
-                        do {
-                            var updatedFile: File!
-
-                            mySharedRoot.children.append(objectsIn: sharedFiles)
-                            updatedFile = try self.updateFileInDatabase(updatedFile: mySharedRoot, using: localRealm)
-
-                            let safeFile = ThreadSafeReference(to: updatedFile)
-                            let sortedChildren = getLocalSortedDirectoryFiles(directory: updatedFile, sortType: sortType)
-                            DispatchQueue.main.async {
-                                completion(realm.resolve(safeFile), sortedChildren, nil)
-                            }
-                        } catch {
-                            DispatchQueue.main.async {
-                                completion(nil, nil, error)
-                            }
-                        }
-                    }
-                }
-            } else {
-                if page == 1 {
-                    if let parent = realm.object(ofType: File.self, forPrimaryKey: mySharedRoot.id) {
-                        var allFiles = [File]()
-                        let searchResult = parent.children.sorted(by: [sortType.value.sortDescriptor])
-                        for child in searchResult.freeze() { allFiles.append(child.freeze()) }
-
-                        mySharedRoot.fullyDownloaded = true
-                        completion(mySharedRoot, allFiles, error)
-                    }
-                }
-                completion(nil, nil, error)
-            }
-        }
+    public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ) async throws -> (files: [File], moreComing: Bool) {
+        try await files(at: DriveFileManager.mySharedRootFile, apiMethod: apiFetcher.mySharedFiles, page: page, sortType: sortType)
     }
 
     public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
@@ -490,56 +437,36 @@ public class DriveFileManager {
         return offlineFiles.map { $0.freeze() }
     }
 
-    public func getLocalSortedDirectoryFiles(directory: File, sortType: SortType) -> [File] {
-        let children = directory.children.sorted(by: [
-            SortDescriptor(keyPath: \File.type, ascending: true),
-            SortDescriptor(keyPath: \File.visibility, ascending: false),
-            sortType.value.sortDescriptor
-        ])
-
-        return Array(children.freeze())
-    }
-
-    @discardableResult
-    public func searchFile(query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) -> DataRequest? {
+    public func searchFile(query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> (files: [File], moreComing: Bool) {
         if ReachabilityListener.instance.currentStatus == .offline {
-            searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType, completion: completion)
+            let localFiles = searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType)
+            return (localFiles, false)
         } else {
-            return apiFetcher.searchFiles(driveId: drive.id, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType) { [self] response, error in
-                if let files = response?.data {
-                    self.backgroundQueue.async { [self] in
-                        autoreleasepool {
-                            let realm = getRealm()
-                            let searchRoot = DriveFileManager.searchFilesRootFile
-                            if files.count < Endpoint.itemsPerPage {
-                                searchRoot.fullyDownloaded = true
-                            }
-                            for file in files {
-                                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-                            }
+            do {
+                let files = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
+                let realm = getRealm()
+                let searchRoot = DriveFileManager.searchFilesRootFile
+                if files.count < Endpoint.itemsPerPage {
+                    searchRoot.fullyDownloaded = true
+                }
+                for file in files {
+                    keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                }
 
-                            setLocalFiles(files, root: searchRoot) {
-                                let safeRoot = ThreadSafeReference(to: searchRoot)
-                                let frozenFiles = files.map { $0.freeze() }
-                                DispatchQueue.main.async {
-                                    completion(getRealm().resolve(safeRoot), frozenFiles, nil)
-                                }
-                            }
-                        }
-                    }
+                setLocalFiles(files, root: searchRoot)
+                return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+            } catch {
+                if error.asAFError?.isExplicitlyCancelledError == true {
+                    throw DriveError.searchCancelled
                 } else {
-                    if error?.asAFError?.isExplicitlyCancelledError ?? false {
-                        completion(nil, nil, DriveError.searchCancelled)
-                    } else {
-                        searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType, completion: completion)
-                    }
+                    let localFiles = searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType)
+                    return (localFiles, false)
                 }
             }
         }
-        return nil
     }
 
-    private func searchOffline(query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, sortType: SortType = .nameAZ, completion: @escaping (File?, [File]?, Error?) -> Void) {
+    private func searchOffline(query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, sortType: SortType = .nameAZ) -> [File] {
         let realm = getRealm()
         var searchResults = realm.objects(File.self).filter("id > 0")
         if let query = query, !query.isBlank {
@@ -549,10 +476,10 @@ public class DriveFileManager {
             searchResults = searchResults.filter(NSPredicate(format: "lastModifiedAt >= %d && lastModifiedAt <= %d", Int(date.start.timeIntervalSince1970), Int(date.end.timeIntervalSince1970)))
         }
         if let fileType = fileType {
-            if fileType == ConvertedType.folder.rawValue {
+            if fileType == .folder {
                 searchResults = searchResults.filter(NSPredicate(format: "type == \"dir\""))
             } else {
-                searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType))
+                searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType.rawValue))
             }
         }
         if !categories.isEmpty {
@@ -575,23 +502,7 @@ public class DriveFileManager {
         let searchRoot = DriveFileManager.searchFilesRootFile
         searchRoot.fullyDownloaded = true
 
-        completion(searchRoot, allFiles, DriveError.networkError)
-    }
-
-    public func getLocalFile(file: File, page: Int = 1, completion: @escaping (File?, Error?) -> Void) {
-        if file.isDirectory {
-            completion(nil, nil)
-        } else {
-            if !file.isLocalVersionOlderThanRemote {
-                // Already up to date, not downloading
-                completion(file, nil)
-            } else {
-                DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { _, error in
-                    completion(file, error)
-                }
-                DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
-            }
-        }
+        return allFiles
     }
 
     public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
@@ -694,78 +605,53 @@ public class DriveFileManager {
         }
     }
 
-    public func setLocalFiles(_ files: [File], root: File, completion: (() -> Void)? = nil) {
-        backgroundQueue.async { [self] in
+    public func setLocalFiles(_ files: [File], root: File) {
+        let realm = getRealm()
+        for file in files {
+            root.children.append(file)
+            file.capabilities = Rights(value: file.capabilities)
+        }
+
+        try? realm.safeWrite {
+            realm.add(root, update: .modified)
+        }
+        deleteOrphanFiles(root: root, newFiles: files, using: realm)
+    }
+
+    public func lastModifiedFiles(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
+        do {
+            let files = try await apiFetcher.lastModifiedFiles(drive: drive, page: page)
             let realm = getRealm()
             for file in files {
-                root.children.append(file)
-                file.capabilities = Rights(value: file.capabilities)
+                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
             }
 
-            try? realm.safeWrite {
-                realm.add(root, update: .modified)
-            }
-            deleteOrphanFiles(root: root, newFiles: files, using: realm)
-            completion?()
-        }
-    }
-
-    public func getLastModifiedFiles(page: Int? = nil, completion: @escaping ([File]?, Error?) -> Void) {
-        apiFetcher.getLastModifiedFiles(driveId: drive.id, page: page) { response, error in
-            if let files = response?.data {
-                self.backgroundQueue.async { [self] in
-                    autoreleasepool {
-                        let realm = getRealm()
-                        for file in files {
-                            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-                        }
-
-                        setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile) {
-                            let frozenFiles = files.map { $0.freeze() }
-                            DispatchQueue.main.async {
-                                completion(frozenFiles, nil)
-                            }
-                        }
-                    }
-                }
+            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile)
+            return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+        } catch {
+            if let files = getCachedFile(id: DriveFileManager.lastModificationsRootFile.id, freeze: true)?.children {
+                return (Array(files), false)
             } else {
-                DispatchQueue.main.async { [weak self] in
-                    if let files = self?.getCachedFile(id: DriveFileManager.lastModificationsRootFile.id, freeze: true)?.children {
-                        completion(Array(files), error)
-                    } else {
-                        completion(nil, error)
-                    }
-                }
+                throw error
             }
         }
     }
 
-    public func getLastPictures(page: Int = 1, completion: @escaping ([File]?, Error?) -> Void) {
-        apiFetcher.getLastPictures(driveId: drive.id, page: page) { response, error in
-            if let files = response?.data {
-                self.backgroundQueue.async { [self] in
-                    autoreleasepool {
-                        let realm = getRealm()
-                        for file in files {
-                            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-                        }
+    public func lastPictures(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
+        do {
+            let files = try await apiFetcher.searchFiles(drive: drive, fileType: .image, categories: [], belongToAllCategories: false, page: page, sortType: .newer)
+            let realm = getRealm()
+            for file in files {
+                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+            }
 
-                        setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile) {
-                            let frozenFiles = files.map { $0.freeze() }
-                            DispatchQueue.main.async {
-                                completion(frozenFiles, nil)
-                            }
-                        }
-                    }
-                }
+            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile)
+            return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+        } catch {
+            if let files = getCachedFile(id: DriveFileManager.lastPicturesRootFile.id, freeze: true)?.children {
+                return (Array(files), false)
             } else {
-                DispatchQueue.main.async { [weak self] in
-                    if let files = self?.getCachedFile(id: DriveFileManager.lastPicturesRootFile.id, freeze: true)?.children {
-                        completion(Array(files), error)
-                    } else {
-                        completion(nil, error)
-                    }
-                }
+                throw error
             }
         }
     }
@@ -1239,6 +1125,18 @@ public class DriveFileManager {
             setFileShareLink(file: proxyFile, shareLink: nil)
         }
         return response
+    }
+
+    // MARK: - Utilities
+
+    public func getLocalSortedDirectoryFiles(directory: File, sortType: SortType) -> [File] {
+        let children = directory.children.sorted(by: [
+            SortDescriptor(keyPath: \File.type, ascending: true),
+            SortDescriptor(keyPath: \File.visibility, ascending: false),
+            sortType.value.sortDescriptor
+        ])
+
+        return Array(children.freeze())
     }
 
     private func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {

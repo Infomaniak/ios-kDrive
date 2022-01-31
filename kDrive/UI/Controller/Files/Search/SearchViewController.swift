@@ -48,7 +48,7 @@ class SearchViewController: FileListViewController {
     }
 
     private var recentSearches = UserDefaults.shared.recentSearches
-    private var currentRequest: DataRequest?
+    private var currentTask: Task<Void, Never>?
 
     // MARK: - View controller lifecycle
 
@@ -94,19 +94,20 @@ class SearchViewController: FileListViewController {
             return
         }
 
-        currentRequest = driveFileManager.searchFile(query: currentSearchText, date: filters.date?.dateInterval, fileType: filters.fileType?.rawValue, categories: Array(filters.categories), belongToAllCategories: filters.belongToAllCategories, page: page, sortType: sortType) { [currentSearchText] file, children, error in
-            guard self.isDisplayingSearchResults else {
-                completion(.failure(DriveError.searchCancelled), false, false)
-                return
-            }
+        currentTask = Task { [currentSearchText] in
+            do {
+                let (files, moreComing) = try await driveFileManager.searchFile(query: currentSearchText, date: filters.date?.dateInterval, fileType: filters.fileType, categories: Array(filters.categories), belongToAllCategories: filters.belongToAllCategories, page: page, sortType: sortType)
+                guard self.isDisplayingSearchResults else {
+                    completion(.failure(DriveError.searchCancelled), false, false)
+                    return
+                }
 
-            if let currentSearchText = currentSearchText {
-                self.addToRecentSearch(currentSearchText)
-            }
-            if let fetchedCurrentDirectory = file, let fetchedChildren = children {
-                completion(.success(fetchedChildren), !fetchedCurrentDirectory.fullyDownloaded, false)
-            } else {
-                completion(.failure(error ?? DriveError.localError), false, false)
+                if let currentSearchText = currentSearchText {
+                    self.addToRecentSearch(currentSearchText)
+                }
+                completion(.success(files), moreComing, false)
+            } catch {
+                completion(.failure(error), false, false)
             }
         }
     }
@@ -163,8 +164,8 @@ class SearchViewController: FileListViewController {
         collectionView.backgroundView = nil
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadData()
-        currentRequest?.cancel()
-        currentRequest = nil
+        currentTask?.cancel()
+        currentTask = nil
         isLoadingData = false
         if isDisplayingSearchResults {
             forceRefresh()
