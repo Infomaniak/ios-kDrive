@@ -30,18 +30,6 @@ public enum ApiRoutes {
 
     static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
 
-    static func createDirectory(driveId: Int, parentId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/folder/\(parentId)?\(with)"
-    }
-
-    static func createCommonDirectory(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/folder/team?\(with)"
-    }
-
-    static func createOfficeFile(driveId: Int, parentId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/file/\(parentId)?\(with)"
-    }
-
     static func getMyShared(driveId: Int, sortType: SortType) -> String {
         return "\(driveApiUrl)\(driveId)/file/my_shared?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }
