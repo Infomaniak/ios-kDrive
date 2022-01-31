@@ -30,8 +30,9 @@ class HomePhotoListController: HomeRecentFilesController {
     }
 
     override func getFiles(completion: @escaping ([File]?) -> Void) {
-        driveFileManager.getLastPictures(page: page) { fetchedFiles, _ in
-            completion(fetchedFiles)
+        Task {
+            let result = try? await driveFileManager.lastPictures(page: page)
+            completion(result?.files)
         }
     }
 
