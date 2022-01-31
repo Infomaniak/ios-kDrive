@@ -90,10 +90,24 @@ class TrashListViewModel: UnmanagedFileListViewModel {
                 emptyTrashSync()
                 forceRefresh()
             }
-            onPresentViewController?(alert)
+            onPresentViewController?(.modal, alert, true)
         } else {
             super.barButtonPressed(type: type)
         }
+    }
+
+    override func didSelectSwipeAction(_ action: SwipeCellAction, at index: Int) {
+        if let file = getFile(at: index),
+           action == .delete {
+            didClickOnTrashOption(option: .delete, files: [file])
+        }
+    }
+
+    override func getSwipeActions(at index: Int) -> [SwipeCellAction]? {
+        if configuration.fromActivities || listStyle == .grid {
+            return nil
+        }
+        return [.delete]
     }
 
     private func emptyTrashSync() {
@@ -208,7 +222,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
                     selectFolderNavigationViewController?.dismiss(animated: true)
                 }
             }
-            onPresentViewController?(selectFolderNavigationViewController)
+            onPresentViewController?(.modal, selectFolderNavigationViewController, true)
         case .restore:
             restoreTrashedFiles(files)
         case .delete:
@@ -225,7 +239,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
                                                 destructive: true, loading: true) {
                 self.deleteFiles(files)
             }
-            onPresentViewController?(alert)
+            onPresentViewController?(.modal, alert, true)
         }
     }
 }
