@@ -182,9 +182,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                 }
             }
-            // Reload
-            reload(animated: false)
         }
+        // Reload
+        reload(animated: false)
     }
 
     // MARK: - Private methods
