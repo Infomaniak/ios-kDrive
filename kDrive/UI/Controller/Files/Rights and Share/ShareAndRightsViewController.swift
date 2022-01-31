@@ -51,6 +51,8 @@ class ShareAndRightsViewController: UIViewController {
 
         navigationController?.navigationBar.isTranslucent = true
 
+        navigationItem.hideBackButtonText()
+
         tableView.register(cellView: InviteUserTableViewCell.self)
         tableView.register(cellView: UsersAccessTableViewCell.self)
         tableView.register(cellView: ShareLinkTableViewCell.self)

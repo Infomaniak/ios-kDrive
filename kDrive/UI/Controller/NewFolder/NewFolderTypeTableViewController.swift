@@ -39,6 +39,7 @@ class NewFolderTypeTableViewController: UITableViewController {
         navigationItem.largeTitleDisplayMode = .always
 
         title = KDriveResourcesStrings.Localizable.newFolderTitle
+        navigationItem.hideBackButtonText()
 
         setupFolderType()
     }

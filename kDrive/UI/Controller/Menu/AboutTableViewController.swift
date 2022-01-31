@@ -50,6 +50,8 @@ class AboutTableViewController: UITableViewController {
         tableView.register(cellView: ParameterAboutTableViewCell.self)
         tableView.register(cellView: AboutDetailTableViewCell.self)
         navigationController?.navigationBar.sizeToFit()
+
+        navigationItem.hideBackButtonText()
     }
 
     // MARK: - Table view data source

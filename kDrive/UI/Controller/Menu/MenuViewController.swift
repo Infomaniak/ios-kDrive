@@ -82,6 +82,9 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
 
         currentAccount = AccountManager.instance.currentAccount
         updateTableContent()
+
+        navigationItem.title = KDriveResourcesStrings.Localizable.menuTitle
+        navigationItem.hideBackButtonText()
     }
 
     override func viewWillAppear(_ animated: Bool) {

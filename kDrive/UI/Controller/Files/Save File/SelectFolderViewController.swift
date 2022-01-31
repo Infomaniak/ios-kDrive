@@ -77,7 +77,7 @@ class SelectFolderViewController: FileListViewController {
             selectFolderViewController.fileToMove = fileToMove
             selectFolderViewController.delegate = delegate
             selectFolderViewController.selectHandler = selectHandler
-            selectFolderViewController.navigationItem.backButtonTitle = ""
+            selectFolderViewController.navigationItem.hideBackButtonText()
             viewControllers.append(selectFolderViewController)
         } else {
             var directory = startDirectory
@@ -88,7 +88,7 @@ class SelectFolderViewController: FileListViewController {
                 selectFolderViewController.currentDirectory = directory
                 selectFolderViewController.delegate = delegate
                 selectFolderViewController.selectHandler = selectHandler
-                selectFolderViewController.navigationItem.backButtonTitle = ""
+                selectFolderViewController.navigationItem.hideBackButtonText()
                 viewControllers.append(selectFolderViewController)
                 directory = directory?.parent
             }

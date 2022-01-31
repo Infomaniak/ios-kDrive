@@ -45,9 +45,7 @@
                             <constraint firstAttribute="bottom" secondItem="Br5-Ox-LQD" secondAttribute="bottom" id="zyn-5h-vEC"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Izx-pt-ViY">
-                        <barButtonItem key="backBarButtonItem" title=" " id="MfV-7g-kRG"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Izx-pt-ViY"/>
                     <nil key="simulatedTopBarMetrics"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
@@ -256,9 +254,7 @@
                             <constraint firstItem="qcp-PP-32U" firstAttribute="top" secondItem="Wnk-0e-vBU" secondAttribute="top" id="f8U-UV-a4s"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Lhp-9h-vfB">
-                        <barButtonItem key="backBarButtonItem" title=" " id="w90-lb-7Is"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Lhp-9h-vfB"/>
                     <connections>
                         <outlet property="tableView" destination="qcp-PP-32U" id="HLr-hT-sg8"/>
                         <segue destination="5uZ-j3-nnx" kind="show" identifier="toSharedWithMeSegue" id="y6f-7m-haP"/>
@@ -418,7 +414,6 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Paramètres" largeTitleDisplayMode="always" id="JaU-H2-8DB">
-                        <barButtonItem key="backBarButtonItem" title=" " id="mHD-co-QUI"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="settingsTitle"/>
                         </userDefinedRuntimeAttributes>
@@ -484,7 +479,6 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Sauvegarde des photos" largeTitleDisplayMode="always" id="rHu-OF-I7F">
-                        <barButtonItem key="backBarButtonItem" title=" " id="9Ny-BV-Yls"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="syncSettingsTitle"/>
                         </userDefinedRuntimeAttributes>

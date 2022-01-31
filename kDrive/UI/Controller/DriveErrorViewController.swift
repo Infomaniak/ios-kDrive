@@ -49,7 +49,7 @@ class DriveErrorViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        navigationItem.backButtonTitle = ""
+        navigationItem.hideBackButtonText()
 
         setupView()
         setupCircleView()

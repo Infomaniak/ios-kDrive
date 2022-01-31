@@ -89,11 +89,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
         set {
             previewFiles[currentIndex.row] = newValue
+            navigationItem.title = currentFile.name
         }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        navigationItem.title = currentFile.name
+        navigationItem.hideBackButtonText()
 
         collectionView.register(cellView: NoPreviewCollectionViewCell.self)
         collectionView.register(cellView: DownloadingPreviewCollectionViewCell.self)

@@ -45,6 +45,8 @@ class SelectDriveViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.hideBackButtonText()
+
         tableView.register(cellView: NoAccountTableViewCell.self)
         tableView.register(cellView: DriveSwitchTableViewCell.self)
         tableView.register(cellView: UserAccountTableViewCell.self)

@@ -44,6 +44,8 @@ class NotificationsSettingsTableViewController: UITableViewController {
 
         updateTableViewContent()
         NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewContent), name: UIApplication.willEnterForegroundNotification, object: nil)
+
+        navigationItem.hideBackButtonText()
     }
 
     deinit {

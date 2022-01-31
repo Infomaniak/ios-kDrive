@@ -30,6 +30,8 @@ class SharedDrivesViewController: UIViewController {
         title = KDriveResourcesStrings.Localizable.sharedWithMeTitle
         tableView.register(cellView: MenuTableViewCell.self)
 
+        navigationItem.hideBackButtonText()
+
         drives = DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true)
         showEmptyView()
     }

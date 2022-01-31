@@ -22,9 +22,7 @@
                             <outlet property="delegate" destination="N7u-GJ-nCc" id="sb3-wu-a5Y"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="8NS-mo-zHt">
-                        <barButtonItem key="backBarButtonItem" title=" " id="6Hn-M1-M0n"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="8NS-mo-zHt"/>
                     <connections>
                         <segue destination="KAo-sr-Ito" kind="show" identifier="toNewFolderSegue" id="BZq-LT-2bx"/>
                     </connections>

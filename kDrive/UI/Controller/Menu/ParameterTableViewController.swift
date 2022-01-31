@@ -79,6 +79,8 @@ class ParameterTableViewController: UITableViewController {
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterAboutTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
+
+        navigationItem.hideBackButtonText()
     }
 
     override func viewWillAppear(_ animated: Bool) {

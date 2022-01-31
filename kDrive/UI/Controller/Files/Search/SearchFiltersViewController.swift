@@ -56,6 +56,8 @@ class SearchFiltersViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.hideBackButtonText()
+
         clearsSelectionOnViewWillAppear = false
 
         tableView.register(cellView: LocationTableViewCell.self)
