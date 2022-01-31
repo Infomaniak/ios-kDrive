@@ -44,11 +44,12 @@ class LastModificationsViewController: FileListViewController {
         }
 
         if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
-            driveFileManager.getLastModifiedFiles(page: page) { response, error in
-                if let files = response {
-                    completion(.success(files), files.count == Endpoint.itemsPerPage, false)
-                } else {
-                    completion(.failure(error ?? DriveError.localError), false, false)
+            Task {
+                do {
+                    let (files, moreComing) = try await driveFileManager.lastModifiedFiles(page: page)
+                    completion(.success(files), moreComing, false)
+                } catch {
+                    completion(.failure(error), false, false)
                 }
             }
         } else {
