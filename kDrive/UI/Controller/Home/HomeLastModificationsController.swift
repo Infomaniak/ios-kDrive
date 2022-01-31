@@ -30,8 +30,9 @@ class HomeLastModificationsController: HomeRecentFilesController {
     }
 
     override func getFiles(completion: @escaping ([File]?) -> Void) {
-        driveFileManager.getLastModifiedFiles(page: page) { fetchedFiles, _ in
-            completion(fetchedFiles)
+        Task {
+            let result = try? await driveFileManager.lastModifiedFiles(page: page)
+            completion(result?.files)
         }
     }
 

@@ -30,24 +30,8 @@ public enum ApiRoutes {
 
     static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
 
-    static func getMyShared(driveId: Int, sortType: SortType) -> String {
-        return "\(driveApiUrl)\(driveId)/file/my_shared?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
-    }
-
     static func getFileDetailActivity(file: File) -> String {
         return "\(fileURL(file: file))activity"
-    }
-
-    static func getFavoriteFiles(driveId: Int, sortType: SortType) -> String {
-        return "\(driveApiUrl)\(driveId)/file/favorite?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
-    }
-
-    static func getLastModifiedFiles(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/last_modified?\(with)"
-    }
-
-    static func getLastPictures(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/search?order=desc&order_by=last_modified_at&\(with)&converted_type=image"
     }
 
     static func renameFile(file: File) -> String {
@@ -95,10 +79,6 @@ public enum ApiRoutes {
     static func getTrashFiles(driveId: Int, fileId: Int? = nil, sortType: SortType) -> String {
         let fileId = fileId == nil ? "" : "\(fileId!)"
         return "\(driveApiUrl)\(driveId)/file/trash/\(fileId)?with=children,parent&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
-    }
-
-    static func searchFiles(driveId: Int, sortType: SortType) -> String {
-        return "\(driveApiUrl)\(driveId)/file/search?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }
 
     public static func showOffice(file: File) -> String {
