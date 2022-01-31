@@ -517,7 +517,7 @@ public extension Endpoint {
     // MARK: Trash
 
     static func trash(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/trash")
+        return .driveInfo(drive: drive).appending(path: "/trash", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func trashCount(drive: AbstractDrive) -> Endpoint {
@@ -525,11 +525,11 @@ public extension Endpoint {
     }
 
     static func trashedInfo(file: AbstractFile) -> Endpoint {
-        return .trash(drive: ProxyDrive(id: file.driveId)).appending(path: "/\(file.id)")
+        return .trash(drive: ProxyDrive(id: file.driveId)).appending(path: "/\(file.id)", queryItems: [fileExtraWithQueryItems])
     }
 
     static func trashedFiles(of directory: AbstractFile) -> Endpoint {
-        return .trashedInfo(file: directory).appending(path: "/files")
+        return .trashedInfo(file: directory).appending(path: "/files", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func restore(file: AbstractFile) -> Endpoint {
