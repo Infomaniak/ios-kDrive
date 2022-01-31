@@ -20,8 +20,8 @@ import Foundation
 import QuickLookThumbnailing
 import UIKit
 
-public class FileHelper {
-    public static let instance = FileHelper()
+public class FilePreviewHelper {
+    public static let instance = FilePreviewHelper()
 
     public func getThumbnail(url: URL, thumbnailSize: CGSize, completion: @escaping (UIImage) -> Void) {
         let request = QLThumbnailGenerator.Request(

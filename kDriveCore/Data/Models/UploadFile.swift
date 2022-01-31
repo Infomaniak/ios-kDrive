@@ -198,7 +198,7 @@ public class UploadFile: Object {
                 }
             }
         } else if let url = pathURL {
-            FileHelper.instance.getThumbnail(url: url, thumbnailSize: thumbnailSize) { image in
+            FilePreviewHelper.instance.getThumbnail(url: url, thumbnailSize: thumbnailSize) { image in
                 completion(image)
             }
         }

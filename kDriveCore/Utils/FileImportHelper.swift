@@ -38,7 +38,7 @@ public class ImportedFile {
     public func getThumbnail(completion: @escaping (UIImage) -> Void) {
         let thumbnailSize = CGSize(width: 38, height: 38)
 
-        FileHelper.instance.getThumbnail(url: path, thumbnailSize: thumbnailSize) { image in
+        FilePreviewHelper.instance.getThumbnail(url: path, thumbnailSize: thumbnailSize) { image in
             completion(image)
         }
     }
