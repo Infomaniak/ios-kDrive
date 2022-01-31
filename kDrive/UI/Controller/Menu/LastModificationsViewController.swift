@@ -26,7 +26,7 @@ class LastModificationsViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        let configuration = Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo)
+        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo)
         filePresenter.listType = LastModificationsViewController.self
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.lastModificationsRootFile
