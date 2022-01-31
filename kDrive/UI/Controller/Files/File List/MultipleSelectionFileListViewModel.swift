@@ -117,7 +117,7 @@ class MultipleSelectionFileListViewModel {
                                                    disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getRootFile()]) { [weak self] selectedFolder in
                     self?.moveSelectedItems(to: selectedFolder)
                 }
-            onPresentViewController?(selectFolderNavigationController)
+            onPresentViewController?(.modal, selectFolderNavigationController, true)
         case .delete:
             var message: NSMutableAttributedString
             if selectedCount == 1,
@@ -132,7 +132,7 @@ class MultipleSelectionFileListViewModel {
                                                 destructive: true, loading: true) { [weak self] in
                 self?.deleteSelectedItems()
             }
-            onPresentViewController?(alert)
+            onPresentViewController?(.modal, alert, true)
         case .more:
             onPresentQuickActionPanel?(Array(selectedItems), .multipleSelection)
         default:

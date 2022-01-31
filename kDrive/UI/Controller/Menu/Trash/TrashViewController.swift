@@ -29,27 +29,4 @@ class TrashViewController: FileListViewController {
     override func getViewModel() -> FileListViewModel {
         return TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
-
-    // MARK: - Private methods
-
-    // MARK: - Swipe action collection view delegate
-
-    override func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
-        let file = viewModel.getFile(at: indexPath.item)!
-        switch action {
-        case .delete:
-            (viewModel as? TrashListViewModel)?.didClickOnTrashOption(option: .delete, files: [file])
-        default:
-            break
-        }
-    }
-
-    // MARK: - Swipe action collection view data source
-
-    override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if viewModel.configuration.fromActivities || viewModel.listStyle == .grid {
-            return nil
-        }
-        return [.delete]
-    }
 }
