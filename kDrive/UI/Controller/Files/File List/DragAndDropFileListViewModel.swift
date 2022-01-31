@@ -23,7 +23,7 @@ import UIKit
 
 @MainActor
 class DraggableFileListViewModel {
-    private var driveFileManager: DriveFileManager
+    internal var driveFileManager: DriveFileManager
 
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
@@ -51,7 +51,7 @@ class DraggableFileListViewModel {
 
 @MainActor
 class DroppableFileListViewModel {
-    private var driveFileManager: DriveFileManager
+    internal var driveFileManager: DriveFileManager
     private var currentDirectory: File
     private var lastDropPosition: DropPosition?
     var onFilePresented: FileListViewModel.FilePresentedCallback?

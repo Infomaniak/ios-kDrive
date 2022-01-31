@@ -24,10 +24,23 @@ import RealmSwift
 class UploadCardViewModel {
     @Published var uploadCount: Int
 
+    internal var driveFileManager: DriveFileManager {
+        didSet {
+            initObservation()
+        }
+    }
+
+    private var uploadDirectory: File
     private var realmObservationToken: NotificationToken?
 
     init(uploadDirectory: File?, driveFileManager: DriveFileManager) {
-        let uploadDirectory = uploadDirectory ?? driveFileManager.getRootFile()
+        self.driveFileManager = driveFileManager
+        self.uploadDirectory = uploadDirectory ?? driveFileManager.getRootFile()
+        self.uploadCount = 0
+        initObservation()
+    }
+
+    private func initObservation() {
         let driveId = driveFileManager.drive.id
         uploadCount = UploadQueue.instance.getUploadingFiles(withParent: uploadDirectory.id, driveId: driveId).count
         realmObservationToken = UploadQueue.instance.getUploadingFiles(withParent: uploadDirectory.id, driveId: driveId).observe(on: .main) { [weak self] change in
