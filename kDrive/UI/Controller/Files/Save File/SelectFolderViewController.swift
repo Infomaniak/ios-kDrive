@@ -54,7 +54,7 @@ class SelectFolderViewController: FileListViewController {
     }
 
     override func getViewModel() -> FileListViewModel {
-        let configuration = Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
+        let configuration = FileListViewModel.Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
         return ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 

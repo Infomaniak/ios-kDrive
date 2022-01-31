@@ -54,6 +54,35 @@ class FileListViewModel {
     /// files sent to the panel, panel type
     typealias PresentQuickActionPanelCallback = ([File], FileListQuickActionType) -> Void
 
+    // MARK: - Configuration
+
+    struct Configuration {
+        /// Is normal folder hierarchy
+        var normalFolderHierarchy = true
+        /// Enable or disable upload status displayed in the header (enabled by default)
+        var showUploadingFiles = true
+        /// Enable or disable multiple selection (enabled by default)
+        var isMultipleSelectionEnabled = true
+        /// Enable or disable refresh control (enabled by default)
+        var isRefreshControlEnabled = true
+        /// Is displayed from activities
+        var fromActivities = false
+        /// Does this folder support "select all" action (no effect if multiple selection is disabled)
+        var selectAllSupported = true
+        /// Root folder title
+        var rootTitle: String?
+        /// Type of empty view to display
+        var emptyViewType: EmptyTableView.EmptyTableViewType
+        /// Does this folder support importing files with drop from external app
+        var supportsDrop = false
+        /// Does this folder support importing files with drag from external app
+        var supportDrag = true
+        /// Bar buttons showed in the file list
+        var leftBarButtons: [FileListBarButtonType]?
+        var rightBarButtons: [FileListBarButtonType]?
+        var sortingOptions: [SortType] = [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest]
+    }
+
     var currentDirectory: File
     var driveFileManager: DriveFileManager
     var isEmpty: Bool {
@@ -103,9 +132,9 @@ class FileListViewModel {
     var draggableFileListViewModel: DraggableFileListViewModel?
     var droppableFileListViewModel: DroppableFileListViewModel?
 
-    var configuration: FileListViewController.Configuration
+    var configuration: Configuration
 
-    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.configuration = configuration
         self.driveFileManager = driveFileManager
         if let currentDirectory = currentDirectory {

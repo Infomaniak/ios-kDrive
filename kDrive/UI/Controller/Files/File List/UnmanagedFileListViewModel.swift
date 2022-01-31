@@ -29,7 +29,7 @@ class UnmanagedFileListViewModel: FileListViewModel {
         return files.count
     }
 
-    override init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         self.files = [File]()
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         driveFileManager.observeFileUpdated(self, fileId: self.currentDirectory.id) { [weak self] _ in
