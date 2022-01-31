@@ -79,7 +79,7 @@ class SaveFileViewController: UIViewController {
 
         tableView.separatorColor = .clear
         tableView.register(cellView: AlertTableViewCell.self)
-        tableView.register(cellView: MenuTableViewCell.self)
+        tableView.register(cellView: UploadTableViewCell.self)
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: ImportingTableViewCell.self)
         tableView.register(cellView: LocationTableViewCell.self)
@@ -205,17 +205,9 @@ extension SaveFileViewController: UITableViewDataSource {
         case .fileName:
             let item = items[indexPath.row]
             if items.count > 1 {
-                let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
+                let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
-                cell.accessoryImageView.image = KDriveResourcesAsset.edit.image
-                cell.logoImage.image = ConvertedType.fromUTI(item.uti).icon
-                item.getThumbnail { image in
-                    cell.logoImage.layer.cornerRadius = UIConstants.imageCornerRadius
-                    cell.logoImage.contentMode = .scaleAspectFill
-                    cell.logoImage.layer.masksToBounds = true
-                    cell.logoImage.image = image
-                }
-                cell.titleLabel.text = item.name
+                cell.configureWith(importedFile: item)
                 return cell
             } else {
                 let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)

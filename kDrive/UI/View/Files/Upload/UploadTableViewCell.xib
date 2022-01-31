@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -23,7 +23,7 @@
                         <rect key="frame" x="24" y="8" width="272" height="60"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="exo-MW-gGi">
-                                <rect key="frame" x="16" y="9" width="178" height="42"/>
+                                <rect key="frame" x="16" y="9" width="150" height="42"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZPd-Op-UHm" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="9" width="24" height="24"/>
@@ -41,10 +41,10 @@
                                         </constraints>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="54V-wB-FIL">
-                                        <rect key="frame" x="78" y="0.0" width="100" height="42"/>
+                                        <rect key="frame" x="78" y="0.0" width="72" height="42"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qcs-cN-ITn" customClass="IKLabel" customModule="kDriveCore">
-                                                <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="72" height="18"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                                 <color key="textColor" name="titleColor"/>
                                                 <nil key="highlightedColor"/>
@@ -53,7 +53,7 @@
                                                 </userDefinedRuntimeAttributes>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7dX-Vg-iSK" customClass="IKLabel" customModule="kDriveCore">
-                                                <rect key="frame" x="0.0" y="26" width="100" height="16"/>
+                                                <rect key="frame" x="0.0" y="26" width="72" height="16"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                 <color key="textColor" name="secondaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -66,10 +66,18 @@
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="UJy-gt-mPu">
-                                <rect key="frame" x="202" y="20.5" width="54" height="19"/>
+                                <rect key="frame" x="174" y="20.5" width="82" height="19"/>
                                 <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="edit" translatesAutoresizingMaskIntoConstraints="NO" id="fSi-IH-Fdu">
+                                        <rect key="frame" x="0.0" y="0.0" width="12" height="14"/>
+                                        <color key="tintColor" name="primaryTextColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="12" id="v5M-w0-9wi"/>
+                                            <constraint firstAttribute="height" constant="14" id="wbO-dy-hYn"/>
+                                        </constraints>
+                                    </imageView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TXK-ec-ySf">
-                                        <rect key="frame" x="0.0" y="0.0" width="20" height="19"/>
+                                        <rect key="frame" x="28" y="-5" width="20" height="19"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="19" id="YTb-hx-OQF"/>
                                             <constraint firstAttribute="width" constant="20" id="eYQ-1i-W8M"/>
@@ -78,7 +86,7 @@
                                         <state key="normal" image="retry"/>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p7c-Ge-Tlc">
-                                        <rect key="frame" x="36" y="0.0" width="18" height="19"/>
+                                        <rect key="frame" x="64" y="-10" width="18" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="19" id="aPW-oS-ELB"/>
                                             <constraint firstAttribute="width" constant="18" id="nCC-vw-AlW"/>
@@ -104,6 +112,7 @@
                         <connections>
                             <outlet property="cancelButton" destination="p7c-Ge-Tlc" id="6A4-Os-WYm"/>
                             <outlet property="detailsLabel" destination="7dX-Vg-iSK" id="I99-1X-7Cp"/>
+                            <outlet property="editImage" destination="fSi-IH-Fdu" id="L9a-78-WzY"/>
                             <outlet property="iconView" destination="MBf-nm-J24" id="Zc8-Ee-kf0"/>
                             <outlet property="progressView" destination="ZPd-Op-UHm" id="liB-pO-2NZ"/>
                             <outlet property="retryButton" destination="TXK-ec-ySf" id="UBt-6k-Q4a"/>
@@ -129,8 +138,17 @@
             <point key="canvasLocation" x="140.57971014492756" y="129.24107142857142"/>
         </tableViewCell>
     </objects>
+    <designables>
+        <designable name="7dX-Vg-iSK">
+            <size key="intrinsicContentSize" width="33" height="16"/>
+        </designable>
+        <designable name="qcs-cN-ITn">
+            <size key="intrinsicContentSize" width="38.5" height="18"/>
+        </designable>
+    </designables>
     <resources>
         <image name="close" width="24" height="24"/>
+        <image name="edit" width="24" height="24"/>
         <image name="file-audio" width="24" height="24"/>
         <image name="retry" width="24" height="24"/>
         <namedColor name="backgroundCardViewColor">

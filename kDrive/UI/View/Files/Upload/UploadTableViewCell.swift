@@ -24,7 +24,7 @@ import UIKit
 class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
-    private var currentFileId: String!
+    private var currentFileId: String?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -37,8 +37,10 @@ class UploadTableViewCell: InsetTableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        cardContentView.editImage?.isHidden = true
         cardContentView.retryButton?.isHidden = true
         cardContentView.progressView.isHidden = true
+        cardContentView.detailsLabel.isHidden = false
         cardContentView.iconView.isHidden = false
         cardContentView.iconView.image = nil
         cardContentView.iconView.contentMode = .scaleAspectFit
@@ -72,7 +74,7 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.titleLabel.text = uploadFile.name
         setStatusFor(uploadFile: uploadFile)
 
-        if let progress = progress {
+        if let progress = progress, let currentFileId = currentFileId {
             updateProgress(fileId: currentFileId, progress: progress, animated: false)
         }
 
@@ -102,8 +104,27 @@ class UploadTableViewCell: InsetTableViewCell {
         }
     }
 
+    func configureWith(importedFile: ImportedFile) {
+        cardContentView.cancelButton?.isHidden = true
+        cardContentView.retryButton?.isHidden = true
+        cardContentView.editImage?.isHidden = false
+
+        cardContentView.editImage?.image = KDriveResourcesAsset.edit.image
+        cardContentView.iconView.image = ConvertedType.fromUTI(importedFile.uti).icon
+        cardContentView.titleLabel.text = importedFile.name
+        cardContentView.detailsLabel.isHidden = true
+        importedFile.getThumbnail { image in
+            DispatchQueue.main.async {
+                self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
+                self.cardContentView.iconView.contentMode = .scaleAspectFill
+                self.cardContentView.iconView.layer.masksToBounds = true
+                self.cardContentView.iconView.image = image
+            }
+        }
+    }
+
     func updateProgress(fileId: String, progress: CGFloat, animated: Bool = true) {
-        if fileId == currentFileId {
+        if let currentFileId = currentFileId, fileId == currentFileId {
             cardContentView.iconView.isHidden = true
             cardContentView.progressView.isHidden = false
             cardContentView.progressView.updateProgress(progress, animated: animated)
