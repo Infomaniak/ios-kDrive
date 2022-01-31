@@ -115,9 +115,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Properties
 
-    var rightBarButtonItems: [UIBarButtonItem]?
-    var leftBarButtonItems: [UIBarButtonItem]?
-
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
@@ -170,8 +167,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
             collectionView.addGestureRecognizer(longPressGesture)
         }
-        rightBarButtonItems = navigationItem.rightBarButtonItems
-        leftBarButtonItems = navigationItem.leftBarButtonItems
 
         if viewModel.droppableFileListViewModel != nil {
             collectionView.dropDelegate = self
@@ -289,7 +284,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         viewModel.onPresentQuickActionPanel = { [weak self] files, type in
-            self?.showQuickActionsPanel(files: files, type: type)
+            self?.showQuickActionsPanel(files: files, actionType: type)
         }
     }
 
@@ -468,13 +463,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     private func reloadCollectionView(with files: [File]) {}
 
-    func showQuickActionsPanel(files: [File], type: FileListQuickActionType) {
+    func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
             floatingPanelViewController.isRemovalInteractionEnabled = true
-            switch type {
+            switch actionType {
             case .file:
                 var fileInformationsViewController = quickActionsViewController as? FileActionsFloatingPanelViewController
-                if fileInformationsViewController == nil {
+                if fileInformationsViewController == nil || type(of: quickActionsViewController) != FileActionsFloatingPanelViewController.self {
                     fileInformationsViewController = FileActionsFloatingPanelViewController()
                     fileInformationsViewController!.presentingParent = self
                     fileInformationsViewController!.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
@@ -503,6 +498,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 var selectViewController = quickActionsViewController as? SelectFloatingPanelTableViewController
                 if selectViewController == nil {
                     selectViewController = SelectFloatingPanelTableViewController()
+                    selectViewController?.files = files
+                    selectViewController?.driveFileManager = driveFileManager
                     floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 260)
                     selectViewController!.reloadAction = { [weak self] in
                         self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
@@ -510,9 +507,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
                     floatingPanelViewController.set(contentViewController: selectViewController!)
                     floatingPanelViewController.track(scrollView: selectViewController!.collectionView)
+                } else {
+                    selectViewController?.files = files
+                    selectViewController?.driveFileManager = driveFileManager
+                    selectViewController?.setupContent()
                 }
-                selectViewController?.files = files
-                selectViewController?.driveFileManager = driveFileManager
+
                 quickActionsViewController = selectViewController
             }
             present(floatingPanelViewController, animated: true)
@@ -536,8 +536,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             collectionView.allowsMultipleSelection = false
             navigationController?.navigationBar.prefersLargeTitles = true
             navigationItem.title = viewModel.title
-            navigationItem.rightBarButtonItems = rightBarButtonItems
-            navigationItem.leftBarButtonItems = leftBarButtonItems
         }
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
