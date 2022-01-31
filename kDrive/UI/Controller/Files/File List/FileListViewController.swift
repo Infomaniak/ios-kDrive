@@ -307,8 +307,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             self.navigationItem.rightBarButtonItems = rightBarButtons?.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
 
-        viewModel.onPresentViewController = { [weak self] viewController in
-            self?.present(viewController, animated: true)
+        viewModel.onPresentViewController = { [weak self] presentationType, viewController, animated in
+            if presentationType == .push,
+               let navigationController = self?.navigationController {
+                navigationController.pushViewController(viewController, animated: animated)
+            } else {
+                self?.present(viewController, animated: animated)
+            }
         }
 
         viewModel.onPresentQuickActionPanel = { [weak self] files, type in
@@ -653,36 +658,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Swipe action collection view delegate
 
     func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
-        #if !ISEXTENSION
-            let file = viewModel.getFile(at: indexPath.item)!
-            switch action {
-            case .share:
-                let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
-                navigationController?.pushViewController(shareVC, animated: true)
-            case .delete:
-                delete(file: file)
-            default:
-                break
-            }
-        #endif
+        viewModel.didSelectSwipeAction(action, at: indexPath.item)
     }
 
     // MARK: - Swipe action collection view data source
 
     func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if viewModel.configuration.fromActivities || viewModel.listStyle == .grid {
-            return nil
-        }
-        var actions = [SwipeCellAction]()
-        if let capabilities = viewModel.getFile(at: indexPath.item)?.capabilities {
-        if capabilities.canShare {
-            actions.append(.share)
-        }
-        if capabilities.canDelete {
-            actions.append(.delete)
-		}
-        }
-        return actions
+        return viewModel.getSwipeActions(at: indexPath.item)
     }
 
     // MARK: - State restoration
