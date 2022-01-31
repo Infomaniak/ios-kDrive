@@ -89,24 +89,26 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 } catch {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: fileId, page: pageIndex) { response, error in
-                        if let file = response?.data {
-                            var containerItems = [FileProviderItem]()
-                            for child in file.children {
-                                autoreleasepool {
-                                    let item = FileProviderItem(file: child, domain: self.domain)
-                                    item.parentItemIdentifier = self.containerItemIdentifier
-                                    containerItems.append(item)
-                                }
+                    do {
+                        let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
+                        let children = try await driveFileManager.apiFetcher.trashedFiles(of: file, page: pageIndex)
+                        var containerItems = [FileProviderItem]()
+                        for child in children {
+                            autoreleasepool {
+                                let item = FileProviderItem(file: child, domain: self.domain)
+                                item.parentItemIdentifier = self.containerItemIdentifier
+                                containerItems.append(item)
                             }
-                            containerItems.append(FileProviderItem(file: file, domain: self.domain))
-                            observer.didEnumerate(containerItems)
-                            if self.isDirectory && file.children.count == Endpoint.itemsPerPage {
-                                observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
-                            } else {
-                                observer.finishEnumerating(upTo: nil)
-                            }
-                        } else if let error = error as? DriveError, error == .maintenance {
+                        }
+                        containerItems.append(FileProviderItem(file: file, domain: self.domain))
+                        observer.didEnumerate(containerItems)
+                        if self.isDirectory && children.count == Endpoint.itemsPerPage {
+                            observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
+                        } else {
+                            observer.finishEnumerating(upTo: nil)
+                        }
+                    } catch {
+                        if let error = error as? DriveError, error == .maintenance {
                             observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found
@@ -155,11 +157,12 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     }
                 } catch {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: directoryIdentifier) { response, error in
-                        if let file = response?.data {
-                            observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
-                            observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
-                        } else if let error = error as? DriveError, error == .maintenance {
+                    do {
+                        let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: driveFileManager.drive.id, id: directoryIdentifier))
+                        observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
+                        observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
+                    } catch {
+                        if let error = error as? DriveError, error == .maintenance {
                             observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found
