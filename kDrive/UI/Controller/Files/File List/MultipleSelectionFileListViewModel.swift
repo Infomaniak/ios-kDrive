@@ -82,9 +82,9 @@ class MultipleSelectionFileListViewModel {
 
     private var driveFileManager: DriveFileManager
     private var currentDirectory: File
-    private var configuration: FileListViewController.Configuration
+    private var configuration: FileListViewModel.Configuration
 
-    init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
+    init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         isMultipleSelectionEnabled = false
         selectedCount = 0
         multipleSelectionActions = [.move, .delete, .more]
