@@ -76,7 +76,6 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Filtres" id="CHQ-vg-ClB">
-                        <barButtonItem key="backBarButtonItem" title=" " id="N6X-Uz-MzA"/>
                         <barButtonItem key="leftBarButtonItem" style="done" systemItem="stop" id="N3C-dt-S4u">
                             <connections>
                                 <action selector="closeButtonPressed:" destination="J5q-yn-jYo" id="g40-7e-LFr"/>

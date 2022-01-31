@@ -19,7 +19,7 @@
 import UIKit
 
 extension UINavigationItem {
-    func dontShowBackButtonText() {
+    func hideBackButtonText() {
         if #available(iOS 14.0, *) {
             self.backButtonDisplayMode = .minimal
         } else {

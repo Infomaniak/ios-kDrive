@@ -141,7 +141,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         setTitle()
 
-        navigationItem.dontShowBackButtonText()
+        navigationItem.hideBackButtonText()
 
         // Set up collection view
         collectionView.register(cellView: FileCollectionViewCell.self)

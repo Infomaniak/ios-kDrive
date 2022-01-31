@@ -89,6 +89,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
         set {
             previewFiles[currentIndex.row] = newValue
+            navigationItem.title = currentFile.name
         }
     }
 
@@ -96,7 +97,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         super.viewDidLoad()
 
         navigationItem.title = currentFile.name
-        navigationItem.dontShowBackButtonText()
+        navigationItem.hideBackButtonText()
 
         collectionView.register(cellView: NoPreviewCollectionViewCell.self)
         collectionView.register(cellView: DownloadingPreviewCollectionViewCell.self)
