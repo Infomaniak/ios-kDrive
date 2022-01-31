@@ -170,31 +170,16 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.fileInfo(file)))
     }
 
-    public func getFavoriteFiles(driveId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFavoriteFiles(driveId: driveId, sortType: sortType))\(pagination(page: page))"
-
-        makeRequest(url, method: .get, completion: completion)
+    public func favorites(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.favorites(drive: drive).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
 
-    public func getMyShared(driveId: Int, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getMyShared(driveId: driveId, sortType: sortType))\(pagination(page: page))"
-
-        makeRequest(url, method: .get, completion: completion)
+    public func mySharedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.mySharedFiles(drive: drive).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
 
-    public func getLastModifiedFiles(driveId: Int, page: Int? = nil, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
-        var url = ApiRoutes.getLastModifiedFiles(driveId: driveId)
-        if let page = page {
-            url += pagination(page: page)
-        }
-
-        makeRequest(url, method: .get, completion: completion)
-    }
-
-    public func getLastPictures(driveId: Int, page: Int = 1, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) {
-        let url = ApiRoutes.getLastPictures(driveId: driveId) + pagination(page: page)
-
-        makeRequest(url, method: .get, completion: completion)
+    public func lastModifiedFiles(drive: AbstractDrive, page: Int = 1) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.lastModifiedFiles(drive: drive).paginated(page: page))).data
     }
 
     public func shareLink(for file: File) async throws -> ShareLink {
@@ -416,35 +401,8 @@ public class DriveApiFetcher: ApiFetcher {
         return try await perform(request: authenticatedRequest(.restore(file: file), method: .post, parameters: parameters)).data
     }
 
-    @discardableResult
-    public func searchFiles(driveId: Int, query: String? = nil, date: DateInterval? = nil, fileType: String? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ, completion: @escaping (ApiResponse<[File]>?, Error?) -> Void) -> DataRequest {
-        let url = ApiRoutes.searchFiles(driveId: driveId, sortType: sortType) + pagination(page: page)
-        var queryItems = [URLQueryItem]()
-        if let query = query, !query.isBlank {
-            queryItems.append(URLQueryItem(name: "query", value: query))
-        }
-        if let date = date {
-            queryItems += [
-                URLQueryItem(name: "modified_at", value: "custom"),
-                URLQueryItem(name: "from", value: "\(Int(date.start.timeIntervalSince1970))"),
-                URLQueryItem(name: "until", value: "\(Int(date.end.timeIntervalSince1970))")
-            ]
-        }
-        if let fileType = fileType {
-            queryItems.append(URLQueryItem(name: "converted_type", value: fileType))
-        }
-        if !categories.isEmpty {
-            let separator = belongToAllCategories ? "&" : "|"
-            queryItems.append(URLQueryItem(name: "category", value: categories.map { "\($0.id)" }.joined(separator: separator)))
-        }
-
-        var urlComponents = URLComponents(string: url)
-        urlComponents?.queryItems?.append(contentsOf: queryItems)
-        guard let url = urlComponents?.url else {
-            fatalError("Search URL invalid")
-        }
-
-        return makeRequest(url, method: .get, completion: completion)
+    public func searchFiles(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.search(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
 
     public func add(category: Category, to file: File) async throws -> Bool {
