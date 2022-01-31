@@ -61,7 +61,7 @@ class FileListBarButton: UIBarButtonItem {
 }
 
 class ConcreteFileListViewModel: ManagedFileListViewModel {
-    override required init(configuration: FileListViewController.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    override required init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         self.files = AnyRealmCollection(self.currentDirectory.children)
     }
@@ -112,34 +112,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     private let gridInnerSpacing = 16.0
     private let maxDiffChanges = Endpoint.itemsPerPage
     private let headerViewIdentifier = "FilesHeaderView"
-
-    // MARK: - Configuration
-
-    struct Configuration {
-        /// Is normal folder hierarchy
-        var normalFolderHierarchy = true
-        /// Enable or disable upload status displayed in the header (enabled by default)
-        var showUploadingFiles = true
-        /// Enable or disable multiple selection (enabled by default)
-        var isMultipleSelectionEnabled = true
-        /// Enable or disable refresh control (enabled by default)
-        var isRefreshControlEnabled = true
-        /// Is displayed from activities
-        var fromActivities = false
-        /// Does this folder support "select all" action (no effect if multiple selection is disabled)
-        var selectAllSupported = true
-        /// Root folder title
-        var rootTitle: String?
-        /// Type of empty view to display
-        var emptyViewType: EmptyTableView.EmptyTableViewType
-        /// Does this folder support importing files with drop from external app
-        var supportsDrop = false
-        /// Does this folder support importing files with drag from external app
-        var supportDrag = true
-        /// Bar buttons showed in the file list
-        var leftBarButtons: [FileListBarButtonType]?
-        var rightBarButtons: [FileListBarButtonType]?
-    }
 
     // MARK: - Properties
 
@@ -215,7 +187,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func getViewModel() -> FileListViewModel {
-        let configuration = Configuration(emptyViewType: .emptyFolder, supportsDrop: true, rightBarButtons: [.search])
+        let configuration = FileListViewModel.Configuration(emptyViewType: .emptyFolder, supportsDrop: true, rightBarButtons: [.search])
         return ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
@@ -711,7 +683,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Files header view delegate
 
     func sortButtonPressed() {
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest],
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: viewModel.configuration.sortingOptions,
                                                                                                              selectedOption: viewModel.sortType,
                                                                                                              headerTitle: KDriveResourcesStrings.Localizable.sortTitle,
                                                                                                              delegate: self)
