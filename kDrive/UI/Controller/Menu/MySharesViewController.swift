@@ -26,7 +26,7 @@ class MySharesViewController: FileListViewController {
 
     override func viewDidLoad() {
         // Set configuration
-        let configuration = Configuration(normalFolderHierarchy: false, selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle, emptyViewType: .noShared)
+        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle, emptyViewType: .noShared)
         filePresenter.listType = MySharesViewController.self
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.mySharedRootFile
