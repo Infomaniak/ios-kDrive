@@ -278,7 +278,7 @@ public class UploadOperation: Operation {
                         try? realm.safeWrite {
                             realm.add(driveFile, update: .all)
                             if file.relativePath.isEmpty && parent != nil && !parent!.children.contains(driveFile) {
-                                parent?.children.append(driveFile)
+                                parent?.children.insert(driveFile)
                             }
                         }
                         if let parent = parent {
