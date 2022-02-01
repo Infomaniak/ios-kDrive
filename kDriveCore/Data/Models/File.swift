@@ -300,7 +300,7 @@ public class File: Object, Codable {
     @Persisted public var conversion: FileConversion?
 
     // Other
-    @Persisted public var children: List<File>
+    @Persisted public var children: MutableSet<File>
     @Persisted(originProperty: "children") var parentLink: LinkingObjects<File>
     @Persisted public var responseAt: Int
     @Persisted public var fullyDownloaded: Bool
@@ -626,7 +626,7 @@ public class File: Object, Codable {
         self.id = id
         self.name = name
         rawType = "dir"
-        children = List<File>()
+        children = MutableSet<File>()
     }
 }
 
