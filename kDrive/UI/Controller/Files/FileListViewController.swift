@@ -159,7 +159,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         // Set up current directory
         if currentDirectory == nil {
-            currentDirectory = driveFileManager?.getRootFile()
+            currentDirectory = driveFileManager?.getCachedRootFile()
         }
         if configuration.showUploadingFiles {
             updateUploadCount()
@@ -960,7 +960,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         func moveButtonPressed() {
             if selectedItems.count > Constants.bulkActionThreshold {
-                let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: currentDirectory, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getRootFile()]) { [weak self] selectedFolder in
+                let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: currentDirectory, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getCachedRootFile()]) { [weak self] selectedFolder in
                     guard let self = self else { return }
                     if self.currentDirectoryCount?.count != nil && self.selectAllMode {
                         self.bulkMoveAll(destinationId: selectedFolder.id)
@@ -1093,7 +1093,7 @@ extension FileListViewController: SelectDelegate {
             filesObserver?.cancel()
             filesObserver = nil
             observeFiles()
-            currentDirectory = driveFileManager.getRootFile()
+            currentDirectory = driveFileManager.getCachedRootFile()
             if configuration.showUploadingFiles {
                 updateUploadCount()
                 // We stop observing the old directory and observe the new one instead
