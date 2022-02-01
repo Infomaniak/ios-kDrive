@@ -125,7 +125,7 @@ public class DriveFileManager {
         return File(id: -8, name: "Images")
     }
 
-    public func getRootFile(using realm: Realm? = nil) -> File {
+    public func getCachedRootFile(using realm: Realm? = nil) -> File {
         if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) {
             if root.name != drive.name {
                 let realm = realm ?? getRealm()
@@ -135,9 +135,7 @@ public class DriveFileManager {
             }
             return root.freeze()
         } else {
-            let root = File(id: DriveFileManager.constants.rootID, name: drive.name)
-            root.driveId = drive.id
-            return root
+            return File(id: DriveFileManager.constants.rootID, name: drive.name)
         }
     }
 
@@ -245,19 +243,16 @@ public class DriveFileManager {
              compactRealmsIfNeeded()
          } */
 
-        // Get root file
+        // Init root file
         let realm = getRealm()
-        if let rootFile = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) {
-            // Update root
-            try? realm.safeWrite {
-                rootFile.driveId = drive.id
-            }
-        } else {
-            // Create root
-            let rootFile = getRootFile(using: realm)
+        if getCachedFile(id: DriveFileManager.constants.rootID, freeze: false, using: realm) == nil {
+            let rootFile = getCachedRootFile(using: realm)
             try? realm.safeWrite {
                 realm.add(rootFile)
             }
+        }
+        Task {
+            try await initRoot()
         }
     }
 
@@ -327,11 +322,16 @@ public class DriveFileManager {
         return freeze ? file?.freeze() : file
     }
 
+    public func initRoot() async throws {
+        let root = try await file(id: DriveFileManager.constants.rootID)
+        _ = try await files(in: root)
+    }
+
     public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
         let parentId = directory.id
         if let cachedParent = getCachedFile(id: parentId, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
-           (cachedParent.fullyDownloaded && !forceRefresh && cachedParent.responseAt > 0) || ReachabilityListener.instance.currentStatus == .offline {
+           (cachedParent.fullyDownloaded && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
         } else {
             // Get children from API
@@ -373,7 +373,7 @@ public class DriveFileManager {
     public func file(id: Int, forceRefresh: Bool = false) async throws -> File {
         if let cachedFile = getCachedFile(id: id),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
-           (cachedFile.fullyDownloaded && !forceRefresh && cachedFile.responseAt > 0) || ReachabilityListener.instance.currentStatus == .offline {
+           (cachedFile.responseAt > 0 && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return cachedFile
         } else {
             let (file, responseAt) = try await apiFetcher.fileInfo(ProxyFile(driveId: drive.id, id: id))
