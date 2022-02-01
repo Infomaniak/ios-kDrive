@@ -56,8 +56,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
                 contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
                 contentInsetView.borderWidth = 2
             } else {
-                contentInsetView.borderColor = KDriveResourcesAsset.borderColor.color
-                contentInsetView.borderWidth = 1
+                contentInsetView.borderWidth = 0
             }
         }
     }
