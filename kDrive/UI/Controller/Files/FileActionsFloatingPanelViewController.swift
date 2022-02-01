@@ -466,7 +466,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .move:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent, fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getRootFile()]) { [unowned self] selectedFolder in
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent, fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getCachedRootFile()]) { [unowned self] selectedFolder in
                 Task {
                     do {
                         let (response, _) = try await driveFileManager.move(file: file, to: selectedFolder)

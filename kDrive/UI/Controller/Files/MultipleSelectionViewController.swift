@@ -133,7 +133,7 @@ class MultipleSelectionViewController: UIViewController {
 
     #if !ISEXTENSION
     func moveSelectedItems() {
-        let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getRootFile()]) { [unowned self] selectedFolder in
+        let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getCachedRootFile()]) { [unowned self] selectedFolder in
             Task {
                 do {
                     try await withThrowingTaskGroup(of: Void.self) { group in
