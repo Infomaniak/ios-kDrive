@@ -339,6 +339,8 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                 }
             }
         }
+
+        MatomoUtils.trackDropBox(emailEnabled: getSetting(for: .optionMail), passwordEnabled: getSetting(for: .optionPassword), dateEnabled: getSetting(for: .optionDate), sizeEnabled: getSetting(for: .optionSize), size: getValue(for: .optionSize) as? Int)
     }
 }
 
@@ -348,5 +350,7 @@ extension ManageDropBoxViewController: DropBoxLinkDelegate {
         let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
         ac.popoverPresentationController?.sourceView = sender
         present(ac, animated: true)
+
+        MatomoUtils.track(eventWithCategory: .dropbox, name: "share")
     }
 }

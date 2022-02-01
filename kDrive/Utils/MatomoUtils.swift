@@ -24,7 +24,7 @@ class MatomoUtils {
     static let shared = MatomoTracker(siteId: "8", baseURL: URL(string: "https://analytics.infomaniak.com/matomo.php")!)
 
     enum EventCategory: String {
-        case newElement, fileAction, fileInfo, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home, trash
+        case newElement, fileAction, fileInfo, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home, trash, dropbox
     }
 
     enum UserAction: String {
@@ -53,5 +53,15 @@ class MatomoUtils {
             floatValue = value ? 1.0 : 0.0
         }
         shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: floatValue)
+    }
+
+    static func trackDropBox(emailEnabled: Bool, passwordEnabled: Bool, dateEnabled: Bool, sizeEnabled: Bool, size: Int?) {
+        track(eventWithCategory: .dropbox, name: "switchEmailOnFileImport", value: emailEnabled)
+        track(eventWithCategory: .dropbox, name: "switchProtectWithPassword", value: passwordEnabled)
+        track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: dateEnabled)
+        track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: sizeEnabled)
+        if sizeEnabled, let size = size {
+            MatomoUtils.track(eventWithCategory: .dropbox, name: "changeLimitStorage", value: Float(size))
+        }
     }
 }

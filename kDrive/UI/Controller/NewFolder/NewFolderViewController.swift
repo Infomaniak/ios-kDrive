@@ -449,6 +449,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                     UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
+            MatomoUtils.trackDropBox(emailEnabled: getSetting(for: .optionMail), passwordEnabled: getSetting(for: .optionPassword), dateEnabled: getSetting(for: .optionDate), sizeEnabled: getSetting(for: .optionSize), size: getValue(for: .optionSize) as? Int)
         }
     }
 }
