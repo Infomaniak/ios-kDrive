@@ -38,20 +38,14 @@ final class DriveFileManagerTests: XCTestCase {
 
     // MARK: - Tests setup
 
-    func setUpTest(testName: String, completion: @escaping (File) -> Void) {
-        getRootDirectory { rootFile in
-            self.createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootFile) { file in
-                XCTAssertNotNil(file, "Failed to create UnitTest directory")
-                completion(file)
-            }
-        }
+    func setUpTest(testName: String) async throws -> File {
+        let rootDirectory = try await getRootDirectory()
+        return try await createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootDirectory)
     }
 
-    func setUpTest(testName: String) async -> File {
-        return await withCheckedContinuation { continuation in
-            setUpTest(testName: testName) { result in
-                continuation.resume(returning: result.freeze())
-            }
+    func setUpTest(testName: String, completion: @escaping (File) -> Void) {
+        Task {
+            try await completion(setUpTest(testName: testName))
         }
     }
 
@@ -63,63 +57,37 @@ final class DriveFileManagerTests: XCTestCase {
 
     // MARK: - Helping methods
 
-    func getRootDirectory(completion: @escaping (File) -> Void) {
-        DriveFileManagerTests.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
-            XCTAssertNotNil(file, "Failed to get root directory")
-            completion(file!)
-        }
+    func getRootDirectory() async throws -> File {
+        try await DriveFileManagerTests.driveFileManager.file(id: DriveFileManager.constants.rootID)
+    }
+
+    func createTestDirectory(name: String, parentDirectory: File) async throws -> File {
+        try await DriveFileManagerTests.driveFileManager.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true)
     }
 
     func createTestDirectory(name: String, parentDirectory: File, completion: @escaping (File) -> Void) {
-        DriveFileManagerTests.driveFileManager.createDirectory(parentDirectory: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true) { directory, _ in
-            XCTAssertNotNil(directory, "Failed to create test directory")
-            completion(directory!)
+        Task {
+            try await completion(createTestDirectory(name: name, parentDirectory: parentDirectory))
         }
     }
 
-    func createTestDirectory(name: String, parentDirectory: File) async -> File {
-        return await withCheckedContinuation { continuation in
-            createTestDirectory(name: name, parentDirectory: parentDirectory) { result in
-                continuation.resume(returning: result.freeze())
-            }
-        }
+    func initOfficeFile(testName: String) async throws -> (File, File) {
+        let testDirectory = try await setUpTest(testName: testName)
+        let file = try await DriveFileManagerTests.driveFileManager.createFile(in: testDirectory, name: "officeFile-\(Date())", type: "docx")
+        return (testDirectory, file)
     }
 
     func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
-        setUpTest(testName: testName) { rootFile in
-            DriveFileManagerTests.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "officeFile-\(Date())", type: "docx") { file, _ in
-                XCTAssertNotNil(file, "Failed to create office file")
-                completion(rootFile, file!)
-            }
+        Task {
+            let (testDirectory, file) = try await initOfficeFile(testName: testName)
+            completion(testDirectory, file)
         }
     }
 
-    func initOfficeFile(testName: String) async -> (File, File) {
-        return await withCheckedContinuation { continuation in
-            initOfficeFile(testName: testName) { result1, result2 in
-                continuation.resume(returning: (result1.freeze(), result2.freeze()))
-            }
-        }
-    }
-
-    func checkIfFileIsInFavorites(file: File, shouldBePresent: Bool = true, completion: @escaping () -> Void) {
-        DriveFileManagerTests.driveFileManager.getFavorites { root, favorites, error in
-            XCTAssertNotNil(root, TestsMessages.notNil("root"))
-            XCTAssertNotNil(favorites, TestsMessages.notNil("favorites"))
-            XCTAssertNil(error, TestsMessages.noError)
-            let isInFavoritesFiles = favorites!.contains { $0.id == file.id }
-            XCTAssertEqual(isInFavoritesFiles, shouldBePresent, "File should\(shouldBePresent ? "" : ",'t") be in favorites files")
-
-            completion()
-        }
-    }
-
-    func checkIfFileIsInFavorites(file: File, shouldBePresent: Bool = true) async {
-        return await withCheckedContinuation { continuation in
-            checkIfFileIsInFavorites(file: file, shouldBePresent: shouldBePresent) {
-                continuation.resume(returning: ())
-            }
-        }
+    func checkIfFileIsInFavorites(file: File, shouldBePresent: Bool = true) async throws {
+        let (favorites, _) = try await DriveFileManagerTests.driveFileManager.favorites()
+        let isInFavoritesFiles = favorites.contains { $0.id == file.id }
+        XCTAssertEqual(isInFavoritesFiles, shouldBePresent, "File should\(shouldBePresent ? "" : ",'t") be in favorites files")
     }
 
     func checkIfFileIsInDestination(file: File, destination: File) {
@@ -130,67 +98,37 @@ final class DriveFileManagerTests: XCTestCase {
 
     // MARK: - Test methods
 
-    func testGetRootFile() {
-        let testName = "Get root file"
-        let expectation = XCTestExpectation(description: testName)
-
-        DriveFileManagerTests.driveFileManager.getFile(id: DriveFileManager.constants.rootID) { root, _, error in
-            XCTAssertNotNil(root, TestsMessages.notNil("root file"))
-            XCTAssertNil(error, TestsMessages.noError)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
+    func testGetRootFile() async throws {
+        _ = try await DriveFileManagerTests.driveFileManager.file(id: DriveFileManager.constants.rootID)
     }
 
-    func testGetCommonDocuments() {
-        let testName = "Get Common documents"
-        let expectation = XCTestExpectation(description: testName)
-
-        DriveFileManagerTests.driveFileManager.getFile(id: Env.commonDocumentsId) { file, _, error in
-            XCTAssertNotNil(file, TestsMessages.notNil("common documents"))
-            XCTAssertNil(error, TestsMessages.noError)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
+    func testGetCommonDocuments() async throws {
+        _ = try await DriveFileManagerTests.driveFileManager.file(id: Env.commonDocumentsId)
     }
 
     func testFavorites() async throws {
-        let rootFile = await setUpTest(testName: "Set favorite")
-        try await DriveFileManagerTests.driveFileManager.setFavorite(file: rootFile, favorite: true)
-        await checkIfFileIsInFavorites(file: rootFile)
-        try await DriveFileManagerTests.driveFileManager.setFavorite(file: rootFile, favorite: false)
-        await checkIfFileIsInFavorites(file: rootFile, shouldBePresent: false)
-        tearDownTest(directory: rootFile)
+        let testDirectory = try await setUpTest(testName: "Set favorite")
+        try await DriveFileManagerTests.driveFileManager.setFavorite(file: testDirectory, favorite: true)
+        try await checkIfFileIsInFavorites(file: testDirectory)
+        try await DriveFileManagerTests.driveFileManager.setFavorite(file: testDirectory, favorite: false)
+        try await checkIfFileIsInFavorites(file: testDirectory, shouldBePresent: false)
+        tearDownTest(directory: testDirectory)
     }
 
     func testShareLink() async throws {
-        let testDirectory = await setUpTest(testName: "Share link")
+        let testDirectory = try await setUpTest(testName: "Share link")
         _ = try await DriveFileManagerTests.driveFileManager.createShareLink(for: testDirectory)
         let response = try await DriveFileManagerTests.driveFileManager.removeShareLink(for: testDirectory)
         XCTAssertTrue(response, "API should return true")
         tearDownTest(directory: testDirectory)
     }
 
-    func testSearchFile() {
-        let testName = "Search file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.searchFile(query: officeFile.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ) { root, fileList, _ in
-                XCTAssertNotNil(root, TestsMessages.notNil("root"))
-                XCTAssertNotNil(fileList, TestsMessages.notNil("files list"))
-                let searchedFile = fileList!.contains { $0.id == officeFile.id }
-                XCTAssertTrue(searchedFile, TestsMessages.notNil("searched file"))
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testSearchFile() async throws {
+        let (testDirectory, file) = try await initOfficeFile(testName: "Search file")
+        let (files, _) = try await DriveFileManagerTests.driveFileManager.searchFile(query: file.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ)
+        let searchedFile = files.contains { $0.id == file.id }
+        XCTAssertTrue(searchedFile, TestsMessages.notNil("searched file"))
+        tearDownTest(directory: testDirectory)
     }
 
     func testFileAvailableOffline() {
@@ -217,66 +155,41 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testGetLastModifiedFiles() {
-        let testName = "Get last modified files"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "test", type: "docx") { officeFile, officeError in
-                XCTAssertNil(officeError, TestsMessages.noError)
-                XCTAssertNotNil(officeFile, TestsMessages.notNil("Office file created"))
-
-                DriveFileManagerTests.driveFileManager.getLastModifiedFiles(page: 1) { files, error in
-                    XCTAssertNil(error, TestsMessages.noError)
-                    XCTAssertNotNil(files, TestsMessages.notNil("Last modified files"))
-                    let lastModifiedFile = files![0].id
-                    XCTAssertEqual(lastModifiedFile, officeFile!.id, "Last modified file should be root file")
-                    expectation.fulfill()
-                }
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout * 2) // DriveFileManagerTests.defaultTimeout is too short
-        tearDownTest(directory: rootFile)
+    func testGetLastModifiedFiles() async throws {
+        let testDirectory = try await setUpTest(testName: "Get last modified files")
+        let file = try await DriveFileManagerTests.driveFileManager.createFile(in: testDirectory, name: "test", type: "docx")
+        let (lastModifiedFiles, _) = try await DriveFileManagerTests.driveFileManager.lastModifiedFiles()
+        XCTAssertEqual(lastModifiedFiles.first?.id, file.id, "Last modified file should be root file")
+        tearDownTest(directory: testDirectory)
     }
 
     func testUndoAction() async throws {
-        let (rootFile, file) = await initOfficeFile(testName: "Undo action")
-        let directory: File = try await withCheckedThrowingContinuation { continuation in
-            DriveFileManagerTests.driveFileManager.createDirectory(parentDirectory: rootFile, name: "directory", onlyForMe: true) { directory, error in
-                if let directory = directory {
-                    continuation.resume(returning: directory.freeze())
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        let (testDirectory, file) = try await initOfficeFile(testName: "Undo action")
+        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(in: testDirectory, name: "directory", onlyForMe: true)
         let (moveResponse, _) = try await DriveFileManagerTests.driveFileManager.move(file: file, to: directory)
         try await DriveFileManagerTests.driveFileManager.undoAction(cancelId: moveResponse.id)
-        checkIfFileIsInDestination(file: file, destination: rootFile)
-        tearDownTest(directory: rootFile)
+        checkIfFileIsInDestination(file: file, destination: testDirectory)
+        tearDownTest(directory: testDirectory)
     }
 
     func testDeleteFile() async throws {
-        let (rootFile, officeFile) = await initOfficeFile(testName: "Delete file")
+        let (testDirectory, officeFile) = try await initOfficeFile(testName: "Delete file")
         let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
         XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
         _ = try await DriveFileManagerTests.driveFileManager.delete(file: officeFile)
-        tearDownTest(directory: rootFile)
+        tearDownTest(directory: testDirectory)
     }
 
     func testMoveFile() async throws {
-        let (rootFile, officeFile) = await initOfficeFile(testName: "Move file")
-        let destination = await createTestDirectory(name: "Destination", parentDirectory: rootFile)
+        let (testDirectory, officeFile) = try await initOfficeFile(testName: "Move file")
+        let destination = try await createTestDirectory(name: "Destination", parentDirectory: testDirectory)
         let (_, file) = try await DriveFileManagerTests.driveFileManager.move(file: officeFile, to: destination)
         XCTAssertEqual(file.parent?.id, destination.id, "New parent should be 'destination' directory")
 
         let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
         XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
         XCTAssertEqual(cached?.parent?.id, destination.id, "New parent not updated in realm")
-        tearDownTest(directory: rootFile)
+        tearDownTest(directory: testDirectory)
     }
 
     func testRenameFile() {
@@ -327,25 +240,12 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testCreateDirectory() {
-        let testName = "Create directory"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.createDirectory(parentDirectory: rootFile, name: "\(testName) - \(Date())", onlyForMe: true) { file, error in
-                XCTAssertNotNil(file, TestsMessages.notNil("directory created"))
-                XCTAssertNil(error, TestsMessages.noError)
-
-                let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: file!.id)
-                XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testCreateDirectory() async throws {
+        let testDirectory = try await setUpTest(testName: "Create directory")
+        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(in: testDirectory, name: "Test directory", onlyForMe: true)
+        let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
+        XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
+        tearDownTest(directory: testDirectory)
     }
 
     func testCategory() async throws {
@@ -358,7 +258,7 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     func testCategoriesAndFiles() async throws {
-        let (rootFile, officeFile) = await initOfficeFile(testName: "Categories and files")
+        let (testDirectory, officeFile) = try await initOfficeFile(testName: "Categories and files")
         let category = try await DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227").freeze()
         try await DriveFileManagerTests.driveFileManager.add(category: category, to: officeFile)
         let fileWithCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
@@ -368,69 +268,30 @@ final class DriveFileManagerTests: XCTestCase {
         XCTAssertFalse(fileWithoutCategory!.categories.contains { $0.id == category.id }, "File should not contain category")
         let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)
         XCTAssertTrue(response, "API should return true")
-        tearDownTest(directory: rootFile)
+        tearDownTest(directory: testDirectory)
     }
 
-    func testCreateCommonDirectory() {
-        let testName = "Create common directory"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        DriveFileManagerTests.driveFileManager.createCommonDirectory(name: "\(testName) - \(Date())", forAllUser: false) { file, error in
-            XCTAssertNotNil(file, TestsMessages.notNil("created common"))
-            XCTAssertNil(error, TestsMessages.noError)
-            rootFile = file!
-
-            let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: rootFile.id)
-            XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testCreateCommonDirectory() async throws {
+        let directory = try await DriveFileManagerTests.driveFileManager.createCommonDirectory(name: "Create common directory - \(Date())", forAllUser: false)
+        let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
+        XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
+        tearDownTest(directory: directory)
     }
 
-    func testCreateDropBox() {
-        let testName = "Create dropbox"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: rootFile, name: "\(testName) - \(Date())", onlyForMe: true, settings: DropBoxSettings(alias: nil, emailWhenFinished: true, limitFileSize: nil, password: "mot de passe", validUntil: nil)) { file, dropbox, error in
-                XCTAssertNotNil(file, TestsMessages.notNil("created file"))
-                XCTAssertNotNil(dropbox, TestsMessages.notNil("dropbox settings"))
-                XCTAssertNil(error, TestsMessages.noError)
-
-                let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: file!.id)
-                XCTAssertNotNil(cached, TestsMessages.notNil("cached dropbox"))
-                XCTAssertTrue(cached!.collaborativeFolder?.count ?? 0 > 0, "Cached dropbox link should be set")
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testCreateDropBox() async throws {
+        let testDirectory = try await setUpTest(testName: "Create dropbox")
+        let (directory, _) = try await DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: testDirectory, name: "Test dropbox", onlyForMe: true, settings: DropBoxSettings(alias: nil, emailWhenFinished: true, limitFileSize: nil, password: "mot de passe", validUntil: nil))
+        let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
+        XCTAssertNotNil(cached, TestsMessages.notNil("cached dropbox"))
+        // XCTAssertTrue(cached!.collaborativeFolder?.count ?? 0 > 0, "Cached dropbox link should be set")
+        tearDownTest(directory: testDirectory)
     }
 
-    func testCreateOfficeFile() {
-        let testName = "Create office file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.createOfficeFile(parentDirectory: rootFile, name: "\(testName) - \(Date())", type: "docx") { file, error in
-                XCTAssertNotNil(file, TestsMessages.notNil("office file"))
-                XCTAssertNil(error, TestsMessages.noError)
-
-                let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: file!.id)
-                XCTAssertNotNil(cached, TestsMessages.notNil("office file"))
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testCreateOfficeFile() async throws {
+        let testDirectory = try await setUpTest(testName: "Create office file")
+        let file = try await DriveFileManagerTests.driveFileManager.createFile(in: testDirectory, name: "Test file", type: "docx")
+        let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
+        XCTAssertNotNil(cached, TestsMessages.notNil("office file"))
+        tearDownTest(directory: testDirectory)
     }
 }
