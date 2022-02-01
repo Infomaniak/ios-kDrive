@@ -360,7 +360,7 @@ public class DriveFileManager {
                     if page == 1 {
                         managedParent.children.removeAll()
                     }
-                    managedParent.children.append(objectsIn: children)
+                    managedParent.children.insert(objectsIn: children)
                 }
 
                 return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
@@ -408,7 +408,7 @@ public class DriveFileManager {
                 root.fullyDownloaded = true
             }
 
-            root.children.append(objectsIn: files)
+            root.children.insert(objectsIn: files)
             let updatedFile = try updateFileInDatabase(updatedFile: root, using: localRealm)
 
             return (getLocalSortedDirectoryFiles(directory: updatedFile, sortType: sortType), files.count == Endpoint.itemsPerPage)
@@ -589,7 +589,7 @@ public class DriveFileManager {
                 if let file = activity.file {
                     let safeFile = File(value: file)
                     keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
-                    homeRootFile.children.append(safeFile)
+                    homeRootFile.children.insert(safeFile)
                     safeActivity.file = safeFile
                     safeActivity.file?.capabilities = Rights(value: file.capabilities)
                 }
@@ -608,7 +608,7 @@ public class DriveFileManager {
     public func setLocalFiles(_ files: [File], root: File) {
         let realm = getRealm()
         for file in files {
-            root.children.append(file)
+            root.children.insert(file)
             file.capabilities = Rights(value: file.capabilities)
         }
 
@@ -737,9 +737,8 @@ public class DriveFileManager {
                     pagedActions[fileId] = .fileDelete
                 case .fileMoveOut:
                     if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
-                       let oldParent = file.parent,
-                       let index = oldParent.children.index(of: file) {
-                        oldParent.children.remove(at: index)
+                       let oldParent = file.parent {
+                        oldParent.children.remove(file)
                     }
                     if let file = activity.file {
                         deletedFiles.append(file)
@@ -752,9 +751,7 @@ public class DriveFileManager {
                         // If the file is a folder we have to copy the old attributes which are not returned by the API
                         keepCacheAttributesForFile(newFile: renamedFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                         realm.add(renamedFile, update: .modified)
-                        if !file.children.contains(renamedFile) {
-                            file.children.append(renamedFile)
-                        }
+                        file.children.insert(renamedFile)
                         renamedFile.applyLastModifiedDateToLocalFile()
                         updatedFiles.append(renamedFile)
                         pagedActions[fileId] = .fileUpdate
@@ -765,14 +762,10 @@ public class DriveFileManager {
                         realm.add(newFile, update: .modified)
                         // If was already had a local parent, remove it
                         if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
-                           let oldParent = file.parent,
-                           let index = oldParent.children.index(of: file) {
-                            oldParent.children.remove(at: index)
+                           let oldParent = file.parent {
+                            oldParent.children.remove(file)
                         }
-                        // It shouldn't be necessary to check for duplicates before adding the child
-                        if !file.children.contains(newFile) {
-                            file.children.append(newFile)
-                        }
+                        file.children.insert(newFile)
                         insertedFiles.append(newFile)
                         pagedActions[fileId] = .fileCreate
                     }
@@ -785,9 +778,7 @@ public class DriveFileManager {
                         } else {
                             keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
                             realm.add(newFile, update: .modified)
-                            if !file.children.contains(newFile) {
-                                file.children.append(newFile)
-                            }
+                            file.children.insert(newFile)
                             updatedFiles.append(newFile)
                             pagedActions[fileId] = .fileUpdate
                         }
@@ -956,10 +947,8 @@ public class DriveFileManager {
            let file = realm.resolve(safeFile) {
             let oldParent = file.parent
             try? realm.write {
-                if let index = oldParent?.children.index(of: file) {
-                    oldParent?.children.remove(at: index)
-                }
-                newParent.children.append(file)
+                oldParent?.children.remove(file)
+                newParent.children.insert(file)
             }
             if let oldParent = oldParent {
                 oldParent.signalChanges(userId: drive.userId)
@@ -1007,7 +996,7 @@ public class DriveFileManager {
                     let realm = duplicateFile.realm
                     let parent = realm?.object(ofType: File.self, forPrimaryKey: parentId)
                     try realm?.safeWrite {
-                        parent?.children.append(duplicateFile)
+                        parent?.children.insert(duplicateFile)
                     }
 
                     duplicateFile.signalChanges(userId: self.drive.userId)
@@ -1033,7 +1022,7 @@ public class DriveFileManager {
         // Add directory to parent
         let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
         try realm.safeWrite {
-            parent?.children.append(createdDirectory)
+            parent?.children.insert(createdDirectory)
         }
         if let parent = createdDirectory.parent {
             parent.signalChanges(userId: drive.userId)
@@ -1064,7 +1053,7 @@ public class DriveFileManager {
         let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
         try realm.write {
             // directory.collaborativeFolder = dropbox.url
-            parent?.children.append(directory)
+            parent?.children.insert(directory)
         }
         if let parent = directory.parent {
             parent.signalChanges(userId: drive.userId)
@@ -1081,7 +1070,7 @@ public class DriveFileManager {
         // Add file to parent
         let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
         try realm.write {
-            parent?.children.append(createdFile)
+            parent?.children.insert(createdFile)
         }
         createdFile.signalChanges(userId: drive.userId)
 
@@ -1201,21 +1190,6 @@ public class DriveFileManager {
             realm.add(updatedFile, update: .modified)
         }
         return updatedFile
-    }
-
-    private func updateFileChildrenInDatabase(file: File, using realm: Realm? = nil) throws -> File {
-        let realm = realm ?? getRealm()
-
-        if let managedFile = realm.object(ofType: File.self, forPrimaryKey: file.id) {
-            try realm.write {
-                file.children.insert(contentsOf: managedFile.children, at: 0)
-                realm.add(file.children, update: .modified)
-                realm.add(file, update: .modified)
-            }
-            return file
-        } else {
-            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
-        }
     }
 
     public func renameCachedFile(updatedFile: File, oldFile: File) throws {
