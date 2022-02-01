@@ -128,6 +128,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     @IBAction func copyButtonPressed(_ sender: UIButton) {
         delegate?.shareLinkSharedButtonPressed(link: url, sender: sender)
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "shareButton")
     }
 
     @IBAction func shareLinkSettingsButtonPressed(_ sender: Any) {

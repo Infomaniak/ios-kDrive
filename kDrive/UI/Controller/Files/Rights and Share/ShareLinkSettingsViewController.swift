@@ -207,6 +207,12 @@ class ShareLinkSettingsViewController: UIViewController {
         return Storyboard.files.instantiateViewController(withIdentifier: "ShareLinkSettingsViewController") as! ShareLinkSettingsViewController
     }
 
+    private func track() {
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "protectWithPassword", value: getSetting(for: .optionPassword))
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "downloadFromLink", value: getSetting(for: .optionDownload))
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "expirationDateLink", value: getSetting(for: .optionDate))
+    }
+
     // MARK: - State restoration
 
     override func encodeRestorableState(with coder: NSCoder) {
@@ -361,5 +367,6 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
                 self.navigationController?.popViewController(animated: true)
             }
         }
+        track()
     }
 }

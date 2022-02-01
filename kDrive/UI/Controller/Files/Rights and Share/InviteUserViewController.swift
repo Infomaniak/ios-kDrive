@@ -333,5 +333,6 @@ extension InviteUserViewController: FooterButtonDelegate {
                 self.showConflictDialog(conflictList: conflictList)
             }
         }
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
     }
 }
