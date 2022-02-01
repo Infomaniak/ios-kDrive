@@ -314,7 +314,7 @@ extension SaveFileViewController: UITableViewDelegate {
 extension SaveFileViewController: SelectFolderDelegate {
     func didSelectFolder(_ folder: File) {
         if folder.id == DriveFileManager.constants.rootID {
-            selectedDirectory = selectedDriveFileManager?.getRootFile()
+            selectedDirectory = selectedDriveFileManager?.getCachedRootFile()
         } else {
             selectedDirectory = folder
         }
@@ -329,7 +329,7 @@ extension SaveFileViewController: SelectDriveDelegate {
     func didSelectDrive(_ drive: Drive) {
         if let selectedDriveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
             self.selectedDriveFileManager = selectedDriveFileManager
-            selectedDirectory = selectedDriveFileManager.getRootFile()
+            selectedDirectory = selectedDriveFileManager.getCachedRootFile()
             sections = [.fileName, .driveSelection, .directorySelection]
         }
         updateButton()
