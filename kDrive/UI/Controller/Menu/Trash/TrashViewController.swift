@@ -105,6 +105,7 @@ class TrashViewController: FileListViewController {
                 let message = success ? KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveResourcesStrings.Localizable.errorDelete
                 UIConstants.showSnackBar(message: message)
             }
+            MatomoUtils.track(eventWithCategory: .trash, name: "emptyTrash")
         }
         present(alert, animated: true)
     }
@@ -149,6 +150,11 @@ class TrashViewController: FileListViewController {
             let result = group.wait(timeout: .now() + Constants.timeout)
             if result == .timedOut {
                 success = false
+            }
+            if self.selectionMode {
+                MatomoUtils.track(eventWithCategory: .trash, name: "bulkDeleteFromTrash", value: Float(self.selectedItems.count))
+            } else {
+                MatomoUtils.track(eventWithCategory: .trash, name: "deleteFromTrash")
             }
             DispatchQueue.main.async {
                 let message: String

@@ -768,6 +768,7 @@ extension FileDetailViewController: FileDetailDelegate {
             }
             self.tableView.contentInset.bottom = self.currentTab == .comments ? 120 : self.tableView.safeAreaInsets.bottom
         }
+        MatomoUtils.track(eventWithCategory: .fileInfo, name: "switchView\(["Info", "Activities", "Comments"][value])")
     }
 }
 
