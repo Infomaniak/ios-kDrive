@@ -235,6 +235,25 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
+    private func track(action: FloatingPanelAction) {
+        let numberOfFiles = files.count
+        switch action {
+        // Quick Actions
+        case .duplicate:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "copy", numberOfItems: numberOfFiles)
+        case .download:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "download", numberOfItems: numberOfFiles)
+        case .favorite:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "favorite", numberOfItems: numberOfFiles)
+        case .offline:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "offline", numberOfItems: numberOfFiles)
+        case .delete:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "putInTrash", numberOfItems: numberOfFiles)
+        default:
+            break
+        }
+    }
+
     // MARK: - Collection view data source
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

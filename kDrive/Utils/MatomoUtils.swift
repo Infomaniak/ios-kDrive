@@ -55,6 +55,10 @@ class MatomoUtils {
         shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: floatValue)
     }
 
+    static func trackBulkEvent(eventWithCategory category: MatomoUtils.EventCategory, name: String, numberOfItems number: Int) {
+        track(eventWithCategory: category, action: .click, name: "bulk\(number == 1 ? "Single" : "")\(name.capitalized)", value: Float(number))
+    }
+
     static func trackDropBox(emailEnabled: Bool, passwordEnabled: Bool, dateEnabled: Bool, sizeEnabled: Bool, size: Int?) {
         track(eventWithCategory: .dropbox, name: "switchEmailOnFileImport", value: emailEnabled)
         track(eventWithCategory: .dropbox, name: "switchProtectWithPassword", value: passwordEnabled)

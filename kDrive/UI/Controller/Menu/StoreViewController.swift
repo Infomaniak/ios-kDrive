@@ -382,6 +382,7 @@ extension StoreViewController: StoreObserverDelegate {
         StoreRequest.shared.sendReceipt(body: body)
         // Show success view controller
         showSuccessView()
+        MatomoUtils.track(eventWithCategory: .inApp, name: "buy")
     }
 
     func storeObserverRestoreDidSucceed() {}
