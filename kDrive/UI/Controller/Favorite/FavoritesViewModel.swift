@@ -22,8 +22,14 @@ import RealmSwift
 import UIKit
 
 class FavoritesViewModel: ManagedFileListViewModel {
-    init(driveFileManager: DriveFileManager) {
-        let configuration = Configuration(normalFolderHierarchy: false, showUploadingFiles: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle, emptyViewType: .noFavorite)
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let configuration = Configuration(normalFolderHierarchy: false,
+                                          showUploadingFiles: false,
+                                          selectAllSupported: false,
+                                          rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle,
+                                          tabBarIcon: KDriveResourcesAsset.star,
+                                          selectedTabBarIcon: KDriveResourcesAsset.starFill,
+                                          emptyViewType: .noFavorite)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
     }
@@ -51,27 +57,5 @@ class FavoritesViewModel: ManagedFileListViewModel {
 
     override func loadActivities() {
         loadFiles(page: 1, forceRefresh: true)
-    }
-}
-
-class FavoriteViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.favorite }
-    override class var storyboardIdentifier: String { "FavoriteViewController" }
-
-    override func getViewModel() -> FileListViewModel {
-        return FavoritesViewModel(driveFileManager: driveFileManager)
-    }
-
-    // MARK: - State restoration
-
-    // swiftlint:disable overridden_super_call
-    override func encodeRestorableState(with coder: NSCoder) {
-        // We don't need to encode anything for Favorites
-    }
-
-    // swiftlint:disable overridden_super_call
-    override func decodeRestorableState(with coder: NSCoder) {
-        // We don't need to decode anything for Favorites
-        // DriveFileManager will be recovered from tab bar controller
     }
 }

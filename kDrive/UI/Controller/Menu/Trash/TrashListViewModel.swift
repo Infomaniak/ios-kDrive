@@ -23,14 +23,14 @@ import kDriveResources
 import UIKit
 
 class TrashListViewModel: UnmanagedFileListViewModel {
-    init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         var configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash, sortingOptions: [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest])
         var currentDirectory = currentDirectory
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile
             configuration.rightBarButtons = [.emptyTrash]
         }
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
         sortTypeObservation?.cancel()
         sortTypeObservation = nil
         sortType = .newerDelete

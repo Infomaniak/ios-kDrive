@@ -22,6 +22,7 @@ import SafariServices
 import Sentry
 import UIKit
 
+@MainActor
 class FilePresenter {
     weak var viewController: UIViewController?
     weak var driveFloatingPanelController: DriveFloatingPanelController?
@@ -68,11 +69,13 @@ class FilePresenter {
             // Show files list
             let nextVC: FileListViewController
             if driveFileManager.drive.sharedWithMe {
-                nextVC = SharedWithMeViewController.instantiate(driveFileManager: driveFileManager)
+                // TODO: create correct viewmodel
+                nextVC = SharedWithMeViewController.instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
             } else if file.isTrashed || file.deletedAt > 0 {
-                nextVC = TrashViewController.instantiate(driveFileManager: driveFileManager)
+                let trashViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+                nextVC = FileListViewController.instantiate(viewModel: trashViewModel)
             } else {
-                nextVC = listType.instantiate(driveFileManager: driveFileManager)
+                nextVC = listType.instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file))
             }
             nextVC.currentDirectory = file
             if file.isDisabled {
