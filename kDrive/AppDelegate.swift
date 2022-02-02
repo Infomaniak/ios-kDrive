@@ -38,7 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     private var accountManager: AccountManager!
     private var uploadQueue: UploadQueue!
     private var reachabilityListener: ReachabilityListener!
-    private static let currentStateVersion = 1
+    private static let currentStateVersion = 2
     private static let appStateVersionKey = "appStateVersionKey"
 
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {

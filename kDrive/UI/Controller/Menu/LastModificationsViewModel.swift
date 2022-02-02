@@ -22,7 +22,7 @@ import RealmSwift
 import UIKit
 
 class LastModificationsViewModel: ManagedFileListViewModel {
-    init(driveFileManager: DriveFileManager) {
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo, sortingOptions: [])
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.lastModificationsRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "type != \"dir\"")))
@@ -55,14 +55,5 @@ class LastModificationsViewModel: ManagedFileListViewModel {
 
     override func loadActivities() {
         loadFiles(page: 1, forceRefresh: true)
-    }
-}
-
-class LastModificationsViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.menu }
-    override class var storyboardIdentifier: String { "LastModificationsViewController" }
-
-    override func getViewModel() -> FileListViewModel {
-        return LastModificationsViewModel(driveFileManager: driveFileManager)
     }
 }

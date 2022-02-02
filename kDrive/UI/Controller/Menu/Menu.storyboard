@@ -53,11 +53,8 @@
                         <segue destination="5Sh-8l-zI9" kind="show" identifier="toPhotoListSegue" id="6hs-QC-MQ5"/>
                         <segue destination="jNB-aI-vQT" kind="show" identifier="toParameterSegue" id="Sx8-qp-TCY"/>
                         <segue destination="26B-is-bLi" kind="show" identifier="switchUserSegue" id="QLc-gd-Rfx"/>
-                        <segue destination="Qoj-Kl-8FL" kind="show" identifier="toTrashSegue" id="kj9-h9-lQC"/>
                         <segue destination="FVV-mz-rrp" kind="show" identifier="toDriveListSegue" id="Llp-sI-CXm"/>
                         <segue destination="XvF-Yr-0F4" kind="show" identifier="toMySharedSegue" id="J1x-fu-5jd"/>
-                        <segue destination="UJN-BO-Tu3" kind="show" identifier="toOfflineSegue" id="aEo-BZ-U5c"/>
-                        <segue destination="6wp-0R-3mI" kind="show" identifier="toLastModificationsSegue" id="FXj-6K-uCY"/>
                         <segue destination="EfG-kK-v5l" kind="show" identifier="toStoreSegue" id="Lg4-x4-Mse"/>
                     </connections>
                 </viewController>
@@ -533,57 +530,6 @@
             </objects>
             <point key="canvasLocation" x="3168" y="921"/>
         </scene>
-        <!--Corbeille-->
-        <scene sceneID="bxf-3T-qSF">
-            <objects>
-                <viewController storyboardIdentifier="TrashViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Qoj-Kl-8FL" customClass="TrashViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="P0D-aA-bNc">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="jSV-9q-qG1" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="4tH-xa-47R">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="Qoj-Kl-8FL" id="OdM-NR-7h5"/>
-                                    <outlet property="delegate" destination="Qoj-Kl-8FL" id="8Y7-4f-uBe"/>
-                                </connections>
-                            </collectionView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="t0Y-7N-Rfa"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="jSV-9q-qG1" firstAttribute="leading" secondItem="t0Y-7N-Rfa" secondAttribute="leading" id="0nJ-1G-0o4"/>
-                            <constraint firstItem="t0Y-7N-Rfa" firstAttribute="trailing" secondItem="jSV-9q-qG1" secondAttribute="trailing" id="BeH-4i-ovY"/>
-                            <constraint firstItem="jSV-9q-qG1" firstAttribute="top" secondItem="P0D-aA-bNc" secondAttribute="top" id="fv9-Hu-InL"/>
-                            <constraint firstAttribute="bottom" secondItem="jSV-9q-qG1" secondAttribute="bottom" id="gcV-TL-Dpl"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Corbeille" largeTitleDisplayMode="always" id="cze-dL-MX2">
-                        <barButtonItem key="rightBarButtonItem" title="Vider la corbeille" id="tWj-xq-ysG">
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonEmptyTrash"/>
-                            </userDefinedRuntimeAttributes>
-                        </barButtonItem>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="trashTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="collectionView" destination="jSV-9q-qG1" id="nEm-m1-ETN"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="mFt-Qj-UYH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="4712" y="921"/>
-        </scene>
         <!--Switch User View Controller-->
         <scene sceneID="unT-Z0-cpP">
             <objects>
@@ -761,52 +707,6 @@
             </objects>
             <point key="canvasLocation" x="6423" y="1669"/>
         </scene>
-        <!--Hors Ligne-->
-        <scene sceneID="DmR-rf-evK">
-            <objects>
-                <viewController storyboardIdentifier="OfflineViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="UJN-BO-Tu3" customClass="OfflineViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="qpq-Px-T9t">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Ru8-RK-H97" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="rXr-Ru-fDC">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="UJN-BO-Tu3" id="QId-8H-AJw"/>
-                                    <outlet property="delegate" destination="UJN-BO-Tu3" id="l5Z-pg-yLD"/>
-                                </connections>
-                            </collectionView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="eqa-2E-bpF"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="eqa-2E-bpF" firstAttribute="trailing" secondItem="Ru8-RK-H97" secondAttribute="trailing" id="N41-iD-DCm"/>
-                            <constraint firstItem="Ru8-RK-H97" firstAttribute="leading" secondItem="eqa-2E-bpF" secondAttribute="leading" id="NcG-1P-2aj"/>
-                            <constraint firstItem="Ru8-RK-H97" firstAttribute="top" secondItem="qpq-Px-T9t" secondAttribute="top" id="ohP-qu-nTX"/>
-                            <constraint firstAttribute="bottom" secondItem="Ru8-RK-H97" secondAttribute="bottom" id="wHF-T8-tjV"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Hors Ligne" id="HTU-Ni-hxJ">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="offlineFileTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="collectionView" destination="Ru8-RK-H97" id="WMZ-Rx-m0j"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="qzi-oV-2ub" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3954" y="921"/>
-        </scene>
         <!--App Lock Settings View Controller-->
         <scene sceneID="0Gq-HL-lDR">
             <objects>
@@ -951,52 +851,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GuQ-eD-LUX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="7200" y="1669"/>
-        </scene>
-        <!--Dernières modifications-->
-        <scene sceneID="vra-n0-jT0">
-            <objects>
-                <viewController storyboardIdentifier="LastModificationsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="6wp-0R-3mI" customClass="LastModificationsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="r7w-Qi-u7D">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="qfd-KY-ZkM" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="5Uu-5h-S7X">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="6wp-0R-3mI" id="Bdl-aE-BHb"/>
-                                    <outlet property="delegate" destination="6wp-0R-3mI" id="DWx-Pc-21a"/>
-                                </connections>
-                            </collectionView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="CvF-Dc-QP2"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="CvF-Dc-QP2" firstAttribute="trailing" secondItem="qfd-KY-ZkM" secondAttribute="trailing" id="ZWF-1p-6Qd"/>
-                            <constraint firstItem="qfd-KY-ZkM" firstAttribute="top" secondItem="r7w-Qi-u7D" secondAttribute="top" id="ohQ-Ct-fYU"/>
-                            <constraint firstItem="qfd-KY-ZkM" firstAttribute="leading" secondItem="CvF-Dc-QP2" secondAttribute="leading" id="okk-bs-Won"/>
-                            <constraint firstAttribute="bottom" secondItem="qfd-KY-ZkM" secondAttribute="bottom" id="tV5-rj-oWc"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Dernières modifications" largeTitleDisplayMode="always" id="n00-JT-avD">
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="lastEditsTitle"/>
-                        </userDefinedRuntimeAttributes>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="collectionView" destination="qfd-KY-ZkM" id="tX3-CX-idS"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="68Q-JN-FvK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2320" y="921"/>
         </scene>
         <!--Sécurité-->
         <scene sceneID="Tt7-mj-zPY">

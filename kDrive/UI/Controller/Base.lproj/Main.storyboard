@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="9yd-Vx-ISo">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="9yd-Vx-ISo">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -67,10 +67,10 @@
             </objects>
             <point key="canvasLocation" x="-680" y="1111"/>
         </scene>
-        <!--FavoriteVC-->
+        <!--FilesVC-->
         <scene sceneID="Dwi-k2-d1o">
             <objects>
-                <viewControllerPlaceholder storyboardName="Favorite" referencedIdentifier="FavoriteVC" id="CYM-Sz-GTs" sceneMemberID="viewController">
+                <viewControllerPlaceholder storyboardName="Files" referencedIdentifier="FilesVC" id="CYM-Sz-GTs" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Item" image="star" selectedImage="star-fill" id="eRF-aR-lyz"/>
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pZD-6L-YOq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

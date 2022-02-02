@@ -80,7 +80,7 @@ class RecentActivityFilesViewController: FileListViewController {
     }
 
     class func instantiate(activities: [FileActivity], driveFileManager: DriveFileManager) -> RecentActivityFilesViewController {
-        let viewController = instantiate(driveFileManager: driveFileManager)
+        let viewController = instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
         viewController.activityFiles = activities.compactMap(\.file)
         viewController.activity = activities.first
         return viewController

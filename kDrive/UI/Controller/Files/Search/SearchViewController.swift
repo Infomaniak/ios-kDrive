@@ -127,7 +127,7 @@ class SearchViewController: FileListViewController {
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager, filters: Filters = Filters()) -> UINavigationController {
-        let searchViewController = instantiate(driveFileManager: driveFileManager)
+        let searchViewController = instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
         searchViewController.filters = filters
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.modalPresentationStyle = .fullScreen

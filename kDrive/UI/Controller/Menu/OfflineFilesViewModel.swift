@@ -22,22 +22,14 @@ import RealmSwift
 import UIKit
 
 class OfflineFilesViewModel: ManagedFileListViewModel {
-    init(configuration: Configuration, driveFileManager: DriveFileManager) {
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: nil)
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isRefreshControlEnabled: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
+        // We don't really need a current directory for offline files
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.homeRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isAvailableOffline = true")))
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {}
 
     override func loadActivities() {}
-}
-
-class OfflineViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.menu }
-    override class var storyboardIdentifier: String { "OfflineViewController" }
-
-    override func getViewModel() -> FileListViewModel {
-        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isRefreshControlEnabled: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
-        return OfflineFilesViewModel(configuration: configuration, driveFileManager: driveFileManager)
-    }
 }
