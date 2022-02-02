@@ -55,11 +55,11 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
         static let store = MenuAction(name: KDriveResourcesStrings.Localizable.upgradeOfferTitle, image: KDriveResourcesAsset.upgradeKdrive.image, segue: "toStoreSegue")
 
         static let sharedWithMe = MenuAction(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle, image: KDriveResourcesAsset.folderSelect2.image, segue: "toDriveListSegue")
-        static let lastModifications = MenuAction(name: KDriveResourcesStrings.Localizable.lastEditsTitle, image: KDriveResourcesAsset.clock.image, segue: "toLastModificationsSegue")
+        static let lastModifications = MenuAction(name: KDriveResourcesStrings.Localizable.lastEditsTitle, image: KDriveResourcesAsset.clock.image, segue: nil)
         static let images = MenuAction(name: KDriveResourcesStrings.Localizable.allPictures, image: KDriveResourcesAsset.images.image, segue: "toPhotoListSegue")
         static let myShares = MenuAction(name: KDriveResourcesStrings.Localizable.mySharesTitle, image: KDriveResourcesAsset.folderSelect.image, segue: "toMySharedSegue")
-        static let offline = MenuAction(name: KDriveResourcesStrings.Localizable.offlineFileTitle, image: KDriveResourcesAsset.availableOffline.image, segue: "toOfflineSegue")
-        static let trash = MenuAction(name: KDriveResourcesStrings.Localizable.trashTitle, image: KDriveResourcesAsset.delete.image, segue: "toTrashSegue")
+        static let offline = MenuAction(name: KDriveResourcesStrings.Localizable.offlineFileTitle, image: KDriveResourcesAsset.availableOffline.image, segue: nil)
+        static let trash = MenuAction(name: KDriveResourcesStrings.Localizable.trashTitle, image: KDriveResourcesAsset.delete.image, segue: nil)
 
         static let switchUser = MenuAction(name: KDriveResourcesStrings.Localizable.switchUserTitle, image: KDriveResourcesAsset.userSwitch.image, segue: "switchUserSegue")
         static let parameters = MenuAction(name: KDriveResourcesStrings.Localizable.settingsTitle, image: KDriveResourcesAsset.parameters.image, segue: "toParameterSegue")
@@ -225,6 +225,12 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         let action = section.actions[indexPath.row]
         switch action {
+        case .lastModifications:
+            createAndPushFileListViewController(with: LastModificationsViewModel(driveFileManager: driveFileManager))
+        case .trash:
+            createAndPushFileListViewController(with: TrashListViewModel(driveFileManager: driveFileManager))
+        case .offline:
+            createAndPushFileListViewController(with: OfflineFilesViewModel(driveFileManager: driveFileManager))
         case .disconnect:
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle, message: KDriveResourcesStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveResourcesStrings.Localizable.buttonConfirm, destructive: true) {
                 AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
@@ -245,6 +251,12 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 performSegue(withIdentifier: segue, sender: nil)
             }
         }
+    }
+
+    private func createAndPushFileListViewController(with viewModel: FileListViewModel) {
+        let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
+        fileListViewController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(fileListViewController, animated: true)
     }
 
     // MARK: - Cell Button Action
