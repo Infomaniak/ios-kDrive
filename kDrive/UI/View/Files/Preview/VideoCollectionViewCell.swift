@@ -69,7 +69,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 if let token = token {
-                    let url = URL(string: ApiRoutes.downloadFile(file: file))!
+                    let url = Endpoint.download(file: file).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     DispatchQueue.main.async {
