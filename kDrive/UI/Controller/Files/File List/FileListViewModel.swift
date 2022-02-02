@@ -71,6 +71,10 @@ class FileListViewModel {
         var selectAllSupported = true
         /// Root folder title
         var rootTitle: String?
+        /// An icon displayed in the tabBar
+        var tabBarIcon = KDriveResourcesAsset.folder
+        /// An selected icon displayed in the tabBar
+        var selectedTabBarIcon = KDriveResourcesAsset.folderFill
         /// Type of empty view to display
         var emptyViewType: EmptyTableView.EmptyTableViewType
         /// Does this folder support importing files with drop from external app
@@ -102,6 +106,7 @@ class FileListViewModel {
     }
 
     var isLoading: Bool
+    var isBound = false
 
     @Published var sortType: SortType
     @Published var listStyle: ListStyle
@@ -142,14 +147,14 @@ class FileListViewModel {
 
     var configuration: Configuration
 
-    init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        fatalError(#function + " needs to be overridden")
+    }
+
+    init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         self.configuration = configuration
         self.driveFileManager = driveFileManager
-        if let currentDirectory = currentDirectory {
-            self.currentDirectory = currentDirectory
-        } else {
-            self.currentDirectory = driveFileManager.getRootFile()
-        }
+        self.currentDirectory = currentDirectory
         self.sortType = FileListOptions.instance.currentSortType
         self.listStyle = FileListOptions.instance.currentStyle
         self.isRefreshIndicatorHidden = true
@@ -261,7 +266,6 @@ class FileListViewModel {
     }
 
     func didSelectSwipeAction(_ action: SwipeCellAction, at index: Int) {
-        #if !ISEXTENSION
         if let file = getFile(at: index) {
             switch action {
             case .share:
@@ -286,7 +290,6 @@ class FileListViewModel {
                 break
             }
         }
-        #endif
     }
 
     func getFile(at index: Int) -> File? {
