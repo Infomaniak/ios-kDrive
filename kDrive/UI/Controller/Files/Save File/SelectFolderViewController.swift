@@ -19,10 +19,20 @@
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
 
 protocol SelectFolderDelegate: AnyObject {
     func didSelectFolder(_ folder: File)
+}
+
+class SelectFolderViewModel: ConcreteFileListViewModel {
+    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+        let configuration = FileListViewModel.Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
+
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        self.files = AnyRealmCollection(self.currentDirectory.children)
+    }
 }
 
 class SelectFolderViewController: FileListViewController {
@@ -53,11 +63,6 @@ class SelectFolderViewController: FileListViewController {
         setUpDirectory()
     }
 
-    override func getViewModel() -> FileListViewModel {
-        let configuration = FileListViewModel.Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
-        return ConcreteFileListViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-    }
-
     private func setUpDirectory() {
         addFolderButton.isEnabled = currentDirectory.capabilities.canCreateDirectory
         addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
@@ -86,7 +91,7 @@ class SelectFolderViewController: FileListViewController {
         } else {
             var directory = startDirectory
             while directory != nil {
-                let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
+                let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: directory))
                 selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
                 selectFolderViewController.fileToMove = fileToMove
                 selectFolderViewController.currentDirectory = directory
@@ -142,7 +147,7 @@ class SelectFolderViewController: FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedFile = viewModel.getFile(at: indexPath.item)!
         if selectedFile.isDirectory {
-            let nextVC = SelectFolderViewController.instantiate(driveFileManager: driveFileManager)
+            let nextVC = SelectFolderViewController.instantiate(viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: selectedFile))
             nextVC.disabledDirectoriesSelection = disabledDirectoriesSelection
             nextVC.fileToMove = fileToMove
             nextVC.currentDirectory = selectedFile
