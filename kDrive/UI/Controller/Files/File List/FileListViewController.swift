@@ -399,8 +399,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         headerView.sortView.isHidden = !isEmptyViewHidden
 
         headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
-        headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
-        headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
+        UIView.performWithoutAnimation {
+            headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
+            headerView.sortButton.layoutIfNeeded()
+            headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
+            headerView.listOrGridButton.layoutIfNeeded()
+        }
 
         if let uploadViewModel = viewModel.uploadViewModel {
             headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
