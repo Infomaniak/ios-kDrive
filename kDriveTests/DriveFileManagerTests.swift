@@ -78,6 +78,14 @@ final class DriveFileManagerTests: XCTestCase {
         }
     }
 
+    func initOfficeFile(testName: String) async -> (File, File) {
+        return await withCheckedContinuation { continuation in
+            initOfficeFile(testName: testName) { result1, result2 in
+                continuation.resume(returning: (result1.freeze(), result2.freeze()))
+            }
+        }
+    }
+
     func checkIfFileIsInFavorites(file: File, shouldBePresent: Bool = true, completion: @escaping () -> Void) {
         DriveFileManagerTests.driveFileManager.getFavorites { root, favorites, error in
             XCTAssertNotNil(root, TestsMessages.notNil("root"))
@@ -247,30 +255,28 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testCancelAction() {
-        let testName = "Cancel Action"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
+    func testUndoAction() async throws {
+        let (rootFile, file) = await initOfficeFile(testName: "Undo action")
+        let directory: File = try await withCheckedThrowingContinuation { continuation in
             DriveFileManagerTests.driveFileManager.createDirectory(parentDirectory: rootFile, name: "directory", onlyForMe: true) { directory, error in
-                XCTAssertNil(error, TestsMessages.noError)
-                XCTAssertNotNil(directory, TestsMessages.notNil("created directory"))
-                DriveFileManagerTests.driveFileManager.moveFile(file: file, newParent: directory!) { moveResponse, file, moveError in
-                    XCTAssertNil(moveError, TestsMessages.noError)
-                    XCTAssertNotNil(moveResponse, TestsMessages.notNil("move response"))
-                    let moveCancelId = moveResponse!.id
-                    DriveFileManagerTests.driveFileManager.cancelAction(cancelId: moveCancelId) { cancelMoveError in
-                        XCTAssertNil(cancelMoveError, TestsMessages.noError)
-                        self.checkIfFileIsInDestination(file: file!, destination: rootFile)
-                        expectation.fulfill()
-                    }
+                if let directory = directory {
+                    continuation.resume(returning: directory.freeze())
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
                 }
             }
         }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
+        let moveResponse: CancelableResponse = try await withCheckedThrowingContinuation { continuation in
+            DriveFileManagerTests.driveFileManager.moveFile(file: file, newParent: directory) { response, _, error in
+                if let response = response {
+                    continuation.resume(returning: response)
+                } else {
+                    continuation.resume(throwing: error ?? DriveError.unknownError)
+                }
+            }
+        }
+        try await DriveFileManagerTests.driveFileManager.undoAction(cancelId: moveResponse.id)
+        checkIfFileIsInDestination(file: file, destination: rootFile)
         tearDownTest(directory: rootFile)
     }
 
@@ -403,7 +409,7 @@ final class DriveFileManagerTests: XCTestCase {
             rootFile = root
             DriveFileManagerTests.driveFileManager.createCategory(name: "Category-\(Date())", color: "#001227") { createResult in
                 switch createResult {
-                case .failure(_):
+                case .failure:
                     XCTFail(TestsMessages.noError)
                 case .success(let createdCategory):
                     expectations[0].expectation.fulfill()
