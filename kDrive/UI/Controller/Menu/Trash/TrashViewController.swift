@@ -152,7 +152,7 @@ class TrashViewController: FileListViewController {
                 success = false
             }
             if self.selectionMode {
-                MatomoUtils.track(eventWithCategory: .trash, name: "bulkDeleteFromTrash", value: Float(self.selectedItems.count))
+                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: self.selectedItems.count)
             } else {
                 MatomoUtils.track(eventWithCategory: .trash, name: "deleteFromTrash")
             }

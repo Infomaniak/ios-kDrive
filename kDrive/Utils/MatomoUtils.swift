@@ -27,7 +27,7 @@ class MatomoUtils {
     static let isEnabled = true
 
     enum EventCategory: String {
-        case newElement, fileAction, fileInfo, shareAndRights, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home, inApp, trash, dropbox, mediaPlayer
+        case newElement, fileAction, fileInfo, shareAndRights, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home, inApp, trash, dropbox, preview, mediaPlayer
     }
 
     enum UserAction: String {
@@ -39,6 +39,7 @@ class MatomoUtils {
     }
 
     static func connectUser() {
+        guard isEnabled else { return }
         shared.userId = String(AccountManager.instance.currentUserId)
     }
 
@@ -66,7 +67,7 @@ class MatomoUtils {
         track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: dateEnabled)
         track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: sizeEnabled)
         if sizeEnabled, let size = size {
-            MatomoUtils.track(eventWithCategory: .dropbox, name: "changeLimitStorage", value: Float(size))
+            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size))
         }
     }
 }

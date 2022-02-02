@@ -160,6 +160,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     override func didEndDisplaying() {
+        MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "leavePlayer", value: Float(player?.progressPercentage ?? 0))
         optOut()
     }
 
@@ -307,8 +308,10 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
         switch playerState {
         case .playing:
             pause()
+            MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
         case .stopped, .paused:
             play()
+            MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "play")
         }
     }
 
@@ -344,6 +347,11 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
 extension AVPlayer {
     var isPlaying: Bool {
         return rate != 0 && error == nil
+    }
+
+    var progressPercentage: Double {
+        guard let currentItem = currentItem else { return 0 }
+        return (currentItem.currentTime().seconds * 100) / currentItem.duration.seconds
     }
 }
 

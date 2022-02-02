@@ -232,6 +232,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
+            track()
         }
         setInteractiveRecognizer()
     }
@@ -341,6 +342,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         } else {
             setNavbarStandard()
         }
+        navigationItem.backButtonTitle = currentFile.name
     }
 
     private func setNavbarStandard() {
@@ -437,6 +439,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
+
+            track()
         }
     }
 
@@ -547,6 +551,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.fromActivities = fromActivities
         return previewPageViewController
+    }
+
+    private func track() {
+        MatomoUtils.track(eventWithCategory: .preview, name: "preview\(currentFile.convertedType.rawValue.capitalized)")
     }
 
     // MARK: - State restoration
