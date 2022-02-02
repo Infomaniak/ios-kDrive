@@ -29,13 +29,17 @@ class UnmanagedFileListViewModel: FileListViewModel {
         return files.count
     }
 
-    override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+    override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         self.files = [File]()
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         driveFileManager.observeFileUpdated(self, fileId: self.currentDirectory.id) { [weak self] _ in
             // FIXME: this suboptimal, we need to improve observation
             self?.forceRefresh()
         }
+    }
+
+    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+        fatalError("init(driveFileManager:currentDirectory:) has not been implemented")
     }
 
     override func forceRefresh() {

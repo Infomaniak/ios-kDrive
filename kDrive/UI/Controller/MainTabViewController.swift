@@ -42,8 +42,18 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
         }
 
+        configureRootViewController(at: 1, with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+        configureRootViewController(at: 3, with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         delegate = self
+    }
+
+    private func configureRootViewController(at index: Int, with viewModel: FileListViewModel) {
+        let rootNavigationViewController = (viewControllers?[index] as? UINavigationController)
+        (rootNavigationViewController?.viewControllers.first as? FileListViewController)?.viewModel = viewModel
+        rootNavigationViewController?.tabBarItem.image = viewModel.configuration.tabBarIcon.image
+        rootNavigationViewController?.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
     }
 
     override func viewDidLayoutSubviews() {
