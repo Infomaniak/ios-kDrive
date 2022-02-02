@@ -56,7 +56,7 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
     private let labelText: String?
     private let placeholder: String?
     private let text: String?
-    private let handler: ((String) -> Void)?
+    private let handler: ((String) async -> Void)?
 
     public var textField: MaterialOutlinedTextField!
     public var textFieldConfiguration: TextFieldConfiguration = .defaultConfiguration {
@@ -79,6 +79,10 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         - loading: If this is set as true, the action button will automatically be set to the loading state while the `handler` is called. In this case, `handler` has to be **synchronous**
         - handler: Closure to execute when the action button is tapped
      */
+    public convenience init(title: String, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) async -> Void)?, cancelHandler: (() -> Void)? = nil) {
+        self.init(title: title, label: placeholder, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
+    }
+
     public convenience init(title: String, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
         self.init(title: title, label: placeholder, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
     }
@@ -94,7 +98,7 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         - loading: If this is set as true, the action button will automatically be set to the loading state while the `handler` is called. In this case, `handler` has to be **synchronous**
         - handler: Closure to execute when the action button is tapped
      */
-    public init(title: String, label: String?, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String, label: String?, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) async -> Void)?, cancelHandler: (() -> Void)? = nil) {
         self.labelText = label
         self.placeholder = placeholder
         self.text = text
@@ -159,15 +163,15 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
 
         if loading {
             setLoading(true)
-            DispatchQueue.global(qos: .userInitiated).async {
-                self.handler?(name)
-                DispatchQueue.main.async {
-                    self.setLoading(false)
-                    self.dismiss(animated: true)
-                }
+            Task(priority: .userInitiated) {
+                await handler?(name)
+                self.setLoading(false)
+                self.dismiss(animated: true)
             }
         } else {
-            handler?(name)
+            Task {
+                await handler?(name)
+            }
             dismiss(animated: true)
         }
     }

@@ -29,7 +29,7 @@ open class AlertViewController: UIViewController {
     private let hasCancelButton: Bool
     private let destructive: Bool
     let loading: Bool
-    private let handler: (() -> Void)?
+    private let handler: (() async -> Void)?
     private let cancelHandler: (() -> Void)?
 
     public var contentView = UIView()
@@ -38,7 +38,7 @@ open class AlertViewController: UIViewController {
     public var cancelButton: UIButton!
     public var centerConstraint: NSLayoutConstraint!
 
-    public init(title: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() async -> Void)?, cancelHandler: (() -> Void)? = nil) {
         self.actionString = action
         self.hasCancelButton = hasCancelButton
         self.destructive = destructive
@@ -159,16 +159,16 @@ open class AlertViewController: UIViewController {
     @objc open func action() {
         if loading {
             setLoading(true)
-            DispatchQueue.global(qos: .userInitiated).async {
-                self.handler?()
-                DispatchQueue.main.async {
-                    self.setLoading(false)
-                    self.dismiss(animated: true)
-                }
+            Task(priority: .userInitiated) {
+                await handler?()
+                self.setLoading(false)
+                self.dismiss(animated: true)
             }
         } else {
             dismiss(animated: true)
-            handler?()
+            Task {
+                await handler?()
+            }
         }
     }
 }
