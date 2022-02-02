@@ -694,11 +694,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
         let maybeCurrentDirectory = driveFileManager.getCachedFile(id: directoryId)
 
-        if maybeCurrentDirectory == nil && directoryId > DriveFileManager.constants.rootID {
-            navigationController?.popViewController(animated: true)
-        }
-
-        if let viewModelName = viewModelName,
+        if !(maybeCurrentDirectory == nil && directoryId > DriveFileManager.constants.rootID),
+           let viewModelName = viewModelName,
            let viewModel = getViewModel(viewModelName: viewModelName, driveFileManager: driveFileManager, currentDirectory: maybeCurrentDirectory) {
             self.viewModel = viewModel
         } else {
