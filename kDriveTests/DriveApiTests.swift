@@ -1477,43 +1477,19 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testCategory() {
-        let createExpectation = XCTestExpectation(description: "Create category")
-        let addExpectation = XCTestExpectation(description: "Add category")
-        let removeExpectation = XCTestExpectation(description: "Remove category")
-        let deleteExpectation = XCTestExpectation(description: "Delete category")
-
-        var folder = File()
-
-        setUpTest(testName: "Categories") { file in
-            folder = file
-            // 1. Create category
-            self.currentApiFetcher.createCategory(driveId: Env.driveId, name: "UnitTest-\(Date())", color: "#1abc9c") { response, error in
-                XCTAssertNil(error, "There should be no error on create category")
-                guard let category = response?.data else {
-                    XCTFail(TestsMessages.notNil("category"))
-                    return
-                }
-                createExpectation.fulfill()
-                // 2. Add category to folder
-                self.currentApiFetcher.addCategory(file: folder, category: category) { _, error in
-                    XCTAssertNil(error, "There should be no error on add category")
-                    addExpectation.fulfill()
-                    // 3. Remove category from folder
-                    self.currentApiFetcher.removeCategory(file: folder, category: category) { _, error in
-                        XCTAssertNil(error, "There should be no error on remove category")
-                        removeExpectation.fulfill()
-                        // 4. Delete category
-                        self.currentApiFetcher.deleteCategory(driveId: Env.driveId, id: category.id) { _, error in
-                            XCTAssertNil(error, "There should be no error on delete category")
-                            deleteExpectation.fulfill()
-                        }
-                    }
-                }
-            }
-        }
-
-        wait(for: [createExpectation, addExpectation, removeExpectation, deleteExpectation], timeout: DriveApiTests.defaultTimeout)
+    func testCategory() async throws {
+        let folder = await setUpTest(testName: "Categories")
+        // 1. Create category
+        let category = try await currentApiFetcher.createCategory(drive: ProxyDrive(id: Env.driveId), name: "UnitTest-\(Date())", color: "#1abc9c")
+        // 2. Add category to folder
+        let addResponse = try await currentApiFetcher.add(category: category, to: folder)
+        XCTAssertTrue(addResponse, "API should return true")
+        // 3. Remove category from folder
+        let removeResponse = try await currentApiFetcher.remove(category: category, from: folder)
+        XCTAssertTrue(removeResponse, "API should return true")
+        // 4. Delete category
+        let deleteResponse = try await currentApiFetcher.deleteCategory(drive: ProxyDrive(id: Env.driveId), category: category)
+        XCTAssertTrue(deleteResponse, "API should return true")
         tearDownTest(directory: folder)
     }
 

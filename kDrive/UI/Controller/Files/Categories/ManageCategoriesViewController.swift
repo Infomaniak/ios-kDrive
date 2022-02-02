@@ -264,8 +264,10 @@ class ManageCategoriesViewController: UITableViewController {
 
         category.isSelected = true
         if let file = file {
-            driveFileManager.addCategory(file: file, category: category) { error in
-                if let error = error {
+            Task {
+                do {
+                    try await driveFileManager.add(category: category, to: file)
+                } catch {
                     category.isSelected = false
                     tableView.deselectRow(at: indexPath, animated: true)
                     UIConstants.showSnackBar(message: error.localizedDescription)
@@ -280,8 +282,10 @@ class ManageCategoriesViewController: UITableViewController {
         guard category != dummyCategory else { return }
         category.isSelected = false
         if let file = file {
-            driveFileManager.removeCategory(file: file, category: category) { error in
-                if let error = error {
+            Task {
+                do {
+                    try await driveFileManager.remove(category: category, from: file)
+                } catch {
                     category.isSelected = true
                     tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
                     UIConstants.showSnackBar(message: error.localizedDescription)
