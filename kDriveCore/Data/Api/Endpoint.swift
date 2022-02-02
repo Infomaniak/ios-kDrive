@@ -121,7 +121,7 @@ extension Endpoint {
     private static let withQueryItem = URLQueryItem(name: "with", value: "parents,capabilities,dropbox,is_favorite,mobile,sharelink,categories")
 
     private static var base: Endpoint {
-        return Endpoint(path: "/2/drive", apiEnvironment: .prod)
+        return Endpoint(path: "/2/drive", apiEnvironment: .preprod)
     }
 
     public static var inAppReceipt: Endpoint {
