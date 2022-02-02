@@ -235,7 +235,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    private func track(action: FloatingPanelAction) {
+    override func track(action: FloatingPanelAction) {
         let numberOfFiles = files.count
         switch action {
         // Quick Actions

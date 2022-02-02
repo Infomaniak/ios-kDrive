@@ -636,7 +636,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    private func track(action: FloatingPanelAction) {
+    internal func track(action: FloatingPanelAction) {
         switch action {
         // Quick Actions
         case .sendCopy:
