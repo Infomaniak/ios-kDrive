@@ -38,7 +38,6 @@ class ShareAndRightsViewController: UIViewController {
     private var shareLinkRights = false
     private var initialLoading = true
     private var fileAccess: FileAccess?
-    private var shareLink: ShareLink?
     private var fileAccessElements = [FileAccessElement]()
     private var selectedElement: FileAccessElement?
 
@@ -80,7 +79,6 @@ class ShareAndRightsViewController: UIViewController {
     private func updateShareList() {
         guard driveFileManager != nil else { return }
         Task {
-            self.shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
             do {
                 let fileAccess = try await driveFileManager.apiFetcher.access(for: file)
                 self.fileAccess = fileAccess
@@ -104,7 +102,7 @@ class ShareAndRightsViewController: UIViewController {
                 rightsSelectionVC.selectedRight = element.right.rawValue
                 rightsSelectionVC.fileAccessElement = element
             } else {
-                rightsSelectionVC.selectedRight = (shareLink == nil ? ShareLinkPermission.restricted : ShareLinkPermission.public).rawValue
+                rightsSelectionVC.selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.restricted).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
             }
         }
@@ -206,7 +204,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
-            cell.configureWith(shareLink: shareLink, file: file)
+            cell.configureWith(file: file)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
@@ -256,7 +254,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
             let right = ShareLinkPermission(rawValue: value)!
             Task {
                 do {
-                    self.shareLink = try await driveFileManager.createOrRemoveShareLink(for: file, right: right)
+                    _ = try await driveFileManager.createOrRemoveShareLink(for: file, right: right)
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
@@ -322,7 +320,6 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
         let shareLinkSettingsViewController = ShareLinkSettingsViewController.instantiate()
         shareLinkSettingsViewController.driveFileManager = driveFileManager
         shareLinkSettingsViewController.file = file
-        shareLinkSettingsViewController.shareLink = shareLink
         navigationController?.pushViewController(shareLinkSettingsViewController, animated: true)
     }
 }
