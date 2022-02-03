@@ -319,22 +319,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(shareVC, animated: true)
             dismiss(animated: true)
         case .shareLink:
-            if file.isDropbox {
-                // Copy drop box link
-                setLoading(true, action: action, at: indexPath)
-                Task {
-                    do {
-                        let dropBox = try await driveFileManager.apiFetcher.getDropBox(directory: file)
-                        self.copyShareLinkToPasteboard(dropBox.url)
-                    } catch {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
-                    }
-                    self.setLoading(false, action: action, at: indexPath)
-                }
-            } /* else if let link = file.shareLink {
+            if let link = file.dropbox?.url {
                 // Copy share link
                 copyShareLinkToPasteboard(link)
-            } */else {
+            } else if let link = file.sharelink?.url {
+                // Copy share link
+                copyShareLinkToPasteboard(link)
+            } else {
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
                 Task {
@@ -348,7 +339,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                             let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
                             setLoading(false, action: action, at: indexPath)
                             if let shareLink = shareLink {
-                                driveFileManager.setFileShareLink(file: file, shareLink: shareLink.url)
+                                driveFileManager.setFileShareLink(file: file, shareLink: shareLink)
                                 copyShareLinkToPasteboard(shareLink.url)
                             }
                         } else {
