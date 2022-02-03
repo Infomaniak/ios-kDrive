@@ -267,7 +267,7 @@ public class File: Object, Codable {
     @Persisted public var users: List<Int> // Extra property
     /// Is File pinned as favorite
     @Persisted public var isFavorite: Bool
-    // @Persisted public var sharelink: ShareLink
+    @Persisted public var sharelink: ShareLink?
     @Persisted private var _capabilities: Rights?
     @Persisted public var categories: List<FileCategory>
 
@@ -283,7 +283,7 @@ public class File: Object, Codable {
     // Directory only
     /// Color of the directory for the user requesting it
     @Persisted public var color: String?
-    // @Persisted public var dropbox: DropBox
+    @Persisted public var dropbox: DropBox?
 
     // File only
     /// Size of File (byte unit)
@@ -328,11 +328,11 @@ public class File: Object, Codable {
         case deletedAt = "deleted_at"
         case users
         case isFavorite = "is_favorite"
-        // case sharelink
+        case sharelink
         case _capabilities = "capabilities"
         case categories
         case color
-        // case dropbox
+        case dropbox
         case size
         case hasThumbnail = "has_thumbnail"
         case hasOnlyoffice = "has_onlyoffice"
@@ -409,11 +409,11 @@ public class File: Object, Codable {
     }
 
     public var isDropbox: Bool {
-        return false // dropbox != nil
+        return dropbox != nil
     }
 
     public var hasSharelink: Bool {
-        return false // sharelink != nil
+        return sharelink != nil
     }
 
     public var `extension`: String {
@@ -601,11 +601,11 @@ public class File: Object, Codable {
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
         isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
-        // sharelink = try container.decodeIfPresent(ShareLink.self, forKey: .sharelink)
+        sharelink = try container.decodeIfPresent(ShareLink.self, forKey: .sharelink)
         _capabilities = try container.decode(Rights.self, forKey: ._capabilities)
         categories = try container.decodeIfPresent(List<FileCategory>.self, forKey: .categories) ?? List<FileCategory>()
         color = try container.decodeIfPresent(String.self, forKey: .color)
-        // dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
+        dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
         size = try container.decodeIfPresent(Int.self, forKey: .size)
         hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail) ?? false
         hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice) ?? false

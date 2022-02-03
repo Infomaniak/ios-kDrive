@@ -17,16 +17,17 @@
  */
 
 import Foundation
+import RealmSwift
 
 public enum ShareLinkPermission: String, Encodable {
     case restricted, `public`, password
 }
 
-public class ShareLink: NSObject, NSCoding, Codable {
-    public var url: String
-    public var right: String
-    public var validUntil: Date?
-    public var capabilities: ShareLinkCapabilities
+public class ShareLink: EmbeddedObject, Codable {
+    @Persisted public var url: String
+    @Persisted public var right: String
+    @Persisted public var validUntil: Date?
+    @Persisted public var capabilities: ShareLinkCapabilities!
 
     enum CodingKeys: String, CodingKey {
         case url
@@ -34,33 +35,14 @@ public class ShareLink: NSObject, NSCoding, Codable {
         case validUntil = "valid_until"
         case capabilities
     }
-
-    public func encode(with coder: NSCoder) {
-        coder.encode(url, forKey: "URL")
-        coder.encode(right, forKey: "Right")
-        coder.encode(validUntil, forKey: "ValidUntil")
-        coder.encode(capabilities, forKey: "Capabilities")
-    }
-
-    public required init?(coder: NSCoder) {
-        guard let url = coder.decodeObject(forKey: "URL") as? String,
-              let right = coder.decodeObject(forKey: "Right") as? String,
-              let capabilities = coder.decodeObject(of: ShareLinkCapabilities.self, forKey: "Capabilities") else {
-            return nil
-        }
-        self.url = url
-        self.right = right
-        self.validUntil = coder.decodeObject(forKey: "ValidUntil") as? Date
-        self.capabilities = capabilities
-    }
 }
 
-public class ShareLinkCapabilities: NSObject, NSCoding, Codable {
-    public var canEdit: Bool
-    public var canSeeStats: Bool
-    public var canSeeInfo: Bool
-    public var canDownload: Bool
-    public var canComment: Bool
+public class ShareLinkCapabilities: EmbeddedObject, Codable {
+    @Persisted public var canEdit: Bool
+    @Persisted public var canSeeStats: Bool
+    @Persisted public var canSeeInfo: Bool
+    @Persisted public var canDownload: Bool
+    @Persisted public var canComment: Bool
 
     enum CodingKeys: String, CodingKey {
         case canEdit = "can_edit"
@@ -68,22 +50,6 @@ public class ShareLinkCapabilities: NSObject, NSCoding, Codable {
         case canSeeInfo = "can_see_info"
         case canDownload = "can_download"
         case canComment = "can_comment"
-    }
-
-    public func encode(with coder: NSCoder) {
-        coder.encode(canEdit, forKey: "CanEdit")
-        coder.encode(canSeeStats, forKey: "CanSeeStats")
-        coder.encode(canSeeInfo, forKey: "CanSeeInfo")
-        coder.encode(canDownload, forKey: "CanDownload")
-        coder.encode(canComment, forKey: "CanComment")
-    }
-
-    public required init?(coder: NSCoder) {
-        self.canEdit = coder.decodeBool(forKey: "CanEdit")
-        self.canSeeStats = coder.decodeBool(forKey: "CanSeeStats")
-        self.canSeeInfo = coder.decodeBool(forKey: "CanSeeInfo")
-        self.canDownload = coder.decodeBool(forKey: "CanComment")
-        self.canComment = coder.decodeBool(forKey: "CanComment")
     }
 }
 
