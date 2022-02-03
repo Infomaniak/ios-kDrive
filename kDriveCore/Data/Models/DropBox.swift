@@ -17,20 +17,21 @@
  */
 
 import Foundation
+import RealmSwift
 
-public class DropBox: Codable {
-    public var id: Int
-    public var url: String
-    public var capabilities: DropBoxCapabilities
+public class DropBox: EmbeddedObject, Codable {
+    @Persisted public var id: Int
+    @Persisted public var url: String
+    @Persisted public var capabilities: DropBoxCapabilities!
 }
 
-public class DropBoxCapabilities: Codable {
-    public var hasPassword: Bool
-    public var hasNotification: Bool
-    public var hasValidity: Bool
-    public var hasSizeLimit: Bool
-    public var validity: DropBoxValidity
-    public var size: DropBoxSize
+public class DropBoxCapabilities: EmbeddedObject, Codable {
+    @Persisted public var hasPassword: Bool
+    @Persisted public var hasNotification: Bool
+    @Persisted public var hasValidity: Bool
+    @Persisted public var hasSizeLimit: Bool
+    @Persisted public var validity: DropBoxValidity!
+    @Persisted public var size: DropBoxSize!
 
     enum CodingKeys: String, CodingKey {
         case hasPassword = "has_password"
@@ -42,9 +43,9 @@ public class DropBoxCapabilities: Codable {
     }
 }
 
-public class DropBoxValidity: Codable {
-    public var date: Date?
-    public var hasExpired: Bool?
+public class DropBoxValidity: EmbeddedObject, Codable {
+    @Persisted public var date: Date?
+    @Persisted public var hasExpired: Bool?
 
     enum CodingKeys: String, CodingKey {
         case date
@@ -52,9 +53,9 @@ public class DropBoxValidity: Codable {
     }
 }
 
-public class DropBoxSize: Codable {
-    public var limit: Int?
-    public var remaining: Int?
+public class DropBoxSize: EmbeddedObject, Codable {
+    @Persisted public var limit: Int?
+    @Persisted public var remaining: Int?
 }
 
 public enum BinarySize: Encodable {

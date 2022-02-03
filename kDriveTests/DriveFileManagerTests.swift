@@ -280,10 +280,10 @@ final class DriveFileManagerTests: XCTestCase {
 
     func testCreateDropBox() async throws {
         let testDirectory = try await setUpTest(testName: "Create dropbox")
-        let (directory, _) = try await DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: testDirectory, name: "Test dropbox", onlyForMe: true, settings: DropBoxSettings(alias: nil, emailWhenFinished: true, limitFileSize: nil, password: "mot de passe", validUntil: nil))
+        let directory = try await DriveFileManagerTests.driveFileManager.createDropBox(parentDirectory: testDirectory, name: "Test dropbox", onlyForMe: true, settings: DropBoxSettings(alias: nil, emailWhenFinished: true, limitFileSize: nil, password: "mot de passe", validUntil: nil))
         let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
         XCTAssertNotNil(cached, TestsMessages.notNil("cached dropbox"))
-        // XCTAssertTrue(cached!.collaborativeFolder?.count ?? 0 > 0, "Cached dropbox link should be set")
+        XCTAssertNotNil(cached?.dropbox, "Cached dropbox link should be set")
         tearDownTest(directory: testDirectory)
     }
 
