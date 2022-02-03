@@ -80,7 +80,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureWith(shareLink: ShareLink?, file: File, insets: Bool = true) {
+    func configureWith(file: File, insets: Bool = true) {
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
             leadingConstraint.constant = 24
@@ -92,15 +92,15 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             initWithoutInsets()
         }
         layoutIfNeeded()
-        if let link = shareLink {
+        if let shareLink = file.sharelink {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.publicSharedLinkTitle
-            let rightPermission = link.capabilities.canEdit ? KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteTitle.lowercased() : KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle.lowercased()
+            let rightPermission = (shareLink.capabilities.canEdit ? KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteTitle : KDriveResourcesStrings.Localizable.shareLinkOfficePermissionReadTitle).lowercased()
             let documentType = file.isDirectory ? KDriveResourcesStrings.Localizable.shareLinkTypeFolder : file.isOfficeFile ? KDriveResourcesStrings.Localizable.shareLinkTypeDocument : KDriveResourcesStrings.Localizable.shareLinkTypeFile
-            let password = link.right == ShareLinkPermission.password.rawValue ? KDriveResourcesStrings.Localizable.shareLinkPublicRightDescriptionPassword : ""
-            let date = link.validUntil != nil ? KDriveResourcesStrings.Localizable.shareLinkPublicRightDescriptionDate(Constants.formatDate(link.validUntil!)) : ""
+            let password = shareLink.right == ShareLinkPermission.password.rawValue ? KDriveResourcesStrings.Localizable.shareLinkPublicRightDescriptionPassword : ""
+            let date = shareLink.validUntil != nil ? KDriveResourcesStrings.Localizable.shareLinkPublicRightDescriptionDate(Constants.formatDate(shareLink.validUntil!)) : ""
             shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.shareLinkPublicRightDescription(rightPermission, documentType, password, date)
             shareLinkStackView.isHidden = false
-            url = link.url
+            url = shareLink.url
             shareIconImageView.image = KDriveResourcesAsset.unlock.image
         } else if file.isDropbox {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkTitle
