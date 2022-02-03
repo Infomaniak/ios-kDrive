@@ -232,7 +232,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
-            track()
+            MatomoUtils.trackPreview(file: currentFile)
         }
         setInteractiveRecognizer()
     }
@@ -385,6 +385,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     @objc private func editFile() {
         floatingPanelViewController.dismiss(animated: true)
         OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
+        MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "edit")
     }
 
     @objc private func openFile() {
@@ -440,7 +441,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
 
-            track()
+            MatomoUtils.trackPreview(file: currentFile)
         }
     }
 
@@ -551,10 +552,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         previewPageViewController.normalFolderHierarchy = normalFolderHierarchy
         previewPageViewController.fromActivities = fromActivities
         return previewPageViewController
-    }
-
-    private func track() {
-        MatomoUtils.track(eventWithCategory: .preview, name: "preview\(currentFile.convertedType.rawValue.capitalized)")
     }
 
     // MARK: - State restoration

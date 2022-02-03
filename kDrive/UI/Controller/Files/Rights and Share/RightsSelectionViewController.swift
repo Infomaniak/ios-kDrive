@@ -116,7 +116,7 @@ class RightsSelectionViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["ShareAndRights", "RightSelection"])
+        MatomoUtils.track(view: ["ShareAndRights", "RightsSelection"])
     }
 
     private func setupView() {
@@ -186,8 +186,6 @@ class RightsSelectionViewController: UIViewController {
             } else {
                 MatomoUtils.track(eventWithCategory: .shareAndRights, name: "\(selectedRight)Right")
             }
-        default:
-            break
         }
     }
 }

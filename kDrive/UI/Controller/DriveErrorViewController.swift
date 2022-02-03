@@ -61,6 +61,7 @@ class DriveErrorViewController: UIViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         MatomoUtils.track(view: ["DriveError"])
     }
 

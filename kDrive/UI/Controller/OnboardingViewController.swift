@@ -236,6 +236,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
+                    MatomoUtils.connectUser()
                     self.goToMainScreen()
                 }
             } catch {

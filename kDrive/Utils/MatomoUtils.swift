@@ -34,6 +34,10 @@ class MatomoUtils {
         case click, input
     }
 
+    enum MediaPlayerType: String {
+        case audio, video
+    }
+
     private init() {
         MatomoUtils.connectUser()
     }
@@ -61,7 +65,9 @@ class MatomoUtils {
         track(eventWithCategory: category, action: .click, name: "bulk\(number == 1 ? "Single" : "")\(name.capitalized)", value: Float(number))
     }
 
-    static func trackDropBox(emailEnabled: Bool, passwordEnabled: Bool, dateEnabled: Bool, sizeEnabled: Bool, size: Int?) {
+    // MARK: - DropBox
+
+    static func trackDropBoxSettings(emailEnabled: Bool, passwordEnabled: Bool, dateEnabled: Bool, sizeEnabled: Bool, size: Int?) {
         track(eventWithCategory: .dropbox, name: "switchEmailOnFileImport", value: emailEnabled)
         track(eventWithCategory: .dropbox, name: "switchProtectWithPassword", value: passwordEnabled)
         track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: dateEnabled)
@@ -69,5 +75,21 @@ class MatomoUtils {
         if sizeEnabled, let size = size {
             track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size))
         }
+    }
+
+    // MARK: - Preview file
+
+    static func trackPreview(file: File) {
+        MatomoUtils.track(eventWithCategory: .preview, name: "preview\(file.convertedType.rawValue.capitalized)")
+    }
+
+    // MARK: - Media player
+
+    static func trackMediaPlayer(playMedia: MatomoUtils.MediaPlayerType) {
+        track(eventWithCategory: .mediaPlayer, name: "play\(playMedia.rawValue.capitalized)")
+    }
+
+    static func trackMediaPlayer(leaveAt percentage: Double?) {
+        track(eventWithCategory: .mediaPlayer, name: "duration", value: Float(percentage ?? 0))
     }
 }

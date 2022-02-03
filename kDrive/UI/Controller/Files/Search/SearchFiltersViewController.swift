@@ -75,6 +75,7 @@ class SearchFiltersViewController: UITableViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         MatomoUtils.track(view: ["Search", "Filters"])
     }
 

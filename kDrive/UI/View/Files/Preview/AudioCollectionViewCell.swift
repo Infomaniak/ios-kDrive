@@ -160,7 +160,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     override func didEndDisplaying() {
-        MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "leavePlayer", value: Float(player?.progressPercentage ?? 0))
+        MatomoUtils.trackMediaPlayer(leaveAt: player?.progressPercentage)
         optOut()
     }
 
@@ -311,7 +311,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
         case .stopped, .paused:
             play()
-            MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "play")
+            MatomoUtils.trackMediaPlayer(playMedia: .audio)
         }
     }
 
