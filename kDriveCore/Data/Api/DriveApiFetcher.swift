@@ -305,22 +305,16 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.comment(file: file, comment: comment), method: .post, parameters: ["body": body])).data
     }
 
-    public func deleteFile(file: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteFile(file: file)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func delete(file: File) async throws -> CancelableResponse {
+        try await perform(request: authenticatedRequest(.fileInfo(file), method: .delete)).data
     }
 
-    public func deleteAllFilesDefinitely(driveId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteAllFilesDefinitely(driveId: driveId)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func emptyTrash(drive: AbstractDrive) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.trash(drive: drive), method: .delete)).data
     }
 
-    public func deleteFileDefinitely(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.deleteFileDefinitely(file: file)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func deleteDefinitely(file: AbstractFile) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.trashedInfo(file: file), method: .delete)).data
     }
 
     public func renameFile(file: File, newName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
@@ -346,10 +340,8 @@ public class DriveApiFetcher: ApiFetcher {
             }
     }
 
-    public func moveFile(file: File, newParent: File, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.moveFile(file: file, newParentId: newParent.id)
-
-        makeRequest(url, method: .post, completion: completion)
+    public func move(file: File, to destination: File) async throws -> CancelableResponse {
+        try await perform(request: authenticatedRequest(.move(file: file, destinationId: destination.id), method: .post)).data
     }
 
     public func getRecentActivity(driveId: Int, page: Int = 1, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
@@ -370,16 +362,12 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
-    public func postFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.favorite(file: file)
-
-        makeRequest(url, method: .post, completion: completion)
+    public func favorite(file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.favorite(file: file), method: .post)).data
     }
 
-    public func deleteFavoriteFile(file: File, completion: @escaping (ApiResponse<Bool>?, Error?) -> Void) {
-        let url = ApiRoutes.favorite(file: file)
-
-        makeRequest(url, method: .delete, completion: completion)
+    public func unfavorite(file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.favorite(file: file), method: .delete)).data
     }
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
@@ -438,17 +426,14 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .get, completion: completion)
     }
 
-    public func restoreTrashedFile(file: File, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.restoreTrashedFile(file: file)
-
-        makeRequest(url, method: .post, completion: completion)
-    }
-
-    public func restoreTrashedFile(file: File, in folderId: Int, completion: @escaping (ApiResponse<EmptyResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.restoreTrashedFile(file: file)
-        let body: [String: Any] = ["destination_directory_id": folderId as Any]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func restore(file: AbstractFile, in directory: AbstractFile? = nil) async throws -> CancelableResponse {
+        let parameters: Parameters?
+        if let directory = directory {
+            parameters = ["destination_directory_id": directory.id]
+        } else {
+            parameters = nil
+        }
+        return try await perform(request: authenticatedRequest(.restore(file: file), method: .post, parameters: parameters)).data
     }
 
     @discardableResult
@@ -518,18 +503,8 @@ public class DriveApiFetcher: ApiFetcher {
         makeRequest(url, method: .post, completion: completion)
     }
 
-    public func bulkAction(driveId: Int, action: BulkAction, completion: @escaping (ApiResponse<CancelableResponse>?, Error?) -> Void) {
-        let url = ApiRoutes.bulkAction(driveId: driveId)
-
-        // Create encoder
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        let parameterEncoder = JSONParameterEncoder(encoder: encoder)
-
-        authenticatedSession.request(url, method: .post, parameters: action, encoder: parameterEncoder)
-            .responseDecodable(of: ApiResponse<CancelableResponse>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+    public func bulkAction(drive: AbstractDrive, action: BulkAction) async throws -> CancelableResponse {
+        try await perform(request: authenticatedRequest(.bulkFiles(drive: drive), method: .post, parameters: action)).data
     }
 
     public func getFileCount(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<FileCount>?, Error?) -> Void) {

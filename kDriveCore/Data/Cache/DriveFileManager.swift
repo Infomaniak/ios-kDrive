@@ -990,85 +990,68 @@ public class DriveFileManager {
         return response
     }
 
-    public func setFavoriteFile(file: File, favorite: Bool, completion: @escaping (Error?) -> Void) {
+    public func setFavorite(file: File, favorite: Bool) async throws {
         let fileId = file.id
         if favorite {
-            apiFetcher.postFavoriteFile(file: file) { _, error in
-                if error == nil {
-                    self.updateFileProperty(fileId: fileId) { file in
-                        file.isFavorite = true
-                    }
+            let response = try await apiFetcher.favorite(file: file)
+            if response {
+                updateFileProperty(fileId: fileId) { file in
+                    file.isFavorite = true
                 }
-                completion(error)
             }
         } else {
-            apiFetcher.deleteFavoriteFile(file: file) { _, error in
-                if error == nil {
-                    self.updateFileProperty(fileId: fileId) { file in
-                        file.isFavorite = false
-                    }
+            let response = try await apiFetcher.unfavorite(file: file)
+            if response {
+                updateFileProperty(fileId: fileId) { file in
+                    file.isFavorite = false
                 }
-                completion(error)
             }
         }
     }
 
-    public func deleteFile(file: File, completion: @escaping (CancelableResponse?, Error?) -> Void) {
+    public func delete(file: File) async throws -> CancelableResponse {
         let fileId = file.id
-        apiFetcher.deleteFile(file: file) { response, error in
-            if error == nil {
-                file.signalChanges(userId: self.drive.userId)
-                self.backgroundQueue.async { [self] in
-                    let localRealm = getRealm()
-                    let savedFile = getCachedFile(id: fileId, using: localRealm)
-                    removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: true, using: localRealm)
-                    DispatchQueue.main.async {
-                        completion(response?.data, error)
-                    }
-                    if let file = savedFile {
-                        self.notifyObserversWith(file: file)
-                    }
-                    deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)
-                }
-            } else {
-                completion(response?.data, error)
+        let response = try await apiFetcher.delete(file: file)
+        file.signalChanges(userId: drive.userId)
+        backgroundQueue.async { [self] in
+            let localRealm = getRealm()
+            let savedFile = getCachedFile(id: fileId, using: localRealm)
+            removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: true, using: localRealm)
+            if let file = savedFile {
+                self.notifyObserversWith(file: file)
             }
+            deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)
         }
+        return response
     }
 
-    public func moveFile(file: File, newParent: File, completion: @escaping (CancelableResponse?, File?, Error?) -> Void) {
-        guard file.isManagedByRealm && newParent.isManagedByRealm else {
-            completion(nil, nil, DriveError.fileNotFound)
-            return
+    public func move(file: File, to destination: File) async throws -> (CancelableResponse, File) {
+        guard file.isManagedByRealm && destination.isManagedByRealm else {
+            throw DriveError.fileNotFound
         }
         let safeFile = ThreadSafeReference(to: file)
-        let safeParent = ThreadSafeReference(to: newParent)
-        apiFetcher.moveFile(file: file, newParent: newParent) { response, error in
-            if error == nil {
-                // Add the moved file to the realm db
-                let realm = self.getRealm()
-                if let newParent = realm.resolve(safeParent),
-                   let file = realm.resolve(safeFile) {
-                    let oldParent = file.parent
-                    try? realm.write {
-                        if let index = oldParent?.children.index(of: file) {
-                            oldParent?.children.remove(at: index)
-                        }
-                        newParent.children.append(file)
-                    }
-                    if let oldParent = oldParent {
-                        oldParent.signalChanges(userId: self.drive.userId)
-                        self.notifyObserversWith(file: oldParent)
-                    }
-                    newParent.signalChanges(userId: self.drive.userId)
-                    self.notifyObserversWith(file: newParent)
-                    completion(response?.data, file, error)
-                } else {
-                    completion(response?.data, nil, error)
+        let safeParent = ThreadSafeReference(to: destination)
+        let response = try await apiFetcher.move(file: file, to: destination)
+        // Add the moved file to Realm
+        let realm = getRealm()
+        if let newParent = realm.resolve(safeParent),
+           let file = realm.resolve(safeFile) {
+            let oldParent = file.parent
+            try? realm.write {
+                if let index = oldParent?.children.index(of: file) {
+                    oldParent?.children.remove(at: index)
                 }
-            } else {
-                completion(nil, nil, error)
+                newParent.children.append(file)
             }
+            if let oldParent = oldParent {
+                oldParent.signalChanges(userId: drive.userId)
+                notifyObserversWith(file: oldParent)
+            }
+            newParent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: newParent)
+            return (response, file)
+        } else {
+            throw DriveError.unknownError
         }
     }
 

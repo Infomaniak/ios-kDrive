@@ -90,16 +90,23 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         case .favorite:
             let isFavorite = filesAreFavorite
             addAction = !isFavorite
-            for file in files where file.rights?.canFavorite ?? false {
-                group.enter()
-                driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { error in
-                    if error != nil {
-                        success = false
+            Task {
+                do {
+                    try await withThrowingTaskGroup(of: Void.self) { group in
+                        for file in files where file.rights?.canFavorite ?? false {
+                            group.addTask {
+                                try await self.driveFileManager.setFavorite(file: file, favorite: !isFavorite)
+                                await MainActor.run {
+                                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                                        self.changedFiles?.append(file)
+                                    }
+                                }
+                            }
+                        }
+                        try await group.waitForAll()
                     }
-                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                        self.changedFiles?.append(file)
-                    }
-                    group.leave()
+                } catch {
+                    // success = false
                 }
             }
         case .folderColor:
@@ -183,10 +190,11 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 if self.files.count > Constants.bulkActionThreshold {
                     addAction = false // Prevents the snackbar to be displayed
                     let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedFolder.id)
-                    self.driveFileManager.apiFetcher.bulkAction(driveId: driveFileManager.drive.id, action: action) { response, error in
+                    Task {
+                        let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
                         let tabBarController = presentingViewController as? MainTabViewController
                         let navigationController = tabBarController?.selectedViewController as? UINavigationController
-                        (navigationController?.topViewController as? FileListViewController)?.bulkObservation(action: .copy, response: response, error: error)
+                        (navigationController?.topViewController as? FileListViewController)?.bulkObservation(action: .copy, response: response)
                     }
                 } else {
                     for file in self.files {

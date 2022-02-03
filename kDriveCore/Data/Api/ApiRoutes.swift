@@ -70,10 +70,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/search?order=desc&order_by=last_modified_at&\(with)&converted_type=image"
     }
 
-    static func deleteFile(file: File) -> String {
-        return fileURL(file: file)
-    }
-
     static func renameFile(file: File) -> String {
         return "\(fileURL(file: file))rename?\(with)"
     }
@@ -84,10 +80,6 @@ public enum ApiRoutes {
 
     static func copyFile(file: File, newParentId: Int) -> String {
         return "\(fileURL(file: file))copy/\(newParentId)"
-    }
-
-    static func moveFile(file: File, newParentId: Int) -> String {
-        return "\(fileURL(file: file))move/\(newParentId)"
     }
 
     static func uploadFile(file: UploadFile) -> String {
@@ -120,25 +112,9 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&actions[]=file_rename&actions[]=file_delete&actions[]=file_update&from_date=\(date)"
     }
 
-    static func favorite(file: File) -> String {
-        return "\(fileURL(file: file))favorite"
-    }
-
     static func getTrashFiles(driveId: Int, fileId: Int? = nil, sortType: SortType) -> String {
         let fileId = fileId == nil ? "" : "\(fileId!)"
         return "\(driveApiUrl)\(driveId)/file/trash/\(fileId)?with=children,parent&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
-    }
-
-    static func deleteAllFilesDefinitely(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/trash"
-    }
-
-    static func deleteFileDefinitely(file: File) -> String {
-        return "\(driveApiUrl)\(file.driveId)/file/trash/\(file.id)"
-    }
-
-    static func restoreTrashedFile(file: File) -> String {
-        return "\(driveApiUrl)\(file.driveId)/file/trash/\(file.id)/restore"
     }
 
     static func searchFiles(driveId: Int, sortType: SortType) -> String {
@@ -159,10 +135,6 @@ public enum ApiRoutes {
 
     public static func convertFile(file: File) -> String {
         return "\(fileURL(file: file))convert"
-    }
-
-    public static func bulkAction(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/bulk"
     }
 
     public static func fileCount(driveId: Int, fileId: Int) -> String {
