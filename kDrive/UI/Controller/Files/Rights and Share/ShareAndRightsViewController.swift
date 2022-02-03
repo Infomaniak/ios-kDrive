@@ -194,8 +194,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            // TODO: Update with new `canUseTeam` capability
-            cell.canUseTeam = true // fileAccess?.canUseTeam ?? false
+            cell.canUseTeam = file.capabilities.canUseTeam
             cell.drive = driveFileManager?.drive
             cell.ignoredShareables = fileAccessElements.compactMap(\.shareable)
             cell.ignoredEmails = ignoredEmails
