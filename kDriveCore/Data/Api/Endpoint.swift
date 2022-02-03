@@ -234,7 +234,7 @@ public extension Endpoint {
 
     static func dropbox(file: AbstractFile) -> Endpoint {
         return .fileInfo(file).appending(path: "/dropbox", queryItems: [
-            URLQueryItem(name: "with", value: "user,capabilities")
+            URLQueryItem(name: "with", value: "user")
         ])
     }
 
