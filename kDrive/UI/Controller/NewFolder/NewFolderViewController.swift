@@ -442,15 +442,15 @@ extension NewFolderViewController: FooterButtonDelegate {
             MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
             Task {
                 do {
-                    let (directory, dropBox) = try await driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
+                    let directory = try await driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
                     if !onlyForMe {
                         let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true
-                        self.dropBoxUrl = dropBox.url
+                        self.dropBoxUrl = directory.dropbox?.url ?? ""
                         self.folderName = directory.name
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
-                        self.showDropBoxLink(url: dropBox.url, fileName: directory.name)
+                        self.showDropBoxLink(url: directory.dropbox?.url ?? "", fileName: directory.name)
                     }
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)

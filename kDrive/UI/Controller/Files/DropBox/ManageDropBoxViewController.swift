@@ -25,7 +25,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     @IBOutlet weak var tableView: UITableView!
 
     private var driveFileManager: DriveFileManager!
-    private var folder: File! {
+    private var directory: File! {
         didSet {
             setTitle()
             getSettings()
@@ -50,7 +50,6 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
     private let optionsRows = OptionsRow.allCases
 
-    private var dropBox: DropBox?
     private var settings = [OptionsRow: Bool]()
     private var settingsValue = [OptionsRow: Any?]()
     private var newPassword = false
@@ -87,7 +86,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
         viewController.convertingFolder = convertingFolder
         viewController.driveFileManager = driveFileManager
-        viewController.folder = folder
+        viewController.directory = folder
         return viewController
     }
 
@@ -109,14 +108,14 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     private func setTitle() {
-        guard folder != nil else { return }
+        guard directory != nil else { return }
         let truncatedName: String
-        if folder.name.count > 20 {
-            truncatedName = folder.name[folder.name.startIndex ..< folder.name.index(folder.name.startIndex, offsetBy: 20)] + "…"
+        if directory.name.count > 20 {
+            truncatedName = directory.name[directory.name.startIndex ..< directory.name.index(directory.name.startIndex, offsetBy: 20)] + "…"
         } else {
-            truncatedName = folder.name
+            truncatedName = directory.name
         }
-        navigationItem.title = convertingFolder ? KDriveResourcesStrings.Localizable.convertToDropboxTitle(truncatedName) : KDriveResourcesStrings.Localizable.manageDropboxTitle(folder.name)
+        navigationItem.title = convertingFolder ? KDriveResourcesStrings.Localizable.convertToDropboxTitle(truncatedName) : KDriveResourcesStrings.Localizable.manageDropboxTitle(directory.name)
     }
 
     private func getSettings() {
@@ -133,33 +132,27 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                 .optionSize: nil
             ]
             newPassword = false
-        } else {
-            Task {
-                do {
-                    let dropBox = try await driveFileManager.apiFetcher.getDropBox(directory: folder)
-                    self.dropBox = dropBox
-                    self.settings = [
-                        .optionMail: dropBox.capabilities.hasNotification,
-                        .optionPassword: dropBox.capabilities.hasPassword,
-                        .optionDate: dropBox.capabilities.hasValidity,
-                        .optionSize: dropBox.capabilities.hasSizeLimit
-                    ]
-                    let sizeLimit: BinarySize?
-                    if let size = dropBox.capabilities.size.limit {
-                        sizeLimit = .bytes(size)
-                    } else {
-                        sizeLimit = nil
-                    }
-                    self.settingsValue = [
-                        .optionPassword: nil,
-                        .optionDate: dropBox.capabilities.validity.date,
-                        .optionSize: sizeLimit?.toGigabytes
-                    ]
-                    self.newPassword = dropBox.capabilities.hasPassword
-                } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
-                }
-                self.tableView.reloadData()
+        } else if let dropBox = directory.dropbox {
+            settings = [
+                .optionMail: dropBox.capabilities.hasNotification,
+                .optionPassword: dropBox.capabilities.hasPassword,
+                .optionDate: dropBox.capabilities.hasValidity,
+                .optionSize: dropBox.capabilities.hasSizeLimit
+            ]
+            let sizeLimit: BinarySize?
+            if let size = dropBox.capabilities.size.limit {
+                sizeLimit = .bytes(size)
+            } else {
+                sizeLimit = nil
+            }
+            settingsValue = [
+                .optionPassword: nil,
+                .optionDate: dropBox.capabilities.validity.date,
+                .optionSize: sizeLimit?.toGigabytes
+            ]
+            newPassword = dropBox.capabilities.hasPassword
+            if isViewLoaded {
+                tableView.reloadData()
             }
         }
     }
@@ -215,7 +208,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             let cell = tableView.dequeueReusableCell(type: DropBoxLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.delegate = self
-            cell.copyTextField.text = dropBox?.url
+            cell.copyTextField.text = directory.dropbox?.url
             return cell
         case .options:
             let option = optionsRows[indexPath.row]
@@ -255,10 +248,10 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         if indexPath.section == 2 {
             Task {
                 do {
-                    let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: folder)
+                    let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: directory)
                     if response {
                         self.dismissAndRefreshDataSource()
-                        self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: nil)
+                        self.driveFileManager.setFileDropBox(file: self.directory, dropBox: nil)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                     }
@@ -275,7 +268,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         super.encodeRestorableState(with: coder)
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(folder.id, forKey: "FolderId")
+        coder.encode(directory.id, forKey: "FolderId")
         coder.encode(convertingFolder, forKey: "ConvertingFolder")
     }
 
@@ -290,7 +283,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         }
         self.driveFileManager = driveFileManager
         self.convertingFolder = convertingFolder
-        folder = driveFileManager.getCachedFile(id: folderId)
+        directory = driveFileManager.getCachedFile(id: folderId)
     }
 }
 
@@ -339,20 +332,20 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
         Task {
             if convertingFolder {
                 do {
-                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: folder, settings: settings)
+                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: directory, settings: settings)
                     let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url
-                    floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.folder.name)
+                    floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.directory.name)
                     self.navigationController?.popViewController(animated: true)
                     self.navigationController?.topViewController?.present(driveFloatingPanelController, animated: true)
-                    self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: dropBox.url)
+                    self.driveFileManager.setFileDropBox(file: self.directory, dropBox: dropBox)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             } else {
                 do {
-                    let response = try await driveFileManager.apiFetcher.updateDropBox(directory: folder, settings: settings)
+                    let response = try await driveFileManager.updateDropBox(directory: directory, settings: settings)
                     if response {
                         self.navigationController?.popViewController(animated: true)
                     } else {

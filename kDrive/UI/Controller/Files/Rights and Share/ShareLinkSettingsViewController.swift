@@ -72,7 +72,6 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     var file: File!
-    var shareLink: ShareLink!
     private var settings = [OptionsRow: Bool]()
     private var settingsValue = [OptionsRow: Any?]()
     var accessRightValue: String!
@@ -170,7 +169,7 @@ class ShareLinkSettingsViewController: UIViewController {
     }
 
     private func initOptions() {
-        guard shareLink != nil else { return }
+        guard let shareLink = file.sharelink else { return }
         // Access right
         accessRightValue = shareLink.right
         // Edit right
@@ -210,7 +209,6 @@ class ShareLinkSettingsViewController: UIViewController {
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
         coder.encode(file.id, forKey: "FileId")
-        coder.encode(shareLink, forKey: "ShareLink")
     }
 
     override func decodeRestorableState(with coder: NSCoder) {
@@ -218,7 +216,6 @@ class ShareLinkSettingsViewController: UIViewController {
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
-        shareLink = coder.decodeObject(forKey: "ShareLink") as? ShareLink
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
             return
         }
@@ -354,7 +351,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
         let settings = ShareLinkSettings(canComment: canEdit, canDownload: getSetting(for: .optionDownload), canEdit: canEdit, canSeeInfo: true, canSeeStats: true, password: password, right: right, validUntil: validUntil)
         Task {
             do {
-                let response = try await driveFileManager.apiFetcher.updateShareLink(for: file, settings: settings)
+                let response = try await driveFileManager.updateShareLink(for: file, settings: settings)
                 if response {
                     self.navigationController?.popViewController(animated: true)
                 }

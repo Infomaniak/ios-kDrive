@@ -236,7 +236,7 @@ public class DriveFileManager {
                     }
                 }
             },
-            objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self, FileVersion.self])
+            objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self, FileVersion.self, ShareLink.self, ShareLinkCapabilities.self, DropBox.self, DropBoxCapabilities.self, DropBoxSize.self, DropBoxValidity.self])
 
         // Only compact in the background
         /* if !Constants.isInExtension && UIApplication.shared.applicationState == .background {
@@ -561,17 +561,17 @@ public class DriveFileManager {
         }
     }
 
-    public func setFileShareLink(file: File, shareLink: String?) {
+    public func setFileShareLink(file: File, shareLink: ShareLink?) {
         updateFileProperty(fileId: file.id) { file in
-            // file.shareLink = shareLink
+            file.sharelink = shareLink
             file.capabilities.canBecomeSharelink = shareLink == nil
         }
     }
 
-    public func setFileCollaborativeFolder(file: File, collaborativeFolder: String?) {
+    public func setFileDropBox(file: File, dropBox: DropBox?) {
         updateFileProperty(fileId: file.id) { file in
-            // file.collaborativeFolder = collaborativeFolder
-            file.capabilities.canBecomeDropbox = collaborativeFolder == nil
+            file.dropbox = dropBox
+            file.capabilities.canBecomeDropbox = dropBox == nil
         }
     }
 
@@ -1041,7 +1041,7 @@ public class DriveFileManager {
         return createdDirectory.freeze()
     }
 
-    public func createDropBox(parentDirectory: File, name: String, onlyForMe: Bool, settings: DropBoxSettings) async throws -> (File, DropBox) {
+    public func createDropBox(parentDirectory: File, name: String, onlyForMe: Bool, settings: DropBoxSettings) async throws -> File {
         let parentId = parentDirectory.id
         // Create directory
         let createdDirectory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
@@ -1052,14 +1052,25 @@ public class DriveFileManager {
 
         let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
         try realm.write {
-            // directory.collaborativeFolder = dropbox.url
+            directory.dropbox = dropbox
             parent?.children.insert(directory)
         }
         if let parent = directory.parent {
             parent.signalChanges(userId: drive.userId)
             notifyObserversWith(file: parent)
         }
-        return (directory.freeze(), dropbox)
+        return directory.freeze()
+    }
+
+    public func updateDropBox(directory: File, settings: DropBoxSettings) async throws -> Bool {
+        let proxyFile = File(value: directory)
+        let response = try await apiFetcher.updateDropBox(directory: directory, settings: settings)
+        if response {
+            // Update dropbox in Realm
+            let dropbox = try await apiFetcher.getDropBox(directory: proxyFile)
+            setFileDropBox(file: proxyFile, dropBox: dropbox)
+        }
+        return response
     }
 
     public func createFile(in parentDirectory: File, name: String, type: String) async throws -> File {
@@ -1102,8 +1113,19 @@ public class DriveFileManager {
         let proxyFile = File(id: file.id, name: file.name)
         let shareLink = try await apiFetcher.createShareLink(for: file)
         // Fix for API not returning share link activities
-        setFileShareLink(file: proxyFile, shareLink: shareLink.url)
+        setFileShareLink(file: proxyFile, shareLink: shareLink)
         return shareLink
+    }
+
+    public func updateShareLink(for file: File, settings: ShareLinkSettings) async throws -> Bool {
+        let proxyFile = File(value: file)
+        let response = try await apiFetcher.updateShareLink(for: file, settings: settings)
+        if response {
+            // Update sharelink in Realm
+            let shareLink = try await apiFetcher.shareLink(for: file)
+            setFileShareLink(file: proxyFile, shareLink: shareLink)
+        }
+        return response
     }
 
     public func removeShareLink(for file: File) async throws -> Bool {
