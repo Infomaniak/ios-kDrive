@@ -25,12 +25,20 @@ class InviteUserViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     var file: File!
-    var sharedFile: SharedFile!
+    var fileAccess: FileAccess!
     var driveFileManager: DriveFileManager!
-    var ignoredShareables: [Shareable] = []
     var ignoredEmails: [String] = []
+    var ignoredShareables: [Shareable] = []
     var emails: [String] = []
     var shareables: [Shareable] = []
+
+    var userIds: [Int] {
+        return shareables.compactMap { $0 as? DriveUser }.map(\.id)
+    }
+
+    var teamIds: [Int] {
+        return shareables.compactMap { $0 as? Team }.map(\.id)
+    }
 
     private enum InviteUserRows: CaseIterable {
         case invited
@@ -41,7 +49,7 @@ class InviteUserViewController: UIViewController {
 
     private var rows = InviteUserRows.allCases
     private var newPermission = UserPermission.read
-    private var message = String()
+    private var message: String?
     private var emptyInvitation = false
     private var savedText = String()
 
@@ -94,10 +102,10 @@ class InviteUserViewController: UIViewController {
         navigationItem.title = file.isDirectory ? KDriveResourcesStrings.Localizable.fileShareFolderTitle : KDriveResourcesStrings.Localizable.fileShareFileTitle
     }
 
-    func showConflictDialog(conflictList: [FileCheckResult]) {
+    func showConflictDialog(conflictList: [CheckChangeAccessFeedbackResource]) {
         let message: NSMutableAttributedString
-        if conflictList.count == 1, let user = sharedFile.users.first(where: { $0.id == conflictList[0].userId }) {
-            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.sharedConflictDescription(user.displayName, (user.permission ?? .read).title, newPermission.title), boldText: user.displayName)
+        if conflictList.count == 1, let user = fileAccess.users.first(where: { $0.id == conflictList[0].userId }) {
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.sharedConflictDescription(user.name, user.right.title, newPermission.title), boldText: user.name)
         } else {
             message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.sharedConflictManyUserDescription(newPermission.title))
         }
@@ -108,9 +116,10 @@ class InviteUserViewController: UIViewController {
     }
 
     func shareAndDismiss() {
-        let usersIds = shareables.compactMap { $0 as? DriveUser }.map(\.id)
-        let teams = shareables.compactMap { $0 as? Team }.map(\.id)
-        driveFileManager.apiFetcher.addUserRights(file: file, users: usersIds, teams: teams, emails: emails, message: message, permission: newPermission.rawValue) { _, _ in }
+        let settings = FileAccessSettings(message: message, right: newPermission, emails: emails, teamIds: teamIds, userIds: userIds)
+        Task {
+            _ = try await driveFileManager.apiFetcher.addAccess(to: file, settings: settings)
+        }
         dismiss(animated: true)
     }
 
@@ -121,7 +130,7 @@ class InviteUserViewController: UIViewController {
             savedText = cell?.textField.text ?? ""
         }
 
-        emptyInvitation = shareables.isEmpty && emails.isEmpty
+        emptyInvitation = emails.isEmpty && userIds.isEmpty && teamIds.isEmpty
 
         if emptyInvitation {
             rows = [.addUser, .rights, .message]
@@ -151,8 +160,8 @@ class InviteUserViewController: UIViewController {
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
         coder.encode(file.id, forKey: "FileId")
         coder.encode(emails, forKey: "Emails")
-        coder.encode(shareables.compactMap { $0 as? DriveUser }.map(\.id), forKey: "UserIds")
-        coder.encode(shareables.compactMap { $0 as? Team }.map(\.id), forKey: "TeamIds")
+        coder.encode(userIds, forKey: "UserIds")
+        coder.encode(teamIds, forKey: "TeamIds")
         coder.encode(newPermission.rawValue, forKey: "NewPermission")
         coder.encode(message, forKey: "Message")
     }
@@ -210,7 +219,8 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
-            cell.canUseTeam = sharedFile.canUseTeam
+            // TODO: Update with new `canUseTeam` capability
+            cell.canUseTeam = true // fileAccess?.canUseTeam ?? false
             cell.drive = driveFileManager.drive
             cell.textField.text = savedText
             cell.textField.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail
@@ -230,7 +240,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .message:
             let cell = tableView.dequeueReusableCell(type: MessageTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            if !message.isEmpty {
+            if let message = message, !message.isEmpty {
                 cell.messageTextView.text = message
             }
             cell.selectionStyle = .none
@@ -318,10 +328,10 @@ extension InviteUserViewController: RightsSelectionDelegate {
 
 extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        let usersIds = shareables.compactMap { $0 as? DriveUser }.map(\.id)
-        let teams = shareables.compactMap { $0 as? Team }.map(\.id)
-        driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, teams: teams, emails: emails, permission: newPermission.rawValue) { response, _ in
-            let conflictList = response?.data?.filter(\.isConflict) ?? []
+        let settings = FileAccessSettings(message: message, right: newPermission, emails: emails, teamIds: teamIds, userIds: userIds)
+        Task {
+            let results = try await driveFileManager.apiFetcher.checkAccessChange(to: file, settings: settings)
+            let conflictList = results.filter(\.needChange)
             if conflictList.isEmpty {
                 self.shareAndDismiss()
             } else {

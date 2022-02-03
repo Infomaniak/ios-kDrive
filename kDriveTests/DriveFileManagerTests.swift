@@ -168,30 +168,12 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: rootFile)
     }
 
-    func testShareLink() {
-        let testName = "Share link"
-        let expectations = [
-            (name: "Activate share link", expectation: XCTestExpectation(description: "Activate share link")),
-            (name: "Remove share link", expectation: XCTestExpectation(description: "Remove share link"))
-        ]
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.activateShareLink(for: rootFile) { shareLink, error in
-                XCTAssertNil(error, TestsMessages.noError)
-                XCTAssertNotNil(shareLink, TestsMessages.notNil("ShareLink"))
-                expectations[0].expectation.fulfill()
-
-                DriveFileManagerTests.driveFileManager.removeShareLink(for: rootFile) { error in
-                    XCTAssertNil(error, TestsMessages.noError)
-                    expectations[1].expectation.fulfill()
-                }
-            }
-        }
-
-        wait(for: expectations.map(\.expectation), timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testShareLink() async throws {
+        let testDirectory = await setUpTest(testName: "Share link")
+        _ = try await DriveFileManagerTests.driveFileManager.createShareLink(for: testDirectory)
+        let response = try await DriveFileManagerTests.driveFileManager.removeShareLink(for: testDirectory)
+        XCTAssertTrue(response, "API should return true")
+        tearDownTest(directory: testDirectory)
     }
 
     func testSearchFile() {

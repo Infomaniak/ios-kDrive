@@ -1231,55 +1231,38 @@ public class DriveFileManager {
         }
     }
 
-    public func updateShareLink(for file: File, with sharedFile: SharedFile?, and value: String, completion: @escaping (ShareLink?, Error?) -> Void) {
-        if let sharedLink = sharedFile?.link {
-            sharedLink.permission = value
-            if value == ShareLinkPermission.restricted.rawValue {
-                removeShareLink(for: file) { error in
-                    completion(nil, error)
-                }
+    public func createOrRemoveShareLink(for file: File, right: ShareLinkPermission) async throws -> ShareLink? {
+        if right == .restricted {
+            // Remove share link
+            let response = try await removeShareLink(for: file)
+            if response {
+                return nil
             } else {
-                apiFetcher.updateShareLinkWith(file: file, canEdit: value == UserPermission.write.rawValue, permission: sharedLink.permission, date: sharedLink.validUntil != nil ? TimeInterval(sharedLink.validUntil!) : nil, blockDownloads: sharedLink.blockDownloads, blockComments: sharedLink.blockComments, /* blockInformation: sharedLink.blockInformation, */ isFree: drive.pack == .free) { _, error in
-                    completion(sharedLink, error)
-                }
+                throw DriveError.serverError
             }
         } else {
-            if value == ShareLinkPermission.public.rawValue {
-                activateShareLink(for: file) { shareLink, error in
-                    if let link = shareLink {
-                        completion(link, error)
-                    }
-                }
-            }
+            // Update share link
+            let shareLink = try await createShareLink(for: file)
+            return shareLink
         }
     }
 
-    public func activateShareLink(for file: File, completion: @escaping (ShareLink?, Error?) -> Void) {
-        apiFetcher.activateShareLinkFor(file: file) { response, error in
-            if let link = response?.data {
-                // Fix for API not returning share link activities
-                self.setFileShareLink(file: file, shareLink: link.url)
-                completion(link, nil)
-            } else {
-                completion(nil, error)
-            }
-        }
+    public func createShareLink(for file: File) async throws -> ShareLink {
+        let proxyFile = File(id: file.id, name: file.name)
+        let shareLink = try await apiFetcher.createShareLink(for: file)
+        // Fix for API not returning share link activities
+        setFileShareLink(file: proxyFile, shareLink: shareLink.url)
+        return shareLink
     }
 
-    public func removeShareLink(for file: File, completion: @escaping (Error?) -> Void) {
-        apiFetcher.removeShareLinkFor(file: file) { response, error in
-            if let data = response?.data {
-                if data {
-                    // Fix for API not returning share link activities
-                    self.setFileShareLink(file: file, shareLink: nil)
-                    completion(nil)
-                } else {
-                    completion(nil)
-                }
-            } else {
-                completion(error)
-            }
+    public func removeShareLink(for file: File) async throws -> Bool {
+        let proxyFile = File(id: file.id, name: file.name)
+        let response = try await apiFetcher.removeShareLink(for: file)
+        if response {
+            // Fix for API not returning share link activities
+            setFileShareLink(file: proxyFile, shareLink: nil)
         }
+        return response
     }
 
     private func removeFileInDatabase(fileId: Int, cascade: Bool, withTransaction: Bool, using realm: Realm? = nil) {

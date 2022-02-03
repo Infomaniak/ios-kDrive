@@ -72,14 +72,21 @@ class FilePresenter {
                 if driveFileManager.drive.isUserAdmin {
                     driveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = driveFloatingPanelController?.contentViewController as? AccessFileFloatingPanelViewController
-                    floatingPanelViewController?.actionHandler = { [weak self] _ in
+                    floatingPanelViewController?.actionHandler = { _ in
                         floatingPanelViewController?.rightButton.setLoading(true)
-                        driveFileManager.apiFetcher.requireFileAccess(file: file) { _, error in
-                            if error != nil {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
-                            } else {
-                                self?.driveFloatingPanelController?.dismiss(animated: true)
-                                self?.navigationController?.pushViewController(nextVC, animated: true)
+                        Task { [weak self] in
+                            do {
+                                let response = try await driveFileManager.apiFetcher.forceAccess(to: file)
+                                if response {
+                                    await self?.driveFloatingPanelController?.dismiss(animated: true)
+                                    await MainActor.run { [weak self] in
+                                        self?.navigationController?.pushViewController(nextVC, animated: true)
+                                    }
+                                } else {
+                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
+                                }
+                            } catch {
+                                UIConstants.showSnackBar(message: error.localizedDescription)
                             }
                         }
                     }

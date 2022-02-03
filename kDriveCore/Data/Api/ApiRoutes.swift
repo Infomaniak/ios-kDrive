@@ -70,50 +70,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/search?order=desc&order_by=last_modified_at&\(with)&converted_type=image"
     }
 
-    static func getShareListFor(file: File) -> String {
-        return "\(fileURL(file: file))share?with=invitation,link,teams"
-    }
-
-    static func activateShareLinkFor(file: File) -> String {
-        return "\(fileURL(file: file))link?permission=public"
-    }
-
-    static func updateShareLinkWith(file: File) -> String {
-        return "\(fileURL(file: file))link"
-    }
-
-    static func removeShareLinkFor(file: File) -> String {
-        return "\(fileURL(file: file))link"
-    }
-
-    static func updateUserRights(file: File, user: DriveUser) -> String {
-        return "\(fileURL(file: file))share/\(user.id)"
-    }
-
-    static func addUserRights(file: File) -> String {
-        return "\(fileURL(file: file))share"
-    }
-
-    static func checkUserRights(file: File) -> String {
-        return "\(fileURL(file: file))share/check"
-    }
-
-    static func updateInvitationRights(driveId: Int, invitation: Invitation) -> String {
-        return "\(driveApiUrl)\(driveId)/user/invitation/\(invitation.id)"
-    }
-
-    static func deleteInvitationRights(driveId: Int, invitation: Invitation) -> String {
-        return "\(driveApiUrl)\(driveId)/file/invitation/\(invitation.id)"
-    }
-
-    static func updateTeamRights(file: File, team: Team) -> String {
-        return "\(fileURL(file: file))share/team/\(team.id)"
-    }
-
-    static func deleteTeamRights(file: File, team: Team) -> String {
-        return "\(fileURL(file: file))share/team/\(team.id)"
-    }
-
     static func deleteFile(file: File) -> String {
         return fileURL(file: file)
     }
@@ -195,10 +151,6 @@ public enum ApiRoutes {
 
     public static func mobileLogin(url: String) -> String {
         return "https://manager.infomaniak.com/v3/mobile_login?url=\(url)"
-    }
-
-    static func requireFileAccess(file: File) -> String {
-        return "\(fileURL(file: file))share/access"
     }
 
     public static func getUploadToken(driveId: Int) -> String {

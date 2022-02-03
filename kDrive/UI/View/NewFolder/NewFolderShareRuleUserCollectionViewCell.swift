@@ -31,14 +31,10 @@ class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
         moreLabel.isHidden = true
     }
 
-    func configure(with shareable: Shareable) {
-        if let user = shareable as? DriveUser {
-            userImage.image = KDriveResourcesAsset.placeholderAvatar.image
-            user.getAvatar { image in
-                self.userImage.image = image
-            }
-        } else if let team = shareable as? Team {
-            userImage.image = team.icon
+    func configure(with element: FileAccessElement) {
+        userImage.image = KDriveResourcesAsset.placeholderAvatar.image
+        Task {
+            userImage.image = await element.icon
         }
     }
 

@@ -17,10 +17,17 @@
  */
 
 import Foundation
+import kDriveResources
 
 public protocol Shareable {
     var id: Int { get set }
-    var userId: Int? { get }
-    var shareableName: String { get }
-    var right: UserPermission? { get set }
+    var displayName: String { get }
+}
+
+extension DriveUser: Shareable {}
+
+extension Team: Shareable {
+    public var displayName: String {
+        return isAllUsers ? KDriveResourcesStrings.Localizable.allAllDriveUsers : name
+    }
 }
