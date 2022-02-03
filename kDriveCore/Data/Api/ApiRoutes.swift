@@ -42,10 +42,6 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/file/file/\(parentId)?\(with)"
     }
 
-    static func setupDropBox(directory: File) -> String {
-        return "\(fileURL(file: directory))collaborate"
-    }
-
     static func getFileListForDirectory(driveId: Int, parentId: Int, sortType: SortType) -> String {
         return "\(driveApiUrl)\(driveId)/file/\(parentId)?\(with)&order=\(sortType.value.order)&order_by=\(sortType.value.apiValue)"
     }
