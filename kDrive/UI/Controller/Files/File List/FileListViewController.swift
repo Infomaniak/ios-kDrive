@@ -456,12 +456,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     static func instantiate(viewModel: FileListViewModel) -> Self {
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
         viewController.viewModel = viewModel
+        viewController.driveFileManager = viewModel.driveFileManager
         return viewController
     }
 
     func getViewModel(viewModelName: String, driveFileManager: DriveFileManager, currentDirectory: File?) -> FileListViewModel? {
         // TODO: discuss this as this feels a little bit hacky
-        if let viewModelClass = NSClassFromString("kDrive.\(viewModelName)") as? FileListViewModel.Type {
+        if let viewModelClass = Bundle.main.classNamed("kDrive.\(viewModelName)") as? FileListViewModel.Type {
             let viewModel = viewModelClass.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
             return viewModel
         } else {
