@@ -35,6 +35,7 @@ public class DriveFileManager {
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
         public let currentUploadDbVersion: UInt64 = 11
+        public let currentVersionCode = 1
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
             if oldSchemaVersion < strongSelf.currentUploadDbVersion {
@@ -331,7 +332,7 @@ public class DriveFileManager {
         let parentId = directory.id
         if let cachedParent = getCachedFile(id: parentId, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
-           (cachedParent.fullyDownloaded && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
+           (cachedParent.fullyDownloaded && cachedParent.versionCode == DriveFileManager.constants.currentVersionCode && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
         } else {
             // Get children from API
@@ -353,6 +354,7 @@ public class DriveFileManager {
                 // Update parent
                 try realm.write {
                     if children.count < Endpoint.itemsPerPage {
+                        managedParent.versionCode = DriveFileManager.constants.currentVersionCode
                         managedParent.fullyDownloaded = true
                     }
                     realm.add(children, update: .modified)
@@ -1224,6 +1226,7 @@ public class DriveFileManager {
         let realm = realm ?? getRealm()
         if let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id) {
             newFile.isAvailableOffline = savedChild.isAvailableOffline
+            newFile.versionCode = savedChild.versionCode
             if keepStandard {
                 newFile.fullyDownloaded = savedChild.fullyDownloaded
                 newFile.children = savedChild.children
