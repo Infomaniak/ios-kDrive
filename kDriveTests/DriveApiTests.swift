@@ -364,7 +364,7 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    func testGetFileDetailActivity() {
+   /* func testGetFileDetailActivity() {
         let testName = "Get file detail activity"
         let expectation = XCTestExpectation(description: testName)
         var rootFile = File()
@@ -380,7 +380,7 @@ final class DriveApiTests: XCTestCase {
 
         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
-    }
+    }*/
 
     func testGetComments() async throws {
         let testDirectory = try await setUpTest(testName: "Get comments")
@@ -476,7 +476,7 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    func testRenameFile() {
+    /*func testRenameFile() {
         let testName = "Rename file"
         let expectation = XCTestExpectation(description: testName)
         var rootFile = File()
@@ -540,7 +540,7 @@ final class DriveApiTests: XCTestCase {
 
         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
         tearDownTest(directory: rootFile)
-    }
+    }*/
 
     func testMoveFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Move file")
@@ -550,7 +550,7 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    func testGetRecentActivity() {
+    /*func testGetRecentActivity() {
         let testName = "Get recent activity"
         let expectation = XCTestExpectation(description: testName)
 
@@ -601,7 +601,7 @@ final class DriveApiTests: XCTestCase {
             XCTAssertNotNil(activity, TestsMessages.notNil("file activity"))
         }
         tearDownTest(directory: testDirectory)
-    }
+    }*/
 
     func testFavoriteFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Favorite file")
