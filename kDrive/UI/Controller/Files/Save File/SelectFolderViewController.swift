@@ -64,6 +64,7 @@ class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
+        currentDirectory = viewModel.currentDirectory
         addFolderButton.isEnabled = currentDirectory.capabilities.canCreateDirectory
         addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
         selectFolderButton.isEnabled = !disabledDirectoriesSelection.contains(currentDirectory.id) && (currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile)
