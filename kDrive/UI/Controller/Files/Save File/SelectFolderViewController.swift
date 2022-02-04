@@ -81,7 +81,7 @@ class SelectFolderViewController: FileListViewController {
         var viewControllers = [SelectFolderViewController]()
         let disabledDirectoriesSelection = disabledDirectoriesSelection.map(\.id)
         if startDirectory == nil || startDirectory?.isRoot == true {
-            let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
+            let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
             selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
             selectFolderViewController.fileToMove = fileToMove
             selectFolderViewController.delegate = delegate
