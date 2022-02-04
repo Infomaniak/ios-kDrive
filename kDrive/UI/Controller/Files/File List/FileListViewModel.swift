@@ -272,11 +272,13 @@ class FileListViewModel {
                 let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
+                // Keep the filename before it is invalidated
+                let filename = file.name
                 driveFileManager.deleteFile(file: file) { cancelAction, error in
                     if let error = error {
                         UIConstants.showSnackBar(message: error.localizedDescription)
                     } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
                             guard let cancelId = cancelAction?.id else { return }
                             self.driveFileManager.cancelAction(cancelId: cancelId) { error in
                                 if error == nil {

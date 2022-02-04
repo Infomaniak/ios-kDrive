@@ -183,13 +183,14 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         var success = true
         for file in files {
             group.enter()
-            driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
+            driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { [weak self] _, error in
+                guard let self = self else { return }
                 file.signalChanges(userId: self.driveFileManager.drive.userId)
                 if let error = error {
                     success = false
                     DDLogError("Error while deleting file: \(error)")
                 } else {
-                    self.driveFileManager.notifyObserversWith(file: DriveFileManager.trashRootFile)
+                    self.removeFile(file: file)
                 }
                 group.leave()
             }
