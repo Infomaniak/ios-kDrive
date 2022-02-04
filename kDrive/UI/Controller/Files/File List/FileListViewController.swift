@@ -146,7 +146,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.backButtonTitle = ""
+        navigationItem.hideBackButtonText()
 
         // Set up collection view
         collectionView.register(cellView: FileCollectionViewCell.self)
