@@ -41,12 +41,13 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.retryButton?.isHidden = true
         cardContentView.progressView.isHidden = true
         cardContentView.detailsLabel.isHidden = false
-        cardContentView.iconView.isHidden = false
         cardContentView.iconView.image = nil
         cardContentView.iconView.contentMode = .scaleAspectFit
         cardContentView.iconView.layer.cornerRadius = 0
         cardContentView.iconView.layer.masksToBounds = false
+        cardContentView.iconView.isHidden = false
         cardContentView.progressView.updateProgress(0, animated: false)
+        cardContentView.iconViewHeightConstraint.constant = 24
     }
 
     private func setStatusFor(uploadFile: UploadFile) {
@@ -85,6 +86,7 @@ class UploadTableViewCell: InsetTableViewCell {
                 self?.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
                 self?.cardContentView.iconView.contentMode = .scaleAspectFill
                 self?.cardContentView.iconView.layer.masksToBounds = true
+                self?.cardContentView.iconViewHeightConstraint.constant = 38
                 self?.cardContentView.iconView.image = image
             }
         }
@@ -118,6 +120,7 @@ class UploadTableViewCell: InsetTableViewCell {
                 self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
                 self.cardContentView.iconView.contentMode = .scaleAspectFill
                 self.cardContentView.iconView.layer.masksToBounds = true
+                self.cardContentView.iconViewHeightConstraint.constant = 38
                 self.cardContentView.iconView.image = image
             }
         }

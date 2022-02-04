@@ -27,6 +27,7 @@ class UploadCardView: UIView {
     @IBOutlet weak var detailsLabel: UILabel!
     @IBOutlet weak var iconView: UIImageView!
     @IBOutlet weak var progressView: RPCircularProgress!
+    @IBOutlet weak var iconViewHeightConstraint: NSLayoutConstraint!
     var cancelButtonPressedHandler: (() -> Void)?
     var retryButtonPressedHandler: (() -> Void)?
 

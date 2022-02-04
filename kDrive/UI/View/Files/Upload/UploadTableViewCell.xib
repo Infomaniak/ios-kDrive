@@ -34,10 +34,10 @@
                                         </constraints>
                                     </view>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file-audio" translatesAutoresizingMaskIntoConstraints="NO" id="MBf-nm-J24">
-                                        <rect key="frame" x="32" y="9" width="38" height="24"/>
+                                        <rect key="frame" x="32" y="2" width="38" height="38"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="38" id="TPh-h4-ZN5"/>
-                                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="38" id="n8G-yE-WkA"/>
+                                            <constraint firstAttribute="height" constant="38" id="n8G-yE-WkA"/>
                                         </constraints>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="54V-wB-FIL">
@@ -114,6 +114,7 @@
                             <outlet property="detailsLabel" destination="7dX-Vg-iSK" id="I99-1X-7Cp"/>
                             <outlet property="editImage" destination="fSi-IH-Fdu" id="L9a-78-WzY"/>
                             <outlet property="iconView" destination="MBf-nm-J24" id="Zc8-Ee-kf0"/>
+                            <outlet property="iconViewHeightConstraint" destination="n8G-yE-WkA" id="JVp-HC-Zsd"/>
                             <outlet property="progressView" destination="ZPd-Op-UHm" id="liB-pO-2NZ"/>
                             <outlet property="retryButton" destination="TXK-ec-ySf" id="UBt-6k-Q4a"/>
                             <outlet property="titleLabel" destination="qcs-cN-ITn" id="pAV-sw-qSJ"/>
