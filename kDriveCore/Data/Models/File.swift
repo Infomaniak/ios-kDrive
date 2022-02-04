@@ -303,6 +303,7 @@ public class File: Object, Codable {
     @Persisted public var children: MutableSet<File>
     @Persisted(originProperty: "children") var parentLink: LinkingObjects<File>
     @Persisted public var responseAt: Int
+    @Persisted public var versionCode: Int
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
 
