@@ -106,7 +106,6 @@ class FileListViewModel {
     }
 
     var isLoading: Bool
-    var isBound = false
 
     @Published var sortType: SortType
     @Published var listStyle: ListStyle
@@ -226,8 +225,9 @@ class FileListViewModel {
         } else {
             switch type {
             case .search:
-                let searchViewController = SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-                onPresentViewController?(.modal, searchViewController, true)
+                /*let searchViewController = SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+                onPresentViewController?(.modal, searchViewController, true)*/
+                break
             default:
                 break
             }
