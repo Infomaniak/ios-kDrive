@@ -45,6 +45,7 @@ class MenuTopTableViewCell: UITableViewCell {
 
         switchDriveButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
         switchDriveButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonSwitchDrive
+        switchDriveButton.isHidden = AccountManager.instance.drives.count <= 1
 
         driveNameLabel.text = drive.name
         driveImageView.tintColor = UIColor(hex: drive.preferences.color)
