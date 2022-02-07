@@ -21,7 +21,7 @@ import MatomoTracker
 import kDriveCore
 
 class MatomoUtils {
-    static let shared = MatomoTracker(siteId: "8", baseURL: URL(string: "https://analytics.infomaniak.com/matomo.php")!)
+    static let shared = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
 
     // Enable or disable Matomo tracking
     static let isEnabled = true
