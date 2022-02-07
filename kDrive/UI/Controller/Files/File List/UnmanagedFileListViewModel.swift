@@ -54,7 +54,7 @@ class UnmanagedFileListViewModel: FileListViewModel {
     func removeFile(file: File) {
         if let fileIndex = files.firstIndex(where: { $0.id == file.id }) {
             files.remove(at: fileIndex)
-            onFileListUpdated?([fileIndex], [], [], false)
+            onFileListUpdated?([fileIndex], [], [], files.isEmpty, false)
         }
     }
 
