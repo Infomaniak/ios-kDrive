@@ -523,7 +523,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     let response = try await self.driveFileManager.delete(file: file)
                     if let presentingParent = self.presentingParent {
                         // Update file list
-                        (presentingParent as? FileListViewController)?.getNewChanges()
+                        (presentingParent as? FileListViewController)?.viewModel.loadActivities()
                         // Close preview
                         if presentingParent is PreviewViewController {
                             presentingParent.navigationController?.popViewController(animated: true)
