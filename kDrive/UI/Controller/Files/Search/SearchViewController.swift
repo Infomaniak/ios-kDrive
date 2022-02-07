@@ -87,7 +87,7 @@ class SearchViewController: FileListViewController {
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        guard isDisplayingSearchResults && driveFileManager != nil else {
+        guard isDisplayingSearchResults else {
             DispatchQueue.main.async {
                 completion(.failure(DriveError.searchCancelled), false, true)
             }
@@ -281,7 +281,7 @@ class SearchViewController: FileListViewController {
         if segue.identifier == "filterSegue" {
             let navigationController = segue.destination as? UINavigationController
             let searchFiltersViewController = navigationController?.topViewController as? SearchFiltersViewController
-            searchFiltersViewController?.driveFileManager = driveFileManager
+            searchFiltersViewController?.driveFileManager = viewModel.driveFileManager
             searchFiltersViewController?.filters = filters
             searchFiltersViewController?.delegate = self
         }
