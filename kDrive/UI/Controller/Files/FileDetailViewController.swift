@@ -590,9 +590,13 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
                     if success {
-                        self.comments.remove(at: indexPath.row)
+                        let commentToDelete = self.comments[indexPath.row]
+                        let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
+                            return IndexPath(row: indexPath.row + index, section: indexPath.section)
+                        }
+                        self.comments.removeSubrange(indexPath.row...indexPath.row+commentToDelete.responsesCount)
                         if !self.comments.isEmpty {
-                            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                            self.tableView.deleteRows(at: rowsToDelete, with: .automatic)
                         } else {
                             self.tableView.reloadSections(IndexSet([1]), with: .automatic)
                         }
