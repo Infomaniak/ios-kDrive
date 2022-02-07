@@ -176,39 +176,6 @@ class TrashListViewModel: UnmanagedFileListViewModel {
             self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
         }
     }
-
-    func deleteFiles(_ files: [File]) {
-        let group = DispatchGroup()
-        var success = true
-        for file in files {
-            group.enter()
-            driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { [weak self] _, error in
-                guard let self = self else { return }
-                file.signalChanges(userId: self.driveFileManager.drive.userId)
-                if let error = error {
-                    success = false
-                    DDLogError("Error while deleting file: \(error)")
-                } else {
-                    self.removeFile(file: file)
-                }
-                group.leave()
-            }
-        }
-        group.notify(queue: DispatchQueue.main) {
-            let message: String
-            if success {
-                if files.count == 1 {
-                    message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(files[0].name)
-                } else {
-                    message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(files.count)
-                }
-            } else {
-                message = KDriveResourcesStrings.Localizable.errorDelete
-            }
-            UIConstants.showSnackBar(message: message)
-            self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
-        }
-    }
 }
 
 // MARK: - Trash options delegate
@@ -227,20 +194,63 @@ extension TrashListViewModel: TrashOptionsDelegate {
         case .restore:
             restoreTrashedFiles(files)
         case .delete:
-            let message: NSMutableAttributedString
-            if files.count == 1 {
-                message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescription(files[0].name), boldText: files[0].name)
-            } else {
-                message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescriptionPlural(files.count))
-            }
-
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.trashActionDelete,
-                                                message: message,
-                                                action: KDriveResourcesStrings.Localizable.buttonDelete,
-                                                destructive: true, loading: true) {
-                self.deleteFiles(files)
+            let alert = TrashViewModelHelper.deleteAlertForFiles(files, driveFileManager: driveFileManager) { [weak self] deletedFiles in
+                deletedFiles.forEach { self?.removeFile(file: $0) }
+                self?.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
             }
             onPresentViewController?(.modal, alert, true)
+        }
+    }
+}
+
+private enum TrashViewModelHelper {
+    static func deleteAlertForFiles(_ files: [File], driveFileManager: DriveFileManager, completion: @escaping ([File]) -> Void) -> AlertTextViewController {
+        let message: NSMutableAttributedString
+        if files.count == 1,
+           let firstFile = files.first {
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescription(firstFile.name), boldText: firstFile.name)
+        } else {
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescriptionPlural(files.count))
+        }
+
+        return AlertTextViewController(title: KDriveResourcesStrings.Localizable.trashActionDelete,
+                                       message: message,
+                                       action: KDriveResourcesStrings.Localizable.buttonDelete,
+                                       destructive: true, loading: true) {
+            deleteFiles(files, driveFileManager: driveFileManager, completion: completion)
+        }
+    }
+
+    private static func deleteFiles(_ files: [File], driveFileManager: DriveFileManager, completion: @escaping ([File]) -> Void) {
+        let group = DispatchGroup()
+        var success = true
+        var deletedFiles = [File]()
+        for file in files {
+            group.enter()
+            driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
+                file.signalChanges(userId: driveFileManager.drive.userId)
+                if let error = error {
+                    success = false
+                    DDLogError("Error while deleting file: \(error)")
+                } else {
+                    deletedFiles.append(file)
+                }
+                group.leave()
+            }
+        }
+        group.notify(queue: DispatchQueue.main) {
+            let message: String
+            if success {
+                if files.count == 1 {
+                    message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(files[0].name)
+                } else {
+                    message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(deletedFiles.count)
+                }
+            } else {
+                message = KDriveResourcesStrings.Localizable.errorDelete
+            }
+            UIConstants.showSnackBar(message: message)
+            completion(deletedFiles)
         }
     }
 }
@@ -254,7 +264,11 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
     override func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .deletePermanently:
-            break
+            let alert = TrashViewModelHelper.deleteAlertForFiles(Array(selectedItems), driveFileManager: driveFileManager) { [weak self] _ in
+                self?.driveFileManager.notifyObserversWith(file: DriveFileManager.trashRootFile)
+                self?.isMultipleSelectionEnabled = false
+            }
+            onPresentViewController?(.modal, alert, true)
         case .more:
             onPresentQuickActionPanel?(Array(selectedItems), .trash)
         default:
