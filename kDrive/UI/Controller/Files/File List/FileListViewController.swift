@@ -118,7 +118,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     private let leftRightInset = 12.0
     private let gridInnerSpacing = 16.0
-    private let maxDiffChanges = Endpoint.itemsPerPage
     private let headerViewIdentifier = "FilesHeaderView"
 
     // MARK: - Properties
@@ -158,6 +157,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         // Set up observers
         observeNetwork()
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+
+        if viewModel != nil {
+            setupViewModel()
+            viewModel.onViewDidLoad()
+        }
     }
 
     private func bindViewModels() {
@@ -336,7 +340,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         if viewModel.draggableFileListViewModel != nil {
             collectionView.dragDelegate = self
         }
-        viewModel.isBound = true
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -348,12 +351,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
         #endif
 
-        if !viewModel.isBound {
-            setupViewModel()
-            viewModel.onViewDidLoad()
-        } else {
-            viewModel.onViewWillAppear()
-        }
+        viewModel.onViewWillAppear()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -393,13 +391,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         viewModel.barButtonPressed(type: sender.type)
     }
 
-    // MARK: - Overridable methods
-
-    func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {}
-
-    func getNewChanges() {}
-
-    func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
+    private func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         headerView.delegate = self
 
         headerView.sortView.isHidden = !isEmptyViewHidden
@@ -421,8 +413,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     // MARK: - Public methods
-
-    final func reloadData(page: Int = 1, forceRefresh: Bool = false, showRefreshControl: Bool = true, withActivities: Bool = true) {}
 
     @objc func forceRefresh() {
         viewModel.forceRefresh()
@@ -451,8 +441,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    final func removeFileFromList(id: Int) {}
-
     static func instantiate(viewModel: FileListViewModel) -> Self {
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
         viewController.viewModel = viewModel
@@ -460,7 +448,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func getViewModel(viewModelName: String, driveFileManager: DriveFileManager, currentDirectory: File?) -> FileListViewModel? {
-        // TODO: discuss this as this feels a little bit hacky
         if let viewModelClass = Bundle.main.classNamed("kDrive.\(viewModelName)") as? FileListViewModel.Type {
             let viewModel = viewModelClass.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
             return viewModel
@@ -480,8 +467,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
         emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
     }
-
-    private func reloadCollectionView(with files: [File]) {}
 
     func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
@@ -698,6 +683,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
            let viewModelName = viewModelName,
            let viewModel = getViewModel(viewModelName: viewModelName, driveFileManager: driveFileManager, currentDirectory: maybeCurrentDirectory) {
             self.viewModel = viewModel
+            setupViewModel()
+            viewModel.onViewDidLoad()
         } else {
             navigationController?.popViewController(animated: true)
         }

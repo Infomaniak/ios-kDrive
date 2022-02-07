@@ -24,7 +24,7 @@ class RecentActivityFilesViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.files }
     override class var storyboardIdentifier: String { "RecentActivityFilesViewController" }
 
-    private var activity: FileActivity?
+    /*private var activity: FileActivity?
     private var activityFiles: [File] = []
 
     override func viewDidLoad() {
@@ -139,5 +139,5 @@ class RecentActivityFilesViewController: FileListViewController {
             activityFiles = activityFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
             forceRefresh()
         }
-    }
+    }*/
 }

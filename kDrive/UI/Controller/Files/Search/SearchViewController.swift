@@ -27,7 +27,7 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Constants
 
-    private let minSearchCount = 1
+    /*private let minSearchCount = 1
     private let maxRecentSearch = 5
     private let searchHeaderIdentifier = "BasicTitleCollectionReusableView"
     private let sectionTitles = [KDriveResourcesStrings.Localizable.searchLastTitle, KDriveResourcesStrings.Localizable.searchFilterTitle]
@@ -301,5 +301,5 @@ extension SearchViewController: UISearchResultsUpdating {
 extension SearchViewController: SearchFiltersDelegate {
     func didUpdateFilters(_ filters: Filters) {
         self.filters = filters
-    }
+    }*/
 }
