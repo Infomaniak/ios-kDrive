@@ -197,13 +197,18 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                         (navigationController?.topViewController as? FileListViewController)?.bulkObservation(action: .copy, response: response)
                     }
                 } else {
-                    for file in self.files {
-                        group.enter()
-                        self.driveFileManager.apiFetcher.copyFile(file: file, newParent: selectedFolder) { _, error in
-                            if error != nil {
-                                success = false
+                    Task {
+                        do {
+                            try await withThrowingTaskGroup(of: Void.self) { group in
+                                for file in files {
+                                    group.addTask {
+                                        _ = try await self.driveFileManager.apiFetcher.copy(file: file, to: selectedFolder)
+                                    }
+                                }
+                                try await group.waitForAll()
                             }
-                            group.leave()
+                        } catch {
+                            // success = false
                         }
                     }
                 }

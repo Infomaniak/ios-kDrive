@@ -21,26 +21,12 @@ import Foundation
 public enum ApiRoutes {
     static let driveApiUrl = "https://drive.preprod.dev.infomaniak.ch/drive/"
     static let officeApiUrl = "https://drive.infomaniak.com/app/office/"
-    static let with = "with=parent,children,rights,collaborative_folder,favorite,mobile,share_link,categories"
-    static let shopUrl = "https://shop.infomaniak.com/order/"
 
     static func fileURL(file: File) -> String {
         return "\(driveApiUrl)\(file.driveId)/file/\(file.id)/"
     }
 
     static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
-
-    static func renameFile(file: File) -> String {
-        return "\(fileURL(file: file))rename?\(with)"
-    }
-
-    static func duplicateFile(file: File) -> String {
-        return "\(fileURL(file: file))copy?\(with)"
-    }
-
-    static func copyFile(file: File, newParentId: Int) -> String {
-        return "\(fileURL(file: file))copy/\(newParentId)"
-    }
 
     static func uploadFile(file: UploadFile) -> String {
         var url = "\(driveApiUrl)\(file.driveId)/public/file/\(file.parentDirectoryId)/upload?file_name=\(file.urlEncodedName)&conflict=\(file.conflictOption.rawValue)&relative_path=\(file.urlEncodedRelativePath)\(file.urlEncodedName)&with=parent,children,rights,collaborative_folder,favorite,share_link"
@@ -68,10 +54,6 @@ public enum ApiRoutes {
 
     public static func getUploadToken(driveId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/1/upload/token"
-    }
-
-    public static func convertFile(file: File) -> String {
-        return "\(fileURL(file: file))convert"
     }
 
     public static func fileCount(driveId: Int, fileId: Int) -> String {
