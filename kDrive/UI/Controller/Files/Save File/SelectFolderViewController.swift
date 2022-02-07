@@ -64,11 +64,10 @@ class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
-        currentDirectory = viewModel.currentDirectory
-        addFolderButton.isEnabled = currentDirectory.capabilities.canCreateDirectory
+        addFolderButton.isEnabled = viewModel.currentDirectory.capabilities.canCreateDirectory
         addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
-        selectFolderButton.isEnabled = !disabledDirectoriesSelection.contains(currentDirectory.id) && (currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile)
-        if currentDirectory.id == DriveFileManager.constants.rootID {
+        selectFolderButton.isEnabled = !disabledDirectoriesSelection.contains(viewModel.currentDirectory.id) && (viewModel.currentDirectory.capabilities.canMoveInto || viewModel.currentDirectory.capabilities.canCreateFile)
+        if viewModel.currentDirectory.id == DriveFileManager.constants.rootID {
             // Root directory: set back button if the view controller is presented modally
             let viewControllersCount = navigationController?.viewControllers.count ?? 0
             if isModal && viewControllersCount < 2 {
@@ -95,7 +94,6 @@ class SelectFolderViewController: FileListViewController {
                 let selectFolderViewController = instantiate(viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: directory))
                 selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
                 selectFolderViewController.fileToMove = fileToMove
-                selectFolderViewController.currentDirectory = directory
                 selectFolderViewController.delegate = delegate
                 selectFolderViewController.selectHandler = selectHandler
                 selectFolderViewController.navigationItem.hideBackButtonText()
@@ -116,8 +114,8 @@ class SelectFolderViewController: FileListViewController {
     }
 
     @IBAction func selectButtonPressed(_ sender: UIButton) {
-        delegate?.didSelectFolder(currentDirectory)
-        selectHandler?(currentDirectory)
+        delegate?.didSelectFolder(viewModel.currentDirectory)
+        selectHandler?(viewModel.currentDirectory)
         // We are only selecting files we can dismiss
         if navigationController?.viewControllers.first is SelectFolderViewController {
             navigationController?.dismiss(animated: true)
@@ -129,7 +127,7 @@ class SelectFolderViewController: FileListViewController {
 
     @IBAction func addFolderButtonPressed(_ sender: UIBarButtonItem) {
         MatomoUtils.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
-        let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: currentDirectory, driveFileManager: driveFileManager)
+        let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: viewModel.currentDirectory, driveFileManager: viewModel.driveFileManager)
         navigationController?.present(newFolderViewController, animated: true)
     }
 
@@ -148,10 +146,9 @@ class SelectFolderViewController: FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedFile = viewModel.getFile(at: indexPath.item)!
         if selectedFile.isDirectory {
-            let nextVC = SelectFolderViewController.instantiate(viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: selectedFile))
+            let nextVC = SelectFolderViewController.instantiate(viewModel: SelectFolderViewModel(driveFileManager: viewModel.driveFileManager, currentDirectory: selectedFile))
             nextVC.disabledDirectoriesSelection = disabledDirectoriesSelection
             nextVC.fileToMove = fileToMove
-            nextVC.currentDirectory = selectedFile
             nextVC.delegate = delegate
             nextVC.selectHandler = selectHandler
             navigationController?.pushViewController(nextVC, animated: true)
