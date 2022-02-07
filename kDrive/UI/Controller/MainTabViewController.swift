@@ -38,12 +38,13 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         setDriveFileManager(AccountManager.instance.currentDriveFileManager) { currentDriveFileManager in
             self.driveFileManager = currentDriveFileManager
         }
-        for viewController in viewControllers ?? [] {
-            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
-        }
 
         configureRootViewController(at: 1, with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
         configureRootViewController(at: 3, with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+
+        for viewController in viewControllers ?? [] {
+            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+        }
 
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         delegate = self
@@ -147,9 +148,8 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     func getCurrentDirectory() -> (DriveFileManager, File) {
         if let filesViewController = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController,
            let driveFileManager = filesViewController.driveFileManager,
-           let directory = filesViewController.currentDirectory,
-           directory.id >= DriveFileManager.constants.rootID {
-            return (driveFileManager, directory)
+           filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+            return (driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
             let file = driveFileManager.getCachedRootFile()
             return (driveFileManager, file)

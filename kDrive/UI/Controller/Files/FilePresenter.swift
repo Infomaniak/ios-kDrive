@@ -77,7 +77,6 @@ class FilePresenter {
             } else {
                 nextVC = listType.instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file))
             }
-            nextVC.currentDirectory = file
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {
                     driveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()

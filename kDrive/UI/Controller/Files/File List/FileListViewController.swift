@@ -133,9 +133,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
     #endif
 
-    var currentDirectory: File!
-    var driveFileManager: DriveFileManager!
-
     private var networkObserver: ObservationToken?
 
     var viewModel: FileListViewModel!
@@ -321,9 +318,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     private func setupViewModel() {
-        if viewModel == nil {
-            viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-        }
         bindViewModels()
         if viewModel.configuration.isRefreshControlEnabled {
             refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
@@ -456,7 +450,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     static func instantiate(viewModel: FileListViewModel) -> Self {
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
         viewController.viewModel = viewModel
-        viewController.driveFileManager = viewModel.driveFileManager
         return viewController
     }
 
@@ -723,7 +716,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     #if !ISEXTENSION
         func uploadCardSelected() {
             let uploadViewController = UploadQueueViewController.instantiate()
-            uploadViewController.currentDirectory = currentDirectory
+            uploadViewController.currentDirectory = viewModel.currentDirectory
             navigationController?.pushViewController(uploadViewController, animated: true)
         }
 
@@ -811,17 +804,24 @@ extension FileListViewController: SelectDelegate {
 
 #if !ISEXTENSION
     extension FileListViewController: SwitchDriveDelegate {
+        var driveFileManager: DriveFileManager! {
+            get {
+                viewModel.driveFileManager
+            }
+            set {
+                viewModel.driveFileManager = newValue
+            }
+        }
+
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
             let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
-            driveFileManager = newDriveFileManager
             if isDifferentDrive {
-                currentDirectory = driveFileManager.getCachedRootFile()
-                viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager, currentDirectory: viewModel.driveFileManager.getCachedRootFile())
                 bindViewModels()
                 viewModel.onViewDidLoad()
                 navigationController?.popToRootViewController(animated: false)
             } else {
-                viewModel.driveFileManager = driveFileManager
+                viewModel.driveFileManager = newDriveFileManager
             }
         }
     }
