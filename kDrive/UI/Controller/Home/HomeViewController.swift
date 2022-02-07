@@ -604,7 +604,8 @@ extension HomeViewController {
                 let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
                 navigationController?.pushViewController(uploadViewController, animated: true)
             case .search:
-                present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
+                //present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
+                break
             }
         case .recentFiles:
             if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1) && !viewModel.recentFilesEmpty {
@@ -673,8 +674,8 @@ extension HomeViewController: RecentActivityDelegate {
         }
 
         if activities.count > 3 && index > 1 {
-            let nextVC = RecentActivityFilesViewController.instantiate(activities: activities, driveFileManager: driveFileManager)
-            filePresenter.navigationController?.pushViewController(nextVC, animated: true)
+            /*let nextVC = RecentActivityFilesViewController.instantiate(activities: activities, driveFileManager: driveFileManager)
+            filePresenter.navigationController?.pushViewController(nextVC, animated: true)*/
         } else {
             filePresenter.present(driveFileManager: driveFileManager, file: file, files: activities.compactMap(\.file), normalFolderHierarchy: false)
         }

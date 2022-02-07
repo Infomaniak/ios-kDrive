@@ -138,7 +138,7 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     @IBAction func searchButtonPressed(_ sender: Any) {
-        present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager, filters: Filters(fileType: .image)), animated: true)
+        //present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager, filters: Filters(fileType: .image)), animated: true)
     }
 
     @IBAction func sortButtonPressed(_ sender: UIBarButtonItem) {
