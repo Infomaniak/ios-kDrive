@@ -458,71 +458,27 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    /* func testRenameFile() {
-         let testName = "Rename file"
-         let expectation = XCTestExpectation(description: testName)
-         var rootFile = File()
+    func testRenameFile() async throws {
+        let (testDirectory, file) = try await initOfficeFile(testName: "Rename file")
+        let newName = "renamed office file"
+        _ = try await currentApiFetcher.rename(file: file, newName: newName)
+        tearDownTest(directory: testDirectory)
+    }
 
-         initOfficeFile(testName: testName) { root, file in
-             rootFile = root
-             let newName = "renamed office file"
-             self.currentApiFetcher.renameFile(file: file, newName: newName) { renameResponse, renameError in
-                 XCTAssertNotNil(renameResponse?.data, TestsMessages.notNil("renamed file"))
-                 XCTAssertNil(renameError, TestsMessages.noError)
-                 XCTAssertTrue(renameResponse!.data!.name == newName, "File name should have changed")
+    func testDuplicateFile() async throws {
+        let (testDirectory, file) = try await initOfficeFile(testName: "Duplicate file")
+        _ = try await currentApiFetcher.duplicate(file: file, duplicateName: "duplicate-\(Date())")
+        let (files, _) = try await currentApiFetcher.files(in: testDirectory)
+        XCTAssertEqual(files.count, 2, "Root file should have 2 children")
+        tearDownTest(directory: testDirectory)
+    }
 
-                 self.checkIfFileIsInDestination(file: renameResponse!.data!, directory: rootFile) {
-                     expectation.fulfill()
-                 }
-             }
-         }
-
-         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-         tearDownTest(directory: rootFile)
-     }
-
-     func testDuplicateFile() {
-         let testName = "Duplicate file"
-         let expectation = XCTestExpectation(description: testName)
-         var rootFile = File()
-
-         initOfficeFile(testName: testName) { root, file in
-             rootFile = root
-             self.currentApiFetcher.duplicateFile(file: file, duplicateName: "duplicate-\(Date())") { duplicateResponse, duplicateError in
-                 XCTAssertNotNil(duplicateResponse?.data, TestsMessages.notNil("duplicated file"))
-                 XCTAssertNil(duplicateError, TestsMessages.noError)
-
-                 Task { [rootFile] in
-                     let (files, _) = try await self.currentApiFetcher.files(in: rootFile)
-                     XCTAssertEqual(files.count, 2, "Root file should have 2 children")
-                     expectation.fulfill()
-                 }
-             }
-         }
-
-         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-         tearDownTest(directory: rootFile)
-     }
-
-     func testCopyFile() {
-         let testName = "Copy file"
-         let expectation = XCTestExpectation(description: testName)
-         var rootFile = File()
-
-         initOfficeFile(testName: testName) { root, file in
-             rootFile = root
-             self.currentApiFetcher.copyFile(file: file, newParent: rootFile) { copyResponse, copyError in
-                 XCTAssertNotNil(copyResponse, TestsMessages.notNil("response"))
-                 XCTAssertNil(copyError, TestsMessages.noError)
-                 self.checkIfFileIsInDestination(file: copyResponse!.data!, directory: rootFile) {
-                     expectation.fulfill()
-                 }
-             }
-         }
-
-         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-         tearDownTest(directory: rootFile)
-     } */
+    func testCopyFile() async throws {
+        let (testDirectory, file) = try await initOfficeFile(testName: "Copy file")
+        let copiedFile = try await currentApiFetcher.copy(file: file, to: testDirectory)
+        try await checkIfFileIsInDestination(file: copiedFile, directory: testDirectory)
+        tearDownTest(directory: testDirectory)
+    }
 
     func testMoveFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Move file")

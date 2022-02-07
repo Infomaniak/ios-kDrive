@@ -49,16 +49,17 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             }
             floatingPanelViewController.actionHandler = { sender in
                 sender.setLoading(true)
-                driveFileManager.apiFetcher.convertFile(file: file) { response, _ in
-                    sender.setLoading(false)
-                    if let newFile = response?.data {
+                Task {
+                    do {
+                        let newFile = try await driveFileManager.apiFetcher.convert(file: file)
+                        sender.setLoading(false)
                         if let parent = file.parent {
                             driveFileManager.notifyObserversWith(file: parent)
                         }
                         viewController.dismiss(animated: true)
                         open(driveFileManager: driveFileManager, file: newFile, viewController: viewController)
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                    } catch {
+                        UIConstants.showSnackBar(message: error.localizedDescription)
                     }
                 }
             }
