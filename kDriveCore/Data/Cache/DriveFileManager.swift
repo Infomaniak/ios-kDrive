@@ -955,56 +955,41 @@ public class DriveFileManager {
         }
     }
 
-    public func renameFile(file: File, newName: String, completion: @escaping (File?, Error?) -> Void) {
+    public func rename(file: File, newName: String) async throws -> File {
         guard file.isManagedByRealm else {
-            completion(nil, DriveError.fileNotFound)
-            return
+            throw DriveError.fileNotFound
         }
         let safeFile = ThreadSafeReference(to: file)
-        apiFetcher.renameFile(file: file, newName: newName) { [self] response, error in
-            let realm = getRealm()
-            if let updatedFile = response?.data,
-               let file = realm.resolve(safeFile) {
-                do {
-                    updatedFile.isAvailableOffline = file.isAvailableOffline
-                    let updatedFile = try self.updateFileInDatabase(updatedFile: updatedFile, oldFile: file, using: realm)
-                    updatedFile.signalChanges(userId: drive.userId)
-                    self.notifyObserversWith(file: updatedFile)
-                    completion(updatedFile, nil)
-                } catch {
-                    completion(nil, error)
-                }
-            } else {
-                completion(nil, error)
+        _ = try await apiFetcher.rename(file: file, newName: newName)
+        let realm = getRealm()
+        if let file = realm.resolve(safeFile) {
+            try realm.write {
+                file.name = newName
             }
+            file.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: file)
+            return file
+        } else {
+            throw DriveError.fileNotFound
         }
     }
 
-    public func duplicateFile(file: File, duplicateName: String, completion: @escaping (File?, Error?) -> Void) {
+    public func duplicate(file: File, duplicateName: String) async throws -> File {
         let parentId = file.parent?.id
-        apiFetcher.duplicateFile(file: file, duplicateName: duplicateName) { response, error in
-            if let duplicateFile = response?.data {
-                do {
-                    let duplicateFile = try self.updateFileInDatabase(updatedFile: duplicateFile)
-                    let realm = duplicateFile.realm
-                    let parent = realm?.object(ofType: File.self, forPrimaryKey: parentId)
-                    try realm?.safeWrite {
-                        parent?.children.insert(duplicateFile)
-                    }
-
-                    duplicateFile.signalChanges(userId: self.drive.userId)
-                    if let parent = file.parent {
-                        parent.signalChanges(userId: self.drive.userId)
-                        self.notifyObserversWith(file: parent)
-                    }
-                    completion(duplicateFile, nil)
-                } catch {
-                    completion(nil, error)
-                }
-            } else {
-                completion(nil, error)
-            }
+        let file = try await apiFetcher.duplicate(file: file, duplicateName: duplicateName)
+        let realm = getRealm()
+        let duplicateFile = try updateFileInDatabase(updatedFile: file, using: realm)
+        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        try realm.safeWrite {
+            parent?.children.insert(duplicateFile)
         }
+
+        duplicateFile.signalChanges(userId: drive.userId)
+        if let parent = file.parent {
+            parent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: parent)
+        }
+        return duplicateFile
     }
 
     public func createDirectory(in parentDirectory: File, name: String, onlyForMe: Bool) async throws -> File {

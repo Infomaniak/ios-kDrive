@@ -478,24 +478,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             let pathString = self.file.name as NSString
             let text = KDriveResourcesStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
             let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate, placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile, text: text, action: KDriveResourcesStrings.Localizable.buttonCopy, loading: true) { duplicateName in
-                if duplicateName != file.name {
-                    let group = DispatchGroup()
-                    var success = false
-                    group.enter()
-                    self.driveFileManager.duplicateFile(file: file, duplicateName: duplicateName) { _, error in
-                        if error == nil {
-                            success = true
-                        }
-                        group.leave()
-                    }
-                    _ = group.wait(timeout: .now() + Constants.timeout)
-                    DispatchQueue.main.async {
-                        if success {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
-                        } else {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDuplicate)
-                        }
-                    }
+                guard duplicateName != file.name else { return }
+                do {
+                    _ = try await self.driveFileManager.duplicate(file: file, duplicateName: duplicateName)
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
             alert.textFieldConfiguration = .fileNameConfiguration
@@ -511,22 +499,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             let file = self.file.freeze()
             let placeholder = file.isDirectory ? KDriveResourcesStrings.Localizable.hintInputDirName : KDriveResourcesStrings.Localizable.hintInputFileName
             let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename, placeholder: placeholder, text: file.name, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { newName in
-                if newName != file.name {
-                    let group = DispatchGroup()
-                    var success = false
-                    group.enter()
-                    self.driveFileManager.renameFile(file: file, newName: newName) { _, error in
-                        if error == nil {
-                            success = true
-                        }
-                        group.leave()
-                    }
-                    _ = group.wait(timeout: .now() + Constants.timeout)
-                    DispatchQueue.main.async {
-                        if !success {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRename)
-                        }
-                    }
+                guard newName != file.name else { return }
+                do {
+                    _ = try await self.driveFileManager.rename(file: file, newName: newName)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
             alert.textFieldConfiguration = .fileNameConfiguration
