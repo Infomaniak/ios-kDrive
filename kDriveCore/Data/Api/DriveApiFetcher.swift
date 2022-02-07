@@ -276,27 +276,16 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.trashedInfo(file: file), method: .delete)).data
     }
 
-    public func renameFile(file: File, newName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.renameFile(file: file)
-        let body: [String: Any] = ["name": newName]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func rename(file: File, newName: String) async throws -> CancelableResponse {
+        try await perform(request: authenticatedRequest(.rename(file: file), method: .post, parameters: ["name": newName])).data
     }
 
-    public func duplicateFile(file: File, duplicateName: String, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.duplicateFile(file: file)
-        let body: [String: Any] = ["name": duplicateName]
-
-        makeRequest(url, method: .post, parameters: body, completion: completion)
+    public func duplicate(file: File, duplicateName: String) async throws -> File {
+        try await perform(request: authenticatedRequest(.duplicate(file: file), method: .post, parameters: ["name": duplicateName])).data
     }
 
-    public func copyFile(file: File, newParent: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.copyFile(file: file, newParentId: newParent.id)
-
-        authenticatedSession.request(url, method: .post)
-            .responseDecodable(of: ApiResponse<File>.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
+    public func copy(file: File, to newParent: File) async throws -> File {
+        try await perform(request: authenticatedRequest(.copy(file: file, destinationId: newParent.id), method: .post)).data
     }
 
     public func move(file: File, to destination: File) async throws -> CancelableResponse {
@@ -441,10 +430,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.undoAction(drive: drive), method: .post, parameters: ["cancel_id": cancelId])).data
     }
 
-    public func convertFile(file: File, completion: @escaping (ApiResponse<File>?, Error?) -> Void) {
-        let url = ApiRoutes.convertFile(file: file)
-
-        makeRequest(url, method: .post, completion: completion)
+    public func convert(file: File) async throws -> File {
+        try await perform(request: authenticatedRequest(.convert(file: file), method: .post)).data
     }
 
     public func bulkAction(drive: AbstractDrive, action: BulkAction) async throws -> CancelableResponse {

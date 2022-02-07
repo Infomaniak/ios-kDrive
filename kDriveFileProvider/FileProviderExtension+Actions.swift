@@ -134,10 +134,11 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.renameFile(file: file, newName: itemName) { file, error in
-            if let file = file {
+        Task {
+            do {
+                let file = try await driveFileManager.rename(file: file, newName: itemName)
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
-            } else {
+            } catch {
                 completionHandler(nil, error)
             }
         }
