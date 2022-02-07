@@ -27,7 +27,7 @@ class MatomoUtils {
     static let isEnabled = true
 
     enum EventCategory: String {
-        case newElement, fileAction, fileInfo, shareAndRights, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home, inApp, trash, dropbox, preview, mediaPlayer
+        case newElement, fileAction, fileInfo, shareAndRights, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home, displayList, inApp, trash, dropbox, preview, mediaPlayer
     }
 
     enum UserAction: String {

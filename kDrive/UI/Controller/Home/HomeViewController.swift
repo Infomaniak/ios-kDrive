@@ -580,7 +580,7 @@ extension HomeViewController {
                     collectionView.performBatchUpdates {
                         collectionView.reloadSections([1])
                     }
-                    MatomoUtils.track(eventWithCategory: .home, name: UserDefaults.shared.homeListStyle == .list ? "viewList" : "viewGrid")
+                    MatomoUtils.track(eventWithCategory: .displayList, name: UserDefaults.shared.homeListStyle == .list ? "viewList" : "viewGrid")
                 }
                 return headerView
             }
