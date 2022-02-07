@@ -533,7 +533,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return
         }
 
-        if !file.isRoot && viewController.currentDirectory?.id != file.id {
+        if !file.isRoot && viewController.viewModel.currentDirectory.id != file.id {
             // Pop to root
             navController.popToRootViewController(animated: false)
             // Present file
