@@ -45,8 +45,8 @@ enum ControllerPresentationType {
 
 @MainActor
 class FileListViewModel {
-    /// deletions, insertions, modifications, shouldReload
-    typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool) -> Void
+    /// deletions, insertions, modifications, isEmpty, shouldReload
+    typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool, Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
     typealias FilePresentedCallback = (File) -> Void
     /// presentation type, presented viewcontroller, animated
@@ -111,7 +111,6 @@ class FileListViewModel {
     @Published var listStyle: ListStyle
     @Published var title: String
     @Published var isRefreshIndicatorHidden: Bool
-    @Published var isEmptyViewHidden: Bool
     @Published var currentLeftBarButtons: [FileListBarButtonType]?
     @Published var currentRightBarButtons: [FileListBarButtonType]?
 
@@ -157,7 +156,6 @@ class FileListViewModel {
         self.sortType = FileListOptions.instance.currentSortType
         self.listStyle = FileListOptions.instance.currentStyle
         self.isRefreshIndicatorHidden = true
-        self.isEmptyViewHidden = true
         self.isLoading = false
         self.currentLeftBarButtons = configuration.leftBarButtons
         self.currentRightBarButtons = configuration.rightBarButtons
@@ -340,7 +338,7 @@ class FileListViewModel {
 class ManagedFileListViewModel: FileListViewModel {
     private var realmObservationToken: NotificationToken?
 
-    internal var files: AnyRealmCollection<File>!
+    internal var files = AnyRealmCollection(List<File>())
     override var isEmpty: Bool {
         return files.isEmpty
     }
@@ -363,12 +361,10 @@ class ManagedFileListViewModel: FileListViewModel {
             switch change {
             case .initial(let results):
                 self?.files = AnyRealmCollection(results)
-                self?.isEmptyViewHidden = !results.isEmpty
-                self?.onFileListUpdated?([], [], [], true)
+                self?.onFileListUpdated?([], [], [], results.isEmpty, true)
             case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                 self?.files = AnyRealmCollection(results)
-                self?.isEmptyViewHidden = !results.isEmpty
-                self?.onFileListUpdated?(deletions, insertions, modifications, false)
+                self?.onFileListUpdated?(deletions, insertions, modifications, results.isEmpty, false)
             case .error(let error):
                 DDLogError("[Realm Observation] Error \(error)")
             }
