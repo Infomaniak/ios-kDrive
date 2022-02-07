@@ -171,7 +171,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     private func bindFileListViewModel() {
-        viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, shouldReload in
+        viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, isEmpty, shouldReload in
+            self?.showEmptyView(!isEmpty)
             guard !shouldReload else {
                 self?.collectionView.reloadData()
                 return
@@ -204,12 +205,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 let offsetPoint = CGPoint(x: 0, y: self.collectionView.contentOffset.y - self.refreshControl.frame.size.height)
                 self.collectionView.setContentOffset(offsetPoint, animated: true)
             }
-        }
-
-        showEmptyView(viewModel.isEmptyViewHidden)
-        viewModel.$isEmptyViewHidden.receiveOnMain(store: &bindStore) { [weak self] isEmptyViewHidden in
-            guard let self = self else { return }
-            self.showEmptyView(isEmptyViewHidden)
         }
 
         viewModel.$listStyle.receiveOnMain(store: &bindStore) { [weak self] listStyle in
@@ -576,7 +571,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
-        setUpHeaderView(headerView, isEmptyViewHidden: viewModel.isEmptyViewHidden)
+        setUpHeaderView(headerView, isEmptyViewHidden: !viewModel.isEmpty)
         self.headerView = headerView
         return headerView
     }

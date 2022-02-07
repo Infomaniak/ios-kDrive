@@ -44,11 +44,10 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         if let children = children {
             let startIndex = fileCount
             files.append(contentsOf: children)
-            onFileListUpdated?([], Array(startIndex ..< files.count), [], false)
+            onFileListUpdated?([], Array(startIndex ..< files.count), [], files.isEmpty, false)
             if children.count == DriveApiFetcher.itemPerPage {
                 loadFiles(page: page + 1)
             }
-            isEmptyViewHidden = fileCount > 0
         } else {
             onDriveError?((error as? DriveError) ?? DriveError.localError)
         }
