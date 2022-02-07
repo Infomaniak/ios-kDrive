@@ -22,7 +22,7 @@ import UIKit
 class SharedWithMeViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "SharedWithMeViewController" }
-
+/*
     override func viewDidLoad() {
         // Set configuration
         let  configuration = FileListViewModel.Configuration(selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, emptyViewType: .noSharedWithMe, supportsDrop: currentDirectory != nil)
@@ -58,5 +58,5 @@ class SharedWithMeViewController: FileListViewController {
         } else {
             super.getNewChanges()
         }
-    }
+    }*/
 }

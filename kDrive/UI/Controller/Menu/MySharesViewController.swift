@@ -23,7 +23,7 @@ import UIKit
 class MySharesViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.menu }
     override class var storyboardIdentifier: String { "MySharesViewController" }
-
+/*
     override func viewDidLoad() {
         // Set configuration
         let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle, emptyViewType: .noShared)
@@ -60,5 +60,5 @@ class MySharesViewController: FileListViewController {
     override func getNewChanges() {
         // We don't have incremental changes for My Shared so we just fetch everything again
         forceRefresh()
-    }
+    }*/
 }
