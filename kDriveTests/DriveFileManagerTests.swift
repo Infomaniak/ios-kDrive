@@ -192,52 +192,28 @@ final class DriveFileManagerTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    func testRenameFile() {
-        let testName = "Rename file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+    func testRenameFile() async throws {
+        let (testDirectory, officeFile) = try await initOfficeFile(testName: "Rename file")
+        let newName = "renamed office file"
+        let renamedFile = try await DriveFileManagerTests.driveFileManager.rename(file: officeFile, newName: newName)
+        XCTAssertEqual(renamedFile.name, newName, "File name should have been renamed")
 
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.renameFile(file: officeFile, newName: testName) { file, error in
-                XCTAssertNotNil(file, TestsMessages.notNil("file"))
-                XCTAssertNil(error, TestsMessages.noError)
-                XCTAssertTrue(file?.name == testName, "File name should have been renamed")
-
-                let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-                XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
-                XCTAssertTrue(cached!.name == testName, "New name not updated in realm")
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveFileManagerTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+        let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
+        XCTAssertNotNil(cached, TestsMessages.notNil("cached file"))
+        XCTAssertEqual(cached!.name, newName, "New name not updated in realm")
+        tearDownTest(directory: testDirectory)
     }
 
-    func testDuplicateFile() {
-        let testName = "Duplicate file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+    func testDuplicateFile() async throws {
+        let (testDirectory, officeFile) = try await initOfficeFile(testName: "Duplicate file")
+        let duplicateFile = try await DriveFileManagerTests.driveFileManager.duplicate(file: officeFile, duplicateName: "Duplicated file")
 
-        initOfficeFile(testName: testName) { root, officeFile in
-            rootFile = root
-            DriveFileManagerTests.driveFileManager.duplicateFile(file: officeFile, duplicateName: "\(testName) - \(Date())") { file, error in
-                XCTAssertNotNil(file, TestsMessages.notNil("duplicated file"))
-                XCTAssertNil(error, TestsMessages.noError)
+        let cachedRoot = DriveFileManagerTests.driveFileManager.getCachedFile(id: testDirectory.id)
+        XCTAssertEqual(cachedRoot!.children.count, 2, "Cached root should have 2 children")
 
-                let cachedRoot = DriveFileManagerTests.driveFileManager.getCachedFile(id: rootFile.id)
-                XCTAssertNotNil(cachedRoot, TestsMessages.notNil("cached root"))
-                XCTAssertTrue(cachedRoot!.children.count == 2, "Cached root should have 2 children")
-
-                let newFile = cachedRoot?.children.contains { $0.id == file!.id }
-                XCTAssertTrue(newFile!, "New file should be in realm")
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: 10.0)
-        tearDownTest(directory: rootFile)
+        let newFile = cachedRoot?.children.contains { $0.id == duplicateFile.id }
+        XCTAssertNotNil(newFile, "New file should be in realm")
+        tearDownTest(directory: testDirectory)
     }
 
     func testCreateDirectory() async throws {
