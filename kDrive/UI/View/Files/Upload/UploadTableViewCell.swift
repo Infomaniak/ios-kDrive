@@ -76,6 +76,16 @@ class UploadTableViewCell: InsetTableViewCell {
             }
         }
     }
+    
+    private func addThumbnail(image: UIImage) {
+        DispatchQueue.main.async {
+            self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
+            self.cardContentView.iconView.contentMode = .scaleAspectFill
+            self.cardContentView.iconView.layer.masksToBounds = true
+            self.cardContentView.iconViewHeightConstraint.constant = 38
+            self.cardContentView.iconView.image = image
+        }
+    }
 
     func configureWith(uploadFile: UploadFile, progress: CGFloat?) {
         currentFileId = uploadFile.id
@@ -88,13 +98,7 @@ class UploadTableViewCell: InsetTableViewCell {
 
         cardContentView.iconView.image = uploadFile.convertedType.icon
         thumbnailRequest = uploadFile.getThumbnail { [weak self] image in
-            DispatchQueue.main.async {
-                self?.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
-                self?.cardContentView.iconView.contentMode = .scaleAspectFill
-                self?.cardContentView.iconView.layer.masksToBounds = true
-                self?.cardContentView.iconViewHeightConstraint.constant = 38
-                self?.cardContentView.iconView.image = image
-            }
+            self?.addThumbnail(image: image)
         }
 
         cardContentView.cancelButtonPressedHandler = {
@@ -122,13 +126,7 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.titleLabel.text = importedFile.name
         cardContentView.detailsLabel.isHidden = true
         let request = importedFile.getThumbnail { [weak self] image in
-            DispatchQueue.main.async {
-                self?.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
-                self?.cardContentView.iconView.contentMode = .scaleAspectFill
-                self?.cardContentView.iconView.layer.masksToBounds = true
-                self?.cardContentView.iconViewHeightConstraint.constant = 38
-                self?.cardContentView.iconView.image = image
-            }
+            self?.addThumbnail(image: image)
         }
         thumbnailRequest = .qlThumbnailRequest(request)
     }
