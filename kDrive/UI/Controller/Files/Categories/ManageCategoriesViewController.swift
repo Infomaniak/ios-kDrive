@@ -117,7 +117,7 @@ class ManageCategoriesViewController: UITableViewController {
         // Select categories
         if let file = file {
             for category in file.categories {
-                if let category = categories.first(where: { $0.id == category.id }) {
+                if let category = categories.first(where: { $0.id == category.categoryId }) {
                     category.isSelected = true
                 }
             }
