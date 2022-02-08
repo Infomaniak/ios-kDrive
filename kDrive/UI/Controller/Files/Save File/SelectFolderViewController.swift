@@ -32,7 +32,7 @@ class SelectFolderViewController: FileListViewController {
     @IBOutlet weak var selectFolderButton: UIButton!
     @IBOutlet weak var addFolderButton: UIBarButtonItem!
 
-    var disabledDirectoriesSelection = [File]()
+    var disabledDirectoriesSelection = [Int]()
     var fileToMove: Int?
     weak var delegate: SelectFolderDelegate?
     var selectHandler: ((File) -> Void)?
@@ -58,7 +58,7 @@ class SelectFolderViewController: FileListViewController {
     private func setUpDirectory() {
         addFolderButton.isEnabled = currentDirectory.capabilities.canCreateDirectory
         addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
-        selectFolderButton.isEnabled = !disabledDirectoriesSelection.map(\.id).contains(currentDirectory.id) && (currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile)
+        selectFolderButton.isEnabled = !disabledDirectoriesSelection.contains(currentDirectory.id) && (currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile)
         if currentDirectory.id == DriveFileManager.constants.rootID {
             // Root directory: set back button if the view controller is presented modally
             let viewControllersCount = navigationController?.viewControllers.count ?? 0
@@ -71,6 +71,7 @@ class SelectFolderViewController: FileListViewController {
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager, startDirectory: File? = nil, fileToMove: Int? = nil, disabledDirectoriesSelection: [File] = [], delegate: SelectFolderDelegate? = nil, selectHandler: ((File) -> Void)? = nil) -> TitleSizeAdjustingNavigationController {
         var viewControllers = [SelectFolderViewController]()
+        let disabledDirectoriesSelection = disabledDirectoriesSelection.map(\.id)
         if startDirectory == nil || startDirectory?.isRoot == true {
             let selectFolderViewController = instantiate(driveFileManager: driveFileManager)
             selectFolderViewController.disabledDirectoriesSelection = disabledDirectoriesSelection
@@ -152,17 +153,13 @@ class SelectFolderViewController: FileListViewController {
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
 
-        coder.encode(disabledDirectoriesSelection.map(\.id), forKey: "DisabledDirectories")
+        coder.encode(disabledDirectoriesSelection, forKey: "DisabledDirectories")
     }
 
     override func decodeRestorableState(with coder: NSCoder) {
         super.decodeRestorableState(with: coder)
 
-        let disabledDirectoriesIds = coder.decodeObject(forKey: "DisabledDirectories") as? [Int] ?? []
-        if driveFileManager != nil {
-            let realm = driveFileManager.getRealm()
-            disabledDirectoriesSelection = disabledDirectoriesIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
-        }
+        disabledDirectoriesSelection = coder.decodeObject(forKey: "DisabledDirectories") as? [Int] ?? []
         setUpDirectory()
     }
 }
