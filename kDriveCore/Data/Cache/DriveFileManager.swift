@@ -415,7 +415,7 @@ public class DriveFileManager {
 
             return (getLocalSortedDirectoryFiles(directory: updatedFile, sortType: sortType), files.count == Endpoint.itemsPerPage)
         } catch {
-            if page == 1 {
+            if page == 1, let root = getCachedFile(id: root.id) {
                 return (getLocalSortedDirectoryFiles(directory: root, sortType: sortType), false)
             } else {
                 throw error
