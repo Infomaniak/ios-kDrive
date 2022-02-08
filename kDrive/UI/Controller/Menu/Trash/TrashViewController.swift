@@ -247,6 +247,7 @@ extension TrashViewController: TrashOptionsDelegate {
             filesToRestore = files
             selectFolderViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, delegate: self)
             present(selectFolderViewController, animated: true)
+            MatomoUtils.track(eventWithCategory: .trash, name: "restoreGivenFolder")
         case .restore:
             let group = DispatchGroup()
             for file in files {
@@ -268,6 +269,7 @@ extension TrashViewController: TrashOptionsDelegate {
                     self.selectionMode = false
                 }
             }
+            MatomoUtils.track(eventWithCategory: .trash, name: "restoreOriginFolder")
         case .delete:
             deleteFiles(files)
         }
