@@ -35,10 +35,11 @@ public class ImportedFile {
         self.uti = uti
     }
 
-    public func getThumbnail(completion: @escaping (UIImage) -> Void) {
+    @discardableResult
+    public func getThumbnail(completion: @escaping (UIImage) -> Void) -> QLThumbnailGenerator.Request {
         let thumbnailSize = CGSize(width: 38, height: 38)
 
-        FilePreviewHelper.instance.getThumbnail(url: path, thumbnailSize: thumbnailSize) { image in
+        return FilePreviewHelper.instance.getThumbnail(url: path, thumbnailSize: thumbnailSize) { image in
             completion(image)
         }
     }

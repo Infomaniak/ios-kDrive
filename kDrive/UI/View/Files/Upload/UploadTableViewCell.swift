@@ -25,6 +25,7 @@ class UploadTableViewCell: InsetTableViewCell {
     // This view is reused if FileListCollectionView header
     @IBOutlet weak var cardContentView: UploadCardView!
     private var currentFileId: String?
+    private var thumbnailRequest: UploadFile.ThumbnailRequest?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -37,6 +38,8 @@ class UploadTableViewCell: InsetTableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        thumbnailRequest?.cancel()
+        thumbnailRequest = nil
         cardContentView.editImage?.isHidden = true
         cardContentView.retryButton?.isHidden = true
         cardContentView.progressView.isHidden = true
@@ -48,6 +51,10 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.isHidden = false
         cardContentView.progressView.updateProgress(0, animated: false)
         cardContentView.iconViewHeightConstraint.constant = 24
+    }
+
+    deinit {
+        thumbnailRequest?.cancel()
     }
 
     private func setStatusFor(uploadFile: UploadFile) {
@@ -80,9 +87,8 @@ class UploadTableViewCell: InsetTableViewCell {
         }
 
         cardContentView.iconView.image = uploadFile.convertedType.icon
-        uploadFile.getThumbnail { [weak self, fileId = uploadFile.id] image in
+        thumbnailRequest = uploadFile.getThumbnail { [weak self] image in
             DispatchQueue.main.async {
-                guard fileId == self?.currentFileId else { return }
                 self?.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
                 self?.cardContentView.iconView.contentMode = .scaleAspectFill
                 self?.cardContentView.iconView.layer.masksToBounds = true
@@ -115,15 +121,16 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.image = ConvertedType.fromUTI(importedFile.uti).icon
         cardContentView.titleLabel.text = importedFile.name
         cardContentView.detailsLabel.isHidden = true
-        importedFile.getThumbnail { image in
+        let request = importedFile.getThumbnail { [weak self] image in
             DispatchQueue.main.async {
-                self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
-                self.cardContentView.iconView.contentMode = .scaleAspectFill
-                self.cardContentView.iconView.layer.masksToBounds = true
-                self.cardContentView.iconViewHeightConstraint.constant = 38
-                self.cardContentView.iconView.image = image
+                self?.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
+                self?.cardContentView.iconView.contentMode = .scaleAspectFill
+                self?.cardContentView.iconView.layer.masksToBounds = true
+                self?.cardContentView.iconViewHeightConstraint.constant = 38
+                self?.cardContentView.iconView.image = image
             }
         }
+        thumbnailRequest = .qlThumbnailRequest(request)
     }
 
     func updateProgress(fileId: String, progress: CGFloat, animated: Bool = true) {

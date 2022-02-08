@@ -23,7 +23,8 @@ import UIKit
 public class FilePreviewHelper {
     public static let instance = FilePreviewHelper()
 
-    public func getThumbnail(url: URL, thumbnailSize: CGSize, completion: @escaping (UIImage) -> Void) {
+    @discardableResult
+    public func getThumbnail(url: URL, thumbnailSize: CGSize, completion: @escaping (UIImage) -> Void) -> QLThumbnailGenerator.Request {
         let request = QLThumbnailGenerator.Request(
             fileAt: url,
             size: thumbnailSize,
@@ -34,5 +35,6 @@ public class FilePreviewHelper {
                 completion(image.uiImage)
             }
         }
+        return request
     }
 }
