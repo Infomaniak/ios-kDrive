@@ -378,16 +378,16 @@ public extension Endpoint {
         return .fileInfo(file).appending(path: "/convert", queryItems: [fileMinimalWithQueryItems])
     }
 
-    static func move(file: AbstractFile, destinationId: Int) -> Endpoint {
-        return .fileInfo(file).appending(path: "/move/\(destinationId)")
+    static func move(file: AbstractFile, destination: AbstractFile) -> Endpoint {
+        return .fileInfo(file).appending(path: "/move/\(destination.id)")
     }
 
     static func duplicate(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/copy", queryItems: [fileMinimalWithQueryItems])
+        return .fileInfo(file).appending(path: "/duplicate", queryItems: [fileMinimalWithQueryItems])
     }
 
-    static func copy(file: AbstractFile, destinationId: Int) -> Endpoint {
-        return .duplicate(file: file).appending(path: "/\(destinationId)", queryItems: [fileMinimalWithQueryItems])
+    static func copy(file: AbstractFile, destination: AbstractFile) -> Endpoint {
+        return .fileInfo(file).appending(path: "/copy/\(destination.id)", queryItems: [fileMinimalWithQueryItems])
     }
 
     static func rename(file: AbstractFile) -> Endpoint {
