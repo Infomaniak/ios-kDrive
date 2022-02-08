@@ -196,6 +196,8 @@ public class DriveFileManager {
                 if oldSchemaVersion < 7 {
                     // Migrate file category
                     migration.enumerateObjects(ofType: FileCategory.className()) { oldObject, newObject in
+                        newObject?["categoryId"] = oldObject?["id"]
+                        newObject?["addedAt"] = oldObject?["addedToFileAt"]
                         newObject?["isGeneratedByAI"] = oldObject?["isGeneratedByIA"]
                         newObject?["userValidation"] = oldObject?["IACategoryUserValidation"]
                     }
@@ -821,7 +823,7 @@ public class DriveFileManager {
         let response = try await apiFetcher.add(category: category, to: file)
         if response {
             updateFileProperty(fileId: fileId) { file in
-                let newCategory = FileCategory(id: categoryId, userId: self.drive.userId)
+                let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
         }
@@ -833,7 +835,7 @@ public class DriveFileManager {
         let response = try await apiFetcher.remove(category: category, from: file)
         if response {
             updateFileProperty(fileId: fileId) { file in
-                if let index = file.categories.firstIndex(where: { $0.id == categoryId }) {
+                if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
             }
@@ -886,9 +888,9 @@ public class DriveFileManager {
             }
             // Delete category from files
             let realm = getRealm()
-            for file in realm.objects(File.self).filter(NSPredicate(format: "ANY categories.id = %d", categoryId)) {
+            for file in realm.objects(File.self).filter(NSPredicate(format: "ANY categories.categoryId = %d", categoryId)) {
                 try? realm.write {
-                    realm.delete(file.categories.filter("id = %d", categoryId))
+                    realm.delete(file.categories.filter("categoryId = %d", categoryId))
                 }
             }
         }
