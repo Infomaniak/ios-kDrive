@@ -284,12 +284,12 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.duplicate(file: file), method: .post, parameters: ["name": duplicateName])).data
     }
 
-    public func copy(file: File, to newParent: File) async throws -> File {
-        try await perform(request: authenticatedRequest(.copy(file: file, destinationId: newParent.id), method: .post)).data
+    public func copy(file: File, to destination: File) async throws -> File {
+        try await perform(request: authenticatedRequest(.copy(file: file, destination: destination), method: .post)).data
     }
 
     public func move(file: File, to destination: File) async throws -> CancelableResponse {
-        try await perform(request: authenticatedRequest(.move(file: file, destinationId: destination.id), method: .post)).data
+        try await perform(request: authenticatedRequest(.move(file: file, destination: destination), method: .post)).data
     }
 
     public func recentActivity(drive: AbstractDrive, page: Int = 1) async throws -> [FileActivity] {
