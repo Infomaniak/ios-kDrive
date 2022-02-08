@@ -165,23 +165,23 @@ public enum SortType: String {
     public var value: SortTypeValue {
         switch self {
         case .nameAZ:
-            return SortTypeValue(apiValue: "files.path", order: "asc", translation: KDriveResourcesStrings.Localizable.sortNameAZ, realmKeyPath: \.sortedName)
+            return SortTypeValue(apiValue: "path", order: "asc", translation: KDriveResourcesStrings.Localizable.sortNameAZ, realmKeyPath: \.sortedName)
         case .nameZA:
-            return SortTypeValue(apiValue: "files.path", order: "desc", translation: KDriveResourcesStrings.Localizable.sortNameZA, realmKeyPath: \.sortedName)
+            return SortTypeValue(apiValue: "path", order: "desc", translation: KDriveResourcesStrings.Localizable.sortNameZA, realmKeyPath: \.sortedName)
         case .older:
             return SortTypeValue(apiValue: "last_modified_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.lastModifiedAt)
         case .newer:
             return SortTypeValue(apiValue: "last_modified_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.lastModifiedAt)
         case .biggest:
-            return SortTypeValue(apiValue: "files.size", order: "desc", translation: KDriveResourcesStrings.Localizable.sortBigger, realmKeyPath: \.size)
+            return SortTypeValue(apiValue: "size", order: "desc", translation: KDriveResourcesStrings.Localizable.sortBigger, realmKeyPath: \.size)
         case .smallest:
-            return SortTypeValue(apiValue: "files.size", order: "asc", translation: KDriveResourcesStrings.Localizable.sortSmaller, realmKeyPath: \.size)
+            return SortTypeValue(apiValue: "size", order: "asc", translation: KDriveResourcesStrings.Localizable.sortSmaller, realmKeyPath: \.size)
         case .ext:
             return SortTypeValue(apiValue: "files", order: "asc", translation: KDriveResourcesStrings.Localizable.sortExtension, realmKeyPath: \.name)
         case .olderDelete:
-            return SortTypeValue(apiValue: "files.deleted_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
+            return SortTypeValue(apiValue: "deleted_at", order: "asc", translation: KDriveResourcesStrings.Localizable.sortOlder, realmKeyPath: \.deletedAt)
         case .newerDelete:
-            return SortTypeValue(apiValue: "files.deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
+            return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
         case .type:
             return SortTypeValue(apiValue: "type", order: "desc", translation: "", realmKeyPath: \.type)
         }
