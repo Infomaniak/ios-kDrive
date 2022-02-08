@@ -1110,7 +1110,7 @@ public class DriveFileManager {
         let shareLink = try await apiFetcher.createShareLink(for: file)
         // Fix for API not returning share link activities
         setFileShareLink(file: proxyFile, shareLink: shareLink)
-        return shareLink
+        return shareLink.freeze()
     }
 
     public func updateShareLink(for file: File, settings: ShareLinkSettings) async throws -> Bool {
@@ -1293,8 +1293,9 @@ public extension DriveFileManager {
     }
 
     func notifyObserversWith(file: File) {
+        let file = file.isFrozen ? file : file.freeze()
         for observer in didUpdateFileObservers.values {
-            observer(file.isFrozen ? file : file.freeze())
+            observer(file)
         }
     }
 }
