@@ -74,7 +74,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
 
     init(file: File, domain: NSFileProviderDomain?) {
         self.itemIdentifier = NSFileProviderItemIdentifier(file.id)
-        self.filename = file.name
+        self.filename = file.name.isEmpty ? "Root" : file.name
         self.typeIdentifier = file.typeIdentifier
         let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
         self.capabilities = FileProviderItem.rightsToCapabilities(rights)
