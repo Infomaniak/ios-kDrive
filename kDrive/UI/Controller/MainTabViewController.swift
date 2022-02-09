@@ -123,9 +123,9 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
     func plusButtonPressed() {
         Task {
-            let (driveFileManager, currentDirectory) = try await getCurrentDirectory()
+            let (currentDriveFileManager, currentDirectory) = try await getCurrentDirectory()
             let floatingPanelViewController = DriveFloatingPanelController()
-            let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager, folder: currentDirectory)
+            let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(driveFileManager: currentDriveFileManager, folder: currentDirectory)
             plusButtonFloatingPanel.floatingPanelController = floatingPanelViewController
             floatingPanelViewController.isRemovalInteractionEnabled = true
             floatingPanelViewController.delegate = plusButtonFloatingPanel
