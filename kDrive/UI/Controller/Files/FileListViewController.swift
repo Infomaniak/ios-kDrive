@@ -1076,7 +1076,7 @@ extension FileListViewController: SelectDelegate {
 #if !ISEXTENSION
     extension FileListViewController: SwitchDriveDelegate {
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
-            let isDifferentDrive = newDriveFileManager.drive.id != driveFileManager.drive.id
+            let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
             driveFileManager = newDriveFileManager
             filesObserver?.cancel()
             filesObserver = nil
