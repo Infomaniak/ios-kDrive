@@ -122,21 +122,19 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func plusButtonPressed() {
-        Task {
-            let (currentDriveFileManager, currentDirectory) = try await getCurrentDirectory()
-            let floatingPanelViewController = DriveFloatingPanelController()
-            let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(driveFileManager: currentDriveFileManager, folder: currentDirectory)
-            plusButtonFloatingPanel.floatingPanelController = floatingPanelViewController
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            floatingPanelViewController.delegate = plusButtonFloatingPanel
+        let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
+        let floatingPanelViewController = DriveFloatingPanelController()
+        let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(driveFileManager: currentDriveFileManager, folder: currentDirectory)
+        plusButtonFloatingPanel.floatingPanelController = floatingPanelViewController
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = plusButtonFloatingPanel
 
-            floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
-            floatingPanelViewController.track(scrollView: plusButtonFloatingPanel.tableView)
-            present(floatingPanelViewController, animated: true)
-        }
+        floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
+        floatingPanelViewController.track(scrollView: plusButtonFloatingPanel.tableView)
+        present(floatingPanelViewController, animated: true)
     }
 
-    @MainActor func getCurrentDirectory() async throws -> (DriveFileManager, File) {
+    func getCurrentDirectory() -> (DriveFileManager, File) {
         if let filesViewController = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController,
            let driveFileManager = filesViewController.driveFileManager,
            let directory = filesViewController.currentDirectory,
@@ -185,10 +183,8 @@ extension MainTabViewController: UITabBarControllerDelegate {
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        Task {
-            let (_, currentDirectory) = try await getCurrentDirectory()
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.capabilities.canCreateFile
-        }
+        let (_, currentDirectory) = getCurrentDirectory()
+        (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.capabilities.canCreateFile
     }
 }
 
