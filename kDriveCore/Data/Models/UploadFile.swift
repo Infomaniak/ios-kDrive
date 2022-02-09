@@ -185,30 +185,41 @@ public class UploadFile: Object {
 
     override init() {}
 
-    public func getThumbnail(completion: @escaping (UIImage) -> Void) {
+    public enum ThumbnailRequest {
+        case phImageRequest(PHImageRequestID)
+        case qlThumbnailRequest(QLThumbnailGenerator.Request)
+
+        public func cancel() {
+            switch self {
+            case .phImageRequest(let requestID):
+                PHImageManager.default().cancelImageRequest(requestID)
+            case .qlThumbnailRequest(let request):
+                QLThumbnailGenerator.shared.cancel(request)
+            }
+        }
+    }
+
+    @discardableResult
+    public func getThumbnail(completion: @escaping (UIImage) -> Void) -> ThumbnailRequest? {
         let thumbnailSize = CGSize(width: 38, height: 38)
         if type == .phAsset, let asset = getPHAsset() {
             let option = PHImageRequestOptions()
             option.deliveryMode = .fastFormat
             option.isNetworkAccessAllowed = true
             option.resizeMode = .fast
-            PHImageManager.default().requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: option) { image, _ in
+            let requestID = PHImageManager.default().requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: option) { image, _ in
                 if let image = image {
                     completion(image)
                 }
             }
+            return .phImageRequest(requestID)
         } else if let url = pathURL {
-            let request = QLThumbnailGenerator.Request(
-                fileAt: url,
-                size: thumbnailSize,
-                scale: UIScreen.main.scale,
-                representationTypes: [.lowQualityThumbnail, .thumbnail])
-            QLThumbnailGenerator.shared.generateRepresentations(for: request) { image, _, _ in
-                if let image = image {
-                    completion(image.uiImage)
-                }
+            let request = FilePreviewHelper.instance.getThumbnail(url: url, thumbnailSize: thumbnailSize) { image in
+                completion(image)
             }
+            return .qlThumbnailRequest(request)
         }
+        return nil
     }
 
     func getPHAsset() -> PHAsset? {

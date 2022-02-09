@@ -21,6 +21,7 @@ import Foundation
 import kDriveResources
 import PDFKit
 import Photos
+import QuickLookThumbnailing
 import VisionKit
 
 public class ImportedFile {
@@ -32,6 +33,15 @@ public class ImportedFile {
         self.name = name
         self.path = path
         self.uti = uti
+    }
+
+    @discardableResult
+    public func getThumbnail(completion: @escaping (UIImage) -> Void) -> QLThumbnailGenerator.Request {
+        let thumbnailSize = CGSize(width: 38, height: 38)
+
+        return FilePreviewHelper.instance.getThumbnail(url: path, thumbnailSize: thumbnailSize) { image in
+            completion(image)
+        }
     }
 }
 
