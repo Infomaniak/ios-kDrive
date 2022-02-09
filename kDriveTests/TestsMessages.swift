@@ -21,6 +21,7 @@ import Foundation
 /// XCTAssert messages
 struct TestsMessages {
     static let noError = "There should be no error"
+    static let shouldReturnTrue = "API should return true"
 
     static func notNil(_ element: String) -> String {
         return "\(element.capitalized) shouldn't be nil"
