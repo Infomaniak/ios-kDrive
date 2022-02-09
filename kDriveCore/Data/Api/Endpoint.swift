@@ -118,7 +118,7 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static let fileMinimalWithQueryItems = URLQueryItem(name: "with", value: "capabilities,dropbox,conversion,sorted_name,parent_id,is_favorite,sharelink,categories")
+    private static let fileMinimalWithQueryItems = URLQueryItem(name: "with", value: "capabilities,dropbox,conversion,sorted_name,is_favorite,sharelink,categories")
     private static let fileExtraWithQueryItems = URLQueryItem(name: "with", value: fileMinimalWithQueryItems.value?.appending(",version,path,users"))
 
     private static var base: Endpoint {
