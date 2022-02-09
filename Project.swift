@@ -162,7 +162,8 @@ let project = Project(name: "kDrive",
                           .extensionTarget(name: "kDriveActionExtension",
                                            bundleId: "com.infomaniak.drive.ActionExtension",
                                            entitlements: "kDriveActionExtension/ActionExtension.entitlements",
+                                           additionalResources: ["kDriveActionExtension/**/*.xcassets",
+                                                                 "kDriveActionExtension/**/*.strings"],
                                            settings: .settings(base: Constants.actionExtensionSettings, debug: Constants.debugActionExtensionSettings))
                       ],
                       fileHeaderTemplate: .file("file-header-template.txt"))
-
