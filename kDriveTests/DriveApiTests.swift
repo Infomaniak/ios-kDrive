@@ -164,7 +164,7 @@ final class DriveApiTests: XCTestCase {
         let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: .gigabytes(5), password: "newPassword", validUntil: Date())
         let (testDirectory, dropBoxDir) = try await initDropbox(testName: "Dropbox settings")
         let response = try await currentApiFetcher.updateDropBox(directory: dropBoxDir, settings: settings)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let dropBox = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
         XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropxbox should have a password")
         XCTAssertTrue(dropBox.capabilities.hasValidity, "Dropbox should have a validity")
@@ -178,7 +178,7 @@ final class DriveApiTests: XCTestCase {
         let (testDirectory, dropBoxDir) = try await initDropbox(testName: "Delete dropbox")
         _ = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
         let response = try await currentApiFetcher.deleteDropBox(directory: dropBoxDir)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
     }
 
@@ -207,7 +207,7 @@ final class DriveApiTests: XCTestCase {
         _ = try await currentApiFetcher.createShareLink(for: testDirectory)
         let updatedSettings = ShareLinkSettings(canComment: true, canDownload: false, canEdit: true, canSeeInfo: true, canSeeStats: true, password: "password", right: .password, validUntil: nil)
         let response = try await currentApiFetcher.updateShareLink(for: testDirectory, settings: updatedSettings)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let updatedShareLink = try await currentApiFetcher.shareLink(for: testDirectory)
         XCTAssertTrue(updatedShareLink.capabilities.canComment, "canComment should be true")
         XCTAssertFalse(updatedShareLink.capabilities.canDownload, "canDownload should be false")
@@ -223,7 +223,7 @@ final class DriveApiTests: XCTestCase {
         let testDirectory = try await setUpTest(testName: "Remove share link")
         _ = try await currentApiFetcher.createShareLink(for: testDirectory)
         let response = try await currentApiFetcher.removeShareLink(for: testDirectory)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
     }
 
@@ -263,7 +263,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(user, "User shouldn't be nil")
         if let user = user {
             let response = try await currentApiFetcher.updateUserAccess(to: testDirectory, user: user, right: .manage)
-            XCTAssertTrue(response, "API should return true")
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedUser = fileAccess.users.first { $0.id == Env.inviteUserId }
             XCTAssertNotNil(updatedUser, "User shouldn't be nil")
@@ -280,7 +280,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(user, "User shouldn't be nil")
         if let user = user {
             let response = try await currentApiFetcher.removeUserAccess(to: testDirectory, user: user)
-            XCTAssertTrue(response, "API should return true")
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let deletedUser = fileAccess.users.first { $0.id == Env.inviteUserId }
             XCTAssertNil(deletedUser, "Deleted user should be nil")
@@ -296,7 +296,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
         if let invitation = invitation {
             let response = try await currentApiFetcher.updateInvitationAccess(drive: proxyDrive, invitation: invitation, right: .write)
-            XCTAssertTrue(response, "API should return true")
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedInvitation = fileAccess.invitations.first { $0.email == Env.inviteMail }
             XCTAssertNotNil(updatedInvitation, "Invitation shouldn't be nil")
@@ -313,7 +313,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
         if let invitation = invitation {
             let response = try await currentApiFetcher.deleteInvitation(drive: proxyDrive, invitation: invitation)
-            XCTAssertTrue(response, "API should return true")
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let deletedInvitation = fileAccess.invitations.first { $0.email == Env.inviteMail }
             XCTAssertNil(deletedInvitation, "Deleted invitation should be nil")
@@ -333,7 +333,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(team, "Team shouldn't be nil")
         if let team = team {
             let response = try await currentApiFetcher.updateTeamAccess(to: testDirectory, team: team, right: .write)
-            XCTAssertTrue(response, "API should return true")
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedTeam = fileAccess.teams.first { $0.id == Env.inviteTeam }
             XCTAssertNotNil(updatedTeam, "Team shouldn't be nil")
@@ -350,7 +350,7 @@ final class DriveApiTests: XCTestCase {
         XCTAssertNotNil(team, "Invitation shouldn't be nil")
         if let team = team {
             let response = try await currentApiFetcher.removeTeamAccess(to: testDirectory, team: team)
-            XCTAssertTrue(response, "API should return true")
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let deletedTeam = fileAccess.teams.first { $0.id == Env.inviteTeam }
             XCTAssertNil(deletedTeam, "Deleted team should be nil")
@@ -401,7 +401,7 @@ final class DriveApiTests: XCTestCase {
         let (testDirectory, file) = try await initOfficeFile(testName: "Like comment")
         let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
         let response = try await currentApiFetcher.likeComment(file: file, liked: false, comment: comment)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
             XCTFail("Comment should exist")
@@ -416,7 +416,7 @@ final class DriveApiTests: XCTestCase {
         let (testDirectory, file) = try await initOfficeFile(testName: "Delete comment")
         let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
         let response = try await currentApiFetcher.deleteComment(file: file, comment: comment)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         XCTAssertNil(comments.first { $0.id == comment.id }, "Comment should be deleted")
         tearDownTest(directory: testDirectory)
@@ -427,7 +427,7 @@ final class DriveApiTests: XCTestCase {
         let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
         let editedBody = "Edited comment"
         let response = try await currentApiFetcher.editComment(file: file, body: editedBody, comment: comment)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let editedComment = comments.first(where: { $0.id == comment.id }) else {
             XCTFail("Edited comment should exist")
@@ -459,15 +459,15 @@ final class DriveApiTests: XCTestCase {
         // Check that file has been deleted
         let (files, _) = try await currentApiFetcher.files(in: testDirectory)
         let deletedFile = files.first { $0.id == directory.id }
-        XCTAssertNil(deletedFile, TestsMessages.notNil("deleted file"))
+        XCTAssertNil(deletedFile, TestsMessages.notNil("trashed file"))
         // Check that file is in trash
         let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
         let fileInTrash = trashedFiles.first { $0.id == directory.id }
-        XCTAssertNotNil(fileInTrash, TestsMessages.notNil("deleted file"))
+        XCTAssertNotNil(fileInTrash, TestsMessages.notNil("trashed file"))
         if let file = fileInTrash {
             // Delete definitely
             let response = try await currentApiFetcher.deleteDefinitely(file: file)
-            XCTAssertTrue(response, "API should return true")
+            XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             // Check that file is not in trash anymore
             let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
             let deletedDefinitelyFile = trashedFiles.first { $0.id == file.id }
@@ -607,14 +607,14 @@ final class DriveApiTests: XCTestCase {
         let (testDirectory, file) = try await initOfficeFile(testName: "Favorite file")
         // Favorite
         let favoriteResponse = try await currentApiFetcher.favorite(file: file)
-        XCTAssertTrue(favoriteResponse, "API should return true")
+        XCTAssertTrue(favoriteResponse, TestsMessages.shouldReturnTrue)
         let files = try await currentApiFetcher.favorites(drive: proxyDrive, sortType: .newer)
         let favoriteFile = files.first { $0.id == file.id }
         XCTAssertNotNil(favoriteFile, "File should be in Favorite files")
         XCTAssertTrue(favoriteFile?.isFavorite == true, "File should be favorite")
         // Unfavorite
         let unfavoriteResponse = try await currentApiFetcher.unfavorite(file: file)
-        XCTAssertTrue(unfavoriteResponse, "API should return true")
+        XCTAssertTrue(unfavoriteResponse, TestsMessages.shouldReturnTrue)
         let files2 = try await currentApiFetcher.favorites(drive: proxyDrive, sortType: .newer)
         let unfavoriteFile = files2.first { $0.id == file.id }
         XCTAssertNil(unfavoriteFile, "File should be in Favorite files")
@@ -735,20 +735,20 @@ final class DriveApiTests: XCTestCase {
         let category = try await currentApiFetcher.createCategory(drive: proxyDrive, name: "UnitTest-\(Date())", color: "#1abc9c")
         // 2. Add category to folder
         let addResponse = try await currentApiFetcher.add(category: category, to: testDirectory)
-        XCTAssertTrue(addResponse, "API should return true")
+        XCTAssertTrue(addResponse, TestsMessages.shouldReturnTrue)
         // 3. Remove category from folder
         let removeResponse = try await currentApiFetcher.remove(category: category, from: testDirectory)
-        XCTAssertTrue(removeResponse, "API should return true")
+        XCTAssertTrue(removeResponse, TestsMessages.shouldReturnTrue)
         // 4. Delete category
         let deleteResponse = try await currentApiFetcher.deleteCategory(drive: proxyDrive, category: category)
-        XCTAssertTrue(deleteResponse, "API should return true")
+        XCTAssertTrue(deleteResponse, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
     }
 
     func testDirectoryColor() async throws {
         let testDirectory = try await setUpTest(testName: "DirectoryColor")
         let result = try await currentApiFetcher.updateColor(directory: testDirectory, color: "#E91E63")
-        XCTAssertTrue(result, "API should return true")
+        XCTAssertTrue(result, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
     }
 }

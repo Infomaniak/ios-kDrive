@@ -189,10 +189,10 @@ class PhotoListViewController: MultipleSelectionViewController {
         isLoading = true
         Task {
             do {
-                let (pictures, moreComing) = try await driveFileManager.lastPictures(page: page)
-                self.insertAndSort(pictures: pictures, replace: self.page == 1)
+                let (pagedPictures, moreComing) = try await driveFileManager.lastPictures(page: page)
+                self.insertAndSort(pictures: pagedPictures, replace: self.page == 1)
 
-                self.pictures += pictures
+                self.pictures += pagedPictures
                 self.showEmptyView(.noImages)
                 self.page += 1
                 self.hasNextPage = moreComing
