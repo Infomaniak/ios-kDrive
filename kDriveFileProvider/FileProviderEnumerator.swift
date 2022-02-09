@@ -67,7 +67,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 forceRefresh = lastResponseAt < anchorExpireTimestamp
             }
 
-            Task { [forceRefresh = forceRefresh] in
+            Task { [forceRefresh] in
                 do {
                     let file = try await driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
                     let (children, moreComing) = try await driveFileManager.files(in: file, page: pageIndex, forceRefresh: forceRefresh)
