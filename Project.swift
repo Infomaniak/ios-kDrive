@@ -17,48 +17,7 @@
  */
 
 import ProjectDescription
-
-public extension SettingsDictionary {
-    func marketingVersion(_ value: String) -> SettingsDictionary {
-        merging(["MARKETING_VERSION": SettingValue(stringLiteral: value)])
-    }
-
-    func bridgingHeader(path value: Path) -> SettingsDictionary {
-        merging(["SWIFT_OBJC_BRIDGING_HEADER": SettingValue(stringLiteral: value.pathString)])
-    }
-
-    func compilationConditions(_ value: String) -> SettingsDictionary {
-        merging(["SWIFT_ACTIVE_COMPILATION_CONDITIONS": SettingValue(stringLiteral: value)])
-    }
-
-    func appIcon(name value: String) -> SettingsDictionary {
-        merging(["ASSETCATALOG_COMPILER_APPICON_NAME": SettingValue(stringLiteral: value)])
-    }
-}
-
-let baseSettings = SettingsDictionary()
-    .automaticCodeSigning(devTeam: "864VDCS2QY")
-    .currentProjectVersion("1")
-    .marketingVersion("4.1.3")
-
-let deploymentTarget = DeploymentTarget.iOS(targetVersion: "13.0", devices: [.iphone, .ipad])
-
-let fileProviderSettings = baseSettings
-    .bridgingHeader(path: "$(SRCROOT)/kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h")
-    .compilationConditions("ISEXTENSION")
-let debugFileProviderSettings = fileProviderSettings
-    .compilationConditions("ISEXTENSION DEBUG")
-
-let shareExtensionSettings = baseSettings
-    .compilationConditions("ISEXTENSION")
-let debugShareExtensionSettings = shareExtensionSettings
-    .compilationConditions("ISEXTENSION DEBUG")
-
-let actionExtensionSettings = baseSettings
-    .compilationConditions("ISEXTENSION")
-    .appIcon(name: "ExtensionIcon")
-let debugActionExtensionSettings = actionExtensionSettings
-    .compilationConditions("ISEXTENSION DEBUG")
+import ProjectDescriptionHelpers
 
 let project = Project(name: "kDrive",
                       packages: [
@@ -90,7 +49,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .app,
                                  bundleId: "com.infomaniak.drive",
-                                 deploymentTarget: deploymentTarget,
+                                 deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDrive/Resources/Info.plist"),
                                  sources: "kDrive/**",
                                  resources: [
@@ -104,9 +63,7 @@ let project = Project(name: "kDrive",
                                      "kDriveCore/GoogleService-Info.plist"
                                  ],
                                  entitlements: "kDrive/Resources/kDrive.entitlements",
-                                 scripts: [
-                                     .post(path: "scripts/lint.sh", name: "Swiftlint")
-                                 ],
+                                 scripts: [Constants.swiftlintScript],
                                  dependencies: [
                                      .target(name: "kDriveFileProvider"),
                                      .target(name: "kDriveCore"),
@@ -121,7 +78,7 @@ let project = Project(name: "kDrive",
                                      .package(product: "MarkdownKit"),
                                      .sdk(name: "StoreKit.framework", status: .required)
                                  ],
-                                 settings: .settings(base: baseSettings)),
+                                 settings: .settings(base: Constants.baseSettings)),
                           Target(name: "kDriveTests",
                                  platform: .iOS,
                                  product: .unitTests,
@@ -132,7 +89,7 @@ let project = Project(name: "kDrive",
                                  dependencies: [
                                      .target(name: "kDrive")
                                  ],
-                                 settings: .settings(base: baseSettings)),
+                                 settings: .settings(base: Constants.baseSettings)),
                           Target(name: "kDriveUITests",
                                  platform: .iOS,
                                  product: .uiTests,
@@ -148,7 +105,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .staticLibrary,
                                  bundleId: "com.infomaniak.drive.resources",
-                                 deploymentTarget: deploymentTarget,
+                                 deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .default,
                                  resources: [
                                      "kDrive/**/*.xcassets",
@@ -159,7 +116,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .framework,
                                  bundleId: "com.infomaniak.drive.core",
-                                 deploymentTarget: deploymentTarget,
+                                 deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveCore/Info.plist"),
                                  sources: "kDriveCore/**",
                                  resources: [
@@ -189,7 +146,7 @@ let project = Project(name: "kDrive",
                                  platform: .iOS,
                                  product: .appExtension,
                                  bundleId: "com.infomaniak.drive.FileProvider",
-                                 deploymentTarget: deploymentTarget,
+                                 deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
                                  sources: "kDriveFileProvider/**",
                                  headers: Headers(project: "kDriveFileProvider/**"),
@@ -197,168 +154,15 @@ let project = Project(name: "kDrive",
                                  dependencies: [
                                      .target(name: "kDriveCore")
                                  ],
-                                 settings: .settings(base: fileProviderSettings, debug: debugFileProviderSettings)),
-                          Target(name: "kDriveShareExtension",
-                                 platform: .iOS,
-                                 product: .appExtension,
-                                 bundleId: "com.infomaniak.drive.ShareExtension",
-                                 deploymentTarget: deploymentTarget,
-                                 infoPlist: .file(path: "kDriveShareExtension/Info.plist"),
-                                 sources: [
-                                     "kDriveShareExtension/**",
-                                     "kDrive/UI/Controller/FloatingPanelSelectOptionViewController.swift",
-                                     "kDrive/UI/Controller/Create File/FloatingPanelUtils.swift",
-                                     "kDrive/UI/Controller/Files/Categories/**",
-                                     "kDrive/UI/Controller/Files/Rights and Share/**",
-                                     "kDrive/UI/Controller/Files/Save File/**",
-                                     "kDrive/UI/Controller/Files/Search/**",
-                                     "kDrive/UI/Controller/Files/MultipleSelectionViewController.swift",
-                                     "kDrive/UI/Controller/Files/FileListViewController.swift",
-                                     "kDrive/UI/Controller/Files/FloatingPanelSortOptionTableViewController.swift",
-                                     "kDrive/UI/Controller/Floating Panel Information/**",
-                                     "kDrive/UI/Controller/NewFolder/**",
-                                     "kDrive/UI/Controller/Storyboard.swift",
-                                     "kDrive/UI/View/EmptyTableView/**",
-                                     "kDrive/UI/View/Header view/**",
-                                     "kDrive/UI/View/Generic/**",
-                                     "kDrive/UI/View/Files/Categories/**",
-                                     "kDrive/UI/View/Files/FileDetail/ShareLink/**",
-                                     "kDrive/UI/View/Files/SaveFile/**",
-                                     "kDrive/UI/View/Files/Search/**",
-                                     "kDrive/UI/View/Files/Upload/**",
-                                     "kDrive/UI/View/Files/FileCollectionViewCell.swift",
-                                     "kDrive/UI/View/Files/FileGridCollectionViewCell.swift",
-                                     "kDrive/UI/View/Files/SwipableCell.swift",
-                                     "kDrive/UI/View/Files/SwipableCollectionView.swift",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.swift",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelQuickActionCollectionViewCell.swift",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.swift",
-                                     "kDrive/UI/View/Footer view/**",
-                                     "kDrive/UI/View/Menu/SwitchUser/**",
-                                     "kDrive/UI/View/Menu/MenuTableViewCell.swift",
-                                     "kDrive/UI/View/NewFolder/**",
-                                     "kDrive/Utils/**"
-                                 ],
-                                 resources: [
-                                     "kDriveShareExtension/**/*.storyboard",
-                                     "kDrive/UI/Controller/Files/**/*.storyboard",
-                                     "kDrive/UI/Controller/Floating Panel Information/*.storyboard",
-                                     "kDrive/UI/Controller/NewFolder/*.storyboard",
-                                     "kDrive/UI/View/EmptyTableView/**/*.xib",
-                                     "kDrive/UI/View/Header view/**/*.xib",
-                                     "kDrive/UI/View/Generic/**/*.xib",
-                                     "kDrive/UI/View/Files/FileCollectionViewCell.xib",
-                                     "kDrive/UI/View/Files/FileGridCollectionViewCell.xib",
-                                     "kDrive/UI/View/Files/Categories/**/*.xib",
-                                     "kDrive/UI/View/Files/FileDetail/ShareLink/*.xib",
-                                     "kDrive/UI/View/Files/SaveFile/*.xib",
-                                     "kDrive/UI/View/Files/Search/*.xib",
-                                     "kDrive/UI/View/Files/Upload/*.xib",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.xib",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelQuickActionCollectionViewCell.xib",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.xib",
-                                     "kDrive/UI/View/Footer view/*.xib",
-                                     "kDrive/UI/View/Menu/MenuTableViewCell.xib",
-                                     "kDrive/UI/View/Menu/SwitchUser/*.xib",
-                                     "kDrive/UI/View/NewFolder/*.xib",
-                                     "kDrive/**/*.xcassets",
-                                     "kDrive/**/*.strings",
-                                     "kDrive/**/*.stringsdict",
-                                     "kDrive/**/*.json"
-                                 ],
-                                 entitlements: "kDriveShareExtension/ShareExtension.entitlements",
-                                 scripts: [
-                                     .post(path: "scripts/lint.sh", name: "Swiftlint")
-                                 ],
-                                 dependencies: [
-                                     .target(name: "kDriveCore"),
-                                     .package(product: "FloatingPanel"),
-                                     .package(product: "Lottie"),
-                                     .package(product: "DropDown"),
-                                     .package(product: "HorizonCalendar")
-                                 ],
-                                 settings: .settings(base: shareExtensionSettings, debug: debugShareExtensionSettings)),
-                          Target(name: "kDriveActionExtension",
-                                 platform: .iOS,
-                                 product: .appExtension,
-                                 bundleId: "com.infomaniak.drive.ActionExtension",
-                                 deploymentTarget: deploymentTarget,
-                                 infoPlist: .file(path: "kDriveActionExtension/Info.plist"),
-                                 sources: [
-                                     "kDriveActionExtension/**",
-                                     "kDrive/UI/Controller/FloatingPanelSelectOptionViewController.swift",
-                                     "kDrive/UI/Controller/Create File/FloatingPanelUtils.swift",
-                                     "kDrive/UI/Controller/Files/Categories/**",
-                                     "kDrive/UI/Controller/Files/Rights and Share/**",
-                                     "kDrive/UI/Controller/Files/Save File/**",
-                                     "kDrive/UI/Controller/Files/Search/**",
-                                     "kDrive/UI/Controller/Files/MultipleSelectionViewController.swift",
-                                     "kDrive/UI/Controller/Files/FileListViewController.swift",
-                                     "kDrive/UI/Controller/Files/FloatingPanelSortOptionTableViewController.swift",
-                                     "kDrive/UI/Controller/Floating Panel Information/**",
-                                     "kDrive/UI/Controller/NewFolder/**",
-                                     "kDrive/UI/Controller/Storyboard.swift",
-                                     "kDrive/UI/View/EmptyTableView/**",
-                                     "kDrive/UI/View/Header view/**",
-                                     "kDrive/UI/View/Generic/**",
-                                     "kDrive/UI/View/Files/Categories/**",
-                                     "kDrive/UI/View/Files/FileDetail/ShareLink/**",
-                                     "kDrive/UI/View/Files/SaveFile/**",
-                                     "kDrive/UI/View/Files/Search/**",
-                                     "kDrive/UI/View/Files/Upload/**",
-                                     "kDrive/UI/View/Files/FileCollectionViewCell.swift",
-                                     "kDrive/UI/View/Files/FileGridCollectionViewCell.swift",
-                                     "kDrive/UI/View/Files/SwipableCell.swift",
-                                     "kDrive/UI/View/Files/SwipableCollectionView.swift",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.swift",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelQuickActionCollectionViewCell.swift",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.swift",
-                                     "kDrive/UI/View/Footer view/**",
-                                     "kDrive/UI/View/Menu/SwitchUser/**",
-                                     "kDrive/UI/View/Menu/MenuTableViewCell.swift",
-                                     "kDrive/UI/View/NewFolder/**",
-                                     "kDrive/Utils/**"
-                                 ],
-                                 resources: [
-                                     "kDriveActionExtension/**/*.storyboard",
-                                     "kDrive/UI/Controller/Files/**/*.storyboard",
-                                     "kDrive/UI/Controller/Floating Panel Information/*.storyboard",
-                                     "kDrive/UI/Controller/NewFolder/*.storyboard",
-                                     "kDrive/UI/View/EmptyTableView/**/*.xib",
-                                     "kDrive/UI/View/Header view/**/*.xib",
-                                     "kDrive/UI/View/Generic/**/*.xib",
-                                     "kDrive/UI/View/Files/FileCollectionViewCell.xib",
-                                     "kDrive/UI/View/Files/FileGridCollectionViewCell.xib",
-                                     "kDrive/UI/View/Files/Categories/**/*.xib",
-                                     "kDrive/UI/View/Files/FileDetail/ShareLink/*.xib",
-                                     "kDrive/UI/View/Files/SaveFile/*.xib",
-                                     "kDrive/UI/View/Files/Search/*.xib",
-                                     "kDrive/UI/View/Files/Upload/*.xib",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.xib",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelQuickActionCollectionViewCell.xib",
-                                     "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.xib",
-                                     "kDrive/UI/View/Footer view/*.xib",
-                                     "kDrive/UI/View/Menu/MenuTableViewCell.xib",
-                                     "kDrive/UI/View/Menu/SwitchUser/*.xib",
-                                     "kDrive/UI/View/NewFolder/*.xib",
-                                     "kDriveActionExtension/**/*.xcassets",
-                                     "kDrive/**/*.xcassets",
-                                     "kDriveActionExtension/**/*.strings",
-                                     "kDrive/**/Localizable.strings",
-                                     "kDrive/**/*.stringsdict",
-                                     "kDrive/**/*.json"
-                                 ],
-                                 entitlements: "kDriveActionExtension/ActionExtension.entitlements",
-                                 scripts: [
-                                     .post(path: "scripts/lint.sh", name: "Swiftlint")
-                                 ],
-                                 dependencies: [
-                                     .target(name: "kDriveCore"),
-                                     .package(product: "FloatingPanel"),
-                                     .package(product: "Lottie"),
-                                     .package(product: "DropDown"),
-                                     .package(product: "HorizonCalendar")
-                                 ],
-                                 settings: .settings(base: actionExtensionSettings, debug: debugActionExtensionSettings))
+                                 settings: .settings(base: Constants.fileProviderSettings, debug: Constants.debugFileProviderSettings)),
+                          .extensionTarget(name: "kDriveShareExtension",
+                                           bundleId: "com.infomaniak.drive.ShareExtension",
+                                           entitlements: "kDriveShareExtension/ShareExtension.entitlements",
+                                           settings: .settings(base: Constants.shareExtensionSettings, debug: Constants.debugShareExtensionSettings)),
+                          .extensionTarget(name: "kDriveActionExtension",
+                                           bundleId: "com.infomaniak.drive.ActionExtension",
+                                           entitlements: "kDriveActionExtension/ActionExtension.entitlements",
+                                           settings: .settings(base: Constants.actionExtensionSettings, debug: Constants.debugActionExtensionSettings))
                       ],
                       fileHeaderTemplate: .file("file-header-template.txt"))
+
