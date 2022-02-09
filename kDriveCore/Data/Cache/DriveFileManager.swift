@@ -339,10 +339,11 @@ public class DriveFileManager {
         } else {
             // Get children from API
             let children: [File]
+            let responseAt: Int?
             if directory.isRoot {
-                (children, _) = try await apiFetcher.rootFiles(drive: drive, page: page, sortType: sortType)
+                (children, responseAt) = try await apiFetcher.rootFiles(drive: drive, page: page, sortType: sortType)
             } else {
-                (children, _) = try await apiFetcher.files(in: directory, page: page, sortType: sortType)
+                (children, responseAt) = try await apiFetcher.files(in: directory, page: page, sortType: sortType)
             }
 
             let realm = getRealm()
@@ -355,6 +356,7 @@ public class DriveFileManager {
             if let managedParent = realm.object(ofType: File.self, forPrimaryKey: parentId) {
                 // Update parent
                 try realm.write {
+                    managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
                     if children.count < Endpoint.itemsPerPage {
                         managedParent.versionCode = DriveFileManager.constants.currentVersionCode
                         managedParent.fullyDownloaded = true
@@ -380,8 +382,7 @@ public class DriveFileManager {
            (cachedFile.responseAt > 0 && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return cachedFile
         } else {
-            let (file, responseAt) = try await apiFetcher.fileInfo(ProxyFile(driveId: drive.id, id: id))
-            file.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+            let (file, _) = try await apiFetcher.fileInfo(ProxyFile(driveId: drive.id, id: id))
 
             let realm = getRealm()
 
