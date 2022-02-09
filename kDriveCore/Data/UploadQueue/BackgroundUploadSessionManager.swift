@@ -131,7 +131,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
                     if let sessionUrl = task.originalRequest?.url?.absoluteString,
                        let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                        .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                        self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = fileId] _, value in
+                        self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId] _, value in
                             guard let newValue = value.newValue else {
                                 return
                             }
