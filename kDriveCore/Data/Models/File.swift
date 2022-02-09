@@ -615,8 +615,9 @@ public class File: Object, Codable {
         conversion = try container.decodeIfPresent(FileConversion.self, forKey: .conversion)
     }
 
-    // We have to keep it for Realm
-    override public init() {}
+    override public init() {
+        // We have to keep it for Realm
+    }
 
     convenience init(id: Int, name: String) {
         self.init()
