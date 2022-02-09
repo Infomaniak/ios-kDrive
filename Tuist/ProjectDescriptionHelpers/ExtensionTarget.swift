@@ -99,7 +99,8 @@ public extension Target {
                           .package(product: "FloatingPanel"),
                           .package(product: "Lottie"),
                           .package(product: "DropDown"),
-                          .package(product: "HorizonCalendar")
+                          .package(product: "HorizonCalendar"),
+                          .package(product: "MatomoTracker")
                       ],
                       settings: settings)
     }
