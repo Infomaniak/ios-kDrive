@@ -594,6 +594,10 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                         let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
                             return IndexPath(row: indexPath.row + index, section: indexPath.section)
                         }
+                        if commentToDelete.isResponse {
+                            let parentComment = self.comments.first { $0.id == commentToDelete.parentId }
+                            parentComment?.responsesCount -= 1
+                        }
                         self.comments.removeSubrange(indexPath.row...indexPath.row + commentToDelete.responsesCount)
                         if !self.comments.isEmpty {
                             self.tableView.deleteRows(at: rowsToDelete, with: .automatic)
