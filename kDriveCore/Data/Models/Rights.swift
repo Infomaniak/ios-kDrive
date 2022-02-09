@@ -95,7 +95,9 @@ public class Rights: EmbeddedObject, Codable {
         canBecomeDropbox = try container.decodeIfPresent(Bool.self, forKey: .canBecomeDropbox) ?? false
     }
 
-    public override init() {}
+    public override init() {
+        // We have to keep it for Realm
+    }
 }
 
 extension Rights: ContentEquatable {
