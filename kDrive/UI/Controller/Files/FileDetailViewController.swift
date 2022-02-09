@@ -594,7 +594,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                         let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
                             return IndexPath(row: indexPath.row + index, section: indexPath.section)
                         }
-                        self.comments.removeSubrange(indexPath.row...indexPath.row+commentToDelete.responsesCount)
+                        self.comments.removeSubrange(indexPath.row...indexPath.row + commentToDelete.responsesCount)
                         if !self.comments.isEmpty {
                             self.tableView.deleteRows(at: rowsToDelete, with: .automatic)
                         } else {
@@ -644,6 +644,13 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     if let data = response?.data {
                         data.isResponse = true
                         self.comments.insert(data, at: indexPath.row + 1)
+                        let parentComment = self.comments[indexPath.row]
+                        if parentComment.responses != nil {
+                            parentComment.responses?.insert(data, at: 0)
+                        } else {
+                            parentComment.responses = [data]
+                        }
+                        parentComment.responsesCount += 1
                         self.tableView.insertRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .automatic)
                         completionHandler(true)
                     } else {
