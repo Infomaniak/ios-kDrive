@@ -7,8 +7,8 @@ assignees: ''
 
 ---
 
-*Note: English is the preferred language, but if you prefer you can write in French.
-L'anglais est la langue préférée, mais si vous préférez, vous pouvez écrire en français.*
+<!--Note: English is the preferred language, but if you prefer you can write in French.
+L'anglais est la langue préférée, mais si vous préférez, vous pouvez écrire en français.-->
 
 **Description**
 A clear and concise description of what the bug is.
