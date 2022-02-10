@@ -581,7 +581,7 @@ public class DriveFileManager {
     }
 
     public func getLocalRecentActivities() -> [FileActivity] {
-        return Array(getRealm().objects(FileActivity.self).sorted(byKeyPath: "createdAt", ascending: false).freeze())
+        return Array(getRealm().objects(FileActivity.self).sorted(by: \.createdAt, ascending: false).freeze())
     }
 
     public func setLocalRecentActivities(_ activities: [FileActivity]) {
@@ -816,7 +816,7 @@ public class DriveFileManager {
 
     public func getWorkingSet() -> [File] {
         // let predicate = NSPredicate(format: "isFavorite = %d OR lastModifiedAt >= %d", true, Int(Date(timeIntervalSinceNow: -3600).timeIntervalSince1970))
-        let files = getRealm().objects(File.self).sorted(byKeyPath: "lastModifiedAt", ascending: false)
+        let files = getRealm().objects(File.self).sorted(by: \.lastModifiedAt, ascending: false)
         var result = [File]()
         for i in 0 ..< min(20, files.count) {
             result.append(files[i])

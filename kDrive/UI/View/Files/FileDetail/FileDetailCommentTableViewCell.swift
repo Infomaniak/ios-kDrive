@@ -69,7 +69,7 @@ class FileDetailCommentTableViewCell: UITableViewCell {
         }
         userNameLabel.text = comment.user.displayName
         descriptionLabel.text = comment.body
-        timeLabel.text = Constants.formatTimestamp(TimeInterval(comment.createdAt), relative: true)
+        timeLabel.text = Constants.formatDate(comment.createdAt, relative: true)
         likeLabel.text = "\(comment.likesCount)"
         likeLabel.textColor = comment.liked ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.iconColor.color
         likeImage.tintColor = comment.liked ? KDriveResourcesAsset.infomaniakColor.color : KDriveResourcesAsset.iconColor.color

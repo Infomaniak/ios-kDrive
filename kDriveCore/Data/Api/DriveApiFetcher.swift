@@ -238,12 +238,6 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .delete)).data
     }
 
-    public func getFileDetailActivity(file: File, page: Int, completion: @escaping (ApiResponse<[FileDetailActivity]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=user,mobile\(pagination(page: page))"
-
-        makeRequest(url, method: .get, completion: completion)
-    }
-
     public func comments(file: File, page: Int) async throws -> [Comment] {
         try await perform(request: authenticatedRequest(.comments(file: file).paginated(page: page))).data
     }
@@ -307,6 +301,13 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func move(file: File, to destination: File) async throws -> CancelableResponse {
         try await perform(request: authenticatedRequest(.move(file: file, destinationId: destination.id), method: .post)).data
+    }
+
+    public func fileActivities(file: File, page: Int) async throws -> [FileDetailActivity] {
+        let endpoint = Endpoint.fileActivities(file: file)
+            .appending(path: "", queryItems: [URLQueryItem(name: "with", value: "user")])
+            .paginated(page: page)
+        return try await perform(request: authenticatedRequest(endpoint)).data
     }
 
     public func getRecentActivity(driveId: Int, page: Int = 1, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
