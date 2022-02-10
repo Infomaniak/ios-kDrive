@@ -76,7 +76,7 @@ class UploadTableViewCell: InsetTableViewCell {
             }
         }
     }
-    
+
     private func addThumbnail(image: UIImage) {
         DispatchQueue.main.async {
             self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
