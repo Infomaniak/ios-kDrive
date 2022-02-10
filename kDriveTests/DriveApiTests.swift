@@ -364,24 +364,6 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-   /* func testGetFileDetailActivity() {
-        let testName = "Get file detail activity"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        setUpTest(testName: testName) { root in
-            rootFile = root
-            self.currentApiFetcher.getFileDetailActivity(file: rootFile, page: 1) { response, error in
-                XCTAssertNotNil(response, TestsMessages.notNil("response"))
-                XCTAssertNil(error, TestsMessages.noError)
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }*/
-
     func testGetComments() async throws {
         let testDirectory = try await setUpTest(testName: "Get comments")
         _ = try await currentApiFetcher.comments(file: testDirectory, page: 1)
@@ -476,71 +458,71 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    /*func testRenameFile() {
-        let testName = "Rename file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+    /* func testRenameFile() {
+         let testName = "Rename file"
+         let expectation = XCTestExpectation(description: testName)
+         var rootFile = File()
 
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            let newName = "renamed office file"
-            self.currentApiFetcher.renameFile(file: file, newName: newName) { renameResponse, renameError in
-                XCTAssertNotNil(renameResponse?.data, TestsMessages.notNil("renamed file"))
-                XCTAssertNil(renameError, TestsMessages.noError)
-                XCTAssertTrue(renameResponse!.data!.name == newName, "File name should have changed")
+         initOfficeFile(testName: testName) { root, file in
+             rootFile = root
+             let newName = "renamed office file"
+             self.currentApiFetcher.renameFile(file: file, newName: newName) { renameResponse, renameError in
+                 XCTAssertNotNil(renameResponse?.data, TestsMessages.notNil("renamed file"))
+                 XCTAssertNil(renameError, TestsMessages.noError)
+                 XCTAssertTrue(renameResponse!.data!.name == newName, "File name should have changed")
 
-                self.checkIfFileIsInDestination(file: renameResponse!.data!, directory: rootFile) {
-                    expectation.fulfill()
-                }
-            }
-        }
+                 self.checkIfFileIsInDestination(file: renameResponse!.data!, directory: rootFile) {
+                     expectation.fulfill()
+                 }
+             }
+         }
 
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
+         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+         tearDownTest(directory: rootFile)
+     }
 
-    func testDuplicateFile() {
-        let testName = "Duplicate file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+     func testDuplicateFile() {
+         let testName = "Duplicate file"
+         let expectation = XCTestExpectation(description: testName)
+         var rootFile = File()
 
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.duplicateFile(file: file, duplicateName: "duplicate-\(Date())") { duplicateResponse, duplicateError in
-                XCTAssertNotNil(duplicateResponse?.data, TestsMessages.notNil("duplicated file"))
-                XCTAssertNil(duplicateError, TestsMessages.noError)
+         initOfficeFile(testName: testName) { root, file in
+             rootFile = root
+             self.currentApiFetcher.duplicateFile(file: file, duplicateName: "duplicate-\(Date())") { duplicateResponse, duplicateError in
+                 XCTAssertNotNil(duplicateResponse?.data, TestsMessages.notNil("duplicated file"))
+                 XCTAssertNil(duplicateError, TestsMessages.noError)
 
-                Task { [rootFile] in
-                    let (files, _) = try await self.currentApiFetcher.files(in: rootFile)
-                    XCTAssertEqual(files.count, 2, "Root file should have 2 children")
-                    expectation.fulfill()
-                }
-            }
-        }
+                 Task { [rootFile] in
+                     let (files, _) = try await self.currentApiFetcher.files(in: rootFile)
+                     XCTAssertEqual(files.count, 2, "Root file should have 2 children")
+                     expectation.fulfill()
+                 }
+             }
+         }
 
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }
+         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+         tearDownTest(directory: rootFile)
+     }
 
-    func testCopyFile() {
-        let testName = "Copy file"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
+     func testCopyFile() {
+         let testName = "Copy file"
+         let expectation = XCTestExpectation(description: testName)
+         var rootFile = File()
 
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.copyFile(file: file, newParent: rootFile) { copyResponse, copyError in
-                XCTAssertNotNil(copyResponse, TestsMessages.notNil("response"))
-                XCTAssertNil(copyError, TestsMessages.noError)
-                self.checkIfFileIsInDestination(file: copyResponse!.data!, directory: rootFile) {
-                    expectation.fulfill()
-                }
-            }
-        }
+         initOfficeFile(testName: testName) { root, file in
+             rootFile = root
+             self.currentApiFetcher.copyFile(file: file, newParent: rootFile) { copyResponse, copyError in
+                 XCTAssertNotNil(copyResponse, TestsMessages.notNil("response"))
+                 XCTAssertNil(copyError, TestsMessages.noError)
+                 self.checkIfFileIsInDestination(file: copyResponse!.data!, directory: rootFile) {
+                     expectation.fulfill()
+                 }
+             }
+         }
 
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
-    }*/
+         wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+         tearDownTest(directory: rootFile)
+     } */
 
     func testMoveFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Move file")
@@ -550,41 +532,24 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    /*func testGetRecentActivity() {
-        let testName = "Get recent activity"
-        let expectation = XCTestExpectation(description: testName)
-
-        currentApiFetcher.getRecentActivity(driveId: Env.driveId) { response, error in
-            XCTAssertNotNil(response?.data, TestsMessages.notNil("response"))
-            XCTAssertNil(error, TestsMessages.noError)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
+    func testGetRecentActivity() async throws {
+        _ = try await currentApiFetcher.recentActivity(drive: proxyDrive)
     }
 
-    func testGetFileActivitiesFromDate() {
-        let testName = "Get file activity from date"
-        let expectation = XCTestExpectation(description: testName)
-        var rootFile = File()
-
-        let earlyDate = Calendar.current.date(byAdding: .hour, value: -1, to: Date())
-        let time = Int(earlyDate!.timeIntervalSince1970)
-
-        initOfficeFile(testName: testName) { root, file in
-            rootFile = root
-            self.currentApiFetcher.getFileActivitiesFromDate(file: file, date: time, page: 1) { response, error in
-                XCTAssertNotNil(response?.data, TestsMessages.notNil("response"))
-                XCTAssertNil(error, TestsMessages.noError)
-                expectation.fulfill()
-            }
-        }
-
-        wait(for: [expectation], timeout: DriveApiTests.defaultTimeout)
-        tearDownTest(directory: rootFile)
+    func testGetFileActivities() async throws {
+        let testDirectory = try await setUpTest(testName: "Get file detail activity")
+        _ = try await currentApiFetcher.fileActivities(file: testDirectory, page: 1)
+        tearDownTest(directory: testDirectory)
     }
 
-    func testGetFilesActivities() async throws {
+    func testGetFileActivitiesFromDate() async throws {
+        let earlyDate = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
+        let (testDirectory, file) = try await initOfficeFile(testName: "Get file activity from date")
+        _ = try await currentApiFetcher.fileActivities(file: file, from: earlyDate, page: 1)
+        tearDownTest(directory: testDirectory)
+    }
+
+    /*func testGetFilesActivities() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
         let secondFile = try await currentApiFetcher.createFile(in: testDirectory, name: "Get files activities-\(Date())", type: "docx")
         let activities: [Int: FilesActivitiesContent] = try await withCheckedThrowingContinuation { continuation in

@@ -22,7 +22,7 @@ import kDriveResources
 import UIKit
 
 class HomeRecentActivitiesController: HomeRecentFilesController {
-    private let mergeFileCreateDelay = 43_200 // 12h
+    private let mergeFileCreateDelay = 43_200.0 // 12h
 
     private var mergedActivities = [FileActivity]()
 
@@ -51,9 +51,9 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         }
         loading = true
 
-        driveFileManager.apiFetcher.getRecentActivity(driveId: driveFileManager.drive.id, page: page) { response, _ in
-            self.loading = false
-            if let activities = response?.data {
+        Task {
+            do {
+                let activities = try await driveFileManager.apiFetcher.recentActivity(drive: driveFileManager.drive, page: page)
                 self.empty = self.page == 1 && activities.isEmpty
                 self.moreComing = activities.count == Endpoint.itemsPerPage
                 self.page += 1
@@ -65,13 +65,15 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                     guard !self.invalidated else {
                         return
                     }
-                    self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
+                    Task {
+                        await self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
+                    }
                 }
                 // Update cache
                 if self.page == 1 {
                     self.driveFileManager.setLocalRecentActivities(activities)
                 }
-            } else {
+            } catch {
                 DispatchQueue.global(qos: .utility).async {
                     let activities = self.driveFileManager.getLocalRecentActivities()
                     self.mergedActivities = self.mergeAndClean(activities: activities)
@@ -81,9 +83,12 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                     guard !self.invalidated else {
                         return
                     }
-                    self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
+                    Task {
+                        await self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
+                    }
                 }
             }
+            self.loading = false
         }
     }
 
@@ -98,7 +103,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
             if !ignoredActivityIds.contains(activity.id) && !ignoreActivity {
                 var i = index + 1
                 var mergedFilesTemp = [activity.fileId: activity.file]
-                while i < activities.count && activity.createdAt - activities[i].createdAt <= mergeFileCreateDelay {
+                while i < activities.count && activity.createdAt.distance(to: activities[i].createdAt) <= mergeFileCreateDelay {
                     if activity.user?.id == activities[i].user?.id && activity.action == activities[i].action && activity.file?.type == activities[i].file?.type {
                         ignoredActivityIds.append(activities[i].id)
                         if mergedFilesTemp[activities[i].fileId] == nil {
