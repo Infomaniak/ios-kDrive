@@ -482,7 +482,7 @@ public class DriveFileManager {
         }
         if let fileType = fileType {
             if fileType == .folder {
-                searchResults = searchResults.filter(NSPredicate(format: "type == \"dir\""))
+                searchResults = searchResults.filter(NSPredicate(format: "rawType == \"dir\""))
             } else {
                 searchResults = searchResults.filter(NSPredicate(format: "rawConvertedType == %@", fileType.rawValue))
             }
