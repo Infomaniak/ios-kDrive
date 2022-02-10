@@ -40,7 +40,7 @@ class RecentActivityBottomTableViewCell: UITableViewCell {
                 fileImage.image = file.icon
                 fileImage.tintColor = file.tintColor
             } else {
-                fileNameLabel.text = String(recentActivity.path.split(separator: "/").last ?? "")
+                fileNameLabel.text = String(recentActivity.newPath.split(separator: "/").last ?? "")
                 fileImage.image = ConvertedType.unknown.icon
                 fileImage.tintColor = ConvertedType.unknown.tintColor
             }

@@ -249,16 +249,19 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     override func getNewChanges() {
-        guard currentDirectory != nil else { return }
+        guard driveFileManager != nil && currentDirectory != nil else { return }
         isLoadingData = true
-        driveFileManager?.getFolderActivities(file: currentDirectory) { [weak self] results, _, error in
-            self?.isLoadingData = false
-            if results != nil {
-                self?.reloadData(showRefreshControl: false, withActivities: false)
-            } else if let error = error as? DriveError, error == .objectNotFound {
-                // Pop view controller
-                self?.navigationController?.popViewController(animated: true)
+        Task {
+            do {
+                _ = try await driveFileManager.fileActivities(file: currentDirectory)
+                self.reloadData(showRefreshControl: false, withActivities: false)
+            } catch {
+                if let error = error as? DriveError, error == .objectNotFound {
+                    // Pop view controller
+                    self.navigationController?.popViewController(animated: true)
+                }
             }
+            self.isLoadingData = false
         }
     }
 
