@@ -26,7 +26,7 @@ import QuickLook
 import RealmSwift
 
 public enum ConvertedType: String, CaseIterable {
-    case archive, audio, code, folder, font, image, pdf, presentation, spreadsheet, text, unknown, url, video
+    case archive, audio, code, folder = "dir", font, image, pdf, presentation, spreadsheet, text, unknown, url, video
 
     public var icon: UIImage {
         switch self {
