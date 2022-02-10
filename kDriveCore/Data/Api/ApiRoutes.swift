@@ -30,10 +30,6 @@ public enum ApiRoutes {
 
     static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
 
-    static func getFileDetailActivity(file: File) -> String {
-        return "\(fileURL(file: file))activity"
-    }
-
     static func renameFile(file: File) -> String {
         return "\(fileURL(file: file))rename?\(with)"
     }

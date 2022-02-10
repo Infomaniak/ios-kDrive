@@ -23,8 +23,8 @@ public class Comment: Codable {
     public var parentId: Int
     public var body: String
     public var isResolved: Bool
-    public var createdAt: Int
-    public var updatedAt: Int
+    public var createdAt: Date
+    public var updatedAt: Date
     public var liked: Bool
     public var likesCount: Int
     public var responsesCount: Int

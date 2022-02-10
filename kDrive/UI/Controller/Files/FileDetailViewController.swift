@@ -223,11 +223,14 @@ class FileDetailViewController: UIViewController {
 
     private func fetchNextActivities() {
         activitiesInfo.isLoading = true
-        driveFileManager.apiFetcher.getFileDetailActivity(file: file, page: activitiesInfo.page) { response, _ in
-            if let data = response?.data {
-                self.orderActivities(data: data)
+        Task {
+            do {
+                let pagedActivities = try await driveFileManager.apiFetcher.fileActivities(file: file, page: activitiesInfo.page)
+                self.orderActivities(data: pagedActivities)
                 self.activitiesInfo.page += 1
-                self.activitiesInfo.hasNextPage = data.count == Endpoint.itemsPerPage
+                self.activitiesInfo.hasNextPage = pagedActivities.count == Endpoint.itemsPerPage
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
             self.activitiesInfo.isLoading = false
         }
@@ -278,12 +281,12 @@ class FileDetailViewController: UIViewController {
             activities[index].append(data[0])
             lastDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval()), style: .date)
         } else {
-            lastDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval(activities[index][0].createdAt)), style: .date)
+            lastDate = Constants.formatDate(activities[index][0].createdAt, style: .date)
         }
 
         for (i, activity) in data.enumerated() {
             if i != 0 || notEmpty {
-                currentDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval(activity.createdAt)), style: .date)
+                currentDate = Constants.formatDate(activity.createdAt, style: .date)
                 if currentDate == lastDate {
                     activities[index].append(activity)
                 } else {
@@ -499,7 +502,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     if indexPath.section == 1 {
                         cell.topSeparatorHeight.constant = 0
                     }
-                    cell.dateLabel.text = Constants.formatTimestamp(TimeInterval(activities[indexPath.section - 1][0].createdAt), style: .date, relative: true)
+                    cell.dateLabel.text = Constants.formatDate(activities[indexPath.section - 1][0].createdAt, style: .date, relative: true)
                     return cell
                 }
                 let cell = tableView.dequeueReusableCell(type: FileDetailActivityTableViewCell.self, for: indexPath)
