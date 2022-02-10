@@ -153,7 +153,7 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            schemaVersion: 7,
+            schemaVersion: 8,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < 1 {
                     // Migration to version 1: migrating rights
@@ -235,6 +235,14 @@ public class DriveFileManager {
                         }
                         if let deletedAt = oldObject?["deletedAt"] as? Int {
                             newObject?["deletedAt"] = Date(timeIntervalSince1970: TimeInterval(deletedAt))
+                        }
+                    }
+                }
+                if oldSchemaVersion < 8 {
+                    migration.enumerateObjects(ofType: FileActivity.className()) { oldObject, newObject in
+                        newObject?["newPath"] = oldObject?["pathNew"]
+                        if let createdAt = oldObject?["createdAt"] as? Int {
+                            newObject?["createdAt"] = Date(timeIntervalSince1970: TimeInterval(createdAt))
                         }
                     }
                 }
@@ -673,47 +681,33 @@ public class DriveFileManager {
         }
     }
 
-    public func getFolderActivities(file: File,
-                                    date: Int? = nil,
-                                    pagedActions: [Int: FileActivityType]? = nil,
-                                    pagedActivities: ActivitiesResult = ActivitiesResult(),
-                                    page: Int = 1,
-                                    completion: @escaping (ActivitiesResult?, Int?, Error?) -> Void) {
-        var pagedActions = pagedActions ?? [Int: FileActivityType]()
-        let fromDate = date ?? file.responseAt
-        // Using a ThreadSafeReference produced crash
+    public func fileActivities(file: File, from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
+        // Get all pages and assemble
         let fileId = file.id
-        apiFetcher.getFileActivitiesFromDate(file: file, date: fromDate, page: page) { response, error in
-            if let activities = response?.data,
-               let timestamp = response?.responseAt {
-                self.backgroundQueue.async { [self] in
-                    let realm = getRealm()
-                    guard let file = realm.object(ofType: File.self, forPrimaryKey: fileId) else {
-                        DispatchQueue.main.async {
-                            completion(nil, nil, nil)
-                        }
-                        return
-                    }
-
-                    var results = applyFolderActivitiesTo(file: file, activities: activities, pagedActions: &pagedActions, timestamp: timestamp, using: realm)
-                    results.inserted.append(contentsOf: pagedActivities.inserted)
-                    results.updated.append(contentsOf: pagedActivities.updated)
-                    results.deleted.append(contentsOf: pagedActivities.deleted)
-
-                    if activities.count < Endpoint.itemsPerPage {
-                        DispatchQueue.main.async {
-                            completion(results, response?.responseAt, nil)
-                        }
-                    } else {
-                        getFolderActivities(file: file, date: fromDate, pagedActions: pagedActions, pagedActivities: results, page: page + 1, completion: completion)
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    completion(nil, nil, error)
-                }
+        let timestamp = TimeInterval(timestamp ?? file.responseAt)
+        var page = 1
+        var moreComing = true
+        var pagedActions = [Int: FileActivityType]()
+        var pagedActivities = ActivitiesResult()
+        var responseAt = 0
+        while moreComing {
+            // Get activities page
+            let (activities, pageResponseAt) = try await apiFetcher.fileActivities(file: file, from: Date(timeIntervalSince1970: timestamp), page: page)
+            moreComing = activities.count == Endpoint.itemsPerPage
+            page += 1
+            responseAt = pageResponseAt ?? Int(Date().timeIntervalSince1970)
+            // Get file from Realm
+            let realm = getRealm()
+            guard let file = realm.object(ofType: File.self, forPrimaryKey: fileId) else {
+                throw DriveError.fileNotFound
             }
+            // Apply activities to file
+            let results = applyFolderActivitiesTo(file: file, activities: activities, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
+            pagedActivities.inserted.insert(contentsOf: results.inserted, at: 0)
+            pagedActivities.updated.insert(contentsOf: results.updated, at: 0)
+            pagedActivities.deleted.insert(contentsOf: results.deleted, at: 0)
         }
+        return (pagedActivities, responseAt)
     }
 
     // swiftlint:disable cyclomatic_complexity
