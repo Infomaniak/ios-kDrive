@@ -121,6 +121,6 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         }
         detailLabel.text = localizedKey.localized
 
-        timeLabel.text = Constants.formatTimestamp(TimeInterval(activity.createdAt), style: .time, relative: true)
+        timeLabel.text = Constants.formatDate(activity.createdAt, style: .time, relative: true)
     }
 }
