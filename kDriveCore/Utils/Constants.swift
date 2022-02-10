@@ -98,10 +98,6 @@ public enum Constants {
         return dateFormatter.string(from: date)
     }
 
-    public static func formatTimestamp(_ timeInterval: TimeInterval, style: DateTimeStyle = .datetime, relative: Bool = false) -> String {
-        return formatDate(Date(timeIntervalSince1970: timeInterval), style: style, relative: relative)
-    }
-
     public static func formatFileLastModifiedRelativeDate(_ lastModified: Date) -> String {
         if Date().timeIntervalSince(lastModified) < 3_600 * 24 * 7 {
             let relativeDateFormatter = RelativeDateTimeFormatter()

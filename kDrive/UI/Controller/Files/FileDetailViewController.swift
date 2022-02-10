@@ -28,7 +28,7 @@ class FileDetailViewController: UIViewController {
     var driveFileManager: DriveFileManager!
     var fileAccess: FileAccess?
 
-    private var activities = [[FileDetailActivity]]()
+    private var activities = [[FileActivity]]()
     private var activitiesInfo = (page: 1, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
@@ -263,7 +263,7 @@ class FileDetailViewController: UIViewController {
         }
     }
 
-    func orderActivities(data: [FileDetailActivity]) {
+    func orderActivities(data: [FileActivity]) {
         guard !data.isEmpty else {
             tableView.reloadData()
             return
@@ -277,7 +277,7 @@ class FileDetailViewController: UIViewController {
         if activities.isEmpty {
             notEmpty = false
             index = 0
-            activities.append([FileDetailActivity]())
+            activities.append([FileActivity]())
             activities[index].append(data[0])
             lastDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval()), style: .date)
         } else {
@@ -291,7 +291,7 @@ class FileDetailViewController: UIViewController {
                     activities[index].append(activity)
                 } else {
                     index += 1
-                    activities.append([FileDetailActivity]())
+                    activities.append([FileActivity]())
                     activities[index].append(activity)
                     lastDate = currentDate
                 }
@@ -506,7 +506,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 }
                 let cell = tableView.dequeueReusableCell(type: FileDetailActivityTableViewCell.self, for: indexPath)
-                cell.configureWith(activity: activities[indexPath.section - 1][indexPath.row - 1], file: file)
+                cell.configure(with: activities[indexPath.section - 1][indexPath.row - 1], file: file)
                 return cell
             case .comments:
                 if file.isOfficeFile {
