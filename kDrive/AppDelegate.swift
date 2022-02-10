@@ -454,7 +454,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                         if let activities = content.activities {
                             // Apply activities to file
                             var handledActivities = Set<FileActivityType>()
-                            for activity in activities where !handledActivities.contains(activity.action) {
+                            for activity in activities where !handledActivities.contains(activity.action!) {
                                 switch activity.action {
                                 case .fileRename:
                                     // Rename file
@@ -471,7 +471,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                 default:
                                     break
                                 }
-                                handledActivities.insert(activity.action)
+                                handledActivities.insert(activity.action!)
                             }
                         } else if let error = content.error {
                             if DriveError(apiError: error) == .objectNotFound {

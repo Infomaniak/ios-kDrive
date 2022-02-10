@@ -132,29 +132,22 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             Task {
                 do {
                     let file = try await driveFileManager.file(id: directoryIdentifier)
-                    self.driveFileManager.getFolderActivities(file: file, date: lastTimestamp) { results, timestamp, error in
-                        if let results = results, let timestamp = timestamp {
-                            let updated = results.inserted + results.updated
-                            var updatedItems = [NSFileProviderItem]()
-                            for updatedChild in updated {
-                                autoreleasepool {
-                                    updatedItems.append(FileProviderItem(file: updatedChild, domain: self.domain))
-                                }
-                            }
-                            updatedItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
-                            observer.didUpdate(updatedItems)
-
-                            var deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
-                            deletedItems += FileProviderExtensionState.shared.deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)
-                            observer.didDeleteItems(withIdentifiers: deletedItems)
-
-                            observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(timestamp), moreComing: false)
-                        } else if let error = error as? DriveError, error == .maintenance {
-                            observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
-                        } else {
-                            observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
+                    let (results, timestamp) = try await driveFileManager.fileActivities(file: file, from: lastTimestamp)
+                    let updated = results.inserted + results.updated
+                    var updatedItems = [NSFileProviderItem]()
+                    for updatedChild in updated {
+                        autoreleasepool {
+                            updatedItems.append(FileProviderItem(file: updatedChild, domain: self.domain))
                         }
                     }
+                    updatedItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    observer.didUpdate(updatedItems)
+
+                    var deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
+                    deletedItems += FileProviderExtensionState.shared.deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    observer.didDeleteItems(withIdentifiers: deletedItems)
+
+                    observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(timestamp), moreComing: false)
                 } catch {
                     // Maybe this is a trashed file
                     do {
