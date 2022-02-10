@@ -44,7 +44,7 @@ public class CancelableResponse: Codable {
     }
 }
 
-public class ApiResponse<ResponseContent: Codable>: Codable {
+public class ApiResponse<ResponseContent: Decodable>: Decodable {
     public let result: ApiResult
     public let data: ResponseContent?
     public let error: ApiError?
