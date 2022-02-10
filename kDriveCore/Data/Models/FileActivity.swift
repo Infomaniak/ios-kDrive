@@ -121,26 +121,24 @@ extension FileActivity: ContentIdentifiable, ContentEquatable {
 }
 
 public class FileDetailActivity: Codable {
+    public var id: Int
+    public var createdAt: Date
     public var action: String
-    public var id: Int = 0
-    public var path: String
-    public var user: DriveUser?
-    public var createdAt: Int
     public var newPath: String?
     public var oldPath: String?
+    public var user: DriveUser?
 
     public var type: FileActivityType? {
         return FileActivityType(rawValue: action)
     }
 
     enum CodingKeys: String, CodingKey {
-        case action
         case id
-        case path
-        case user
         case createdAt = "created_at"
+        case action
         case newPath = "new_path"
         case oldPath = "old_path"
+        case user
     }
 }
 
