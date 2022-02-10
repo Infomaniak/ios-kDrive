@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -94,22 +95,28 @@
                             <constraint firstAttribute="bottom" secondItem="zbp-KC-tjt" secondAttribute="bottom" constant="8" id="k24-J6-xa2"/>
                         </constraints>
                     </view>
-                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jGG-JN-vvc">
-                        <rect key="frame" x="105" y="416" width="67" height="31"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jGG-JN-vvc">
+                        <rect key="frame" x="50.5" y="371" width="176.5" height="54"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <state key="normal" title="Button"/>
-                        <buttonConfiguration key="configuration" style="plain" title="Button"/>
+                        <buttonConfiguration key="configuration" style="plain" image="open-with" imagePlacement="leading" title="buttonOpenWith" imagePadding="6" buttonSize="large">
+                            <backgroundConfiguration key="background" cornerRadius="10">
+                                <color key="backgroundColor" name="infomaniakColor"/>
+                            </backgroundConfiguration>
+                        </buttonConfiguration>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="openWithButton"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenWith"/>
                         </userDefinedRuntimeAttributes>
                     </button>
                 </subviews>
             </view>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <constraints>
+                <constraint firstItem="jGG-JN-vvc" firstAttribute="centerX" secondItem="ZTg-uK-7eu" secondAttribute="centerX" id="0yd-4N-4dg"/>
                 <constraint firstItem="Xzn-rl-KOk" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="KnF-Jg-cos"/>
                 <constraint firstItem="Xzn-rl-KOk" firstAttribute="centerY" secondItem="gTV-IL-0wX" secondAttribute="centerY" id="RPm-47-V8p"/>
                 <constraint firstAttribute="trailing" secondItem="Xzn-rl-KOk" secondAttribute="trailing" id="UJ6-4S-3sA"/>
+                <constraint firstItem="jGG-JN-vvc" firstAttribute="top" secondItem="zbp-KC-tjt" secondAttribute="bottom" constant="2" id="VSg-tb-qO0"/>
             </constraints>
             <size key="customSize" width="277" height="522"/>
             <connections>
@@ -129,5 +136,9 @@
     </designables>
     <resources>
         <image name="offline" width="24" height="24"/>
+        <image name="open-with" width="24" height="24"/>
+        <namedColor name="infomaniakColor">
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>
