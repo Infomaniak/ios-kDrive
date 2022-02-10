@@ -125,7 +125,7 @@ public extension Endpoint {
         return Endpoint(path: "/2/drive", apiEnvironment: .preprod)
     }
 
-    public static var inAppReceipt: Endpoint {
+    static var inAppReceipt: Endpoint {
         return Endpoint(path: "/invoicing/inapp/apple/link_receipt", apiEnvironment: .prod)
     }
 
@@ -494,7 +494,7 @@ public extension Endpoint {
             ]
         }
         if let fileType = fileType {
-            queryItems.append(URLQueryItem(name: "converted_type", value: fileType.rawValue))
+            queryItems.append(URLQueryItem(name: "type", value: fileType.rawValue))
         }
         if !categories.isEmpty {
             let separator = belongToAllCategories ? "&" : "|"
