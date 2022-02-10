@@ -590,9 +590,17 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 _ = group.wait(timeout: .now() + Constants.timeout)
                 DispatchQueue.main.async {
                     if success {
-                        self.comments.remove(at: indexPath.row)
+                        let commentToDelete = self.comments[indexPath.row]
+                        let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
+                            return IndexPath(row: indexPath.row + index, section: indexPath.section)
+                        }
+                        if commentToDelete.isResponse {
+                            let parentComment = self.comments.first { $0.id == commentToDelete.parentId }
+                            parentComment?.responsesCount -= 1
+                        }
+                        self.comments.removeSubrange(indexPath.row...indexPath.row + commentToDelete.responsesCount)
                         if !self.comments.isEmpty {
-                            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                            self.tableView.deleteRows(at: rowsToDelete, with: .automatic)
                         } else {
                             self.tableView.reloadSections(IndexSet([1]), with: .automatic)
                         }
@@ -640,6 +648,13 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     if let data = response?.data {
                         data.isResponse = true
                         self.comments.insert(data, at: indexPath.row + 1)
+                        let parentComment = self.comments[indexPath.row]
+                        if parentComment.responses != nil {
+                            parentComment.responses?.insert(data, at: 0)
+                        } else {
+                            parentComment.responses = [data]
+                        }
+                        parentComment.responsesCount += 1
                         self.tableView.insertRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .automatic)
                         completionHandler(true)
                     } else {
