@@ -501,7 +501,8 @@ extension HomeViewController {
                 cell.valueChangeHandler = { [weak self] selector in
                     guard let self = self else { return }
                     self.setSelectedHomeIndex(selector.selectedSegmentIndex)
-                    MatomoUtils.track(eventWithCategory: .home, name: "switchView\(["Activity", "Offline", "Images"][selector.selectedSegmentIndex])")
+                    MatomoUtils.track(eventWithCategory: .home,
+                                      name: "switchView\(["Activity", "Offline", "Images"][selector.selectedSegmentIndex])")
                 }
                 return cell
             }

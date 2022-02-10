@@ -340,7 +340,11 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
             }
         }
 
-        MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail), passwordEnabled: getSetting(for: .optionPassword), dateEnabled: getSetting(for: .optionDate), sizeEnabled: getSetting(for: .optionSize), size: getValue(for: .optionSize) as? Int)
+        MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail),
+                                         passwordEnabled: getSetting(for: .optionPassword),
+                                         dateEnabled: getSetting(for: .optionDate),
+                                         sizeEnabled: getSetting(for: .optionSize),
+                                         size: getValue(for: .optionSize) as? Int)
     }
 }
 

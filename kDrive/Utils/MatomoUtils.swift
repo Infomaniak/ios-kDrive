@@ -27,7 +27,9 @@ class MatomoUtils {
     static let isEnabled = true
 
     enum EventCategory: String {
-        case newElement, fileAction, fileInfo, shareAndRights, colorFolder, categories, search, fileList, comment, drive, account, settings, photoSync, home, displayList, inApp, trash, dropbox, preview, mediaPlayer
+        case newElement, fileAction, fileInfo, shareAndRights, colorFolder, categories, search,
+             fileList, comment, drive, account, settings, photoSync, home, displayList, inApp, trash,
+             dropbox, preview, mediaPlayer
     }
 
     enum UserAction: String {
@@ -52,17 +54,18 @@ class MatomoUtils {
         shared.track(view: view)
     }
 
-    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String, value: Float? = nil) {
+    static func track(eventWithCategory category: EventCategory, action: UserAction = .click, name: String, value: Float? = nil) {
         guard isEnabled else { return }
         shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: value)
     }
 
-    static func track(eventWithCategory category: MatomoUtils.EventCategory, action: MatomoUtils.UserAction = .click, name: String, value: Bool) {
+    static func track(eventWithCategory category: EventCategory, action: UserAction = .click, name: String, value: Bool) {
         track(eventWithCategory: category, action: action, name: name, value: value ? 1.0 : 0.0)
     }
 
-    static func trackBulkEvent(eventWithCategory category: MatomoUtils.EventCategory, name: String, numberOfItems number: Int) {
-        track(eventWithCategory: category, action: .click, name: "bulk\(number == 1 ? "Single" : "")\(name.capitalized)", value: Float(number))
+    static func trackBulkEvent(eventWithCategory category: EventCategory, name: String, numberOfItems number: Int) {
+        track(eventWithCategory: category, action: .click,
+              name: "bulk\(number == 1 ? "Single" : "")\(name.capitalized)", value: Float(number))
     }
 
     // MARK: - DropBox
