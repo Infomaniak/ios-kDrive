@@ -113,9 +113,9 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
 
         avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
 
-        if let user = activity?.user {
+        if let user = recentActivity.user {
             titleLabel.text = user.displayName
-            timeLabel.text = Constants.formatTimestamp(TimeInterval(activity?.createdAt ?? 0), relative: true)
+            timeLabel.text = Constants.formatDate(recentActivity.createdAt, relative: true)
 
             user.getAvatar { [weak self] image in
                 self?.avatarImage.image = image.withRenderingMode(.alwaysOriginal)
