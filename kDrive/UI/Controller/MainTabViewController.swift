@@ -39,11 +39,13 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
             self.driveFileManager = currentDriveFileManager
         }
 
-        configureRootViewController(at: 1, with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
-        configureRootViewController(at: 3, with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+        if driveFileManager != nil {
+            configureRootViewController(at: 1, with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+            configureRootViewController(at: 3, with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
 
-        for viewController in viewControllers ?? [] {
-            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+            for viewController in viewControllers ?? [] {
+                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+            }
         }
 
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
