@@ -52,7 +52,7 @@ extension ApiFetcher {
             .request(endpoint.url, method: method, parameters: parameters, encoder: JSONParameterEncoder.convertToSnakeCase)
     }
 
-    func perform<T: Codable>(request: DataRequest) async throws -> (data: T, responseAt: Int?) {
+    func perform<T: Decodable>(request: DataRequest) async throws -> (data: T, responseAt: Int?) {
         let response = await request.serializingDecodable(ApiResponse<T>.self, automaticallyCancelling: true, decoder: ApiFetcher.decoder).response
         let json = try response.result.get()
         if let result = json.data {
@@ -238,12 +238,6 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .delete)).data
     }
 
-    public func getFileDetailActivity(file: File, page: Int, completion: @escaping (ApiResponse<[FileDetailActivity]>?, Error?) -> Void) {
-        let url = "\(ApiRoutes.getFileDetailActivity(file: file))?with=user,mobile\(pagination(page: page))"
-
-        makeRequest(url, method: .get, completion: completion)
-    }
-
     public func comments(file: File, page: Int) async throws -> [Comment] {
         try await perform(request: authenticatedRequest(.comments(file: file).paginated(page: page))).data
     }
@@ -309,16 +303,28 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.move(file: file, destinationId: destination.id), method: .post)).data
     }
 
-    public func getRecentActivity(driveId: Int, page: Int = 1, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
-        let url = ApiRoutes.getRecentActivity(driveId: driveId) + pagination(page: page)
-
-        makeRequest(url, method: .get, completion: completion)
+    public func recentActivity(drive: AbstractDrive, page: Int = 1) async throws -> [FileActivity] {
+        try await perform(request: authenticatedRequest(.recentActivity(drive: drive).paginated(page: page))).data
     }
 
-    public func getFileActivitiesFromDate(file: File, date: Int, page: Int, completion: @escaping (ApiResponse<[FileActivity]>?, Error?) -> Void) {
-        let url = ApiRoutes.getFileActivitiesFromDate(file: file, date: date) + pagination(page: page)
+    public func fileActivities(file: File, page: Int) async throws -> [FileActivity] {
+        let endpoint = Endpoint.fileActivities(file: file)
+            .appending(path: "", queryItems: [URLQueryItem(name: "with", value: "user")])
+            .paginated(page: page)
+        return try await perform(request: authenticatedRequest(endpoint)).data
+    }
 
-        makeRequest(url, method: .get, completion: completion)
+    public func fileActivities(file: File, from date: Date, page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
+        var queryItems = [
+            URLQueryItem(name: "with", value: "file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name"),
+            URLQueryItem(name: "depth", value: "children"),
+            URLQueryItem(name: "from_date", value: "\(Int(date.timeIntervalSince1970))")
+        ]
+        queryItems.append(contentsOf: FileActivityType.fileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
+        let endpoint = Endpoint.fileActivities(file: file)
+            .appending(path: "", queryItems: queryItems)
+            .paginated(page: page)
+        return try await perform(request: authenticatedRequest(endpoint))
     }
 
     public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (ApiResponse<FilesActivities>?, Error?) -> Void) {

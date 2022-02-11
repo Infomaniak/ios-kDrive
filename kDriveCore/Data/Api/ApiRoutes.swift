@@ -30,10 +30,6 @@ public enum ApiRoutes {
 
     static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
 
-    static func getFileDetailActivity(file: File) -> String {
-        return "\(fileURL(file: file))activity"
-    }
-
     static func renameFile(file: File) -> String {
         return "\(fileURL(file: file))rename?\(with)"
     }
@@ -55,20 +51,6 @@ public enum ApiRoutes {
             url += "&last_modified_at=\(Int(modificationDate.timeIntervalSince1970))"
         }
         return url
-    }
-
-    static func getRecentActivity(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&depth=unlimited" +
-            "&actions[]=file_create" +
-            "&actions[]=file_update" +
-            "&actions[]=comment_create" +
-            "&actions[]=file_restore" +
-            "&actions[]=file_trash"
-    }
-
-    static func getFileActivitiesFromDate(file: File, date: Int) -> String {
-        let activitiesParam = FileActivityType.fileActivities.map { "&actions[]=\($0.rawValue)" }.joined()
-        return "\(fileURL(file: file))activity?depth=children&with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&from_date=\(date)" + activitiesParam
     }
 
     static func getFilesActivities(driveId: Int, files: [File], from date: Int) -> String {

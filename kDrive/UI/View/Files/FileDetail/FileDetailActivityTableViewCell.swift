@@ -46,7 +46,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    func configureWith(activity: FileDetailActivity, file: File) {
+    func configure(with activity: FileActivity, file: File) {
         titleLabel.text = activity.user?.displayName ?? KDriveResourcesStrings.Localizable.allUserAnonymous
 
         if let user = activity.user {
@@ -59,7 +59,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         }
 
         let localizedKey: String
-        switch activity.type {
+        switch activity.action {
         case .fileAccess:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderAccess" : "fileDetailsActivityFileAccess"
         case .fileCreate:
@@ -121,6 +121,6 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         }
         detailLabel.text = localizedKey.localized
 
-        timeLabel.text = Constants.formatTimestamp(TimeInterval(activity.createdAt), style: .time, relative: true)
+        timeLabel.text = Constants.formatDate(activity.createdAt, style: .time, relative: true)
     }
 }

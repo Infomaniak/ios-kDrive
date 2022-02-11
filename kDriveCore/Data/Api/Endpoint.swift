@@ -118,8 +118,8 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static let fileMinimalWithQueryItems = URLQueryItem(name: "with", value: "capabilities,dropbox,conversion,sorted_name,is_favorite,sharelink,categories")
-    private static let fileExtraWithQueryItems = URLQueryItem(name: "with", value: fileMinimalWithQueryItems.value?.appending(",version,path,users"))
+    private static let fileMinimalWithQueryItems = URLQueryItem(name: "with", value: "capabilities,categories,conversion,dropbox,is_favorite,sharelink,sorted_name")
+    private static let fileExtraWithQueryItems = URLQueryItem(name: "with", value: fileMinimalWithQueryItems.value?.appending(",path,users,version"))
 
     private static var base: Endpoint {
         return Endpoint(path: "/2/drive", apiEnvironment: .preprod)
@@ -137,9 +137,9 @@ public extension Endpoint {
 
     // MARK: Activities
 
-    static func fileActivities(drive: AbstractDrive) -> Endpoint {
+    static func recentActivity(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/activities", queryItems: [
-            URLQueryItem(name: "with", value: "file"),
+            URLQueryItem(name: "with", value: "file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name,user"),
             URLQueryItem(name: "depth", value: "unlimited"),
             URLQueryItem(name: "actions[]", value: "file_create"),
             URLQueryItem(name: "actions[]", value: "file_update"),
@@ -153,14 +153,8 @@ public extension Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/notifications")
     }
 
-    static func fileActivities(file: AbstractFile, from date: Int) -> Endpoint {
-        var queryItems = [
-            URLQueryItem(name: "with", value: "file"),
-            URLQueryItem(name: "depth", value: "children"),
-            URLQueryItem(name: "from_date", value: "\(date)")
-        ]
-        queryItems.append(contentsOf: FileActivityType.fileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
-        return .fileInfo(file).appending(path: "/activities", queryItems: queryItems)
+    static func fileActivities(file: AbstractFile) -> Endpoint {
+        return .fileInfo(file).appending(path: "/activities")
     }
 
     static func trashedFileActivities(file: AbstractFile) -> Endpoint {
@@ -177,7 +171,7 @@ public extension Endpoint {
         return .buildArchive(drive: drive).appending(path: "/\(uuid)")
     }
 
-    // MARK: - Category
+    // MARK: Category
 
     static func categories(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/categories")

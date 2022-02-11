@@ -28,7 +28,7 @@ class FileDetailViewController: UIViewController {
     var driveFileManager: DriveFileManager!
     var fileAccess: FileAccess?
 
-    private var activities = [[FileDetailActivity]]()
+    private var activities = [[FileActivity]]()
     private var activitiesInfo = (page: 1, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
@@ -218,11 +218,14 @@ class FileDetailViewController: UIViewController {
 
     private func fetchNextActivities() {
         activitiesInfo.isLoading = true
-        driveFileManager.apiFetcher.getFileDetailActivity(file: file, page: activitiesInfo.page) { response, _ in
-            if let data = response?.data {
-                self.orderActivities(data: data)
+        Task {
+            do {
+                let pagedActivities = try await driveFileManager.apiFetcher.fileActivities(file: file, page: activitiesInfo.page)
+                self.orderActivities(data: pagedActivities)
                 self.activitiesInfo.page += 1
-                self.activitiesInfo.hasNextPage = data.count == Endpoint.itemsPerPage
+                self.activitiesInfo.hasNextPage = pagedActivities.count == Endpoint.itemsPerPage
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
             self.activitiesInfo.isLoading = false
         }
@@ -255,7 +258,7 @@ class FileDetailViewController: UIViewController {
         }
     }
 
-    func orderActivities(data: [FileDetailActivity]) {
+    func orderActivities(data: [FileActivity]) {
         guard !data.isEmpty else {
             tableView.reloadData()
             return
@@ -269,21 +272,21 @@ class FileDetailViewController: UIViewController {
         if activities.isEmpty {
             notEmpty = false
             index = 0
-            activities.append([FileDetailActivity]())
+            activities.append([FileActivity]())
             activities[index].append(data[0])
             lastDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval()), style: .date)
         } else {
-            lastDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval(activities[index][0].createdAt)), style: .date)
+            lastDate = Constants.formatDate(activities[index][0].createdAt, style: .date)
         }
 
         for (i, activity) in data.enumerated() {
             if i != 0 || notEmpty {
-                currentDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval(activity.createdAt)), style: .date)
+                currentDate = Constants.formatDate(activity.createdAt, style: .date)
                 if currentDate == lastDate {
                     activities[index].append(activity)
                 } else {
                     index += 1
-                    activities.append([FileDetailActivity]())
+                    activities.append([FileActivity]())
                     activities[index].append(activity)
                     lastDate = currentDate
                 }
@@ -493,11 +496,11 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     if indexPath.section == 1 {
                         cell.topSeparatorHeight.constant = 0
                     }
-                    cell.dateLabel.text = Constants.formatTimestamp(TimeInterval(activities[indexPath.section - 1][0].createdAt), style: .date, relative: true)
+                    cell.dateLabel.text = Constants.formatDate(activities[indexPath.section - 1][0].createdAt, style: .date, relative: true)
                     return cell
                 }
                 let cell = tableView.dequeueReusableCell(type: FileDetailActivityTableViewCell.self, for: indexPath)
-                cell.configureWith(activity: activities[indexPath.section - 1][indexPath.row - 1], file: file)
+                cell.configure(with: activities[indexPath.section - 1][indexPath.row - 1], file: file)
                 return cell
             case .comments:
                 if file.isOfficeFile {
