@@ -379,13 +379,16 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     @objc private func openFile() {
         if currentFile.isBookmark {
-            // Open bookmark URL
-            if let url = currentFile.getBookmarkURL() {
-                let safariViewController = SFSafariViewController(url: url)
-                floatingPanelViewController.dismiss(animated: true)
-                present(safariViewController, animated: true)
-            } else {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
+            floatingPanelViewController.dismiss(animated: false)
+            FilePresenter(viewController: self, floatingPanelViewController: nil).present(
+                driveFileManager: driveFileManager,
+                file: currentFile,
+                files: [],
+                normalFolderHierarchy: true
+            ) { success in
+                if !success {
+                    self.present(self.floatingPanelViewController, animated: false)
+                }
             }
         }
     }
