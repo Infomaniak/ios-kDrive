@@ -19,6 +19,7 @@
 import kDriveCore
 import kDriveResources
 import SafariServices
+import Sentry
 import UIKit
 
 class FilePresenter {
@@ -56,7 +57,12 @@ class FilePresenter {
         }
     }
 
-    func present(driveFileManager: DriveFileManager, file: File, files: [File], normalFolderHierarchy: Bool, fromActivities: Bool = false) {
+    func present(driveFileManager: DriveFileManager,
+                 file: File,
+                 files: [File],
+                 normalFolderHierarchy: Bool,
+                 fromActivities: Bool = false,
+                 completion: ((Bool) -> Void)? = nil) {
         if file.isDirectory {
             // Show files list
             let nextVC: FileListViewController
@@ -91,24 +97,20 @@ class FilePresenter {
             } else {
                 navigationController?.pushViewController(nextVC, animated: true)
             }
+            completion?(true)
         } else if file.isBookmark {
             // Open bookmark URL
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
-                if let url = file.getBookmarkURL() {
-                    presentSafariViewController(url: url)
-                } else {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
-                }
+                presentBookmark(for: file, completion: completion)
             } else {
                 // Download file
                 DownloadQueue.instance.temporaryDownload(file: file) { error in
                     DispatchQueue.main.async {
                         if let error = error {
                             UIConstants.showSnackBar(message: error.localizedDescription)
-                        } else if let url = file.getBookmarkURL() {
-                            self.presentSafariViewController(url: url)
+                            completion?(false)
                         } else {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
+                            self.presentBookmark(for: file, completion: completion)
                         }
                     }
                 }
@@ -119,9 +121,11 @@ class FilePresenter {
             if let index = files.firstIndex(where: { $0.id == file.id }) {
                 let previewViewController = PreviewViewController.instantiate(files: files, index: Int(index), driveFileManager: driveFileManager, normalFolderHierarchy: normalFolderHierarchy, fromActivities: fromActivities)
                 navigationController?.pushViewController(previewViewController, animated: true)
+                completion?(true)
             }
             if file.isTrashed {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPreviewTrash)
+                completion?(false)
             }
         }
     }
@@ -132,8 +136,22 @@ class FilePresenter {
         }
     }
 
-    private func presentSafariViewController(url: URL, animated: Bool = true) {
-        let safariViewController = SFSafariViewController(url: url)
-        viewController?.present(safariViewController, animated: animated)
+    private func presentBookmark(for file: File, animated: Bool = true, completion: ((Bool) -> Void)? = nil) {
+        if let url = file.getBookmarkURL() {
+            if url.scheme == "http" || url.scheme == "https" {
+                let safariViewController = SFSafariViewController(url: url)
+                viewController?.present(safariViewController, animated: animated)
+                completion?(true)
+            } else {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
+                SentrySDK.capture(message: "Tried to present unsupported scheme") { scope in
+                    scope.setContext(value: ["URL": url], key: "Details")
+                }
+                completion?(false)
+            }
+        } else {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
+            completion?(false)
+        }
     }
 }
