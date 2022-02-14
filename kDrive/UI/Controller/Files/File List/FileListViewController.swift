@@ -150,7 +150,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         if viewModel != nil {
             setupViewModel()
-            viewModel.onViewDidLoad()
+            tryOrDisplayError {
+                try await self.viewModel.loadFiles()
+            }
         }
     }
 
@@ -203,14 +205,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             UIView.transition(with: self.collectionView, duration: 0.25, options: .transitionCrossDissolve) {
                 self.collectionView.reloadData()
                 self.setSelectedCells()
-            }
-        }
-
-        viewModel.onDriveError = { [weak self] driveError in
-            if driveError == .objectNotFound {
-                self?.navigationController?.popViewController(animated: true)
-            } else if driveError != .searchCancelled {
-                UIConstants.showSnackBar(message: driveError.localizedDescription)
             }
         }
 
@@ -336,7 +330,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
         #endif
 
-        viewModel.onViewWillAppear()
+        tryOrDisplayError {
+            try await self.viewModel.loadActivitiesIfNeeded()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -352,6 +348,24 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         coordinator.animate { _ in
             self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
             self.setSelectedCells()
+        }
+    }
+
+    private func tryOrDisplayError(_ block: @escaping () async throws -> Void) {
+        Task {
+            do {
+                try await block()
+            } catch {
+                if let driveError = error as? DriveError {
+                    if driveError == .objectNotFound {
+                        navigationController?.popViewController(animated: true)
+                    } else if driveError != .searchCancelled {
+                        UIConstants.showSnackBar(message: error.localizedDescription)
+                    }
+                } else {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                }
+            }
         }
     }
 
@@ -669,7 +683,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
            let viewModel = getViewModel(viewModelName: viewModelName, driveFileManager: driveFileManager, currentDirectory: maybeCurrentDirectory) {
             self.viewModel = viewModel
             setupViewModel()
-            viewModel.onViewDidLoad()
+            tryOrDisplayError {
+                try await viewModel.loadFiles()
+            }
         } else {
             navigationController?.popViewController(animated: true)
         }
@@ -798,7 +814,9 @@ extension FileListViewController: SelectDelegate {
             if isDifferentDrive {
                 viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager, currentDirectory: viewModel.driveFileManager.getCachedRootFile())
                 bindViewModels()
-                viewModel.onViewDidLoad()
+                tryOrDisplayError {
+                    try await self.viewModel.loadFiles()
+                }
                 navigationController?.popToRootViewController(animated: false)
             } else {
                 viewModel.driveFileManager = newDriveFileManager
