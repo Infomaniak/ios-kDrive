@@ -47,8 +47,8 @@ class UnmanagedFileListViewModel: FileListViewModel {
         super.forceRefresh()
     }
 
-    override func getFile(at index: Int) -> File? {
-        return index < fileCount ? files[index] : nil
+    override func getFile(at indexPath: IndexPath) -> File? {
+        return indexPath.item < fileCount ? files[indexPath.item] : nil
     }
 
     func removeFile(file: File) {
