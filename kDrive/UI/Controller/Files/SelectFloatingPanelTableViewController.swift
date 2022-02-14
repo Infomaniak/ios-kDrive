@@ -244,11 +244,13 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         case .download:
             MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "download", numberOfItems: numberOfFiles)
         case .favorite:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "favorite", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "add_favorite", numberOfItems: numberOfFiles)
         case .offline:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "offline", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "set_offline", numberOfItems: numberOfFiles)
         case .delete:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "putInTrash", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "trash", numberOfItems: numberOfFiles)
+        case .folderColor:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "color_folder", numberOfItems: numberOfFiles)
         default:
             break
         }
