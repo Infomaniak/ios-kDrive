@@ -115,7 +115,6 @@ class FileListViewModel {
     @Published var currentRightBarButtons: [FileListBarButtonType]?
 
     var onFileListUpdated: FileListUpdatedCallback?
-    var onDriveError: DriveErrorCallback?
     var onPresentQuickActionPanel: PresentQuickActionPanelCallback? {
         didSet {
             multipleSelectionViewModel?.onPresentQuickActionPanel = onPresentQuickActionPanel
@@ -333,17 +332,9 @@ class FileListViewModel {
         }
     }
 
-    func onViewDidLoad() {
-        Task {
-            try await loadFiles()
-        }
-    }
-
-    func onViewWillAppear() {
+    func loadActivitiesIfNeeded() async throws {
         if currentDirectory.fullyDownloaded && fileCount > 0 {
-            Task {
-                try await loadActivities()
-            }
+            try await loadActivities()
         }
     }
 }
