@@ -356,10 +356,17 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .openWith:
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
-                presentInteractionController(from: indexPath)
+                FileActionsHelper.openWith(
+                    file: file,
+                    from: collectionView.cellForItem(at: indexPath)?.frame ?? .zero,
+                    in: collectionView)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    self?.presentInteractionController(from: indexPath)
+                    guard let self = self else { return }
+                    FileActionsHelper.openWith(
+                        file: self.file,
+                        from: self.collectionView.cellForItem(at: indexPath)?.frame ?? .zero,
+                        in: self.collectionView)
                 }
             }
         case .edit:
@@ -676,7 +683,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             // Create document interaction controller
             interactionController = UIDocumentInteractionController(url: fileUrl)
-            interactionController.delegate = self
             let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
             // Present document interaction controller
             interactionController.presentOpenInMenu(from: view, in: collectionView, animated: true)
@@ -832,14 +838,5 @@ extension FileActionsFloatingPanelViewController: UICollectionViewDragDelegate {
             }
         }
         return [draggedItem]
-    }
-}
-
-// MARK: - Document interaction controller delegate
-
-extension FileActionsFloatingPanelViewController: UIDocumentInteractionControllerDelegate {
-    func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
-        // Dismiss interaction controller when the user taps an app
-        controller.dismissMenu(animated: true)
     }
 }

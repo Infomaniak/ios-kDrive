@@ -107,6 +107,9 @@
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenWith"/>
                         </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="openFileWith:" destination="gTV-IL-0wX" eventType="touchUpInside" id="abo-xT-Fy5"/>
+                        </connections>
                     </button>
                 </subviews>
             </view>

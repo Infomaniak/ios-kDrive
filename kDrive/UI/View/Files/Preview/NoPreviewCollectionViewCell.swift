@@ -70,4 +70,8 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
         progressView.isHidden = true
         subtitleLabel.text = KDriveResourcesStrings.Localizable.errorDownload
     }
+
+    @IBAction func openFileWith(_ sender: UIButton) {
+        //FileActionsHelper.openWith(file: File(), from: sender.frame, in: sender.superview)
+    }
 }
