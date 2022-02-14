@@ -133,7 +133,7 @@ class SelectFolderViewController: FileListViewController {
     // MARK: - Collection view data source
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let file = viewModel.getFile(at: indexPath.item)!
+        let file = viewModel.getFile(at: indexPath)!
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! FileCollectionViewCell
         cell.setEnabled(file.isDirectory && file.id != fileToMove)
         cell.moreButton.isHidden = true
@@ -143,7 +143,7 @@ class SelectFolderViewController: FileListViewController {
     // MARK: - Collection view delegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedFile = viewModel.getFile(at: indexPath.item)!
+        let selectedFile = viewModel.getFile(at: indexPath)!
         if selectedFile.isDirectory {
             let nextVC = SelectFolderViewController.instantiate(viewModel: SelectFolderViewModel(driveFileManager: viewModel.driveFileManager, currentDirectory: selectedFile))
             nextVC.disabledDirectoriesSelection = disabledDirectoriesSelection
