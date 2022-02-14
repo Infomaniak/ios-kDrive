@@ -404,8 +404,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.bulkFiles(drive: drive), method: .post, parameters: action)).data
     }
 
-    public func count(of file: AbstractFile) async throws -> FileCount {
-        try await perform(request: authenticatedRequest(.count(of: file))).data
+    public func count(of directory: AbstractFile) async throws -> FileCount {
+        try await perform(request: authenticatedRequest(.count(of: directory))).data
     }
 
     public func buildArchive(drive: AbstractDrive, for files: [File]) async throws -> DownloadArchiveResponse {
