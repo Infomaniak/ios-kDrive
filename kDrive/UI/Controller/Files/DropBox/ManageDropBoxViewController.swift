@@ -170,7 +170,9 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         let fileNavigationController = mainTabViewController?.selectedViewController as? UINavigationController
         if let viewControllers = fileNavigationController?.viewControllers, viewControllers.count > 1 {
             let fileListViewController = viewControllers[viewControllers.count - 2] as? FileListViewController
-            fileListViewController?.viewModel.loadActivities()
+            Task {
+                try await fileListViewController?.viewModel.loadActivities()
+            }
         }
         navigationController?.popViewController(animated: true)
     }

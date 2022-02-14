@@ -47,8 +47,9 @@ public enum UIConstants {
         return snackbar
     }
 
-    public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, cancelableResponse: CancelableResponse, driveFileManager: DriveFileManager) {
-        UIConstants.showSnackBar(message: message, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
+    @discardableResult
+    public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, duration: SnackBar.Duration = .lengthLong, cancelableResponse: CancelableResponse, driveFileManager: DriveFileManager) -> IKSnackBar? {
+        return UIConstants.showSnackBar(message: message, duration: duration, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
             Task {
                 do {
                     try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
