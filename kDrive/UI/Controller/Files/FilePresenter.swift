@@ -71,7 +71,7 @@ class FilePresenter {
             if driveFileManager.drive.sharedWithMe {
                 // TODO: create correct viewmodel
                 nextVC = SharedWithMeViewController.instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
-            } else if file.isTrashed || file.deletedAt > 0 {
+            } else if file.isTrashed || file.deletedAt != nil {
                 let trashViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
                 nextVC = FileListViewController.instantiate(viewModel: trashViewModel)
             } else {

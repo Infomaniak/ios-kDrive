@@ -223,8 +223,8 @@ class FileListViewModel {
         } else {
             switch type {
             case .search:
-                /*let searchViewController = SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-                onPresentViewController?(.modal, searchViewController, true)*/
+                /* let searchViewController = SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+                 onPresentViewController?(.modal, searchViewController, true) */
                 break
             default:
                 break
@@ -244,11 +244,22 @@ class FileListViewModel {
         }
     }
 
-    func fetchFiles(id: Int, withExtras: Bool = false, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false, completion: @escaping (File?, [File]?, Error?) -> Void) {}
+    func startRefreshing(page: Int) {
+        isLoading = true
 
-    func loadActivities() {}
+        if page == 1 {
+            showLoadingIndicatorIfNeeded()
+        }
+    }
 
-    func loadFiles(page: Int = 1, forceRefresh: Bool = false) {}
+    func endRefreshing() {
+        isLoading = false
+        isRefreshIndicatorHidden = true
+    }
+
+    func loadActivities() async throws {}
+
+    func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {}
 
     func didSelectFile(at index: Int) {
         guard let file: File = getFile(at: index) else { return }
@@ -271,19 +282,17 @@ class FileListViewModel {
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
                 // Keep the filename before it is invalidated
-                let filename = file.name
-                driveFileManager.deleteFile(file: file) { cancelAction, error in
-                    if let error = error {
+                let frozenFile = file.freeze()
+                Task {
+                    do {
+                        let cancelResponse = try await driveFileManager.delete(file: frozenFile)
+                        UIConstants.showCancelableSnackBar(
+                            message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(frozenFile.name),
+                            cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
+                            cancelableResponse: cancelResponse,
+                            driveFileManager: driveFileManager)
+                    } catch {
                         UIConstants.showSnackBar(message: error.localizedDescription)
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                            guard let cancelId = cancelAction?.id else { return }
-                            self.driveFileManager.cancelAction(cancelId: cancelId) { error in
-                                if error == nil {
-                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allTrashActionCancelled)
-                                }
-                            }
-                        })
                     }
                 }
             default:
@@ -305,12 +314,11 @@ class FileListViewModel {
             return nil
         }
         var actions = [SwipeCellAction]()
-        if let file = getFile(at: index),
-           let rights = file.rights {
-            if rights.share {
+        if let file = getFile(at: index) {
+            if file.capabilities.canShare {
                 actions.append(.share)
             }
-            if rights.delete {
+            if file.capabilities.canDelete {
                 actions.append(.delete)
             }
         }
@@ -319,18 +327,23 @@ class FileListViewModel {
     }
 
     func forceRefresh() {
-        isLoading = false
-        isRefreshIndicatorHidden = false
-        loadFiles(page: 1, forceRefresh: true)
+        endRefreshing()
+        Task {
+            try await loadFiles(page: 1, forceRefresh: true)
+        }
     }
 
     func onViewDidLoad() {
-        loadFiles()
+        Task {
+            try await loadFiles()
+        }
     }
 
     func onViewWillAppear() {
         if currentDirectory.fullyDownloaded && fileCount > 0 {
-            loadActivities()
+            Task {
+                try await loadActivities()
+            }
         }
     }
 }
@@ -355,7 +368,7 @@ class ManagedFileListViewModel: FileListViewModel {
         realmObservationToken?.invalidate()
         realmObservationToken = files.sorted(by: [
             SortDescriptor(keyPath: \File.type, ascending: true),
-            SortDescriptor(keyPath: \File.rawVisibility, ascending: false),
+            SortDescriptor(keyPath: \File.visibility, ascending: false),
             sortType.value.sortDescriptor
         ]).observe(on: .main) { [weak self] change in
             switch change {

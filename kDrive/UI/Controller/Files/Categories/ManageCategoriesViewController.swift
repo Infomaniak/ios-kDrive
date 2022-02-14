@@ -103,7 +103,9 @@ class ManageCategoriesViewController: UITableViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        fileListViewController?.viewModel.loadActivities()
+        Task {
+           try await fileListViewController?.viewModel.loadActivities()
+        }
     }
 
     @objc func closeButtonPressed() {

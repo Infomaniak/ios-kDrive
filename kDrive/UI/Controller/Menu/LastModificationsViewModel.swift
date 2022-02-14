@@ -25,35 +25,28 @@ class LastModificationsViewModel: ManagedFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo, sortingOptions: [])
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.lastModificationsRootFile)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "type != \"dir\"")))
+        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "rawType != \"dir\"")))
         sortTypeObservation?.cancel()
         sortTypeObservation = nil
         sortType = .newer
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        isLoading = true
-        if page == 1 {
-            showLoadingIndicatorIfNeeded()
+        startRefreshing(page: page)
+        defer {
+            endRefreshing()
         }
 
-        if currentDirectory.id == DriveFileManager.lastModificationsRootFile.id {
-            Task {
-                do {
-                    let (files, moreComing) = try await driveFileManager.lastModifiedFiles(page: page)
-                    completion(.success(files), moreComing, false)
-                } catch {
-                    completion(.failure(error), false, false)
-                }
-            } else if let error = error as? DriveError {
-                self?.onDriveError?(error)
-            }
+        let (_, moreComing) = try await driveFileManager.lastModifiedFiles(page: page)
+        endRefreshing()
+        if moreComing {
+            try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
         }
     }
 
-    override func loadActivities() {
-        loadFiles(page: 1, forceRefresh: true)
+    override func loadActivities() async throws {
+        try await loadFiles(page: 1, forceRefresh: true)
     }
 }

@@ -34,28 +34,25 @@ class FavoritesViewModel: ManagedFileListViewModel {
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        isLoading = true
-        if page == 1 {
-            showLoadingIndicatorIfNeeded()
+        startRefreshing(page: page)
+        defer {
+            endRefreshing()
         }
 
-        driveFileManager.getFavorites(page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
-            self?.isLoading = false
-            self?.isRefreshIndicatorHidden = true
-            if let fetchedCurrentDirectory = file {
-                if !fetchedCurrentDirectory.fullyDownloaded {
-                    self?.loadFiles(page: page + 1, forceRefresh: forceRefresh)
-                }
-            } else if let error = error as? DriveError {
-                self?.onDriveError?(error)
-            }
+        // TODO: there is no force refresh for favorites ?
+        let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType)
+        endRefreshing()
+        if moreComing {
+            try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
+        } else if !forceRefresh {
+            try await loadActivities()
         }
     }
 
-    override func loadActivities() {
-        loadFiles(page: 1, forceRefresh: true)
+    override func loadActivities() async throws {
+        try await loadFiles(page: 1, forceRefresh: true)
     }
 }

@@ -63,50 +63,40 @@ class FileListBarButton: UIBarButtonItem {
 class ConcreteFileListViewModel: ManagedFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         let configuration = FileListViewModel.Configuration(emptyViewType: .emptyFolder, supportsDrop: true, rightBarButtons: [.search])
-        let currentDirectory = currentDirectory == nil ? driveFileManager.getRootFile() : currentDirectory
+        let currentDirectory = currentDirectory == nil ? driveFileManager.getCachedRootFile() : currentDirectory
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
         self.files = AnyRealmCollection(self.currentDirectory.children)
     }
 
     override internal init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
-        let currentDirectory = currentDirectory == nil ? driveFileManager.getRootFile() : currentDirectory
+        let currentDirectory = currentDirectory == nil ? driveFileManager.getCachedRootFile() : currentDirectory
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
         self.files = AnyRealmCollection(self.currentDirectory.children)
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
         if currentDirectory.fullyDownloaded && !forceRefresh {
-            loadActivities()
+            try await loadActivities()
         } else {
-            isLoading = true
-            if page == 1 {
-                showLoadingIndicatorIfNeeded()
+            startRefreshing(page: page)
+            defer {
+                endRefreshing()
             }
 
-            driveFileManager.getFile(id: currentDirectory.id, page: page, sortType: sortType, forceRefresh: forceRefresh) { [weak self] file, _, error in
-                self?.isLoading = false
-                self?.isRefreshIndicatorHidden = true
-                if let fetchedCurrentDirectory = file {
-                    if !fetchedCurrentDirectory.fullyDownloaded {
-                        self?.loadFiles(page: page + 1, forceRefresh: forceRefresh)
-                    } else if !forceRefresh {
-                        self?.loadActivities()
-                    }
-                } else if let error = error as? DriveError {
-                    self?.onDriveError?(error)
-                }
+            let (_, moreComing) = try await driveFileManager.files(in: currentDirectory, page: page, sortType: sortType, forceRefresh: forceRefresh)
+            endRefreshing()
+            if moreComing {
+                try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
+            } else if !forceRefresh {
+                try await loadActivities()
             }
         }
     }
 
-    override func loadActivities() {
-        driveFileManager.getFolderActivities(file: currentDirectory) { [weak self] _, _, error in
-            if let error = error as? DriveError {
-                self?.onDriveError?(error)
-            }
-        }
+    override func loadActivities() async throws {
+        _ = try await driveFileManager.fileActivities(file: currentDirectory)
     }
 }
 
@@ -851,7 +841,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
             if let indexPath = coordinator.destinationIndexPath,
                indexPath.item < viewModel.fileCount,
                let file = viewModel.getFile(at: indexPath.item) {
-                if file.isDirectory && file.rights?.uploadNewFile == true {
+                if file.isDirectory && file.capabilities.canUpload {
                     destinationDirectory = file
                 }
             }
