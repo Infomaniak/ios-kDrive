@@ -134,9 +134,9 @@ class FileListViewModel {
         }
     }
 
-    internal var sortTypeObservation: AnyCancellable?
-    internal var listStyleObservation: AnyCancellable?
-    internal var bindStore = Set<AnyCancellable>()
+    var sortTypeObservation: AnyCancellable?
+    var listStyleObservation: AnyCancellable?
+    var bindStore = Set<AnyCancellable>()
 
     var uploadViewModel: UploadCardViewModel?
     var multipleSelectionViewModel: MultipleSelectionFileListViewModel?
@@ -351,7 +351,7 @@ class FileListViewModel {
 class ManagedFileListViewModel: FileListViewModel {
     private var realmObservationToken: NotificationToken?
 
-    internal var files = AnyRealmCollection(List<File>())
+    var files = AnyRealmCollection(List<File>())
     override var isEmpty: Bool {
         return files.isEmpty
     }

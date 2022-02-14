@@ -20,7 +20,7 @@ import Foundation
 import kDriveCore
 
 class UnmanagedFileListViewModel: FileListViewModel {
-    internal var files: [File]
+    var files: [File]
     override var isEmpty: Bool {
         return files.isEmpty
     }
