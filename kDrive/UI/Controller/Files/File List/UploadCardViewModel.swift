@@ -24,7 +24,7 @@ import RealmSwift
 class UploadCardViewModel {
     @Published var uploadCount: Int
 
-    internal var driveFileManager: DriveFileManager {
+    var driveFileManager: DriveFileManager {
         didSet {
             initObservation()
         }
