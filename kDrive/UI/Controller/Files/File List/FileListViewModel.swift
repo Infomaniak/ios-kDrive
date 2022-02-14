@@ -260,21 +260,21 @@ class FileListViewModel {
 
     func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {}
 
-    func didSelectFile(at index: Int) {
-        guard let file: File = getFile(at: index) else { return }
+    func didSelectFile(at indexPath: IndexPath) {
+        guard let file: File = getFile(at: indexPath) else { return }
         if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
             return
         }
         onFilePresented?(file)
     }
 
-    func didTapMore(at index: Int) {
-        guard let file: File = getFile(at: index) else { return }
+    func didTapMore(at indexPath: IndexPath) {
+        guard let file: File = getFile(at: indexPath) else { return }
         onPresentQuickActionPanel?([file], .file)
     }
 
-    func didSelectSwipeAction(_ action: SwipeCellAction, at index: Int) {
-        if let file = getFile(at: index) {
+    func didSelectSwipeAction(_ action: SwipeCellAction, at indexPath: IndexPath) {
+        if let file = getFile(at: indexPath) {
             switch action {
             case .share:
                 let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
@@ -300,7 +300,7 @@ class FileListViewModel {
         }
     }
 
-    func getFile(at index: Int) -> File? {
+    func getFile(at indexPath: IndexPath) -> File? {
         fatalError(#function + " needs to be overridden")
     }
 
@@ -308,12 +308,12 @@ class FileListViewModel {
         fatalError(#function + " needs to be overridden")
     }
 
-    func getSwipeActions(at index: Int) -> [SwipeCellAction]? {
+    func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {
         if configuration.fromActivities || listStyle == .grid {
             return nil
         }
         var actions = [SwipeCellAction]()
-        if let file = getFile(at: index) {
+        if let file = getFile(at: indexPath) {
             if file.capabilities.canShare {
                 actions.append(.share)
             }
@@ -375,8 +375,8 @@ class ManagedFileListViewModel: FileListViewModel {
         }
     }
 
-    override func getFile(at index: Int) -> File? {
-        return index < fileCount ? files[index] : nil
+    override func getFile(at indexPath: IndexPath) -> File? {
+        return indexPath.item < fileCount ? files[indexPath.item] : nil
     }
 
     override func getAllFiles() -> [File] {

@@ -80,14 +80,14 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         }
     }
 
-    override func didSelectSwipeAction(_ action: SwipeCellAction, at index: Int) {
-        if let file = getFile(at: index),
+    override func didSelectSwipeAction(_ action: SwipeCellAction, at indexPath: IndexPath) {
+        if let file = getFile(at: indexPath),
            action == .delete {
             didClickOnTrashOption(option: .delete, files: [file])
         }
     }
 
-    override func getSwipeActions(at index: Int) -> [SwipeCellAction]? {
+    override func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {
         if configuration.fromActivities || listStyle == .grid {
             return nil
         }
@@ -107,8 +107,8 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         }
     }
 
-    override func didTapMore(at index: Int) {
-        guard let file: File = getFile(at: index) else { return }
+    override func didTapMore(at indexPath: IndexPath) {
+        guard let file: File = getFile(at: indexPath) else { return }
         onPresentQuickActionPanel?([file], .trash)
     }
 
