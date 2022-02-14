@@ -30,7 +30,7 @@ class DraggableFileListViewModel {
     }
 
     func dragItems(for draggedFile: File, in collectionView: UICollectionView, at indexPath: IndexPath, with session: UIDragSession) -> [UIDragItem] {
-        guard draggedFile.rights?.move == true && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
+        guard draggedFile.capabilities.canMove && !driveFileManager.drive.sharedWithMe && !draggedFile.isTrashed else {
             return []
         }
 
@@ -62,7 +62,7 @@ class DroppableFileListViewModel {
     }
 
     private func handleDropOverDirectory(_ directory: File, in collectionView: UICollectionView, at indexPath: IndexPath) -> UICollectionViewDropProposal {
-        guard directory.rights?.uploadNewFile == true && directory.rights?.moveInto == true else {
+        guard directory.capabilities.canUpload && directory.capabilities.canMoveInto else {
             return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
         }
 
@@ -93,19 +93,15 @@ class DroppableFileListViewModel {
                     let destinationDriveFileManager = self.driveFileManager
                     if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
                         if destinationDirectory.id == file.parentId { return }
-                        destinationDriveFileManager.moveFile(file: file, newParent: destinationDirectory) { response, _, error in
-                            if error != nil {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
-                            } else {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name), action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
-                                    if let cancelId = response?.id {
-                                        self.driveFileManager.cancelAction(cancelId: cancelId) { error in
-                                            if error == nil {
-                                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allFileMoveCancelled)
-                                            }
-                                        }
-                                    }
-                                })
+                        Task {
+                            do {
+                                let (cancelResponse, _) = try await destinationDriveFileManager.move(file: file, to: destinationDirectory)
+                                UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name),
+                                                                   cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
+                                                                   cancelableResponse: cancelResponse,
+                                                                   driveFileManager: destinationDriveFileManager)
+                            } catch {
+                                UIConstants.showSnackBar(message: error.localizedDescription)
                             }
                         }
                     } else {

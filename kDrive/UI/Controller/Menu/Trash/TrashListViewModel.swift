@@ -37,46 +37,31 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         multipleSelectionViewModel = MultipleSelectionTrashViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
     }
 
-    private func handleNewChildren(_ children: [File]?, page: Int, error: Error?) {
-        isLoading = false
-        isRefreshIndicatorHidden = true
-
-        if let children = children {
-            let startIndex = fileCount
-            files.append(contentsOf: children)
-            onFileListUpdated?([], Array(startIndex ..< files.count), [], files.isEmpty, false)
-            if children.count == DriveApiFetcher.itemPerPage {
-                loadFiles(page: page + 1)
-            }
-        } else {
-            onDriveError?((error as? DriveError) ?? DriveError.localError)
-        }
-    }
-
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) {
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        isLoading = true
-        if page == 1 {
-            showLoadingIndicatorIfNeeded()
+        startRefreshing(page: page)
+        defer {
+            endRefreshing()
         }
 
+        let fetchedFiles: [File]
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
-            driveFileManager.apiFetcher.getTrashedFiles(driveId: driveFileManager.drive.id, page: page, sortType: sortType) { [weak self] response, error in
-                self?.handleNewChildren(response?.data, page: page, error: error)
-            }
+            fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(drive: driveFileManager.drive, page: page, sortType: sortType)
         } else {
-            driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: currentDirectory.id, page: page, sortType: sortType) { [weak self] response, error in
-                var children: [File]?
-                if let fetchedChildren = response?.data?.children {
-                    children = Array(fetchedChildren)
-                }
-                self?.handleNewChildren(children, page: page, error: error)
-            }
+            fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory, page: page, sortType: sortType)
+        }
+
+        let startIndex = fileCount
+        files.append(contentsOf: fetchedFiles)
+        onFileListUpdated?([], Array(startIndex ..< files.count), [], files.isEmpty, false)
+        endRefreshing()
+        if files.count == Endpoint.itemsPerPage {
+            try await loadFiles(page: page + 1)
         }
     }
 
-    override func loadActivities() {
+    override func loadActivities() async throws {
         forceRefresh()
     }
 
@@ -86,8 +71,7 @@ class TrashListViewModel: UnmanagedFileListViewModel {
                                                 message: KDriveResourcesStrings.Localizable.modalEmptyTrashDescription,
                                                 action: KDriveResourcesStrings.Localizable.buttonEmpty,
                                                 destructive: true, loading: true) { [self] in
-                emptyTrashSync()
-                forceRefresh()
+                await emptyTrash()
             }
             onPresentViewController?(.modal, alert, true)
         } else {
@@ -109,25 +93,16 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         return [.delete]
     }
 
-    private func emptyTrashSync() {
-        let group = DispatchGroup()
-        var success = false
-        group.enter()
-        driveFileManager.apiFetcher.deleteAllFilesDefinitely(driveId: driveFileManager.drive.id) { _, error in
-            if let error = error {
-                success = false
-                DDLogError("Error while emptying trash: \(error)")
-            } else {
-                self.forceRefresh()
-                success = true
-            }
-            group.leave()
-        }
-        _ = group.wait(timeout: .now() + Constants.timeout)
-
-        DispatchQueue.main.async {
+    private func emptyTrash() async {
+        do {
+            let success = try await driveFileManager.apiFetcher.emptyTrash(drive: driveFileManager.drive)
             let message = success ? KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveResourcesStrings.Localizable.errorDelete
             UIConstants.showSnackBar(message: message)
+            if success {
+                forceRefresh()
+            }
+        } catch {
+            UIConstants.showSnackBar(message: error.localizedDescription)
         }
     }
 
@@ -136,44 +111,28 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         onPresentQuickActionPanel?([file], .trash)
     }
 
-    private func restoreTrashedFiles(_ restoredFiles: [File], in directory: File, completion: @escaping () -> Void) {
-        let group = DispatchGroup()
-        for file in restoredFiles {
-            group.enter()
-            driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: directory.id) { [self] _, error in
-                directory.signalChanges(userId: driveFileManager.drive.userId)
-                if error == nil {
-                    driveFileManager.notifyObserversWith(file: DriveFileManager.trashRootFile)
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorRestore)
+    private func restoreTrashedFiles(_ restoredFiles: [File], in directory: File? = nil) async {
+        do {
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for file in restoredFiles {
+                    group.addTask { [self] in
+                        _ = try await driveFileManager.apiFetcher.restore(file: file, in: directory)
+                        // TODO: We don't have an alert for moving multiple files, snackbar is spammed until end
+                        if let directory = directory {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
+                        } else {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
+                        }
+                    }
                 }
-                group.leave()
+                try await group.waitForAll()
             }
-        }
-        group.notify(queue: DispatchQueue.main) {
-            self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
-            completion()
-        }
-    }
+            directory?.signalChanges(userId: driveFileManager.drive.userId)
 
-    private func restoreTrashedFiles(_ restoredFiles: [File]) {
-        let group = DispatchGroup()
-        for file in restoredFiles {
-            group.enter()
-            driveFileManager.apiFetcher.restoreTrashedFile(file: file) { [self] _, error in
-                if error == nil {
-                    driveFileManager.notifyObserversWith(file: DriveFileManager.trashRootFile)
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorRestore)
-                }
-                group.leave()
-            }
+        } catch {
+            UIConstants.showSnackBar(message: error.localizedDescription)
         }
-        group.notify(queue: DispatchQueue.main) {
-            self.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
-        }
+        multipleSelectionViewModel?.isMultipleSelectionEnabled = false
     }
 }
 
@@ -184,14 +143,19 @@ extension TrashListViewModel: TrashOptionsDelegate {
         switch option {
         case .restoreIn:
             var selectFolderNavigationViewController: TitleSizeAdjustingNavigationController!
-            selectFolderNavigationViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager) { directory in
-                self.restoreTrashedFiles(files, in: directory) {
-                    selectFolderNavigationViewController?.dismiss(animated: true)
+            selectFolderNavigationViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager) { [self] directory in
+                // TODO: async SelectFolderViewController
+                Task {
+                    await restoreTrashedFiles(files, in: directory)
+                    // FIXME: concurrently
+                    //selectFolderNavigationViewController?.dismiss(animated: true)
                 }
             }
             onPresentViewController?(.modal, selectFolderNavigationViewController, true)
         case .restore:
-            restoreTrashedFiles(files)
+            Task {
+                await restoreTrashedFiles(files)
+            }
         case .delete:
             let alert = TrashViewModelHelper.deleteAlertForFiles(files, driveFileManager: driveFileManager) { [weak self] deletedFiles in
                 deletedFiles.forEach { self?.removeFile(file: $0) }
@@ -216,40 +180,41 @@ private enum TrashViewModelHelper {
                                        message: message,
                                        action: KDriveResourcesStrings.Localizable.buttonDelete,
                                        destructive: true, loading: true) {
-            deleteFiles(files, driveFileManager: driveFileManager, completion: completion)
+            let files = await deleteFiles(files, driveFileManager: driveFileManager, completion: completion)
+            completion(files)
         }
     }
 
-    private static func deleteFiles(_ files: [File], driveFileManager: DriveFileManager, completion: @escaping ([File]) -> Void) {
-        let group = DispatchGroup()
-        var success = true
-        var deletedFiles = [File]()
-        for file in files {
-            group.enter()
-            driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
-                file.signalChanges(userId: driveFileManager.drive.userId)
-                if let error = error {
-                    success = false
-                    DDLogError("Error while deleting file: \(error)")
-                } else {
-                    deletedFiles.append(file)
+    private static func deleteFiles(_ deletedFiles: [File], driveFileManager: DriveFileManager, completion: @escaping ([File]) -> Void) async -> [File] {
+        do {
+            let definitelyDeletedFiles = try await withThrowingTaskGroup(of: File.self) { group -> [File] in
+                for file in deletedFiles {
+                    group.addTask {
+                        _ = try await driveFileManager.apiFetcher.deleteDefinitely(file: file)
+                        file.signalChanges(userId: driveFileManager.drive.userId)
+                        return file
+                    }
                 }
-                group.leave()
+
+                var successFullyDeletedFile = [File]()
+                for try await file in group {
+                    successFullyDeletedFile.append(file)
+                }
+                return successFullyDeletedFile
             }
-        }
-        group.notify(queue: DispatchQueue.main) {
+
             let message: String
-            if success {
-                if files.count == 1 {
-                    message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(files[0].name)
-                } else {
-                    message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(deletedFiles.count)
-                }
+            if definitelyDeletedFiles.count == 1 {
+                message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(definitelyDeletedFiles[0].name)
             } else {
-                message = KDriveResourcesStrings.Localizable.errorDelete
+                message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(definitelyDeletedFiles.count)
             }
+
             UIConstants.showSnackBar(message: message)
-            completion(deletedFiles)
+            return definitelyDeletedFiles
+        } catch {
+            UIConstants.showSnackBar(message: error.localizedDescription)
+            return []
         }
     }
 }
