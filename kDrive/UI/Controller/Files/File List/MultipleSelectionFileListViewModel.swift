@@ -40,7 +40,7 @@ struct MultipleSelectionAction: Equatable {
 @MainActor
 class MultipleSelectionFileListViewModel {
     /// itemIndex
-    typealias ItemSelectedCallback = (Int) -> Void
+    typealias ItemSelectedCallback = (IndexPath) -> Void
     /// selectedFiles
     typealias MoreButtonPressedCallback = ([File]) -> Void
 
@@ -194,16 +194,16 @@ class MultipleSelectionFileListViewModel {
         onDeselectAll?()
     }
 
-    func didSelectFile(_ file: File, at index: Int) {
+    func didSelectFile(_ file: File, at indexPath: IndexPath) {
         selectedItems.insert(file)
         selectedCount = selectedItems.count
-        onItemSelected?(index)
+        onItemSelected?(indexPath)
     }
 
-    func didDeselectFile(_ file: File, at index: Int) {
+    func didDeselectFile(_ file: File, at indexPath: IndexPath) {
         if isSelectAllModeEnabled {
             deselectAll()
-            didSelectFile(file, at: index)
+            didSelectFile(file, at: indexPath)
         } else {
             selectedItems.remove(file)
             selectedCount = selectedItems.count

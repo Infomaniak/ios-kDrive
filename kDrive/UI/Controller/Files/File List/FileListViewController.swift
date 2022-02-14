@@ -271,8 +271,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             self?.headerView?.selectView.updateTitle(selectedCount)
         }
 
-        viewModel.multipleSelectionViewModel?.onItemSelected = { [weak self] itemIndex in
-            self?.collectionView.selectItem(at: IndexPath(item: itemIndex, section: 0), animated: true, scrollPosition: .init(rawValue: 0))
+        viewModel.multipleSelectionViewModel?.onItemSelected = { [weak self] selectedIndexPath in
+            self?.collectionView.selectItem(at: selectedIndexPath, animated: true, scrollPosition: .init(rawValue: 0))
         }
 
         viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
@@ -373,8 +373,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             multipleSelectionViewModel.isMultipleSelectionEnabled = true
             // Necessary for events to trigger in the right order
             DispatchQueue.main.async { [unowned self] in
-                if let file = self.viewModel.getFile(at: indexPath.item) {
-                    multipleSelectionViewModel.didSelectFile(file, at: indexPath.item)
+                if let file = self.viewModel.getFile(at: indexPath) {
+                    multipleSelectionViewModel.didSelectFile(file, at: indexPath)
                 }
             }
         }
@@ -539,7 +539,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func getItem(at indexPath: IndexPath) -> File? {
-        return viewModel.getFile(at: indexPath.item)
+        return viewModel.getFile(at: indexPath)
     }
 
     func getAllItems() -> [File] {
@@ -554,8 +554,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             }
         } else {
             if multipleSelectionViewModel.isMultipleSelectionEnabled && !multipleSelectionViewModel.selectedItems.isEmpty {
-                for i in 0 ..< viewModel.fileCount where multipleSelectionViewModel.selectedItems.contains(viewModel.getFile(at: i)!) {
-                    collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: .centeredVertically)
+                for i in 0 ..< viewModel.fileCount where multipleSelectionViewModel.selectedItems.contains(viewModel.getFile(at: IndexPath(item: i, section: 0))!) {
+                    collectionView.selectItem(at: IndexPath(item: i, section: 0), animated: false, scrollPosition: .centeredVertically)
                 }
             }
         }
@@ -584,7 +584,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
         let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
 
-        let file = viewModel.getFile(at: indexPath.item)!
+        let file = viewModel.getFile(at: indexPath)!
         cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.fileCount - 1)
         cell.configureWith(driveFileManager: viewModel.driveFileManager, file: file, selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
         cell.delegate = self
@@ -610,30 +610,30 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
-            viewModel.multipleSelectionViewModel?.didSelectFile(viewModel.getFile(at: indexPath.item)!, at: indexPath.item)
+            viewModel.multipleSelectionViewModel?.didSelectFile(viewModel.getFile(at: indexPath)!, at: indexPath)
         } else {
-            viewModel.didSelectFile(at: indexPath.item)
+            viewModel.didSelectFile(at: indexPath)
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         guard viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true,
-              let file = viewModel.getFile(at: indexPath.item) else {
+              let file = viewModel.getFile(at: indexPath) else {
             return
         }
-        viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath.item)
+        viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath)
     }
 
     // MARK: - Swipe action collection view delegate
 
     func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
-        viewModel.didSelectSwipeAction(action, at: indexPath.item)
+        viewModel.didSelectSwipeAction(action, at: indexPath)
     }
 
     // MARK: - Swipe action collection view data source
 
     func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        return viewModel.getSwipeActions(at: indexPath.item)
+        return viewModel.getSwipeActions(at: indexPath)
     }
 
     // MARK: - State restoration
@@ -774,7 +774,7 @@ extension FileListViewController: FileCellDelegate {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
         }
-        viewModel.didTapMore(at: indexPath.item)
+        viewModel.didTapMore(at: indexPath)
     }
 }
 
@@ -832,7 +832,7 @@ extension FileListViewController: TopScrollable {
 extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
         if let draggableViewModel = viewModel.draggableFileListViewModel,
-           let draggedFile = viewModel.getFile(at: indexPath.item) {
+           let draggedFile = viewModel.getFile(at: indexPath) {
             return draggableViewModel.dragItems(for: draggedFile, in: collectionView, at: indexPath, with: session)
         } else {
             return []
@@ -845,7 +845,7 @@ extension FileListViewController: UICollectionViewDragDelegate {
 extension FileListViewController: UICollectionViewDropDelegate {
     func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
         if let droppableViewModel = viewModel.droppableFileListViewModel {
-            let file = destinationIndexPath != nil ? viewModel.getFile(at: destinationIndexPath!.item) : nil
+            let file = destinationIndexPath != nil ? viewModel.getFile(at: destinationIndexPath!) : nil
             return droppableViewModel.updateDropSession(session, in: collectionView, with: destinationIndexPath, destinationFile: file)
         } else {
             return UICollectionViewDropProposal(operation: .cancel, intent: .unspecified)
@@ -858,7 +858,7 @@ extension FileListViewController: UICollectionViewDropDelegate {
 
             if let indexPath = coordinator.destinationIndexPath,
                indexPath.item < viewModel.fileCount,
-               let file = viewModel.getFile(at: indexPath.item) {
+               let file = viewModel.getFile(at: indexPath) {
                 if file.isDirectory && file.capabilities.canUpload {
                     destinationDirectory = file
                 }
