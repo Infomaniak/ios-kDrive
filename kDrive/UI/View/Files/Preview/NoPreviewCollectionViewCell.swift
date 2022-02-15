@@ -28,6 +28,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     @IBOutlet weak var progressView: UIProgressView!
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
+    weak var fileActonsFloatingPanel: FileActionsFloatingPanelViewController?
 
     var file: File!
 
@@ -75,6 +76,6 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     }
 
     @IBAction func openFileWith(_ sender: UIButton) {
-        FileActionsHelper.instance.openWith(file: file, from: sender.frame, in: sender)
+        previewDelegate?.openWith(from: sender.frame)
     }
 }

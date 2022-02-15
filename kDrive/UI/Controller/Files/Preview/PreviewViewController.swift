@@ -29,6 +29,7 @@ protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
     func setFullscreen(_ fullscreen: Bool?)
     func errorWhilePreviewing(fileId: Int, error: Error)
+    func openWith(from rect: CGRect)
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
@@ -466,6 +467,23 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
     }
 
+    func openWith(from rect: CGRect) {
+        if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
+            FileActionsHelper.instance.openWith(file: currentFile, from: rect, in: fileInformationsViewController.view)
+        } else {
+            downloadToOpenWith { [weak self] in
+                guard let self = self else { return }
+                FileActionsHelper.instance.openWith(file: self.currentFile, from: rect, in: self.fileInformationsViewController.view)
+            }
+        }
+    }
+
+    private func downloadToOpenWith(completion: @escaping () -> Void) {
+        DownloadQueue.instance.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
+            
+        }
+    }
+
     private func downloadFileIfNeeded(at indexPath: IndexPath) {
         let currentFile = previewFiles[indexPath.row]
         previewErrors.values.forEach { $0.downloadTask?.cancel() }
@@ -646,6 +664,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                     cell.errorDownloading()
                 }
                 cell.previewDelegate = self
+                cell.fileActonsFloatingPanel = fileInformationsViewController
                 return cell
             }
         } else if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
@@ -661,6 +680,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file, isOffline: true)
             cell.previewDelegate = self
+            cell.fileActonsFloatingPanel = fileInformationsViewController
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
@@ -671,6 +691,7 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.setDownloadProgress(progress)
             }
             cell.previewDelegate = self
+            cell.fileActonsFloatingPanel = fileInformationsViewController
             return cell
         }
     }

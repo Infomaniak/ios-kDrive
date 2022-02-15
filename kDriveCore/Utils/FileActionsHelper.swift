@@ -26,12 +26,6 @@ public class FileActionsHelper {
     private var interactionController: UIDocumentInteractionController!
 
     public func openWith(file: File, from rect: CGRect, in view: UIView) {
-        if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
-            presentInteractionController(file: file, from: rect, in: view)
-        }
-    }
-
-    private func presentInteractionController(file: File, from rect: CGRect, in view: UIView) {
         guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
             DDLogError("Open in place directory not found")
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
