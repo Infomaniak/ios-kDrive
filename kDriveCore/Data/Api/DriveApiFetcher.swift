@@ -291,7 +291,7 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func fileActivities(file: File, from date: Date, page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
         var queryItems = [
-            URLQueryItem(name: "with", value: "file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name"),
+            Endpoint.fileActivitiesWithQueryItem,
             URLQueryItem(name: "depth", value: "children"),
             URLQueryItem(name: "from_date", value: "\(Int(date.timeIntervalSince1970))")
         ]
