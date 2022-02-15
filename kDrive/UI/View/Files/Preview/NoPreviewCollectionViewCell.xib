@@ -19,7 +19,7 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xzn-rl-KOk">
-                        <rect key="frame" x="0.0" y="145.5" width="277" height="231.5"/>
+                        <rect key="frame" x="0.0" y="120" width="277" height="282.5"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="wxX-8m-bwJ">
                                 <rect key="frame" x="90.5" y="0.0" width="96" height="96"/>
@@ -84,6 +84,22 @@
                                     </view>
                                 </subviews>
                             </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jGG-JN-vvc">
+                                <rect key="frame" x="50.5" y="228.5" width="176.5" height="54"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" image="open-with" imagePlacement="leading" title="buttonOpenWith" imagePadding="6" buttonSize="large">
+                                    <backgroundConfiguration key="background" cornerRadius="10">
+                                        <color key="backgroundColor" name="infomaniakColor"/>
+                                    </backgroundConfiguration>
+                                </buttonConfiguration>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenWith"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="openFileWith:" destination="gTV-IL-0wX" eventType="touchUpInside" id="abo-xT-Fy5"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -92,34 +108,18 @@
                             <constraint firstAttribute="trailing" secondItem="zbp-KC-tjt" secondAttribute="trailing" constant="24" id="GQv-u7-KrB"/>
                             <constraint firstItem="zbp-KC-tjt" firstAttribute="leading" secondItem="Xzn-rl-KOk" secondAttribute="leading" constant="24" id="I3o-lW-cVN"/>
                             <constraint firstItem="zbp-KC-tjt" firstAttribute="top" secondItem="wxX-8m-bwJ" secondAttribute="bottom" constant="32" id="d6L-f6-o0q"/>
-                            <constraint firstAttribute="bottom" secondItem="zbp-KC-tjt" secondAttribute="bottom" constant="8" id="k24-J6-xa2"/>
+                            <constraint firstItem="jGG-JN-vvc" firstAttribute="top" secondItem="zbp-KC-tjt" secondAttribute="bottom" constant="5" id="htc-vN-c9a"/>
+                            <constraint firstItem="jGG-JN-vvc" firstAttribute="centerX" secondItem="Xzn-rl-KOk" secondAttribute="centerX" id="oXN-Aq-IeS"/>
+                            <constraint firstAttribute="bottom" secondItem="jGG-JN-vvc" secondAttribute="bottom" id="qAt-Vt-ip9"/>
                         </constraints>
                     </view>
-                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jGG-JN-vvc">
-                        <rect key="frame" x="50.5" y="371" width="176.5" height="54"/>
-                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <state key="normal" title="Button"/>
-                        <buttonConfiguration key="configuration" style="plain" image="open-with" imagePlacement="leading" title="buttonOpenWith" imagePadding="6" buttonSize="large">
-                            <backgroundConfiguration key="background" cornerRadius="10">
-                                <color key="backgroundColor" name="infomaniakColor"/>
-                            </backgroundConfiguration>
-                        </buttonConfiguration>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenWith"/>
-                        </userDefinedRuntimeAttributes>
-                        <connections>
-                            <action selector="openFileWith:" destination="gTV-IL-0wX" eventType="touchUpInside" id="abo-xT-Fy5"/>
-                        </connections>
-                    </button>
                 </subviews>
             </view>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <constraints>
-                <constraint firstItem="jGG-JN-vvc" firstAttribute="centerX" secondItem="ZTg-uK-7eu" secondAttribute="centerX" id="0yd-4N-4dg"/>
                 <constraint firstItem="Xzn-rl-KOk" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="KnF-Jg-cos"/>
                 <constraint firstItem="Xzn-rl-KOk" firstAttribute="centerY" secondItem="gTV-IL-0wX" secondAttribute="centerY" id="RPm-47-V8p"/>
                 <constraint firstAttribute="trailing" secondItem="Xzn-rl-KOk" secondAttribute="trailing" id="UJ6-4S-3sA"/>
-                <constraint firstItem="jGG-JN-vvc" firstAttribute="top" secondItem="zbp-KC-tjt" secondAttribute="bottom" constant="2" id="VSg-tb-qO0"/>
             </constraints>
             <size key="customSize" width="277" height="522"/>
             <connections>

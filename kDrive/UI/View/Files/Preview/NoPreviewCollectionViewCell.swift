@@ -29,8 +29,6 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
 
-    var file: File!
-
     private var observationToken: ObservationToken?
 
     override func awakeFromNib() {
@@ -51,7 +49,6 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     }
 
     func configureWith(file: File, isOffline: Bool = false) {
-        self.file = file
         titleLabel.text = file.name
         if isOffline {
             iconImageView.image = KDriveResourcesAsset.fileDefault.image
