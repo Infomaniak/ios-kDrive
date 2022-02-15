@@ -19,24 +19,17 @@
 import Foundation
 
 public enum ApiRoutes {
-    static let driveApiUrl = "https://drive.preprod.dev.infomaniak.ch/drive/"
-    static let officeApiUrl = "https://drive.infomaniak.com/app/office/"
-
-    static func fileURL(file: File) -> String {
-        return "\(driveApiUrl)\(file.driveId)/file/\(file.id)/"
-    }
+    static let driveApiUrl = "https://\(ApiEnvironment.current.driveHost)/drive/"
 
     static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
 
-    static func uploadFile(file: UploadFile) -> String {
-        var url = "\(driveApiUrl)\(file.driveId)/public/file/\(file.parentDirectoryId)/upload?file_name=\(file.urlEncodedName)&conflict=\(file.conflictOption.rawValue)&relative_path=\(file.urlEncodedRelativePath)\(file.urlEncodedName)&with=parent,children,rights,collaborative_folder,favorite,share_link"
-        if let creationDate = file.creationDate {
-            url += "&file_created_at=\(Int(creationDate.timeIntervalSince1970))"
-        }
-        if let modificationDate = file.modificationDate {
-            url += "&last_modified_at=\(Int(modificationDate.timeIntervalSince1970))"
-        }
-        return url
+    static func upload(file: UploadFile) -> URL? {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = ApiEnvironment.current.driveHost
+        components.path = "/drive/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload"
+        components.queryItems = file.queryItems
+        return components.url
     }
 
     static func getFilesActivities(driveId: Int, files: [File], from date: Int) -> String {
@@ -44,19 +37,16 @@ public enum ApiRoutes {
         return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&actions[]=file_rename&actions[]=file_delete&actions[]=file_update&from_date=\(date)"
     }
 
-    public static func showOffice(file: File) -> String {
-        return "\(officeApiUrl)\(file.driveId)/\(file.id)"
-    }
-
-    public static func mobileLogin(url: String) -> String {
-        return "https://manager.infomaniak.com/v3/mobile_login?url=\(url)"
+    public static func mobileLogin(url: String) -> URL? {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = ApiEnvironment.current.managerHost
+        components.path = "/v3/mobile_login"
+        components.queryItems = [URLQueryItem(name: "url", value: url)]
+        return components.url
     }
 
     public static func getUploadToken(driveId: Int) -> String {
         return "\(driveApiUrl)\(driveId)/file/1/upload/token"
-    }
-
-    public static func fileCount(driveId: Int, fileId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/\(fileId)/count"
     }
 }
