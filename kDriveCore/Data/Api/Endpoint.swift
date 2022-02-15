@@ -20,16 +20,30 @@ import Foundation
 
 // MARK: - Type definition
 
-enum ApiEnvironment {
+public enum ApiEnvironment {
     case prod, preprod
+
+    public static let current = ApiEnvironment.preprod
 
     var host: String {
         switch self {
         case .prod:
-            return "api.infomaniak.com"
+            return "infomaniak.com"
         case .preprod:
-            return "api.preprod.dev.infomaniak.ch"
+            return "preprod.dev.infomaniak.ch"
         }
+    }
+
+    var apiHost: String {
+        return "api.\(host)"
+    }
+
+    public var driveHost: String {
+        return "drive.\(host)"
+    }
+
+    public var managerHost: String {
+        return "manager.\(host)"
     }
 }
 
@@ -43,7 +57,7 @@ public struct Endpoint {
     public var url: URL {
         var components = URLComponents()
         components.scheme = "https"
-        components.host = apiEnvironment.host
+        components.host = apiEnvironment.apiHost
         components.path = path
         components.queryItems = queryItems
 
@@ -53,7 +67,7 @@ public struct Endpoint {
         return url
     }
 
-    init(path: String, queryItems: [URLQueryItem]? = nil, apiEnvironment: ApiEnvironment = .prod) {
+    init(path: String, queryItems: [URLQueryItem]? = nil, apiEnvironment: ApiEnvironment = .current) {
         self.path = path
         self.queryItems = queryItems
         self.apiEnvironment = apiEnvironment
@@ -122,11 +136,11 @@ public extension Endpoint {
     private static let fileExtraWithQueryItems = URLQueryItem(name: "with", value: fileMinimalWithQueryItems.value?.appending(",path,users,version"))
 
     private static var base: Endpoint {
-        return Endpoint(path: "/2/drive", apiEnvironment: .preprod)
+        return Endpoint(path: "/2/drive")
     }
 
     static var inAppReceipt: Endpoint {
-        return Endpoint(path: "/invoicing/inapp/apple/link_receipt", apiEnvironment: .prod)
+        return Endpoint(path: "/invoicing/inapp/apple/link_receipt")
     }
 
     // MARK: Action

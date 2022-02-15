@@ -793,12 +793,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         updateSelectionButtons(selectAll: true)
         selectAllMode = true
         navigationItem.rightBarButtonItem = loadingBarButtonItem
-        driveFileManager.apiFetcher.getFileCount(driveId: driveFileManager.drive.id, fileId: currentDirectory.id) { [self] response, _ in
-            if let fileCount = response?.data {
+        Task {
+            do {
+                let fileCount = try await driveFileManager.apiFetcher.count(of: currentDirectory)
                 currentDirectoryCount = fileCount
                 setSelectedCells()
                 updateSelectedCount()
-            } else {
+            } catch {
                 updateSelectionButtons()
                 selectAllMode = false
                 updateSelectAllButton()
