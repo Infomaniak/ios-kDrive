@@ -104,24 +104,10 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    private func pagination(page: Int) -> String {
-        return "&page=\(page)&per_page=\(Endpoint.itemsPerPage)"
-    }
-
     @discardableResult
     private func makeRequest<T: Decodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoding: ParameterEncoding = JSONEncoding.default, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
         return authenticatedSession
             .request(convertible, method: method, parameters: parameters, encoding: encoding, headers: headers, interceptor: interceptor, requestModifier: requestModifier)
-            .validate()
-            .responseDecodable(of: T.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
-    }
-
-    @discardableResult
-    private func makeRequest<T: Decodable, Parameters: Encodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoder: ParameterEncoder = JSONParameterEncoder.convertToSnakeCase, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
-        return authenticatedSession
-            .request(convertible, method: method, parameters: parameters, encoder: encoder, headers: headers, interceptor: interceptor, requestModifier: requestModifier)
             .validate()
             .responseDecodable(of: T.self, decoder: ApiFetcher.decoder) { response in
                 self.handleResponse(response: response, completion: completion)
@@ -438,10 +424,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.bulkFiles(drive: drive), method: .post, parameters: action)).data
     }
 
-    public func getFileCount(driveId: Int, fileId: Int, completion: @escaping (ApiResponse<FileCount>?, Error?) -> Void) {
-        let url = ApiRoutes.fileCount(driveId: driveId, fileId: fileId)
-
-        makeRequest(url, method: .get, completion: completion)
+    public func count(of file: AbstractFile) async throws -> FileCount {
+        try await perform(request: authenticatedRequest(.count(of: file))).data
     }
 
     public func buildArchive(drive: AbstractDrive, for files: [File]) async throws -> DownloadArchiveResponse {
