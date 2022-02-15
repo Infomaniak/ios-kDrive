@@ -429,6 +429,12 @@ extension NewFolderViewController: FooterButtonDelegate {
                 }
             }
         case .dropbox:
+            MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail),
+                                             passwordEnabled: getSetting(for: .optionPassword),
+                                             dateEnabled: getSetting(for: .optionDate),
+                                             sizeEnabled: getSetting(for: .optionSize),
+                                             size: getValue(for: .optionSize) as? Int)
+            
             let onlyForMe = tableView.indexPathForSelectedRow?.row == 0
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
@@ -449,11 +455,6 @@ extension NewFolderViewController: FooterButtonDelegate {
                     UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
-            MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail),
-                                             passwordEnabled: getSetting(for: .optionPassword),
-                                             dateEnabled: getSetting(for: .optionDate),
-                                             sizeEnabled: getSetting(for: .optionSize),
-                                             size: getValue(for: .optionSize) as? Int)
         }
     }
 }

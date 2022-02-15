@@ -316,6 +316,12 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
         let limitFileSize = getSetting(for: .optionSize) ? (getValue(for: .optionSize) as? Int) : nil
 
+        MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail),
+                                         passwordEnabled: getSetting(for: .optionPassword),
+                                         dateEnabled: getSetting(for: .optionDate),
+                                         sizeEnabled: getSetting(for: .optionSize),
+                                         size: getValue(for: .optionSize) as? Int)
+
         if convertingFolder {
             driveFileManager.apiFetcher.setupDropBox(directory: folder, password: (password?.isEmpty ?? false) ? nil : password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { response, _ in
                 if let dropBox = response?.data {
@@ -339,22 +345,15 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                 }
             }
         }
-
-        MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail),
-                                         passwordEnabled: getSetting(for: .optionPassword),
-                                         dateEnabled: getSetting(for: .optionDate),
-                                         sizeEnabled: getSetting(for: .optionSize),
-                                         size: getValue(for: .optionSize) as? Int)
     }
 }
 
 extension ManageDropBoxViewController: DropBoxLinkDelegate {
     func didClickOnShareLink(link: String, sender: UIView) {
+        MatomoUtils.track(eventWithCategory: .dropbox, name: "share")
         let items = [URL(string: link)!]
         let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
         ac.popoverPresentationController?.sourceView = sender
         present(ac, animated: true)
-
-        MatomoUtils.track(eventWithCategory: .dropbox, name: "share")
     }
 }

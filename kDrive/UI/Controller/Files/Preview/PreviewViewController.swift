@@ -223,6 +223,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
         if initialLoading {
+            MatomoUtils.trackPreview(file: currentFile)
+
             collectionView.setNeedsLayout()
             collectionView.layoutIfNeeded()
 
@@ -232,7 +234,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
-            MatomoUtils.trackPreview(file: currentFile)
         }
         setInteractiveRecognizer()
     }
@@ -383,9 +384,9 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     @objc private func editFile() {
+        MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "edit")
         floatingPanelViewController.dismiss(animated: true)
         OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
-        MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "edit")
     }
 
     @objc private func openFile() {
@@ -432,6 +433,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if let centerCellIndexPath = collectionView.indexPathForItem(at: view.convert(view.center, to: collectionView)),
            currentIndex != centerCellIndexPath {
+            MatomoUtils.trackPreview(file: currentFile)
+            
             let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
             previousCell?.didEndDisplaying()
 
@@ -440,8 +443,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
-
-            MatomoUtils.trackPreview(file: currentFile)
         }
     }
 

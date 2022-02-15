@@ -934,6 +934,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func gridButtonPressed() {
+        MatomoUtils.track(eventWithCategory: .displayList, name: listStyle == .grid ? "viewGrid" : "viewList")
         // Toggle grid/list
         if listStyle == .grid {
             listStyle = .list
@@ -941,7 +942,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             listStyle = .grid
         }
         FileListOptions.instance.currentStyle = listStyle
-        MatomoUtils.track(eventWithCategory: .displayList, name: listStyle == .grid ? "viewGrid" : "viewList")
         // Collection view will be reloaded via the observer
     }
 
@@ -1067,6 +1067,7 @@ extension FileListViewController: FileCellDelegate {
 extension FileListViewController: SelectDelegate {
     func didSelect(option: Selectable) {
         guard let type = option as? SortType else { return }
+        MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
         sortType = type
         if !trashSort {
             FileListOptions.instance.currentSortType = sortType
@@ -1074,7 +1075,6 @@ extension FileListViewController: SelectDelegate {
         } else {
             reloadData(showRefreshControl: false)
         }
-        MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
     }
 }
 

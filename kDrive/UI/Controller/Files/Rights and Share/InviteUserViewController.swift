@@ -325,6 +325,7 @@ extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let usersIds = shareables.compactMap { $0 as? DriveUser }.map(\.id)
         let teams = shareables.compactMap { $0 as? Team }.map(\.id)
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
         driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, teams: teams, emails: emails, permission: newPermission.rawValue) { response, _ in
             let conflictList = response?.data?.filter(\.isConflict) ?? []
             if conflictList.isEmpty {
@@ -333,6 +334,5 @@ extension InviteUserViewController: FooterButtonDelegate {
                 self.showConflictDialog(conflictList: conflictList)
             }
         }
-        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
     }
 }

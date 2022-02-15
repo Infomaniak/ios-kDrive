@@ -258,6 +258,10 @@ class ManageCategoriesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let category = category(at: indexPath)
 
+        if file != nil {
+            MatomoUtils.track(eventWithCategory: .categories, name: "assign")
+        }
+
         if category == dummyCategory {
             let editCategoryViewController = EditCategoryViewController.instantiate(driveFileManager: driveFileManager)
             if let searchText = searchText {
@@ -278,15 +282,16 @@ class ManageCategoriesViewController: UITableViewController {
             }
         }
         delegate?.didSelect(category: category)
-
-        if file != nil {
-            MatomoUtils.track(eventWithCategory: .categories, name: "assign")
-        }
     }
 
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         let category = category(at: indexPath)
         guard category != dummyCategory else { return }
+
+        if file != nil {
+            MatomoUtils.track(eventWithCategory: .categories, name: "remove")
+        }
+        
         category.isSelected = false
         if let file = file {
             driveFileManager.removeCategory(file: file, category: category) { error in
@@ -298,10 +303,6 @@ class ManageCategoriesViewController: UITableViewController {
             }
         }
         delegate?.didDeselect(category: category)
-
-        if file != nil {
-            MatomoUtils.track(eventWithCategory: .categories, name: "remove")
-        }
     }
 
     // MARK: - Navigation

@@ -66,11 +66,10 @@ class SwitchUserViewController: UIViewController {
     }
 
     @IBAction func buttonAddUserClicked(_ sender: UIButton) {
+        MatomoUtils.track(eventWithCategory: .account, name: "add")
         let nextViewController = OnboardingViewController.instantiate()
         nextViewController.addUser = true
         present(nextViewController, animated: true)
-
-        MatomoUtils.track(eventWithCategory: .account, name: "add")
     }
 
     class func instantiate() -> SwitchUserViewController {
@@ -106,6 +105,9 @@ extension SwitchUserViewController: UITableViewDelegate {
             tableView.deselectRow(at: indexPath, animated: true)
             present(driveErrorViewControllerNav, animated: true)
         } else {
+            MatomoUtils.track(eventWithCategory: .account, name: "switch")
+            MatomoUtils.connectUser()
+            
             AccountManager.instance.switchAccount(newAccount: account)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
             if isRootViewController {
@@ -113,9 +115,6 @@ extension SwitchUserViewController: UITableViewDelegate {
             } else {
                 navigationController?.popViewController(animated: true)
             }
-
-            MatomoUtils.track(eventWithCategory: .account, name: "switch")
-            MatomoUtils.connectUser()
         }
     }
 }

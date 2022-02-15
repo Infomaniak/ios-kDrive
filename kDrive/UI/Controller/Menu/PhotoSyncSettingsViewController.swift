@@ -462,15 +462,6 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
 
 extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        DispatchQueue.global(qos: .utility).async {
-            let realm = DriveFileManager.constants.uploadsRealm
-            self.saveSettings(using: realm)
-            DispatchQueue.main.async {
-                self.navigationController?.popViewController(animated: true)
-            }
-            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
-        }
-
         MatomoUtils.track(eventWithCategory: .photoSync, name: photoSyncEnabled ? "enabled" : "disabled")
         if photoSyncEnabled {
             MatomoUtils.track(eventWithCategory: .photoSync, name: "sync\(["New", "All", "FromDate"][newSyncSettings.syncMode.rawValue])")
@@ -479,6 +470,15 @@ extension PhotoSyncSettingsViewController: FooterButtonDelegate {
             MatomoUtils.track(eventWithCategory: .photoSync, name: "importScreenshots", value: newSyncSettings.syncScreenshotsEnabled)
             MatomoUtils.track(eventWithCategory: .photoSync, name: "createDatedFolders", value: newSyncSettings.createDatedSubFolders)
             MatomoUtils.track(eventWithCategory: .photoSync, name: "deleteAfterImport", value: newSyncSettings.deleteAssetsAfterImport)
+        }
+        
+        DispatchQueue.global(qos: .utility).async {
+            let realm = DriveFileManager.constants.uploadsRealm
+            self.saveSettings(using: realm)
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+            _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue(using: realm)
         }
     }
 }

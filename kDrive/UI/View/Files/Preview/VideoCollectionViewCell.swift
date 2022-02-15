@@ -92,12 +92,15 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
 
     @IBAction func playVideoPressed(_ sender: Any) {
         guard let player = player else { return }
+
+        MatomoUtils.trackMediaPlayer(playMedia: .video)
+
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
-            self?.player?.pause()
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
+            self?.player?.pause()
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
@@ -107,7 +110,5 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
         }
-
-        MatomoUtils.trackMediaPlayer(playMedia: .video)
     }
 }

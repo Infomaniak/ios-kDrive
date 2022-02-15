@@ -372,6 +372,7 @@ extension StoreViewController: StoreManagerDelegate {
 
 extension StoreViewController: StoreObserverDelegate {
     func storeObserverPurchaseDidSucceed(transaction: SKPaymentTransaction, receiptString: String) {
+        MatomoUtils.track(eventWithCategory: .inApp, name: "buy")
         // Send receipt to the server
         let body = ReceiptInfo(latestReceipt: receiptString,
                                userId: AccountManager.instance.currentUserId,
@@ -382,7 +383,6 @@ extension StoreViewController: StoreObserverDelegate {
         StoreRequest.shared.sendReceipt(body: body)
         // Show success view controller
         showSuccessView()
-        MatomoUtils.track(eventWithCategory: .inApp, name: "buy")
     }
 
     func storeObserverRestoreDidSucceed() {}

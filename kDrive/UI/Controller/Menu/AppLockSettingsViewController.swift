@@ -69,6 +69,7 @@ class AppLockSettingsViewController: UIViewController {
         let context = LAContext()
         let reason = KDriveResourcesStrings.Localizable.appSecurityDescription
         var error: NSError?
+        MatomoUtils.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
                 context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
@@ -84,7 +85,6 @@ class AppLockSettingsViewController: UIViewController {
                 sender.setOn(!sender.isOn, animated: true)
             }
         }
-        MatomoUtils.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
     }
 
     class func instantiate() -> AppLockSettingsViewController {

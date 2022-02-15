@@ -500,9 +500,9 @@ extension HomeViewController {
                 cell.selector.selectedSegmentIndex = UserDefaults.shared.selectedHomeIndex
                 cell.valueChangeHandler = { [weak self] selector in
                     guard let self = self else { return }
-                    self.setSelectedHomeIndex(selector.selectedSegmentIndex)
                     MatomoUtils.track(eventWithCategory: .home,
                                       name: "switchView\(["Activity", "Offline", "Images"][selector.selectedSegmentIndex])")
+                    self.setSelectedHomeIndex(selector.selectedSegmentIndex)
                 }
                 return cell
             }
@@ -576,12 +576,13 @@ extension HomeViewController {
                 headerView.switchLayoutButton.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveResourcesAsset.largelist.image : KDriveResourcesAsset.grid.image, for: .normal)
                 headerView.switchLayoutButton.isHidden = !currentRecentFilesController.listStyleEnabled
                 headerView.actionHandler = { button in
+                    MatomoUtils.track(eventWithCategory: .displayList,
+                                      name: UserDefaults.shared.homeListStyle == .list ? "viewList" : "viewGrid")
                     UserDefaults.shared.homeListStyle = UserDefaults.shared.homeListStyle == .list ? .grid : .list
                     button.setImage(UserDefaults.shared.homeListStyle == .list ? KDriveResourcesAsset.largelist.image : KDriveResourcesAsset.grid.image, for: .normal)
                     collectionView.performBatchUpdates {
                         collectionView.reloadSections([1])
                     }
-                    MatomoUtils.track(eventWithCategory: .displayList, name: UserDefaults.shared.homeListStyle == .list ? "viewList" : "viewGrid")
                 }
                 return headerView
             }

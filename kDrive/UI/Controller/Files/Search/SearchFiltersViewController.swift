@@ -165,6 +165,7 @@ class SearchFiltersViewController: UITableViewController {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
         case .date:
+            MatomoUtils.track(eventWithCategory: .search, name: "filterDate")
             let customDateOption: DateOption
             if let option = filters.date, case .custom = option {
                 customDateOption = option
@@ -174,23 +175,22 @@ class SearchFiltersViewController: UITableViewController {
             let allCases: [DateOption] = [.today, .yesterday, .last7days, customDateOption]
             let floatingPanelController = FloatingPanelSelectOptionViewController<DateOption>.instantiatePanel(options: allCases, selectedOption: filters.date, headerTitle: filterType.title, delegate: self)
             present(floatingPanelController, animated: true)
-            MatomoUtils.track(eventWithCategory: .search, name: "filterDate")
             return nil
         case .type:
+            MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
             var fileTypes = ConvertedType.allCases
             fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
             let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: filterType.title, delegate: self)
             present(floatingPanelController, animated: true)
-            MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
             return nil
         case .categories:
             if indexPath.row == 0 {
+                MatomoUtils.track(eventWithCategory: .search, name: "filterCategory")
                 let manageCategoriesViewController = ManageCategoriesViewController.instantiate(driveFileManager: driveFileManager)
                 manageCategoriesViewController.canEdit = false
                 manageCategoriesViewController.selectedCategories = Array(filters.categories)
                 manageCategoriesViewController.delegate = self
                 navigationController?.pushViewController(manageCategoriesViewController, animated: true)
-                MatomoUtils.track(eventWithCategory: .search, name: "filterCategory")
                 return nil
             } else {
                 return indexPath

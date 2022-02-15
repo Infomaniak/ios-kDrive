@@ -140,10 +140,13 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         if indexPath.section == 0 {
             return
         }
-
         dismiss(animated: true)
         guard let mainTabViewController = parent?.presentingViewController as? MainTabViewController else { return }
         let action = content[indexPath.section][indexPath.row]
+        // Folder creation is already tracked through its creation page
+        if action != .folderAction {
+            MatomoUtils.track(eventWithCategory: .newElement, name: action.matomoName)
+        }
         switch action {
         case .importAction:
             let documentPicker = DriveImportDocumentPickerViewController(documentTypes: [UTI.data.identifier], in: .import)
@@ -206,11 +209,6 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
             mainTabViewController.present(alertViewController, animated: true)
         default:
             break
-        }
-
-        // Folder creation is already tracked through its creation page
-        if action != .folderAction {
-            MatomoUtils.track(eventWithCategory: .newElement, name: action.matomoName)
         }
     }
 
