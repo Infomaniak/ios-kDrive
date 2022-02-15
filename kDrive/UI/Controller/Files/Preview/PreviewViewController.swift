@@ -479,16 +479,22 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     private func downloadToOpenWith(completion: @escaping () -> Void) {
+        guard let currentCell = collectionView.cellForItem(at: currentIndex) as? NoPreviewCollectionViewCell else { return }
+
         DownloadQueue.instance.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 if error == nil {
                     completion()
+                    currentCell.observeProgress(false, file: self.currentFile)
                 } else if error != .taskCancelled && error != .taskRescheduled {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
                 }
+
             }
         }
         DownloadQueue.instance.addToQueue(file: currentFile)
+        currentCell.observeProgress(true, file: currentFile)
     }
 
     private func downloadFileIfNeeded(at indexPath: IndexPath) {
@@ -671,7 +677,6 @@ extension PreviewViewController: UICollectionViewDataSource {
                     cell.errorDownloading()
                 }
                 cell.previewDelegate = self
-                cell.fileActonsFloatingPanel = fileInformationsViewController
                 return cell
             }
         } else if file.hasThumbnail && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
@@ -687,7 +692,6 @@ extension PreviewViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file, isOffline: true)
             cell.previewDelegate = self
-            cell.fileActonsFloatingPanel = fileInformationsViewController
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
@@ -698,7 +702,6 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.setDownloadProgress(progress)
             }
             cell.previewDelegate = self
-            cell.fileActonsFloatingPanel = fileInformationsViewController
             return cell
         }
     }

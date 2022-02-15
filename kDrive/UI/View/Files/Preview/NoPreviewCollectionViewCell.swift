@@ -28,9 +28,10 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     @IBOutlet weak var progressView: UIProgressView!
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
-    weak var fileActonsFloatingPanel: FileActionsFloatingPanelViewController?
 
     var file: File!
+
+    private var observationToken: ObservationToken?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -68,6 +69,19 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
         progressView.isHidden = false
         progressView.observedProgress = progress
         subtitleLabel.text = KDriveResourcesStrings.Localizable.previewDownloadIndication
+    }
+
+    func observeProgress(_ showProgress: Bool, file: File) {
+        observationToken?.cancel()
+        progressView.isHidden = !showProgress
+        progressView.progress = 0
+        if showProgress {
+            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+                DispatchQueue.main.async { [weak self] in
+                    self?.progressView.progress = Float(progress)
+                }
+            }
+        }
     }
 
     func errorDownloading() {
