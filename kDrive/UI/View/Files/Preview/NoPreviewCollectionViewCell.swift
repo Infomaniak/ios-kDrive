@@ -29,6 +29,8 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
 
+    var file: File!
+
     override func awakeFromNib() {
         super.awakeFromNib()
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
@@ -47,6 +49,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     }
 
     func configureWith(file: File, isOffline: Bool = false) {
+        self.file = file
         titleLabel.text = file.name
         if isOffline {
             iconImageView.image = KDriveResourcesAsset.fileDefault.image
@@ -72,6 +75,6 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     }
 
     @IBAction func openFileWith(_ sender: UIButton) {
-        //FileActionsHelper.openWith(file: File(), from: sender.frame, in: sender.superview)
+        FileActionsHelper.instance.openWith(file: file, from: sender.frame, in: sender)
     }
 }
