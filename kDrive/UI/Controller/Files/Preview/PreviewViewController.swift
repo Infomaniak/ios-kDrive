@@ -67,7 +67,11 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private var initialLoading = true
     private var fromActivities = false
     private var centerIndexPathBeforeRotate: IndexPath?
-    private var currentIndex = IndexPath(row: 0, section: 0)
+    private var currentIndex = IndexPath(row: 0, section: 0) {
+        didSet {
+            setTitle()
+        }
+    }
     private var currentDownloadOperation: DownloadOperation?
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
@@ -89,14 +93,12 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
         set {
             previewFiles[currentIndex.row] = newValue
-            navigationItem.title = currentFile.name
         }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        navigationItem.title = currentFile.name
         navigationItem.hideBackButtonText()
 
         collectionView.register(cellView: NoPreviewCollectionViewCell.self)
@@ -306,6 +308,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     override var prefersStatusBarHidden: Bool {
         return fullScreenPreview
+    }
+
+    private func setTitle() {
+        navigationItem.title = currentFile.name
     }
 
     func updateNavigationBar() {
