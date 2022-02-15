@@ -480,8 +480,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
 
     private func downloadToOpenWith(completion: @escaping () -> Void) {
         DownloadQueue.instance.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
-            
+            DispatchQueue.main.async {
+                if error == nil {
+                    completion()
+                } else if error != .taskCancelled && error != .taskRescheduled {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
+                }
+            }
         }
+        DownloadQueue.instance.addToQueue(file: currentFile)
     }
 
     private func downloadFileIfNeeded(at indexPath: IndexPath) {
