@@ -254,14 +254,15 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         Task {
             do {
                 _ = try await driveFileManager.fileActivities(file: currentDirectory)
+                self.isLoadingData = false
                 self.reloadData(showRefreshControl: false, withActivities: false)
             } catch {
+                self.isLoadingData = false
                 if let error = error as? DriveError, error == .objectNotFound {
                     // Pop view controller
                     self.navigationController?.popViewController(animated: true)
                 }
             }
-            self.isLoadingData = false
         }
     }
 
