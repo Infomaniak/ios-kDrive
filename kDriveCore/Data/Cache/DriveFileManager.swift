@@ -702,7 +702,7 @@ public class DriveFileManager {
                 throw DriveError.fileNotFound
             }
             // Apply activities to file
-            let results = applyFolderActivitiesTo(file: file, activities: activities, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
+            let results = apply(activities: activities, to: file, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
             pagedActivities.inserted.insert(contentsOf: results.inserted, at: 0)
             pagedActivities.updated.insert(contentsOf: results.updated, at: 0)
             pagedActivities.deleted.insert(contentsOf: results.deleted, at: 0)
@@ -711,11 +711,11 @@ public class DriveFileManager {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    private func applyFolderActivitiesTo(file: File,
-                                         activities: [FileActivity],
-                                         pagedActions: inout [Int: FileActivityType],
-                                         timestamp: Int,
-                                         using realm: Realm? = nil) -> ActivitiesResult {
+    private func apply(activities: [FileActivity],
+                       to file: File,
+                       pagedActions: inout [Int: FileActivityType],
+                       timestamp: Int,
+                       using realm: Realm? = nil) -> ActivitiesResult {
         var insertedFiles = [File]()
         var updatedFiles = [File]()
         var deletedFiles = [File]()
