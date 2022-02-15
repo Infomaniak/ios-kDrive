@@ -627,18 +627,10 @@ final class DriveApiTests: XCTestCase {
         let (testDirectory, _) = try await initOfficeFile(testName: "Get file count")
         _ = try await currentApiFetcher.createFile(in: testDirectory, name: "secondFile-\(Date())", type: "docx")
         _ = try await currentApiFetcher.createDirectory(in: testDirectory, name: "directory-\(Date())", onlyForMe: true)
-        let count: FileCount = try await withCheckedThrowingContinuation { continuation in
-            self.currentApiFetcher.getFileCount(driveId: Env.driveId, fileId: testDirectory.id) { response, error in
-                if let count = response?.data {
-                    continuation.resume(returning: count)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
+        let count = try await currentApiFetcher.count(of: testDirectory)
         XCTAssertEqual(count.count, 3, "Root file should contain 3 elements")
         XCTAssertEqual(count.files, 2, "Root file should contain 2 files")
-        XCTAssertEqual(count.folders, 1, "Root file should contain 1 folder")
+        XCTAssertEqual(count.directories, 1, "Root file should contain 1 folder")
         tearDownTest(directory: testDirectory)
     }
 
