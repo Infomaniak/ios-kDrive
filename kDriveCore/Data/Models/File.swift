@@ -426,7 +426,11 @@ public class File: Object, Codable {
     }
 
     public var officeUrl: URL? {
-        return URL(string: ApiRoutes.showOffice(file: self))
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = ApiEnvironment.current.driveHost
+        components.path = "/app/office/\(driveId)/\(id)"
+        return components.url
     }
 
     public var typeIdentifier: String {

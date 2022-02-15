@@ -109,7 +109,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
 
         // Load request
-        if let url = URL(string: ApiRoutes.mobileLogin(url: ApiRoutes.showOffice(file: file))) {
+        if let officeUrl = file.officeUrl, let url = ApiRoutes.mobileLogin(url: officeUrl.absoluteString) {
             if let token = driveFileManager.apiFetcher.currentToken {
                 driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                     if let token = token {
@@ -161,9 +161,8 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         if let url = navigationAction.request.url {
             let urlString = url.absoluteString
             if url == file.officeUrl
-                || urlString.contains("login.infomaniak.com")
-                || urlString.contains("manager.infomaniak.com/v3/mobile_login")
-                || urlString.contains("documentserver.drive.infomaniak.com") {
+                || urlString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
+                || urlString.starts(with: "https://documentserver.\(ApiEnvironment.current.driveHost)") {
                 // HACK: Print/download a file if the URL contains "/output." because `shouldPerformDownload` doesn't work
                 if urlString.contains("/output.") {
                     if UIPrintInteractionController.canPrint(url) {
