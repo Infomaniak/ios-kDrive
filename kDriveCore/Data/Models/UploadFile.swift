@@ -59,14 +59,6 @@ public class UploadFile: Object {
     public var isFirstInCollection = false
     public var isLastInCollection = false
 
-    var urlEncodedName: String {
-        return name.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
-    }
-
-    var urlEncodedRelativePath: String {
-        return relativePath.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
-    }
-
     public var pathURL: URL? {
         get {
             return url == nil ? nil : URL(fileURLWithPath: url!)
@@ -140,7 +132,8 @@ public class UploadFile: Object {
             URLQueryItem(name: "conflict", value: conflictOption.rawValue),
             URLQueryItem(name: "file_name", value: name),
             URLQueryItem(name: "relative_path", value: relativePath),
-            URLQueryItem(name: "total_size", value: "\(size)")
+            // URLQueryItem(name: "total_size", value: "\(size)")
+            URLQueryItem(name: "with", value: "parent,children,rights,collaborative_folder,favorite,share_link")
         ]
         if let creationDate = creationDate {
             queryItems.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))

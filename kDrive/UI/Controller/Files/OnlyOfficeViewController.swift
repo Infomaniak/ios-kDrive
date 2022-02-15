@@ -109,7 +109,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
 
         // Load request
-        if let url = URL(string: ApiRoutes.mobileLogin(url: ApiRoutes.showOffice(file: file))) {
+        if let officeUrl = file.officeUrl, let url = ApiRoutes.mobileLogin(url: officeUrl.absoluteString) {
             if let token = driveFileManager.apiFetcher.currentToken {
                 driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                     if let token = token {
@@ -153,7 +153,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let url = navigationAction.request.url?.absoluteString {
-            if url == file.officeUrl?.absoluteString || url.contains("login.infomaniak.com") || url.contains("manager.infomaniak.com/v3/mobile_login") || url.contains("documentserver.drive.infomaniak.com") {
+            if url == file.officeUrl?.absoluteString || url.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login") || url.starts(with: "https://documentserver.\(ApiEnvironment.current.driveHost)") {
                 decisionHandler(.allow)
                 return
             }
