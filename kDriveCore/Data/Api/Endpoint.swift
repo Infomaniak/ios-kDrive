@@ -45,6 +45,24 @@ public enum ApiEnvironment {
     public var managerHost: String {
         return "manager.\(host)"
     }
+
+    var mqttHost: String {
+        switch self {
+        case .prod:
+            return "info-mq.infomaniak.com"
+        case .preprod:
+            return "preprod-info-mq.infomaniak.com"
+        }
+    }
+
+    var mqttPass: String {
+        switch self {
+        case .prod:
+            return "8QC5EwBqpZ2Z"
+        case .preprod:
+            return "4fBt5AdC2P"
+        }
+    }
 }
 
 public struct Endpoint {
