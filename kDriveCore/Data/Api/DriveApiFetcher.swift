@@ -92,28 +92,6 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
-    // MARK: - Old request helpers
-
-    override public func handleResponse<Type>(response: DataResponse<Type, AFError>, completion: @escaping (Type?, Error?) -> Void) {
-        super.handleResponse(response: response) { res, error in
-            if let error = error as? InfomaniakCore.ApiError {
-                completion(res, DriveError(apiError: error))
-            } else {
-                completion(res, error)
-            }
-        }
-    }
-
-    @discardableResult
-    private func makeRequest<T: Decodable>(_ convertible: URLConvertible, method: HTTPMethod = .get, parameters: Parameters? = nil, encoding: ParameterEncoding = JSONEncoding.default, headers: HTTPHeaders? = nil, interceptor: RequestInterceptor? = nil, requestModifier: Session.RequestModifier? = nil, completion: @escaping (T?, Error?) -> Void) -> DataRequest {
-        return authenticatedSession
-            .request(convertible, method: method, parameters: parameters, encoding: encoding, headers: headers, interceptor: interceptor, requestModifier: requestModifier)
-            .validate()
-            .responseDecodable(of: T.self, decoder: ApiFetcher.decoder) { response in
-                self.handleResponse(response: response, completion: completion)
-            }
-    }
-
     // MARK: - API methods
 
     public func createDirectory(in parentDirectory: File, name: String, onlyForMe: Bool) async throws -> File {
@@ -302,10 +280,8 @@ public class DriveApiFetcher: ApiFetcher {
         return try await perform(request: authenticatedRequest(endpoint))
     }
 
-    public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (ApiResponse<FilesActivities>?, Error?) -> Void) {
-        let url = ApiRoutes.getFilesActivities(driveId: driveId, files: files, from: date)
-
-        makeRequest(url, method: .get, completion: completion)
+    public func filesActivities(drive: AbstractDrive, files: [File], from date: Date) async throws -> (data: [ActivitiesForFile], responseAt: Int?) {
+        try await perform(request: authenticatedRequest(.filesActivities(drive: drive, fileIds: files.map(\.id), from: date)))
     }
 
     public func favorite(file: File) async throws -> Bool {
