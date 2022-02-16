@@ -457,16 +457,12 @@ public class DriveFileManager {
         } else {
             do {
                 let files = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
-                let realm = getRealm()
                 let searchRoot = DriveFileManager.searchFilesRootFile
                 if files.count < Endpoint.itemsPerPage {
                     searchRoot.fullyDownloaded = true
                 }
-                for file in files {
-                    keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-                }
 
-                setLocalFiles(files, root: searchRoot)
+                setLocalFiles(files, root: searchRoot, deleteOrphans: page == 1)
                 return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
             } catch {
                 if error.asAFError?.isExplicitlyCancelledError == true {
@@ -618,9 +614,10 @@ public class DriveFileManager {
         }
     }
 
-    public func setLocalFiles(_ files: [File], root: File) {
+    public func setLocalFiles(_ files: [File], root: File, deleteOrphans: Bool) {
         let realm = getRealm()
         for file in files {
+            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
             root.children.insert(file)
             file.capabilities = Rights(value: file.capabilities)
         }
@@ -628,18 +625,16 @@ public class DriveFileManager {
         try? realm.safeWrite {
             realm.add(root, update: .modified)
         }
-        deleteOrphanFiles(root: root, newFiles: files, using: realm)
+        if deleteOrphans {
+            deleteOrphanFiles(root: root, newFiles: files, using: realm)
+        }
     }
 
     public func lastModifiedFiles(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
         do {
             let files = try await apiFetcher.lastModifiedFiles(drive: drive, page: page)
-            let realm = getRealm()
-            for file in files {
-                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-            }
 
-            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile)
+            setLocalFiles(files, root: DriveFileManager.lastModificationsRootFile, deleteOrphans: page == 1)
             return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastModificationsRootFile.id, freeze: true)?.children {
@@ -653,12 +648,8 @@ public class DriveFileManager {
     public func lastPictures(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
         do {
             let files = try await apiFetcher.searchFiles(drive: drive, fileType: .image, categories: [], belongToAllCategories: false, page: page, sortType: .newer)
-            let realm = getRealm()
-            for file in files {
-                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-            }
 
-            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile)
+            setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: page == 1)
             return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
         } catch {
             if let files = getCachedFile(id: DriveFileManager.lastPicturesRootFile.id, freeze: true)?.children {
