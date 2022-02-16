@@ -16,15 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
 import kDriveCore
 import RealmSwift
 
 class PhotoListViewModel: ManagedFileListViewModel {
-    private typealias Section = ArraySection<Group, File>
+    typealias Section = ArraySection<Group, File>
 
-    private struct Group: Differentiable {
+    struct Group: Differentiable {
         let referenceDate: Date
         let dateComponents: DateComponents
         let sortMode: PhotoSortMode
@@ -50,8 +51,14 @@ class PhotoListViewModel: ManagedFileListViewModel {
 
     private static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
 
-    private var sections = emptySections
+    var sections = emptySections
     private var shouldLoadMore = false
+    private var page = 1
+    private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
+        didSet { updateSort() }
+    }
+
+    var onReloadWithChangeset: ((StagedChangeset<[PhotoListViewModel.Section]>, ([PhotoListViewModel.Section]) -> Void) -> Void)?
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         super.init(configuration: Configuration(showUploadingFiles: false,
@@ -60,7 +67,7 @@ class PhotoListViewModel: ManagedFileListViewModel {
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm()
             .objects(File.self)
-            .filter(NSPredicate(format: "rawConvertedType = %@", ConvertedType.image.rawValue))
+            .filter(NSPredicate(format: "extensionType = %@", ConvertedType.image.rawValue))
             .sorted(by: [SortType.newer.value.sortDescriptor]))
     }
 
@@ -73,5 +80,71 @@ class PhotoListViewModel: ManagedFileListViewModel {
             return nil
         }
         return pictures[indexPath.row]
+    }
+
+    override func updateDataSource() {
+        realmObservationToken?.invalidate()
+        realmObservationToken = files.observe(on: .main) { [weak self] change in
+            guard let self = self else { return }
+            switch change {
+            case .initial(let results):
+                let results = AnyRealmCollection(results)
+                self.files = results
+                let changeset = self.insertAndSort(pictures: results, replace: true)
+                self.onReloadWithChangeset?(changeset) { newSections in
+                    self.sections = newSections
+                }
+            case .update(let results, deletions: _, insertions: _, modifications: _):
+                self.files = AnyRealmCollection(results)
+                let changeset = self.insertAndSort(pictures: results, replace: false)
+                self.onReloadWithChangeset?(changeset) { newSections in
+                    self.sections = newSections
+                }
+            case .error(let error):
+                DDLogError("[Realm Observation] Error \(error)")
+            }
+        }
+    }
+
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
+        guard !isLoading || page > 1 else { return }
+
+        startRefreshing(page: page)
+        defer {
+            endRefreshing()
+        }
+
+        (_, shouldLoadMore) = try await driveFileManager.lastPictures(page: page)
+    }
+
+    override func loadActivities() async throws {}
+
+    private func updateSort() {
+        UserDefaults.shared.photoSortMode = sortMode
+        let changeset = insertAndSort(pictures: files, replace: true)
+        onReloadWithChangeset?(changeset) { newSections in
+            self.sections = newSections
+        }
+    }
+
+    private func insertAndSort(pictures: AnyRealmCollection<File>, replace: Bool) -> StagedChangeset<[PhotoListViewModel.Section]> {
+        let sortMode = self.sortMode
+        var newSections = replace ? PhotoListViewModel.emptySections : sections
+        for picture in pictures {
+            let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedAt)
+
+            var currentSectionIndex: Int!
+            if newSections.last?.model.dateComponents == currentDateComponents {
+                currentSectionIndex = newSections.count - 1
+            } else if let yearMonthIndex = newSections.firstIndex(where: { $0.model.dateComponents == currentDateComponents }) {
+                currentSectionIndex = yearMonthIndex
+            } else {
+                newSections.append(Section(model: Group(referenceDate: picture.lastModifiedAt, sortMode: sortMode), elements: []))
+                currentSectionIndex = newSections.count - 1
+            }
+            newSections[currentSectionIndex].elements.append(picture)
+        }
+
+        return StagedChangeset(source: sections, target: newSections)
     }
 }
