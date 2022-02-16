@@ -22,10 +22,18 @@ public extension Object {
     var isManagedByRealm: Bool {
         return realm != nil
     }
+
+    func freezeIfNeeded() -> Self {
+        return isManagedByRealm && !isFrozen ? freeze() : self
+    }
 }
 
 public extension EmbeddedObject {
     var isManagedByRealm: Bool {
         return realm != nil
+    }
+
+    func freezeIfNeeded() -> Self {
+        return isManagedByRealm && !isFrozen ? freeze() : self
     }
 }

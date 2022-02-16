@@ -465,10 +465,16 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .move:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent?.freeze(), fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getCachedRootFile()]) { [unowned self] selectedFolder in
+                let frozenParent = file.parent?.freezeIfNeeded()
                 Task {
                     do {
                         let (response, _) = try await driveFileManager.move(file: file, to: selectedFolder)
-                        UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name), cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled, cancelableResponse: response, driveFileManager: driveFileManager)
+                        UIConstants.showCancelableSnackBar(
+                            message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name),
+                            cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
+                            cancelableResponse: response,
+                            parentFile: frozenParent,
+                            driveFileManager: driveFileManager)
                         // Close preview
                         if self.presentingParent is PreviewViewController {
                             self.presentingParent?.navigationController?.popViewController(animated: true)
@@ -527,7 +533,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
-            let file = self.file.freeze()
+            let file = self.file.freezeIfNeeded()
+            let parent = self.file.parent?.freezeIfNeeded()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
                 do {
                     let response = try await self.driveFileManager.delete(file: file)
@@ -543,7 +550,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         presentingParent.dismiss(animated: true)
                     }
                     // Show snackbar
-                    UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name), cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled, cancelableResponse: response, driveFileManager: self.driveFileManager)
+                    UIConstants.showCancelableSnackBar(
+                        message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name),
+                        cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
+                        cancelableResponse: response,
+                        parentFile: parent,
+                        driveFileManager: self.driveFileManager)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }
