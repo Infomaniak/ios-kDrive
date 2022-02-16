@@ -441,49 +441,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 continue
             }
 
-            let offlineFiles = driveFileManager.getAvailableOfflineFiles()
-            guard !offlineFiles.isEmpty else { continue }
-            driveFileManager.getFilesActivities(driveId: drive.id, files: offlineFiles, from: UserDefaults.shared.lastSyncDateOfflineFiles) { result in
-                switch result {
-                case .success(let filesActivities):
-                    for (fileId, content) in filesActivities {
-                        guard let file = offlineFiles.first(where: { $0.id == fileId }) else {
-                            continue
-                        }
-
-                        if let activities = content.activities {
-                            // Apply activities to file
-                            var handledActivities = Set<FileActivityType>()
-                            for activity in activities where !handledActivities.contains(activity.action!) {
-                                switch activity.action {
-                                case .fileRename:
-                                    // Rename file
-                                    Task {
-                                        let newFile = try await driveFileManager.file(id: file.id, forceRefresh: true)
-                                        try? driveFileManager.renameCachedFile(updatedFile: newFile, oldFile: file)
-                                    }
-                                case .fileUpdate:
-                                    // Download new version
-                                    DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId)
-                                case .fileDelete:
-                                    // File has been deleted -- remove it from offline files
-                                    driveFileManager.setFileAvailableOffline(file: file, available: false) { _ in }
-                                default:
-                                    break
-                                }
-                                handledActivities.insert(activity.action!)
-                            }
-                        } else if let error = content.error {
-                            if DriveError(apiError: error) == .objectNotFound {
-                                driveFileManager.setFileAvailableOffline(file: file, available: false) { _ in }
-                            } else {
-                                SentrySDK.capture(error: error)
-                            }
-                            // Silently handle error
-                            DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(error)")
-                        }
-                    }
-                case .failure(let error):
+            Task {
+                do {
+                    try await driveFileManager.updateAvailableOfflineFiles()
+                } catch {
                     // Silently handle error
                     DDLogError("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)")
                 }
@@ -507,7 +468,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func setRootViewController(_ vc: UIViewController, animated: Bool = true) {
-        guard animated, let window = self.window else {
+        guard animated, let window = window else {
             self.window?.rootViewController = vc
             self.window?.makeKeyAndVisible()
             return
