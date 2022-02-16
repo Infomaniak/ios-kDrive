@@ -56,7 +56,7 @@ class AboutTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description, "About"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "About"])
     }
 
     // MARK: - Table view data source

@@ -76,7 +76,7 @@ class SearchFiltersViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.search.description, "Filters"])
+        MatomoUtils.track(view: [MatomoUtils.Views.search.displayName, "Filters"])
     }
 
     private func reloadSection(_ filterType: FilterType) {

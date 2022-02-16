@@ -57,7 +57,7 @@ class SwitchUserViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, "SwitchUser"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, "SwitchUser"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

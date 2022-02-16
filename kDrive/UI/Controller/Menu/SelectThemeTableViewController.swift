@@ -38,7 +38,7 @@ class SelectThemeTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description, "SelectTheme"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "SelectTheme"])
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {

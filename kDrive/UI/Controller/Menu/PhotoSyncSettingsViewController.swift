@@ -128,7 +128,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationController?.navigationBar.isTranslucent = false
 
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description, "PhotoSync"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "PhotoSync"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

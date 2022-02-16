@@ -29,7 +29,7 @@ class MatomoUtils {
     enum Views: String {
         case shareAndRights, save, search, uploadQueue, preview, menu, settings, store, security
 
-        var description: String {
+        var displayName: String {
             return rawValue.capitalized
         }
     }

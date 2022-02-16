@@ -72,7 +72,7 @@ class SelectDriveViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.save.description, "SelectDrive"])
+        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SelectDrive"])
     }
 
     private func initForCurrentAccount(_ account: Account) {

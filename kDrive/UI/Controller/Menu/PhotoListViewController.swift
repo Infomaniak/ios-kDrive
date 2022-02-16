@@ -126,7 +126,7 @@ class PhotoListViewController: MultipleSelectionViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, "PhotoList"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, "PhotoList"])
     }
 
     override func viewWillLayoutSubviews() {

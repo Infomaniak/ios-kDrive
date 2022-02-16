@@ -38,8 +38,8 @@ class SecurityTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         tableView.reloadData()
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description,
-                                 MatomoUtils.Views.security.description])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName,
+                                 MatomoUtils.Views.security.displayName])
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

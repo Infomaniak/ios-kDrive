@@ -22,7 +22,7 @@ import UIKit
 class StoreSuccessViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.store.description, "Success"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.store.displayName, "Success"])
     }
 
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {

@@ -65,7 +65,7 @@ class InviteUserViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.description, "InviteUser"])
+        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "InviteUser"])
     }
 
     deinit {
