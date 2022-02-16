@@ -281,7 +281,8 @@ class FileListViewModel {
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
                 // Keep the filename before it is invalidated
-                let frozenFile = file.freeze()
+                let frozenFile = file.freezeIfNeeded()
+                let frozenParent = currentDirectory.freezeIfNeeded()
                 Task {
                     do {
                         let cancelResponse = try await driveFileManager.delete(file: frozenFile)
@@ -289,6 +290,7 @@ class FileListViewModel {
                             message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(frozenFile.name),
                             cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                             cancelableResponse: cancelResponse,
+                            parentFile: frozenParent,
                             driveFileManager: driveFileManager)
                     } catch {
                         UIConstants.showSnackBar(message: error.localizedDescription)
