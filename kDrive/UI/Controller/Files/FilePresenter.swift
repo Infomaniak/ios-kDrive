@@ -27,8 +27,6 @@ class FilePresenter {
     weak var viewController: UIViewController?
     weak var driveFloatingPanelController: DriveFloatingPanelController?
 
-    var listType: FileListViewController.Type = FileListViewController.self
-
     var navigationController: UINavigationController? {
         return viewController?.navigationController
     }
@@ -67,16 +65,15 @@ class FilePresenter {
                  completion: ((Bool) -> Void)? = nil) {
         if file.isDirectory {
             // Show files list
-            let nextVC: FileListViewController
+            let viewModel: FileListViewModel
             if driveFileManager.drive.sharedWithMe {
-                // TODO: create correct viewmodel
-                nextVC = SharedWithMeViewController.instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+                viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
             } else if file.isTrashed || file.deletedAt != nil {
-                let trashViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
-                nextVC = FileListViewController.instantiate(viewModel: trashViewModel)
+                viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
             } else {
-                nextVC = listType.instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file))
+                viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
             }
+            let nextVC = FileListViewController.instantiate(viewModel: viewModel)
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {
                     driveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
