@@ -658,7 +658,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         #if ISEXTENSION
             maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
         #else
-            if !(self is SharedWithMeViewController) {
+            if !(viewModel is SharedWithMeViewModel) {
                 maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
             } else {
                 maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
