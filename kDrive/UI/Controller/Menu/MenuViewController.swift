@@ -146,12 +146,13 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
         }
 
         // Hide shared with me action if no shared with me drive
-        let sharedWithMeInList = Section.more.actions.contains { $0 == .sharedWithMe }
+        guard let sectionIndex = sections.firstIndex(of: .more) else { return }
+        let sharedWithMeInList = sections[sectionIndex].actions.contains(.sharedWithMe)
         let hasSharedWithMe = !DriveInfosManager.instance.getDrives(for: AccountManager.instance.currentUserId, sharedWithMe: true).isEmpty
         if sharedWithMeInList && !hasSharedWithMe {
-            Section.more.actions.removeFirst()
+            sections[sectionIndex].actions.removeFirst()
         } else if !sharedWithMeInList && hasSharedWithMe {
-            Section.more.actions.insert(.sharedWithMe, at: 0)
+            sections[sectionIndex].actions.insert(.sharedWithMe, at: 0)
         }
     }
 
