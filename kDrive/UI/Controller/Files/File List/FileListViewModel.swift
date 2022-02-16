@@ -359,22 +359,20 @@ class ManagedFileListViewModel: FileListViewModel {
 
     func updateDataSource() {
         realmObservationToken?.invalidate()
-        realmObservationToken = files.sorted(by: [
-            SortDescriptor(keyPath: \File.type, ascending: true),
-            SortDescriptor(keyPath: \File.visibility, ascending: false),
-            sortType.value.sortDescriptor
-        ]).observe(on: .main) { [weak self] change in
-            switch change {
-            case .initial(let results):
-                self?.files = AnyRealmCollection(results)
-                self?.onFileListUpdated?([], [], [], results.isEmpty, true)
-            case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                self?.files = AnyRealmCollection(results)
-                self?.onFileListUpdated?(deletions, insertions, modifications, results.isEmpty, false)
-            case .error(let error):
-                DDLogError("[Realm Observation] Error \(error)")
+        realmObservationToken = files
+            .filesSorted(by: sortType)
+            .observe(on: .main) { [weak self] change in
+                switch change {
+                case .initial(let results):
+                    self?.files = AnyRealmCollection(results)
+                    self?.onFileListUpdated?([], [], [], results.isEmpty, true)
+                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    self?.files = AnyRealmCollection(results)
+                    self?.onFileListUpdated?(deletions, insertions, modifications, results.isEmpty, false)
+                case .error(let error):
+                    DDLogError("[Realm Observation] Error \(error)")
+                }
             }
-        }
     }
 
     override func getFile(at indexPath: IndexPath) -> File? {
@@ -397,5 +395,15 @@ extension Publisher where Self.Failure == Never {
         receive(on: RunLoop.main)
             .sink(receiveValue: receiveValue)
             .store(in: &store)
+    }
+}
+
+extension AnyRealmCollection {
+    func filesSorted(by sortType: SortType) -> Results<Element> {
+        return self.sorted(by: [
+            SortDescriptor(keyPath: \File.type, ascending: true),
+            SortDescriptor(keyPath: \File.visibility, ascending: false),
+            sortType.value.sortDescriptor
+        ])
     }
 }
