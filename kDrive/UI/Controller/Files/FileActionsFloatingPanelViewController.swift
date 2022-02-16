@@ -249,7 +249,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .favorite:
                 return file.rights?.canFavorite == true && !sharedWithMe
             case .convertToDropbox:
-                return file.rights?.canBecomeCollab == true && file.shareLink == nil
+                return file.rights?.canBecomeCollab == true
             case .manageDropbox:
                 return file.visibility == .isCollaborativeFolder
             case .folderColor:
