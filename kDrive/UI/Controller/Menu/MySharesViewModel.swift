@@ -21,17 +21,15 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class FavoritesViewModel: ManagedFileListViewModel {
+class MySharesViewModel: ManagedFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        let configuration = Configuration(normalFolderHierarchy: false,
-                                          showUploadingFiles: false,
-                                          selectAllSupported: false,
-                                          rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle,
-                                          tabBarIcon: KDriveResourcesAsset.star,
-                                          selectedTabBarIcon: KDriveResourcesAsset.starFill,
-                                          emptyViewType: .noFavorite)
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
+        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false,
+                                                            showUploadingFiles: false,
+                                                            selectAllSupported: false,
+                                                            rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle,
+                                                            emptyViewType: .noShared)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.mySharedRootFile)
+        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "users.@count > 0 AND id > 1")))
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
@@ -42,8 +40,8 @@ class FavoritesViewModel: ManagedFileListViewModel {
             endRefreshing()
         }
 
-        // TODO: there is no force refresh for favorites ?
-        let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType)
+        // TODO: there is no force refresh for my shares ?
+        let (_, moreComing) = try await driveFileManager.mySharedFiles(page: page, sortType: sortType)
         endRefreshing()
         if moreComing {
             try await loadFiles(page: page + 1, forceRefresh: forceRefresh)

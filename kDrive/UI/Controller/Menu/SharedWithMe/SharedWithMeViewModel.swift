@@ -29,7 +29,7 @@ class SharedWithMeViewModel: ConcreteFileListViewModel {
 
     override func loadActivities() async throws {
         if currentDirectory.isRoot {
-            forceRefresh()
+            try await loadFiles(forceRefresh: true)
         } else {
             try await super.loadActivities()
         }
