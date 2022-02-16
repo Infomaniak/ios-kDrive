@@ -358,7 +358,7 @@ public class DriveFileManager {
 
             // Keep cached properties for children
             for child in children {
-                keepCacheAttributesForFile(newFile: child, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                keepCacheAttributesForFile(newFile: child, keepProperties: [.standard, .extras], using: realm)
             }
 
             if let managedParent = realm.object(ofType: File.self, forPrimaryKey: parentId) {
@@ -395,7 +395,7 @@ public class DriveFileManager {
             let realm = getRealm()
 
             // Keep cached properties for file
-            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: false, keepRights: false, using: realm)
+            keepCacheAttributesForFile(newFile: file, keepProperties: [.standard], using: realm)
 
             // Update file in Realm
             try? realm.safeWrite {
@@ -414,7 +414,7 @@ public class DriveFileManager {
 
             let localRealm = getRealm()
             for file in files {
-                keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: localRealm)
+                keepCacheAttributesForFile(newFile: file, keepProperties: [.standard, .path, .version], using: localRealm)
             }
 
             if files.count < Endpoint.itemsPerPage {
@@ -597,7 +597,7 @@ public class DriveFileManager {
                 let safeActivity = FileActivity(value: activity)
                 if let file = activity.file {
                     let safeFile = File(value: file)
-                    keepCacheAttributesForFile(newFile: safeFile, keepStandard: true, keepExtras: true, keepRights: true, using: realm)
+                    keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, using: realm)
                     homeRootFile.children.insert(safeFile)
                     safeActivity.file = safeFile
                     safeActivity.file?.capabilities = Rights(value: file.capabilities)
@@ -617,7 +617,7 @@ public class DriveFileManager {
     public func setLocalFiles(_ files: [File], root: File, deleteOrphans: Bool) {
         let realm = getRealm()
         for file in files {
-            keepCacheAttributesForFile(newFile: file, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+            keepCacheAttributesForFile(newFile: file, keepProperties: [.standard, .extras], using: realm)
             root.children.insert(file)
             file.capabilities = Rights(value: file.capabilities)
         }
@@ -739,7 +739,7 @@ public class DriveFileManager {
                        let renamedFile = activity.file {
                         try? renameCachedFile(updatedFile: renamedFile, oldFile: oldFile)
                         // If the file is a folder we have to copy the old attributes which are not returned by the API
-                        keepCacheAttributesForFile(newFile: renamedFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                        keepCacheAttributesForFile(newFile: renamedFile, keepProperties: [.standard, .extras], using: realm)
                         realm.add(renamedFile, update: .modified)
                         file.children.insert(renamedFile)
                         renamedFile.applyLastModifiedDateToLocalFile()
@@ -748,7 +748,7 @@ public class DriveFileManager {
                     }
                 case .fileMoveIn, .fileRestore, .fileCreate:
                     if let newFile = activity.file {
-                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                        keepCacheAttributesForFile(newFile: newFile, keepProperties: [.standard, .extras], using: realm)
                         realm.add(newFile, update: .modified)
                         // If was already had a local parent, remove it
                         if let file = realm.object(ofType: File.self, forPrimaryKey: fileId),
@@ -761,7 +761,7 @@ public class DriveFileManager {
                     }
                 case .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete:
                     if let newFile = activity.file {
-                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                        keepCacheAttributesForFile(newFile: newFile, keepProperties: [.standard, .extras], using: realm)
                         realm.add(newFile, update: .modified)
                         file.children.insert(newFile)
                         updatedFiles.append(newFile)
@@ -809,7 +809,7 @@ public class DriveFileManager {
         // Update file in Realm & rename if needed
         if let newFile = activities.file {
             let realm = getRealm()
-            keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+            keepCacheAttributesForFile(newFile: newFile, keepProperties: [.standard, .extras], using: realm)
             _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
         }
         // Apply activities to file
@@ -1232,26 +1232,47 @@ public class DriveFileManager {
         }
     }
 
-    private func keepCacheAttributesForFile(newFile: File, keepStandard: Bool, keepExtras: Bool, keepRights: Bool, using realm: Realm? = nil) {
+    struct FilePropertiesOptions: OptionSet {
+        let rawValue: Int
+
+        static let fullyDownloaded = FilePropertiesOptions(rawValue: 1 << 0)
+        static let children = FilePropertiesOptions(rawValue: 1 << 1)
+        static let responseAt = FilePropertiesOptions(rawValue: 1 << 2)
+        static let path = FilePropertiesOptions(rawValue: 1 << 3)
+        static let users = FilePropertiesOptions(rawValue: 1 << 4)
+        static let version = FilePropertiesOptions(rawValue: 1 << 5)
+        static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
+
+        static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt]
+        static let extras: FilePropertiesOptions = [.path, .users, .version]
+        static let all: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .path, .users, .version, .capabilities]
+    }
+
+    private func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, using realm: Realm? = nil) {
         let realm = realm ?? getRealm()
-        if let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id) {
-            newFile.isAvailableOffline = savedChild.isAvailableOffline
-            newFile.versionCode = savedChild.versionCode
-            if keepStandard {
-                newFile.fullyDownloaded = savedChild.fullyDownloaded
-                newFile.children = savedChild.children
-                newFile.responseAt = savedChild.responseAt
-            }
-            if keepExtras {
-                newFile.path = savedChild.path
-                newFile.users = savedChild.users.freeze()
-                if let version = savedChild.version {
-                    newFile.version = FileVersion(value: version)
-                }
-            }
-            if keepRights {
-                newFile.capabilities = savedChild.capabilities
-            }
+        guard let savedChild = realm.object(ofType: File.self, forPrimaryKey: newFile.id) else { return }
+        newFile.isAvailableOffline = savedChild.isAvailableOffline
+        newFile.versionCode = savedChild.versionCode
+        if keepProperties.contains(.fullyDownloaded) {
+            newFile.fullyDownloaded = savedChild.fullyDownloaded
+        }
+        if keepProperties.contains(.children) {
+            newFile.children = savedChild.children
+        }
+        if keepProperties.contains(.responseAt) {
+            newFile.responseAt = savedChild.responseAt
+        }
+        if keepProperties.contains(.path) {
+            newFile.path = savedChild.path
+        }
+        if keepProperties.contains(.users) {
+            newFile.users = savedChild.users.freeze()
+        }
+        if keepProperties.contains(.version), let version = savedChild.version {
+            newFile.version = FileVersion(value: version)
+        }
+        if keepProperties.contains(.capabilities) {
+            newFile.capabilities = savedChild.capabilities
         }
     }
 
