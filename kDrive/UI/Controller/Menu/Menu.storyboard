@@ -54,7 +54,6 @@
                         <segue destination="jNB-aI-vQT" kind="show" identifier="toParameterSegue" id="Sx8-qp-TCY"/>
                         <segue destination="26B-is-bLi" kind="show" identifier="switchUserSegue" id="QLc-gd-Rfx"/>
                         <segue destination="FVV-mz-rrp" kind="show" identifier="toDriveListSegue" id="Llp-sI-CXm"/>
-                        <segue destination="XvF-Yr-0F4" kind="show" identifier="toMySharedSegue" id="J1x-fu-5jd"/>
                         <segue destination="EfG-kK-v5l" kind="show" identifier="toStoreSegue" id="Lg4-x4-Mse"/>
                     </connections>
                 </viewController>
@@ -84,7 +83,7 @@
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgD-0d-5ra">
-                                <rect key="frame" x="24" y="302" width="366" height="292"/>
+                                <rect key="frame" x="24" y="334" width="366" height="228.5"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="order-success" translatesAutoresizingMaskIntoConstraints="NO" id="vmx-9Y-v0i">
                                         <rect key="frame" x="108" y="0.0" width="150" height="150"/>
@@ -94,7 +93,7 @@
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="174" width="366" height="41"/>
+                                        <rect key="frame" x="0.0" y="174" width="366" height="21.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -104,7 +103,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="231" width="366" height="61"/>
+                                        <rect key="frame" x="0.0" y="211.5" width="366" height="17"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -444,48 +443,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lov-7m-2UZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="4815.9420289855079" y="1668.75"/>
-        </scene>
-        <!--My Shares View Controller-->
-        <scene sceneID="j2U-To-L2y">
-            <objects>
-                <viewController storyboardIdentifier="MySharesViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="XvF-Yr-0F4" customClass="MySharesViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="PWA-yM-cwO">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="KX7-BT-RpP" customClass="SwipableCollectionView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Krb-aq-yI3">
-                                    <size key="itemSize" width="128" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="XvF-Yr-0F4" id="gbe-JW-jEY"/>
-                                    <outlet property="delegate" destination="XvF-Yr-0F4" id="RMK-U7-u28"/>
-                                </connections>
-                            </collectionView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="z6N-6g-2ng"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="z6N-6g-2ng" firstAttribute="trailing" secondItem="KX7-BT-RpP" secondAttribute="trailing" id="LsY-FI-mXN"/>
-                            <constraint firstAttribute="bottom" secondItem="KX7-BT-RpP" secondAttribute="bottom" id="MZM-DY-n76"/>
-                            <constraint firstItem="KX7-BT-RpP" firstAttribute="top" secondItem="PWA-yM-cwO" secondAttribute="top" id="hDx-VH-bkI"/>
-                            <constraint firstItem="KX7-BT-RpP" firstAttribute="leading" secondItem="z6N-6g-2ng" secondAttribute="leading" id="qv5-4H-Jw3"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="55U-WK-kHf"/>
-                    <connections>
-                        <outlet property="collectionView" destination="KX7-BT-RpP" id="2Wt-Ld-Jtl"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="F6e-M9-cZ9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3168" y="921"/>
         </scene>
         <!--Switch User View Controller-->
         <scene sceneID="unT-Z0-cpP">
@@ -842,7 +799,7 @@
             <size key="intrinsicContentSize" width="161.5" height="17"/>
         </designable>
         <designable name="Let-jx-exJ">
-            <size key="intrinsicContentSize" width="196" height="32"/>
+            <size key="intrinsicContentSize" width="174" height="29"/>
         </designable>
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="130.5" height="21.5"/>
