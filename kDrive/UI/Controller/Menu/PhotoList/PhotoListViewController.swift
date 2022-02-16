@@ -38,21 +38,9 @@ class PhotoListViewController: MultipleSelectionViewController {
 
     var driveFileManager: DriveFileManager!
 
-    private var page = 1
-    private var hasNextPage = true
     private var isLargeTitle = true
     private var floatingPanelViewController: DriveFloatingPanelController?
     private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
-
-    private var isLoading = true {
-        didSet {
-            collectionView?.collectionViewLayout.invalidateLayout()
-        }
-    }
-
-    private var shouldLoadMore: Bool {
-        return hasNextPage && !isLoading
-    }
 
     private var numberOfColumns: Int {
         return UIDevice.current.orientation.isLandscape ? 5 : 3
@@ -84,8 +72,10 @@ class PhotoListViewController: MultipleSelectionViewController {
         /* let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
          collectionView.addGestureRecognizer(longPressGesture) */
 
-        fetchNextPage()
+        bindViewModel()
+    }
 
+    private func bindViewModel() {
         viewModel.onReloadWithChangeset = { [weak self] changeset, completion in
             self?.collectionView.reload(using: changeset, interrupt: { $0.changeCount > Endpoint.itemsPerPage }, setData: completion)
             self?.showEmptyView(.noImages)
@@ -150,29 +140,6 @@ class PhotoListViewController: MultipleSelectionViewController {
         navigationController?.navigationBar.standardAppearance = navbarAppearance
         navigationController?.navigationBar.compactAppearance = navbarAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
-    }
-
-    func fetchNextPage() {
-        /* guard driveFileManager != nil else { return }
-         isLoading = true
-         Task {
-             do {
-                 let (pagedPictures, moreComing) = try await driveFileManager.lastPictures(page: page)
-                 self.insertAndSort(pictures: pagedPictures, replace: self.page == 1)
-
-                 self.pictures += pagedPictures
-                 self.showEmptyView(.noImages)
-                 self.page += 1
-                 self.hasNextPage = moreComing
-             } catch {
-                 UIConstants.showSnackBar(message: error.localizedDescription)
-             }
-             self.isLoading = false
-             if self.sections.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
-                 self.hasNextPage = false
-                 self.showEmptyView(.noNetwork, showButton: true)
-             }
-         } */
     }
 
     func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
@@ -259,8 +226,10 @@ class PhotoListViewController: MultipleSelectionViewController {
         // Infinite scroll
         let scrollPosition = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
-        if scrollPosition > contentHeight && shouldLoadMore {
-            fetchNextPage()
+        if scrollPosition > contentHeight {
+            Task {
+               try await viewModel.loadNextPageIfNeeded()
+            }
         }
     }
     /*
@@ -302,7 +271,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
-        if section == numberOfSections(in: collectionView) - 1 && isLoading {
+        if section == numberOfSections(in: collectionView) - 1 && viewModel.isLoading {
             return CGSize(width: collectionView.frame.width, height: 80)
         } else {
             return .zero
@@ -323,7 +292,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
             let indicator = UIActivityIndicatorView(style: .medium)
             indicator.hidesWhenStopped = true
             indicator.color = KDriveResourcesAsset.loaderDarkerDefaultColor.color
-            if isLoading {
+            if viewModel.isLoading {
                 indicator.startAnimating()
             } else {
                 indicator.stopAnimating()

@@ -52,8 +52,8 @@ class PhotoListViewModel: ManagedFileListViewModel {
     private static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
 
     var sections = emptySections
-    private var shouldLoadMore = false
-    private var page = 1
+    private var moreComing = false
+    private var currentPage = 1
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
         didSet { updateSort() }
     }
@@ -69,6 +69,12 @@ class PhotoListViewModel: ManagedFileListViewModel {
             .objects(File.self)
             .filter(NSPredicate(format: "extensionType = %@", ConvertedType.image.rawValue))
             .sorted(by: [SortType.newer.value.sortDescriptor]))
+    }
+
+    func loadNextPageIfNeeded() async throws {
+        if !isLoading && moreComing {
+            try await loadFiles(page: currentPage + 1)
+        }
     }
 
     override func getFile(at indexPath: IndexPath) -> File? {
@@ -90,13 +96,13 @@ class PhotoListViewModel: ManagedFileListViewModel {
             case .initial(let results):
                 let results = AnyRealmCollection(results)
                 self.files = results
-                let changeset = self.insertAndSort(pictures: results, replace: true)
+                let changeset = self.insertAndSort(pictures: results.freeze(), replace: true)
                 self.onReloadWithChangeset?(changeset) { newSections in
                     self.sections = newSections
                 }
             case .update(let results, deletions: _, insertions: _, modifications: _):
                 self.files = AnyRealmCollection(results)
-                let changeset = self.insertAndSort(pictures: results, replace: false)
+                let changeset = self.insertAndSort(pictures: results.freeze(), replace: false)
                 self.onReloadWithChangeset?(changeset) { newSections in
                     self.sections = newSections
                 }
@@ -114,7 +120,8 @@ class PhotoListViewModel: ManagedFileListViewModel {
             endRefreshing()
         }
 
-        (_, shouldLoadMore) = try await driveFileManager.lastPictures(page: page)
+        (_, moreComing) = try await driveFileManager.lastPictures(page: page)
+        currentPage = page
     }
 
     override func loadActivities() async throws {}
