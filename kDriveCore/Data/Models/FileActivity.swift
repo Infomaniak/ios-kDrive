@@ -128,37 +128,10 @@ extension FileActivity: ContentIdentifiable, ContentEquatable {
     }
 }
 
-public class FilesActivities: Decodable {
-    public var activities: [Int: FilesActivitiesContent]
-
-    struct DynamicCodingKeys: CodingKey {
-        var stringValue: String
-
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        var intValue: Int?
-
-        init?(intValue: Int) {
-            return nil
-        }
-    }
-
-    public required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-        var activities = [Int: FilesActivitiesContent]()
-        for key in container.allKeys {
-            guard let id = Int(key.stringValue) else { continue }
-            activities[id] = try container.decode(FilesActivitiesContent.self, forKey: key)
-        }
-        self.activities = activities
-    }
-}
-
-public class FilesActivitiesContent: Decodable {
-    public var status: ApiResult
-    public var activities: [FileActivity]?
-    public var error: ApiError?
+public class ActivitiesForFile: Decodable {
+    public var id: Int
+    public var result: Bool
+    public var message: String?
+    public var file: File?
+    public var activities: [FileActivity]
 }

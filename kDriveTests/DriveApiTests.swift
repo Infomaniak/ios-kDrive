@@ -505,24 +505,16 @@ final class DriveApiTests: XCTestCase {
         tearDownTest(directory: testDirectory)
     }
 
-    /*func testGetFilesActivities() async throws {
+    func testGetFilesActivities() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
         let secondFile = try await currentApiFetcher.createFile(in: testDirectory, name: "Get files activities-\(Date())", type: "docx")
-        let activities: [Int: FilesActivitiesContent] = try await withCheckedThrowingContinuation { continuation in
-            self.currentApiFetcher.getFilesActivities(driveId: Env.driveId, files: [file, secondFile], from: testDirectory.id) { response, error in
-                if let activities = response?.data?.activities {
-                    continuation.resume(returning: activities)
-                } else {
-                    continuation.resume(throwing: error ?? DriveError.unknownError)
-                }
-            }
-        }
-        XCTAssertEqual(activities.count, 2, "Array should contain two activities")
-        for activity in activities {
+        let (result, _) = try await currentApiFetcher.filesActivities(drive: proxyDrive, files: [file, secondFile], from: Date(timeIntervalSince1970: 0))
+        XCTAssertEqual(result.activities.count, 2, "Array should contain two activities")
+        for activity in result.activities {
             XCTAssertNotNil(activity, TestsMessages.notNil("file activity"))
         }
         tearDownTest(directory: testDirectory)
-    }*/
+    }
 
     func testFavoriteFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Favorite file")
