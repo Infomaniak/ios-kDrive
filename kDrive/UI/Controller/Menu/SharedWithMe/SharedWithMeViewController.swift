@@ -19,44 +19,19 @@
 import kDriveCore
 import UIKit
 
-class SharedWithMeViewController: FileListViewController {
-    override class var storyboard: UIStoryboard { Storyboard.menu }
-    override class var storyboardIdentifier: String { "SharedWithMeViewController" }
-/*
-    override func viewDidLoad() {
-        // Set configuration
-        let  configuration = FileListViewModel.Configuration(selectAllSupported: currentDirectory != nil && !currentDirectory.isRoot, emptyViewType: .noSharedWithMe, supportsDrop: currentDirectory != nil)
-        if currentDirectory == nil {
-            currentDirectory = driveFileManager?.getCachedRootFile() ?? DriveFileManager.sharedWithMeRootFile
-        }
+class SharedWithMeViewModel: ConcreteFileListViewModel {
+    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+        let isRoot = currentDirectory?.isRoot != false
+        let configuration = FileListViewModel.Configuration(selectAllSupported: !isRoot, emptyViewType: .noSharedWithMe, supportsDrop: !isRoot)
 
-        super.viewDidLoad()
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
-    override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        guard driveFileManager != nil && currentDirectory != nil else {
-            DispatchQueue.main.async {
-                completion(.success([]), false, true)
-            }
-            return
-        }
-
-        if currentDirectory.isRoot && currentDirectory.fullyDownloaded && !forceRefresh {
-            // We don't have file activities for the root in shared with me
-            // Get the files from the cache
-            super.getFiles(page: page, sortType: sortType, forceRefresh: false, completion: completion)
-            // Update the files online
-            super.getFiles(page: 1, sortType: sortType, forceRefresh: true, completion: completion)
-        } else {
-            super.getFiles(page: page, sortType: sortType, forceRefresh: forceRefresh, completion: completion)
-        }
-    }
-
-    override func getNewChanges() {
+    override func loadActivities() async throws {
         if currentDirectory.isRoot {
             forceRefresh()
         } else {
-            super.getNewChanges()
+            try await super.loadActivities()
         }
-    }*/
+    }
 }
