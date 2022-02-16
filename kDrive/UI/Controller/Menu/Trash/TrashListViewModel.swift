@@ -119,9 +119,13 @@ class TrashListViewModel: UnmanagedFileListViewModel {
                         _ = try await driveFileManager.apiFetcher.restore(file: file, in: directory)
                         // TODO: We don't have an alert for moving multiple files, snackbar is spammed until end
                         if let directory = directory {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
+                            _ = await MainActor.run {
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
+                            }
                         } else {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
+                            _ = await MainActor.run {
+                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
+                            }
                         }
                     }
                 }
@@ -142,13 +146,10 @@ extension TrashListViewModel: TrashOptionsDelegate {
     func didClickOnTrashOption(option: TrashOption, files: [File]) {
         switch option {
         case .restoreIn:
-            var selectFolderNavigationViewController: TitleSizeAdjustingNavigationController!
+            let selectFolderNavigationViewController: TitleSizeAdjustingNavigationController
             selectFolderNavigationViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager) { [self] directory in
-                // TODO: async SelectFolderViewController
                 Task {
                     await restoreTrashedFiles(files, in: directory)
-                    // FIXME: concurrently
-                    //selectFolderNavigationViewController?.dismiss(animated: true)
                 }
             }
             onPresentViewController?(.modal, selectFolderNavigationViewController, true)
