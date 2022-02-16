@@ -1315,7 +1315,7 @@ public extension DriveFileManager {
     }
 
     func notifyObserversWith(file: File) {
-        let file = file.isManagedByRealm && !file.isFrozen ? file.freeze() : file
+        let file = file.freezeIfNeeded()
         for observer in didUpdateFileObservers.values {
             observer(file)
         }
