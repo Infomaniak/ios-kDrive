@@ -62,9 +62,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
             offlineView.isHidden = true
         }
         // Hide "open with" button if file will be downloaded and displayed
-        if ConvertedType.downloadableTypes.contains(file.convertedType) {
-            openButton.isHidden = true
-        }
+        openButton.isHidden = ConvertedType.downloadableTypes.contains(file.convertedType)
     }
 
     func setDownloadProgress(_ progress: Progress) {

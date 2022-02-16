@@ -25,7 +25,7 @@ public class FileActionsHelper {
 
     private var interactionController: UIDocumentInteractionController!
 
-    public func openWith(file: File, from rect: CGRect, in view: UIView) {
+    public func openWith(file: File, from rect: CGRect, in view: UIView, delegate: UIDocumentInteractionControllerDelegate) {
         guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
             DDLogError("Open in place directory not found")
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
@@ -56,6 +56,7 @@ public class FileActionsHelper {
             }
 
             interactionController = UIDocumentInteractionController(url: fileUrl)
+            interactionController.delegate = delegate
             interactionController.presentOpenInMenu(from: rect, in: view, animated: true)
         } catch {
             DDLogError("Cannot present interaction controller: \(error)")

@@ -366,7 +366,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
         backButton.isHidden = false
         editButton.isHidden = true
-        openButton.isHidden = false
+        openButton.isHidden = true
         pdfPageLabel.text = KDriveResourcesStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
         titleWidthConstraint?.constant = pdfPageLabel.frame.width + 32
@@ -468,12 +468,13 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func openWith(from rect: CGRect) {
+        floatingPanelViewController.dismiss(animated: true)
         if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
-            FileActionsHelper.instance.openWith(file: currentFile, from: rect, in: fileInformationsViewController.view)
+            FileActionsHelper.instance.openWith(file: currentFile, from: rect, in: view, delegate: self)
         } else {
             downloadToOpenWith { [weak self] in
                 guard let self = self else { return }
-                FileActionsHelper.instance.openWith(file: self.currentFile, from: rect, in: self.fileInformationsViewController.view)
+                FileActionsHelper.instance.openWith(file: self.currentFile, from: rect, in: self.view, delegate: self)
             }
         }
     }
@@ -736,5 +737,18 @@ extension PreviewViewController: UICollectionViewDelegate {}
 extension PreviewViewController: FloatingPanelControllerDelegate {
     func floatingPanelShouldBeginDragging(_ vc: FloatingPanelController) -> Bool {
         return !fromActivities
+    }
+}
+
+// MARK: - Document interaction controller delegate
+
+extension PreviewViewController: UIDocumentInteractionControllerDelegate {
+    func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
+        // Dismiss interaction controller when the user taps an app
+        controller.dismissMenu(animated: true)
+    }
+
+    func documentInteractionControllerDidDismissOpenInMenu(_ controller: UIDocumentInteractionController) {
+        present(floatingPanelViewController, animated: true)
     }
 }

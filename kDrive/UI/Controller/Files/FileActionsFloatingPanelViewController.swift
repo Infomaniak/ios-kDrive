@@ -357,11 +357,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .openWith:
             let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
-                FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView)
+                FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView, delegate: self)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
                     guard let self = self else { return }
-                    FileActionsHelper.instance.openWith(file: self.file, from: view, in: self.collectionView)
+                    FileActionsHelper.instance.openWith(file: self.file, from: view, in: self.collectionView, delegate: self)
                 }
             }
         case .edit:
@@ -795,5 +795,14 @@ extension FileActionsFloatingPanelViewController: UICollectionViewDragDelegate {
             }
         }
         return [draggedItem]
+    }
+}
+
+// MARK: - Document interaction controller delegate
+
+extension FileActionsFloatingPanelViewController: UIDocumentInteractionControllerDelegate {
+    func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
+        // Dismiss interaction controller when the user taps an app
+        controller.dismissMenu(animated: true)
     }
 }
