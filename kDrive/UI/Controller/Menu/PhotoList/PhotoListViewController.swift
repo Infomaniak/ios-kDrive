@@ -38,36 +38,6 @@ class PhotoListViewController: MultipleSelectionViewController {
 
     var driveFileManager: DriveFileManager!
 
-    private struct Group: Differentiable {
-        let referenceDate: Date
-        let dateComponents: DateComponents
-        let sortMode: PhotoSortMode
-
-        var differenceIdentifier: Date {
-            return referenceDate
-        }
-
-        var formattedDate: String {
-            return sortMode.dateFormatter.string(from: referenceDate)
-        }
-
-        init(referenceDate: Date, sortMode: PhotoSortMode) {
-            self.referenceDate = referenceDate
-            self.dateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: referenceDate)
-            self.sortMode = sortMode
-        }
-
-        func isContentEqual(to source: PhotoListViewController.Group) -> Bool {
-            return referenceDate == source.referenceDate && dateComponents == source.dateComponents && sortMode == source.sortMode
-        }
-    }
-
-    private typealias Section = ArraySection<Group, File>
-
-    private static let emptySections = [Section(model: Group(referenceDate: Date(), sortMode: .day), elements: [])]
-
-    private var sections = emptySections
-    private var pictures = [File]()
     private var page = 1
     private var hasNextPage = true
     private var isLargeTitle = true
@@ -78,10 +48,6 @@ class PhotoListViewController: MultipleSelectionViewController {
         didSet {
             collectionView?.collectionViewLayout.invalidateLayout()
         }
-    }
-
-    private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
-        didSet { updateSort() }
     }
 
     private var shouldLoadMore: Bool {
@@ -108,7 +74,7 @@ class PhotoListViewController: MultipleSelectionViewController {
 
         // Set up collection view
         collectionView.delegate = self
-        // collectionView.dataSource = self
+        collectionView.dataSource = self
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: footerIdentifier)
         collectionView.register(UINib(nibName: "PhotoSectionHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
@@ -119,6 +85,11 @@ class PhotoListViewController: MultipleSelectionViewController {
          collectionView.addGestureRecognizer(longPressGesture) */
 
         fetchNextPage()
+
+        viewModel.onReloadWithChangeset = { [weak self] changeset, completion in
+            self?.collectionView.reload(using: changeset, interrupt: { $0.changeCount > Endpoint.itemsPerPage }, setData: completion)
+            self?.showEmptyView(.noImages)
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -127,6 +98,9 @@ class PhotoListViewController: MultipleSelectionViewController {
         setPhotosNavigationBar()
         navigationItem.title = KDriveResourcesStrings.Localizable.allPictures
         applyGradient(view: headerImageView)
+        Task {
+            try await viewModel.loadFiles()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -149,8 +123,8 @@ class PhotoListViewController: MultipleSelectionViewController {
     }
 
     @IBAction func sortButtonPressed(_ sender: UIBarButtonItem) {
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>.instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
-        present(floatingPanelViewController, animated: true)
+        /* let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>.instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
+         present(floatingPanelViewController, animated: true) */
     }
 
     func applyGradient(view: UIImageView) {
@@ -183,73 +157,39 @@ class PhotoListViewController: MultipleSelectionViewController {
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
     }
 
-    func forceRefresh() {
-        page = 1
-        pictures = []
-        fetchNextPage()
-    }
-
     func fetchNextPage() {
-        guard driveFileManager != nil else { return }
-        isLoading = true
-        Task {
-            do {
-                let (pagedPictures, moreComing) = try await driveFileManager.lastPictures(page: page)
-                self.insertAndSort(pictures: pagedPictures, replace: self.page == 1)
+        /* guard driveFileManager != nil else { return }
+         isLoading = true
+         Task {
+             do {
+                 let (pagedPictures, moreComing) = try await driveFileManager.lastPictures(page: page)
+                 self.insertAndSort(pictures: pagedPictures, replace: self.page == 1)
 
-                self.pictures += pagedPictures
-                self.showEmptyView(.noImages)
-                self.page += 1
-                self.hasNextPage = moreComing
-            } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
-            }
-            self.isLoading = false
-            if self.sections.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
-                self.hasNextPage = false
-                self.showEmptyView(.noNetwork, showButton: true)
-            }
-        }
+                 self.pictures += pagedPictures
+                 self.showEmptyView(.noImages)
+                 self.page += 1
+                 self.hasNextPage = moreComing
+             } catch {
+                 UIConstants.showSnackBar(message: error.localizedDescription)
+             }
+             self.isLoading = false
+             if self.sections.isEmpty && ReachabilityListener.instance.currentStatus == .offline {
+                 self.hasNextPage = false
+                 self.showEmptyView(.noNetwork, showButton: true)
+             }
+         } */
     }
 
     func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
-        if sections.isEmpty {
+        if viewModel.isEmpty {
             let background = EmptyTableView.instantiate(type: type, button: showButton, setCenteringEnabled: true)
             background.actionHandler = { [weak self] _ in
-                self?.forceRefresh()
+                self?.viewModel.forceRefresh()
             }
             collectionView.backgroundView = background
         } else {
             collectionView.backgroundView = nil
         }
-    }
-
-    private func insertAndSort(pictures: [File], replace: Bool) {
-        let sortMode = self.sortMode
-        var newSections = replace ? PhotoListViewController.emptySections : sections
-        for picture in pictures {
-            let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedAt)
-
-            var currentSectionIndex: Int!
-            if newSections.last?.model.dateComponents == currentDateComponents {
-                currentSectionIndex = newSections.count - 1
-            } else if let yearMonthIndex = newSections.firstIndex(where: { $0.model.dateComponents == currentDateComponents }) {
-                currentSectionIndex = yearMonthIndex
-            } else {
-                newSections.append(Section(model: Group(referenceDate: picture.lastModifiedAt, sortMode: sortMode), elements: []))
-                currentSectionIndex = newSections.count - 1
-            }
-            newSections[currentSectionIndex].elements.append(picture)
-        }
-        let changeset = StagedChangeset(source: sections, target: newSections)
-        collectionView.reload(using: changeset) { $0.changeCount > 100 } setData: { data in
-            self.sections = data
-        }
-    }
-
-    private func updateSort() {
-        UserDefaults.shared.photoSortMode = sortMode
-        insertAndSort(pictures: pictures, replace: true)
     }
 
     class func instantiate() -> PhotoListViewController {
@@ -286,21 +226,6 @@ class PhotoListViewController: MultipleSelectionViewController {
          collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
      }
 
-     override func getItem(at indexPath: IndexPath) -> File? {
-         guard indexPath.section < sections.count else {
-             return nil
-         }
-         let pictures = sections[indexPath.section].elements
-         guard indexPath.row < pictures.count else {
-             return nil
-         }
-         return pictures[indexPath.row]
-     }
-
-     override func getAllItems() -> [File] {
-         return pictures
-     }
-
      override func setSelectedCells() {
          if selectionMode && !selectedItems.isEmpty {
              for i in 0..<sections.count {
@@ -310,63 +235,40 @@ class PhotoListViewController: MultipleSelectionViewController {
                  }
              }
          }
-     }
+     }*/
 
-     override func setSelectionButtonsEnabled(moveEnabled: Bool, deleteEnabled: Bool, moreEnabled: Bool) {
-         moveButton.isEnabled = moveEnabled
-         deleteButton.isEnabled = deleteEnabled
-         moreButton.isEnabled = moreEnabled
-     }
+    // MARK: - Scroll view delegate
 
-     override func updateSelectedCount() {
-         headerTitleLabel.text = KDriveResourcesStrings.Localizable.fileListMultiSelectedTitle(selectedItems.count)
-     }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait ?? true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+        headerView.isHidden = isLargeTitle
+        (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
+        navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
+        navigationController?.setNeedsStatusBarAppearanceUpdate()
 
-     @IBAction func moveButtonPressed(_ sender: Any) {
-     }
+        for headerView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
+            if let headerView = headerView as? PhotoSectionHeaderView {
+                let position = collectionView.convert(headerView.frame.origin, to: view)
+                headerView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
+            }
+        }
+        if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == false {
+            // Disable this behavior in selection mode because we reuse the view
+            if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY), from: headerTitleLabel)) {
+                headerTitleLabel.text = viewModel.sections[indexPath.section].model.formattedDate
+            } else if !viewModel.sections.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
+                headerTitleLabel.text = viewModel.sections[0].model.formattedDate
+            }
+        }
 
-     @IBAction func deleteButtonPressed(_ sender: Any) {
-     }
-
-     @IBAction func moreButtonPressed(_ sender: Any) {
-     }
-
-     override func getNewChanges() {
-         forceRefresh()
-     }
-
-     // MARK: - Scroll view delegate
-
-     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait ?? true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
-         headerView.isHidden = isLargeTitle
-         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
-         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
-         navigationController?.setNeedsStatusBarAppearanceUpdate()
-
-         for headerView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
-             if let headerView = headerView as? PhotoSectionHeaderView {
-                 let position = collectionView.convert(headerView.frame.origin, to: view)
-                 headerView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
-             }
-         }
-         if !selectionMode {
-             // Disable this behavior in selection mode because we reuse the view
-             if let indexPath = collectionView.indexPathForItem(at: collectionView.convert(CGPoint(x: headerTitleLabel.frame.minX, y: headerTitleLabel.frame.maxY), from: headerTitleLabel)) {
-                 headerTitleLabel.text = sections[indexPath.section].model.formattedDate
-             } else if !sections.isEmpty && (headerTitleLabel.text?.isEmpty ?? true) {
-                 headerTitleLabel.text = sections[0].model.formattedDate
-             }
-         }
-
-         // Infinite scroll
-         let scrollPosition = scrollView.contentOffset.y
-         let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
-         if scrollPosition > contentHeight && shouldLoadMore {
-             fetchNextPage()
-         }
-     }
-
+        // Infinite scroll
+        let scrollPosition = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
+        if scrollPosition > contentHeight && shouldLoadMore {
+            fetchNextPage()
+        }
+    }
+    /*
      // MARK: - State restoration
 
      override func encodeRestorableState(with coder: NSCoder) {
@@ -391,11 +293,11 @@ class PhotoListViewController: MultipleSelectionViewController {
 
 extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return sections.count
+        return viewModel.sections.count
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return sections[section].elements.count
+        return viewModel.sections[section].elements.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -441,28 +343,28 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
         } else {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! PhotoSectionHeaderView
             if indexPath.section > 0 {
-                let yearMonth = sections[indexPath.section].model
+                let yearMonth = viewModel.sections[indexPath.section].model
                 headerView.titleLabel.text = yearMonth.formattedDate
             }
             return headerView
         }
     }
 
-    /*func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
-            viewModel.multipleSelectionViewModel?.didSelectFile(viewModel.getFile(at: indexPath)!, at: indexPath.item)
+            viewModel.multipleSelectionViewModel?.didSelectFile(viewModel.getFile(at: indexPath)!, at: indexPath)
         } else {
-            viewModel.didSelectFile(at: indexPath.item)
+            viewModel.didSelectFile(at: indexPath)
         }
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         guard viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true,
-              let file = viewModel.getFile(at: indexPath.item) else {
-                  return
-              }
-        viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath.item)
-    }*/
+              let file = viewModel.getFile(at: indexPath) else {
+            return
+        }
+        viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath)
+    }
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
@@ -483,6 +385,6 @@ extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
 extension PhotoListViewController: SelectDelegate {
     func didSelect(option: Selectable) {
         guard let mode = option as? PhotoSortMode else { return }
-        sortMode = mode
+        // sortMode = mode
     }
 }
