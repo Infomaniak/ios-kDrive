@@ -32,11 +32,6 @@ public enum ApiRoutes {
         return components.url
     }
 
-    static func getFilesActivities(driveId: Int, files: [File], from date: Int) -> String {
-        let fileIds = files.map { String($0.id) }
-        return "\(driveApiUrl)\(driveId)/files/\(fileIds.joined(separator: ","))/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories&actions[]=file_rename&actions[]=file_delete&actions[]=file_update&from_date=\(date)"
-    }
-
     public static func mobileLogin(url: String) -> URL? {
         var components = URLComponents()
         components.scheme = "https"
