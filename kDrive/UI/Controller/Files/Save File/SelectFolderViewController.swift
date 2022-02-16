@@ -31,7 +31,6 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
         let configuration = FileListViewModel.Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-        self.files = AnyRealmCollection(self.currentDirectory.children)
     }
 }
 
