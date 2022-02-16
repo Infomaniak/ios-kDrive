@@ -61,17 +61,15 @@ class FileListBarButton: UIBarButtonItem {
 }
 
 class ConcreteFileListViewModel: ManagedFileListViewModel {
-    required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
+    required convenience init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         let configuration = FileListViewModel.Configuration(emptyViewType: .emptyFolder, supportsDrop: true, rightBarButtons: [.search])
-        let currentDirectory = currentDirectory == nil ? driveFileManager.getCachedRootFile() : currentDirectory
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
-        self.files = AnyRealmCollection(self.currentDirectory.children)
+        self.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
 
-    override internal init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
-        let currentDirectory = currentDirectory == nil ? driveFileManager.getCachedRootFile() : currentDirectory
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
-        self.files = AnyRealmCollection(self.currentDirectory.children)
+    override init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
+        let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile()
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        files = AnyRealmCollection(currentDirectory.children)
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {

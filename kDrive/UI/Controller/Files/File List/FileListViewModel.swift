@@ -340,7 +340,7 @@ class FileListViewModel {
 }
 
 class ManagedFileListViewModel: FileListViewModel {
-    private var realmObservationToken: NotificationToken?
+    var realmObservationToken: NotificationToken?
 
     var files = AnyRealmCollection(List<File>())
     override var isEmpty: Bool {
