@@ -26,6 +26,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     @IBOutlet weak var subtitleLabel: UILabel!
     @IBOutlet weak var offlineView: UIStackView!
     @IBOutlet weak var progressView: UIProgressView!
+    @IBOutlet weak var openButton: UIButton!
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
 
@@ -59,6 +60,10 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
             iconImageView.tintColor = file.tintColor
             subtitleLabel.text = KDriveResourcesStrings.Localizable.previewNoPreview
             offlineView.isHidden = true
+        }
+        // Hide "open with" button if file will be downloaded and displayed
+        if ConvertedType.downloadableTypes.contains(file.convertedType) {
+            openButton.isHidden = true
         }
     }
 

@@ -50,7 +50,7 @@
                                         <rect key="frame" x="0.0" y="71.5" width="229" height="24"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="n3N-4l-Lcn">
-                                                <rect key="frame" x="54" y="0.0" width="121" height="24"/>
+                                                <rect key="frame" x="22.5" y="0.0" width="184.5" height="24"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="offline" translatesAutoresizingMaskIntoConstraints="NO" id="PWB-e7-TbP">
                                                         <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
@@ -61,7 +61,7 @@
                                                         </constraints>
                                                     </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" alpha="0.5" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uuk-Lo-4gw" customClass="IKLabel" customModule="kDriveCore">
-                                                        <rect key="frame" x="34" y="0.0" width="87" height="24"/>
+                                                        <rect key="frame" x="34" y="0.0" width="150.5" height="24"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                         <nil key="highlightedColor"/>
@@ -125,6 +125,7 @@
             <connections>
                 <outlet property="iconImageView" destination="wxX-8m-bwJ" id="Btc-ow-ePo"/>
                 <outlet property="offlineView" destination="n3N-4l-Lcn" id="o5y-d5-1At"/>
+                <outlet property="openButton" destination="jGG-JN-vvc" id="3Nh-Y4-oQ1"/>
                 <outlet property="progressView" destination="70m-uN-hhd" id="VFW-Mj-vx0"/>
                 <outlet property="subtitleLabel" destination="N9n-Yd-KkA" id="ZGA-m7-W0V"/>
                 <outlet property="titleLabel" destination="2vc-OR-Nm9" id="TOe-BV-0MR"/>
@@ -134,7 +135,7 @@
     </objects>
     <designables>
         <designable name="Uuk-Lo-4gw">
-            <size key="intrinsicContentSize" width="87" height="17"/>
+            <size key="intrinsicContentSize" width="150.5" height="16"/>
         </designable>
     </designables>
     <resources>
