@@ -93,13 +93,16 @@ class DroppableFileListViewModel {
                     let destinationDriveFileManager = self.driveFileManager
                     if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
                         if destinationDirectory.id == file.parentId { return }
+                        let frozenParent = file.parent?.freezeIfNeeded()
                         Task {
                             do {
                                 let (cancelResponse, _) = try await destinationDriveFileManager.move(file: file, to: destinationDirectory)
-                                UIConstants.showCancelableSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name),
-                                                                   cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
-                                                                   cancelableResponse: cancelResponse,
-                                                                   driveFileManager: destinationDriveFileManager)
+                                UIConstants.showCancelableSnackBar(
+                                    message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name),
+                                    cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
+                                    cancelableResponse: cancelResponse,
+                                    parentFile: frozenParent,
+                                    driveFileManager: destinationDriveFileManager)
                             } catch {
                                 UIConstants.showSnackBar(message: error.localizedDescription)
                             }

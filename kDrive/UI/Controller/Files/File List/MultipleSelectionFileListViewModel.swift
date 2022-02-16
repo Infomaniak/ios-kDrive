@@ -311,6 +311,7 @@ class MultipleSelectionFileListViewModel {
                                                                    cancelSuccessMessage: cancelMessage,
                                                                    duration: .infinite,
                                                                    cancelableResponse: cancelableResponse,
+                                                                   parentFile: currentDirectory,
                                                                    driveFileManager: driveFileManager)
 
             AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelableResponse.id) { actionProgress in
