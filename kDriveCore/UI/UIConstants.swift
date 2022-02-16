@@ -48,16 +48,23 @@ public enum UIConstants {
     }
 
     @discardableResult
-    public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, duration: SnackBar.Duration = .lengthLong, cancelableResponse: CancelableResponse, driveFileManager: DriveFileManager) -> IKSnackBar? {
+    public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, duration: SnackBar.Duration = .lengthLong, cancelableResponse: CancelableResponse, parentFile: File?, driveFileManager: DriveFileManager) -> IKSnackBar? {
         return UIConstants.showSnackBar(message: message, duration: duration, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
             Task {
                 do {
+                    let now = Date()
                     try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
-                    DispatchQueue.main.async {
+                    if let parentFile = parentFile {
+                        _ = try? await driveFileManager.fileActivities(file: parentFile, from: Int(now.timeIntervalSince1970))
+                    }
+
+                    _ = await MainActor.run {
                         UIConstants.showSnackBar(message: cancelSuccessMessage)
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    _ = await MainActor.run {
+                        UIConstants.showSnackBar(message: error.localizedDescription)
+                    }
                 }
             }
         })
