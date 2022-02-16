@@ -50,7 +50,7 @@ class NotificationsSettingsTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Menu", "Settings", "Notifications"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description, "Notifications"])
     }
 
     deinit {

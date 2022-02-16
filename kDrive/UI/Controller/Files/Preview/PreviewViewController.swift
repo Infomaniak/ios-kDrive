@@ -249,7 +249,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         becomeFirstResponder()
 
         heightToHide = backButton.frame.minY
-        MatomoUtils.track(view: ["Preview", "File"])
+        MatomoUtils.track(view: [MatomoUtils.Views.preview.description, "File"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

@@ -156,7 +156,7 @@ class ShareLinkSettingsViewController: UIViewController {
         navigationBarAppearanceLarge.configureWithTransparentBackground()
         navigationBarAppearanceLarge.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
-        MatomoUtils.track(view: ["ShareAndRights", "ShareLinkSettings"])
+        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.description, "ShareLinkSettings"])
     }
 
     override func viewDidAppear(_ animated: Bool) {

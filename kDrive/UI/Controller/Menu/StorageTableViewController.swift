@@ -79,7 +79,7 @@ class StorageTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Menu", "Settings", "Storage"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description, "Storage"])
     }
 
     private func reload() {

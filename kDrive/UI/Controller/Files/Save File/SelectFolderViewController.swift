@@ -57,7 +57,7 @@ class SelectFolderViewController: FileListViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Save", "SelectFolder"])
+        MatomoUtils.track(view: [MatomoUtils.Views.save.description, "SelectFolder"])
     }
 
     private func setUpDirectory() {

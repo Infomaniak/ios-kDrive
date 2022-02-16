@@ -91,7 +91,7 @@ class ParameterTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Menu", "Settings"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description])
     }
 
     private func getNotificationText() -> String {

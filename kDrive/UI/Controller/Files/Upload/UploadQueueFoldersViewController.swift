@@ -45,7 +45,7 @@ class UploadQueueFoldersViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["UploadQueue", "Folders"])
+        MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.description, "Folders"])
     }
 
     deinit {

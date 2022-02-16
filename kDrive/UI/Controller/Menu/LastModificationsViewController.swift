@@ -37,7 +37,7 @@ class LastModificationsViewController: FileListViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Menu", "LastModifications"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, "LastModifications"])
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {

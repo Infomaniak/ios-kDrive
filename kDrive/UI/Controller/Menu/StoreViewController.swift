@@ -111,7 +111,7 @@ class StoreViewController: UICollectionViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        MatomoUtils.track(view: ["Menu", "Store"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.store.description])
     }
 
     @objc func closeButtonPressed() {

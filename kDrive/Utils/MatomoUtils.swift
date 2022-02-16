@@ -26,6 +26,14 @@ class MatomoUtils {
     // Enable or disable Matomo tracking
     static let isEnabled = true
 
+    enum Views: String {
+        case shareAndRights, save, search, uploadQueue, preview, menu, settings, store, security
+
+        var description: String {
+            return rawValue.capitalized
+        }
+    }
+
     enum EventCategory: String {
         case newElement, fileAction, fileInfo, shareAndRights, colorFolder, categories, search,
              fileList, comment, drive, account, settings, photoSync, home, displayList, inApp, trash,

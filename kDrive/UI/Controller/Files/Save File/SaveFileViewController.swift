@@ -95,7 +95,7 @@ class SaveFileViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Save", "SaveFile"])
+        MatomoUtils.track(view: [MatomoUtils.Views.save.description, "SaveFile"])
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {

@@ -53,7 +53,8 @@ class AppLockSettingsViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["Menu", "Settings", "Security", "AppLock"])
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.description, MatomoUtils.Views.settings.description,
+                                 MatomoUtils.Views.security.description, "AppLock"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {

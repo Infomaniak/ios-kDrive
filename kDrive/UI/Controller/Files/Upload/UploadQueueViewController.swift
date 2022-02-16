@@ -65,7 +65,7 @@ class UploadQueueViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["UploadQueue", "Main"])
+        MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.description, "Main"])
     }
 
     deinit {
