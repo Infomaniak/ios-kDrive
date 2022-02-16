@@ -183,7 +183,7 @@ public enum SortType: String {
         case .newerDelete:
             return SortTypeValue(apiValue: "deleted_at", order: "desc", translation: KDriveResourcesStrings.Localizable.sortRecent, realmKeyPath: \.deletedAt)
         case .type:
-            return SortTypeValue(apiValue: "type", order: "desc", translation: "", realmKeyPath: \.type)
+            return SortTypeValue(apiValue: "type", order: "asc", translation: "", realmKeyPath: \.type)
         }
     }
 }
