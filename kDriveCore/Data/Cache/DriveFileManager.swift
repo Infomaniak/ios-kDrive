@@ -786,18 +786,54 @@ public class DriveFileManager {
         return ActivitiesResult(inserted: insertedFiles.map { $0.freeze() }, updated: updatedFiles.map { $0.freeze() }, deleted: deletedFiles)
     }
 
-    public func getFilesActivities(driveId: Int, files: [File], from date: Int, completion: @escaping (Result<[Int: FilesActivitiesContent], Error>) -> Void) {
-        apiFetcher.getFilesActivities(driveId: driveId, files: files, from: date) { response, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let activities = response?.data?.activities {
-                completion(.success(activities))
-            } else {
-                completion(.failure(DriveError.serverError))
+    public func filesActivities(files: [File], from date: Date) async throws -> [ActivitiesForFile] {
+        let (result, responseAt) = try await apiFetcher.filesActivities(drive: drive, files: files, from: date)
+        // Update last sync date
+        if let responseAt = responseAt {
+            UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
+        }
+        return result
+    }
+
+    public func updateAvailableOfflineFiles() async throws {
+        let offlineFiles = getAvailableOfflineFiles()
+        guard !offlineFiles.isEmpty else { return }
+        let date = Date(timeIntervalSince1970: TimeInterval(UserDefaults.shared.lastSyncDateOfflineFiles))
+        // Get activities
+        let filesActivities = try await filesActivities(files: offlineFiles, from: date)
+        for activities in filesActivities {
+            guard let file = offlineFiles.first(where: { $0.id == activities.id }) else {
+                continue
             }
-            // Update last sync date
-            if let responseAt = response?.responseAt {
-                UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
+
+            if activities.result {
+                // Update file in Realm & rename if needed
+                if let newFile = activities.file {
+                    let realm = getRealm()
+                    keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                    _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
+                }
+                // Apply activities to file
+                var handledActivities = Set<FileActivityType>()
+                for activity in activities.activities where activity.action != nil && !handledActivities.contains(activity.action!) {
+                    switch activity.action {
+                    case .fileUpdate:
+                        // Download new version
+                        DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
+                    default:
+                        break
+                    }
+                    handledActivities.insert(activity.action!)
+                }
+            } else if let message = activities.message {
+                if message == DriveError.objectNotFound.code {
+                    // File has been deleted -- remove it from offline files
+                    setFileAvailableOffline(file: file, available: false) { _ in }
+                } else {
+                    SentrySDK.capture(message: message)
+                }
+                // Silently handle error
+                DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")
             }
         }
     }
