@@ -324,7 +324,7 @@ public class File: Object, Codable {
         return FileManager.default.fileExists(atPath: localUrl.path)
     }
 
-    public var canBeOpenedWith: Bool {
+    public var isMostRecentDownloaded: Bool {
         return isDownloaded && !isLocalVersionOlderThanRemote()
     }
 

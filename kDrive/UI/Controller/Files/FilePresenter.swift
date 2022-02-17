@@ -100,7 +100,7 @@ class FilePresenter {
             completion?(true)
         } else if file.isBookmark {
             // Open bookmark URL
-            if file.canBeOpenedWith {
+            if file.isMostRecentDownloaded {
                 presentBookmark(for: file, completion: completion)
             } else {
                 // Download file

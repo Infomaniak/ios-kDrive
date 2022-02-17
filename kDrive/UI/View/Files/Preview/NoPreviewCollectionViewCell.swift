@@ -61,7 +61,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
 
         if isOffline {
             subtitleLabel.text = KDriveResourcesStrings.Localizable.previewLoadError
-            openButton.isHidden = !file.canBeOpenedWith
+            openButton.isHidden = !file.isMostRecentDownloaded
         }
     }
 
