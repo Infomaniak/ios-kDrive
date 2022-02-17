@@ -51,18 +51,18 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
 
     func configureWith(file: File, isOffline: Bool = false) {
         titleLabel.text = file.name
-        if isOffline {
-            iconImageView.image = KDriveResourcesAsset.fileDefault.image
-            subtitleLabel.text = KDriveResourcesStrings.Localizable.previewLoadError
-            offlineView.isHidden = false
-        } else {
-            iconImageView.image = file.icon
-            iconImageView.tintColor = file.tintColor
-            subtitleLabel.text = KDriveResourcesStrings.Localizable.previewNoPreview
-            offlineView.isHidden = true
-        }
+
+        iconImageView.image = file.icon
+        iconImageView.tintColor = file.tintColor
+        subtitleLabel.text = KDriveResourcesStrings.Localizable.previewNoPreview
+        offlineView.isHidden = !isOffline
         // Hide "open with" button if file will be downloaded and displayed
         openButton.isHidden = ConvertedType.downloadableTypes.contains(file.convertedType)
+
+        if isOffline {
+            subtitleLabel.text = KDriveResourcesStrings.Localizable.previewLoadError
+            openButton.isHidden = !file.canBeOpenedWith
+        }
     }
 
     func setDownloadProgress(_ progress: Progress) {
