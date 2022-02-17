@@ -123,6 +123,7 @@ class SelectFolderViewController: FileListViewController {
     }
 
     @IBAction func addFolderButtonPressed(_ sender: UIBarButtonItem) {
+        MatomoUtils.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
         let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: currentDirectory, driveFileManager: driveFileManager)
         navigationController?.present(newFolderViewController, animated: true)
     }
