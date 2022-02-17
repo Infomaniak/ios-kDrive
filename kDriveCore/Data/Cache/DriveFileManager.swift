@@ -807,35 +807,42 @@ public class DriveFileManager {
             }
 
             if activities.result {
-                // Update file in Realm & rename if needed
-                if let newFile = activities.file {
-                    let realm = getRealm()
-                    keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-                    _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
-                }
-                // Apply activities to file
-                var handledActivities = Set<FileActivityType>()
-                for activity in activities.activities where activity.action != nil && !handledActivities.contains(activity.action!) {
-                    switch activity.action {
-                    case .fileUpdate:
-                        // Download new version
-                        DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
-                    default:
-                        break
-                    }
-                    handledActivities.insert(activity.action!)
-                }
+                try applyActivities(activities, offlineFile: file)
             } else if let message = activities.message {
-                if message == DriveError.objectNotFound.code {
-                    // File has been deleted -- remove it from offline files
-                    setFileAvailableOffline(file: file, available: false) { _ in }
-                } else {
-                    SentrySDK.capture(message: message)
-                }
-                // Silently handle error
-                DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")
+                handleError(message: message, offlineFile: file)
             }
         }
+    }
+
+    private func applyActivities(_ activities: ActivitiesForFile, offlineFile file: File) throws {
+        // Update file in Realm & rename if needed
+        if let newFile = activities.file {
+            let realm = getRealm()
+            keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+            _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
+        }
+        // Apply activities to file
+        var handledActivities = Set<FileActivityType>()
+        for activity in activities.activities where activity.action != nil && !handledActivities.contains(activity.action!) {
+            if activity.action == .fileUpdate {
+                // Download new version
+                DownloadQueue.instance.addToQueue(file: file, userId: drive.userId)
+            }
+            handledActivities.insert(activity.action!)
+        }
+    }
+
+    private func handleError(message: String, offlineFile file: File) {
+        if message == DriveError.objectNotFound.code {
+            // File has been deleted -- remove it from offline files
+            setFileAvailableOffline(file: file, available: false) { _ in
+                // No need to wait for the response, no error will be returned
+            }
+        } else {
+            SentrySDK.capture(message: message)
+        }
+        // Silently handle error
+        DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(message)")
     }
 
     public func getWorkingSet() -> [File] {
