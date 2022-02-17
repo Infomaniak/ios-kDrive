@@ -29,6 +29,7 @@ protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
     func setFullscreen(_ fullscreen: Bool?)
     func errorWhilePreviewing(fileId: Int, error: Error)
+    func openWith(from: UIView)
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
@@ -365,7 +366,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
         backButton.isHidden = false
         editButton.isHidden = true
-        openButton.isHidden = false
+        openButton.isHidden = true
         pdfPageLabel.text = KDriveResourcesStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
         titleWidthConstraint?.constant = pdfPageLabel.frame.width + 32
@@ -464,6 +465,38 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             previewErrors[fileId] = previewError
             collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
         }
+    }
+
+    func openWith(from: UIView) {
+        let frame = from.convert(from.bounds, to: self.view)
+        floatingPanelViewController.dismiss(animated: true)
+        if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
+            FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: self.view, delegate: self)
+        } else {
+            downloadToOpenWith { [weak self] in
+                guard let self = self else { return }
+                FileActionsHelper.instance.openWith(file: self.currentFile, from: frame, in: self.view, delegate: self)
+            }
+        }
+    }
+
+    private func downloadToOpenWith(completion: @escaping () -> Void) {
+        guard let currentCell = collectionView.cellForItem(at: currentIndex) as? NoPreviewCollectionViewCell else { return }
+
+        DownloadQueue.instance.observeFileDownloaded(self, fileId: currentFile.id) { [weak self] _, error in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if error == nil {
+                    completion()
+                    currentCell.observeProgress(false, file: self.currentFile)
+                } else if error != .taskCancelled && error != .taskRescheduled {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
+                }
+
+            }
+        }
+        DownloadQueue.instance.addToQueue(file: currentFile)
+        currentCell.observeProgress(true, file: currentFile)
     }
 
     private func downloadFileIfNeeded(at indexPath: IndexPath) {
@@ -705,5 +738,18 @@ extension PreviewViewController: UICollectionViewDelegate {}
 extension PreviewViewController: FloatingPanelControllerDelegate {
     func floatingPanelShouldBeginDragging(_ vc: FloatingPanelController) -> Bool {
         return !fromActivities
+    }
+}
+
+// MARK: - Document interaction controller delegate
+
+extension PreviewViewController: UIDocumentInteractionControllerDelegate {
+    func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
+        // Dismiss interaction controller when the user taps an app
+        controller.dismissMenu(animated: true)
+    }
+
+    func documentInteractionControllerDidDismissOpenInMenu(_ controller: UIDocumentInteractionController) {
+        present(floatingPanelViewController, animated: true)
     }
 }

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -18,7 +19,7 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xzn-rl-KOk">
-                        <rect key="frame" x="0.0" y="145.5" width="277" height="231.5"/>
+                        <rect key="frame" x="0.0" y="120" width="277" height="282.5"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="wxX-8m-bwJ">
                                 <rect key="frame" x="90.5" y="0.0" width="96" height="96"/>
@@ -83,6 +84,22 @@
                                     </view>
                                 </subviews>
                             </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jGG-JN-vvc">
+                                <rect key="frame" x="50.5" y="228.5" width="176.5" height="54"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" image="open-with" imagePlacement="leading" title="buttonOpenWith" imagePadding="6" buttonSize="large">
+                                    <backgroundConfiguration key="background" cornerRadius="10">
+                                        <color key="backgroundColor" name="infomaniakColor"/>
+                                    </backgroundConfiguration>
+                                </buttonConfiguration>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenWith"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="openFileWith:" destination="gTV-IL-0wX" eventType="touchUpInside" id="abo-xT-Fy5"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -91,7 +108,9 @@
                             <constraint firstAttribute="trailing" secondItem="zbp-KC-tjt" secondAttribute="trailing" constant="24" id="GQv-u7-KrB"/>
                             <constraint firstItem="zbp-KC-tjt" firstAttribute="leading" secondItem="Xzn-rl-KOk" secondAttribute="leading" constant="24" id="I3o-lW-cVN"/>
                             <constraint firstItem="zbp-KC-tjt" firstAttribute="top" secondItem="wxX-8m-bwJ" secondAttribute="bottom" constant="32" id="d6L-f6-o0q"/>
-                            <constraint firstAttribute="bottom" secondItem="zbp-KC-tjt" secondAttribute="bottom" constant="8" id="k24-J6-xa2"/>
+                            <constraint firstItem="jGG-JN-vvc" firstAttribute="top" secondItem="zbp-KC-tjt" secondAttribute="bottom" constant="5" id="htc-vN-c9a"/>
+                            <constraint firstItem="jGG-JN-vvc" firstAttribute="centerX" secondItem="Xzn-rl-KOk" secondAttribute="centerX" id="oXN-Aq-IeS"/>
+                            <constraint firstAttribute="bottom" secondItem="jGG-JN-vvc" secondAttribute="bottom" id="qAt-Vt-ip9"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -106,6 +125,7 @@
             <connections>
                 <outlet property="iconImageView" destination="wxX-8m-bwJ" id="Btc-ow-ePo"/>
                 <outlet property="offlineView" destination="n3N-4l-Lcn" id="o5y-d5-1At"/>
+                <outlet property="openButton" destination="jGG-JN-vvc" id="3Nh-Y4-oQ1"/>
                 <outlet property="progressView" destination="70m-uN-hhd" id="VFW-Mj-vx0"/>
                 <outlet property="subtitleLabel" destination="N9n-Yd-KkA" id="ZGA-m7-W0V"/>
                 <outlet property="titleLabel" destination="2vc-OR-Nm9" id="TOe-BV-0MR"/>
@@ -113,7 +133,16 @@
             <point key="canvasLocation" x="136.95652173913044" y="129.91071428571428"/>
         </collectionViewCell>
     </objects>
+    <designables>
+        <designable name="Uuk-Lo-4gw">
+            <size key="intrinsicContentSize" width="150.5" height="16"/>
+        </designable>
+    </designables>
     <resources>
         <image name="offline" width="24" height="24"/>
+        <image name="open-with" width="24" height="24"/>
+        <namedColor name="infomaniakColor">
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>

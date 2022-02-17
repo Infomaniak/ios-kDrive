@@ -26,8 +26,11 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     @IBOutlet weak var subtitleLabel: UILabel!
     @IBOutlet weak var offlineView: UIStackView!
     @IBOutlet weak var progressView: UIProgressView!
+    @IBOutlet weak var openButton: UIButton!
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
+
+    private var observationToken: ObservationToken?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -58,6 +61,8 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
             subtitleLabel.text = KDriveResourcesStrings.Localizable.previewNoPreview
             offlineView.isHidden = true
         }
+        // Hide "open with" button if file will be downloaded and displayed
+        openButton.isHidden = ConvertedType.downloadableTypes.contains(file.convertedType)
     }
 
     func setDownloadProgress(_ progress: Progress) {
@@ -66,8 +71,25 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
         subtitleLabel.text = KDriveResourcesStrings.Localizable.previewDownloadIndication
     }
 
+    func observeProgress(_ showProgress: Bool, file: File) {
+        observationToken?.cancel()
+        progressView.isHidden = !showProgress
+        progressView.progress = 0
+        if showProgress {
+            observationToken = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { _, progress in
+                DispatchQueue.main.async { [weak self] in
+                    self?.progressView.progress = Float(progress)
+                }
+            }
+        }
+    }
+
     func errorDownloading() {
         progressView.isHidden = true
         subtitleLabel.text = KDriveResourcesStrings.Localizable.errorDownload
+    }
+
+    @IBAction func openFileWith(_ sender: UIButton) {
+        previewDelegate?.openWith(from: sender)
     }
 }

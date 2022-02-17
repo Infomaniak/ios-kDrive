@@ -355,11 +355,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .openWith:
+            let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
             if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
-                presentInteractionController(from: indexPath)
+                FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView, delegate: self)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    self?.presentInteractionController(from: indexPath)
+                    guard let self = self else { return }
+                    FileActionsHelper.instance.openWith(file: self.file, from: view, in: self.collectionView, delegate: self)
                 }
             }
         case .edit:
@@ -645,45 +647,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         let activityViewController = UIActivityViewController(activityItems: [file.localUrl], applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = collectionView.cellForItem(at: indexPath) ?? collectionView
         present(activityViewController, animated: true)
-    }
-
-    private func presentInteractionController(from indexPath: IndexPath) {
-        guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
-            DDLogError("Open in place directory not found")
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
-            return
-        }
-        do {
-            // Create directory if needed
-            let folderURL = rootFolderURL.appendingPathComponent("\(file.driveId)", isDirectory: true).appendingPathComponent("\(file.id)", isDirectory: true)
-            if !FileManager.default.fileExists(atPath: folderURL.path) {
-                try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
-            }
-            // Copy file
-            let fileUrl = folderURL.appendingPathComponent(file.name)
-            var shouldCopy = true
-            if FileManager.default.fileExists(atPath: fileUrl.path) {
-                let attributes = try FileManager.default.attributesOfItem(atPath: fileUrl.path)
-                let modificationDate = attributes[.modificationDate] as? Date ?? Date(timeIntervalSince1970: 0)
-                if file.lastModifiedDate > modificationDate {
-                    try FileManager.default.removeItem(at: fileUrl)
-                } else {
-                    shouldCopy = false
-                }
-            }
-            if shouldCopy {
-                try FileManager.default.copyItem(at: file.localUrl, to: fileUrl)
-            }
-            // Create document interaction controller
-            interactionController = UIDocumentInteractionController(url: fileUrl)
-            interactionController.delegate = self
-            let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
-            // Present document interaction controller
-            interactionController.presentOpenInMenu(from: view, in: collectionView, animated: true)
-        } catch {
-            DDLogError("Cannot present interaction controller: \(error)")
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
-        }
     }
 
     private func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
