@@ -601,7 +601,8 @@ extension HomeViewController {
                 let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
                 navigationController?.pushViewController(uploadViewController, animated: true)
             case .search:
-                //present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
+                let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+                present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
                 break
             }
         case .recentFiles:

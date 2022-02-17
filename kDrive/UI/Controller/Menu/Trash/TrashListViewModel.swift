@@ -52,9 +52,7 @@ class TrashListViewModel: UnmanagedFileListViewModel {
             fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory, page: page, sortType: sortType)
         }
 
-        let startIndex = fileCount
-        files.append(contentsOf: fetchedFiles)
-        onFileListUpdated?([], Array(startIndex ..< files.count), [], files.isEmpty, false)
+        addPage(files: fetchedFiles, page: page)
         endRefreshing()
         if files.count == Endpoint.itemsPerPage {
             try await loadFiles(page: page + 1)

@@ -30,6 +30,7 @@ enum FileListBarButtonType {
     case cancel
     case search
     case emptyTrash
+    case searchFilters
 }
 
 enum FileListQuickActionType {
@@ -219,15 +220,6 @@ class FileListViewModel: SelectDelegate {
     func barButtonPressed(type: FileListBarButtonType) {
         if multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             multipleSelectionViewModel?.barButtonPressed(type: type)
-        } else {
-            switch type {
-            case .search:
-                /* let searchViewController = SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
-                 onPresentViewController?(.modal, searchViewController, true) */
-                break
-            default:
-                break
-            }
         }
     }
 
