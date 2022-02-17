@@ -322,7 +322,7 @@ final class DriveApiTests: XCTestCase {
     }
 
     func createCommonDirectory(testName: String) async throws -> File {
-        try await currentApiFetcher.createCommonDirectory(drive: proxyDrive, name: "UnitTest - \(testName)", forAllUser: false)
+        try await currentApiFetcher.createCommonDirectory(drive: proxyDrive, name: "UnitTest-\(testName)-\(Date())", forAllUser: false)
     }
 
     func testUpdateTeamAccess() async throws {
