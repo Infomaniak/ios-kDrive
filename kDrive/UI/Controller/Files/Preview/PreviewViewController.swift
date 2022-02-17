@@ -29,7 +29,7 @@ protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
     func setFullscreen(_ fullscreen: Bool?)
     func errorWhilePreviewing(fileId: Int, error: Error)
-    func openWith(from rect: CGRect)
+    func openWith(from: UIView)
 }
 
 class PreviewViewController: UIViewController, PreviewContentCellDelegate {
@@ -467,14 +467,15 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         }
     }
 
-    func openWith(from rect: CGRect) {
+    func openWith(from: UIView) {
+        let frame = from.convert(from.bounds, to: self.view)
         floatingPanelViewController.dismiss(animated: true)
         if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
-            FileActionsHelper.instance.openWith(file: currentFile, from: rect, in: view, delegate: self)
+            FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: self.view, delegate: self)
         } else {
             downloadToOpenWith { [weak self] in
                 guard let self = self else { return }
-                FileActionsHelper.instance.openWith(file: self.currentFile, from: rect, in: self.view, delegate: self)
+                FileActionsHelper.instance.openWith(file: self.currentFile, from: frame, in: self.view, delegate: self)
             }
         }
     }

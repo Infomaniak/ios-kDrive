@@ -90,6 +90,6 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     }
 
     @IBAction func openFileWith(_ sender: UIButton) {
-        previewDelegate?.openWith(from: sender.frame)
+        previewDelegate?.openWith(from: sender)
     }
 }
