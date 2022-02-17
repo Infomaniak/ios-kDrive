@@ -20,6 +20,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+@MainActor
 protocol SearchFiltersDelegate: AnyObject {
     func didUpdateFilters(_ filters: Filters)
 }
@@ -72,6 +73,19 @@ class SearchFiltersViewController: UITableViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
+    static func instantiate(driveFileManager: DriveFileManager) -> SearchFiltersViewController {
+        let viewController = Storyboard.search.instantiateViewController(withIdentifier: "SearchFiltersViewController") as! SearchFiltersViewController
+        viewController.driveFileManager = driveFileManager
+        return viewController
+    }
+
+    static func instantiateInNavigationController(driveFileManager: DriveFileManager) -> UINavigationController {
+        let viewController = instantiate(driveFileManager: driveFileManager)
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.navigationBar.prefersLargeTitles = true
+        return navigationController
     }
 
     private func reloadSection(_ filterType: FilterType) {

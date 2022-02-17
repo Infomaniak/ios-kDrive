@@ -46,14 +46,23 @@ class UnmanagedFileListViewModel: FileListViewModel {
         forceRefresh()
     }
 
-    override func forceRefresh() {
-        files.removeAll()
-        onFileListUpdated?([], [], [], false, true)
-        super.forceRefresh()
-    }
-
     override func getFile(at indexPath: IndexPath) -> File? {
         return indexPath.item < fileCount ? files[indexPath.item] : nil
+    }
+
+    /// Use this method to add fetched files to the file list. It will replace the list on first page and append the files on following pages.
+    /// - Parameters:
+    ///   - fetchedFiles: The list of files to add.
+    ///   - page: The page of the files.
+    final func addPage(files fetchedFiles: [File], page: Int) {
+        if page == 1 {
+            files = fetchedFiles
+            onFileListUpdated?([], [], [], files.isEmpty, true)
+        } else {
+            let startIndex = fileCount
+            files.append(contentsOf: fetchedFiles)
+            onFileListUpdated?([], Array(startIndex ..< files.count), [], files.isEmpty, false)
+        }
     }
 
     func removeFile(file: File) {
