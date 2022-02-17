@@ -55,6 +55,9 @@ class FileListBarButton: UIBarButtonItem {
             self.init(barButtonSystemItem: .search, target: target, action: action)
         case .emptyTrash:
             self.init(title: KDriveResourcesStrings.Localizable.buttonEmptyTrash, style: .plain, target: target, action: action)
+        case .searchFilters:
+            self.init(image: KDriveResourcesAsset.filter.image, style: .plain, target: target, action: action)
+            accessibilityLabel = KDriveResourcesStrings.Localizable.filtersTitle
         }
         self.type = type
     }
@@ -95,6 +98,16 @@ class ConcreteFileListViewModel: ManagedFileListViewModel {
 
     override func loadActivities() async throws {
         _ = try await driveFileManager.fileActivities(file: currentDirectory)
+    }
+
+    override func barButtonPressed(type: FileListBarButtonType) {
+        if type == .search {
+            let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+            let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
+            onPresentViewController?(.modal, searchViewController, true)
+        } else {
+            super.barButtonPressed(type: type)
+        }
     }
 }
 
@@ -388,7 +401,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         viewModel.barButtonPressed(type: sender.type)
     }
 
-    private func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
+    func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         headerView.delegate = self
 
         headerView.sortView.isHidden = !isEmptyViewHidden
