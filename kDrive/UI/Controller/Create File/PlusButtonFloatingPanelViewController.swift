@@ -29,6 +29,8 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
 
+    let presentedFromPlusButton: Bool
+
     private struct PlusButtonMenuAction: Equatable {
         let name: String
         let image: UIImage
@@ -54,9 +56,10 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         [.docsAction, .gridsAction, .pointsAction, .noteAction]
     ]
 
-    init(driveFileManager: DriveFileManager, folder: File) {
+    init(driveFileManager: DriveFileManager, folder: File, presentedFromPlusButton: Bool = true) {
         self.driveFileManager = driveFileManager
         self.currentDirectory = folder
+        self.presentedFromPlusButton = presentedFromPlusButton
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -145,7 +148,8 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         let action = content[indexPath.section][indexPath.row]
         // Folder creation is already tracked through its creation page
         if action != .folderAction {
-            MatomoUtils.track(eventWithCategory: .newElement, name: action.matomoName)
+            let suffix = presentedFromPlusButton ? "FromFAB" : "FromFolder"
+            MatomoUtils.track(eventWithCategory: .newElement, name: "\(action.matomoName)\(suffix)")
         }
         switch action {
         case .importAction:
