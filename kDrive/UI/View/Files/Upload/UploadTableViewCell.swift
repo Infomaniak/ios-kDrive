@@ -33,6 +33,7 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.isHidden = true
         cardContentView.progressView.isHidden = true
         cardContentView.iconView.isHidden = false
+        cardContentView.editImage?.isHidden = true
         cardContentView.progressView.setInfomaniakStyle()
     }
 
@@ -76,7 +77,7 @@ class UploadTableViewCell: InsetTableViewCell {
             }
         }
     }
-    
+
     private func addThumbnail(image: UIImage) {
         DispatchQueue.main.async {
             self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
