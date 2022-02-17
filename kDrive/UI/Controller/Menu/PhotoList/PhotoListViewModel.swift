@@ -65,7 +65,8 @@ class PhotoListViewModel: ManagedFileListViewModel {
         super.init(configuration: Configuration(showUploadingFiles: false,
                                                 selectAllSupported: false,
                                                 rootTitle: KDriveResourcesStrings.Localizable.allPictures,
-                                                emptyViewType: .noImages),
+                                                emptyViewType: .noImages,
+                                                rightBarButtons: [.search, .searchFilters]),
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm()
@@ -128,6 +129,18 @@ class PhotoListViewModel: ManagedFileListViewModel {
     }
 
     override func loadActivities() async throws {}
+
+    override func barButtonPressed(type: FileListBarButtonType) {
+        if type == .search {
+            let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager, filters: Filters(fileType: .image))
+            let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
+            onPresentViewController?(.modal, searchViewController, true)
+        } else if type == .searchFilters {
+            // TODO: Add filtering
+        } else {
+            super.barButtonPressed(type: type)
+        }
+    }
 
     private func updateSort() {
         UserDefaults.shared.photoSortMode = sortMode
