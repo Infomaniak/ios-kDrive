@@ -32,6 +32,7 @@ extension Selectable {
     var tintColor: UIColor? { return nil }
 }
 
+@MainActor
 protocol SelectDelegate: AnyObject {
     func didSelect(option: Selectable)
 }
