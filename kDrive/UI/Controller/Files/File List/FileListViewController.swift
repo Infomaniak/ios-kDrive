@@ -113,6 +113,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
+    var selectView: SelectView?
     private lazy var floatingPanelViewController = DriveFloatingPanelController()
     private var quickActionsViewController: UIViewController!
 
@@ -160,7 +161,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         bindMultipleSelectionViewModel()
     }
 
-    private func bindFileListViewModel() {
+    func bindFileListViewModel() {
         viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, isEmpty, shouldReload in
             self?.showEmptyView(!isEmpty)
             guard !shouldReload else {
@@ -260,12 +261,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    private func bindMultipleSelectionViewModel() {
+    func bindMultipleSelectionViewModel() {
         viewModel.multipleSelectionViewModel?.$isMultipleSelectionEnabled.receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
             self?.toggleMultipleSelection(isMultipleSelectionEnabled)
         }
 
         viewModel.multipleSelectionViewModel?.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
+            guard self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true else { return }
             self?.headerView?.selectView.updateTitle(selectedCount)
         }
 
@@ -286,7 +288,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
-            self?.headerView?.selectView.setActions(actions)
+            self?.selectView?.setActions(actions)
         }
     }
 
@@ -353,16 +355,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         Task {
             do {
                 try await block()
-            } catch {
-                if let driveError = error as? DriveError {
-                    if driveError == .objectNotFound {
-                        navigationController?.popViewController(animated: true)
-                    } else if driveError != .searchCancelled {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
-                    }
-                } else {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+            } catch let driveError as DriveError {
+                if driveError == .objectNotFound {
+                    navigationController?.popViewController(animated: true)
+                } else if driveError != .searchCancelled {
+                    UIConstants.showSnackBar(message: driveError.localizedDescription)
                 }
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
         }
     }
@@ -438,7 +438,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    static func instantiate(viewModel: FileListViewModel) -> Self {
+    class func instantiate(viewModel: FileListViewModel) -> Self {
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
         viewController.viewModel = viewModel
         return viewController
@@ -575,6 +575,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
         setUpHeaderView(headerView, isEmptyViewHidden: !viewModel.isEmpty)
         self.headerView = headerView
+        selectView = headerView.selectView
         return headerView
     }
 
