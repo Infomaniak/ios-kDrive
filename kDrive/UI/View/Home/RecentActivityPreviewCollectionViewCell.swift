@@ -85,8 +85,13 @@ class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
     func configureWithoutPreview(file: File?, more: Int?) {
         previewImage.isHidden = true
         noPreviewView.isHidden = false
-        logoImage.image = file?.icon ?? KDriveResourcesAsset.fileDefault.image
-        logoImage.tintColor = file?.tintColor
+        if let file = file {
+            logoImage.image = file.icon
+            logoImage.tintColor = file.tintColor
+        } else {
+            logoImage.image = ConvertedType.unknown.icon
+            logoImage.tintColor = ConvertedType.unknown.tintColor
+        }
         accessibilityLabel = file?.name
         if let count = more {
             setMoreLabel(count: count)

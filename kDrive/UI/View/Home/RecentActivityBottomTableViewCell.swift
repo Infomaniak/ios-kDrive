@@ -35,9 +35,15 @@ class RecentActivityBottomTableViewCell: UITableViewCell {
             fileNameLabel.text = KDriveResourcesStrings.Localizable.fileActivityOtherFiles(count)
             fileImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
         } else {
-            fileImage.image = recentActivity.file?.icon ?? ConvertedType.unknown.icon
-            fileNameLabel.text = recentActivity.file?.name ?? String(recentActivity.path.split(separator: "/").last ?? "")
-            fileImage.tintColor = recentActivity.file?.tintColor
+            if let file = recentActivity.file {
+                fileNameLabel.text = file.name
+                fileImage.image = file.icon
+                fileImage.tintColor = file.tintColor
+            } else {
+                fileNameLabel.text = String(recentActivity.path.split(separator: "/").last ?? "")
+                fileImage.image = ConvertedType.unknown.icon
+                fileImage.tintColor = ConvertedType.unknown.tintColor
+            }
         }
         fileImage.backgroundColor = nil
     }
