@@ -48,8 +48,8 @@ enum ControllerPresentationType {
 
 @MainActor
 class FileListViewModel: SelectDelegate {
-    /// deletions, insertions, modifications, isEmpty, shouldReload
-    typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool, Bool) -> Void
+    /// deletions, insertions, modifications, moved, isEmpty, shouldReload
+    typealias FileListUpdatedCallback = ([Int], [Int], [Int], [(source: Int, target: Int)], Bool, Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
     typealias FilePresentedCallback = (File) -> Void
     /// presentation type, presented viewcontroller, animated
@@ -386,10 +386,10 @@ class ManagedFileListViewModel: FileListViewModel {
                 switch change {
                 case .initial(let results):
                     self?.files = AnyRealmCollection(results)
-                    self?.onFileListUpdated?([], [], [], results.isEmpty, true)
+                    self?.onFileListUpdated?([], [], [], [], results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     self?.files = AnyRealmCollection(results)
-                    self?.onFileListUpdated?(deletions, insertions, modifications, results.isEmpty, false)
+                    self?.onFileListUpdated?(deletions, insertions, modifications, [], results.isEmpty, false)
                 case .error(let error):
                     DDLogError("[Realm Observation] Error \(error)")
                 }

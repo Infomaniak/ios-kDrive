@@ -57,18 +57,18 @@ class UnmanagedFileListViewModel: FileListViewModel {
     final func addPage(files fetchedFiles: [File], page: Int) {
         if page == 1 {
             files = fetchedFiles
-            onFileListUpdated?([], [], [], files.isEmpty, true)
+            onFileListUpdated?([], [], [], [], files.isEmpty, true)
         } else {
             let startIndex = fileCount
             files.append(contentsOf: fetchedFiles)
-            onFileListUpdated?([], Array(startIndex ..< files.count), [], files.isEmpty, false)
+            onFileListUpdated?([], Array(startIndex ..< files.count), [], [], files.isEmpty, false)
         }
     }
 
     func removeFile(file: File) {
         if let fileIndex = files.firstIndex(where: { $0.id == file.id }) {
             files.remove(at: fileIndex)
-            onFileListUpdated?([fileIndex], [], [], files.isEmpty, false)
+            onFileListUpdated?([fileIndex], [], [], [], files.isEmpty, false)
         }
     }
 

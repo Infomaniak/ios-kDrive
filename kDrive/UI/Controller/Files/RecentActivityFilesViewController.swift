@@ -16,42 +16,83 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DifferenceKit
 import kDriveCore
 import kDriveResources
 import UIKit
+
+class RecentActivityFilesViewModel: UnmanagedFileListViewModel {
+    var activity: FileActivity?
+
+    convenience init(driveFileManager: DriveFileManager, activities: [FileActivity]) {
+        self.init(driveFileManager: driveFileManager)
+        activity = activities.first
+        files = sort(files: activities.compactMap(\.file))
+    }
+
+    required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        let configuration = Configuration(normalFolderHierarchy: false,
+                                          showUploadingFiles: false,
+                                          isMultipleSelectionEnabled: false,
+                                          isRefreshControlEnabled: false,
+                                          fromActivities: true,
+                                          rootTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle,
+                                          emptyViewType: .emptyFolder)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.homeRootFile)
+    }
+
+    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {}
+
+    override func loadActivities() async throws {}
+
+    override func sortingChanged() {
+        let sortedFiles = sort(files: files)
+        let stagedChangeset = StagedChangeset(source: files, target: sortedFiles)
+        for changeset in stagedChangeset {
+            files = changeset.data
+            onFileListUpdated?(changeset.elementDeleted.map(\.element),
+                               changeset.elementInserted.map(\.element),
+                               changeset.elementUpdated.map(\.element),
+                               changeset.elementMoved.map { (source: $0.source.element, target: $0.target.element) },
+                               sortedFiles.isEmpty,
+                               false)
+        }
+    }
+
+    private func sort(files: [File]) -> [File] {
+        return files.sorted { firstFile, secondFile -> Bool in
+            switch sortType {
+            case .nameAZ:
+                return firstFile.name.lowercased() < secondFile.name.lowercased()
+            case .nameZA:
+                return firstFile.name.lowercased() > secondFile.name.lowercased()
+            case .older:
+                return firstFile.lastModifiedAt < secondFile.lastModifiedAt
+            case .newer:
+                return firstFile.lastModifiedAt > secondFile.lastModifiedAt
+            case .biggest:
+                return firstFile.size ?? 0 > secondFile.size ?? 0
+            case .smallest:
+                return firstFile.size ?? 0 < secondFile.size ?? 0
+            default:
+                return true
+            }
+        }
+    }
+}
 
 class RecentActivityFilesViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.files }
     override class var storyboardIdentifier: String { "RecentActivityFilesViewController" }
 
-    /*private var activity: FileActivity?
-    private var activityFiles: [File] = []
-
-    override func viewDidLoad() {
-        // Set configuration
-        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isMultipleSelectionEnabled: false, isRefreshControlEnabled: false, fromActivities: true, rootTitle: KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle, emptyViewType: .emptyFolder)
-
-        super.viewDidLoad()
-    }
-
-    override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
-        DispatchQueue.main.async {
-            completion(.success(self.sortFiles(self.activityFiles)), false, true)
-        }
-    }
-
-    override func getNewChanges() {
-        // No update needed
-    }
-
     override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
         // Set up activity header
-        guard let activity = activity else { return }
+        guard let activity = (viewModel as? RecentActivityFilesViewModel)?.activity else { return }
         headerView.activityListView.isHidden = false
         headerView.activityAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
 
-        let count = activityFiles.count
+        let count = viewModel.fileCount
         let isDirectory = activity.file?.isDirectory ?? false
 
         if let user = activity.user {
@@ -80,39 +121,13 @@ class RecentActivityFilesViewController: FileListViewController {
     }
 
     class func instantiate(activities: [FileActivity], driveFileManager: DriveFileManager) -> RecentActivityFilesViewController {
-        let viewController = instantiate(viewModel: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
-        viewController.activityFiles = activities.compactMap(\.file)
-        viewController.activity = activities.first
-        return viewController
-    }
-
-    // MARK: - Private methods
-
-    private func sortFiles(_ files: [File]) -> [File] {
-        return files.sorted { firstFile, secondFile -> Bool in
-            switch viewModel.sortType {
-            case .nameAZ:
-                return firstFile.name.lowercased() < secondFile.name.lowercased()
-            case .nameZA:
-                return firstFile.name.lowercased() > secondFile.name.lowercased()
-            case .older:
-                return firstFile.lastModifiedAt < secondFile.lastModifiedAt
-            case .newer:
-                return firstFile.lastModifiedAt > secondFile.lastModifiedAt
-            case .biggest:
-                return firstFile.size ?? 0 > secondFile.size ?? 0
-            case .smallest:
-                return firstFile.size ?? 0 < secondFile.size ?? 0
-            default:
-                return true
-            }
-        }
+        return instantiate(viewModel: RecentActivityFilesViewModel(driveFileManager: driveFileManager, activities: activities))
     }
 
     // MARK: - Swipe action collection view data source
 
     override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell, at indexPath: IndexPath) -> [SwipeCellAction]? {
-        if viewModel.getFile(at: indexPath.item)!.isTrashed {
+        guard !viewModel.getFile(at: indexPath)!.isTrashed else {
             return nil
         }
         return super.collectionView(collectionView, actionsFor: cell, at: indexPath)
@@ -120,24 +135,24 @@ class RecentActivityFilesViewController: FileListViewController {
 
     // MARK: - State restoration
 
-    override func encodeRestorableState(with coder: NSCoder) {
-        super.encodeRestorableState(with: coder)
+    /* override func encodeRestorableState(with coder: NSCoder) {
+         super.encodeRestorableState(with: coder)
 
-        coder.encode(activity?.id ?? 0, forKey: "ActivityId")
-        coder.encode(activityFiles.map(\.id), forKey: "Files")
-    }
+         coder.encode(activity?.id ?? 0, forKey: "ActivityId")
+         coder.encode(activityFiles.map(\.id), forKey: "Files")
+     }
 
-    override func decodeRestorableState(with coder: NSCoder) {
-        super.decodeRestorableState(with: coder)
+     override func decodeRestorableState(with coder: NSCoder) {
+         super.decodeRestorableState(with: coder)
 
-        let activityId = coder.decodeInteger(forKey: "ActivityId")
-        let activityFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-        navigationItem.title = KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle
-        if driveFileManager != nil {
-            let realm = driveFileManager.getRealm()
-            activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)
-            activityFiles = activityFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
-            forceRefresh()
-        }
-    }*/
+         let activityId = coder.decodeInteger(forKey: "ActivityId")
+         let activityFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
+         navigationItem.title = KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle
+         if driveFileManager != nil {
+             let realm = driveFileManager.getRealm()
+             activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)
+             activityFiles = activityFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+             forceRefresh()
+         }
+     } */
 }
