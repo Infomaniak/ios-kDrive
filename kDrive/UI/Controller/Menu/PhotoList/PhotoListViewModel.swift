@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
 import kDriveCore
+import kDriveResources
 import RealmSwift
 
 class PhotoListViewModel: ManagedFileListViewModel {
@@ -62,6 +63,8 @@ class PhotoListViewModel: ManagedFileListViewModel {
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         super.init(configuration: Configuration(showUploadingFiles: false,
+                                                selectAllSupported: false,
+                                                rootTitle: KDriveResourcesStrings.Localizable.allPictures,
                                                 emptyViewType: .noImages),
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
