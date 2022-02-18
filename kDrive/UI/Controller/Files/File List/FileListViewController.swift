@@ -178,7 +178,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func bindFileListViewModel() {
-        viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, isEmpty, shouldReload in
+        viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, moved, isEmpty, shouldReload in
             self?.showEmptyView(!isEmpty)
             guard !shouldReload else {
                 self?.collectionView.reloadData()
@@ -190,6 +190,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self?.collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 0) })
                 self?.collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 0) })
                 self?.collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 0) })
+                for (source, target) in moved {
+                    self?.collectionView.moveItem(at: IndexPath(item: source, section: 0), to: IndexPath(item: target, section: 0))
+                }
             }
             // Reload corners (outside of batch to prevent incompatible operations)
             self?.reloadFileCorners(insertions: insertions, deletions: deletions)
