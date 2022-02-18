@@ -306,7 +306,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 self.presentingParent?.present(floatingPanelViewController, animated: true)
             }
         case .sendCopy:
-            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
+            if file.isMostRecentDownloaded {
                 presentShareSheet(from: indexPath)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
@@ -356,7 +356,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .openWith:
             let view = collectionView.cellForItem(at: indexPath)?.frame ?? .zero
-            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
+            if file.isMostRecentDownloaded {
                 FileActionsHelper.instance.openWith(file: file, from: view, in: collectionView, delegate: self)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
@@ -445,7 +445,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
         case .download:
-            if file.isDownloaded && !file.isLocalVersionOlderThanRemote() {
+            if file.isMostRecentDownloaded {
                 save(file: file)
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel

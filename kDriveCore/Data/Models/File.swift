@@ -324,6 +324,10 @@ public class File: Object, Codable {
         return FileManager.default.fileExists(atPath: localUrl.path)
     }
 
+    public var isMostRecentDownloaded: Bool {
+        return isDownloaded && !isLocalVersionOlderThanRemote()
+    }
+
     public var isOfficeFile: Bool {
         return onlyOffice || onlyOfficeConvertExtension != nil
     }
