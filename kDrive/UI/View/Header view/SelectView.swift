@@ -46,6 +46,7 @@ class SelectView: UIView {
 
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var actionsView: UIStackView!
+    var buttonTint: UIColor?
 
     weak var delegate: FilesHeaderViewDelegate?
 
@@ -62,6 +63,7 @@ class SelectView: UIView {
             actionButton = MultipleSelectionActionButton(action: action) { [weak self] in
                 self?.delegate?.multipleSelectionActionButtonPressed(actionButton)
             }
+            actionButton.tintColor = buttonTint
             actionsView.addArrangedSubview(actionButton)
         }
     }
