@@ -42,8 +42,13 @@ class UnmanagedFileListViewModel: FileListViewModel {
         fatalError("init(driveFileManager:currentDirectory:) has not been implemented")
     }
 
+    override func sortingChanged() {
+        forceRefresh()
+    }
+
     override func forceRefresh() {
         files.removeAll()
+        onFileListUpdated?([], [], [], false, true)
         super.forceRefresh()
     }
 
