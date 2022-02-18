@@ -20,6 +20,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+@MainActor
 protocol SelectSwitchDriveDelegate: SelectDelegate, UIViewController {}
 extension SelectSwitchDriveDelegate {
     func didSelect(option: Selectable) {
@@ -41,7 +42,7 @@ extension SelectSwitchDriveDelegate {
             Task {
                 // Download root files
                 try await currentDriveFileManager.initRoot()
-                await (tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
+                (tabBarController as? SwitchDriveDelegate)?.didSwitchDriveFileManager(newDriveFileManager: currentDriveFileManager)
             }
         }
     }
