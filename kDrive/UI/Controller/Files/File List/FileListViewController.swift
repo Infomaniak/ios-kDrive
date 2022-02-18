@@ -188,6 +188,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 self?.collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 0) })
                 self?.collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 0) })
             }
+            // Reload corners (outside of batch to prevent incompatible operations)
+            self?.reloadFileCorners(insertions: insertions, deletions: deletions)
         }
 
         headerView?.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
@@ -460,7 +462,28 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
+    func reloadCorners(insertions: [Int], deletions: [Int], count: Int) {
+        var modifications = Set<IndexPath>()
+        if insertions.contains(0) {
+            modifications.insert(IndexPath(row: 1, section: 0))
+        }
+        if deletions.contains(0) {
+            modifications.insert(IndexPath(row: 0, section: 0))
+        }
+        if insertions.contains(count - 1) {
+            modifications.insert(IndexPath(row: count - 2, section: 0))
+        }
+        if deletions.contains(count) {
+            modifications.insert(IndexPath(row: count - 1, section: 0))
+        }
+        collectionView.reloadItems(at: Array(modifications))
+    }
+
     // MARK: - Private methods
+
+    private func reloadFileCorners(insertions: [Int], deletions: [Int]) {
+        reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.fileCount)
+    }
 
     private func updateEmptyView(_ emptyBackground: EmptyTableView) {
         if UIDevice.current.orientation.isPortrait {
