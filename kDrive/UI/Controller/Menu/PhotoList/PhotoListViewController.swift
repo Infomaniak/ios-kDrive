@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import Combine
 import DifferenceKit
 import InfomaniakCore
 import kDriveCore
@@ -25,22 +26,12 @@ import UIKit
 
 extension PhotoSortMode: Selectable {}
 
-class PhotoListViewController: MultipleSelectionViewController {
-    @IBOutlet weak var headerView: UIView!
+class PhotoListViewController: FileListViewController {
+    @IBOutlet weak var headerView: SelectView!
     @IBOutlet weak var headerImageView: UIImageView!
     @IBOutlet weak var headerTitleLabel: IKLabel!
-    @IBOutlet weak var selectButtonsStackView: UIStackView!
-    @IBOutlet weak var moveButton: UIButton!
-    @IBOutlet weak var deleteButton: UIButton!
-    @IBOutlet weak var moreButton: UIButton!
-    var rightBarButtonItems: [UIBarButtonItem]?
-    var leftBarButtonItems: [UIBarButtonItem]?
-
-    var driveFileManager: DriveFileManager!
 
     private var isLargeTitle = true
-    private var floatingPanelViewController: DriveFloatingPanelController?
-    private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
 
     private var numberOfColumns: Int {
         return UIDevice.current.orientation.isLandscape ? 5 : 3
@@ -53,30 +44,25 @@ class PhotoListViewController: MultipleSelectionViewController {
         return isLargeTitle ? .default : .lightContent
     }
 
-    private lazy var viewModel = PhotoListViewModel(driveFileManager: driveFileManager)
+    private var photoListViewModel: PhotoListViewModel {
+        return viewModel as! PhotoListViewModel
+    }
 
     override func viewDidLoad() {
-        super.viewDidLoad()
-
         headerTitleLabel.textColor = .white
+        headerView.buttonTint = .white
 
-        // Set up collection view
-        collectionView.delegate = self
-        collectionView.dataSource = self
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: footerIdentifier)
         collectionView.register(UINib(nibName: "PhotoSectionHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
-        (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = true
-
-        // Set up multiple selection gesture
-        /* let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-         collectionView.addGestureRecognizer(longPressGesture) */
-
-        bindViewModel()
+        selectView = headerView
+        selectView?.delegate = self
+        super.viewDidLoad()
     }
 
-    private func bindViewModel() {
-        viewModel.onReloadWithChangeset = { [weak self] changeset, completion in
+    override func bindFileListViewModel() {
+        super.bindFileListViewModel()
+        photoListViewModel.onReloadWithChangeset = { [weak self] changeset, completion in
             self?.collectionView.reload(using: changeset, interrupt: { $0.changeCount > Endpoint.itemsPerPage }, setData: completion)
             self?.showEmptyView(.noImages)
         }
@@ -86,7 +72,7 @@ class PhotoListViewController: MultipleSelectionViewController {
         super.viewWillAppear(animated)
 
         setPhotosNavigationBar()
-        navigationItem.title = KDriveResourcesStrings.Localizable.allPictures
+        navigationItem.title = viewModel.title
         applyGradient(view: headerImageView)
         Task {
             try await viewModel.loadFiles()
@@ -108,16 +94,7 @@ class PhotoListViewController: MultipleSelectionViewController {
         navigationController?.navigationBar.tintColor = nil
     }
 
-    @IBAction func searchButtonPressed(_ sender: Any) {
-        // present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager, filters: Filters(fileType: .image)), animated: true)
-    }
-
-    @IBAction func sortButtonPressed(_ sender: UIBarButtonItem) {
-        /* let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>.instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode, headerTitle: KDriveResourcesStrings.Localizable.sortTitle, delegate: self)
-         present(floatingPanelViewController, animated: true) */
-    }
-
-    func applyGradient(view: UIImageView) {
+    private func applyGradient(view: UIImageView) {
         let gradient = CAGradientLayer()
         let bounds = view.frame
         gradient.frame = bounds
@@ -159,54 +136,44 @@ class PhotoListViewController: MultipleSelectionViewController {
         }
     }
 
-    class func instantiate() -> PhotoListViewController {
-        return Storyboard.menu.instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
+    override static func instantiate(viewModel: FileListViewModel) -> Self {
+        let viewController = Storyboard.menu.instantiateViewController(withIdentifier: "PhotoListViewController") as! PhotoListViewController
+        viewController.viewModel = viewModel
+        return viewController as! Self
     }
 
     // MARK: - Multiple selection
 
-    /* override func toggleMultipleSelection() {
-         if selectionMode {
-             navigationItem.title = nil
-             selectButtonsStackView.isHidden = false
-             headerTitleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
-             collectionView.allowsMultipleSelection = true
-             navigationController?.navigationBar.prefersLargeTitles = false
-             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(cancelMultipleSelection))
-             navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
-             navigationItem.rightBarButtonItems = nil
-             let generator = UIImpactFeedbackGenerator()
-             generator.prepare()
-             generator.impactOccurred()
-         } else {
-             deselectAllChildren()
-             selectButtonsStackView.isHidden = true
-             headerTitleLabel.style = .header2
-             headerTitleLabel.textColor = .white
-             scrollViewDidScroll(collectionView)
-             collectionView.allowsMultipleSelection = false
-             navigationController?.navigationBar.prefersLargeTitles = true
-             navigationItem.title = KDriveResourcesStrings.Localizable.allPictures
-             navigationItem.leftBarButtonItem = nil
-             navigationItem.rightBarButtonItems = rightBarButtonItems
-         }
-         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
-     }
+    override func toggleMultipleSelection(_ on: Bool) {
+        if on {
+            navigationItem.title = nil
+            headerView.actionsView.isHidden = false
+            headerTitleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
+            collectionView.allowsMultipleSelection = true
+            navigationController?.navigationBar.prefersLargeTitles = false
+            let generator = UIImpactFeedbackGenerator()
+            generator.prepare()
+            generator.impactOccurred()
+        } else {
+            headerView.actionsView.isHidden = true
+            headerTitleLabel.style = .header2
+            headerTitleLabel.textColor = .white
+            collectionView.allowsMultipleSelection = false
+            navigationController?.navigationBar.prefersLargeTitles = true
+            navigationItem.title = viewModel.title
+            scrollViewDidScroll(collectionView)
+        }
+        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+    }
 
-     override func setSelectedCells() {
-         if selectionMode && !selectedItems.isEmpty {
-             for i in 0..<sections.count {
-                 let pictures = sections[i].elements
-                 for j in 0..<pictures.count where selectedItems.contains(pictures[j]) {
-                     collectionView.selectItem(at: IndexPath(row: j, section: i), animated: false, scrollPosition: .centeredVertically)
-                 }
-             }
-         }
-     }*/
+    func updateTitle(_ count: Int) {
+        headerTitleLabel.text = KDriveResourcesStrings.Localizable.fileListMultiSelectedTitle(count)
+    }
 
     // MARK: - Scroll view delegate
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let viewModel = photoListViewModel
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait ?? true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         headerView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
@@ -233,43 +200,22 @@ class PhotoListViewController: MultipleSelectionViewController {
         let contentHeight = scrollView.contentSize.height - collectionView.frame.size.height
         if scrollPosition > contentHeight {
             Task {
-               try await viewModel.loadNextPageIfNeeded()
+                try await viewModel.loadNextPageIfNeeded()
             }
         }
     }
-    /*
-     // MARK: - State restoration
 
-     override func encodeRestorableState(with coder: NSCoder) {
-         super.encodeRestorableState(with: coder)
+    // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
-         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-     }
-
-     override func decodeRestorableState(with coder: NSCoder) {
-         super.decodeRestorableState(with: coder)
-
-         let driveId = coder.decodeInteger(forKey: "DriveId")
-         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
-             return
-         }
-         self.driveFileManager = driveFileManager
-         forceRefresh()
-     }*/
-}
-
-// MARK: - UICollectionViewDelegate, UICollectionViewDataSource
-
-extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return viewModel.sections.count
+        return photoListViewModel.sections.count
     }
 
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.sections[section].elements.count
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return photoListViewModel.sections[section].elements.count
     }
 
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: HomeLastPicCollectionViewCell.self, for: indexPath)
         cell.configureWith(file: viewModel.getFile(at: indexPath)!, roundedCorners: false, selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
         return cell
@@ -283,7 +229,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         if section == 0 {
             return .zero
         } else {
@@ -291,7 +237,7 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionFooter {
             let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: footerIdentifier, for: indexPath)
             let indicator = UIActivityIndicatorView(style: .medium)
@@ -312,34 +258,16 @@ extension PhotoListViewController: UICollectionViewDelegate, UICollectionViewDat
         } else {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! PhotoSectionHeaderView
             if indexPath.section > 0 {
-                let yearMonth = viewModel.sections[indexPath.section].model
+                let yearMonth = photoListViewModel.sections[indexPath.section].model
                 headerView.titleLabel.text = yearMonth.formattedDate
             }
             return headerView
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
-            viewModel.multipleSelectionViewModel?.didSelectFile(viewModel.getFile(at: indexPath)!, at: indexPath)
-        } else {
-            viewModel.didSelectFile(at: indexPath)
-        }
-    }
+    // MARK: - UICollectionViewDelegateFlowLayout
 
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        guard viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true,
-              let file = viewModel.getFile(at: indexPath) else {
-            return
-        }
-        viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath)
-    }
-}
-
-// MARK: - UICollectionViewDelegateFlowLayout
-
-extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         guard let collectionViewLayout = collectionViewLayout as? UICollectionViewFlowLayout else {
             return .zero
         }
@@ -347,13 +275,16 @@ extension PhotoListViewController: UICollectionViewDelegateFlowLayout {
         let cellWidth = width / CGFloat(numberOfColumns)
         return CGSize(width: floor(cellWidth), height: floor(cellWidth))
     }
-}
 
-// MARK: - Photo sort delegate
+    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 4
+    }
 
-extension PhotoListViewController: SelectDelegate {
-    func didSelect(option: Selectable) {
-        guard let mode = option as? PhotoSortMode else { return }
-        // sortMode = mode
+    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 4
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return .zero
     }
 }
