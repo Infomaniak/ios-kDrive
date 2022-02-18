@@ -44,7 +44,7 @@ enum ControllerPresentationType {
 }
 
 @MainActor
-class FileListViewModel {
+class FileListViewModel: SelectDelegate {
     /// deletions, insertions, modifications, isEmpty, shouldReload
     typealias FileListUpdatedCallback = ([Int], [Int], [Int], Bool, Bool) -> Void
     typealias DriveErrorCallback = (DriveError) -> Void
@@ -231,6 +231,20 @@ class FileListViewModel {
         }
     }
 
+    func listStyleButtonPressed() {
+        FileListOptions.instance.currentStyle = listStyle == .grid ? .list : .grid
+        MatomoUtils.track(eventWithCategory: .displayList, name: FileListOptions.instance.currentStyle == .grid ? "viewGrid" : "viewList")
+    }
+
+    func sortButtonPressed() {
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>
+            .instantiatePanel(options: configuration.sortingOptions,
+                              selectedOption: sortType,
+                              headerTitle: KDriveResourcesStrings.Localizable.sortTitle,
+                              delegate: self)
+        onPresentViewController?(.modal, floatingPanelViewController, true)
+    }
+
     func sortingChanged() {}
 
     func showLoadingIndicatorIfNeeded() {
@@ -339,6 +353,14 @@ class FileListViewModel {
             try await loadActivities()
         }
     }
+
+    // MARK: - Sort options delegate
+
+    func didSelect(option: Selectable) {
+        guard let type = option as? SortType else { return }
+        MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
+        FileListOptions.instance.currentSortType = type
+    }
 }
 
 class ManagedFileListViewModel: FileListViewModel {
@@ -400,7 +422,7 @@ extension Publisher where Self.Failure == Never {
 
 extension AnyRealmCollection {
     func filesSorted(by sortType: SortType) -> Results<Element> {
-        return self.sorted(by: [
+        return sorted(by: [
             SortDescriptor(keyPath: \File.type, ascending: true),
             SortDescriptor(keyPath: \File.visibility, ascending: false),
             sortType.value.sortDescriptor
