@@ -112,6 +112,12 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         onPresentQuickActionPanel?([file], .trash)
     }
 
+    override func didSelect(option: Selectable) {
+        guard let type = option as? SortType else { return }
+        sortType = type
+        sortingChanged()
+    }
+
     private func restoreTrashedFiles(_ restoredFiles: [File], in directory: File? = nil) async {
         do {
             try await withThrowingTaskGroup(of: Void.self) { group in
