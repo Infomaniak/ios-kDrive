@@ -686,17 +686,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     // MARK: - Files header view delegate
 
     func sortButtonPressed() {
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>.instantiatePanel(options: viewModel.configuration.sortingOptions,
-                                                                                                             selectedOption: viewModel.sortType,
-                                                                                                             headerTitle: KDriveResourcesStrings.Localizable.sortTitle,
-                                                                                                             delegate: self)
-        present(floatingPanelViewController, animated: true)
+        viewModel.sortButtonPressed()
     }
 
     func gridButtonPressed() {
-        // Toggle grid/list
-        FileListOptions.instance.currentStyle = viewModel.listStyle == .grid ? .list : .grid
-        // Collection view will be reloaded via the observer
+        viewModel.listStyleButtonPressed()
     }
 
     #if !ISEXTENSION
@@ -773,16 +767,6 @@ extension FileListViewController: FileCellDelegate {
             return
         }
         viewModel.didTapMore(at: indexPath)
-    }
-}
-
-// MARK: - Sort options delegate
-
-extension FileListViewController: SelectDelegate {
-    func didSelect(option: Selectable) {
-        guard let type = option as? SortType else { return }
-        // Collection view will be reloaded via the observer
-        FileListOptions.instance.currentSortType = type
     }
 }
 
