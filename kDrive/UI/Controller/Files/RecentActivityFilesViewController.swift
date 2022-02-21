@@ -59,6 +59,22 @@ class RecentActivityFilesViewModel: UnmanagedFileListViewModel {
         }
     }
 
+    func encodeRestorableState(with coder: NSCoder) {
+        coder.encode(activity?.id ?? 0, forKey: "ActivityId")
+        coder.encode(files.map(\.id), forKey: "Files")
+    }
+
+    func decodeRestorableState(with coder: NSCoder) {
+        let activityId = coder.decodeInteger(forKey: "ActivityId")
+        let fileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
+
+        let realm = driveFileManager.getRealm()
+        activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)?.freeze()
+        files = fileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+
+        forceRefresh()
+    }
+
     private func sort(files: [File]) -> [File] {
         return files.sorted { firstFile, secondFile -> Bool in
             switch sortType {
@@ -85,10 +101,14 @@ class RecentActivityFilesViewController: FileListViewController {
     override class var storyboard: UIStoryboard { Storyboard.files }
     override class var storyboardIdentifier: String { "RecentActivityFilesViewController" }
 
+    private var activityViewModel: RecentActivityFilesViewModel! {
+        return viewModel as? RecentActivityFilesViewModel
+    }
+
     override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
         // Set up activity header
-        guard let activity = (viewModel as? RecentActivityFilesViewModel)?.activity else { return }
+        guard let activity = activityViewModel?.activity else { return }
         headerView.activityListView.isHidden = false
         headerView.activityAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
 
@@ -135,24 +155,15 @@ class RecentActivityFilesViewController: FileListViewController {
 
     // MARK: - State restoration
 
-    /* override func encodeRestorableState(with coder: NSCoder) {
-         super.encodeRestorableState(with: coder)
+    override func encodeRestorableState(with coder: NSCoder) {
+        super.encodeRestorableState(with: coder)
 
-         coder.encode(activity?.id ?? 0, forKey: "ActivityId")
-         coder.encode(activityFiles.map(\.id), forKey: "Files")
-     }
+        activityViewModel?.encodeRestorableState(with: coder)
+    }
 
-     override func decodeRestorableState(with coder: NSCoder) {
-         super.decodeRestorableState(with: coder)
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
 
-         let activityId = coder.decodeInteger(forKey: "ActivityId")
-         let activityFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
-         navigationItem.title = KDriveResourcesStrings.Localizable.fileDetailsActivitiesTitle
-         if driveFileManager != nil {
-             let realm = driveFileManager.getRealm()
-             activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)
-             activityFiles = activityFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
-             forceRefresh()
-         }
-     } */
+        activityViewModel?.decodeRestorableState(with: coder)
+    }
 }
