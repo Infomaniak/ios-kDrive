@@ -38,6 +38,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         return files.allSatisfy(\.isFavorite)
     }
 
+    private var success = true
     private var downloadedArchiveUrl: URL?
     private var currentArchiveId: String?
     private var downloadError: DriveError?
@@ -61,7 +62,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
 
     override func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         let action = actions[indexPath.row]
-        var success = true
+        success = true
         var addAction = true
         let group = DispatchGroup()
 
@@ -79,7 +80,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 group.enter()
                 driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
                     if error != nil {
-                        success = false
+                        self.success = false
                     }
                     if let file = self.driveFileManager.getCachedFile(id: file.id) {
                         self.changedFiles?.append(file)
@@ -90,24 +91,14 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         case .favorite:
             let isFavorite = filesAreFavorite
             addAction = !isFavorite
+            group.enter()
             Task {
                 do {
-                    try await withThrowingTaskGroup(of: Void.self) { group in
-                        for file in files where file.capabilities.canUseFavorite {
-                            group.addTask {
-                                try await self.driveFileManager.setFavorite(file: file, favorite: !isFavorite)
-                                await MainActor.run {
-                                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                                        self.changedFiles?.append(file)
-                                    }
-                                }
-                            }
-                        }
-                        try await group.waitForAll()
-                    }
+                    try await toggleFavorite(isFavorite: isFavorite)
                 } catch {
-                    // success = false
+                    success = false
                 }
+                group.leave()
             }
         case .folderColor:
             group.enter()
@@ -129,7 +120,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
                 colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
                 colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
-                    success = isSuccess
+                    self.success = isSuccess
                     group.leave()
                 }
                 dismiss(animated: true) {
@@ -155,10 +146,10 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                         switch result {
                         case .success(let archiveUrl):
                             self.downloadedArchiveUrl = archiveUrl
-                            success = true
+                            self.success = true
                         case .failure(let error):
                             self.downloadError = error
-                            success = false
+                            self.success = false
                         }
                         group.leave()
                     }
@@ -186,30 +177,12 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 }
             }
         case .duplicate:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [unowned self, fileIds = files.map(\.id)] selectedFolder in
-                if self.files.count > Constants.bulkActionThreshold {
-                    addAction = false // Prevents the snackbar to be displayed
-                    let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedFolder.id)
-                    Task {
-                        let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
-                        let tabBarController = presentingViewController as? MainTabViewController
-                        let navigationController = tabBarController?.selectedViewController as? UINavigationController
-                        (navigationController?.topViewController as? FileListViewController)?.bulkObservation(action: .copy, response: response)
-                    }
-                } else {
-                    Task {
-                        do {
-                            try await withThrowingTaskGroup(of: Void.self) { group in
-                                for file in files {
-                                    group.addTask {
-                                        _ = try await self.driveFileManager.apiFetcher.copy(file: file, to: selectedFolder)
-                                    }
-                                }
-                                try await group.waitForAll()
-                            }
-                        } catch {
-                            // success = false
-                        }
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [unowned self, fileIds = files.map(\.id)] selectedDirectory in
+                Task {
+                    do {
+                        try await self.copy(fileIds: fileIds, to: selectedDirectory)
+                    } catch {
+                        self.success = false
                     }
                 }
                 group.leave()
@@ -222,7 +195,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
 
         group.notify(queue: .main) {
-            if success {
+            if self.success {
                 if action == .offline && addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.filter { !$0.isDirectory }.count))
                 } else if action == .favorite && addAction {
@@ -274,17 +247,41 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    // MARK: - Collection view data source
+    // MARK: - Private methods
 
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch Self.sections[indexPath.section] {
-        case .actions:
-            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
-            let action = actions[indexPath.item]
-            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
-            return cell
-        default:
-            return super.collectionView(collectionView, cellForItemAt: indexPath)
+    private func toggleFavorite(isFavorite: Bool) async throws {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for file in files where file.capabilities.canUseFavorite {
+                group.addTask {
+                    try await self.driveFileManager.setFavorite(file: file, favorite: !isFavorite)
+                    await MainActor.run {
+                        if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                            self.changedFiles?.append(file)
+                        }
+                    }
+                }
+            }
+            try await group.waitForAll()
+        }
+    }
+
+    private func copy(fileIds: [Int], to selectedDirectory: File) async throws {
+        if files.count > Constants.bulkActionThreshold {
+            // addAction = false // Prevents the snackbar to be displayed
+            let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedDirectory.id)
+            let response = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: action)
+            let tabBarController = presentingViewController as? MainTabViewController
+            let navigationController = tabBarController?.selectedViewController as? UINavigationController
+            (navigationController?.topViewController as? FileListViewController)?.bulkObservation(action: .copy, response: response)
+        } else {
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for file in files {
+                    group.addTask {
+                        _ = try await self.driveFileManager.apiFetcher.copy(file: file, to: selectedDirectory)
+                    }
+                }
+                try await group.waitForAll()
+            }
         }
     }
 
@@ -307,6 +304,20 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             } catch {
                 completion(.failure(error as? DriveError ?? .unknownError))
             }
+        }
+    }
+
+    // MARK: - Collection view data source
+
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        switch Self.sections[indexPath.section] {
+        case .actions:
+            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
+            let action = actions[indexPath.item]
+            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+            return cell
+        default:
+            return super.collectionView(collectionView, cellForItemAt: indexPath)
         }
     }
 }
