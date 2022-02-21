@@ -148,7 +148,7 @@ class FileListViewModel: SelectDelegate {
     var configuration: Configuration
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        fatalError(#function + " needs to be overridden")
+        Logging.functionOverrideError(#function)
     }
 
     init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
@@ -238,7 +238,10 @@ class FileListViewModel: SelectDelegate {
         onPresentViewController?(.modal, floatingPanelViewController, true)
     }
 
-    func sortingChanged() {}
+    /// Called when sortType is updated
+    func sortingChanged() {
+        // Implemented by subclasses
+    }
 
     func showLoadingIndicatorIfNeeded() {
         // Show refresh control if loading is slow
@@ -263,9 +266,13 @@ class FileListViewModel: SelectDelegate {
         isRefreshIndicatorHidden = true
     }
 
-    func loadActivities() async throws {}
+    func loadActivities() async throws {
+        // Implemented by subclasses
+    }
 
-    func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {}
+    func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
+        // Implemented by subclasses
+    }
 
     func didSelectFile(at indexPath: IndexPath) {
         guard let file: File = getFile(at: indexPath) else { return }
@@ -310,11 +317,11 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getFile(at indexPath: IndexPath) -> File? {
-        fatalError(#function + " needs to be overridden")
+        Logging.functionOverrideError(#function)
     }
 
     func getAllFiles() -> [File] {
-        fatalError(#function + " needs to be overridden")
+        Logging.functionOverrideError(#function)
     }
 
     func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {

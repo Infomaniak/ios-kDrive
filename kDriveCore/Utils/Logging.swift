@@ -47,6 +47,10 @@ public enum Logging {
         }
         fatalError("Failed creating realm \(error.localizedDescription)")
     }
+    
+    public static func functionOverrideError(_ function: String) -> Never {
+        fatalError(function + " needs to be overridden")
+    }
 
     private static func initLogger() {
         DDOSLogger.sharedInstance.logFormatter = LogFormatter()
