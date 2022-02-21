@@ -58,6 +58,9 @@ class FileListBarButton: UIBarButtonItem {
         case .searchFilters:
             self.init(image: KDriveResourcesAsset.filter.image, style: .plain, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.filtersTitle
+        case .photoSort:
+            self.init(image: KDriveResourcesAsset.filter.image, style: .plain, target: target, action: action)
+            accessibilityLabel = KDriveResourcesStrings.Localizable.sortTitle
         }
         self.type = type
     }
