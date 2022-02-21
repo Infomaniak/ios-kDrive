@@ -168,9 +168,9 @@ final class DriveApiTests: XCTestCase {
         let dropBox = try await currentApiFetcher.getDropBox(directory: dropBoxDir)
         XCTAssertTrue(dropBox.capabilities.hasPassword, "Dropxbox should have a password")
         XCTAssertTrue(dropBox.capabilities.hasValidity, "Dropbox should have a validity")
-        XCTAssertNotNil(dropBox.capabilities.validity.date, "Validity shouldn't be nil")
+        XCTAssertNotNil(dropBox.capabilities.validity.date, TestsMessages.notNil("validity"))
         XCTAssertTrue(dropBox.capabilities.hasSizeLimit, "Dropbox should have a size limit")
-        XCTAssertNotNil(dropBox.capabilities.size.limit, "Size limit shouldn't be nil")
+        XCTAssertNotNil(dropBox.capabilities.size.limit, TestsMessages.notNil("size limit"))
         tearDownTest(directory: testDirectory)
     }
 
@@ -260,13 +260,13 @@ final class DriveApiTests: XCTestCase {
         let settings = FileAccessSettings(message: "Test update user access", right: .read, userIds: [Env.inviteUserId])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let user = response.users.first { $0.id == Env.inviteUserId }?.access
-        XCTAssertNotNil(user, "User shouldn't be nil")
+        XCTAssertNotNil(user, TestsMessages.notNil("user"))
         if let user = user {
             let response = try await currentApiFetcher.updateUserAccess(to: testDirectory, user: user, right: .manage)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedUser = fileAccess.users.first { $0.id == Env.inviteUserId }
-            XCTAssertNotNil(updatedUser, "User shouldn't be nil")
+            XCTAssertNotNil(updatedUser, TestsMessages.notNil("user"))
             XCTAssertEqual(updatedUser?.right, .manage, "User permission should be equal to 'manage'")
         }
         tearDownTest(directory: testDirectory)
@@ -277,7 +277,7 @@ final class DriveApiTests: XCTestCase {
         let settings = FileAccessSettings(message: "Test remove user access", right: .read, userIds: [Env.inviteUserId])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let user = response.users.first { $0.id == Env.inviteUserId }?.access
-        XCTAssertNotNil(user, "User shouldn't be nil")
+        XCTAssertNotNil(user, TestsMessages.notNil("user"))
         if let user = user {
             let response = try await currentApiFetcher.removeUserAccess(to: testDirectory, user: user)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
@@ -293,13 +293,13 @@ final class DriveApiTests: XCTestCase {
         let settings = FileAccessSettings(message: "Test update invitation access", right: .read, emails: [Env.inviteMail])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let invitation = response.emails.first { $0.id == Env.inviteMail }?.access
-        XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
+        XCTAssertNotNil(invitation, TestsMessages.notNil("invitation"))
         if let invitation = invitation {
             let response = try await currentApiFetcher.updateInvitationAccess(drive: proxyDrive, invitation: invitation, right: .write)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedInvitation = fileAccess.invitations.first { $0.email == Env.inviteMail }
-            XCTAssertNotNil(updatedInvitation, "Invitation shouldn't be nil")
+            XCTAssertNotNil(updatedInvitation, TestsMessages.notNil("invitation"))
             XCTAssertEqual(updatedInvitation?.right, .write, "Invitation right should be equal to 'write'")
         }
         tearDownTest(directory: testDirectory)
@@ -310,7 +310,7 @@ final class DriveApiTests: XCTestCase {
         let settings = FileAccessSettings(message: "Test delete invitation", right: .read, emails: [Env.inviteMail])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let invitation = response.emails.first { $0.id == Env.inviteMail }?.access
-        XCTAssertNotNil(invitation, "Invitation shouldn't be nil")
+        XCTAssertNotNil(invitation, TestsMessages.notNil("invitation"))
         if let invitation = invitation {
             let response = try await currentApiFetcher.deleteInvitation(drive: proxyDrive, invitation: invitation)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
@@ -330,13 +330,13 @@ final class DriveApiTests: XCTestCase {
         let settings = FileAccessSettings(message: "Test update team access", right: .read, teamIds: [Env.inviteTeam])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let team = response.teams.first { $0.id == Env.inviteTeam }?.access
-        XCTAssertNotNil(team, "Team shouldn't be nil")
+        XCTAssertNotNil(team, TestsMessages.notNil("team"))
         if let team = team {
             let response = try await currentApiFetcher.updateTeamAccess(to: testDirectory, team: team, right: .write)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             let fileAccess = try await currentApiFetcher.access(for: testDirectory)
             let updatedTeam = fileAccess.teams.first { $0.id == Env.inviteTeam }
-            XCTAssertNotNil(updatedTeam, "Team shouldn't be nil")
+            XCTAssertNotNil(updatedTeam, TestsMessages.notNil("team"))
             XCTAssertEqual(updatedTeam?.right, .write, "Team right should be equal to 'write'")
         }
         tearDownTest(directory: testDirectory)
@@ -347,7 +347,7 @@ final class DriveApiTests: XCTestCase {
         let settings = FileAccessSettings(message: "Test remove team access", right: .read, teamIds: [Env.inviteTeam])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let team = response.teams.first { $0.id == Env.inviteTeam }?.access
-        XCTAssertNotNil(team, "Invitation shouldn't be nil")
+        XCTAssertNotNil(team, TestsMessages.notNil("invitation"))
         if let team = team {
             let response = try await currentApiFetcher.removeTeamAccess(to: testDirectory, team: team)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
@@ -372,21 +372,22 @@ final class DriveApiTests: XCTestCase {
 
     func testAddComment() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Add comment")
-        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
-        XCTAssertEqual(comment.body, "Testing comment", "Comment body should be equal to 'Testing comment'")
+        let body = "Test add comment"
+        let comment = try await currentApiFetcher.addComment(to: file, body: body)
+        XCTAssertEqual(comment.body, body, "Comment body should be equal to 'Testing comment'")
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
-        XCTAssertNotNil(comments.first { $0.id == comment.id }, "Comment should exist")
+        XCTAssertNotNil(comments.first { $0.id == comment.id }, TestsMessages.notNil("comment"))
         tearDownTest(directory: testDirectory)
     }
 
     func testLikeComment() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Like comment")
-        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Test like comment")
         let response = try await currentApiFetcher.likeComment(file: file, liked: false, comment: comment)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
-            XCTFail("Comment should exist")
+            XCTFail(TestsMessages.notNil("comment"))
             tearDownTest(directory: testDirectory)
             return
         }
@@ -396,7 +397,7 @@ final class DriveApiTests: XCTestCase {
 
     func testDeleteComment() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Delete comment")
-        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Test delete comment")
         let response = try await currentApiFetcher.deleteComment(file: file, comment: comment)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
@@ -406,13 +407,13 @@ final class DriveApiTests: XCTestCase {
 
     func testEditComment() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Edit comment")
-        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
-        let editedBody = "Edited comment"
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Test comment")
+        let editedBody = "Test edited comment"
         let response = try await currentApiFetcher.editComment(file: file, body: editedBody, comment: comment)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let editedComment = comments.first(where: { $0.id == comment.id }) else {
-            XCTFail("Edited comment should exist")
+            XCTFail(TestsMessages.notNil("edited comment"))
             tearDownTest(directory: testDirectory)
             return
         }
@@ -422,15 +423,15 @@ final class DriveApiTests: XCTestCase {
 
     func testAnswerComment() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Answer comment")
-        let comment = try await currentApiFetcher.addComment(to: file, body: "Testing comment")
+        let comment = try await currentApiFetcher.addComment(to: file, body: "Test answer comment")
         let answer = try await currentApiFetcher.answerComment(file: file, body: "Answer comment", comment: comment)
         let comments = try await currentApiFetcher.comments(file: file, page: 1)
         guard let fetchedComment = comments.first(where: { $0.id == comment.id }) else {
-            XCTFail("Comment should exist")
+            XCTFail(TestsMessages.notNil("comment"))
             tearDownTest(directory: testDirectory)
             return
         }
-        XCTAssertNotNil(fetchedComment.responses?.first { $0.id == answer.id }, "Answer should exist")
+        XCTAssertNotNil(fetchedComment.responses?.first { $0.id == answer.id }, TestsMessages.notNil("answer"))
         tearDownTest(directory: testDirectory)
     }
 
