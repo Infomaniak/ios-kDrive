@@ -93,7 +93,8 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.titleLabel.text = uploadFile.name
         setStatusFor(uploadFile: uploadFile)
 
-        if let progress = progress, let currentFileId = currentFileId {
+        if let progress = progress, let currentFileId = currentFileId,
+           uploadFile.error == nil || uploadFile.error == .taskRescheduled {
             updateProgress(fileId: currentFileId, progress: progress, animated: false)
         }
 
