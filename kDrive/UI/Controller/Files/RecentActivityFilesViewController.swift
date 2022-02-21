@@ -41,10 +41,6 @@ class RecentActivityFilesViewModel: UnmanagedFileListViewModel {
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.homeRootFile)
     }
 
-    override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {}
-
-    override func loadActivities() async throws {}
-
     override func sortingChanged() {
         let sortedFiles = sort(files: files)
         let stagedChangeset = StagedChangeset(source: files, target: sortedFiles)
