@@ -37,6 +37,8 @@ class UploadQueueViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.hideBackButtonText()
+
         tableView.register(cellView: UploadTableViewCell.self)
 
         retryButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonRetry
