@@ -58,37 +58,31 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                 self.moreComing = activities.count == Endpoint.itemsPerPage
                 self.page += 1
 
-                DispatchQueue.global(qos: .utility).async {
-                    let mergedActivities = self.mergeAndClean(activities: activities)
-                    self.mergedActivities.append(contentsOf: mergedActivities)
-
-                    guard !self.invalidated else {
-                        return
-                    }
-                    Task {
-                        await self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
-                    }
-                }
+                display(activities: activities)
                 // Update cache
                 if self.page == 1 {
                     self.driveFileManager.setLocalRecentActivities(activities)
                 }
             } catch {
-                DispatchQueue.global(qos: .utility).async {
-                    let activities = self.driveFileManager.getLocalRecentActivities()
-                    self.mergedActivities = self.mergeAndClean(activities: activities)
+                let activities = self.driveFileManager.getLocalRecentActivities()
+                self.empty = activities.isEmpty
+                self.moreComing = false
 
-                    self.empty = self.mergedActivities.isEmpty
-                    self.moreComing = false
-                    guard !self.invalidated else {
-                        return
-                    }
-                    Task {
-                        await self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
-                    }
-                }
+                display(activities: activities)
             }
             self.loading = false
+        }
+    }
+
+    private func display(activities: [FileActivity]) {
+        DispatchQueue.global(qos: .utility).async {
+            let mergedActivities = self.mergeAndClean(activities: activities)
+            self.mergedActivities.append(contentsOf: mergedActivities)
+
+            guard !self.invalidated else {
+                return
+            }
+            self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
         }
     }
 
