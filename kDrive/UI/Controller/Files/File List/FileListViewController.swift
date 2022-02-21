@@ -754,7 +754,9 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         viewModel.multipleSelectionViewModel?.actionButtonPressed(action: button.action)
     }
 
-    func removeFilterButtonPressed(_ filter: Filterable) {}
+    func removeFilterButtonPressed(_ filter: Filterable) {
+        // Overriden in subclasses
+    }
 }
 
 // MARK: - Collection view delegate flow layout
