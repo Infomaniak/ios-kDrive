@@ -66,7 +66,7 @@ class PhotoListViewModel: ManagedFileListViewModel {
                                                 selectAllSupported: false,
                                                 rootTitle: KDriveResourcesStrings.Localizable.allPictures,
                                                 emptyViewType: .noImages,
-                                                rightBarButtons: [.search, .searchFilters]),
+                                                rightBarButtons: [.search, .photoSort]),
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm()
@@ -135,11 +135,20 @@ class PhotoListViewModel: ManagedFileListViewModel {
             let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager, filters: Filters(fileType: .image))
             let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
             onPresentViewController?(.modal, searchViewController, true)
-        } else if type == .searchFilters {
-            // TODO: Add filtering
+        } else if type == .photoSort {
+            let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>
+                .instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode,
+                                  headerTitle: KDriveResourcesStrings.Localizable.sortTitle,
+                                  delegate: self)
+            onPresentViewController?(.modal, floatingPanelViewController, true)
         } else {
             super.barButtonPressed(type: type)
         }
+    }
+
+    override func didSelect(option: Selectable) {
+        guard let mode = option as? PhotoSortMode else { return }
+        sortMode = mode
     }
 
     private func updateSort() {
