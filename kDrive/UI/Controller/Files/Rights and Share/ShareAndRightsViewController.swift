@@ -81,10 +81,10 @@ class ShareAndRightsViewController: UIViewController {
         guard driveFileManager != nil else { return }
         Task {
             do {
-                let fileAccess = try await driveFileManager.apiFetcher.access(for: file)
-                self.fileAccess = fileAccess
-                self.fileAccessElements = fileAccess.elements
-                self.ignoredEmails = fileAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
+                let fetchedAccess = try await driveFileManager.apiFetcher.access(for: file)
+                self.fileAccess = fetchedAccess
+                self.fileAccessElements = fetchedAccess.elements
+                self.ignoredEmails = fetchedAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
                 self.tableView.reloadData()
             } catch {
                 DDLogError("Cannot get shared file: \(error)")
