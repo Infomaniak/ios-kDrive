@@ -119,7 +119,7 @@ final class DriveFileManagerTests: XCTestCase {
         let testDirectory = try await setUpTest(testName: "Share link")
         _ = try await DriveFileManagerTests.driveFileManager.createShareLink(for: testDirectory)
         let response = try await DriveFileManagerTests.driveFileManager.removeShareLink(for: testDirectory)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
     }
 
@@ -230,7 +230,7 @@ final class DriveFileManagerTests: XCTestCase {
         let editedCategory = try await DriveFileManagerTests.driveFileManager.edit(category: category, name: category.name, color: "#314159")
         XCTAssertEqual(categoryId, editedCategory.id, "Category id should be the same")
         let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
     }
 
     func testCategoriesAndFiles() async throws {
@@ -243,7 +243,7 @@ final class DriveFileManagerTests: XCTestCase {
         let fileWithoutCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
         XCTAssertFalse(fileWithoutCategory!.categories.contains { $0.categoryId == category.id }, "File should not contain category")
         let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)
-        XCTAssertTrue(response, "API should return true")
+        XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
     }
 
