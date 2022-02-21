@@ -186,6 +186,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
+        navigationItem.hideBackButtonText()
+
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
