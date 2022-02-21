@@ -37,11 +37,6 @@ public class AlertTextViewController: AlertViewController {
         self.init(title: title, message: attributedText, action: action, hasCancelButton: hasCancelButton, destructive: destructive, loading: loading, handler: handler, cancelHandler: cancelHandler)
     }
 
-    public convenience init(title: String, message: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
-        let attributedText = NSAttributedString(string: message)
-        self.init(title: title, message: attributedText, action: action, hasCancelButton: hasCancelButton, destructive: destructive, loading: loading, handler: handler, cancelHandler: cancelHandler)
-    }
-
     /**
      Creates a new alert with text content.
      - Parameters:
@@ -55,16 +50,6 @@ public class AlertTextViewController: AlertViewController {
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
     public init(title: String, message: NSAttributedString, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() async -> Void)?, cancelHandler: (() -> Void)? = nil) {
-        let label = IKLabel()
-        label.attributedText = message
-        label.numberOfLines = 0
-        label.style = .body1
-        label.sizeToFit()
-        super.init(title: title, action: action, hasCancelButton: hasCancelButton, destructive: destructive, loading: loading, handler: handler, cancelHandler: cancelHandler)
-        contentView = label
-    }
-
-    public init(title: String, message: NSAttributedString, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
         let label = IKLabel()
         label.attributedText = message
         label.numberOfLines = 0

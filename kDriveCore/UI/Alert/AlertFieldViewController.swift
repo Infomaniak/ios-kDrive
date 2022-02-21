@@ -83,10 +83,6 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
         self.init(title: title, label: placeholder, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
     }
 
-    public convenience init(title: String, placeholder: String?, text: String? = nil, action: String, loading: Bool = false, handler: ((String) -> Void)?, cancelHandler: (() -> Void)? = nil) {
-        self.init(title: title, label: placeholder, placeholder: placeholder, text: text, action: action, loading: loading, handler: handler, cancelHandler: cancelHandler)
-    }
-
     /**
      Creates a new alert with text field.
      - Parameters:
