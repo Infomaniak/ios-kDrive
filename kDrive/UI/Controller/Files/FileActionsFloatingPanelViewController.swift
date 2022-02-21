@@ -458,22 +458,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .move:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: file.parent?.freeze(), fileToMove: file.id, disabledDirectoriesSelection: [file.parent ?? driveFileManager.getCachedRootFile()]) { [unowned self] selectedFolder in
-                let frozenParent = file.parent?.freezeIfNeeded()
-                Task {
-                    do {
-                        let (response, _) = try await driveFileManager.move(file: file, to: selectedFolder)
-                        UIConstants.showCancelableSnackBar(
-                            message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, selectedFolder.name),
-                            cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
-                            cancelableResponse: response,
-                            parentFile: frozenParent,
-                            driveFileManager: driveFileManager)
-                        // Close preview
-                        if self.presentingParent is PreviewViewController {
-                            self.presentingParent?.navigationController?.popViewController(animated: true)
-                        }
-                    } catch {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
+                FileActionsHelper.instance.move(file: file, to: selectedFolder, driveFileManager: driveFileManager) { success in
+                    // Close preview
+                    if success,
+                       self.presentingParent is PreviewViewController {
+                        self.presentingParent?.navigationController?.popViewController(animated: true)
                     }
                 }
             }

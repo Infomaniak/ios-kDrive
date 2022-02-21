@@ -63,4 +63,29 @@ public class FileActionsHelper {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
         }
     }
+
+    public func move(file: File, to destinationDirectory: File, driveFileManager: DriveFileManager, completion: ((Bool) -> Void)? = nil) {
+        guard destinationDirectory.id != file.parentId else { return }
+        let frozenParent = file.parent?.freezeIfNeeded()
+        let frozenFile = file.freezeIfNeeded()
+        Task {
+            do {
+                let (cancelResponse, _) = try await driveFileManager.move(file: frozenFile, to: destinationDirectory)
+                DispatchQueue.main.async {
+                    UIConstants.showCancelableSnackBar(
+                        message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name),
+                        cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
+                        cancelableResponse: cancelResponse,
+                        parentFile: frozenParent,
+                        driveFileManager: driveFileManager)
+                    completion?(true)
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    completion?(false)
+                }
+            }
+        }
+    }
 }
