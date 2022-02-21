@@ -31,6 +31,7 @@ enum FileListBarButtonType {
     case search
     case emptyTrash
     case searchFilters
+    case photoSort
 }
 
 enum FileListQuickActionType {
