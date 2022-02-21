@@ -128,8 +128,6 @@ class PhotoListViewModel: ManagedFileListViewModel {
         currentPage = page
     }
 
-    override func loadActivities() async throws {}
-
     override func barButtonPressed(type: FileListBarButtonType) {
         if type == .search {
             let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager, filters: Filters(fileType: .image))
