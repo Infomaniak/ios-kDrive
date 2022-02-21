@@ -28,7 +28,13 @@ protocol SelectFolderDelegate: AnyObject {
 
 class SelectFolderViewModel: ConcreteFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
-        let configuration = FileListViewModel.Configuration(showUploadingFiles: false, isMultipleSelectionEnabled: false, rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle, emptyViewType: .emptyFolder)
+        let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile()
+        let configuration = FileListViewModel.Configuration(showUploadingFiles: false,
+                                                            isMultipleSelectionEnabled: false,
+                                                            rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle,
+                                                            emptyViewType: .emptyFolder,
+                                                            leftBarButtons: currentDirectory.id == DriveFileManager.constants.rootID ? [.cancel] : nil,
+                                                            rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil)
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
@@ -39,20 +45,11 @@ class SelectFolderViewController: FileListViewController {
     override class var storyboardIdentifier: String { "SelectFolderViewController" }
 
     @IBOutlet weak var selectFolderButton: UIButton!
-    @IBOutlet weak var addFolderButton: UIBarButtonItem!
 
     var disabledDirectoriesSelection = [Int]()
     var fileToMove: Int?
     weak var delegate: SelectFolderDelegate?
     var selectHandler: ((File) -> Void)?
-
-    var isModal: Bool {
-        let presentingIsModal = presentingViewController != nil
-        let presentingIsNavigation = navigationController?.presentingViewController?.presentedViewController == navigationController
-        let presentingIsTabBar = tabBarController?.presentingViewController is UITabBarController
-
-        return presentingIsModal || presentingIsNavigation || presentingIsTabBar
-    }
 
     override func viewDidLoad() {
         // Set configuration
@@ -63,17 +60,7 @@ class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
-        addFolderButton.isEnabled = viewModel.currentDirectory.capabilities.canCreateDirectory
-        addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
         selectFolderButton.isEnabled = !disabledDirectoriesSelection.contains(viewModel.currentDirectory.id) && (viewModel.currentDirectory.capabilities.canMoveInto || viewModel.currentDirectory.capabilities.canCreateFile)
-        if viewModel.currentDirectory.id == DriveFileManager.constants.rootID {
-            // Root directory: set back button if the view controller is presented modally
-            let viewControllersCount = navigationController?.viewControllers.count ?? 0
-            if isModal && viewControllersCount < 2 {
-                navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(closeButtonPressed))
-                navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
-            }
-        }
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager, startDirectory: File? = nil, fileToMove: Int? = nil, disabledDirectoriesSelection: [File] = [], delegate: SelectFolderDelegate? = nil, selectHandler: ((File) -> Void)? = nil) -> TitleSizeAdjustingNavigationController {
@@ -108,8 +95,16 @@ class SelectFolderViewController: FileListViewController {
 
     // MARK: - Actions
 
-    @objc func closeButtonPressed() {
-        dismiss(animated: true)
+    override func barButtonPressed(_ sender: FileListBarButton) {
+        if sender.type == .cancel {
+            dismiss(animated: true)
+        } else if sender.type == .addFolder {
+            MatomoUtils.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
+            let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: viewModel.currentDirectory, driveFileManager: viewModel.driveFileManager)
+            navigationController?.present(newFolderViewController, animated: true)
+        } else {
+            super.barButtonPressed(sender)
+        }
     }
 
     @IBAction func selectButtonPressed(_ sender: UIButton) {
@@ -123,12 +118,6 @@ class SelectFolderViewController: FileListViewController {
             // We are creating file, go back to file name
             navigationController?.popToRootViewController(animated: true)
         }
-    }
-
-    @IBAction func addFolderButtonPressed(_ sender: UIBarButtonItem) {
-        MatomoUtils.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
-        let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: viewModel.currentDirectory, driveFileManager: viewModel.driveFileManager)
-        navigationController?.present(newFolderViewController, animated: true)
     }
 
     // MARK: - Collection view data source
