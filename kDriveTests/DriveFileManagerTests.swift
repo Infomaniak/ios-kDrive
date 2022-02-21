@@ -43,12 +43,6 @@ final class DriveFileManagerTests: XCTestCase {
         return try await createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootDirectory)
     }
 
-    func setUpTest(testName: String, completion: @escaping (File) -> Void) {
-        Task {
-            try await completion(setUpTest(testName: testName))
-        }
-    }
-
     func tearDownTest(directory: File) {
         Task {
             _ = try await DriveFileManagerTests.driveFileManager.delete(file: directory)
@@ -63,12 +57,6 @@ final class DriveFileManagerTests: XCTestCase {
 
     func createTestDirectory(name: String, parentDirectory: File) async throws -> File {
         try await DriveFileManagerTests.driveFileManager.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true)
-    }
-
-    func createTestDirectory(name: String, parentDirectory: File, completion: @escaping (File) -> Void) {
-        Task {
-            try await completion(createTestDirectory(name: name, parentDirectory: parentDirectory))
-        }
     }
 
     func initOfficeFile(testName: String) async throws -> (File, File) {

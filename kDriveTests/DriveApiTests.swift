@@ -53,12 +53,6 @@ final class DriveApiTests: XCTestCase {
         return try await createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootDirectory)
     }
 
-    func setUpTest(testName: String, completion: @escaping (File) -> Void) {
-        Task {
-            try await completion(setUpTest(testName: testName))
-        }
-    }
-
     func tearDownTest(directory: File) {
         Task {
             _ = try await currentApiFetcher.delete(file: directory)
@@ -75,12 +69,6 @@ final class DriveApiTests: XCTestCase {
         try await currentApiFetcher.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true)
     }
 
-    func createTestDirectory(name: String, parentDirectory: File, completion: @escaping (File) -> Void) {
-        Task {
-            try await completion(createTestDirectory(name: name, parentDirectory: parentDirectory))
-        }
-    }
-
     func initDropbox(testName: String) async throws -> (File, File) {
         let testDirectory = try await setUpTest(testName: testName)
         let directory = try await createTestDirectory(name: "dropbox-\(Date())", parentDirectory: testDirectory)
@@ -89,37 +77,16 @@ final class DriveApiTests: XCTestCase {
         return (testDirectory, directory)
     }
 
-    func initDropbox(testName: String, completion: @escaping (File, File) -> Void) {
-        Task {
-            let (testDirectory, directory) = try await initDropbox(testName: testName)
-            completion(testDirectory, directory)
-        }
-    }
-
     func initOfficeFile(testName: String) async throws -> (File, File) {
         let testDirectory = try await setUpTest(testName: testName)
         let file = try await currentApiFetcher.createFile(in: testDirectory, name: "officeFile-\(Date())", type: "docx")
         return (testDirectory, file)
     }
 
-    func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
-        Task {
-            let (testDirectory, file) = try await initOfficeFile(testName: testName)
-            completion(testDirectory, file)
-        }
-    }
-
     func checkIfFileIsInDestination(file: File, directory: File) async throws {
         let (files, _) = try await currentApiFetcher.files(in: directory)
         let movedFile = files.contains { $0.id == file.id }
         XCTAssertTrue(movedFile, "File should be in destination")
-    }
-
-    func checkIfFileIsInDestination(file: File, directory: File, completion: @escaping () -> Void) {
-        Task {
-            try await checkIfFileIsInDestination(file: file, directory: directory)
-            completion()
-        }
     }
 
     // MARK: - Test methods
