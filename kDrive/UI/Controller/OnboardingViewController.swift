@@ -108,11 +108,12 @@ class OnboardingViewController: UIViewController {
     }
 
     @IBAction func signInButtonPressed(_ sender: Any) {
+        MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
         InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
-        MatomoUtils.track(eventWithCategory: .account, name: "create")
+        MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
         present(RegisterViewController.instantiateInNavigationController(delegate: self), animated: true)
     }
 
@@ -226,6 +227,7 @@ extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDa
 
 extension OnboardingViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
+        MatomoUtils.track(eventWithCategory: .account, name: "loggedIn")
         let previousAccount = AccountManager.instance.currentAccount
         signInButton.setLoading(true)
         registerButton.isEnabled = false
