@@ -290,75 +290,83 @@ class MultipleSelectionFileListViewModel {
     }
 
     public func performAndObserve(bulkAction: BulkAction) async {
+        isMultipleSelectionEnabled = false
         do {
-            isMultipleSelectionEnabled = false
-            let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
-
-            let message: String
-            let cancelMessage: String
-            switch bulkAction.action {
-            case .trash:
-                message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
-                cancelMessage = KDriveResourcesStrings.Localizable.allTrashActionCancelled
-            case .move:
-                message = KDriveResourcesStrings.Localizable.fileListMoveStartedSnackbar
-                cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-            case .copy:
-                message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
-                cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-            }
-            let progressSnack = UIConstants.showCancelableSnackBar(message: message,
-                                                                   cancelSuccessMessage: cancelMessage,
-                                                                   duration: .infinite,
-                                                                   cancelableResponse: cancelableResponse,
-                                                                   parentFile: currentDirectory,
-                                                                   driveFileManager: driveFileManager)
-
-            AccountManager.instance.mqService.observeActionProgress(self, actionId: cancelableResponse.id) { actionProgress in
-                DispatchQueue.main.async { [weak self] in
-                    switch actionProgress.progress.message {
-                    case .starting:
-                        break
-                    case .processing:
-                        switch bulkAction.action {
-                        case .trash:
-                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                        case .move:
-                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                        case .copy:
-                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                        }
-                        self?.notifyObserversForCurrentDirectory()
-                    case .done:
-                        switch bulkAction.action {
-                        case .trash:
-                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
-                        case .move:
-                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveDoneSnackbar
-                        case .copy:
-                            progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyDoneSnackbar
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            progressSnack?.dismiss()
-                        }
-                        self?.notifyObserversForCurrentDirectory()
-                    case .canceled:
-                        let message: String
-                        switch bulkAction.action {
-                        case .trash:
-                            message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
-                        case .move:
-                            message = KDriveResourcesStrings.Localizable.allFileMoveCancelled
-                        case .copy:
-                            message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-                        }
-                        UIConstants.showSnackBar(message: message)
-                        self?.notifyObserversForCurrentDirectory()
-                    }
-                }
-            }
+            let (actionId, progressSnackBar) = try await perform(bulkAction: bulkAction)
+            observeAction(id: actionId, ofType: bulkAction.action, using: progressSnackBar)
         } catch {
             DDLogError("Error while performing bulk action: \(error)")
+        }
+    }
+
+    private func perform(bulkAction: BulkAction) async throws -> (actionId: String, snackBar: IKSnackBar?) {
+        let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
+
+        let message: String
+        let cancelMessage: String
+        switch bulkAction.action {
+        case .trash:
+            message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
+            cancelMessage = KDriveResourcesStrings.Localizable.allTrashActionCancelled
+        case .move:
+            message = KDriveResourcesStrings.Localizable.fileListMoveStartedSnackbar
+            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
+        case .copy:
+            message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
+            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
+        }
+        let progressSnack = UIConstants.showCancelableSnackBar(message: message,
+                                                               cancelSuccessMessage: cancelMessage,
+                                                               duration: .infinite,
+                                                               cancelableResponse: cancelableResponse,
+                                                               parentFile: currentDirectory,
+                                                               driveFileManager: driveFileManager)
+        return (cancelableResponse.id, progressSnack)
+    }
+
+    private func observeAction(id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?) {
+        AccountManager.instance.mqService.observeActionProgress(self, actionId: id) { actionProgress in
+            DispatchQueue.main.async { [weak self] in
+                switch actionProgress.progress.message {
+                case .starting:
+                    break
+                case .processing:
+                    switch actionType {
+                    case .trash:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                    case .move:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                    case .copy:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                    }
+                    self?.notifyObserversForCurrentDirectory()
+                case .done:
+                    switch actionType {
+                    case .trash:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
+                    case .move:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveDoneSnackbar
+                    case .copy:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyDoneSnackbar
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        progressSnack?.dismiss()
+                    }
+                    self?.notifyObserversForCurrentDirectory()
+                case .canceled:
+                    let message: String
+                    switch actionType {
+                    case .trash:
+                        message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
+                    case .move:
+                        message = KDriveResourcesStrings.Localizable.allFileMoveCancelled
+                    case .copy:
+                        message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
+                    }
+                    UIConstants.showSnackBar(message: message)
+                    self?.notifyObserversForCurrentDirectory()
+                }
+            }
         }
     }
 
