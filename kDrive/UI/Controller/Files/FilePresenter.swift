@@ -84,10 +84,8 @@ class FilePresenter {
                             do {
                                 let response = try await driveFileManager.apiFetcher.forceAccess(to: file)
                                 if response {
-                                    await self.driveFloatingPanelController?.dismiss(animated: true)
-                                    await MainActor.run {
-                                        self.navigationController?.pushViewController(nextVC, animated: true)
-                                    }
+                                    self.driveFloatingPanelController?.dismiss(animated: true)
+                                    self.navigationController?.pushViewController(nextVC, animated: true)
                                 } else {
                                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
                                 }
