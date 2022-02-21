@@ -34,12 +34,14 @@ public struct FileAccessSettings: Encodable {
     public var teamIds: [Int]?
     public var userIds: [Int]?
 
+    private let allowedLanguageCodes = ["fr", "de", "it", "en", "es"]
+
     public init(message: String? = nil, right: UserPermission, emails: [String]? = nil, teamIds: [Int]? = nil, userIds: [Int]? = nil) {
-        var lang = "en"
-        if let languageCode = Locale.current.languageCode, ["fr", "de", "it", "en", "es"].contains(languageCode) {
-            lang = languageCode
+        if let languageCode = Locale.current.languageCode, allowedLanguageCodes.contains(languageCode) {
+            self.lang = languageCode
+        } else {
+            self.lang = "en"
         }
-        self.lang = lang
         self.message = message
         self.right = right
         self.emails = emails
