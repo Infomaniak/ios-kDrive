@@ -172,8 +172,8 @@ class InviteUserViewController: UIViewController {
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let fileId = coder.decodeInteger(forKey: "FileId")
         emails = coder.decodeObject(forKey: "Emails") as? [String] ?? []
-        let userIds = coder.decodeObject(forKey: "UserIds") as? [Int] ?? []
-        let teamIds = coder.decodeObject(forKey: "TeamIds") as? [Int] ?? []
+        let restoredUserIds = coder.decodeObject(forKey: "UserIds") as? [Int] ?? []
+        let restoredTeamIds = coder.decodeObject(forKey: "TeamIds") as? [Int] ?? []
         newPermission = UserPermission(rawValue: coder.decodeObject(forKey: "NewPermission") as? String ?? "") ?? .read
         message = coder.decodeObject(forKey: "Message") as? String ?? ""
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
@@ -182,7 +182,8 @@ class InviteUserViewController: UIViewController {
         self.driveFileManager = driveFileManager
         file = driveFileManager.getCachedFile(id: fileId)
         let realm = DriveInfosManager.instance.getRealm()
-        shareables = userIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) } + teamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
+        shareables = restoredUserIds.compactMap { DriveInfosManager.instance.getUser(id: $0, using: realm) }
+            + restoredTeamIds.compactMap { DriveInfosManager.instance.getTeam(id: $0, using: realm) }
         // Update UI
         setTitle()
         reloadInvited()
