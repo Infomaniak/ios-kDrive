@@ -402,7 +402,7 @@ public class File: Object, Codable {
     }
 
     public var isMostRecentDownloaded: Bool {
-        return isDownloaded && !isLocalVersionOlderThanRemote()
+        return isDownloaded && !isLocalVersionOlderThanRemote
     }
 
     public var isOfficeFile: Bool {

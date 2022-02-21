@@ -470,7 +470,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     func openWith(from: UIView) {
         let frame = from.convert(from.bounds, to: self.view)
         floatingPanelViewController.dismiss(animated: true)
-        if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
+        if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote {
             FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: self.view, delegate: self)
         } else {
             downloadToOpenWith { [weak self] in
