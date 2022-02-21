@@ -240,8 +240,8 @@ class FileDetailViewController: UIViewController {
         commentsInfo.isLoading = true
         Task {
             do {
-                let comments = try await driveFileManager.apiFetcher.comments(file: file, page: commentsInfo.page)
-                for comment in comments {
+                let pagedPictures = try await driveFileManager.apiFetcher.comments(file: file, page: commentsInfo.page)
+                for comment in pagedPictures {
                     self.comments.append(comment)
                     if let responses = comment.responses {
                         for response in responses {
@@ -252,7 +252,7 @@ class FileDetailViewController: UIViewController {
                 }
 
                 self.commentsInfo.page += 1
-                self.commentsInfo.hasNextPage = comments.count == Endpoint.itemsPerPage
+                self.commentsInfo.hasNextPage = pagedPictures.count == Endpoint.itemsPerPage
                 if self.currentTab == .comments {
                     self.reloadTableView()
                 }
@@ -355,6 +355,79 @@ class FileDetailViewController: UIViewController {
         viewController.driveFileManager = driveFileManager
         viewController.file = file
         return viewController
+    }
+
+    // MARK: - Private methods
+
+    private func delete(at indexPath: IndexPath, actionCompletion: (Bool) -> Void) async {
+        MatomoUtils.track(eventWithCategory: .comment, name: "delete")
+        let comment = self.comments[indexPath.row]
+        do {
+            let response = try await driveFileManager.apiFetcher.deleteComment(file: file, comment: comment)
+            if response {
+                let commentToDelete = comments[indexPath.row]
+                let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
+                    IndexPath(row: indexPath.row + index, section: indexPath.section)
+                }
+                if commentToDelete.isResponse {
+                    let parentComment = comments.first { $0.id == commentToDelete.parentId }
+                    parentComment?.responsesCount -= 1
+                }
+                comments.removeSubrange(indexPath.row...indexPath.row + commentToDelete.responsesCount)
+                if !comments.isEmpty {
+                    tableView.deleteRows(at: rowsToDelete, with: .automatic)
+                } else {
+                    tableView.reloadSections(IndexSet([1]), with: .automatic)
+                }
+                actionCompletion(true)
+            } else {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
+                actionCompletion(false)
+            }
+        } catch {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
+            actionCompletion(false)
+        }
+    }
+
+    private func edit(at indexPath: IndexPath, body: String, actionCompletion: (Bool) -> Void) async {
+        MatomoUtils.track(eventWithCategory: .comment, name: "edit")
+        let comment = self.comments[indexPath.row]
+        do {
+            let response = try await driveFileManager.apiFetcher.editComment(file: file, body: body, comment: comment)
+            if response {
+                comments[indexPath.row].body = body
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                actionCompletion(true)
+            } else {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+                actionCompletion(false)
+            }
+        } catch {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+            actionCompletion(false)
+        }
+    }
+
+    private func answer(at indexPath: IndexPath, reply: String, actionCompletion: (Bool) -> Void) async {
+        MatomoUtils.track(eventWithCategory: .comment, name: "answer")
+        let comment = self.comments[indexPath.row]
+        do {
+            let reply = try await driveFileManager.apiFetcher.answerComment(file: file, body: reply, comment: comment)
+            reply.isResponse = true
+            comments.insert(reply, at: indexPath.row + 1)
+            let parentComment = comments[indexPath.row]
+            if parentComment.responses != nil {
+                parentComment.responses?.insert(reply, at: 0)
+            } else {
+                parentComment.responses = [reply]
+            }
+            parentComment.responsesCount += 1
+            tableView.insertRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .automatic)
+            actionCompletion(true)
+        } catch {
+            actionCompletion(false)
+        }
     }
 
     // MARK: - State restoration
@@ -559,35 +632,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { _, _, completionHandler in
-            let comment = self.comments[indexPath.row]
-            let deleteAlert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: KDriveResourcesStrings.Localizable.modalCommentDeleteDescription, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
-                MatomoUtils.track(eventWithCategory: .comment, name: "delete")
-                do {
-                    let response = try await self.driveFileManager.apiFetcher.deleteComment(file: self.file, comment: comment)
-                    if response {
-                        let commentToDelete = self.comments[indexPath.row]
-                        let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
-                            return IndexPath(row: indexPath.row + index, section: indexPath.section)
-                        }
-                        if commentToDelete.isResponse {
-                            let parentComment = self.comments.first { $0.id == commentToDelete.parentId }
-                            parentComment?.responsesCount -= 1
-                        }
-                        self.comments.removeSubrange(indexPath.row...indexPath.row + commentToDelete.responsesCount)
-                        if !self.comments.isEmpty {
-                            self.tableView.deleteRows(at: rowsToDelete, with: .automatic)
-                        } else {
-                            self.tableView.reloadSections(IndexSet([1]), with: .automatic)
-                        }
-                        completionHandler(true)
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
-                        completionHandler(false)
-                    }
-                } catch {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
-                    completionHandler(false)
-                }
+            let deleteAlert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: KDriveResourcesStrings.Localizable.modalCommentDeleteDescription, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) { [weak self] in
+                await self?.delete(at: indexPath, actionCompletion: completionHandler)
             } cancelHandler: {
                 completionHandler(false)
             }
@@ -595,23 +641,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let editAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
-            let comment = self.comments[indexPath.row]
-            let editAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.modalCommentAddTitle, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { body in
-                MatomoUtils.track(eventWithCategory: .comment, name: "edit")
-                do {
-                    let response = try await self.driveFileManager.apiFetcher.editComment(file: self.file, body: body, comment: comment)
-                    if response {
-                        self.comments[indexPath.row].body = body
-                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
-                        completionHandler(true)
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
-                        completionHandler(false)
-                    }
-                } catch {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
-                    completionHandler(false)
-                }
+            let editAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.modalCommentAddTitle, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { [weak self] body in
+                await self?.edit(at: indexPath, body: body, actionCompletion: completionHandler)
             } cancelHandler: {
                 completionHandler(false)
             }
@@ -619,27 +650,8 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let answerAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
-            let answerAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { body in
-                MatomoUtils.track(eventWithCategory: .comment, name: "answer")
-                let comment = self.comments[indexPath.row]
-                Task {
-                    do {
-                        let reply = try await self.driveFileManager.apiFetcher.answerComment(file: self.file, body: body, comment: comment)
-                        reply.isResponse = true
-                        self.comments.insert(reply, at: indexPath.row + 1)
-                        let parentComment = self.comments[indexPath.row]
-                        if parentComment.responses != nil {
-                            parentComment.responses?.insert(reply, at: 0)
-                        } else {
-                            parentComment.responses = [reply]
-                        }
-                        parentComment.responsesCount += 1
-                        self.tableView.insertRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .automatic)
-                        completionHandler(true)
-                    } catch {
-                        completionHandler(false)
-                    }
-                }
+            let answerAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { [weak self] body in
+                await self?.answer(at: indexPath, reply: body, actionCompletion: completionHandler)
             } cancelHandler: {
                 completionHandler(false)
             }
