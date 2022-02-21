@@ -464,8 +464,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     func getViewModel(viewModelName: String, driveFileManager: DriveFileManager, currentDirectory: File?) -> FileListViewModel? {
         if let viewModelClass = Bundle.main.classNamed("kDrive.\(viewModelName)") as? FileListViewModel.Type {
-            let viewModel = viewModelClass.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-            return viewModel
+            return viewModelClass.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         } else {
             return nil
         }
@@ -611,11 +610,12 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     }
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
-        setUpHeaderView(headerView, isEmptyViewHidden: !viewModel.isEmpty)
-        self.headerView = headerView
-        selectView = headerView.selectView
-        return headerView
+        let dequeuedHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
+        setUpHeaderView(dequeuedHeaderView, isEmptyViewHidden: !viewModel.isEmpty)
+        
+        headerView = dequeuedHeaderView
+        selectView = dequeuedHeaderView.selectView
+        return dequeuedHeaderView
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -888,10 +888,9 @@ extension FileListViewController: UICollectionViewDropDelegate {
 
             if let indexPath = coordinator.destinationIndexPath,
                indexPath.item < viewModel.fileCount,
-               let file = viewModel.getFile(at: indexPath) {
-                if file.isDirectory && file.capabilities.canUpload {
-                    destinationDirectory = file
-                }
+               let file = viewModel.getFile(at: indexPath),
+               file.isDirectory && file.capabilities.canUpload {
+                destinationDirectory = file
             }
 
             droppableViewModel.performDrop(with: coordinator, in: collectionView, destinationDirectory: destinationDirectory)
