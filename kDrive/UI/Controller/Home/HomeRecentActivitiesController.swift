@@ -56,13 +56,13 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
                 let activities = try await driveFileManager.apiFetcher.recentActivity(drive: driveFileManager.drive, page: page)
                 self.empty = self.page == 1 && activities.isEmpty
                 self.moreComing = activities.count == Endpoint.itemsPerPage
-                self.page += 1
 
                 display(activities: activities)
                 // Update cache
                 if self.page == 1 {
                     self.driveFileManager.setLocalRecentActivities(activities)
                 }
+                self.page += 1
             } catch {
                 let activities = self.driveFileManager.getLocalRecentActivities()
                 self.empty = activities.isEmpty
