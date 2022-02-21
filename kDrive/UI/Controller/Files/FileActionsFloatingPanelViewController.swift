@@ -515,11 +515,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
-            let file = self.file.freezeIfNeeded()
-            let parent = self.file.parent?.freezeIfNeeded()
+            let frozenFile = self.file.freezeIfNeeded()
+            let frozenParent = self.file.parent?.freezeIfNeeded()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
                 do {
-                    let response = try await self.driveFileManager.delete(file: file)
+                    let response = try await self.driveFileManager.delete(file: frozenFile)
                     if let presentingParent = self.presentingParent {
                         // Update file list
                         try await (presentingParent as? FileListViewController)?.viewModel.loadActivities()
@@ -533,10 +533,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                     // Show snackbar
                     UIConstants.showCancelableSnackBar(
-                        message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(file.name),
+                        message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(frozenFile.name),
                         cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                         cancelableResponse: response,
-                        parentFile: parent,
+                        parentFile: frozenParent,
                         driveFileManager: self.driveFileManager)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
