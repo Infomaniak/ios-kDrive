@@ -23,15 +23,6 @@ public enum ApiRoutes {
 
     static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
 
-    static func upload(file: UploadFile) -> URL? {
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = ApiEnvironment.current.driveHost
-        components.path = "/drive/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload"
-        components.queryItems = file.queryItems
-        return components.url
-    }
-
     public static func mobileLogin(url: String) -> URL? {
         var components = URLComponents()
         components.scheme = "https"
