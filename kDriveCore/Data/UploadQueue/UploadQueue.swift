@@ -205,6 +205,7 @@ public class UploadQueue {
                 file.maxRetryCount = UploadFile.defaultMaxRetryCount
             }
             self.addToQueue(file: file, using: self.realm)
+            self.publishProgress(0, for: file.id)
         }
     }
 
@@ -217,7 +218,10 @@ public class UploadQueue {
                     file.maxRetryCount = UploadFile.defaultMaxRetryCount
                 }
             }
-            failedUploadFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
+            failedUploadFiles.forEach {
+                self.addToQueue(file: $0, using: self.realm)
+                self.publishProgress(0, for: $0.id)
+            }
         }
     }
 
