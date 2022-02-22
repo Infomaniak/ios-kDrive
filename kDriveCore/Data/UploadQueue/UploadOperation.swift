@@ -37,10 +37,15 @@ public class UploadTokenManager {
         } else if let userToken = AccountManager.instance.getTokenForUserId(userId),
                   let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
                   let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            driveFileManager.apiFetcher.getPublicUploadTokenWithToken(userToken, driveId: drive.id) { response, _ in
-                let token = response?.data
-                self.tokens[userId] = token
-                completionHandler(token)
+            driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive) { result in
+                switch result {
+                case .success(let token):
+                    self.tokens[userId] = token
+                    completionHandler(token)
+                case .failure(let error):
+                    DDLogError("[UploadOperation] Error while trying to get upload token: \(error)")
+                    completionHandler(nil)
+                }
                 self.lock.leave()
             }
         } else {
