@@ -173,7 +173,7 @@ public class UploadOperation: Operation {
             return
         }
 
-        let url = ApiRoutes.upload(file: file)!
+        let url = Endpoint.directUpload(file: file).url
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("Bearer \(token.token)", forHTTPHeaderField: "Authorization")
