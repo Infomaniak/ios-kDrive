@@ -36,6 +36,8 @@ class UploadQueueFoldersViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.hideBackButtonText()
+
         tableView.register(cellView: UploadFolderTableViewCell.self)
 
         setUpObserver()
