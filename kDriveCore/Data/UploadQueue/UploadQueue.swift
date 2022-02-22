@@ -163,7 +163,7 @@ public class UploadQueue {
     public func cancel(_ file: UploadFile) {
         dispatchQueue.async { [fileId = file.id, parentId = file.parentDirectoryId, userId = file.userId, driveId = file.driveId, realm = realm!] in
             let operation = self.operationsInQueue[fileId]
-            if !(operation?.isExecuting ?? true) {
+            if operation?.isExecuting != true {
                 if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
                     let publishedToDelete = UploadFile(value: toDelete)
                     publishedToDelete.error = .taskCancelled
