@@ -591,8 +591,11 @@ public extension Endpoint {
     }
 
     static func directUpload(file: UploadFile) -> Endpoint {
-        let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
-        return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
+        // let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
+        // return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
+        // Using upload v1 for now
+        let queryItems = file.queryItems + [fileMinimalWithQueryItem]
+        return Endpoint(path: "/drive/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
     }
 
     static func uploadStatus(file: AbstractFile, token: String) -> Endpoint {
