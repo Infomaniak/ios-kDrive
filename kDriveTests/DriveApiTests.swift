@@ -525,9 +525,13 @@ final class DriveApiTests: XCTestCase {
         let expectation = XCTestExpectation(description: testName)
 
         let token = currentApiFetcher.currentToken!
-        currentApiFetcher.getPublicUploadTokenWithToken(token, driveId: Env.driveId) { apiResponse, error in
-            XCTAssertNil(error, TestsMessages.noError)
-            XCTAssertNotNil(apiResponse?.data, TestsMessages.notNil("API Response"))
+        currentApiFetcher.getPublicUploadToken(with: token, drive: proxyDrive) { result in
+            switch result {
+            case .success:
+                break
+            case .failure:
+                XCTFail(TestsMessages.noError)
+            }
             expectation.fulfill()
         }
 

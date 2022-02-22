@@ -19,10 +19,6 @@
 import Foundation
 
 public enum ApiRoutes {
-    static let driveApiUrl = "https://\(ApiEnvironment.current.driveHost)/drive/"
-
-    static func getAllDrivesData() -> String { return "\(driveApiUrl)init?with=drives,users,teams,categories" }
-
     public static func mobileLogin(url: String) -> URL? {
         var components = URLComponents()
         components.scheme = "https"
@@ -30,9 +26,5 @@ public enum ApiRoutes {
         components.path = "/v3/mobile_login"
         components.queryItems = [URLQueryItem(name: "url", value: url)]
         return components.url
-    }
-
-    public static func getUploadToken(driveId: Int) -> String {
-        return "\(driveApiUrl)\(driveId)/file/1/upload/token"
     }
 }

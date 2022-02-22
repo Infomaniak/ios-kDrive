@@ -37,7 +37,7 @@ extension ApiFetcher {
     }
 
     func userDrives() async throws -> DriveResponse {
-        try await perform(request: authenticatedSession.request(ApiRoutes.getAllDrivesData())).data
+        try await perform(request: authenticatedRequest(.initData)).data
     }
 
     // MARK: - New request helpers
@@ -322,16 +322,20 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
-    public func getPublicUploadTokenWithToken(_ token: ApiToken, driveId: Int, completion: @escaping (ApiResponse<UploadToken>?, Error?) -> Void) {
-        let url = ApiRoutes.getUploadToken(driveId: driveId)
+    public func getPublicUploadToken(with token: ApiToken, drive: AbstractDrive, completion: @escaping (Result<UploadToken, Error>) -> Void) {
+        let url = Endpoint.uploadToken(drive: drive).url
         performAuthenticatedRequest(token: token) { token, error in
             if let token = token {
-                AF.request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])
-                    .responseDecodable(of: ApiResponse<UploadToken>.self, decoder: ApiFetcher.decoder) { response in
-                        self.handleResponse(response: response, completion: completion)
+                Task {
+                    do {
+                        let token: UploadToken = try await self.perform(request: AF.request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])).data
+                        completion(.success(token))
+                    } catch {
+                        completion(.failure(error))
                     }
+                }
             } else {
-                completion(nil, error)
+                completion(.failure(error ?? DriveError.unknownError))
             }
         }
     }
