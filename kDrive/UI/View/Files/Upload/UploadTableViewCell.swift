@@ -35,6 +35,7 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.isHidden = false
         cardContentView.editImage?.isHidden = true
         cardContentView.progressView.setInfomaniakStyle()
+        cardContentView.iconViewHeightConstraint.constant = 24
     }
 
     override func prepareForReuse() {
