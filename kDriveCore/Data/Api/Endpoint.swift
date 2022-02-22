@@ -23,7 +23,7 @@ import Foundation
 public enum ApiEnvironment {
     case prod, preprod
 
-    public static let current = ApiEnvironment.preprod
+    public static let current = ApiEnvironment.prod
 
     var host: String {
         switch self {
