@@ -116,6 +116,10 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = "fileActivityCollaborativeFolderUpdate"
         case .collaborativeFolderDelete:
             localizedKey = "fileActivityCollaborativeFolderDelete"
+        case .fileColorUpdate:
+            localizedKey = "fileDetailsActivityFileColorUpdate"
+        case .fileColorDelete:
+            localizedKey = "fileDetailsActivityFileColorDelete"
         case .none:
             localizedKey = "fileActivityUnknown"
         }
