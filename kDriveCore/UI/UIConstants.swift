@@ -61,13 +61,9 @@ public enum UIConstants {
                         _ = try? await driveFileManager.fileActivities(file: frozenParentFile, from: Int(now.timeIntervalSince1970))
                     }
 
-                    _ = await MainActor.run {
-                        UIConstants.showSnackBar(message: cancelSuccessMessage)
-                    }
+                    UIConstants.showSnackBar(message: cancelSuccessMessage)
                 } catch {
-                    _ = await MainActor.run {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
-                    }
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
         })
