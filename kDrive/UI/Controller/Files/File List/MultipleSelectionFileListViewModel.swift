@@ -326,7 +326,7 @@ class MultipleSelectionFileListViewModel {
 
     private func observeAction(id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?) {
         AccountManager.instance.mqService.observeActionProgress(self, actionId: id) { actionProgress in
-            DispatchQueue.main.async { [weak self] in
+            Task { [weak self] in
                 switch actionProgress.progress.message {
                 case .starting:
                     break

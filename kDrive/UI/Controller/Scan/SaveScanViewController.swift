@@ -74,7 +74,7 @@ class SaveScanViewController: SaveFileViewController {
         DispatchQueue.global(qos: .userInteractive).async { [self] in
             do {
                 try FileImportHelper.instance.upload(scan: scan, name: filename, scanType: scanType, in: selectedDirectory, drive: selectedDriveFileManager.drive)
-                DispatchQueue.main.async {
+                Task {
                     let parent = presentingViewController
                     footer.footerButton.setLoading(false)
                     dismiss(animated: true) {
@@ -84,7 +84,7 @@ class SaveScanViewController: SaveFileViewController {
                     }
                 }
             } catch {
-                DispatchQueue.main.async {
+                Task {
                     footer.footerButton.setLoading(false)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorUpload)
                 }

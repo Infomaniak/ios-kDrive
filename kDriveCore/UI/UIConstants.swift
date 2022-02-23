@@ -37,6 +37,7 @@ public enum UIConstants {
     public static let dropDelay = -1.0
 
     @discardableResult
+    @MainActor
     public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {
         let snackbar = IKSnackBar.make(message: message, duration: duration)
         if let action = action {
@@ -48,6 +49,7 @@ public enum UIConstants {
     }
 
     @discardableResult
+    @MainActor
     public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, duration: SnackBar.Duration = .lengthLong, cancelableResponse: CancelableResponse, parentFile: File?, driveFileManager: DriveFileManager) -> IKSnackBar? {
         let frozenParentFile = parentFile?.freezeIfNeeded()
         return UIConstants.showSnackBar(message: message, duration: duration, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {

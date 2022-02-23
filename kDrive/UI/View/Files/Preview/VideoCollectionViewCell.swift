@@ -76,7 +76,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                     }
                 } else {
-                    DispatchQueue.main.async {
+                    Task {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
                     }
                 }
