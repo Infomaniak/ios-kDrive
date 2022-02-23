@@ -234,7 +234,6 @@ class MultipleSelectionFileListViewModel {
     }
 
     func deleteSelectedItems() async {
-        // TODO: check this working
         if isSelectAllModeEnabled {
             await bulkDeleteAll()
         } else if selectedCount > Constants.bulkActionThreshold {
@@ -339,7 +338,7 @@ class MultipleSelectionFileListViewModel {
                     case .copy:
                         progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
                     }
-                    self?.notifyObserversForCurrentDirectory()
+                    self?.loadActivitiesForCurrentDirectory()
                 case .done:
                     switch actionType {
                     case .trash:
@@ -352,7 +351,7 @@ class MultipleSelectionFileListViewModel {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         progressSnack?.dismiss()
                     }
-                    self?.notifyObserversForCurrentDirectory()
+                    self?.loadActivitiesForCurrentDirectory()
                 case .canceled:
                     let message: String
                     switch actionType {
@@ -364,13 +363,16 @@ class MultipleSelectionFileListViewModel {
                         message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
                     }
                     UIConstants.showSnackBar(message: message)
-                    self?.notifyObserversForCurrentDirectory()
+                    self?.loadActivitiesForCurrentDirectory()
                 }
             }
         }
     }
 
-    private func notifyObserversForCurrentDirectory() {
-        driveFileManager.notifyObserversWith(file: currentDirectory)
+    private func loadActivitiesForCurrentDirectory() {
+        Task {
+            let _ = try await driveFileManager.fileActivities(file: currentDirectory)
+            driveFileManager.notifyObserversWith(file: currentDirectory)
+        }
     }
 }
