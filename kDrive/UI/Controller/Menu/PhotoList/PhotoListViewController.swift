@@ -174,7 +174,7 @@ class PhotoListViewController: FileListViewController {
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let viewModel = photoListViewModel
-        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait ?? true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
+        isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         headerView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
