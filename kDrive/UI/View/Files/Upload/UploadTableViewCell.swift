@@ -33,7 +33,9 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.iconView.isHidden = true
         cardContentView.progressView.isHidden = true
         cardContentView.iconView.isHidden = false
+        cardContentView.editImage?.isHidden = true
         cardContentView.progressView.setInfomaniakStyle()
+        cardContentView.iconViewHeightConstraint.constant = 24
     }
 
     override func prepareForReuse() {
@@ -76,7 +78,7 @@ class UploadTableViewCell: InsetTableViewCell {
             }
         }
     }
-    
+
     private func addThumbnail(image: UIImage) {
         DispatchQueue.main.async {
             self.cardContentView.iconView.layer.cornerRadius = UIConstants.imageCornerRadius
@@ -92,7 +94,8 @@ class UploadTableViewCell: InsetTableViewCell {
         cardContentView.titleLabel.text = uploadFile.name
         setStatusFor(uploadFile: uploadFile)
 
-        if let progress = progress, let currentFileId = currentFileId {
+        if let progress = progress, let currentFileId = currentFileId,
+           uploadFile.error == nil || uploadFile.error == .taskRescheduled {
             updateProgress(fileId: currentFileId, progress: progress, animated: false)
         }
 

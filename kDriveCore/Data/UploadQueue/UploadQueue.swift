@@ -163,7 +163,7 @@ public class UploadQueue {
     public func cancel(_ file: UploadFile) {
         dispatchQueue.async { [fileId = file.id, parentId = file.parentDirectoryId, userId = file.userId, driveId = file.driveId, realm = realm!] in
             let operation = self.operationsInQueue[fileId]
-            if !(operation?.isExecuting ?? true) {
+            if operation?.isExecuting != true {
                 if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
                     let publishedToDelete = UploadFile(value: toDelete)
                     publishedToDelete.error = .taskCancelled
@@ -205,6 +205,7 @@ public class UploadQueue {
                 file.maxRetryCount = UploadFile.defaultMaxRetryCount
             }
             self.addToQueue(file: file, using: self.realm)
+            self.publishProgress(0, for: file.id)
         }
     }
 
@@ -217,7 +218,10 @@ public class UploadQueue {
                     file.maxRetryCount = UploadFile.defaultMaxRetryCount
                 }
             }
-            failedUploadFiles.forEach { self.addToQueue(file: $0, using: self.realm) }
+            failedUploadFiles.forEach {
+                self.addToQueue(file: $0, using: self.realm)
+                self.publishProgress(0, for: $0.id)
+            }
         }
     }
 

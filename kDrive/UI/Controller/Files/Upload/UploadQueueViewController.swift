@@ -51,7 +51,7 @@ class UploadQueueViewController: UIViewController {
                 guard let self = self else { return }
                 self.progressForFileId[fileId] = progress
                 for cell in self.tableView.visibleCells {
-                    (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: progress)
+                    (cell as? UploadTableViewCell)?.updateProgress(fileId: fileId, progress: progress, animated: progress > 0)
                 }
             }
         }
