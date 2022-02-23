@@ -102,7 +102,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
                         self.setUpObservers()
                     }
                 } else {
-                    DispatchQueue.main.async {
+                    Task {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
                     }
                 }

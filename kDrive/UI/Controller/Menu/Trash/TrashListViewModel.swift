@@ -124,13 +124,10 @@ class TrashListViewModel: UnmanagedFileListViewModel {
                         _ = try await driveFileManager.apiFetcher.restore(file: file, in: directory)
                         // TODO: We don't have an alert for moving multiple files, snackbar is spammed until end
                         if let directory = directory {
-                            _ = await MainActor.run {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
-                            }
+                            await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
+
                         } else {
-                            _ = await MainActor.run {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
-                            }
+                            await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
                         }
                     }
                 }
@@ -219,10 +216,10 @@ private enum TrashViewModelHelper {
                 message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(definitelyDeletedFiles.count)
             }
 
-            UIConstants.showSnackBar(message: message)
+            await UIConstants.showSnackBar(message: message)
             return definitelyDeletedFiles
         } catch {
-            UIConstants.showSnackBar(message: error.localizedDescription)
+            await UIConstants.showSnackBar(message: error.localizedDescription)
             return []
         }
     }
