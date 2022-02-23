@@ -86,7 +86,7 @@ class ShareAndRightsViewController: UIViewController {
                 self.ignoredEmails = fetchedAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
                 self.tableView.reloadData()
             } catch {
-                DDLogError("Cannot get shared file: \(error)")
+                DDLogError("Cannot get file access: \(error)")
             }
         }
     }

@@ -91,7 +91,7 @@ public class FileActivity: Object, Decodable {
 
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let userContainer = try? container.nestedContainer(keyedBy: UserCodingKeys.self, forKey: .user) // Optional?
+        let userContainer = try? container.nestedContainer(keyedBy: UserCodingKeys.self, forKey: .user)
         id = try container.decode(Int.self, forKey: .id)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         rawAction = try container.decode(String.self, forKey: .action)

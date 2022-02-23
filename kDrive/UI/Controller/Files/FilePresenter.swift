@@ -79,15 +79,15 @@ class FilePresenter {
                 if driveFileManager.drive.isUserAdmin {
                     driveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = driveFloatingPanelController?.contentViewController as? AccessFileFloatingPanelViewController
-                    floatingPanelViewController?.actionHandler = { _ in
+                    floatingPanelViewController?.actionHandler = { [unowned self] _ in
                         floatingPanelViewController?.rightButton.setLoading(true)
-                        Task { [weak self] in
+                        Task {
                             do {
                                 let response = try await driveFileManager.apiFetcher.forceAccess(to: file)
                                 if response {
-                                    await self?.driveFloatingPanelController?.dismiss(animated: true)
-                                    await MainActor.run { [weak self] in
-                                        self?.navigationController?.pushViewController(nextVC, animated: true)
+                                    await self.driveFloatingPanelController?.dismiss(animated: true)
+                                    await MainActor.run {
+                                        self.navigationController?.pushViewController(nextVC, animated: true)
                                     }
                                 } else {
                                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
