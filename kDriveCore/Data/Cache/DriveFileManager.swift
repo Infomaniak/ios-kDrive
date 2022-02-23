@@ -334,7 +334,7 @@ public class DriveFileManager {
     }
 
     public func initRoot() async throws {
-        let root = try await file(id: DriveFileManager.constants.rootID)
+        let root = try await file(id: DriveFileManager.constants.rootID, forceRefresh: true)
         _ = try await files(in: root)
     }
 
