@@ -82,7 +82,9 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
             guard !self.invalidated else {
                 return
             }
-            self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
+            Task {
+                self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
+            }
         }
     }
 
