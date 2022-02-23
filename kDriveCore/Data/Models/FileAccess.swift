@@ -48,6 +48,10 @@ public struct FileAccessSettings: Encodable {
         self.teamIds = teamIds
         self.userIds = userIds
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case lang, message, right, emails, teamIds, userIds
+    }
 }
 
 public protocol FileAccessElement: Codable {

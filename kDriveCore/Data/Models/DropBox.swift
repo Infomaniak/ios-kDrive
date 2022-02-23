@@ -98,15 +98,15 @@ public enum BinarySize: Encodable {
 
 public struct DropBoxSettings: Encodable {
     /// Alias of the dropbox
-    public var alias: String?
+    @NullEncodable public var alias: String?
     /// Send an email when done
     public var emailWhenFinished: Bool
     /// Limit total size of folder (bytes)
-    public var limitFileSize: BinarySize?
+    @NullEncodable public var limitFileSize: BinarySize?
     /// Password for protecting the dropbox
     public var password: String?
     /// Date of validity
-    public var validUntil: Date?
+    @NullEncodable public var validUntil: Date?
 
     public init(alias: String?, emailWhenFinished: Bool, limitFileSize: BinarySize?, password: String?, validUntil: Date?) {
         self.alias = alias
