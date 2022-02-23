@@ -359,9 +359,10 @@ class FileDetailViewController: UIViewController {
 
     // MARK: - Private methods
 
+    @MainActor
     private func delete(at indexPath: IndexPath, actionCompletion: (Bool) -> Void) async {
         MatomoUtils.track(eventWithCategory: .comment, name: "delete")
-        let comment = self.comments[indexPath.row]
+        let comment = comments[indexPath.row]
         do {
             let response = try await driveFileManager.apiFetcher.deleteComment(file: file, comment: comment)
             if response {
@@ -390,9 +391,10 @@ class FileDetailViewController: UIViewController {
         }
     }
 
+    @MainActor
     private func edit(at indexPath: IndexPath, body: String, actionCompletion: (Bool) -> Void) async {
         MatomoUtils.track(eventWithCategory: .comment, name: "edit")
-        let comment = self.comments[indexPath.row]
+        let comment = comments[indexPath.row]
         do {
             let response = try await driveFileManager.apiFetcher.editComment(file: file, body: body, comment: comment)
             if response {
@@ -409,9 +411,10 @@ class FileDetailViewController: UIViewController {
         }
     }
 
+    @MainActor
     private func answer(at indexPath: IndexPath, reply: String, actionCompletion: (Bool) -> Void) async {
         MatomoUtils.track(eventWithCategory: .comment, name: "answer")
-        let comment = self.comments[indexPath.row]
+        let comment = comments[indexPath.row]
         do {
             let reply = try await driveFileManager.apiFetcher.answerComment(file: file, body: reply, comment: comment)
             reply.isResponse = true
