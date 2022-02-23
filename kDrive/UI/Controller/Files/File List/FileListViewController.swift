@@ -833,7 +833,7 @@ extension FileListViewController: FileCellDelegate {
                 viewModel.driveFileManager
             }
             set {
-                viewModel.driveFileManager = newValue
+                viewModel?.driveFileManager = newValue
             }
         }
 

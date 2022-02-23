@@ -158,7 +158,6 @@ class PhotoListViewModel: ManagedFileListViewModel {
     }
 
     private func insertAndSort(pictures: AnyRealmCollection<File>, replace: Bool) -> StagedChangeset<[PhotoListViewModel.Section]> {
-        let sortMode = self.sortMode
         var newSections = replace ? PhotoListViewModel.emptySections : sections
         for picture in pictures {
             let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedAt)

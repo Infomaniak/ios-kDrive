@@ -47,7 +47,7 @@ public enum Logging {
         }
         fatalError("Failed creating realm \(error.localizedDescription)")
     }
-    
+
     public static func functionOverrideError(_ function: String) -> Never {
         fatalError(function + " needs to be overridden")
     }
@@ -65,7 +65,7 @@ public enum Logging {
     private static func initNetworkLogging() {
         #if DEBUG
             if !Constants.isInExtension {
-                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
+                Atlantis.start(hostName: "127.0.0.1")
             }
         #endif
     }

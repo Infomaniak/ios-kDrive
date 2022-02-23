@@ -189,12 +189,12 @@ private enum TrashViewModelHelper {
                                        message: message,
                                        action: KDriveResourcesStrings.Localizable.buttonDelete,
                                        destructive: true, loading: true) {
-            let files = await deleteFiles(files, driveFileManager: driveFileManager, completion: completion)
+            let files = await deleteFiles(files, driveFileManager: driveFileManager)
             completion(files)
         }
     }
 
-    private static func deleteFiles(_ deletedFiles: [File], driveFileManager: DriveFileManager, completion: @escaping ([File]) -> Void) async -> [File] {
+    private static func deleteFiles(_ deletedFiles: [File], driveFileManager: DriveFileManager) async -> [File] {
         do {
             let definitelyDeletedFiles = try await withThrowingTaskGroup(of: File.self) { group -> [File] in
                 for file in deletedFiles {
