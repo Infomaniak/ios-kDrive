@@ -331,7 +331,7 @@ extension InviteUserViewController: FooterButtonDelegate {
         let settings = FileAccessSettings(message: message, right: newPermission, emails: emails, teamIds: teamIds, userIds: userIds)
         Task {
             let results = try await driveFileManager.apiFetcher.checkAccessChange(to: file, settings: settings)
-            let conflictList = results.filter(\.needChange)
+            let conflictList = results.filter { !$0.needChange }
             if conflictList.isEmpty {
                 self.shareAndDismiss()
             } else {

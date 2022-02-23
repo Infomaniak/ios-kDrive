@@ -343,14 +343,22 @@ extension ShareLinkSettingsViewController: RightsSelectionDelegate {
 
 extension ShareLinkSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
-        let right: ShareLinkPermission = getSetting(for: .optionPassword) ? .password : .public
+        let right: ShareLinkPermission?
+        // If we set a new password, set the right to "password"
+        if getSetting(for: .optionPassword) && !newPassword {
+            right = .password
+        } else if !getSetting(for: .optionPassword) {
+            right = .public
+        } else {
+            right = nil
+        }
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
         let canEdit = editRightValue == EditPermission.write.rawValue
         let settings = ShareLinkSettings(canComment: canEdit, canDownload: getSetting(for: .optionDownload), canEdit: canEdit, canSeeInfo: true, canSeeStats: true, password: password, right: right, validUntil: validUntil)
-        Task {
+        Task { [frozenFile = file.freeze()] in
             do {
-                let response = try await driveFileManager.updateShareLink(for: file, settings: settings)
+                let response = try await driveFileManager.updateShareLink(for: frozenFile, settings: settings)
                 if response {
                     self.navigationController?.popViewController(animated: true)
                 }

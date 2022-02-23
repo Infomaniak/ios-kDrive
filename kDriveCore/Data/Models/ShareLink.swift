@@ -67,12 +67,12 @@ public struct ShareLinkSettings: Encodable {
     /// The password if the permission password is set.
     public var password: String?
     /// Permission of the shared link: no restriction (public), access by authenticate and authorized user (inherit) or public but protected by a password (password).
-    public var right: ShareLinkPermission
+    public var right: ShareLinkPermission?
     /// Validity of the link.
     @NullEncodable
     public var validUntil: Date?
 
-    public init(canComment: Bool? = nil, canDownload: Bool? = nil, canEdit: Bool? = nil, canSeeInfo: Bool? = nil, canSeeStats: Bool? = nil, password: String? = nil, right: ShareLinkPermission, validUntil: Date? = nil) {
+    public init(canComment: Bool? = nil, canDownload: Bool? = nil, canEdit: Bool? = nil, canSeeInfo: Bool? = nil, canSeeStats: Bool? = nil, password: String? = nil, right: ShareLinkPermission?, validUntil: Date? = nil) {
         self.canComment = canComment
         self.canDownload = canDownload
         self.canEdit = canEdit

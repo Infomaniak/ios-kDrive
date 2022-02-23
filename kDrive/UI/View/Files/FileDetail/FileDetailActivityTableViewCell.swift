@@ -99,15 +99,15 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         case .commentCreate:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderCommentCreate" : "fileDetailsActivityFileCommentCreate"
         case .commentUpdate:
-            localizedKey = "fileDetailsActivityCommentUpdate"
+            localizedKey = "fileDetailsActivityFileCommentUpdate"
         case .commentDelete:
-            localizedKey = "fileDetailsActivityCommentDelete"
+            localizedKey = "fileDetailsActivityFileCommentDelete"
         case .commentLike:
-            localizedKey = "fileDetailsActivityCommentLike"
+            localizedKey = "fileDetailsActivityFileCommentLike"
         case .commentUnlike:
-            localizedKey = "fileDetailsActivityCommentUnlike"
+            localizedKey = "fileDetailsActivityFileCommentUnlike"
         case .commentResolve:
-            localizedKey = "fileDetailsActivityCommentResolve"
+            localizedKey = "fileDetailsActivityFileCommentResolve"
         case .fileMoveIn, .fileMoveOut:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderMove" : "fileDetailsActivityFileMove"
         case .collaborativeFolderCreate:
