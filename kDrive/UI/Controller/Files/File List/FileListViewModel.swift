@@ -113,7 +113,7 @@ class FileListViewModel: SelectDelegate {
     @Published var sortType: SortType
     @Published var listStyle: ListStyle
     @Published var title: String
-    @Published var isRefreshIndicatorHidden: Bool
+    @Published var isRefreshing: Bool
     @Published var currentLeftBarButtons: [FileListBarButtonType]?
     @Published var currentRightBarButtons: [FileListBarButtonType]?
 
@@ -157,7 +157,7 @@ class FileListViewModel: SelectDelegate {
         self.currentDirectory = currentDirectory
         self.sortType = FileListOptions.instance.currentSortType
         self.listStyle = FileListOptions.instance.currentStyle
-        self.isRefreshIndicatorHidden = true
+        self.isRefreshing = false
         self.isLoading = false
         self.currentLeftBarButtons = configuration.leftBarButtons
         self.currentRightBarButtons = configuration.rightBarButtons
@@ -248,8 +248,8 @@ class FileListViewModel: SelectDelegate {
         // Show refresh control if loading is slow
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
-            if self.isLoading && self.isRefreshIndicatorHidden {
-                self.isRefreshIndicatorHidden = false
+            if self.isLoading && !self.isRefreshing {
+                self.isRefreshing = false
             }
         }
     }
@@ -264,7 +264,7 @@ class FileListViewModel: SelectDelegate {
 
     func endRefreshing() {
         isLoading = false
-        isRefreshIndicatorHidden = true
+        isRefreshing = false
     }
 
     func loadActivities() async throws {

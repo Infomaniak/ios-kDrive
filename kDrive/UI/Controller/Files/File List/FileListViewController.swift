@@ -183,22 +183,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     func bindFileListViewModel() {
         viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, moved, isEmpty, shouldReload in
             self?.showEmptyView(!isEmpty)
-            guard !shouldReload else {
+            if shouldReload {
                 self?.collectionView.reloadData()
-                return
+            } else {
+                self?.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
             }
-            self?.collectionView.performBatchUpdates {
-                // Always apply updates in the following order: deletions, insertions, then modifications.
-                // Handling insertions before deletions may result in unexpected behavior.
-                self?.collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 0) })
-                self?.collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 0) })
-                self?.collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 0) })
-                for (source, target) in moved {
-                    self?.collectionView.moveItem(at: IndexPath(item: source, section: 0), to: IndexPath(item: target, section: 0))
-                }
-            }
-            // Reload corners (outside of batch to prevent incompatible operations)
-            self?.reloadFileCorners(insertions: insertions, deletions: deletions)
         }
 
         headerView?.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
@@ -208,39 +197,24 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             self?.navigationItem.title = title
         }
 
-        viewModel.$isRefreshIndicatorHidden.receiveOnMain(store: &bindStore) { [weak self] isRefreshIndicatorHidden in
-            guard let self = self,
-                  self.refreshControl.isRefreshing == isRefreshIndicatorHidden
-            else { return }
-
-            if isRefreshIndicatorHidden {
-                self.refreshControl.endRefreshing()
-            } else {
-                self.refreshControl.beginRefreshing()
-                let offsetPoint = CGPoint(x: 0, y: self.collectionView.contentOffset.y - self.refreshControl.frame.size.height)
-                self.collectionView.setContentOffset(offsetPoint, animated: true)
-            }
+        viewModel.$isRefreshing.receiveOnMain(store: &bindStore) { [weak self] isRefreshing in
+            self?.toggleRefreshing(isRefreshing)
         }
 
         viewModel.$listStyle.receiveOnMain(store: &bindStore) { [weak self] listStyle in
-            guard let self = self else { return }
-            self.headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
-            UIView.transition(with: self.collectionView, duration: 0.25, options: .transitionCrossDissolve) {
-                self.collectionView.reloadData()
-                self.setSelectedCells()
-            }
+            self?.updateListStyle(listStyle)
         }
 
-        viewModel.onFilePresented = { [weak self] file in
-            guard let self = self else { return }
-            #if !ISEXTENSION
+        #if !ISEXTENSION
+            viewModel.onFilePresented = { [weak self] file in
+                guard let self = self else { return }
                 self.filePresenter.present(driveFileManager: self.viewModel.driveFileManager,
                                            file: file,
                                            files: self.viewModel.getAllFiles(),
                                            normalFolderHierarchy: self.viewModel.configuration.normalFolderHierarchy,
                                            fromActivities: self.viewModel.configuration.fromActivities)
-            #endif
-        }
+            }
+        #endif
 
         viewModel.$currentLeftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
             guard let self = self else { return }
@@ -254,12 +228,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         viewModel.onPresentViewController = { [weak self] presentationType, viewController, animated in
-            if presentationType == .push,
-               let navigationController = self?.navigationController {
-                navigationController.pushViewController(viewController, animated: animated)
-            } else {
-                self?.present(viewController, animated: animated)
-            }
+            self?.present(viewController, presentationType: presentationType, animated: animated)
         }
 
         viewModel.onPresentQuickActionPanel = { [weak self] files, type in
@@ -267,21 +236,66 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
+    private func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
+        collectionView.performBatchUpdates {
+            // Always apply updates in the following order: deletions, insertions, then modifications.
+            // Handling insertions before deletions may result in unexpected behavior.
+            collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 0) })
+            collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 0) })
+            collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 0) })
+            for (source, target) in moved {
+                collectionView.moveItem(at: IndexPath(item: source, section: 0), to: IndexPath(item: target, section: 0))
+            }
+        }
+        // Reload corners (outside of batch to prevent incompatible operations)
+        reloadFileCorners(insertions: insertions, deletions: deletions)
+    }
+
+    private func toggleRefreshing(_ refreshing: Bool) {
+        if refreshing {
+            refreshControl.beginRefreshing()
+            let offsetPoint = CGPoint(x: 0, y: collectionView.contentOffset.y - refreshControl.frame.size.height)
+            collectionView.setContentOffset(offsetPoint, animated: true)
+        } else {
+            refreshControl.endRefreshing()
+        }
+    }
+
+    private func updateListStyle(_ listStyle: ListStyle) {
+        headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
+        UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
+            self.collectionView.reloadData()
+            self.setSelectedCells()
+        }
+    }
+
+    private func present(_ viewController: UIViewController, presentationType: ControllerPresentationType, animated: Bool) {
+        if presentationType == .push,
+           let navigationController = navigationController {
+            navigationController.pushViewController(viewController, animated: animated)
+        } else {
+            present(viewController, animated: animated)
+        }
+    }
+
     private func bindUploadCardViewModel() {
         viewModel.uploadViewModel?.$uploadCount.receiveOnMain(store: &bindStore) { [weak self] uploadCount in
-            guard let self = self else { return }
-            let shouldHideUploadCard: Bool
-            if uploadCount > 0 {
-                self.headerView?.uploadCardView.setUploadCount(uploadCount)
-                shouldHideUploadCard = false
-            } else {
-                shouldHideUploadCard = true
-            }
-            // Only perform reload if needed
-            if shouldHideUploadCard != self.headerView?.uploadCardView.isHidden {
-                self.headerView?.uploadCardView.isHidden = shouldHideUploadCard
-                self.collectionView.performBatchUpdates(nil)
-            }
+            self?.updateUploadCard(uploadCount: uploadCount)
+        }
+    }
+
+    private func updateUploadCard(uploadCount: Int) {
+        let shouldHideUploadCard: Bool
+        if uploadCount > 0 {
+            headerView?.uploadCardView.setUploadCount(uploadCount)
+            shouldHideUploadCard = false
+        } else {
+            shouldHideUploadCard = true
+        }
+        // Only perform reload if needed
+        if shouldHideUploadCard != headerView?.uploadCardView.isHidden {
+            headerView?.uploadCardView.isHidden = shouldHideUploadCard
+            collectionView.performBatchUpdates(nil)
         }
     }
 
@@ -618,7 +632,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let dequeuedHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerViewIdentifier, for: indexPath) as! FilesHeaderView
         setUpHeaderView(dequeuedHeaderView, isEmptyViewHidden: !viewModel.isEmpty)
-        
+
         headerView = dequeuedHeaderView
         selectView = dequeuedHeaderView.selectView
         return dequeuedHeaderView
