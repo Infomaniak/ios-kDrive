@@ -47,6 +47,7 @@ extension UserDefaults.Keys {
     static let categoryPanelDisplayed = UserDefaults.Keys(rawValue: "categoryPanelDisplayed")
     static let homeListStyle = UserDefaults.Keys(rawValue: "homeListStyle")
     static let selectedHomeIndex = UserDefaults.Keys(rawValue: "selectedHomeIndex")
+    static let fpStorageVersion = UserDefaults.Keys(rawValue: "fpStorageVersion")
 }
 
 public extension UserDefaults {
@@ -323,6 +324,15 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.selectedHomeIndex))
+        }
+    }
+
+    var fpStorageVersion: Int {
+        get {
+            return integer(forKey: key(.fpStorageVersion))
+        }
+        set {
+            set(newValue, forKey: key(.fpStorageVersion))
         }
     }
 }

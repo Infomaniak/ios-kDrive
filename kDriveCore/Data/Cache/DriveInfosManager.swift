@@ -27,6 +27,7 @@ import Sentry
 public class DriveInfosManager {
     public static let instance = DriveInfosManager()
     private static let currentDbVersion: UInt64 = 5
+    private let currentFpStorageVersion = 1
     public let realmConfiguration: Realm.Configuration
     private let dbName = "DrivesInfos.realm"
     private var fileProviderManagers: [String: NSFileProviderManager] = [:]
@@ -90,7 +91,20 @@ public class DriveInfosManager {
     }
 
     private func initFileProviderDomains(drives: [Drive], user: InfomaniakCore.UserProfile) {
-        let updatedDomains = drives.map { NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier($0.objectId), displayName: "\($0.name) (\(user.email))", pathRelativeToDocumentStorage: "\($0.id)") }
+        // Clean file provider storage if needed
+        if UserDefaults.shared.fpStorageVersion < currentFpStorageVersion {
+            do {
+                let fileURLs = try FileManager.default.contentsOfDirectory(at: NSFileProviderManager.default.documentStorageURL, includingPropertiesForKeys: nil)
+                for url in fileURLs {
+                    try FileManager.default.removeItem(at: url)
+                }
+                UserDefaults.shared.fpStorageVersion = currentFpStorageVersion
+            } catch {
+                // Silently handle error
+            }
+        }
+
+        let updatedDomains = drives.map { NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier($0.objectId), displayName: "\($0.name) (\(user.email))", pathRelativeToDocumentStorage: "\($0.objectId)") }
         Task {
             do {
                 let allDomains = try await NSFileProviderManager.domains()
