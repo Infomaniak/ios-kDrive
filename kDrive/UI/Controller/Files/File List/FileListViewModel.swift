@@ -249,7 +249,7 @@ class FileListViewModel: SelectDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             if self.isLoading && !self.isRefreshing {
-                self.isRefreshing = false
+                self.isRefreshing = true
             }
         }
     }
