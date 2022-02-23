@@ -75,7 +75,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             }
-            for file in files where !file.isDirectory {
+            for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
                 group.enter()
                 driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
                     if error != nil {
@@ -206,7 +206,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         group.notify(queue: .main) {
             if success {
                 if action == .offline && addAction {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.count))
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.filter { !$0.isDirectory }.count))
                 } else if action == .favorite && addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
                 } else if action == .folderColor {
