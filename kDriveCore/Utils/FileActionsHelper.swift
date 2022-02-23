@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import kDriveResources
 import UIKit
 
+@MainActor
 public class FileActionsHelper {
     public static let instance = FileActionsHelper()
 
@@ -71,20 +72,16 @@ public class FileActionsHelper {
         Task {
             do {
                 let (cancelResponse, _) = try await driveFileManager.move(file: frozenFile, to: destinationDirectory)
-                DispatchQueue.main.async {
-                    UIConstants.showCancelableSnackBar(
-                        message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name),
-                        cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
-                        cancelableResponse: cancelResponse,
-                        parentFile: frozenParent,
-                        driveFileManager: driveFileManager)
-                    completion?(true)
-                }
+                UIConstants.showCancelableSnackBar(
+                    message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationDirectory.name),
+                    cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
+                    cancelableResponse: cancelResponse,
+                    parentFile: frozenParent,
+                    driveFileManager: driveFileManager)
+                completion?(true)
             } catch {
-                DispatchQueue.main.async {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
-                    completion?(false)
-                }
+                UIConstants.showSnackBar(message: error.localizedDescription)
+                completion?(false)
             }
         }
     }

@@ -95,14 +95,10 @@ class DroppableFileListViewModel {
                         FileActionsHelper.instance.move(file: file, to: destinationDirectory, driveFileManager: self.driveFileManager)
                     } else {
                         // TODO: enable copy from different driveFileManager
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
-                        }
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                     }
                 } else {
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
-                    }
+                    UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
                 }
             }
         }
@@ -114,9 +110,7 @@ class DroppableFileListViewModel {
             _ = FileImportHelper.instance.importItems(externalFiles) { [weak self] importedFiles, errorCount in
                 guard let self = self else { return }
                 if errorCount > 0 {
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
-                    }
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
                 }
                 guard !importedFiles.isEmpty else {
                     return
@@ -124,9 +118,7 @@ class DroppableFileListViewModel {
                 do {
                     try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
                 } catch {
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
-                    }
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
         }

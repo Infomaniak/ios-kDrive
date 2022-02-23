@@ -110,7 +110,7 @@ class FilePresenter {
             } else {
                 // Download file
                 DownloadQueue.instance.temporaryDownload(file: file) { error in
-                    DispatchQueue.main.async {
+                    Task {
                         if let error = error {
                             UIConstants.showSnackBar(message: error.localizedDescription)
                             completion?(false)
