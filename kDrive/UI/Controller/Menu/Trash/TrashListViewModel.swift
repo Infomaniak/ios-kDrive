@@ -121,7 +121,7 @@ class TrashListViewModel: UnmanagedFileListViewModel {
                 for file in restoredFiles {
                     group.addTask { [self] in
                         _ = try await driveFileManager.apiFetcher.restore(file: file, in: directory)
-                        // TODO: We don't have an alert for moving multiple files, snackbar is spammed until end
+                        // We don't have an alert for moving multiple files, snackbar is spammed until end
                         if let directory = directory {
                             await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
 
