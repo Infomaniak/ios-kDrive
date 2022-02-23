@@ -29,11 +29,8 @@ class HomeLastModificationsController: HomeRecentFilesController {
                   listStyleEnabled: true)
     }
 
-    override func getFiles(completion: @escaping ([File]?) -> Void) {
-        Task {
-            let result = try? await driveFileManager.lastModifiedFiles(page: page)
-            completion(result?.files)
-        }
+    override func getFiles() async throws -> [File] {
+        return try await driveFileManager.lastModifiedFiles(page: page).files
     }
 
     override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {

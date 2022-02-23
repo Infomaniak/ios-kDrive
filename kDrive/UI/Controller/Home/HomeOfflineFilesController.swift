@@ -29,8 +29,8 @@ class HomeOfflineFilesController: HomeRecentFilesController {
                   listStyleEnabled: true)
     }
 
-    override func getFiles(completion: @escaping ([File]?) -> Void) {
-        completion(driveFileManager.getAvailableOfflineFiles())
+    override func getFiles() async throws -> [File] {
+        return driveFileManager.getAvailableOfflineFiles()
     }
 
     override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {

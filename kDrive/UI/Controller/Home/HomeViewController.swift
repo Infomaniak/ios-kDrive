@@ -279,11 +279,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadWith(fetchedFiles: HomeFileType, isEmpty: Bool) {
-        DispatchQueue.main.async { [self] in
-            refreshControl.endRefreshing()
-            let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
-            headerView?.switchLayoutButton.isEnabled = !isEmpty
-        }
+        refreshControl.endRefreshing()
+        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
+        headerView?.switchLayoutButton.isEnabled = !isEmpty
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
                                          recentFilesEmpty: isEmpty,
