@@ -21,6 +21,7 @@ import Foundation
 import kDriveCore
 import UIKit
 
+@MainActor
 class HomeRecentFilesController {
     static let updateDelay: TimeInterval = 60 // 1 minute
     private var lastUpdate = Date()
@@ -56,7 +57,9 @@ class HomeRecentFilesController {
         self.homeViewController = homeViewController
     }
 
-    func getFiles(completion: @escaping ([File]?) -> Void) {}
+    func getFiles() async throws -> [File] {
+        fatalError(#function + " needs to be overwritten")
+    }
 
     func restoreCachedPages() {
         invalidated = false
@@ -103,9 +106,9 @@ class HomeRecentFilesController {
         }
 
         loading = true
-        getFiles { fetchedFiles in
-            self.loading = false
-            if let fetchedFiles = fetchedFiles {
+        Task {
+            do {
+                let fetchedFiles = try await getFiles()
                 self.files.append(contentsOf: fetchedFiles)
                 self.empty = self.page == 1 && fetchedFiles.isEmpty
                 self.moreComing = fetchedFiles.count == Endpoint.itemsPerPage
@@ -115,7 +118,10 @@ class HomeRecentFilesController {
                     return
                 }
                 self.homeViewController?.reloadWith(fetchedFiles: .file(self.files), isEmpty: self.empty)
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
+            self.loading = false
         }
     }
 
