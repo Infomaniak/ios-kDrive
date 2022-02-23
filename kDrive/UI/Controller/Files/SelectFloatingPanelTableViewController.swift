@@ -75,7 +75,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             }
-            for file in files where !file.isDirectory {
+            for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
                 group.enter()
                 driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
                     if error != nil {
