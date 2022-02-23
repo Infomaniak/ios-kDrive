@@ -181,9 +181,9 @@ class PhotoListViewController: FileListViewController {
         navigationController?.setNeedsStatusBarAppearanceUpdate()
 
         for headerView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
-            if let headerView = headerView as? PhotoSectionHeaderView {
+            if let photoSectionHeaderView = headerView as? PhotoSectionHeaderView {
                 let position = collectionView.convert(headerView.frame.origin, to: view)
-                headerView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
+                photoSectionHeaderView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
             }
         }
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == false {
@@ -256,12 +256,12 @@ class PhotoListViewController: FileListViewController {
             ])
             return footerView
         } else {
-            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! PhotoSectionHeaderView
+            let photoSectionHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! PhotoSectionHeaderView
             if indexPath.section > 0 {
                 let yearMonth = photoListViewModel.sections[indexPath.section].model
-                headerView.titleLabel.text = yearMonth.formattedDate
+                photoSectionHeaderView.titleLabel.text = yearMonth.formattedDate
             }
-            return headerView
+            return photoSectionHeaderView
         }
     }
 
