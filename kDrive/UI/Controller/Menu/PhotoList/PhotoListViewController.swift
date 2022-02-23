@@ -175,9 +175,9 @@ class PhotoListViewController: FileListViewController {
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
         navigationController?.setNeedsStatusBarAppearanceUpdate()
 
-        for headerView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
-            if let photoSectionHeaderView = headerView as? PhotoSectionHeaderView {
-                let position = collectionView.convert(headerView.frame.origin, to: view)
+        for visibleHeaderView in collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader) {
+            if let photoSectionHeaderView = visibleHeaderView as? PhotoSectionHeaderView {
+                let position = collectionView.convert(photoSectionHeaderView.frame.origin, to: view)
                 photoSectionHeaderView.titleLabel.isHidden = position.y < headerTitleLabel.frame.minY && !isLargeTitle
             }
         }
