@@ -21,7 +21,11 @@ import MatomoTracker
 import kDriveCore
 
 class MatomoUtils {
-    static let shared = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
+    static let shared: MatomoTracker = {
+        let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
+        tracker.userId = String(AccountManager.instance.currentUserId)
+        return tracker
+    }()
 
     // Enable or disable Matomo tracking
     static let isEnabled = true
@@ -46,10 +50,6 @@ class MatomoUtils {
 
     enum MediaPlayerType: String {
         case audio, video
-    }
-
-    private init() {
-        MatomoUtils.connectUser()
     }
 
     static func connectUser() {
