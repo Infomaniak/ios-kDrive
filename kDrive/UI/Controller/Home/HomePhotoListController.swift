@@ -29,11 +29,8 @@ class HomePhotoListController: HomeRecentFilesController {
                   listStyleEnabled: false)
     }
 
-    override func getFiles(completion: @escaping ([File]?) -> Void) {
-        Task {
-            let result = try? await driveFileManager.lastPictures(page: page)
-            completion(result?.files)
-        }
+    override func getFiles() async throws -> [File] {
+        return try await driveFileManager.lastPictures(page: page).files
     }
 
     override func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
