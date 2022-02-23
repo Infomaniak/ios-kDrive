@@ -606,7 +606,6 @@ extension HomeViewController {
             case .search:
                 let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
                 present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
-                break
             }
         case .recentFiles:
             if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1) && !viewModel.recentFilesEmpty {
