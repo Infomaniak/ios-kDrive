@@ -26,17 +26,6 @@ public enum ApiResult: String, Codable {
 
 public class EmptyResponse: Codable {}
 
-// TODO: remove when migrated to api v2
-public class CancelableResponseV2: Codable {
-    public let id: String
-    public let validUntil: Int
-
-    enum CodingKeys: String, CodingKey {
-        case id = "cancel_id"
-        case validUntil = "valid_until"
-    }
-}
-
 public class CancelableResponse: Codable {
     public let id: String
     public let validUntil: Int
