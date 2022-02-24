@@ -58,6 +58,14 @@ public extension InfomaniakLogin {
     }
 }
 
+@globalActor actor AccountActor: GlobalActor {
+    static let shared = AccountActor()
+
+    public static func run<T>(resultType: T.Type = T.self, body: @AccountActor @Sendable () throws -> T) async rethrows -> T {
+        try await body()
+    }
+}
+
 public class AccountManager: RefreshTokenDelegate {
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -244,7 +252,9 @@ public class AccountManager: RefreshTokenDelegate {
             throw DriveError.unknownToken
         }
 
-        let apiFetcher = getApiFetcher(for: account.userId, token: account.token)
+        let apiFetcher = await AccountActor.run {
+            getApiFetcher(for: account.userId, token: account.token)
+        }
         let user = try await apiFetcher.userProfile()
         account.user = user
 
@@ -307,9 +317,9 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func switchAccount(newAccount: Account) {
-        AccountManager.instance.setCurrentAccount(account: newAccount)
-        AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drives.first!)
-        AccountManager.instance.saveAccounts()
+        setCurrentAccount(account: newAccount)
+        setCurrentDriveForCurrentAccount(drive: drives.first!)
+        saveAccounts()
     }
 
     private func setCurrentAccount(account: Account) {
