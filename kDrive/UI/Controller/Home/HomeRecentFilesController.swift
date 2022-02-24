@@ -41,7 +41,6 @@ class HomeRecentFilesController {
     var loading = false
     var moreComing = true
     var invalidated = false
-    var forceRefresh = false
 
     private var files = [File]()
 
@@ -67,29 +66,33 @@ class HomeRecentFilesController {
 
     func refreshIfNeeded() {
         if Date().timeIntervalSince(lastUpdate) > HomeRecentFilesController.updateDelay {
-            lastUpdate = Date()
-            forceRefresh = true
-            loadNextPage()
+            forceRefresh()
         }
     }
 
     func refreshIfNeeded(with file: File) {
-        if files.contains(file) {
-            lastUpdate = Date()
-            forceRefresh = true
-            loadNextPage()
+        if filesContain(file) {
+            forceRefresh()
         }
     }
 
+    func filesContain(_ file: File) -> Bool {
+        return files.contains { $0.id == file.id }
+    }
+
+    func forceRefresh() {
+        lastUpdate = Date()
+        loadNextPage(forceRefresh: true)
+    }
+
     func resetController() {
-        forceRefresh = false
         files = []
         page = 1
         loading = false
         moreComing = true
     }
 
-    func loadNextPage() {
+    func loadNextPage(forceRefresh: Bool = false) {
         if forceRefresh {
             resetController()
         }

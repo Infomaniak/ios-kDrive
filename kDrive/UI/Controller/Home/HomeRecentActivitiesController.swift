@@ -39,7 +39,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         homeViewController?.reloadWith(fetchedFiles: .fileActivity(mergedActivities), isEmpty: empty)
     }
 
-    override func loadNextPage() {
+    override func loadNextPage(forceRefresh: Bool = false) {
         if forceRefresh {
             resetController()
             mergedActivities = []
