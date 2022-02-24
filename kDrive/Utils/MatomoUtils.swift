@@ -117,6 +117,12 @@ class MatomoUtils {
         }
     }
 
+    static func trackShareLinkSettings(protectWithPassword: Bool, downloadFromLink: Bool, expirationDateLink: Bool) {
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "protectWithPassword", value: protectWithPassword)
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "downloadFromLink", value: downloadFromLink)
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "expirationDateLink", value: expirationDateLink)
+    }
+
     // MARK: - Preview file
 
     static func trackPreview(file: File) {
