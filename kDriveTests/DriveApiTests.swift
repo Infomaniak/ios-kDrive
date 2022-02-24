@@ -515,8 +515,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Perform authenticated request"
         let expectation = XCTestExpectation(description: testName)
 
-        let token = currentApiFetcher.currentToken!
-        currentApiFetcher.performAuthenticatedRequest(token: token) { apiToken, error in
+        currentApiFetcher.performAuthenticatedRequest(token: DriveApiTests.token) { apiToken, error in
             XCTAssertNil(error, TestsMessages.noError)
             XCTAssertNotNil(apiToken, TestsMessages.notNil("API Token"))
             expectation.fulfill()
@@ -529,8 +528,7 @@ final class DriveApiTests: XCTestCase {
         let testName = "Get public upload token with token"
         let expectation = XCTestExpectation(description: testName)
 
-        let token = currentApiFetcher.currentToken!
-        currentApiFetcher.getPublicUploadToken(with: token, drive: proxyDrive) { result in
+        currentApiFetcher.getPublicUploadToken(with: DriveApiTests.token, drive: proxyDrive) { result in
             switch result {
             case .success:
                 break
