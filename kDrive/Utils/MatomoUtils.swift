@@ -102,6 +102,21 @@ class MatomoUtils {
         }
     }
 
+    // MARK: - Share annd Rights
+
+    static func trackRightSelection(type: RightsSelectionType, selected right: String) {
+        switch type {
+        case .shareLinkSettings:
+            MatomoUtils.track(eventWithCategory: .shareAndRights, name: "\(right)ShareLink")
+        case .addUserRights, .officeOnly:
+            if right == UserPermission.delete.rawValue {
+                MatomoUtils.track(eventWithCategory: .shareAndRights, name: "deleteUser")
+            } else {
+                MatomoUtils.track(eventWithCategory: .shareAndRights, name: "\(right)Right")
+            }
+        }
+    }
+
     // MARK: - Preview file
 
     static func trackPreview(file: File) {

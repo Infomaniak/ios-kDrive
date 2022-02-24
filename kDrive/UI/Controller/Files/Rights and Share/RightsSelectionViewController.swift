@@ -155,7 +155,7 @@ class RightsSelectionViewController: UIViewController {
     @IBAction func closeButtonPressed(_ sender: Any) {
         let rightKey = rights[tableView.indexPathForSelectedRow?.row ?? 0].key
         delegate?.didUpdateRightValue(newValue: rightKey)
-        track(selectedRight: rightKey)
+        MatomoUtils.trackRightSelection(type: rightSelectionType, selected: rightKey)
         dismiss(animated: true)
     }
 
@@ -174,19 +174,6 @@ class RightsSelectionViewController: UIViewController {
         viewController.file = file
         viewController.driveFileManager = driveFileManager
         return viewController
-    }
-
-    private func track(selectedRight: String) {
-        switch rightSelectionType {
-        case .shareLinkSettings:
-            MatomoUtils.track(eventWithCategory: .shareAndRights, name: "\(selectedRight)ShareLink")
-        case .addUserRights, .officeOnly:
-            if selectedRight == UserPermission.delete.rawValue {
-                MatomoUtils.track(eventWithCategory: .shareAndRights, name: "deleteUser")
-            } else {
-                MatomoUtils.track(eventWithCategory: .shareAndRights, name: "\(selectedRight)Right")
-            }
-        }
     }
 }
 
