@@ -220,7 +220,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
         coordinator.animate { _ in
             self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
-            //self.collectionView?.collectionViewLayout.invalidateLayout()
+            self.setSelectedCells()
         }
     }
 
