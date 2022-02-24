@@ -31,20 +31,25 @@ class FakeTokenDelegate: RefreshTokenDelegate {
 }
 
 final class DriveApiTests: XCTestCase {
-    static let defaultTimeout = 30.0
+    private static let defaultTimeout = 30.0
+    private static let token = ApiToken(accessToken: Env.token,
+                                        expiresIn: Int.max,
+                                        refreshToken: "",
+                                        scope: "",
+                                        tokenType: "",
+                                        userId: Env.userId,
+                                        expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
 
-    var currentApiFetcher: DriveApiFetcher = {
-        let token = ApiToken(accessToken: Env.token,
-                             expiresIn: Int.max,
-                             refreshToken: "",
-                             scope: "",
-                             tokenType: "",
-                             userId: Env.userId,
-                             expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
-        return DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
-    }()
-
+    private let currentApiFetcher = DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
     private let proxyDrive = ProxyDrive(id: Env.driveId)
+
+    override class func tearDown() {
+        Task {
+            let drive = ProxyDrive(id: Env.driveId)
+            let apiFetcher = DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
+            _ = try await apiFetcher.emptyTrash(drive: drive)
+        }
+    }
 
     // MARK: - Tests setup
 
