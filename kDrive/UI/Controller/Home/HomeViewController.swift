@@ -185,7 +185,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            self?.reloadTopRows()
+            Task { [weak self] in
+                self?.reloadTopRows()
+            }
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
@@ -285,12 +287,10 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func reload(newViewModel: HomeViewModel) {
-        DispatchQueue.main.async { [self] in
-            var newViewModel = newViewModel
-            let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
-            collectionView.reload(using: changeset) { data in
-                self.viewModel = HomeViewModel(changeSet: data)
-            }
+        var newViewModel = newViewModel
+        let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
+        collectionView.reload(using: changeset) { data in
+            self.viewModel = HomeViewModel(changeSet: data)
         }
     }
 
