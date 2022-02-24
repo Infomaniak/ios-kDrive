@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -78,13 +78,21 @@
                                         <rect key="frame" x="0.0" y="138" width="364" height="50"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="1BT-ci-MqW">
-                                                <rect key="frame" x="8" y="0.0" width="63" height="50"/>
+                                                <rect key="frame" x="8" y="0.0" width="83" height="50"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file-image" translatesAutoresizingMaskIntoConstraints="NO" id="m0U-12-qPF">
                                                         <rect key="frame" x="0.0" y="15.5" width="19" height="19"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="19" id="JVV-7g-YeS"/>
                                                             <constraint firstAttribute="width" secondItem="m0U-12-qPF" secondAttribute="height" multiplier="1:1" id="aRq-X5-QkX"/>
+                                                        </constraints>
+                                                    </imageView>
+                                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="check" translatesAutoresizingMaskIntoConstraints="NO" id="sEJ-PG-gDu">
+                                                        <rect key="frame" x="23" y="17" width="16" height="16"/>
+                                                        <color key="tintColor" name="greenColor"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" secondItem="sEJ-PG-gDu" secondAttribute="height" multiplier="1:1" id="Jyk-0f-20y"/>
+                                                            <constraint firstAttribute="height" constant="16" id="vHe-ZC-Bf5"/>
                                                         </constraints>
                                                     </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzB-wT-0Da" customClass="IKLabel" customModule="kDriveCore">
@@ -96,7 +104,20 @@
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="favorite" translatesAutoresizingMaskIntoConstraints="NO" id="kne-t0-uma">
+                                                        <rect key="frame" x="71" y="19" width="12" height="12"/>
+                                                        <color key="tintColor" name="favoriteColor"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="12" id="cKs-QM-5ib"/>
+                                                            <constraint firstAttribute="width" secondItem="kne-t0-uma" secondAttribute="height" multiplier="1:1" id="noh-Zh-Ebd"/>
+                                                        </constraints>
+                                                    </imageView>
                                                 </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="sEJ-PG-gDu" firstAttribute="width" secondItem="sEJ-PG-gDu" secondAttribute="height" multiplier="1:1" id="Deq-u1-EjZ"/>
+                                                    <constraint firstItem="sEJ-PG-gDu" firstAttribute="width" secondItem="sEJ-PG-gDu" secondAttribute="height" multiplier="1:1" id="lap-N9-gDn"/>
+                                                    <constraint firstItem="kne-t0-uma" firstAttribute="width" secondItem="kne-t0-uma" secondAttribute="height" multiplier="1:1" id="sL7-xz-WO9"/>
+                                                </constraints>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" alignment="center" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="Z4e-Ix-xZg">
                                                 <rect key="frame" x="292.5" y="0.0" width="55.5" height="50"/>
@@ -173,8 +194,10 @@
             </constraints>
             <size key="customSize" width="175" height="150"/>
             <connections>
+                <outlet property="availableOfflineImageView" destination="sEJ-PG-gDu" id="wxm-XH-LoH"/>
                 <outlet property="contentInsetView" destination="aCp-2c-Jek" id="lBq-mi-KfS"/>
                 <outlet property="disabledView" destination="7D5-S4-5JV" id="l0k-fh-f20"/>
+                <outlet property="favoriteImageView" destination="kne-t0-uma" id="VKi-Qw-xi4"/>
                 <outlet property="highlightedView" destination="z0E-HT-fIs" id="MK3-dU-BxN"/>
                 <outlet property="iconImageView" destination="m0U-12-qPF" id="5uU-yD-5hK"/>
                 <outlet property="largeIconImageView" destination="5Sk-df-fP8" id="q19-Hr-dG3"/>
@@ -196,7 +219,9 @@
         </designable>
     </designables>
     <resources>
+        <image name="check" width="24" height="24"/>
         <image name="clock" width="24" height="24"/>
+        <image name="favorite" width="24" height="24"/>
         <image name="file-image" width="24" height="24"/>
         <image name="folder-filled" width="24" height="24"/>
         <image name="menu" width="24" height="24"/>
@@ -208,6 +233,12 @@
         </namedColor>
         <namedColor name="backgroundCardViewSelectedColor">
             <color red="0.78823529411764703" green="0.78823529411764703" blue="0.81568627450980391" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="favoriteColor">
+            <color red="1" green="0.75686274509803919" blue="0.039215686274509803" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="greenColor">
+            <color red="0.24300000071525574" green="0.74900001287460327" blue="0.30199998617172241" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
             <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
