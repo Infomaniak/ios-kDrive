@@ -252,11 +252,6 @@ public class AccountManager: RefreshTokenDelegate {
             throw DriveError.unknownToken
         }
 
-		if MatomoTracker.shared.userId != String(account.userId) {
-            MatomoTracker.shared.userId = String(account.userId)
-            MatomoTracker.shared.startNewSession()
-        }
-
         let apiFetcher = await AccountActor.run {
             getApiFetcher(for: account.userId, token: account.token)
         }

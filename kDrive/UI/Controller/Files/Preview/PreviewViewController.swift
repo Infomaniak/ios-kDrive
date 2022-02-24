@@ -343,7 +343,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         } else {
             setNavbarStandard()
         }
-        navigationItem.backButtonTitle = currentFile.name
     }
 
     private func setNavbarStandard() {
