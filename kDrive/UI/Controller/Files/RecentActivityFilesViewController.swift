@@ -71,6 +71,15 @@ class RecentActivityFilesViewModel: UnmanagedFileListViewModel {
         forceRefresh()
     }
 
+    override func getFile(at indexPath: IndexPath) -> File? {
+        if let file = super.getFile(at: indexPath) {
+            // We need a managed instance to present the file list as a live object
+            return driveFileManager.getManagedFile(from: file)
+        } else {
+            return nil
+        }
+    }
+
     private func sort(files: [File]) -> [File] {
         return files.sorted { firstFile, secondFile -> Bool in
             switch sortType {

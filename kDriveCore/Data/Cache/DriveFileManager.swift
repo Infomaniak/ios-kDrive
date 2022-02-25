@@ -1278,7 +1278,24 @@ public class DriveFileManager {
             newFile.version = FileVersion(value: version)
         }
         if keepProperties.contains(.capabilities) {
-            newFile.capabilities = savedChild.capabilities
+            newFile.capabilities = Rights(value: savedChild.capabilities)
+        }
+    }
+
+    /**
+     Get a live version for the given file (if the file is not cached in realm it is added and then returned)
+     - Returns: A realm managed file
+     */
+    public func getManagedFile(from file: File) -> File {
+        let realm = getRealm()
+        if let cachedFile = getCachedFile(id: file.id, freeze: false, using: realm) {
+            return cachedFile
+        } else {
+            keepCacheAttributesForFile(newFile: file, keepProperties: [.all], using: realm)
+            try? realm.write {
+                realm.add(file, update: .all)
+            }
+            return file
         }
     }
 
