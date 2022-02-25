@@ -305,7 +305,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         viewModel.multipleSelectionViewModel?.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
             guard self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true else { return }
-            self?.headerView?.selectView.updateTitle(selectedCount)
+            self?.selectView?.updateTitle(selectedCount)
         }
 
         viewModel.multipleSelectionViewModel?.onItemSelected = { [weak self] selectedIndexPath in
