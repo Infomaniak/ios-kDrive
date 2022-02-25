@@ -382,7 +382,7 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                 let cell = tableView.dequeueReusableCell(type: PhotoSyncSettingsTableViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate
-                cell.valueLabel.text = newSyncSettings.syncMode.title
+                cell.valueLabel.text = newSyncSettings.syncMode.title.lowercased()
                 cell.delegate = self
                 if newSyncSettings.syncMode == .fromDate {
                     cell.datePicker.isHidden = false
