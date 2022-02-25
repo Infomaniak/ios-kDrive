@@ -49,6 +49,8 @@ class PhotoListViewController: FileListViewController {
     }
 
     override func viewDidLoad() {
+        super.viewDidLoad()
+
         headerTitleLabel.textColor = .white
         headerView.buttonTint = .white
 
@@ -57,11 +59,10 @@ class PhotoListViewController: FileListViewController {
         collectionView.register(UINib(nibName: "PhotoSectionHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
         selectView = headerView
         selectView?.delegate = self
-        super.viewDidLoad()
+        bindPhotoListViewModel()
     }
 
-    override func bindFileListViewModel() {
-        super.bindFileListViewModel()
+    private func bindPhotoListViewModel() {
         photoListViewModel.onReloadWithChangeset = { [weak self] changeset, completion in
             self?.collectionView.reload(using: changeset, interrupt: { $0.changeCount > Endpoint.itemsPerPage }, setData: completion)
             self?.showEmptyView(.noImages)
@@ -198,6 +199,11 @@ class PhotoListViewController: FileListViewController {
                 try await viewModel.loadNextPageIfNeeded()
             }
         }
+    }
+
+    override func decodeRestorableState(with coder: NSCoder) {
+        super.decodeRestorableState(with: coder)
+        bindPhotoListViewModel()
     }
 
     // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
