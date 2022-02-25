@@ -632,7 +632,7 @@ extension HomeViewController {
 // MARK: - FileCellDelegate
 
 extension HomeViewController: FileCellDelegate {
-    @objc func didTapMoreButton(_ cell: FileCollectionViewCell) {
+    func didTapMoreButton(_ cell: FileCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
         }

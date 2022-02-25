@@ -148,6 +148,10 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - View controller lifecycle
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.hideBackButtonText()
@@ -174,13 +178,65 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        navigationController?.setInfomaniakAppearanceNavigationBar()
+
+        #if !ISEXTENSION
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
+        #endif
+
+        tryOrDisplayError {
+            try await self.viewModel.loadActivitiesIfNeeded()
+        }
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        if let emptyView = collectionView?.backgroundView as? EmptyTableView {
+            updateEmptyView(emptyView)
+        }
+        coordinator.animate { _ in
+            self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
+            self.setSelectedCells()
+        }
+    }
+
+    @objc func appWillEnterForeground() {
+        viewWillAppear(true)
+    }
+
+    // MARK: - Private methods
+
+    private func setupViewModel() {
+        bindViewModels()
+        if viewModel.configuration.isRefreshControlEnabled {
+            refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+            collectionView.refreshControl = refreshControl
+        }
+        // Set up multiple selection gesture
+        if viewModel.multipleSelectionViewModel != nil {
+            let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+            collectionView.addGestureRecognizer(longPressGesture)
+        }
+
+        if viewModel.droppableFileListViewModel != nil {
+            collectionView.dropDelegate = self
+        }
+
+        if viewModel.draggableFileListViewModel != nil {
+            collectionView.dragDelegate = self
+        }
+    }
+
     private func bindViewModels() {
         bindFileListViewModel()
         bindUploadCardViewModel()
         bindMultipleSelectionViewModel()
     }
 
-    func bindFileListViewModel() {
+    private func bindFileListViewModel() {
         viewModel.onFileListUpdated = { [weak self] deletions, insertions, modifications, moved, isEmpty, shouldReload in
             self?.showEmptyView(!isEmpty)
             if shouldReload {
@@ -236,6 +292,51 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
+    private func bindUploadCardViewModel() {
+        viewModel.uploadViewModel?.$uploadCount.receiveOnMain(store: &bindStore) { [weak self] uploadCount in
+            self?.updateUploadCard(uploadCount: uploadCount)
+        }
+    }
+
+    private func bindMultipleSelectionViewModel() {
+        viewModel.multipleSelectionViewModel?.$isMultipleSelectionEnabled.receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
+            self?.toggleMultipleSelection(isMultipleSelectionEnabled)
+        }
+
+        viewModel.multipleSelectionViewModel?.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
+            guard self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true else { return }
+            self?.headerView?.selectView.updateTitle(selectedCount)
+        }
+
+        viewModel.multipleSelectionViewModel?.onItemSelected = { [weak self] selectedIndexPath in
+            self?.collectionView.selectItem(at: selectedIndexPath, animated: true, scrollPosition: .init(rawValue: 0))
+        }
+
+        viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
+            for indexPath in self?.collectionView.indexPathsForVisibleItems ?? [] {
+                self?.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            }
+        }
+
+        viewModel.multipleSelectionViewModel?.onDeselectAll = { [weak self] in
+            for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
+                self?.collectionView.deselectItem(at: indexPath, animated: false)
+            }
+        }
+
+        viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
+            self?.selectView?.setActions(actions)
+        }
+    }
+
+    func getViewModel(viewModelName: String, driveFileManager: DriveFileManager, currentDirectory: File?) -> FileListViewModel? {
+        if let viewModelClass = Bundle.main.classNamed("kDrive.\(viewModelName)") as? FileListViewModel.Type {
+            return viewModelClass.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        } else {
+            return nil
+        }
+    }
+
     private func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
         collectionView.performBatchUpdates {
             // Always apply updates in the following order: deletions, insertions, then modifications.
@@ -278,12 +379,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    private func bindUploadCardViewModel() {
-        viewModel.uploadViewModel?.$uploadCount.receiveOnMain(store: &bindStore) { [weak self] uploadCount in
-            self?.updateUploadCard(uploadCount: uploadCount)
-        }
-    }
-
     private func updateUploadCard(uploadCount: Int) {
         let shouldHideUploadCard: Bool
         if uploadCount > 0 {
@@ -299,231 +394,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
-    func bindMultipleSelectionViewModel() {
-        viewModel.multipleSelectionViewModel?.$isMultipleSelectionEnabled.receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
-            self?.toggleMultipleSelection(isMultipleSelectionEnabled)
-        }
-
-        viewModel.multipleSelectionViewModel?.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
-            guard self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true else { return }
-            self?.headerView?.selectView.updateTitle(selectedCount)
-        }
-
-        viewModel.multipleSelectionViewModel?.onItemSelected = { [weak self] selectedIndexPath in
-            self?.collectionView.selectItem(at: selectedIndexPath, animated: true, scrollPosition: .init(rawValue: 0))
-        }
-
-        viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
-            for indexPath in self?.collectionView.indexPathsForVisibleItems ?? [] {
-                self?.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
-            }
-        }
-
-        viewModel.multipleSelectionViewModel?.onDeselectAll = { [weak self] in
-            for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
-                self?.collectionView.deselectItem(at: indexPath, animated: false)
-            }
-        }
-
-        viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
-            self?.selectView?.setActions(actions)
-        }
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-
-    @objc func appWillEnterForeground() {
-        viewWillAppear(true)
-    }
-
-    private func setupViewModel() {
-        bindViewModels()
-        if viewModel.configuration.isRefreshControlEnabled {
-            refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
-            collectionView.refreshControl = refreshControl
-        }
-        // Set up multiple selection gesture
-        if viewModel.multipleSelectionViewModel != nil {
-            let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-            collectionView.addGestureRecognizer(longPressGesture)
-        }
-
-        if viewModel.droppableFileListViewModel != nil {
-            collectionView.dropDelegate = self
-        }
-
-        if viewModel.draggableFileListViewModel != nil {
-            collectionView.dragDelegate = self
-        }
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        navigationController?.setInfomaniakAppearanceNavigationBar()
-
-        #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
-        #endif
-
-        tryOrDisplayError {
-            try await self.viewModel.loadActivitiesIfNeeded()
-        }
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        MatomoUtils.track(view: ["FileList"])
-    }
-
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        if let emptyView = collectionView?.backgroundView as? EmptyTableView {
-            updateEmptyView(emptyView)
-        }
-        coordinator.animate { _ in
-            self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
-            self.setSelectedCells()
-        }
-    }
-
-    private func tryOrDisplayError(_ block: @escaping () async throws -> Void) {
-        Task {
-            do {
-                try await block()
-            } catch let driveError as DriveError {
-                if driveError == .objectNotFound {
-                    navigationController?.popViewController(animated: true)
-                } else if driveError != .searchCancelled {
-                    UIConstants.showSnackBar(message: driveError.localizedDescription)
-                }
-            } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
-            }
-        }
-    }
-
-    @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
-        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel,
-              !multipleSelectionViewModel.isMultipleSelectionEnabled
-        else { return }
-
-        let pos = sender.location(in: collectionView)
-        if let indexPath = collectionView.indexPathForItem(at: pos) {
-            multipleSelectionViewModel.isMultipleSelectionEnabled = true
-            // Necessary for events to trigger in the right order
-            DispatchQueue.main.async { [unowned self] in
-                if let file = self.viewModel.getFile(at: indexPath) {
-                    multipleSelectionViewModel.didSelectFile(file, at: indexPath)
-                }
-            }
-        }
-    }
-
-    @objc func barButtonPressed(_ sender: FileListBarButton) {
-        viewModel.barButtonPressed(type: sender.type)
-    }
-
-    func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
-        headerView.delegate = self
-
-        headerView.sortView.isHidden = !isEmptyViewHidden
-
-        headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
-        UIView.performWithoutAnimation {
-            headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
-            headerView.sortButton.layoutIfNeeded()
-            headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
-            headerView.listOrGridButton.layoutIfNeeded()
-        }
-
-        if let uploadViewModel = viewModel.uploadViewModel {
-            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
-            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
-            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
-            headerView.uploadCardView.progressView.enableIndeterminate()
-        }
-    }
-
-    // MARK: - Public methods
-
-    @objc func forceRefresh() {
-        viewModel.forceRefresh()
-    }
-
-    final func observeNetwork() {
-        guard networkObserver == nil else { return }
-        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.headerView?.offlineView.isHidden = status != .offline
-                self.collectionView.collectionViewLayout.invalidateLayout()
-                self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
-            }
-        }
-    }
-
-    private func showEmptyView(_ isHidden: Bool) {
-        let emptyView = EmptyTableView.instantiate(type: viewModel.configuration.emptyViewType, button: false)
-        emptyView.actionHandler = { [weak self] _ in
-            self?.forceRefresh()
-        }
-        collectionView.backgroundView = isHidden ? nil : emptyView
-        if let headerView = headerView {
-            setUpHeaderView(headerView, isEmptyViewHidden: isHidden)
-        }
-    }
-
-    class func instantiate(viewModel: FileListViewModel) -> Self {
-        let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
-        viewController.viewModel = viewModel
-        return viewController
-    }
-
-    func getViewModel(viewModelName: String, driveFileManager: DriveFileManager, currentDirectory: File?) -> FileListViewModel? {
-        if let viewModelClass = Bundle.main.classNamed("kDrive.\(viewModelName)") as? FileListViewModel.Type {
-            return viewModelClass.init(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-        } else {
-            return nil
-        }
-    }
-
-    func reloadCorners(insertions: [Int], deletions: [Int], count: Int) {
-        var modifications = Set<IndexPath>()
-        if insertions.contains(0) {
-            modifications.insert(IndexPath(row: 1, section: 0))
-        }
-        if deletions.contains(0) {
-            modifications.insert(IndexPath(row: 0, section: 0))
-        }
-        if insertions.contains(count - 1) {
-            modifications.insert(IndexPath(row: count - 2, section: 0))
-        }
-        if deletions.contains(count) {
-            modifications.insert(IndexPath(row: count - 1, section: 0))
-        }
-        collectionView.reloadItems(at: Array(modifications))
-    }
-
-    // MARK: - Private methods
-
-    private func reloadFileCorners(insertions: [Int], deletions: [Int]) {
-        reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.fileCount)
-    }
-
-    private func updateEmptyView(_ emptyBackground: EmptyTableView) {
-        if UIDevice.current.orientation.isPortrait {
-            emptyBackground.emptyImageFrameViewHeightConstant.constant = 200
-        }
-        if UIDevice.current.orientation.isLandscape {
-            emptyBackground.emptyImageFrameViewHeightConstant.constant = 120
-        }
-        emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
-    }
-
-    func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
+    private func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
             floatingPanelViewController.isRemovalInteractionEnabled = true
             switch actionType {
@@ -579,6 +450,132 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         #endif
     }
 
+    private func reloadFileCorners(insertions: [Int], deletions: [Int]) {
+        reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.fileCount)
+    }
+
+    private func updateEmptyView(_ emptyBackground: EmptyTableView) {
+        if UIDevice.current.orientation.isPortrait {
+            emptyBackground.emptyImageFrameViewHeightConstant.constant = 200
+        }
+        if UIDevice.current.orientation.isLandscape {
+            emptyBackground.emptyImageFrameViewHeightConstant.constant = 120
+        }
+        emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
+    }
+
+    private func tryOrDisplayError(_ block: @escaping () async throws -> Void) {
+        Task {
+            do {
+                try await block()
+            } catch let driveError as DriveError {
+                if driveError == .objectNotFound {
+                    navigationController?.popViewController(animated: true)
+                } else if driveError != .searchCancelled {
+                    UIConstants.showSnackBar(message: driveError.localizedDescription)
+                }
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
+            }
+        }
+    }
+
+    // MARK: - Actions
+
+    @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
+        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel,
+              !multipleSelectionViewModel.isMultipleSelectionEnabled
+        else { return }
+
+        let pos = sender.location(in: collectionView)
+        if let indexPath = collectionView.indexPathForItem(at: pos) {
+            multipleSelectionViewModel.isMultipleSelectionEnabled = true
+            // Necessary for events to trigger in the right order
+            DispatchQueue.main.async { [unowned self] in
+                if let file = self.viewModel.getFile(at: indexPath) {
+                    multipleSelectionViewModel.didSelectFile(file, at: indexPath)
+                }
+            }
+        }
+    }
+
+    @objc func barButtonPressed(_ sender: FileListBarButton) {
+        viewModel.barButtonPressed(type: sender.type)
+    }
+
+    @objc func forceRefresh() {
+        viewModel.forceRefresh()
+    }
+
+    // MARK: - Public methods
+
+    func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
+        headerView.delegate = self
+
+        headerView.sortView.isHidden = !isEmptyViewHidden
+
+        headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
+        UIView.performWithoutAnimation {
+            headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
+            headerView.sortButton.layoutIfNeeded()
+            headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
+            headerView.listOrGridButton.layoutIfNeeded()
+        }
+
+        if let uploadViewModel = viewModel.uploadViewModel {
+            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
+            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
+            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
+            headerView.uploadCardView.progressView.enableIndeterminate()
+        }
+    }
+
+    private func observeNetwork() {
+        guard networkObserver == nil else { return }
+        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.headerView?.offlineView.isHidden = status != .offline
+                self.collectionView.collectionViewLayout.invalidateLayout()
+                self.collectionView.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
+            }
+        }
+    }
+
+    private func showEmptyView(_ isHidden: Bool) {
+        let emptyView = EmptyTableView.instantiate(type: viewModel.configuration.emptyViewType, button: false)
+        emptyView.actionHandler = { [weak self] _ in
+            self?.forceRefresh()
+        }
+        collectionView.backgroundView = isHidden ? nil : emptyView
+        if let headerView = headerView {
+            setUpHeaderView(headerView, isEmptyViewHidden: isHidden)
+        }
+    }
+
+    class func instantiate(viewModel: FileListViewModel) -> Self {
+        let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
+        viewController.viewModel = viewModel
+        return viewController
+    }
+
+    func reloadCorners(insertions: [Int], deletions: [Int], count: Int) {
+        var modifications = Set<IndexPath>()
+        if insertions.contains(0) {
+            modifications.insert(IndexPath(row: 1, section: 0))
+        }
+        if deletions.contains(0) {
+            modifications.insert(IndexPath(row: 0, section: 0))
+        }
+        if insertions.contains(count - 1) {
+            modifications.insert(IndexPath(row: count - 2, section: 0))
+        }
+        if deletions.contains(count) {
+            modifications.insert(IndexPath(row: count - 1, section: 0))
+        }
+        collectionView.reloadItems(at: Array(modifications))
+    }
+
     // MARK: - Multiple selection
 
     func toggleMultipleSelection(_ on: Bool) {
@@ -598,14 +595,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             navigationItem.title = viewModel.title
         }
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
-    }
-
-    func getItem(at indexPath: IndexPath) -> File? {
-        return viewModel.getFile(at: indexPath)
-    }
-
-    func getAllItems() -> [File] {
-        return viewModel.getAllFiles()
     }
 
     func setSelectedCells() {
@@ -830,7 +819,7 @@ extension FileListViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - File cell delegate
 
 extension FileListViewController: FileCellDelegate {
-    @objc func didTapMoreButton(_ cell: FileCollectionViewCell) {
+    func didTapMoreButton(_ cell: FileCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
         }
