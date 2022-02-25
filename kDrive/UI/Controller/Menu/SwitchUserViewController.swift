@@ -107,7 +107,7 @@ extension SwitchUserViewController: UITableViewDelegate {
         } else {
             MatomoUtils.track(eventWithCategory: .account, name: "switch")
             MatomoUtils.connectUser()
-            
+
             AccountManager.instance.switchAccount(newAccount: account)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
             if isRootViewController {

@@ -291,7 +291,7 @@ class ManageCategoriesViewController: UITableViewController {
         if file != nil {
             MatomoUtils.track(eventWithCategory: .categories, name: "remove")
         }
-        
+
         category.isSelected = false
         if let file = file {
             driveFileManager.removeCategory(file: file, category: category) { error in

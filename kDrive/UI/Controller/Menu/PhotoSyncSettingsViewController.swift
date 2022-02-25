@@ -463,7 +463,7 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
 extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
         MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
-        
+
         DispatchQueue.global(qos: .utility).async {
             let realm = DriveFileManager.constants.uploadsRealm
             self.saveSettings(using: realm)

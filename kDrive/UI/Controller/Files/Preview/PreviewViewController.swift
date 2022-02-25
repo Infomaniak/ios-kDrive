@@ -73,6 +73,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
             setTitle()
         }
     }
+
     private var currentDownloadOperation: DownloadOperation?
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
@@ -433,7 +434,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         if let centerCellIndexPath = collectionView.indexPathForItem(at: view.convert(view.center, to: collectionView)),
            currentIndex != centerCellIndexPath {
             MatomoUtils.trackPreview(file: currentFile)
-            
+
             let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
             previousCell?.didEndDisplaying()
 
@@ -474,10 +475,10 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func openWith(from: UIView) {
-        let frame = from.convert(from.bounds, to: self.view)
+        let frame = from.convert(from.bounds, to: view)
         floatingPanelViewController.dismiss(animated: true)
         if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
-            FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: self.view, delegate: self)
+            FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
         } else {
             downloadToOpenWith { [weak self] in
                 guard let self = self else { return }
@@ -498,7 +499,6 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 } else if error != .taskCancelled && error != .taskRescheduled {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
                 }
-
             }
         }
         DownloadQueue.instance.addToQueue(file: currentFile)

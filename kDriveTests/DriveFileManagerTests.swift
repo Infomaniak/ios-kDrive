@@ -403,7 +403,7 @@ final class DriveFileManagerTests: XCTestCase {
             rootFile = root
             DriveFileManagerTests.driveFileManager.createCategory(name: "Category-\(Date())", color: "#001227") { createResult in
                 switch createResult {
-                case .failure(_):
+                case .failure:
                     XCTFail(TestsMessages.noError)
                 case .success(let createdCategory):
                     expectations[0].expectation.fulfill()
