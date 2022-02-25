@@ -866,13 +866,19 @@ public class DriveFileManager {
                     }
                 case .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete:
                     if let newFile = activity.file {
-                        keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
-                        realm.add(newFile, update: .modified)
-                        if !file.children.contains(newFile) {
-                            file.children.append(newFile)
+                        if newFile.isTrashed {
+                            removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: false, using: realm)
+                            deletedFiles.append(newFile)
+                            pagedActions[fileId] = .fileDelete
+                        } else {
+                            keepCacheAttributesForFile(newFile: newFile, keepStandard: true, keepExtras: true, keepRights: false, using: realm)
+                            realm.add(newFile, update: .modified)
+                            if !file.children.contains(newFile) {
+                                file.children.append(newFile)
+                            }
+                            updatedFiles.append(newFile)
+                            pagedActions[fileId] = .fileUpdate
                         }
-                        updatedFiles.append(newFile)
-                        pagedActions[fileId] = .fileUpdate
                     }
                 default:
                     break
