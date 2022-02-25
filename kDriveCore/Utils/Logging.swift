@@ -65,7 +65,7 @@ public enum Logging {
     private static func initNetworkLogging() {
         #if DEBUG
             if !Constants.isInExtension {
-                Atlantis.start(hostName: "127.0.0.1")
+                Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
             }
         #endif
     }

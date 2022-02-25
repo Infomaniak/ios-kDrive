@@ -101,7 +101,6 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
                     do {
                         try FileImportHelper.instance.upload(files: importedFiles, in: self.currentDirectory, drive: self.driveFileManager.drive)
                         await self.showUploadSnackbar(count: importedFiles.count, filename: importedFiles[0].name)
-
                     } catch {
                         await self.handleError(error)
                     }
