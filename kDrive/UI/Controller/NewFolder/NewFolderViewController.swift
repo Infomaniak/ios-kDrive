@@ -434,7 +434,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                                              dateEnabled: getSetting(for: .optionDate),
                                              sizeEnabled: getSetting(for: .optionSize),
                                              size: getValue(for: .optionSize) as? Int)
-            
+
             let onlyForMe = tableView.indexPathForSelectedRow?.row == 0
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil

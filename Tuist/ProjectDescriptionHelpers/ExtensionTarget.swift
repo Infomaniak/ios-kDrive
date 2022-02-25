@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 import ProjectDescription
 
 public extension Target {
@@ -104,5 +103,4 @@ public extension Target {
                       ],
                       settings: settings)
     }
-
 }
