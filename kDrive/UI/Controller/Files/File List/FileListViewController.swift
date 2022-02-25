@@ -765,8 +765,8 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
             uploadViewController.currentDirectory = viewModel.currentDirectory
             navigationController?.pushViewController(uploadViewController, animated: true)
         }
-
     #endif
+
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton) {
         viewModel.multipleSelectionViewModel?.actionButtonPressed(action: button.action)
     }

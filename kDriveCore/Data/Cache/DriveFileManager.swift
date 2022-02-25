@@ -348,7 +348,7 @@ public class DriveFileManager {
             // Get children from API
             let children: [File]
             let responseAt: Int?
-            if directory.isRoot && !drive.sharedWithMe {
+            if directory.isRoot {
                 (children, responseAt) = try await apiFetcher.rootFiles(drive: drive, page: page, sortType: sortType)
             } else {
                 (children, responseAt) = try await apiFetcher.files(in: directory, page: page, sortType: sortType)
