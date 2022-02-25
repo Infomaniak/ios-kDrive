@@ -242,8 +242,8 @@ class MultipleSelectionFileListViewModel {
             do {
                 try await withThrowingTaskGroup(of: Void.self) { group in
                     for file in selectedItems {
-                        group.addTask { [self] in
-                            _ = try await driveFileManager.delete(file: file)
+                        group.addTask { [frozenFile = file.freezeIfNeeded(), self] in
+                            _ = try await driveFileManager.delete(file: frozenFile)
                         }
                     }
                     try await group.waitForAll()
