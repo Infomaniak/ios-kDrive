@@ -111,6 +111,7 @@ class StoreViewController: UICollectionViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.store.displayName])
     }
 
     @objc func closeButtonPressed() {
@@ -371,6 +372,7 @@ extension StoreViewController: StoreManagerDelegate {
 
 extension StoreViewController: StoreObserverDelegate {
     func storeObserverPurchaseDidSucceed(transaction: SKPaymentTransaction, receiptString: String) {
+        MatomoUtils.track(eventWithCategory: .inApp, name: "buy")
         // Send receipt to the server
         let body = ReceiptInfo(latestReceipt: receiptString,
                                userId: AccountManager.instance.currentUserId,

@@ -30,6 +30,7 @@ extension SelectSwitchDriveDelegate {
             floatingPanelViewController?.setTitleLabel(with: drive.name)
             present(driveFloatingPanelController, animated: true)
         } else {
+            MatomoUtils.track(eventWithCategory: .drive, name: "switch")
             AccountManager.instance.setCurrentDriveForCurrentAccount(drive: drive)
             AccountManager.instance.saveAccounts()
             // Download root file

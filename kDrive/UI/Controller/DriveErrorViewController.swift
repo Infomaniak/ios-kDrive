@@ -60,6 +60,11 @@ class DriveErrorViewController: UIViewController {
         navigationController?.setInfomaniakAppearanceNavigationBar()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: ["DriveError"])
+    }
+
     @IBAction func testButtonPressed(_ sender: Any) {
         UIApplication.shared.open(URLConstants.shop.url)
     }

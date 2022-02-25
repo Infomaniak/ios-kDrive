@@ -70,6 +70,11 @@ class SelectDriveViewController: UIViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SelectDrive"])
+    }
+
     private func initForCurrentAccount(_ account: Account) {
         currentAccount = account
         accounts = AccountManager.instance.accounts.filter { $0.userId != account.userId }

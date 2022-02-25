@@ -67,6 +67,11 @@ class OnboardingViewController: UIViewController {
         signInButton.setLoading(false)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: ["Onboarding"])
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if view.frame.height < 600 {
@@ -103,10 +108,12 @@ class OnboardingViewController: UIViewController {
     }
 
     @IBAction func signInButtonPressed(_ sender: Any) {
+        MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
         InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
     }
 
     @IBAction func registerButtonPressed(_ sender: Any) {
+        MatomoUtils.track(eventWithCategory: .account, name: "openCreationWebview")
         present(RegisterViewController.instantiateInNavigationController(delegate: self), animated: true)
     }
 
@@ -220,6 +227,7 @@ extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDa
 
 extension OnboardingViewController: InfomaniakLoginDelegate {
     func didCompleteLoginWith(code: String, verifier: String) {
+        MatomoUtils.track(eventWithCategory: .account, name: "loggedIn")
         let previousAccount = AccountManager.instance.currentAccount
         signInButton.setLoading(true)
         registerButton.isEnabled = false
@@ -230,6 +238,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 AccountManager.instance.currentDriveFileManager?.getFile(id: DriveFileManager.constants.rootID) { _, _, _ in
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
+                    MatomoUtils.connectUser()
                     self.goToMainScreen()
                 }
             } catch {

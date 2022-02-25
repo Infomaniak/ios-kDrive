@@ -105,6 +105,7 @@ class TrashViewController: FileListViewController {
                 let message = success ? KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveResourcesStrings.Localizable.errorDelete
                 UIConstants.showSnackBar(message: message)
             }
+            MatomoUtils.track(eventWithCategory: .trash, name: "emptyTrash")
         }
         present(alert, animated: true)
     }
@@ -131,6 +132,11 @@ class TrashViewController: FileListViewController {
             message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescriptionPlural(files.count))
         }
         let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.trashActionDelete, message: message, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
+            if self.selectionMode {
+                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: self.selectedItems.count)
+            } else {
+                MatomoUtils.track(eventWithCategory: .trash, name: "deleteFromTrash")
+            }
             let group = DispatchGroup()
             var success = true
             for file in files {
@@ -238,10 +244,12 @@ extension TrashViewController: TrashOptionsDelegate {
     func didClickOnTrashOption(option: TrashOption, files: [File]) {
         switch option {
         case .restoreIn:
+            MatomoUtils.track(eventWithCategory: .trash, name: "restoreGivenFolder")
             filesToRestore = files
             selectFolderViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, delegate: self)
             present(selectFolderViewController, animated: true)
         case .restore:
+            MatomoUtils.track(eventWithCategory: .trash, name: "restoreOriginFolder")
             let group = DispatchGroup()
             for file in files {
                 group.enter()

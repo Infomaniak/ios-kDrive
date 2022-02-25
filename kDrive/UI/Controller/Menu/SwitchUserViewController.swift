@@ -55,12 +55,18 @@ class SwitchUserViewController: UIViewController {
         navigationController?.setTransparentStandardAppearanceNavigationBar()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, "SwitchUser"])
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setDefaultStandardAppearanceNavigationBar()
     }
 
     @IBAction func buttonAddUserClicked(_ sender: UIButton) {
+        MatomoUtils.track(eventWithCategory: .account, name: "add")
         let nextViewController = OnboardingViewController.instantiate()
         nextViewController.addUser = true
         present(nextViewController, animated: true)
@@ -99,6 +105,9 @@ extension SwitchUserViewController: UITableViewDelegate {
             tableView.deselectRow(at: indexPath, animated: true)
             present(driveErrorViewControllerNav, animated: true)
         } else {
+            MatomoUtils.track(eventWithCategory: .account, name: "switch")
+            MatomoUtils.connectUser()
+            
             AccountManager.instance.switchAccount(newAccount: account)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
             if isRootViewController {

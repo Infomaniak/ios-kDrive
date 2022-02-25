@@ -63,6 +63,11 @@ class InviteUserViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "InviteUser"])
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -320,6 +325,7 @@ extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let usersIds = shareables.compactMap { $0 as? DriveUser }.map(\.id)
         let teams = shareables.compactMap { $0 as? Team }.map(\.id)
+        MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
         driveFileManager.apiFetcher.checkUserRights(file: file, users: usersIds, teams: teams, emails: emails, permission: newPermission.rawValue) { response, _ in
             let conflictList = response?.data?.filter(\.isConflict) ?? []
             if conflictList.isEmpty {

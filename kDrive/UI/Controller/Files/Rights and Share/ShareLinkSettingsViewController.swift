@@ -156,6 +156,7 @@ class ShareLinkSettingsViewController: UIViewController {
         navigationBarAppearanceLarge.configureWithTransparentBackground()
         navigationBarAppearanceLarge.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         navigationItem.scrollEdgeAppearance = navigationBarAppearanceLarge
+        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "ShareLinkSettings"])
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -360,5 +361,8 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
                 self.navigationController?.popViewController(animated: true)
             }
         }
+        MatomoUtils.trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),
+                                           downloadFromLink: getSetting(for: .optionDownload),
+                                           expirationDateLink: getSetting(for: .optionDate))
     }
 }

@@ -48,6 +48,11 @@ class NotificationsSettingsTableViewController: UITableViewController {
         navigationItem.hideBackButtonText()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "Notifications"])
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }

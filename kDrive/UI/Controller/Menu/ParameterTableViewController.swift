@@ -89,6 +89,11 @@ class ParameterTableViewController: UITableViewController {
         tableView.reloadData()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName])
+    }
+
     private func getNotificationText() -> String {
         if !UserDefaults.shared.isNotificationEnabled {
             return KDriveResourcesStrings.Localizable.notificationDisable
@@ -127,6 +132,7 @@ class ParameterTableViewController: UITableViewController {
             cell.initWithPositionAndShadow()
             cell.valueSwitch.isOn = UserDefaults.shared.isWifiOnly
             cell.switchHandler = { sender in
+                MatomoUtils.track(eventWithCategory: .settings, name: "onlyWifiTransfer", value: sender.isOn)
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell

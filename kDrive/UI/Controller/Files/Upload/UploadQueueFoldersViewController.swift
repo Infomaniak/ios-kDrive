@@ -43,6 +43,11 @@ class UploadQueueFoldersViewController: UITableViewController {
         setUpObserver()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.uploadQueue.displayName, "Folders"])
+    }
+
     deinit {
         notificationToken?.invalidate()
     }

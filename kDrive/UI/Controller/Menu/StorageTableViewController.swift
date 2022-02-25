@@ -77,6 +77,11 @@ class StorageTableViewController: UITableViewController {
         reload()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "Storage"])
+    }
+
     private func reload() {
         totalSize = 0
         // Get directories

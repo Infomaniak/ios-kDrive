@@ -29,22 +29,25 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
 
+    let presentedFromPlusButton: Bool
+
     private struct PlusButtonMenuAction: Equatable {
         let name: String
         let image: UIImage
         var color: UIColor = KDriveResourcesAsset.iconColor.color
         var docType: String = ""
+        var matomoName: String = ""
 
-        static let takePictureAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonTakePhotoOrVideo, image: KDriveResourcesAsset.camera.image)
-        static let importMediaAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo, image: KDriveResourcesAsset.images.image)
-        static let importAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadFile, image: KDriveResourcesAsset.upload.image)
-        static let scanAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonDocumentScanning, image: KDriveResourcesAsset.scan.image)
+        static let takePictureAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonTakePhotoOrVideo, image: KDriveResourcesAsset.camera.image, matomoName: "takePhotoOrVideo")
+        static let importMediaAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo, image: KDriveResourcesAsset.images.image, matomoName: "uploadMedia")
+        static let importAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadFile, image: KDriveResourcesAsset.upload.image, matomoName: "uploadFile")
+        static let scanAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonDocumentScanning, image: KDriveResourcesAsset.scan.image, matomoName: "scan")
         static let folderAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allFolder, image: KDriveResourcesAsset.folderFill.image)
 
-        static let docsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeDocs, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.infomaniakColor.color, docType: "docx")
-        static let pointsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficePoints, image: KDriveResourcesAsset.filePresentation.image, docType: "pptx")
-        static let gridsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeGrids, image: KDriveResourcesAsset.fileSheets.image, docType: "xlsx")
-        static let noteAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeNote, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.secondaryTextColor.color, docType: "txt")
+        static let docsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeDocs, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.infomaniakColor.color, docType: "docx", matomoName: "createDocument")
+        static let pointsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficePoints, image: KDriveResourcesAsset.filePresentation.image, docType: "pptx", matomoName: "createPresentation")
+        static let gridsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeGrids, image: KDriveResourcesAsset.fileSheets.image, docType: "xlsx", matomoName: "createTable")
+        static let noteAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeNote, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.secondaryTextColor.color, docType: "txt", matomoName: "createText")
     }
 
     private var content: [[PlusButtonMenuAction]] = [
@@ -53,9 +56,10 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         [.docsAction, .gridsAction, .pointsAction, .noteAction]
     ]
 
-    init(driveFileManager: DriveFileManager, folder: File) {
+    init(driveFileManager: DriveFileManager, folder: File, presentedFromPlusButton: Bool = true) {
         self.driveFileManager = driveFileManager
         self.currentDirectory = folder
+        self.presentedFromPlusButton = presentedFromPlusButton
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -139,10 +143,14 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         if indexPath.section == 0 {
             return
         }
-
         dismiss(animated: true)
         guard let mainTabViewController = parent?.presentingViewController as? MainTabViewController else { return }
         let action = content[indexPath.section][indexPath.row]
+        // Folder creation is already tracked through its creation page
+        if action != .folderAction {
+            let suffix = presentedFromPlusButton ? "FromFAB" : "FromFolder"
+            MatomoUtils.track(eventWithCategory: .newElement, name: "\(action.matomoName)\(suffix)")
+        }
         switch action {
         case .importAction:
             let documentPicker = DriveImportDocumentPickerViewController(documentTypes: [UTI.data.identifier], in: .import)

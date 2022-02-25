@@ -36,6 +36,11 @@ class SelectThemeTableViewController: UITableViewController {
         selectedTheme = UserDefaults.shared.theme
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "SelectTheme"])
+    }
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -55,7 +60,9 @@ class SelectThemeTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        UserDefaults.shared.theme = tableContent[indexPath.row]
+        let theme = tableContent[indexPath.row]
+        MatomoUtils.track(eventWithCategory: .settings, name: "theme\(theme.rawValue.capitalized)")
+        UserDefaults.shared.theme = theme
         (UIApplication.shared.delegate as? AppDelegate)?.window?.overrideUserInterfaceStyle = UserDefaults.shared.theme.interfaceStyle
         navigationController?.popViewController(animated: true)
     }

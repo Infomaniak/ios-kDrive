@@ -36,6 +36,11 @@ class FavoriteViewController: FileListViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: ["Favorite"])
+    }
+
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
         guard driveFileManager != nil else {
             DispatchQueue.main.async {

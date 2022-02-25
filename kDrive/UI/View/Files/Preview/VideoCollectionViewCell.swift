@@ -86,12 +86,20 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
+    override func didEndDisplaying() {
+        MatomoUtils.trackMediaPlayer(leaveAt: player?.progressPercentage)
+    }
+
     @IBAction func playVideoPressed(_ sender: Any) {
         guard let player = player else { return }
+
+        MatomoUtils.trackMediaPlayer(playMedia: .video)
+
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
         navController.disappearCallback = { [weak self] in
+            MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
             self?.player?.pause()
         }
         navController.setNavigationBarHidden(true, animated: false)

@@ -197,6 +197,7 @@ extension EditCategoryViewController: ColorSelectionDelegate {
 
 extension EditCategoryViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
+        MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
         if let category = category {
             // Edit category
             driveFileManager.editCategory(id: category.id, name: category.isPredefined ? nil : category.name, color: category.colorHex) { [weak self] result in

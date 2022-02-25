@@ -51,6 +51,12 @@ class AppLockSettingsViewController: UIViewController {
         faceIdSwitch.setOn(UserDefaults.shared.isAppLockEnabled, animated: false)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName,
+                                 MatomoUtils.Views.security.displayName, "AppLock"])
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         closeActionHandler?()
@@ -64,6 +70,7 @@ class AppLockSettingsViewController: UIViewController {
         let context = LAContext()
         let reason = KDriveResourcesStrings.Localizable.appSecurityDescription
         var error: NSError?
+        MatomoUtils.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
         if #available(iOS 8.0, *) {
             if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
                 context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in

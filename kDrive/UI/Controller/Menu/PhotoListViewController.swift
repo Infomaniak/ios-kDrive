@@ -124,6 +124,11 @@ class PhotoListViewController: MultipleSelectionViewController {
         applyGradient(view: headerImageView)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, "PhotoList"])
+    }
+
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         collectionView.collectionViewLayout.invalidateLayout()

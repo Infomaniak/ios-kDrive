@@ -55,6 +55,11 @@ class SelectFolderViewController: FileListViewController {
         setUpDirectory()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.save.displayName, "SelectFolder"])
+    }
+
     private func setUpDirectory() {
         addFolderButton.isEnabled = currentDirectory.rights?.createNewFolder ?? false
         addFolderButton.accessibilityLabel = KDriveResourcesStrings.Localizable.createFolderTitle
@@ -118,6 +123,7 @@ class SelectFolderViewController: FileListViewController {
     }
 
     @IBAction func addFolderButtonPressed(_ sender: UIBarButtonItem) {
+        MatomoUtils.track(eventWithCategory: .newElement, name: "newFolderOnTheFly")
         let newFolderViewController = NewFolderTypeTableViewController.instantiateInNavigationController(parentDirectory: currentDirectory, driveFileManager: driveFileManager)
         navigationController?.present(newFolderViewController, animated: true)
     }

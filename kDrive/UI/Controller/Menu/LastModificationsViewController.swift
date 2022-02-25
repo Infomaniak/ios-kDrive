@@ -35,6 +35,11 @@ class LastModificationsViewController: FileListViewController {
         super.viewDidLoad()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, "LastModifications"])
+    }
+
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
         guard driveFileManager != nil && currentDirectory != nil else {
             DispatchQueue.main.async {

@@ -101,6 +101,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateContentIfNeeded()
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName])
     }
 
     func updateContentIfNeeded() {

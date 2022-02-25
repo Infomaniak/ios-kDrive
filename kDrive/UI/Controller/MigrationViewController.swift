@@ -39,6 +39,11 @@ class MigrationViewController: UIViewController {
         setupViewForMigration()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: ["Migration"])
+    }
+
     private func setupViewForMigration() {
         buttonView.alpha = 0
         migrationProgressView.alpha = 1

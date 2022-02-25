@@ -69,6 +69,7 @@ class ShareAndRightsViewController: UIViewController {
             updateShareList()
         }
         initialLoading = false
+        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName])
     }
 
     private func setTitle() {

@@ -127,6 +127,8 @@ class PhotoSyncSettingsViewController: UIViewController {
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationController?.navigationBar.isTranslucent = false
+
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "PhotoSync"])
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -460,6 +462,8 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
 
 extension PhotoSyncSettingsViewController: FooterButtonDelegate {
     func didClickOnButton() {
+        MatomoUtils.trackPhotoSync(isEnabled: photoSyncEnabled, with: newSyncSettings)
+        
         DispatchQueue.global(qos: .utility).async {
             let realm = DriveFileManager.constants.uploadsRealm
             self.saveSettings(using: realm)

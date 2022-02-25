@@ -74,6 +74,11 @@ class SearchFiltersViewController: UITableViewController {
         navigationController?.setInfomaniakAppearanceNavigationBar()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.search.displayName, "Filters"])
+    }
+
     private func reloadSection(_ filterType: FilterType) {
         if let index = filterTypes.firstIndex(of: filterType) {
             let selectedIndexPath = tableView.indexPathForSelectedRow
@@ -160,6 +165,7 @@ class SearchFiltersViewController: UITableViewController {
         let filterType = filterTypes[indexPath.section]
         switch filterType {
         case .date:
+            MatomoUtils.track(eventWithCategory: .search, name: "filterDate")
             let customDateOption: DateOption
             if let option = filters.date, case .custom = option {
                 customDateOption = option
@@ -171,6 +177,7 @@ class SearchFiltersViewController: UITableViewController {
             present(floatingPanelController, animated: true)
             return nil
         case .type:
+            MatomoUtils.track(eventWithCategory: .search, name: "filterFileType")
             var fileTypes = ConvertedType.allCases
             fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
             let floatingPanelController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiatePanel(options: fileTypes, selectedOption: filters.fileType, headerTitle: filterType.title, delegate: self)
@@ -178,6 +185,7 @@ class SearchFiltersViewController: UITableViewController {
             return nil
         case .categories:
             if indexPath.row == 0 {
+                MatomoUtils.track(eventWithCategory: .search, name: "filterCategory")
                 let manageCategoriesViewController = ManageCategoriesViewController.instantiate(driveFileManager: driveFileManager)
                 manageCategoriesViewController.canEdit = false
                 manageCategoriesViewController.selectedCategories = Array(filters.categories)

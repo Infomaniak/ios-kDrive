@@ -42,6 +42,11 @@ class RegisterViewController: UIViewController {
         webView.navigationDelegate = self
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: ["Register"])
+    }
+
     private func setupProgressView() {
         guard let navigationBar = navigationController?.navigationBar else { return }
 

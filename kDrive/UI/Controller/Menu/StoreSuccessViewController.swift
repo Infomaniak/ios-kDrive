@@ -20,6 +20,11 @@ import kDriveCore
 import UIKit
 
 class StoreSuccessViewController: UIViewController {
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.store.displayName, "Success"])
+    }
+
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {
         if let rootViewController = sender.window?.rootViewController as? MainTabViewController {
             rootViewController.dismiss(animated: true)

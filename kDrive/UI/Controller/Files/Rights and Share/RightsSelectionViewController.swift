@@ -114,6 +114,11 @@ class RightsSelectionViewController: UIViewController {
         navigationController?.navigationBar.sizeToFit()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: [MatomoUtils.Views.shareAndRights.displayName, "RightsSelection"])
+    }
+
     private func setupView() {
         switch rightSelectionType {
         case .shareLinkSettings:
@@ -148,7 +153,9 @@ class RightsSelectionViewController: UIViewController {
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {
-        delegate?.didUpdateRightValue(newValue: rights[tableView.indexPathForSelectedRow?.row ?? 0].key)
+        let rightKey = rights[tableView.indexPathForSelectedRow?.row ?? 0].key
+        delegate?.didUpdateRightValue(newValue: rightKey)
+        MatomoUtils.trackRightSelection(type: rightSelectionType, selected: rightKey)
         dismiss(animated: true)
     }
 

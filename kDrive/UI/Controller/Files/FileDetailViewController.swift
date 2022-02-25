@@ -124,6 +124,11 @@ class FileDetailViewController: UIViewController {
         initialLoading = false
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: ["FileDetail"])
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.tintColor = nil
@@ -301,6 +306,7 @@ class FileDetailViewController: UIViewController {
     }
 
     @IBAction func addComment(_ sender: UIButton) {
+        MatomoUtils.track(eventWithCategory: .comment, name: "add")
         let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { comment in
             let group = DispatchGroup()
             var newComment: Comment?
@@ -578,6 +584,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { _, _, completionHandler in
             let deleteAlert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: KDriveResourcesStrings.Localizable.modalCommentDeleteDescription, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
+                MatomoUtils.track(eventWithCategory: .comment, name: "delete")
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
@@ -617,6 +624,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
         let editAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
             let editAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.modalCommentAddTitle, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, text: self.comments[indexPath.row].body, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { comment in
+                MatomoUtils.track(eventWithCategory: .comment, name: "edit")
                 let group = DispatchGroup()
                 var success = false
                 group.enter()
@@ -644,6 +652,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
         let answerAction = UIContextualAction(style: .normal, title: nil) { _, _, completionHandler in
             let answerAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { comment in
+                MatomoUtils.track(eventWithCategory: .comment, name: "answer")
                 self.driveFileManager.apiFetcher.answerComment(file: self.file, text: comment, comment: self.comments[indexPath.row]) { response, _ in
                     if let data = response?.data {
                         data.isResponse = true
@@ -732,6 +741,7 @@ extension FileDetailViewController {
 
 extension FileDetailViewController: FileDetailDelegate {
     func didUpdateSegmentedControl(value: Int) {
+        MatomoUtils.track(eventWithCategory: .fileInfo, name: "switchView\(["Info", "Activities", "Comments"][value])")
         oldSections = tableView.numberOfSections
         currentTab = Tabs(rawValue: value) ?? .informations
         switch currentTab {
@@ -786,6 +796,7 @@ extension FileDetailViewController: FileLocationDelegate {
 
 extension FileDetailViewController: FileCommentDelegate {
     func didLikeComment(comment: Comment, index: Int) {
+        MatomoUtils.track(eventWithCategory: .comment, name: "like")
         driveFileManager.apiFetcher.likeComment(file: file, liked: comment.liked, comment: comment) { _, _ in
             self.comments[index].likesCount = !self.comments[index].liked ? self.comments[index].likesCount + 1 : self.comments[index].likesCount - 1
             self.comments[index].liked = !self.comments[index].liked

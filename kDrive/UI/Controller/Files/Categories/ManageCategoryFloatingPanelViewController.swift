@@ -122,6 +122,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         case .delete:
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteCategoryDescription(category.name), boldText: category.name)
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.buttonDelete, message: attrString, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: true) {
+                MatomoUtils.track(eventWithCategory: .categories, name: "delete")
                 let group = DispatchGroup()
                 var success = false
                 group.enter()

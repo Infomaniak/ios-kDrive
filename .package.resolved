@@ -236,6 +236,15 @@
         }
       },
       {
+        "package": "MatomoTracker",
+        "repositoryURL": "https://github.com/matomo-org/matomo-sdk-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "cea4a1cfcb05d49c5745801e05fff1cfed7a14e3",
+          "version": "7.5.1"
+        }
+      },
+      {
         "package": "mqtt-nio",
         "repositoryURL": "https://github.com/adam-fowler/mqtt-nio",
         "state": {

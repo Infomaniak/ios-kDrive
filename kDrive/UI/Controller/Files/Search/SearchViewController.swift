@@ -83,6 +83,7 @@ class SearchViewController: FileListViewController {
         DispatchQueue.main.async {
             self.searchController.searchBar.becomeFirstResponder()
         }
+        MatomoUtils.track(view: [MatomoUtils.Views.search.displayName])
     }
 
     override func getFiles(page: Int, sortType: SortType, forceRefresh: Bool, completion: @escaping (Result<[File], Error>, Bool, Bool) -> Void) {
