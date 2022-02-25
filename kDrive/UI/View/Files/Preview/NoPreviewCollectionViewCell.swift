@@ -26,7 +26,7 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
     @IBOutlet weak var subtitleLabel: UILabel!
     @IBOutlet weak var offlineView: UIView!
     @IBOutlet weak var progressView: UIProgressView!
-    @IBOutlet weak var openButton: UIButton!
+    @IBOutlet weak var openButton: IKLargeIconButton!
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
 

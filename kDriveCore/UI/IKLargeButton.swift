@@ -96,7 +96,7 @@ import UIKit
     }
 
     func setUpButton() {
-        layer.cornerRadius = 10
+        layer.cornerRadius = UIConstants.buttonCornerRadius
 
         // Set text font & color
         titleLabel?.font = style.titleFont
