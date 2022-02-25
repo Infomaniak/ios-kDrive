@@ -854,7 +854,7 @@ extension FileListViewController: FileCellDelegate {
         func didSwitchDriveFileManager(newDriveFileManager: DriveFileManager) {
             let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
             if isDifferentDrive {
-                viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager, currentDirectory: viewModel.driveFileManager.getCachedRootFile())
+                viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager)
                 bindViewModels()
                 tryOrDisplayError {
                     try await self.viewModel.loadFiles()
