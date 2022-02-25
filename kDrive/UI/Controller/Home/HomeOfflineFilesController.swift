@@ -33,6 +33,12 @@ class HomeOfflineFilesController: HomeRecentFilesController {
         completion(driveFileManager.getAvailableOfflineFiles())
     }
 
+    override func refreshIfNeeded(with file: File) {
+        if filesContain(file) || file.isAvailableOffline {
+            forceRefresh()
+        }
+    }
+
     override class func initInstance(driveFileManager: DriveFileManager, homeViewController: HomeViewController) -> Self {
         return Self(driveFileManager: driveFileManager, homeViewController: homeViewController)
     }
