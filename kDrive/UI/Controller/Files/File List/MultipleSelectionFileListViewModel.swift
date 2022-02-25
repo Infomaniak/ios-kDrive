@@ -371,7 +371,7 @@ class MultipleSelectionFileListViewModel {
 
     private func loadActivitiesForCurrentDirectory() {
         Task {
-            let _ = try await driveFileManager.fileActivities(file: currentDirectory)
+            _ = try await driveFileManager.fileActivities(file: currentDirectory)
             driveFileManager.notifyObserversWith(file: currentDirectory)
         }
     }
