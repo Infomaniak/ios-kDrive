@@ -28,7 +28,7 @@ class UploadQueueViewController: UIViewController {
     @IBOutlet weak var cancelButton: UIBarButtonItem!
 
     var currentDirectory: File!
-    private var uploadingFiles = [UploadFile]()
+    private var uploadingFiles = AnyRealmCollection(List<UploadFile>())
     private var progressForFileId = [String: CGFloat]()
     private var notificationToken: NotificationToken?
 
@@ -78,18 +78,13 @@ class UploadQueueViewController: UIViewController {
             .observe(on: .main) { [weak self] change in
                 switch change {
                 case .initial(let results):
-                    self?.uploadingFiles = Array(results)
-                    self?.uploadingFiles.first?.isFirstInCollection = true
-                    self?.uploadingFiles.last?.isLastInCollection = true
+                    self?.uploadingFiles = AnyRealmCollection(results)
                     self?.tableView.reloadData()
                     if results.isEmpty {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     self?.tableView.performBatchUpdates {
-                        self?.uploadingFiles = Array(results)
-                        self?.uploadingFiles.first?.isFirstInCollection = true
-                        self?.uploadingFiles.last?.isLastInCollection = true
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
                         self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
@@ -162,7 +157,8 @@ extension UploadQueueViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
         let file = uploadingFiles[indexPath.row]
-        cell.initWithPositionAndShadow(isFirst: file.isFirstInCollection, isLast: file.isLastInCollection)
+        cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
+                                       isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1)
         cell.configureWith(uploadFile: file, progress: progressForFileId[file.id])
         cell.selectionStyle = .none
         return cell

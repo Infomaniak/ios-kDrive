@@ -56,9 +56,6 @@ public class UploadFile: Object {
 
     private var localAsset: PHAsset?
 
-    public var isFirstInCollection = false
-    public var isLastInCollection = false
-
     var urlEncodedName: String {
         return name.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
     }
@@ -234,18 +231,5 @@ public class UploadFile: Object {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy/MM/"
         relativePath = dateFormatter.string(from: creationDate ?? Date())
-    }
-}
-
-extension UploadFile: Differentiable {
-    public var differenceIdentifier: String {
-        return id
-    }
-
-    public func isContentEqual(to source: UploadFile) -> Bool {
-        return name == source.name
-            && _error == source._error
-            && isFirstInCollection == source.isFirstInCollection
-            && isLastInCollection == source.isLastInCollection
     }
 }
