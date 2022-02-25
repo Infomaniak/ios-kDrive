@@ -154,7 +154,7 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         switch action {
         case .importAction:
             let documentPicker = DriveImportDocumentPickerViewController(documentTypes: [UTI.data.identifier], in: .import)
-            documentPicker.importDriveDirectory = currentDirectory
+            documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
             documentPicker.delegate = mainTabViewController
             mainTabViewController.present(documentPicker, animated: true)
         case .folderAction:
@@ -166,7 +166,7 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
                 let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
                 navigationViewController.modalPresentationStyle = .fullScreen
                 navigationViewController.currentDriveFileManager = driveFileManager
-                navigationViewController.currentDirectory = currentDirectory
+                navigationViewController.currentDirectory = currentDirectory.freezeIfNeeded()
                 scanDoc.delegate = navigationViewController
                 mainTabViewController.present(navigationViewController, animated: true)
             } else {
@@ -174,7 +174,7 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
             }
         case .takePictureAction, .importMediaAction:
             mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
-            mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory
+            mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory.freezeIfNeeded()
 
             if #available(iOS 14, *), action == .importMediaAction {
                 // Present new photo picker
@@ -209,7 +209,9 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
                 }
             }
         case .docsAction, .gridsAction, .pointsAction, .noteAction:
-            let alertViewController = AlertDocViewController(fileType: action.docType, directory: currentDirectory, driveFileManager: driveFileManager)
+            let alertViewController = AlertDocViewController(fileType: action.docType,
+                                                             directory: currentDirectory.freezeIfNeeded(),
+                                                             driveFileManager: driveFileManager)
             mainTabViewController.present(alertViewController, animated: true)
         default:
             break
