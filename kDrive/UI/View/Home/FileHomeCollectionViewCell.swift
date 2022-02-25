@@ -98,20 +98,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
     }
 
     override func configureLoading() {
+        super.configureLoading()
         timeStackView.isHidden = true
-        titleLabel.text = " "
-        let titleLayer = CALayer()
-        titleLayer.anchorPoint = .zero
-        titleLayer.bounds = CGRect(x: 0, y: 0, width: 100, height: 15)
-        titleLayer.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color.cgColor
-        titleLabel.layer.addSublayer(titleLayer)
-        logoImage.image = nil
-        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
-        largeIconImageView.isHidden = true
-        iconImageView.isHidden = false
-        iconImageView.image = nil
-        iconImageView.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
-        moreButton.isHidden = true
-        checkmarkImage?.isHidden = true
     }
 }
