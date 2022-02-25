@@ -677,7 +677,7 @@ extension HomeViewController: RecentActivityDelegate {
             let nextVC = RecentActivityFilesViewController.instantiate(activities: activities, driveFileManager: driveFileManager)
             filePresenter.navigationController?.pushViewController(nextVC, animated: true)
         } else {
-            filePresenter.present(driveFileManager: driveFileManager, file: file, files: activities.compactMap(\.file), normalFolderHierarchy: false)
+            filePresenter.present(driveFileManager: driveFileManager, file: driveFileManager.getManagedFile(from: file), files: activities.compactMap(\.file), normalFolderHierarchy: false)
         }
     }
 }
