@@ -252,8 +252,8 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
     private func toggleFavorite(isFavorite: Bool) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
             for file in files where file.capabilities.canUseFavorite {
-                group.addTask {
-                    try await self.driveFileManager.setFavorite(file: file, favorite: !isFavorite)
+                group.addTask { [frozenFile = file.freezeIfNeeded()] in
+                    try await self.driveFileManager.setFavorite(file: frozenFile, favorite: !isFavorite)
                     await MainActor.run {
                         if let file = self.driveFileManager.getCachedFile(id: file.id) {
                             self.changedFiles?.append(file)
