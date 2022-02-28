@@ -157,10 +157,28 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
     // MARK: - Web view navigation delegate
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        if let url = navigationAction.request.url?.absoluteString {
-            if url == file.officeUrl?.absoluteString || url.contains("login.infomaniak.com") || url.contains("manager.infomaniak.com/v3/mobile_login") || url.contains("documentserver.drive.infomaniak.com") {
-                decisionHandler(.allow)
-                return
+        if let url = navigationAction.request.url {
+            let urlString = url.absoluteString
+            if url == file.officeUrl
+                || urlString.contains("login.infomaniak.com")
+                || urlString.contains("manager.infomaniak.com/v3/mobile_login")
+                || urlString.contains("documentserver.drive.infomaniak.com") {
+                // HACK: Print/download a file if the URL contains "/output." because `shouldPerformDownload` doesn't work
+                if urlString.contains("/output.") {
+                    if UIPrintInteractionController.canPrint(url) {
+                        let printController = UIPrintInteractionController()
+                        printController.printingItem = url
+                        printController.present(animated: true)
+                    } else {
+                        // Download
+                        UIApplication.shared.open(url)
+                    }
+                    decisionHandler(.cancel)
+                    return
+                } else {
+                    decisionHandler(.allow)
+                    return
+                }
             }
         }
         decisionHandler(.cancel)
