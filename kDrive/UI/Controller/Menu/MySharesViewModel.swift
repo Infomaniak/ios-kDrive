@@ -23,11 +23,12 @@ import UIKit
 
 class MySharesViewModel: ManagedFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false,
-                                                            showUploadingFiles: false,
-                                                            selectAllSupported: false,
-                                                            rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle,
-                                                            emptyViewType: .noShared)
+        let configuration = Configuration(normalFolderHierarchy: false,
+                                          showUploadingFiles: false,
+                                          selectAllSupported: false,
+                                          rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle,
+                                          emptyViewType: .noShared,
+                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "MyShares"])
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.mySharedRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "users.@count > 0 AND id > 1")))
     }

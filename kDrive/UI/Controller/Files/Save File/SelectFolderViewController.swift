@@ -29,12 +29,13 @@ protocol SelectFolderDelegate: AnyObject {
 class SelectFolderViewModel: ConcreteFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile()
-        let configuration = FileListViewModel.Configuration(showUploadingFiles: false,
-                                                            isMultipleSelectionEnabled: false,
-                                                            rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle,
-                                                            emptyViewType: .emptyFolder,
-                                                            leftBarButtons: currentDirectory.id == DriveFileManager.constants.rootID ? [.cancel] : nil,
-                                                            rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil)
+        let configuration = Configuration(showUploadingFiles: false,
+                                          isMultipleSelectionEnabled: false,
+                                          rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle,
+                                          emptyViewType: .emptyFolder,
+                                          leftBarButtons: currentDirectory.id == DriveFileManager.constants.rootID ? [.cancel] : nil,
+                                          rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil,
+                                          matomoViewPath: [MatomoUtils.Views.save.displayName, "SelectFolder"])
 
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
     }
