@@ -70,20 +70,21 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
 
                 display(activities: activities)
             }
-            self.loading = false
         }
     }
 
     private func display(activities: [FileActivity]) {
         DispatchQueue.global(qos: .utility).async {
-            let mergedActivities = self.mergeAndClean(activities: activities)
-            self.mergedActivities.append(contentsOf: mergedActivities)
+            let pagedActivities = self.mergeAndClean(activities: activities)
+            self.mergedActivities.append(contentsOf: pagedActivities)
 
             guard !self.invalidated else {
+                self.loading = false
                 return
             }
-            Task {
-                self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
+            Task { [activities = self.mergedActivities] in
+                self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(activities), isEmpty: self.empty)
+                self.loading = false
             }
         }
     }
@@ -99,7 +100,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
             if !ignoredActivityIds.contains(activity.id) && !ignoreActivity {
                 var i = index + 1
                 var mergedFilesTemp = [activity.fileId: activity.file]
-                while i < activities.count && activity.createdAt.distance(to: activities[i].createdAt) <= mergeFileCreateDelay {
+                while i < activities.count && activities[i].createdAt.distance(to: activity.createdAt) <= mergeFileCreateDelay {
                     if activity.user?.id == activities[i].user?.id && activity.action == activities[i].action && activity.file?.type == activities[i].file?.type {
                         ignoredActivityIds.append(activities[i].id)
                         if mergedFilesTemp[activities[i].fileId] == nil {
