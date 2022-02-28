@@ -29,7 +29,8 @@ class FavoritesViewModel: ManagedFileListViewModel {
                                           rootTitle: KDriveResourcesStrings.Localizable.favoritesTitle,
                                           tabBarIcon: KDriveResourcesAsset.star,
                                           selectedTabBarIcon: KDriveResourcesAsset.starFill,
-                                          emptyViewType: .noFavorite)
+                                          emptyViewType: .noFavorite,
+                                          matomoViewPath: ["Favorite"])
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
     }

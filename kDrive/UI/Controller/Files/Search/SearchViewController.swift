@@ -96,7 +96,8 @@ class SearchFilesViewModel: UnmanagedFileListViewModel {
                                           rootTitle: KDriveResourcesStrings.Localizable.searchTitle,
                                           emptyViewType: .noSearchResults,
                                           leftBarButtons: [.cancel],
-                                          rightBarButtons: [.searchFilters])
+                                          rightBarButtons: [.searchFilters],
+                                          matomoViewPath: [MatomoUtils.Views.search.displayName])
         filters = Filters()
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.searchFilesRootFile)
         // Overriding default behavior to change list style in recent searches
@@ -221,7 +222,6 @@ class SearchViewController: FileListViewController {
         DispatchQueue.main.async {
             self.searchController.searchBar.becomeFirstResponder()
         }
-        MatomoUtils.track(view: [MatomoUtils.Views.search.displayName])
     }
 
     override func barButtonPressed(_ sender: FileListBarButton) {

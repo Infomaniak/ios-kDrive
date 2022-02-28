@@ -24,7 +24,11 @@ import UIKit
 
 class TrashListViewModel: UnmanagedFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        var configuration = Configuration(selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.trashTitle, emptyViewType: .noTrash, sortingOptions: [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest])
+        var configuration = Configuration(selectAllSupported: false,
+                                          rootTitle: KDriveResourcesStrings.Localizable.trashTitle,
+                                          emptyViewType: .noTrash,
+                                          sortingOptions: [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest],
+                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "TrashList"])
         var currentDirectory = currentDirectory
         if currentDirectory == nil {
             currentDirectory = DriveFileManager.trashRootFile

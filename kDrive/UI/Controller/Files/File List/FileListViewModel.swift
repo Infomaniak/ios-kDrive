@@ -88,6 +88,7 @@ class FileListViewModel: SelectDelegate {
         var leftBarButtons: [FileListBarButtonType]?
         var rightBarButtons: [FileListBarButtonType]?
         var sortingOptions: [SortType] = [.nameAZ, .nameZA, .newer, .older, .biggest, .smallest]
+        var matomoViewPath = ["FileList"]
     }
 
     var currentDirectory: File
