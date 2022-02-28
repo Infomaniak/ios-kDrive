@@ -23,7 +23,12 @@ import UIKit
 
 class OfflineFilesViewModel: ManagedFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, showUploadingFiles: false, isRefreshControlEnabled: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle, emptyViewType: .noOffline)
+        let configuration = Configuration(normalFolderHierarchy: false,
+                                          showUploadingFiles: false,
+                                          isRefreshControlEnabled: false, selectAllSupported: false,
+                                          rootTitle: KDriveResourcesStrings.Localizable.offlineFileTitle,
+                                          emptyViewType: .noOffline,
+                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "Offline"])
         // We don't really need a current directory for offline files
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.homeRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isAvailableOffline = true")))

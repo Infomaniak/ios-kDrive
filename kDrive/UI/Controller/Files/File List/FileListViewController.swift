@@ -192,6 +192,11 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        MatomoUtils.track(view: viewModel.configuration.matomoViewPath)
+    }
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         if let emptyView = collectionView?.backgroundView as? EmptyTableView {
