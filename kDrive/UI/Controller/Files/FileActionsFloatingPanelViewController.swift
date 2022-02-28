@@ -374,7 +374,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .favorite:
             driveFileManager.setFavoriteFile(file: file, favorite: !file.isFavorite) { [wasFavorited = file.isFavorite] error in
                 if error == nil {
-                    if !wasFavorited {
+                    if wasFavorited {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListRemoveFavoritesConfirmationSnackbar(1))
+                    } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavoritesConfirmationSnackbar(1))
                     }
                 } else {

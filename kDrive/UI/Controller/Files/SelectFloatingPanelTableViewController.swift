@@ -205,14 +205,27 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
 
         group.notify(queue: .main) {
             if success {
-                if action == .offline && addAction {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.filter { !$0.isDirectory }.count))
-                } else if action == .favorite && addAction {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavoritesConfirmationSnackbar(self.files.count))
-                } else if action == .folderColor {
+                switch action {
+                case .offline:
+                    let filesUpdatedNumber = self.files.filter { !$0.isDirectory }.count
+                    if addAction {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(filesUpdatedNumber))
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListRemoveOfflineConfirmationSnackbar(filesUpdatedNumber))
+                    }
+                case .favorite:
+                    if addAction {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavoritesConfirmationSnackbar(self.files.count))
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListRemoveFavoritesConfirmationSnackbar(self.files.count))
+                    }
+                case .folderColor:
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.isDirectory).count))
-                } else if action == .duplicate && addAction {
+                case .duplicate:
+                    guard addAction else { break }
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
+                default:
+                    break
                 }
             } else {
                 if self.downloadError != .taskCancelled {
