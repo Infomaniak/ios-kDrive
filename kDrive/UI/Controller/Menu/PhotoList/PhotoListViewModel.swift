@@ -66,7 +66,8 @@ class PhotoListViewModel: ManagedFileListViewModel {
                                                 selectAllSupported: false,
                                                 rootTitle: KDriveResourcesStrings.Localizable.allPictures,
                                                 emptyViewType: .noImages,
-                                                rightBarButtons: [.search, .photoSort]),
+                                                rightBarButtons: [.search, .photoSort],
+                                                matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
                    driveFileManager: driveFileManager,
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm()

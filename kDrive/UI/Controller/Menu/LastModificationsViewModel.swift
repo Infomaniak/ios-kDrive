@@ -23,7 +23,12 @@ import UIKit
 
 class LastModificationsViewModel: ManagedFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        let configuration = FileListViewModel.Configuration(normalFolderHierarchy: false, selectAllSupported: false, rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle, emptyViewType: .noActivitiesSolo, sortingOptions: [])
+        let configuration = Configuration(normalFolderHierarchy: false,
+                                          selectAllSupported: false,
+                                          rootTitle: KDriveResourcesStrings.Localizable.lastEditsTitle,
+                                          emptyViewType: .noActivitiesSolo,
+                                          sortingOptions: [],
+                                          matomoViewPath: [MatomoUtils.Views.menu.displayName, "LastModifications"])
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.lastModificationsRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "rawType != \"dir\"")))
         sortTypeObservation?.cancel()
