@@ -25,13 +25,13 @@ Please, don't do a merge request before creating an issue.
 ## Tech things
 
 ### Language
-The whole project is developed in **Swift 5** using **Xcode 12**.
+The whole project is developed in **Swift 5** using **Xcode 13**.
 
 ### Tuist
-This project uses [Tuist](https://tuist.io/docs/usage/getting-started/) to prevent conflicts on xcodeproj files. To generate the Xcode project, you need to install Tuist and run the `tuist generate` command. Refer to their documentation for more information.
+This project uses [Tuist](https://docs.tuist.io/tutorial/get-started) to prevent conflicts on xcodeproj files. To generate the Xcode project, you need to install Tuist and run the `tuist generate` command. Refer to their documentation for more information.
 
 ### Compatibility
-The minimum needed version to execute the app is iOS 12.0, anyway, we recommend to use the most recent version of iOS, the majority of our tests having been carried out on iOS 14.
+The minimum needed version to execute the app is iOS 13.0, anyway, we recommend to use the most recent version of iOS, the majority of our tests having been carried out on iOS 15.
 
 ### Cache
 We use [Realm.io](https://realm.io/) on both platforms (iOS and Android) to store the offline data of files and shares (in different databases instances). App and user preferences are stored in `UserDefaults`. 
