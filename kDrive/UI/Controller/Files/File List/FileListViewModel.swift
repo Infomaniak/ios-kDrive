@@ -351,7 +351,13 @@ class FileListViewModel: SelectDelegate {
 
     func loadActivitiesIfNeeded() async throws {
         if currentDirectory.fullyDownloaded && fileCount > 0 {
-            try await loadActivities()
+            let responseAtDate = Date(timeIntervalSince1970: Double(currentDirectory.responseAt))
+            let now = Date()
+            if responseAtDate.distance(to: now) > Constants.activitiesReloadTimeOut {
+                try await loadFiles(page: 1, forceRefresh: true)
+            } else {
+                try await loadActivities()
+            }
         }
     }
 

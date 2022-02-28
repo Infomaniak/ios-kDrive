@@ -85,7 +85,7 @@ class ConcreteFileListViewModel: ManagedFileListViewModel {
         guard !isLoading || page > 1 else { return }
 
         if currentDirectory.fullyDownloaded && !forceRefresh {
-            try await loadActivities()
+            try await loadActivitiesIfNeeded()
         } else {
             startRefreshing(page: page)
             defer {
@@ -172,9 +172,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
         if viewModel != nil {
             setupViewModel()
-            tryOrDisplayError {
-                try await self.viewModel.loadFiles()
-            }
         }
     }
 
@@ -188,7 +185,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         #endif
 
         tryOrDisplayError {
-            try await self.viewModel.loadActivitiesIfNeeded()
+            try await self.viewModel.loadFiles()
         }
     }
 
