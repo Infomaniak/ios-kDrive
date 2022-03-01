@@ -177,10 +177,10 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 }
             }
         case .duplicate:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [unowned self, fileIds = files.map(\.id)] selectedDirectory in
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
                 Task {
                     do {
-                        try await self.copy(fileIds: fileIds, to: selectedDirectory)
+                        try await self.copy(files: files, to: selectedDirectory)
                     } catch {
                         self.success = false
                     }
@@ -265,10 +265,10 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    private func copy(fileIds: [Int], to selectedDirectory: File) async throws {
+    private func copy(files: [File], to selectedDirectory: File) async throws {
         if files.count > Constants.bulkActionThreshold {
             // addAction = false // Prevents the snackbar to be displayed
-            let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedDirectory.id)
+            let action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
             let tabBarController = presentingViewController as? MainTabViewController
             let navigationController = tabBarController?.selectedViewController as? UINavigationController
             await (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?.performAndObserve(bulkAction: action)
