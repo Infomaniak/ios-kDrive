@@ -604,7 +604,7 @@ final class DriveApiTests: XCTestCase {
 
     func testBuildArchive() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Build archive")
-        _ = try await currentApiFetcher.buildArchive(drive: proxyDrive, for: [file])
+        _ = try await currentApiFetcher.buildArchive(drive: proxyDrive, body: .init(files: [file]))
         tearDownTest(directory: testDirectory)
     }
 
