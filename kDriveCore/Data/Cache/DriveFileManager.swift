@@ -596,11 +596,10 @@ public class DriveFileManager {
             for activity in activities {
                 let safeActivity = FileActivity(value: activity)
                 if let file = activity.file {
-                    let safeFile = File(value: file)
+                    let safeFile = file.detached()
                     keepCacheAttributesForFile(newFile: safeFile, keepProperties: .all, using: realm)
                     homeRootFile.children.insert(safeFile)
                     safeActivity.file = safeFile
-                    safeActivity.file?.capabilities = Rights(value: file.capabilities)
                 }
                 activitiesSafe.append(safeActivity)
             }
@@ -1003,11 +1002,11 @@ public class DriveFileManager {
         _ = try await apiFetcher.rename(file: file, newName: newName)
         let realm = getRealm()
         if let file = realm.resolve(safeFile) {
-            try realm.write {
-                file.name = newName
-            }
-            file.signalChanges(userId: drive.userId)
-            notifyObserversWith(file: file)
+            let newFile = file.detached()
+            newFile.name = newName
+            _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
+            newFile.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: newFile)
             return file
         } else {
             throw DriveError.fileNotFound
