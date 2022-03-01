@@ -84,7 +84,7 @@ class ConcreteFileListViewModel: ManagedFileListViewModel {
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        if currentDirectory.fullyDownloaded && !forceRefresh {
+        if currentDirectory.canLoadChildrenFromCache && !forceRefresh {
             try await loadActivitiesIfNeeded()
         } else {
             startRefreshing(page: page)
