@@ -505,6 +505,11 @@ public class File: Object, Codable {
         return FileVisibility(rawValue: rawVisibility)
     }
 
+    /// Indicate if we can use the cached children or if we must call API.
+    public var canLoadChildrenFromCache: Bool {
+        return fullyDownloaded && versionCode == DriveFileManager.constants.currentVersionCode
+    }
+
     public func applyLastModifiedDateToLocalFile() {
         try? FileManager.default.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
     }

@@ -342,7 +342,7 @@ public class DriveFileManager {
         let parentId = directory.id
         if let cachedParent = getCachedFile(id: parentId, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
-           (cachedParent.fullyDownloaded && cachedParent.versionCode == DriveFileManager.constants.currentVersionCode && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
+           (cachedParent.canLoadChildrenFromCache && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
         } else {
             // Get children from API
