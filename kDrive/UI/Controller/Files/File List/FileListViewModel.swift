@@ -351,7 +351,7 @@ class FileListViewModel: SelectDelegate {
     }
 
     func loadActivitiesIfNeeded() async throws {
-        if currentDirectory.fullyDownloaded && fileCount > 0 {
+        if currentDirectory.canLoadChildrenFromCache {
             let responseAtDate = Date(timeIntervalSince1970: Double(currentDirectory.responseAt))
             let now = Date()
             if responseAtDate.distance(to: now) > Constants.activitiesReloadTimeOut {
