@@ -144,8 +144,8 @@ class MultipleSelectionFileListViewModel {
 
     private func updateActionButtons() {
         let notEmpty = selectedCount > 0
-        let canMove = selectedItems.allSatisfy { $0.capabilities.canMove }
-        let canDelete = selectedItems.allSatisfy { $0.capabilities.canDelete }
+        let canMove = selectedItems.allSatisfy(\.capabilities.canMove)
+        let canDelete = selectedItems.allSatisfy(\.capabilities.canDelete)
 
         for i in 0 ..< multipleSelectionActions.count {
             var updatedAction: MultipleSelectionAction
