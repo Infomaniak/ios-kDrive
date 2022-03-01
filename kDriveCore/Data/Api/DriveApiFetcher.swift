@@ -408,8 +408,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.count(of: directory))).data
     }
 
-    public func buildArchive(drive: AbstractDrive, for files: [File]) async throws -> DownloadArchiveResponse {
-        try await perform(request: authenticatedRequest(.buildArchive(drive: drive), method: .post, parameters: ["file_ids": files.map(\.id)])).data
+    public func buildArchive(drive: AbstractDrive, body: ArchiveBody) async throws -> DownloadArchiveResponse {
+        try await perform(request: authenticatedRequest(.buildArchive(drive: drive), method: .post, parameters: body)).data
     }
 
     public func updateColor(directory: File, color: String) async throws -> Bool {

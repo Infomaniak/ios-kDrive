@@ -431,7 +431,13 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                 var selectViewController = quickActionsViewController as? SelectFloatingPanelTableViewController
                 if selectViewController == nil {
                     selectViewController = SelectFloatingPanelTableViewController()
-                    selectViewController?.files = files
+                    if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
+                        selectViewController?.allItemsSelected = true
+                        selectViewController?.parentId = viewModel.currentDirectory.id
+                    } else {
+                        selectViewController?.allItemsSelected = false
+                        selectViewController?.files = files
+                    }
                     selectViewController?.driveFileManager = driveFileManager
                     floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 260)
                     selectViewController!.reloadAction = { [weak self] in
