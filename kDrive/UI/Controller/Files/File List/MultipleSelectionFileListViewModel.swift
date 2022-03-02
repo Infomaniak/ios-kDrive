@@ -57,6 +57,7 @@ class MultipleSelectionFileListViewModel {
                 selectedItems.removeAll()
                 selectedCount = 0
                 isSelectAllModeEnabled = false
+                onDeselectAll?()
             }
         }
     }
