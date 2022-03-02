@@ -55,6 +55,7 @@ class MultipleSelectionFileListViewModel {
                 leftBarButtons = nil
                 rightBarButtons = nil
                 selectedItems.removeAll()
+                exceptItems.removeAll()
                 selectedCount = 0
                 isSelectAllModeEnabled = false
                 onDeselectAll?()
@@ -79,6 +80,7 @@ class MultipleSelectionFileListViewModel {
     var onPresentQuickActionPanel: FileListViewModel.PresentQuickActionPanelCallback?
 
     private(set) var selectedItems = Set<File>()
+    private(set) var exceptItems = Set<File>()
     var isSelectAllModeEnabled = false
 
     var driveFileManager: DriveFileManager
@@ -197,6 +199,7 @@ class MultipleSelectionFileListViewModel {
     func deselectAll() {
         selectedCount = 0
         selectedItems.removeAll()
+        exceptItems.removeAll()
         isSelectAllModeEnabled = false
         rightBarButtons = [.selectAll]
         onDeselectAll?()
@@ -215,6 +218,7 @@ class MultipleSelectionFileListViewModel {
     func didDeselectFile(_ file: File, at indexPath: IndexPath) {
         if isSelectAllModeEnabled {
             selectedCount -= 1
+            exceptItems.insert(file)
             if selectedCount == 0 {
                 deselectAll()
             }
