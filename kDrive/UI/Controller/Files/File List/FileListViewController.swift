@@ -315,14 +315,14 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
         }
 
         viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
-            for indexPath in self?.collectionView.indexPathsForVisibleItems ?? [] {
-                self?.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            for i in 0 ..< (self?.viewModel.fileCount ?? 0) {
+                self?.collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: true, scrollPosition: [])
             }
         }
 
         viewModel.multipleSelectionViewModel?.onDeselectAll = { [weak self] in
             for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
-                self?.collectionView.deselectItem(at: indexPath, animated: false)
+                self?.collectionView.deselectItem(at: indexPath, animated: true)
             }
         }
 
@@ -658,7 +658,6 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
-            cell.isSelected = true
         }
     }
 
