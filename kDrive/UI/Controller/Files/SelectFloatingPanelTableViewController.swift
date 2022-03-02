@@ -23,6 +23,7 @@ import UIKit
 class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewController {
     var files = [File]()
     var allItemsSelected = false
+    var exceptFileIds: [Int]?
     var parentId: Int?
     var changedFiles: [File]? = []
     var downloadInProgress = false
@@ -273,7 +274,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             // addAction = false // Prevents the snackbar to be displayed
             let action: BulkAction
             if allItemsSelected {
-                action = BulkAction(action: .copy, parentId: parentId, destinationDirectoryId: selectedDirectory.id)
+                action = BulkAction(action: .copy, parentId: parentId, exceptFileIds: exceptFileIds, destinationDirectoryId: selectedDirectory.id)
             } else {
                 action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
             }

@@ -433,6 +433,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                     selectViewController = SelectFloatingPanelTableViewController()
                     if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
                         selectViewController?.allItemsSelected = true
+                        selectViewController?.exceptFileIds = viewModel.multipleSelectionViewModel?.exceptItems.map(\.id)
                         selectViewController?.parentId = viewModel.currentDirectory.id
                     } else {
                         selectViewController?.allItemsSelected = false
