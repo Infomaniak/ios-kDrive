@@ -111,10 +111,18 @@ class MultipleSelectionFileListViewModel {
     func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .move:
+            // Current directory is always disabled.
+            var disabledDirectoriesIds = [currentDirectory.id]
+            // Selected items all have the same parent, add it to the disabled directories
+            if let firstSelectedParentId = selectedItems.first?.parentId,
+               firstSelectedParentId != currentDirectory.id,
+               selectedItems.allSatisfy({ $0.parentId == firstSelectedParentId }) {
+                disabledDirectoriesIds.append(firstSelectedParentId)
+            }
             let selectFolderNavigationController = SelectFolderViewController
                 .instantiateInNavigationController(driveFileManager: driveFileManager,
                                                    startDirectory: currentDirectory,
-                                                   disabledDirectoriesSelection: [selectedItems.first?.parent ?? driveFileManager.getCachedRootFile()]) { selectedFolder in
+                                                   disabledDirectoriesIdsSelection: disabledDirectoriesIds) { selectedFolder in
                     Task { [weak self] in
                         await self?.moveSelectedItems(to: selectedFolder)
                     }
@@ -217,7 +225,8 @@ class MultipleSelectionFileListViewModel {
         } else {
             do {
                 try await withThrowingTaskGroup(of: Void.self) { group in
-                    for file in selectedItems {
+                    // Move files only if needed
+                    for file in selectedItems where file.parentId != destinationDirectory.id {
                         group.addTask { [self] in
                             _ = try await driveFileManager.move(file: file, to: destinationDirectory)
                         }
