@@ -112,17 +112,17 @@ class MultipleSelectionFileListViewModel {
         switch action {
         case .move:
             // Current directory is always disabled.
-            var disabledDirectories = [currentDirectory]
+            var disabledDirectoriesIds = [currentDirectory.id]
             // Selected items all have the same parent, add it to the disabled directories
-            if let firstSelectedParent = selectedItems.first?.parent,
-               firstSelectedParent != currentDirectory,
-               selectedItems.allSatisfy({ $0.parent == firstSelectedParent }) {
-                disabledDirectories.append(firstSelectedParent)
+            if let firstSelectedParentId = selectedItems.first?.parentId,
+               firstSelectedParentId != currentDirectory.id,
+               selectedItems.allSatisfy({ $0.parentId == firstSelectedParentId }) {
+                disabledDirectoriesIds.append(firstSelectedParentId)
             }
             let selectFolderNavigationController = SelectFolderViewController
                 .instantiateInNavigationController(driveFileManager: driveFileManager,
                                                    startDirectory: currentDirectory,
-                                                   disabledDirectoriesSelection: disabledDirectories) { selectedFolder in
+                                                   disabledDirectoriesIdsSelection: disabledDirectoriesIds) { selectedFolder in
                     Task { [weak self] in
                         await self?.moveSelectedItems(to: selectedFolder)
                     }
@@ -227,7 +227,7 @@ class MultipleSelectionFileListViewModel {
             do {
                 try await withThrowingTaskGroup(of: Void.self) { group in
                     // Move files only if needed
-                    for file in selectedItems where file.parent?.id != destinationDirectory.id {
+                    for file in selectedItems where file.parentId != destinationDirectory.id {
                         group.addTask { [self] in
                             _ = try await driveFileManager.move(file: file, to: destinationDirectory)
                         }
