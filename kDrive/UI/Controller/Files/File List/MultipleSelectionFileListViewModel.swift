@@ -283,7 +283,7 @@ class MultipleSelectionFileListViewModel {
     }
 
     private func bulkMoveAll(destinationId: Int) async {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, destinationDirectoryId: destinationId)
+        let action = BulkAction(action: .move, parentId: currentDirectory.id, exceptFileIds: exceptItems.map(\.id), destinationDirectoryId: destinationId)
         await performAndObserve(bulkAction: action)
     }
 
@@ -293,7 +293,7 @@ class MultipleSelectionFileListViewModel {
     }
 
     private func bulkDeleteAll() async {
-        let action = BulkAction(action: .trash, parentId: currentDirectory.id)
+        let action = BulkAction(action: .trash, parentId: currentDirectory.id, exceptFileIds: exceptItems.map(\.id))
         await performAndObserve(bulkAction: action)
     }
 
