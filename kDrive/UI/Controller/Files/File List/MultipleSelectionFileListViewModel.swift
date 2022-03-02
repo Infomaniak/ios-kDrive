@@ -203,15 +203,21 @@ class MultipleSelectionFileListViewModel {
     }
 
     func didSelectFile(_ file: File, at indexPath: IndexPath) {
-        selectedItems.insert(file)
-        selectedCount = selectedItems.count
+        if isSelectAllModeEnabled {
+            selectedCount += 1
+        } else {
+            selectedItems.insert(file)
+            selectedCount = selectedItems.count
+        }
         onItemSelected?(indexPath)
     }
 
     func didDeselectFile(_ file: File, at indexPath: IndexPath) {
         if isSelectAllModeEnabled {
-            deselectAll()
-            didSelectFile(file, at: indexPath)
+            selectedCount -= 1
+            if selectedCount == 0 {
+                deselectAll()
+            }
         } else {
             selectedItems.remove(file)
             selectedCount = selectedItems.count
