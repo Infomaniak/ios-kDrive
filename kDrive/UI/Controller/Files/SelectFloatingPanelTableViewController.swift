@@ -21,7 +21,9 @@ import kDriveResources
 import UIKit
 
 class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewController {
-    var files: [File]!
+    var files = [File]()
+    var allItemsSelected = false
+    var parentId: Int?
     var changedFiles: [File]? = []
     var downloadInProgress = false
     var reloadAction: (() -> Void)?
@@ -53,7 +55,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
     override func setupContent() {
         if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
-        } else if files.count > Constants.bulkActionThreshold {
+        } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
             actions = FloatingPanelAction.multipleSelectionBulkActions
         } else {
             actions = FloatingPanelAction.multipleSelectionActions
@@ -128,7 +130,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 }
             }
         case .download:
-            if files.count > Constants.bulkActionThreshold || !files.allSatisfy({ !$0.isDirectory }) {
+            if files.count > Constants.bulkActionThreshold || allItemsSelected || files.contains(where: \.isDirectory) {
                 if downloadInProgress,
                    let currentArchiveId = currentArchiveId,
                    let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
@@ -142,7 +144,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                     downloadInProgress = true
                     collectionView.reloadItems(at: [indexPath])
                     group.enter()
-                    downloadArchivedFiles(files: files, downloadCellPath: indexPath) { result in
+                    downloadArchivedFiles(downloadCellPath: indexPath) { result in
                         switch result {
                         case .success(let archiveUrl):
                             self.downloadedArchiveUrl = archiveUrl
@@ -177,10 +179,10 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                 }
             }
         case .duplicate:
-            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [unowned self, fileIds = files.map(\.id)] selectedDirectory in
+            let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
                 Task {
                     do {
-                        try await self.copy(fileIds: fileIds, to: selectedDirectory)
+                        try await self.copy(files: files, to: selectedDirectory)
                     } catch {
                         self.success = false
                     }
@@ -210,7 +212,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                     UIConstants.showSnackBar(message: self.downloadError?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
                 }
             }
-            self.files = self.changedFiles
+            self.files = self.changedFiles ?? []
             self.downloadInProgress = false
             self.collectionView.reloadItems(at: [indexPath])
             if action == .download {
@@ -265,10 +267,16 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    private func copy(fileIds: [Int], to selectedDirectory: File) async throws {
-        if files.count > Constants.bulkActionThreshold {
+    @MainActor
+    private func copy(files: [File], to selectedDirectory: File) async throws {
+        if files.count > Constants.bulkActionThreshold || allItemsSelected {
             // addAction = false // Prevents the snackbar to be displayed
-            let action = BulkAction(action: .copy, fileIds: fileIds, destinationDirectoryId: selectedDirectory.id)
+            let action: BulkAction
+            if allItemsSelected {
+                action = BulkAction(action: .copy, parentId: parentId, destinationDirectoryId: selectedDirectory.id)
+            } else {
+                action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
+            }
             let tabBarController = presentingViewController as? MainTabViewController
             let navigationController = tabBarController?.selectedViewController as? UINavigationController
             await (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?.performAndObserve(bulkAction: action)
@@ -284,10 +292,16 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    private func downloadArchivedFiles(files: [File], downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
+    private func downloadArchivedFiles(downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
         Task {
             do {
-                let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, for: files)
+                let archiveBody: ArchiveBody
+                if allItemsSelected, let parentId = parentId {
+                    archiveBody = .init(parentId: parentId)
+                } else {
+                    archiveBody = .init(files: files)
+                }
+                let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, body: archiveBody)
                 self.currentArchiveId = response.id
                 DownloadQueue.instance.observeArchiveDownloaded(self, archiveId: response.id) { _, archiveUrl, error in
                     if let archiveUrl = archiveUrl {

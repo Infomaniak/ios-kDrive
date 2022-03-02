@@ -144,8 +144,8 @@ class MultipleSelectionFileListViewModel {
 
     private func updateActionButtons() {
         let notEmpty = selectedCount > 0
-        let canMove = selectedItems.allSatisfy { $0.capabilities.canMove }
-        let canDelete = selectedItems.allSatisfy { $0.capabilities.canDelete }
+        let canMove = selectedItems.allSatisfy(\.capabilities.canMove)
+        let canDelete = selectedItems.allSatisfy(\.capabilities.canDelete)
 
         for i in 0 ..< multipleSelectionActions.count {
             var updatedAction: MultipleSelectionAction
@@ -174,8 +174,7 @@ class MultipleSelectionFileListViewModel {
         isSelectAllModeEnabled = true
         rightBarButtons = [.loading]
         onSelectAll?()
-        let frozenDirectory = currentDirectory.freeze()
-        Task {
+        Task { [frozenDirectory = currentDirectory.freeze()] in
             do {
                 let directoryCount = try await driveFileManager.apiFetcher.count(of: frozenDirectory)
                 selectedCount = directoryCount.count
