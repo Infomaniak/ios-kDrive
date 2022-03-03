@@ -55,7 +55,7 @@ class MultipleSelectionFileListViewModel {
                 leftBarButtons = nil
                 rightBarButtons = nil
                 selectedItems.removeAll()
-                exceptItems.removeAll()
+                exceptItemIds.removeAll()
                 selectedCount = 0
                 isSelectAllModeEnabled = false
                 onDeselectAll?()
@@ -80,7 +80,7 @@ class MultipleSelectionFileListViewModel {
     var onPresentQuickActionPanel: FileListViewModel.PresentQuickActionPanelCallback?
 
     private(set) var selectedItems = Set<File>()
-    private(set) var exceptItems = Set<File>()
+    private(set) var exceptItemIds = Set<Int>()
     var isSelectAllModeEnabled = false
 
     var driveFileManager: DriveFileManager
@@ -199,7 +199,7 @@ class MultipleSelectionFileListViewModel {
     func deselectAll() {
         selectedCount = 0
         selectedItems.removeAll()
-        exceptItems.removeAll()
+        exceptItemIds.removeAll()
         isSelectAllModeEnabled = false
         rightBarButtons = [.selectAll]
         onDeselectAll?()
@@ -218,7 +218,7 @@ class MultipleSelectionFileListViewModel {
     func didDeselectFile(_ file: File, at indexPath: IndexPath) {
         if isSelectAllModeEnabled {
             selectedCount -= 1
-            exceptItems.insert(file)
+            exceptItemIds.insert(file.id)
             if selectedCount == 0 {
                 deselectAll()
             }
@@ -293,7 +293,7 @@ class MultipleSelectionFileListViewModel {
     }
 
     private func bulkMoveAll(destinationId: Int) async {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, exceptFileIds: exceptItems.map(\.id), destinationDirectoryId: destinationId)
+        let action = BulkAction(action: .move, parentId: currentDirectory.id, exceptFileIds: Array(exceptItemIds), destinationDirectoryId: destinationId)
         await performAndObserve(bulkAction: action)
     }
 
@@ -303,7 +303,7 @@ class MultipleSelectionFileListViewModel {
     }
 
     private func bulkDeleteAll() async {
-        let action = BulkAction(action: .trash, parentId: currentDirectory.id, exceptFileIds: exceptItems.map(\.id))
+        let action = BulkAction(action: .trash, parentId: currentDirectory.id, exceptFileIds: Array(exceptItemIds))
         await performAndObserve(bulkAction: action)
     }
 

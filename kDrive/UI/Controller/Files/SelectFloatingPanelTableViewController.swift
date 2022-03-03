@@ -273,7 +273,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         if files.count > Constants.bulkActionThreshold || allItemsSelected {
             // addAction = false // Prevents the snackbar to be displayed
             let action: BulkAction
-            if allItemsSelected {
+            if allItemsSelected, let parentId = parentId {
                 action = BulkAction(action: .copy, parentId: parentId, exceptFileIds: exceptFileIds, destinationDirectoryId: selectedDirectory.id)
             } else {
                 action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
