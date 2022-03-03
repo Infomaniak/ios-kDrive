@@ -88,6 +88,16 @@ final class DriveApiTests: XCTestCase {
         return (testDirectory, file)
     }
 
+    func initSeveralFiles(testName: String) async throws -> (File, [File]) {
+        let testDirectory = try await setUpTest(testName: testName)
+        var files = [File]()
+        for i in 0..<5 {
+            let file = try await currentApiFetcher.createFile(in: testDirectory, name: "officeFile-\(i)", type: "docx")
+            files.append(file)
+        }
+        return (testDirectory, files)
+    }
+
     func checkIfFileIsInDestination(file: File, directory: File) async throws {
         let (files, _) = try await currentApiFetcher.files(in: directory)
         let movedFile = files.contains { $0.id == file.id }
@@ -531,6 +541,20 @@ final class DriveApiTests: XCTestCase {
     func testBuildArchive() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Build archive")
         _ = try await currentApiFetcher.buildArchive(drive: proxyDrive, body: .init(files: [file]))
+        tearDownTest(directory: testDirectory)
+    }
+
+    func testBulkAction() async throws {
+        let (testDirectory, files) = try await initSeveralFiles(testName: "Bulk action")
+        let bulkAction = BulkAction(action: .trash, fileIds: files[0...1].map(\.id))
+        _ = try await currentApiFetcher.bulkAction(drive: proxyDrive, action: bulkAction)
+        tearDownTest(directory: testDirectory)
+    }
+
+    func testBulkSelectAll() async throws {
+        let (testDirectory, _) = try await initSeveralFiles(testName: "Bulk action : select all")
+        let bulkAction = BulkAction(action: .trash, parentId: testDirectory.id)
+        _ = try await currentApiFetcher.bulkAction(drive: proxyDrive, action: bulkAction)
         tearDownTest(directory: testDirectory)
     }
 
