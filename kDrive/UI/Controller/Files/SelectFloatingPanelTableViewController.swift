@@ -298,7 +298,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             do {
                 let archiveBody: ArchiveBody
                 if allItemsSelected, let parentId = parentId {
-                    archiveBody = .init(parentId: parentId)
+                    archiveBody = .init(parentId: parentId, exceptFileIds: exceptFileIds)
                 } else {
                     archiveBody = .init(files: files)
                 }
