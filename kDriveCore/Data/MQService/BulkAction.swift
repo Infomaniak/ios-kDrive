@@ -25,15 +25,15 @@ public struct BulkAction: Encodable {
     let parentId: Int?
     let destinationDirectoryId: Int?
 
-    public init(action: BulkActionType, parentId: Int? = nil, exceptFileIds: [Int]? = nil, destinationDirectoryId: Int? = nil) {
-        self.init(action: action, exceptFileIds: exceptFileIds, fileIds: nil, parentId: parentId, destinationDirectoryId: destinationDirectoryId)
+    public init(action: BulkActionType, parentId: Int, exceptFileIds: [Int]? = nil, destinationDirectoryId: Int? = nil) {
+        self.init(action: action, parentId: parentId, fileIds: nil, exceptFileIds: exceptFileIds, destinationDirectoryId: destinationDirectoryId)
     }
 
     public init(action: BulkActionType, fileIds: [Int]? = nil, destinationDirectoryId: Int? = nil) {
-        self.init(action: action, exceptFileIds: nil, fileIds: fileIds, parentId: nil, destinationDirectoryId: destinationDirectoryId)
+        self.init(action: action, parentId: nil, fileIds: fileIds, exceptFileIds: nil, destinationDirectoryId: destinationDirectoryId)
     }
 
-    private init(action: BulkActionType, exceptFileIds: [Int]? = nil, fileIds: [Int]? = nil, parentId: Int? = nil, destinationDirectoryId: Int? = nil) {
+    private init(action: BulkActionType, parentId: Int? = nil, fileIds: [Int]? = nil, exceptFileIds: [Int]? = nil, destinationDirectoryId: Int? = nil) {
         self.action = action
         self.exceptFileIds = exceptFileIds
         self.fileIds = fileIds
