@@ -433,7 +433,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
                     selectViewController = SelectFloatingPanelTableViewController()
                     if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
                         selectViewController?.allItemsSelected = true
-                        selectViewController?.exceptFileIds = viewModel.multipleSelectionViewModel?.exceptItems.map(\.id)
+                        selectViewController?.exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
                         selectViewController?.parentId = viewModel.currentDirectory.id
                     } else {
                         selectViewController?.allItemsSelected = false
@@ -665,7 +665,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true,
            let file = viewModel.getFile(at: indexPath),
-           !(viewModel.multipleSelectionViewModel?.exceptItems.contains(file) ?? true)
+           !(viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) ?? true)
         {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }
