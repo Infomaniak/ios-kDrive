@@ -182,7 +182,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
+            let plusButtonDirectory: File
+            if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+                plusButtonDirectory = viewModel.currentDirectory
+            } else {
+                plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
+            }
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = plusButtonDirectory.capabilities.canCreateFile
         #endif
 
         tryOrDisplayError {
