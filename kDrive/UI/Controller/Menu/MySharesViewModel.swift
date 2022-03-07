@@ -37,25 +37,25 @@ class MySharesViewModel: ManagedFileListViewModel {
         guard !isLoading || page > 1 else { return }
 
         if currentDirectory.canLoadChildrenFromCache && !forceRefresh {
-            try await loadActivitiesIfNeeded()
+            let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: true)
+            if moreComing {
+                try await loadFiles(page: page + 1, forceRefresh: true)
+            }
         } else {
             startRefreshing(page: page)
             defer {
                 endRefreshing()
             }
-
-            let (_, moreComing) = try await driveFileManager.mySharedFiles(page: page, sortType: sortType, forceRefresh: forceRefresh)
+            
+            let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: forceRefresh)
             endRefreshing()
             if moreComing {
                 try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-            } else if !forceRefresh {
-                try await loadActivities()
             }
         }
     }
 
     override func loadActivities() async throws {
-        let shareActivityTypes: [FileActivityType] = [.shareLinkCreate, .shareLinkDelete, .fileShareCreate, .fileShareDelete]
-        try await driveFileManager.activities(ofTypes: shareActivityTypes, fakeRoot: DriveFileManager.mySharedRootFile)
+        try await loadFiles(page: 1, forceRefresh: false)
     }
 }
