@@ -199,6 +199,7 @@ class MultipleSelectionFileListViewModel {
     func didSelectFile(_ file: File, at indexPath: IndexPath) {
         if isSelectAllModeEnabled {
             selectedCount += 1
+            exceptItemIds.remove(file.id)
         } else {
             selectedItems.insert(file)
             selectedCount = selectedItems.count
