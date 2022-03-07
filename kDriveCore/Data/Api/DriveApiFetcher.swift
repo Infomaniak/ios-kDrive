@@ -280,6 +280,10 @@ public class DriveApiFetcher: ApiFetcher {
         return try await perform(request: authenticatedRequest(endpoint))
     }
 
+    public func fakeRootFileActivities(drive: AbstractDrive, activityTypes: [FileActivityType], from: Int, page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
+        return try await perform(request: authenticatedRequest(.fakeRootFileActivities(drive: drive, activityTypes: activityTypes, from: from)))
+    }
+
     public func filesActivities(drive: AbstractDrive, files: [File], from date: Date) async throws -> (data: [ActivitiesForFile], responseAt: Int?) {
         try await perform(request: authenticatedRequest(.filesActivities(drive: drive, fileIds: files.map(\.id), from: date)))
     }

@@ -31,29 +31,34 @@ class FavoritesViewModel: ManagedFileListViewModel {
                                           selectedTabBarIcon: KDriveResourcesAsset.starFill,
                                           emptyViewType: .noFavorite,
                                           matomoViewPath: ["Favorite"])
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
+        let favoritesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.favoriteRootFile)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: favoritesFakeRoot)
+        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self)
+            .filter(NSPredicate(format: "isFavorite = true AND NOT(rawStatus IN %@)", [FileStatus.trashed.rawValue, FileStatus.trashInherited.rawValue])))
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        startRefreshing(page: page)
-        defer {
-            endRefreshing()
-        }
+        if currentDirectory.canLoadChildrenFromCache && !forceRefresh {
+            try await loadActivitiesIfNeeded()
+        } else {
+            startRefreshing(page: page)
+            defer {
+                endRefreshing()
+            }
 
-        // TODO: there is no force refresh for favorites ?
-        let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType)
-        endRefreshing()
-        if moreComing {
-            try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-        } else if !forceRefresh {
-            try await loadActivities()
+            let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: forceRefresh)
+            endRefreshing()
+            if moreComing {
+                try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
+            } else if !forceRefresh {
+                try await loadActivities()
+            }
         }
     }
 
     override func loadActivities() async throws {
-        try await loadFiles(forceRefresh: true)
+        try await driveFileManager.activities(ofTypes: [.fileFavoriteCreate, .fileFavoriteRemove], fakeRoot: DriveFileManager.favoriteRootFile)
     }
 }

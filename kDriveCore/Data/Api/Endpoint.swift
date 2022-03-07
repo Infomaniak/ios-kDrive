@@ -197,6 +197,15 @@ public extension Endpoint {
         ])
     }
 
+    static func fakeRootFileActivities(drive: AbstractDrive, activityTypes: [FileActivityType], from: Int) -> Endpoint {
+        var queryItems = [fileActivitiesWithQueryItem,
+                          URLQueryItem(name: "depth", value: "unlimited"),
+                          URLQueryItem(name: "from_date", value: "\(from)")]
+
+        queryItems.append(contentsOf: activityTypes.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
+        return .driveInfo(drive: drive).appending(path: "/files/activities", queryItems: queryItems)
+    }
+
     static func notifications(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/files/notifications")
     }
