@@ -423,18 +423,18 @@ public class DriveFileManager {
     typealias FileApiSignature = (AbstractDrive, Int, SortType) async throws -> [File]
 
     public func favorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: DriveFileManager.favoriteRootFile, fetchFiles: {
+        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile), fetchFiles: {
             let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
             return (favorites, Int(Date().timeIntervalSince1970))
         },
         page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
     }
 
-    public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: DriveFileManager.mySharedRootFile, fetchFiles: {
+    public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool) async throws -> (files: [File], moreComing: Bool) {
+        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile), fetchFiles: {
             let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
             return (mySharedFiles, Int(Date().timeIntervalSince1970))
-        }, page: page, sortType: sortType, keepProperties: [.standard, .path, .version], forceRefresh: false)
+        }, page: page, sortType: sortType, keepProperties: [.standard, .path, .version], forceRefresh: forceRefresh)
     }
 
     public func activities(ofTypes types: [FileActivityType], fakeRoot: File) async throws {
