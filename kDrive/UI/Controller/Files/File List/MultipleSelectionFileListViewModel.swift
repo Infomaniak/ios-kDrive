@@ -55,6 +55,7 @@ class MultipleSelectionFileListViewModel {
                 leftBarButtons = nil
                 rightBarButtons = nil
                 selectedItems.removeAll()
+                exceptItemIds.removeAll()
                 selectedCount = 0
                 isSelectAllModeEnabled = false
                 onDeselectAll?()
@@ -79,6 +80,7 @@ class MultipleSelectionFileListViewModel {
     var onPresentQuickActionPanel: FileListViewModel.PresentQuickActionPanelCallback?
 
     private(set) var selectedItems = Set<File>()
+    private(set) var exceptItemIds = Set<Int>()
     var isSelectAllModeEnabled = false
 
     var driveFileManager: DriveFileManager
@@ -197,21 +199,30 @@ class MultipleSelectionFileListViewModel {
     func deselectAll() {
         selectedCount = 0
         selectedItems.removeAll()
+        exceptItemIds.removeAll()
         isSelectAllModeEnabled = false
         rightBarButtons = [.selectAll]
         onDeselectAll?()
     }
 
     func didSelectFile(_ file: File, at indexPath: IndexPath) {
-        selectedItems.insert(file)
-        selectedCount = selectedItems.count
+        if isSelectAllModeEnabled {
+            selectedCount += 1
+            exceptItemIds.remove(file.id)
+        } else {
+            selectedItems.insert(file)
+            selectedCount = selectedItems.count
+        }
         onItemSelected?(indexPath)
     }
 
     func didDeselectFile(_ file: File, at indexPath: IndexPath) {
         if isSelectAllModeEnabled {
-            deselectAll()
-            didSelectFile(file, at: indexPath)
+            selectedCount -= 1
+            exceptItemIds.insert(file.id)
+            if selectedCount == 0 {
+                deselectAll()
+            }
         } else {
             selectedItems.remove(file)
             selectedCount = selectedItems.count
@@ -283,7 +294,7 @@ class MultipleSelectionFileListViewModel {
     }
 
     private func bulkMoveAll(destinationId: Int) async {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, destinationDirectoryId: destinationId)
+        let action = BulkAction(action: .move, parentId: currentDirectory.id, exceptFileIds: Array(exceptItemIds), destinationDirectoryId: destinationId)
         await performAndObserve(bulkAction: action)
     }
 
@@ -293,7 +304,7 @@ class MultipleSelectionFileListViewModel {
     }
 
     private func bulkDeleteAll() async {
-        let action = BulkAction(action: .trash, parentId: currentDirectory.id)
+        let action = BulkAction(action: .trash, parentId: currentDirectory.id, exceptFileIds: Array(exceptItemIds))
         await performAndObserve(bulkAction: action)
     }
 
