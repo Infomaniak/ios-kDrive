@@ -665,7 +665,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true,
            let file = viewModel.getFile(at: indexPath),
-           !(viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) ?? true)
+           viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) != true
         {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }
