@@ -423,11 +423,15 @@ public class DriveFileManager {
     typealias FileApiSignature = (AbstractDrive, Int, SortType) async throws -> [File]
 
     public func favorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile), fetchFiles: {
-            let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
-            return (favorites, Int(Date().timeIntervalSince1970))
-        },
-        page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
+        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile),
+                        fetchFiles: {
+                            let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
+                            return (favorites, Int(Date().timeIntervalSince1970))
+                        },
+                        page: page,
+                        sortType: sortType,
+                        keepProperties: [.standard, .extras],
+                        forceRefresh: forceRefresh)
     }
 
     public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
@@ -435,32 +439,6 @@ public class DriveFileManager {
             let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
             return (mySharedFiles, Int(Date().timeIntervalSince1970))
         }, page: page, sortType: sortType, keepProperties: [.standard, .path, .version], forceRefresh: forceRefresh)
-    }
-
-    public func activities(ofTypes types: [FileActivityType], fakeRoot: File) async throws {
-        @ThreadSafe var rootFile = getManagedFile(from: fakeRoot)
-        let from = rootFile?.responseAt ?? 0
-        var page = 1
-        var moreComing = true
-        var pagedActions = [Int: FileActivityType]()
-        var responseAt = 0
-
-        while moreComing {
-            // Get activities page
-            let (activities, pageResponseAt) = try await apiFetcher.fakeRootFileActivities(drive: drive, activityTypes: types, from: from, page: page)
-            moreComing = activities.count == Endpoint.itemsPerPage
-            page += 1
-            responseAt = pageResponseAt ?? Int(Date().timeIntervalSince1970)
-            if let rootFile = rootFile {
-                _ = apply(activities: activities, to: rootFile, pagedActions: &pagedActions, timestamp: responseAt)
-            }
-        }
-
-        if let rootFile = rootFile {
-            try? rootFile.realm?.write {
-                rootFile.responseAt = responseAt
-            }
-        }
     }
 
     public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
