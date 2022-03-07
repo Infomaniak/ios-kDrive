@@ -21,10 +21,17 @@ import kDriveResources
 import UIKit
 
 class SelectFloatingPanelTableViewController: UICollectionViewController {
+    var driveFileManager: DriveFileManager!
     var files: [File]!
     var changedFiles: [File]? = []
     var downloadInProgress = false
     var reloadAction: (() -> Void)?
+
+    weak var presentingParent: UIViewController?
+
+    var sharedWithMe: Bool {
+        return driveFileManager?.drive.sharedWithMe ?? false
+    }
 
     enum Section: CaseIterable {
         case header, quickActions, actions
@@ -33,6 +40,8 @@ class SelectFloatingPanelTableViewController: UICollectionViewController {
     class var sections: [Section] {
         return [.actions]
     }
+
+    var actions = FloatingPanelAction.listActions
 
     var filesAvailableOffline: Bool {
         return files.allSatisfy(\.isAvailableOffline)
@@ -53,7 +62,7 @@ class SelectFloatingPanelTableViewController: UICollectionViewController {
         setupContent()
     }
 
-    override func setupContent() {
+    func setupContent() {
         if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if files.count > Constants.bulkActionThreshold {
@@ -63,7 +72,7 @@ class SelectFloatingPanelTableViewController: UICollectionViewController {
         }
     }
 
-    override func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         let action = actions[indexPath.row]
         var success = true
         var addAction = true
@@ -239,7 +248,7 @@ class SelectFloatingPanelTableViewController: UICollectionViewController {
         }
     }
 
-    override func track(action: FloatingPanelAction) {
+    func track(action: FloatingPanelAction) {
         let numberOfFiles = files.count
         switch action {
         // Quick Actions
