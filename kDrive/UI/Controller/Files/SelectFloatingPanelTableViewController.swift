@@ -20,13 +20,17 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewController {
+class SelectFloatingPanelTableViewController: UICollectionViewController {
     var files: [File]!
     var changedFiles: [File]? = []
     var downloadInProgress = false
     var reloadAction: (() -> Void)?
 
-    override class var sections: [Section] {
+    enum Section: CaseIterable {
+        case header, quickActions, actions
+    }
+
+    class var sections: [Section] {
         return [.actions]
     }
 
