@@ -86,24 +86,17 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
         switch action {
         case .offline:
-            let isAvailableOffline = filesAvailableOffline
-            addAction = !isAvailableOffline
-            if !isAvailableOffline {
+            FileActionsHelper.availableOffline(files: files, at: indexPath, driveFileManager: driveFileManager) { indexPath in
                 downloadInProgress = true
                 collectionView.reloadItems(at: [indexPath])
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-            }
-            for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
-                group.enter()
-                driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
-                    if error != nil {
-                        success = false
-                    }
-                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                        self.changedFiles?.append(file)
-                    }
-                    group.leave()
+            } completion: { file, error in
+                if error != nil {
+                    success = false
+                }
+                if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                    self.changedFiles?.append(file)
                 }
             }
         case .favorite:
@@ -351,6 +344,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             action = actions[indexPath.item]
         }
         handleAction(action, at: indexPath)
+        // TODO: Add Matomo
     }
 
     // MARK: - Collection view data source

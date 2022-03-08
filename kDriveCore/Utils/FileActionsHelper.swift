@@ -76,4 +76,19 @@ public class FileActionsHelper {
             group.leave()
         }
     }
+
+    public static func availableOffline(files: [File], at indexPath: IndexPath, driveFileManager: DriveFileManager, filesNotAvailable: (IndexPath) -> Void, completion: @escaping (File, Error?) -> Void) {
+        let isAvailableOffline = files.allSatisfy(\.isAvailableOffline)
+        if !isAvailableOffline {
+            filesNotAvailable(indexPath)
+        }
+        let group = DispatchGroup()
+        for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
+            group.enter()
+            driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
+                completion(file, error)
+                group.leave()
+            }
+        }
+    }
 }
