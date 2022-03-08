@@ -105,6 +105,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     var file: File!
     var normalFolderHierarchy = true
     weak var presentingParent: UIViewController?
+    var matomoCategory: MatomoUtils.EventCategory {
+        if presentingParent is PhotoListViewController {
+            return .picturesFileAction
+        }
+        return .fileListFileAction
+    }
 
     var sharedWithMe: Bool {
         return driveFileManager?.drive.sharedWithMe ?? false
@@ -642,28 +648,28 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         switch action {
         // Quick Actions
         case .sendCopy:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "sendFileCopy")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "sendFileCopy")
         case .shareLink:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "copyShareLink")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "copyShareLink")
         case .informations:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "openFileInfos")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "openFileInfos")
         // Actions
         case .duplicate:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "copy")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "copy")
         case .move:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "move")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "move")
         case .download:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "download")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "download")
         case .favorite:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "favorite", value: !file.isFavorite)
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "favorite", value: !file.isFavorite)
         case .offline:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "offline", value: !file.isAvailableOffline)
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "offline", value: !file.isAvailableOffline)
         case .rename:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "rename")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "rename")
         case .delete:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "putInTrash")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "putInTrash")
         case .convertToDropbox:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "convertToDropBox")
+            MatomoUtils.track(eventWithCategory: matomoCategory, name: "convertToDropBox")
         default:
             break
         }

@@ -240,17 +240,17 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         switch action {
         // Quick Actions
         case .duplicate:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "copy", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "copy", numberOfItems: numberOfFiles)
         case .download:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "download", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "download", numberOfItems: numberOfFiles)
         case .favorite:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "add_favorite", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "add_favorite", numberOfItems: numberOfFiles)
         case .offline:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "set_offline", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "set_offline", numberOfItems: numberOfFiles)
         case .delete:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "trash", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "trash", numberOfItems: numberOfFiles)
         case .folderColor:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "color_folder", numberOfItems: numberOfFiles)
+            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "color_folder", numberOfItems: numberOfFiles)
         default:
             break
         }
