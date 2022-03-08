@@ -63,4 +63,17 @@ public class FileActionsHelper {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
         }
     }
+
+    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: @escaping (File, Bool, Error?) -> Void) {
+        let isFavorite = files.allSatisfy(\.isFavorite)
+        let group = DispatchGroup()
+        for file in files where file.rights?.canFavorite != false {
+            group.enter()
+            let isFavored = !isFavorite
+            driveFileManager.setFavoriteFile(file: file, favorite: isFavored) { error in
+                completion(file, isFavored, error)
+            }
+            group.leave()
+        }
+    }
 }

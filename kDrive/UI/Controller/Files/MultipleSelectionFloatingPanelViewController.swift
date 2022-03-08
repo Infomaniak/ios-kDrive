@@ -102,18 +102,13 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .favorite:
-            let isFavorite = filesAreFavorite
-            addAction = !isFavorite
-            for file in files where file.rights?.canFavorite ?? false {
-                group.enter()
-                driveFileManager.setFavoriteFile(file: file, favorite: !isFavorite) { error in
-                    if error != nil {
-                        success = false
-                    }
-                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                        self.changedFiles?.append(file)
-                    }
-                    group.leave()
+            FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager) { file, isFavored, error in
+                addAction = isFavored
+                if error != nil {
+                    success = false
+                }
+                if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                    self.changedFiles?.append(file)
                 }
             }
         case .folderColor:
