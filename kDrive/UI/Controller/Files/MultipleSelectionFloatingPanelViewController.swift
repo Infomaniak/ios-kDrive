@@ -21,7 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class SelectFloatingPanelTableViewController: UICollectionViewController {
+class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     var driveFileManager: DriveFileManager!
     var files: [File]!
     var changedFiles: [File]? = []

@@ -233,7 +233,7 @@ class MultipleSelectionViewController: UIViewController {
 
     func showMenuForSelection() {
         let floatingPanelViewController = DriveFloatingPanelController()
-        let selectViewController = SelectFloatingPanelTableViewController()
+        let selectViewController = MultipleSelectionFloatingPanelViewController()
         selectViewController.presentingParent = self
         floatingPanelViewController.isRemovalInteractionEnabled = true
         selectViewController.files = Array(selectedItems)
