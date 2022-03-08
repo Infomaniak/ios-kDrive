@@ -35,7 +35,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     enum Section: CaseIterable {
-        case header, quickActions, actions
+        case actions
     }
 
     class var sections: [Section] {
@@ -56,9 +56,14 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     private var currentArchiveId: String?
     private var downloadError: DriveError?
 
+    convenience init() {
+        self.init(collectionViewLayout: MultipleSelectionFloatingPanelViewController.createLayout())
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
         setupContent()
     }
@@ -306,17 +311,17 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    // MARK: - Collection view data source
+    // MARK: - Private methods
 
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch Self.sections[indexPath.section] {
-        case .actions:
-            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
-            let action = actions[indexPath.item]
-            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
-            return cell
-        default:
-            return super.collectionView(collectionView, cellForItemAt: indexPath)
+    private static func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { section, _ in
+            switch sections[section] {
+            case .actions:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(53))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                return NSCollectionLayoutSection(group: group)
+            }
         }
     }
 
@@ -334,6 +339,29 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             } else {
                 completion(nil, (error as? DriveError) ?? .serverError)
             }
+        }
+    }
+
+    // MARK: - Collection view data source
+
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return Self.sections.count
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch Self.sections[section] {
+        case .actions:
+            return actions.count
+        }
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        switch Self.sections[indexPath.section] {
+        case .actions:
+            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
+            let action = actions[indexPath.item]
+            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+            return cell
         }
     }
 }
