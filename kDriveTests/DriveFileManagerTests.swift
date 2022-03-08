@@ -75,7 +75,7 @@ final class DriveFileManagerTests: XCTestCase {
     func checkIfFileIsInFavorites(file: File, shouldBePresent: Bool = true) async throws {
         let (favorites, _) = try await DriveFileManagerTests.driveFileManager.favorites()
         let isInFavoritesFiles = favorites.contains { $0.id == file.id }
-        XCTAssertEqual(isInFavoritesFiles, shouldBePresent, "File should\(shouldBePresent ? "" : ",'t") be in favorites files")
+        XCTAssertEqual(isInFavoritesFiles, shouldBePresent, "File should\(shouldBePresent ? "" : "n't") be in favorites files")
     }
 
     func checkIfFileIsInDestination(file: File, destination: File) {
