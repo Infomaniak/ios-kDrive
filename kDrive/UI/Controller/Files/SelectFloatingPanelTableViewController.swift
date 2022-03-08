@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -175,7 +176,7 @@ class SelectFloatingPanelTableViewController: UICollectionViewController {
                         DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
-                                    save(file: file)
+                                    self.save(file: file)
                                 }
                             } else {
                                 success = false
@@ -245,6 +246,47 @@ class SelectFloatingPanelTableViewController: UICollectionViewController {
             }
             self.reloadAction?()
             self.changedFiles = []
+        }
+    }
+
+    func save(file: File) {
+        switch file.convertedType {
+        case .image:
+            if let image = UIImage(contentsOfFile: file.localUrl.path) {
+                Task {
+                    do {
+                        try await PhotoLibrarySaver.instance.save(image: image)
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
+                        }
+                    } catch {
+                        DDLogError("Cannot save image: \(error)")
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                        }
+                    }
+                }
+            }
+        case .video:
+            Task {
+                do {
+                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
+                    }
+                } catch {
+                    DDLogError("Cannot save video: \(error)")
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                    }
+                }
+            }
+        case .folder:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
+            present(documentExportViewController, animated: true)
+        default:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
+            present(documentExportViewController, animated: true)
         }
     }
 
