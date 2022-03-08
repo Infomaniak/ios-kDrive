@@ -342,6 +342,17 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
+    // MARK: - Collection view delegate
+
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let action: FloatingPanelAction
+        switch Self.sections[indexPath.section] {
+        case .actions:
+            action = actions[indexPath.item]
+        }
+        handleAction(action, at: indexPath)
+    }
+
     // MARK: - Collection view data source
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
