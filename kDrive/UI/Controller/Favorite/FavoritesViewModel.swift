@@ -40,26 +40,18 @@ class FavoritesViewModel: ManagedFileListViewModel {
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        if currentDirectory.canLoadChildrenFromCache && !forceRefresh {
-            let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: true)
-            if moreComing {
-                try await loadFiles(page: page + 1, forceRefresh: true)
-            }
-        } else {
+        // Only show loading indicator if we have nothing in cache
+        if !currentDirectory.canLoadChildrenFromCache {
             startRefreshing(page: page)
-            defer {
-                endRefreshing()
-            }
-
-            let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: forceRefresh)
-            endRefreshing()
-            if moreComing {
-                try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-            }
         }
-    }
+        defer {
+            endRefreshing()
+        }
 
-    override func loadActivities() async throws {
-        try await loadFiles(page: 1, forceRefresh: false)
+        let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: true)
+        endRefreshing()
+        if moreComing {
+            try await loadFiles(page: page + 1, forceRefresh: true)
+        }
     }
 }
