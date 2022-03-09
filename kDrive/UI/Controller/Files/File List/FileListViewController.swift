@@ -144,6 +144,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var viewModel: FileListViewModel!
 
     var bindStore = Set<AnyCancellable>()
+    var currentFileLoadingTask: Task<Void, Never>?
 
     // MARK: - View controller lifecycle
 
@@ -205,6 +206,13 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         coordinator.animate { _ in
             self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
             self.setSelectedCells()
+        }
+    }
+
+    override func willMove(toParent parent: UIViewController?) {
+        super.willMove(toParent: parent)
+        if parent == nil {
+            currentFileLoadingTask?.cancel()
         }
     }
 
@@ -467,7 +475,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     private func tryLoadingFilesOrDisplayError() {
-        Task {
+        guard !viewModel.isLoading else { return }
+
+        currentFileLoadingTask = Task {
             do {
                 try await self.viewModel.loadFiles()
             } catch let driveError as DriveError {
@@ -477,7 +487,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                     UIConstants.showSnackBar(message: driveError.localizedDescription)
                 }
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                if error.asAFError?.isExplicitlyCancelledError != true {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                }
             }
         }
     }
