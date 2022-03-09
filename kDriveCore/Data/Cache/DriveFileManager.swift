@@ -339,16 +339,16 @@ public class DriveFileManager {
     }
 
     public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        let fetchFiles: () async throws -> ([File], Int)
+        let fetchFiles: () async throws -> ([File], Int?)
         if directory.isRoot {
             fetchFiles = {
                 let (children, responseAt) = try await self.apiFetcher.rootFiles(drive: self.drive, page: page, sortType: sortType)
-                return (children, responseAt ?? Int(Date().timeIntervalSince1970))
+                return (children, responseAt)
             }
         } else {
             fetchFiles = {
                 let (children, responseAt) = try await self.apiFetcher.files(in: directory, page: page, sortType: sortType)
-                return (children, responseAt ?? Int(Date().timeIntervalSince1970))
+                return (children, responseAt)
             }
         }
         return try await files(in: DriveFileManager.favoriteRootFile, fetchFiles: fetchFiles,
@@ -356,7 +356,7 @@ public class DriveFileManager {
     }
 
     private func files(in directory: File,
-                       fetchFiles: () async throws -> ([File], Int),
+                       fetchFiles: () async throws -> ([File], Int?),
                        page: Int,
                        sortType: SortType,
                        keepProperties: FilePropertiesOptions,
@@ -378,7 +378,7 @@ public class DriveFileManager {
             if let managedParent = realm.object(ofType: File.self, forPrimaryKey: parentId) {
                 // Update parent
                 try realm.write {
-                    managedParent.responseAt = responseAt
+                    managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
                     if children.count < Endpoint.itemsPerPage {
                         managedParent.versionCode = DriveFileManager.constants.currentVersionCode
                         managedParent.fullyDownloaded = true
@@ -420,13 +420,11 @@ public class DriveFileManager {
         }
     }
 
-    typealias FileApiSignature = (AbstractDrive, Int, SortType) async throws -> [File]
-
     public func favorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
         try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile),
                         fetchFiles: {
                             let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
-                            return (favorites, Int(Date().timeIntervalSince1970))
+                            return (favorites, nil)
                         },
                         page: page,
                         sortType: sortType,
@@ -435,10 +433,15 @@ public class DriveFileManager {
     }
 
     public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile), fetchFiles: {
-            let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
-            return (mySharedFiles, Int(Date().timeIntervalSince1970))
-        }, page: page, sortType: sortType, keepProperties: [.standard, .path, .version], forceRefresh: forceRefresh)
+        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile),
+                        fetchFiles: {
+                            let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
+                            return (mySharedFiles, nil)
+                        },
+                        page: page,
+                        sortType: sortType,
+                        keepProperties: [.standard, .path, .version],
+                        forceRefresh: forceRefresh)
     }
 
     public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
