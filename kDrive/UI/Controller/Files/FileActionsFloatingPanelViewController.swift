@@ -404,30 +404,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
         case .folderColor:
-            if driveFileManager.drive.pack == .free {
-                let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
-                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
-                floatingPanelViewController?.actionHandler = { _ in
-                    driveFloatingPanelController.dismiss(animated: true) {
-                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
-                    }
-                }
-                present(driveFloatingPanelController, animated: true)
-            } else {
-                let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(files: [file], driveFileManager: driveFileManager)
-                let floatingPanelViewController = DriveFloatingPanelController()
-                floatingPanelViewController.isRemovalInteractionEnabled = true
-                floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
-                floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
-                colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
-                colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
-                    if isSuccess {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(1))
-                    }
-                }
-                dismiss(animated: true) {
-                    self.presentingParent?.present(floatingPanelViewController, animated: true)
+            _ = FileActionsHelper.folderColor(files: [file], driveFileManager: driveFileManager, with: self, presentingParent: presentingParent) { isSuccess in
+                if isSuccess {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(1))
                 }
             }
         case .seeFolder:

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import kDriveResources
 import UIKit
+import kDriveCore
 
 public class FileActionsHelper {
     public static let instance = FileActionsHelper()
@@ -135,4 +136,34 @@ public class FileActionsHelper {
         return group
     }
 
+    public static func folderColor(files: [File], driveFileManager: DriveFileManager, with viewController: UIViewController, presentingParent: UIViewController?, completion: @escaping (Bool) -> Void) -> DispatchGroup {
+        let group = DispatchGroup()
+        group.enter()
+        if driveFileManager.drive.pack == .free {
+            let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
+            let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
+            floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
+            floatingPanelViewController?.actionHandler = { _ in
+                driveFloatingPanelController.dismiss(animated: true) {
+                    StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
+                }
+            }
+            viewController.present(driveFloatingPanelController, animated: true)
+        } else {
+            let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(files: files, driveFileManager: driveFileManager)
+            let floatingPanelViewController = DriveFloatingPanelController()
+            floatingPanelViewController.isRemovalInteractionEnabled = true
+            floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
+            floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
+            colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
+            colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
+                completion(isSuccess)
+                group.leave()
+            }
+            viewController.dismiss(animated: true) {
+                presentingParent?.present(floatingPanelViewController, animated: true)
+            }
+        }
+        return group
+    }
 }
