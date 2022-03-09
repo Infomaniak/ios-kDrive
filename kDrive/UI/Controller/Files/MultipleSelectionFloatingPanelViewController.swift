@@ -259,7 +259,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             action = actions[indexPath.item]
         }
         handleAction(action, at: indexPath)
-        MatomoUtils.trackBulkAction(action: action, files: files)
+        MatomoUtils.trackBulkAction(action: action, files: files, fromPhotoList: presentingParent is PhotoListViewController)
     }
 
     // MARK: - Collection view data source
