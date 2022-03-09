@@ -617,37 +617,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    internal func track(action: FloatingPanelAction) {
-        switch action {
-        // Quick Actions
-        case .sendCopy:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "sendFileCopy")
-        case .shareLink:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "copyShareLink")
-        case .informations:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "openFileInfos")
-        // Actions
-        case .duplicate:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "copy")
-        case .move:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "move")
-        case .download:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "download")
-        case .favorite:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "favorite", value: !file.isFavorite)
-        case .offline:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "offline", value: !file.isAvailableOffline)
-        case .rename:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "rename")
-        case .delete:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "putInTrash")
-        case .convertToDropbox:
-            MatomoUtils.track(eventWithCategory: .fileAction, name: "convertToDropBox")
-        default:
-            break
-        }
-    }
-
     private func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
         action.isLoading = isLoading
         DispatchQueue.main.async { [weak self] in
@@ -744,7 +713,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             action = actions[indexPath.item]
         }
-        track(action: action)
+        MatomoUtils.trackFileAction(action: action, file: file)
         handleAction(action, at: indexPath)
     }
 }

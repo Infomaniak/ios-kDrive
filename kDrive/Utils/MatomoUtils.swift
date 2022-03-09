@@ -138,4 +138,62 @@ class MatomoUtils {
     static func trackMediaPlayer(leaveAt percentage: Double?) {
         track(eventWithCategory: .mediaPlayer, name: "duration", value: Float(percentage ?? 0))
     }
+
+    // MARK: - File action
+
+    #if !ISEXTENSION
+
+    static func trackFileAction(action: FloatingPanelAction, file: File) {
+        switch action {
+        // Quick Actions
+        case .sendCopy:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "sendFileCopy")
+        case .shareLink:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "copyShareLink")
+        case .informations:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "openFileInfos")
+        // Actions
+        case .duplicate:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "copy")
+        case .move:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "move")
+        case .download:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "download")
+        case .favorite:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "favorite", value: !file.isFavorite)
+        case .offline:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "offline", value: !file.isAvailableOffline)
+        case .rename:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "rename")
+        case .delete:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "putInTrash")
+        case .convertToDropbox:
+            MatomoUtils.track(eventWithCategory: .fileAction, name: "convertToDropBox")
+        default:
+            break
+        }
+    }
+
+    static func trackBulkAction(action: FloatingPanelAction, files: [File]) {
+        let numberOfFiles = files.count
+        switch action {
+        // Quick Actions
+        case .duplicate:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "copy", numberOfItems: numberOfFiles)
+        case .download:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "download", numberOfItems: numberOfFiles)
+        case .favorite:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "add_favorite", numberOfItems: numberOfFiles)
+        case .offline:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "set_offline", numberOfItems: numberOfFiles)
+        case .delete:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "trash", numberOfItems: numberOfFiles)
+        case .folderColor:
+            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "color_folder", numberOfItems: numberOfFiles)
+        default:
+            break
+        }
+    }
+
+    #endif
 }

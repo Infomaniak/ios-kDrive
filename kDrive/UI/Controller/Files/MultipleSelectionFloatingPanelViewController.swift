@@ -219,27 +219,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func track(action: FloatingPanelAction) {
-        let numberOfFiles = files.count
-        switch action {
-        // Quick Actions
-        case .duplicate:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "copy", numberOfItems: numberOfFiles)
-        case .download:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "download", numberOfItems: numberOfFiles)
-        case .favorite:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "add_favorite", numberOfItems: numberOfFiles)
-        case .offline:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "set_offline", numberOfItems: numberOfFiles)
-        case .delete:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "trash", numberOfItems: numberOfFiles)
-        case .folderColor:
-            MatomoUtils.trackBulkEvent(eventWithCategory: .fileAction, name: "color_folder", numberOfItems: numberOfFiles)
-        default:
-            break
-        }
-    }
-
     // MARK: - Private methods
 
     private static func createLayout() -> UICollectionViewLayout {
@@ -280,7 +259,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             action = actions[indexPath.item]
         }
         handleAction(action, at: indexPath)
-        // TODO: Add Matomo
+        MatomoUtils.trackBulkAction(action: action, files: files)
     }
 
     // MARK: - Collection view data source
