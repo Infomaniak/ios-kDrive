@@ -26,6 +26,8 @@ public class FileActionsHelper {
 
     private var interactionController: UIDocumentInteractionController!
 
+    // MARK: - Single file
+
     public func openWith(file: File, from rect: CGRect, in view: UIView, delegate: UIDocumentInteractionControllerDelegate) {
         guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
             DDLogError("Open in place directory not found")
@@ -106,6 +108,8 @@ public class FileActionsHelper {
         }
     }
 
+    // MARK: - Single file and multiselection
+
     public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: @escaping (File, Bool, Error?) -> Void) -> DispatchGroup {
         let isFavorite = files.allSatisfy(\.isFavorite)
         let group = DispatchGroup()
@@ -114,8 +118,8 @@ public class FileActionsHelper {
             let isFavored = !isFavorite
             driveFileManager.setFavoriteFile(file: file, favorite: isFavored) { error in
                 completion(file, isFavored, error)
+                group.leave()
             }
-            group.leave()
         }
         return group
     }
