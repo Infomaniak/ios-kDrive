@@ -64,7 +64,48 @@ public class FileActionsHelper {
         }
     }
 
-    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: @escaping (File, Bool, Error?) -> Void) {
+    public static func save(file: File, with viewController: UIViewController) {
+        switch file.convertedType {
+        case .image:
+            if let image = UIImage(contentsOfFile: file.localUrl.path) {
+                Task {
+                    do {
+                        try await PhotoLibrarySaver.instance.save(image: image)
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
+                        }
+                    } catch {
+                        DDLogError("Cannot save image: \(error)")
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                        }
+                    }
+                }
+            }
+        case .video:
+            Task {
+                do {
+                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
+                    }
+                } catch {
+                    DDLogError("Cannot save video: \(error)")
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                    }
+                }
+            }
+        case .folder:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
+            viewController.present(documentExportViewController, animated: true)
+        default:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
+            viewController.present(documentExportViewController, animated: true)
+        }
+    }
+
+    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: @escaping (File, Bool, Error?) -> Void) -> DispatchGroup {
         let isFavorite = files.allSatisfy(\.isFavorite)
         let group = DispatchGroup()
         for file in files where file.rights?.canFavorite != false {
@@ -75,9 +116,10 @@ public class FileActionsHelper {
             }
             group.leave()
         }
+        return group
     }
 
-    public static func availableOffline(files: [File], at indexPath: IndexPath, driveFileManager: DriveFileManager, filesNotAvailable: (IndexPath) -> Void, completion: @escaping (File, Error?) -> Void) {
+    public static func availableOffline(files: [File], at indexPath: IndexPath, driveFileManager: DriveFileManager, filesNotAvailable: (IndexPath) -> Void, completion: @escaping (File, Error?) -> Void) -> DispatchGroup {
         let isAvailableOffline = files.allSatisfy(\.isAvailableOffline)
         if !isAvailableOffline {
             filesNotAvailable(indexPath)
@@ -90,5 +132,7 @@ public class FileActionsHelper {
                 group.leave()
             }
         }
+        return group
     }
+
 }

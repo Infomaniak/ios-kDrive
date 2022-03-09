@@ -373,7 +373,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             (manageCategoriesViewController.topViewController as? ManageCategoriesViewController)?.fileListViewController = presentingParent as? FileListViewController
             present(manageCategoriesViewController, animated: true)
         case .favorite:
-            FileActionsHelper.favorite(files: [file], driveFileManager: driveFileManager) { _, isFavored, error in
+            _ = FileActionsHelper.favorite(files: [file], driveFileManager: driveFileManager) { _, isFavored, error in
                 if error == nil {
                     if isFavored {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
@@ -436,7 +436,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             filePresenter.presentParent(of: file, driveFileManager: driveFileManager)
             dismiss(animated: true)
         case .offline:
-            FileActionsHelper.availableOffline(files: [file], at: indexPath, driveFileManager: driveFileManager) { _ in
+            _ = FileActionsHelper.availableOffline(files: [file], at: indexPath, driveFileManager: driveFileManager) { _ in
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             } completion: { [weak self] _, error in
@@ -447,7 +447,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .download:
             if file.isMostRecentDownloaded {
-                save(file: file)
+                FileActionsHelper.save(file: file, with: self)
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel
                 let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
@@ -457,7 +457,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
                     if let file = self?.file {
-                        self?.save(file: file)
+                        guard let self = self else { return }
+                        FileActionsHelper.save(file: file, with: self)
                     }
                 }
             }
@@ -702,47 +703,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     private func copyShareLinkToPasteboard(_ link: String) {
         UIPasteboard.general.url = URL(string: link)
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileInfoLinkCopiedToClipboard)
-    }
-
-    internal func save(file: File) {
-        switch file.convertedType {
-        case .image:
-            if let image = UIImage(contentsOfFile: file.localUrl.path) {
-                Task {
-                    do {
-                        try await PhotoLibrarySaver.instance.save(image: image)
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
-                        }
-                    } catch {
-                        DDLogError("Cannot save image: \(error)")
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                        }
-                    }
-                }
-            }
-        case .video:
-            Task {
-                do {
-                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
-                    }
-                } catch {
-                    DDLogError("Cannot save video: \(error)")
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                    }
-                }
-            }
-        case .folder:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
-            present(documentExportViewController, animated: true)
-        default:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
-            present(documentExportViewController, animated: true)
-        }
     }
 
     // MARK: - Collection view data source

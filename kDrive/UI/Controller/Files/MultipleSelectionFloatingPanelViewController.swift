@@ -82,11 +82,11 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         let action = actions[indexPath.row]
         var success = true
         var addAction = true
-        let group = DispatchGroup()
+        var group = DispatchGroup()
 
         switch action {
         case .offline:
-            FileActionsHelper.availableOffline(files: files, at: indexPath, driveFileManager: driveFileManager) { indexPath in
+            group = FileActionsHelper.availableOffline(files: files, at: indexPath, driveFileManager: driveFileManager) { indexPath in
                 downloadInProgress = true
                 collectionView.reloadItems(at: [indexPath])
                 // Update offline files before setting new file to synchronize them
@@ -100,7 +100,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .favorite:
-            FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager) { file, isFavored, error in
+            group = FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager) { file, isFavored, error in
                 addAction = isFavored
                 if error != nil {
                     success = false
@@ -161,7 +161,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             } else {
                 for file in files {
                     if file.isDownloaded {
-                        save(file: file)
+                        FileActionsHelper.save(file: file, with: self)
                     } else {
                         downloadInProgress = true
                         collectionView.reloadItems(at: [indexPath])
@@ -169,7 +169,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
-                                    self.save(file: file)
+                                    FileActionsHelper.save(file: file, with: self)
                                 }
                             } else {
                                 success = false
@@ -239,47 +239,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             }
             self.reloadAction?()
             self.changedFiles = []
-        }
-    }
-
-    func save(file: File) {
-        switch file.convertedType {
-        case .image:
-            if let image = UIImage(contentsOfFile: file.localUrl.path) {
-                Task {
-                    do {
-                        try await PhotoLibrarySaver.instance.save(image: image)
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
-                        }
-                    } catch {
-                        DDLogError("Cannot save image: \(error)")
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                        }
-                    }
-                }
-            }
-        case .video:
-            Task {
-                do {
-                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
-                    }
-                } catch {
-                    DDLogError("Cannot save video: \(error)")
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                    }
-                }
-            }
-        case .folder:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
-            present(documentExportViewController, animated: true)
-        default:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
-            present(documentExportViewController, animated: true)
         }
     }
 
