@@ -29,8 +29,9 @@ class MySharesViewModel: ManagedFileListViewModel {
                                           rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle,
                                           emptyViewType: .noShared,
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "MyShares"])
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.mySharedRootFile)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "users.@count > 0 AND id > 1")))
+        let mySharesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.mySharedRootFile)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: mySharesFakeRoot)
+        files = AnyRealmCollection(AnyRealmCollection(mySharesFakeRoot.children).filesSorted(by: sortType))
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
