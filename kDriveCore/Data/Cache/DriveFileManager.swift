@@ -351,7 +351,7 @@ public class DriveFileManager {
                 return (children, responseAt)
             }
         }
-        return try await files(in: DriveFileManager.favoriteRootFile, fetchFiles: fetchFiles,
+        return try await files(in: directory, fetchFiles: fetchFiles,
                                page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
     }
 
