@@ -32,3 +32,4 @@ opt_in_rules:
 excluded:
  - .tuist-bin/*
  - Derived/Sources/*
+function_parameter_count: 7
