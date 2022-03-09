@@ -67,7 +67,7 @@ public class FileActionsHelper {
         }
     }
 
-    public static func save(file: File, with viewController: UIViewController) {
+    public static func save(file: File, from viewController: UIViewController) {
         switch file.convertedType {
         case .image:
             if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -110,12 +110,13 @@ public class FileActionsHelper {
 
     // MARK: - Single file and multiselection
 
-    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: @escaping (File, Bool, Error?) -> Void) -> DispatchGroup {
-        let isFavorite = files.allSatisfy(\.isFavorite)
+    public static func favorite(files: [File], driveFileManager: DriveFileManager,
+                                completion: @escaping (File, Bool, Error?) -> Void) -> DispatchGroup {
         let group = DispatchGroup()
-        for file in files where file.rights?.canFavorite != false {
+        let areFilesFavorites = files.allSatisfy(\.isFavorite)
+        let isFavored = !areFilesFavorites
+        for file in files where file.rights?.canFavorite == true {
             group.enter()
-            let isFavored = !isFavorite
             driveFileManager.setFavoriteFile(file: file, favorite: isFavored) { error in
                 completion(file, isFavored, error)
                 group.leave()
@@ -124,7 +125,8 @@ public class FileActionsHelper {
         return group
     }
 
-    public static func availableOffline(files: [File], at indexPath: IndexPath, driveFileManager: DriveFileManager, filesNotAvailable: (IndexPath) -> Void, completion: @escaping (File, Error?) -> Void) -> DispatchGroup {
+    public static func offline(files: [File], at indexPath: IndexPath, driveFileManager: DriveFileManager,
+                               filesNotAvailable: (IndexPath) -> Void, completion: @escaping (File, Error?) -> Void) -> DispatchGroup {
         let isAvailableOffline = files.allSatisfy(\.isAvailableOffline)
         if !isAvailableOffline {
             filesNotAvailable(indexPath)
@@ -140,7 +142,8 @@ public class FileActionsHelper {
         return group
     }
 
-    public static func folderColor(files: [File], driveFileManager: DriveFileManager, with viewController: UIViewController, presentingParent: UIViewController?, completion: @escaping (Bool) -> Void) -> DispatchGroup {
+    public static func folderColor(files: [File], driveFileManager: DriveFileManager, with viewController: UIViewController,
+                                   presentingParent: UIViewController?, completion: @escaping (Bool) -> Void) -> DispatchGroup {
         let group = DispatchGroup()
         group.enter()
         if driveFileManager.drive.pack == .free {

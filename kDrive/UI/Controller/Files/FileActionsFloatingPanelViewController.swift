@@ -415,7 +415,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             filePresenter.presentParent(of: file, driveFileManager: driveFileManager)
             dismiss(animated: true)
         case .offline:
-            _ = FileActionsHelper.availableOffline(files: [file], at: indexPath, driveFileManager: driveFileManager) { _ in
+            _ = FileActionsHelper.offline(files: [file], at: indexPath, driveFileManager: driveFileManager) { _ in
                 // Update offline files before setting new file to synchronize them
                 (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
             } completion: { [weak self] _, error in
@@ -426,7 +426,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .download:
             if file.isMostRecentDownloaded {
-                FileActionsHelper.save(file: file, with: self)
+                FileActionsHelper.save(file: file, from: self)
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel
                 let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
@@ -437,7 +437,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
                     if let file = self?.file {
                         guard let self = self else { return }
-                        FileActionsHelper.save(file: file, with: self)
+                        FileActionsHelper.save(file: file, from: self)
                     }
                 }
             }

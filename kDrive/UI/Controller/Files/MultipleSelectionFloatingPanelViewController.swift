@@ -86,7 +86,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
         switch action {
         case .offline:
-            group = FileActionsHelper.availableOffline(files: files, at: indexPath, driveFileManager: driveFileManager) { indexPath in
+            group = FileActionsHelper.offline(files: files, at: indexPath, driveFileManager: driveFileManager) { indexPath in
                 downloadInProgress = true
                 collectionView.reloadItems(at: [indexPath])
                 // Update offline files before setting new file to synchronize them
@@ -138,7 +138,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             } else {
                 for file in files {
                     if file.isDownloaded {
-                        FileActionsHelper.save(file: file, with: self)
+                        FileActionsHelper.save(file: file, from: self)
                     } else {
                         downloadInProgress = true
                         collectionView.reloadItems(at: [indexPath])
@@ -146,7 +146,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
-                                    FileActionsHelper.save(file: file, with: self)
+                                    FileActionsHelper.save(file: file, from: self)
                                 }
                             } else {
                                 success = false
