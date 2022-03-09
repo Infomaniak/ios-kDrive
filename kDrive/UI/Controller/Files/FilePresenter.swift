@@ -143,10 +143,10 @@ class FilePresenter {
                 viewController?.present(safariViewController, animated: animated)
                 completion?(true)
             } else {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
                 SentrySDK.capture(message: "Tried to present unsupported scheme") { scope in
-                    scope.setContext(value: ["URL": url], key: "Details")
+                    scope.setContext(value: ["URL": url.absoluteString], key: "Details")
                 }
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGetBookmarkURL)
                 completion?(false)
             }
         } else {

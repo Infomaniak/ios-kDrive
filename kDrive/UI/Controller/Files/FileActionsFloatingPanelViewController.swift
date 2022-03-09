@@ -105,6 +105,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     var file: File!
     var normalFolderHierarchy = true
     weak var presentingParent: UIViewController?
+    var matomoCategory: MatomoUtils.EventCategory {
+        if presentingParent is PhotoListViewController {
+            return .picturesFileAction
+        }
+        return .fileListFileAction
+    }
 
     var sharedWithMe: Bool {
         return driveFileManager?.drive.sharedWithMe ?? false
