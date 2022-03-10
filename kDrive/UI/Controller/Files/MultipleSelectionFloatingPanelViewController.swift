@@ -34,14 +34,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         return driveFileManager?.drive.sharedWithMe ?? false
     }
 
-    enum Section: CaseIterable {
-        case actions
-    }
-
-    class var sections: [Section] {
-        return [.actions]
-    }
-
     var actions = FloatingPanelAction.listActions
 
     var filesAvailableOffline: Bool {
@@ -223,13 +215,10 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
     private static func createLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { section, _ in
-            switch sections[section] {
-            case .actions:
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(53))
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-                return NSCollectionLayoutSection(group: group)
-            }
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(53))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+            return NSCollectionLayoutSection(group: group)
         }
     }
 
@@ -253,11 +242,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     // MARK: - Collection view delegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let action: FloatingPanelAction
-        switch Self.sections[indexPath.section] {
-        case .actions:
-            action = actions[indexPath.item]
-        }
+        let action = actions[indexPath.item]
         handleAction(action, at: indexPath)
         MatomoUtils.trackBulkAction(action: action, files: files, fromPhotoList: presentingParent is PhotoListViewController)
     }
@@ -265,23 +250,17 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     // MARK: - Collection view data source
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return Self.sections.count
+        return 1
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch Self.sections[section] {
-        case .actions:
-            return actions.count
-        }
+        return actions.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch Self.sections[indexPath.section] {
-        case .actions:
-            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
-            let action = actions[indexPath.item]
-            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
-            return cell
-        }
+        let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
+        let action = actions[indexPath.item]
+        cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+        return cell
     }
 }
