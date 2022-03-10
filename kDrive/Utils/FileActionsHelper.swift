@@ -142,6 +142,8 @@ public class FileActionsHelper {
         return group
     }
 
+    #if !ISEXTENSION
+
     public static func folderColor(files: [File], driveFileManager: DriveFileManager, with viewController: UIViewController,
                                    presentingParent: UIViewController?, completion: @escaping (Bool) -> Void) -> DispatchGroup {
         let group = DispatchGroup()
@@ -173,4 +175,6 @@ public class FileActionsHelper {
         }
         return group
     }
+
+    #endif
 }
