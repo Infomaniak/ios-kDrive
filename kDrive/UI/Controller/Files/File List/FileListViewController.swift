@@ -117,7 +117,7 @@ class ConcreteFileListViewModel: ManagedFileListViewModel {
     }
 }
 
-class FileListViewController: MultipleSelectionViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
+class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
@@ -129,6 +129,7 @@ class FileListViewController: MultipleSelectionViewController, UICollectionViewD
 
     // MARK: - Properties
 
+    @IBOutlet weak var collectionView: UICollectionView!
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
