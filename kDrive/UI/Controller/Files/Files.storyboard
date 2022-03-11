@@ -38,7 +38,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="collectionView" destination="yCM-Om-3CZ" id="Ld6-T6-Bge"/>
+                        <outlet property="collectionView" destination="yCM-Om-3CZ" id="ArS-ze-ns7"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cIe-lL-Jiy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
