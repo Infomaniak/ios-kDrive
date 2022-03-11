@@ -25,7 +25,7 @@ import UIKit
 import Vision
 import VisionKit
 
-class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, FloatingPanelControllerDelegate {
+class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
 

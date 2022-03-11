@@ -37,35 +37,7 @@ protocol SelectDelegate: AnyObject {
     func didSelect(option: Selectable)
 }
 
-class TableFloatingPanelViewController: UITableViewController {
-    weak var floatingPanelController: FloatingPanelController?
-
-    private var contentSizeObservation: NSKeyValueObservation?
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        contentSizeObservation = tableView.observe(\.contentSize) { [weak self] _, _ in
-            guard let window = self?.view.window else { return }
-            self?.updateLayout(size: window.bounds.size)
-        }
-    }
-
-    deinit {
-        contentSizeObservation?.invalidate()
-    }
-
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        updateLayout(size: size)
-    }
-
-    func updateLayout(size: CGSize) {
-        floatingPanelController?.layout = PlusButtonFloatingPanelLayout(height: min(tableView.contentSize.height + view.safeAreaInsets.bottom, size.height - 48))
-        floatingPanelController?.invalidateLayout()
-    }
-}
-
-class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: TableFloatingPanelViewController {
+class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITableViewController {
     var headerTitle = ""
     var selectedOption: T?
     var options = [T]()
@@ -91,19 +63,18 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: TableF
     }
 
     static func instantiatePanel(options: [T], selectedOption: T? = nil, headerTitle: String, delegate: SelectDelegate? = nil) -> DriveFloatingPanelController {
-        let floatingPanelViewController = DriveFloatingPanelController()
+        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
         let viewController = FloatingPanelSelectOptionViewController<T>()
 
         viewController.headerTitle = headerTitle
         viewController.options = options
         viewController.selectedOption = selectedOption
         viewController.delegate = delegate
-        viewController.floatingPanelController = floatingPanelViewController
 
         floatingPanelViewController.isRemovalInteractionEnabled = true
 
         floatingPanelViewController.set(contentViewController: viewController)
-        floatingPanelViewController.track(scrollView: viewController.tableView)
+        floatingPanelViewController.trackAndObserve(scrollView: viewController.tableView)
         return floatingPanelViewController
     }
 
