@@ -23,7 +23,6 @@ import kDriveResources
 import UIKit
 
 class MainTabViewController: UITabBarController, MainTabBarDelegate {
-    var floatingPanelViewController: DriveFloatingPanelController?
     // swiftlint:disable weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
