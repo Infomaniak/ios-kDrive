@@ -33,8 +33,8 @@
                                                 <constraint firstAttribute="width" constant="24" id="iYa-EI-wA0"/>
                                             </constraints>
                                         </imageView>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1xA-38-wIp" customClass="IKLabel" customModule="kDriveCore">
-                                            <rect key="frame" x="32" y="5" width="240" height="14.5"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1xA-38-wIp" customClass="IKLabel" customModule="InfomaniakCore">
+                                            <rect key="frame" x="32" y="4" width="240" height="16"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <color key="textColor" name="primaryTextColor"/>
                                             <nil key="highlightedColor"/>
@@ -57,8 +57,8 @@
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="e6M-e1-pOF" customClass="SelectView" customModule="kDrive" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="272" height="44"/>
                             <subviews>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ug6-Jg-W6r" customClass="IKLabel" customModule="kDriveCore">
-                                    <rect key="frame" x="0.0" y="12.5" width="123" height="19.5"/>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 sélectionné(s)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ug6-Jg-W6r" customClass="IKLabel" customModule="InfomaniakCore">
+                                    <rect key="frame" x="0.0" y="9" width="167.5" height="26.5"/>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -131,10 +131,10 @@
                             <rect key="frame" x="0.0" y="0.0" width="272" height="68"/>
                             <subviews>
                                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="DyE-08-LRW">
-                                    <rect key="frame" x="16" y="14.5" width="220" height="39.5"/>
+                                    <rect key="frame" x="16" y="13" width="220" height="42"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xiY-Ct-w9c" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
-                                            <rect key="frame" x="0.0" y="7.5" width="24" height="24"/>
+                                            <rect key="frame" x="0.0" y="9" width="24" height="24"/>
                                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="24" id="07h-7G-RJk"/>
@@ -142,17 +142,17 @@
                                             </constraints>
                                         </view>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XQm-FH-k7g">
-                                            <rect key="frame" x="32" y="0.5" width="38" height="38"/>
+                                            <rect key="frame" x="32" y="2" width="38" height="38"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="38" id="wa9-hZ-S9j"/>
                                                 <constraint firstAttribute="width" constant="38" id="yGL-IJ-iOw"/>
                                             </constraints>
                                         </imageView>
                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="BcR-qh-Ym5">
-                                            <rect key="frame" x="78" y="0.0" width="142" height="39.5"/>
+                                            <rect key="frame" x="78" y="0.0" width="142" height="42"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YIY-ah-68A" customClass="IKLabel" customModule="kDriveCore">
-                                                    <rect key="frame" x="0.0" y="0.0" width="142" height="17"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YIY-ah-68A" customClass="IKLabel" customModule="InfomaniakCore">
+                                                    <rect key="frame" x="0.0" y="0.0" width="142" height="18"/>
                                                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                                     <color key="textColor" name="titleColor"/>
                                                     <nil key="highlightedColor"/>
@@ -160,8 +160,8 @@
                                                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uYH-Mq-qZt" customClass="IKLabel" customModule="kDriveCore">
-                                                    <rect key="frame" x="0.0" y="25" width="142" height="14.5"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uYH-Mq-qZt" customClass="IKLabel" customModule="InfomaniakCore">
+                                                    <rect key="frame" x="0.0" y="26" width="142" height="16"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                     <color key="textColor" name="secondaryTextColor"/>
                                                     <nil key="highlightedColor"/>
@@ -223,8 +223,8 @@
                                                 </userDefinedRuntimeAttribute>
                                             </userDefinedRuntimeAttributes>
                                         </imageView>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ATr-sQ-1YC" customClass="IKLabel" customModule="kDriveCore">
-                                            <rect key="frame" x="32" y="5" width="240" height="14.5"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ATr-sQ-1YC" customClass="IKLabel" customModule="InfomaniakCore">
+                                            <rect key="frame" x="32" y="4" width="240" height="16"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <color key="textColor" name="primaryTextColor"/>
                                             <nil key="highlightedColor"/>
@@ -247,7 +247,7 @@
                             <rect key="frame" x="0.0" y="0.0" width="272" height="24"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bAx-uw-yHB" customClass="IKButton" customModule="kDriveCore">
-                                    <rect key="frame" x="0.0" y="0.0" width="51" height="24"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="57" height="24"/>
                                     <constraints>
                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="50" id="yl0-ph-QLT"/>
                                     </constraints>
@@ -309,22 +309,22 @@
     </objects>
     <designables>
         <designable name="1xA-38-wIp">
-            <size key="intrinsicContentSize" width="76.5" height="14.5"/>
+            <size key="intrinsicContentSize" width="150.5" height="16"/>
         </designable>
         <designable name="ATr-sQ-1YC">
-            <size key="intrinsicContentSize" width="31" height="14.5"/>
+            <size key="intrinsicContentSize" width="33" height="16"/>
         </designable>
         <designable name="Ug6-Jg-W6r">
-            <size key="intrinsicContentSize" width="123" height="19.5"/>
+            <size key="intrinsicContentSize" width="167.5" height="26.5"/>
         </designable>
         <designable name="YIY-ah-68A">
-            <size key="intrinsicContentSize" width="36" height="17"/>
+            <size key="intrinsicContentSize" width="38.5" height="18"/>
         </designable>
         <designable name="bAx-uw-yHB">
-            <size key="intrinsicContentSize" width="51" height="24"/>
+            <size key="intrinsicContentSize" width="57" height="24"/>
         </designable>
         <designable name="uYH-Mq-qZt">
-            <size key="intrinsicContentSize" width="31" height="14.5"/>
+            <size key="intrinsicContentSize" width="33" height="16"/>
         </designable>
     </designables>
     <resources>
@@ -347,13 +347,13 @@
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
