@@ -146,7 +146,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private var floatingPanelViewController: DriveFloatingPanelController?
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
-    private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
+    private lazy var filePresenter = FilePresenter(viewController: self)
 
     private var currentRecentFilesController: HomeRecentFilesController!
     private var recentFilesControllersCache = [String: HomeRecentFilesController]()
