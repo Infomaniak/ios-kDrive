@@ -392,7 +392,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     @objc private func openFile() {
         if currentFile.isBookmark {
             floatingPanelViewController.dismiss(animated: false)
-            FilePresenter(viewController: self, floatingPanelViewController: nil).present(
+            FilePresenter(viewController: self).present(
                 driveFileManager: driveFileManager,
                 file: currentFile,
                 files: [],

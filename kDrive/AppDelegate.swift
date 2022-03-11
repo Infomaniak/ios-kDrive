@@ -498,8 +498,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             // Pop to root
             navController.popToRootViewController(animated: false)
             // Present file
-            let filePresenter = FilePresenter(viewController: viewController, floatingPanelViewController: nil)
-            filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+            FilePresenter(viewController: viewController).present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
         }
     }
 
