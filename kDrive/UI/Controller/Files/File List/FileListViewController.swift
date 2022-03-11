@@ -134,11 +134,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
     var selectView: SelectView?
-    private lazy var floatingPanelViewController = DriveFloatingPanelController()
-    private var quickActionsViewController: UIViewController!
 
     #if !ISEXTENSION
-        lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
+        lazy var filePresenter = FilePresenter(viewController: self)
     #endif
 
     private var networkObserver: ObservationToken?
@@ -403,63 +401,53 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     private func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
-            floatingPanelViewController.isRemovalInteractionEnabled = true
+            var floatingPanelViewController: DriveFloatingPanelController
             switch actionType {
             case .file:
-                var fileInformationsViewController = quickActionsViewController as? FileActionsFloatingPanelViewController
-                if fileInformationsViewController == nil || type(of: quickActionsViewController) != FileActionsFloatingPanelViewController.self {
-                    fileInformationsViewController = FileActionsFloatingPanelViewController()
-                    fileInformationsViewController!.presentingParent = self
-                    fileInformationsViewController!.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
+                floatingPanelViewController = DriveFloatingPanelController()
+                let fileInformationsViewController = FileActionsFloatingPanelViewController()
 
-                    floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
-                    floatingPanelViewController.set(contentViewController: fileInformationsViewController!)
+                fileInformationsViewController.presentingParent = self
+                fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
-                    floatingPanelViewController.track(scrollView: fileInformationsViewController!.collectionView)
-                }
+                floatingPanelViewController.layout = FileFloatingPanelLayout(initialState: .half, hideTip: true, backdropAlpha: 0.2)
+
                 if let file = files.first {
-                    fileInformationsViewController?.setFile(file, driveFileManager: driveFileManager)
+                    fileInformationsViewController.setFile(file, driveFileManager: driveFileManager)
                 }
-                quickActionsViewController = fileInformationsViewController
+
+                floatingPanelViewController.set(contentViewController: fileInformationsViewController)
+                floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
             case .trash:
-                var trashFloatingPanelTableViewController = quickActionsViewController as? TrashFloatingPanelTableViewController
-                if trashFloatingPanelTableViewController == nil {
-                    trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
-                    trashFloatingPanelTableViewController!.delegate = (viewModel as? TrashListViewModel)
+                floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+                let trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
+                trashFloatingPanelTableViewController.delegate = (viewModel as? TrashListViewModel)
 
-                    floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 200)
-                    floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController!)
-                }
-                trashFloatingPanelTableViewController?.trashedFiles = files
-                quickActionsViewController = trashFloatingPanelTableViewController
+                trashFloatingPanelTableViewController.trashedFiles = files
+
+                floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController)
+                (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?.trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
             case .multipleSelection:
-                var selectViewController = quickActionsViewController as? SelectFloatingPanelTableViewController
-                if selectViewController == nil {
-                    selectViewController = SelectFloatingPanelTableViewController()
-                    if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
-                        selectViewController?.allItemsSelected = true
-                        selectViewController?.exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
-                        selectViewController?.parentId = viewModel.currentDirectory.id
-                    } else {
-                        selectViewController?.allItemsSelected = false
-                        selectViewController?.files = files
-                    }
-                    selectViewController?.driveFileManager = driveFileManager
-                    floatingPanelViewController.layout = PlusButtonFloatingPanelLayout(height: 260)
-                    selectViewController!.reloadAction = { [weak self] in
-                        self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
-                    }
+                floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+                let selectViewController = SelectFloatingPanelTableViewController()
 
-                    floatingPanelViewController.set(contentViewController: selectViewController!)
-                    floatingPanelViewController.track(scrollView: selectViewController!.collectionView)
+                if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
+                    selectViewController.allItemsSelected = true
+                    selectViewController.exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
+                    selectViewController.parentId = viewModel.currentDirectory.id
                 } else {
-                    selectViewController?.files = files
-                    selectViewController?.driveFileManager = driveFileManager
-                    selectViewController?.setupContent()
+                    selectViewController.allItemsSelected = false
+                    selectViewController.files = files
+                }
+                selectViewController.driveFileManager = driveFileManager
+                selectViewController.reloadAction = { [weak self] in
+                    self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
                 }
 
-                quickActionsViewController = selectViewController
+                floatingPanelViewController.set(contentViewController: selectViewController)
+                (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?.trackAndObserve(scrollView: selectViewController.collectionView)
             }
+            floatingPanelViewController.isRemovalInteractionEnabled = true
             present(floatingPanelViewController, animated: true)
         #endif
     }
@@ -670,8 +658,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true,
            let file = viewModel.getFile(at: indexPath),
-           viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) != true
-        {
+           viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) != true {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }
     }
