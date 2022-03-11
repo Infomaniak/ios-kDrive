@@ -41,6 +41,34 @@ class DriveFloatingPanelController: FloatingPanelController {
     }
 }
 
+class AdaptiveDriveFloatingPanelController: DriveFloatingPanelController {
+    private var contentSizeObservation: NSKeyValueObservation?
+
+    deinit {
+        contentSizeObservation?.invalidate()
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        updateLayout(size: size)
+    }
+
+    func updateLayout(size: CGSize) {
+        guard let trackingScrollView = trackingScrollView else { return }
+        layout = PlusButtonFloatingPanelLayout(height: min(trackingScrollView.contentSize.height + view.safeAreaInsets.bottom, size.height - 48))
+        invalidateLayout()
+    }
+
+    func trackAndObserve(scrollView: UIScrollView) {
+        contentSizeObservation?.invalidate()
+        contentSizeObservation = scrollView.observe(\.contentSize) { [weak self] _, _ in
+            guard let window = self?.view.window else { return }
+            self?.updateLayout(size: window.bounds.size)
+        }
+        track(scrollView: scrollView)
+    }
+}
+
 class FileFloatingPanelLayout: FloatingPanelLayout {
     var position: FloatingPanelPosition = .bottom
     var initialState: FloatingPanelState = .tip
