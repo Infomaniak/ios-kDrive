@@ -393,7 +393,7 @@ public class DriveFileManager {
 
                 return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
             } else {
-                throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: parentId)])
+                throw DriveError.fileNotFound(id: parentId)
             }
         }
     }
@@ -519,7 +519,7 @@ public class DriveFileManager {
     public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
         let realm = getRealm()
         guard let file = getCachedFile(id: file.id, freeze: false, using: realm) else {
-            completion(DriveError.fileNotFound)
+            completion(DriveError.fileNotFound(id: file.id))
             return
         }
         let oldUrl = file.localUrl
@@ -691,7 +691,7 @@ public class DriveFileManager {
             // Get file from Realm
             let realm = getRealm()
             guard let file = realm.object(ofType: File.self, forPrimaryKey: fileId) else {
-                throw DriveError.fileNotFound
+                throw DriveError.fileNotFound(id: fileId)
             }
             // Apply activities to file
             let results = apply(activities: activities, to: file, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
@@ -831,7 +831,7 @@ public class DriveFileManager {
     }
 
     private func handleError(message: String, offlineFile file: File) {
-        if message == DriveError.objectNotFound.code {
+        if message == ApiErrorCode.objectNotFound.rawValue {
             // File has been deleted -- remove it from offline files
             setFileAvailableOffline(file: file, available: false) { _ in
                 // No need to wait for the response, no error will be returned
@@ -966,7 +966,7 @@ public class DriveFileManager {
 
     public func move(file: File, to destination: File) async throws -> (CancelableResponse, File) {
         guard file.isManagedByRealm && destination.isManagedByRealm else {
-            throw DriveError.fileNotFound
+            throw DriveError.fileNotFound(id: file.id)
         }
         let safeFile = ThreadSafeReference(to: file)
         let safeParent = ThreadSafeReference(to: destination)
@@ -994,7 +994,7 @@ public class DriveFileManager {
 
     public func rename(file: File, newName: String) async throws -> File {
         guard file.isManagedByRealm else {
-            throw DriveError.fileNotFound
+            throw DriveError.fileNotFound(id: file.id)
         }
         let safeFile = ThreadSafeReference(to: file)
         _ = try await apiFetcher.rename(file: file, newName: newName)
@@ -1007,7 +1007,7 @@ public class DriveFileManager {
             notifyObserversWith(file: newFile)
             return file
         } else {
-            throw DriveError.fileNotFound
+            throw DriveError.fileNotFound(id: nil)
         }
     }
 
@@ -1115,7 +1115,7 @@ public class DriveFileManager {
             if response {
                 return nil
             } else {
-                throw DriveError.serverError
+                throw DriveError.unknownError
             }
         } else {
             // Update share link

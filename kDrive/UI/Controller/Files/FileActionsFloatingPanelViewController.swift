@@ -341,7 +341,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         setLoading(false, action: action, at: indexPath)
                         copyShareLinkToPasteboard(shareLink.url)
                     } catch {
-                        if let error = error as? DriveError, error == .shareLinkAlreadyExists {
+                        if let error = error as? DriveError, error.equals(to: .shareLinkAlreadyExists) {
                             // This should never happen
                             let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
                             setLoading(false, action: action, at: indexPath)

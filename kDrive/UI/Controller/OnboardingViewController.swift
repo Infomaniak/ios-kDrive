@@ -249,13 +249,13 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 DispatchQueue.main.async {
                     self.signInButton.setLoading(false)
                     self.registerButton.isEnabled = true
-                    if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
+                    if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == ApiErrorCode.noDrive.rawValue {
                         let driveErrorVC = DriveErrorViewController.instantiate()
                         driveErrorVC.driveErrorViewType = .noDrive
                         self.present(driveErrorVC, animated: true)
-                    } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance {
+                    } else if let driveError = error as? DriveError, driveError.equals(to: .noDrive) || driveError.equals(to: .maintenance) {
                         let driveErrorVC = DriveErrorViewController.instantiate()
-                        driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
+                        driveErrorVC.driveErrorViewType = driveError.equals(to: .noDrive) ? .noDrive : .maintenance
                         self.present(driveErrorVC, animated: true)
                     } else {
                         SentrySDK.capture(error: error)

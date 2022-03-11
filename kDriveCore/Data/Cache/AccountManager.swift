@@ -232,12 +232,14 @@ public class AccountManager: RefreshTokenDelegate {
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.main.isEmpty else {
             removeAccount(toDeleteAccount: newAccount)
-            throw DriveError.noDrive
+            // TODO: Find a solution for this
+            throw DriveError.unknownError // DriveError.noDrive
         }
         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
         guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
             removeAccount(toDeleteAccount: newAccount)
-            throw DriveError.maintenance
+            // TODO: Find a solution for this
+            throw DriveError.unknownError // DriveError.maintenance
         }
 
         setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())
@@ -249,7 +251,7 @@ public class AccountManager: RefreshTokenDelegate {
 
     public func updateUser(for account: Account, registerToken: Bool) async throws -> (Account, Drive?) {
         guard account.isConnected else {
-            throw DriveError.unknownToken
+            throw DriveError.noToken
         }
 
         let apiFetcher = await AccountActor.run {
@@ -261,7 +263,8 @@ public class AccountManager: RefreshTokenDelegate {
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.main.isEmpty else {
             removeAccount(toDeleteAccount: account)
-            throw DriveError.noDrive
+            // TODO: Find a solution for this
+            throw DriveError.unknownError // DriveError.noDrive
         }
 
         let driveRemovedList = DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)

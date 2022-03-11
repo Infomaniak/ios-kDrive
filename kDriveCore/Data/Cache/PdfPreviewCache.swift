@@ -50,7 +50,7 @@ public class PdfPreviewCache {
         let pdfUrl = pdfPreviewUrl(for: file)
         if isLocalVersionOlderThanRemote(for: file) {
             guard let token = driveFileManager.apiFetcher.currentToken else {
-                completion(nil, DriveError.unknownToken)
+                completion(nil, DriveError.noToken)
                 return
             }
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in

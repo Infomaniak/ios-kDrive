@@ -171,7 +171,7 @@ public class DownloadOperation: Operation {
             }
             task?.resume()
         } else {
-            error = .localError // Other error?
+            error = .noToken
             end(sessionUrl: url)
         }
     }
@@ -209,12 +209,12 @@ public class DownloadOperation: Operation {
                 }
             } catch {
                 DDLogError("[DownloadOperation] Error moving file \(file.id): \(error)")
-                self.error = .localError
+                self.error = .unknownError
             }
         } else {
             // Server-side error
             DDLogError("[DownloadOperation] Server error for \(file.id) (code: \(statusCode))")
-            self.error = .serverError
+            self.error = .serverError(statusCode: statusCode)
         }
         end(sessionUrl: task?.originalRequest?.url)
     }

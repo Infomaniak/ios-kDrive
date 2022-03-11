@@ -213,7 +213,7 @@ public class UploadOperation: Operation {
             }
         } else {
             DDLogError("[UploadOperation] No file path found for job \(file.id)")
-            file.error = .fileNotFound
+            file.error = .fileNotFound(id: nil)
             end()
         }
     }
@@ -296,17 +296,17 @@ public class UploadOperation: Operation {
             }
         } else {
             // Server-side error
-            var error = DriveError.serverError
+            var error = DriveError.serverError(statusCode: statusCode)
             if let data = data,
                let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
-                error = DriveError(apiError: apiError)
+                error = DriveError.apiError(apiError)
             }
             DDLogError("[UploadOperation] Server error for job \(file.id) (code: \(statusCode)): \(error)")
             file.sessionUrl = ""
             file.error = error
-            if error == .quotaExceeded {
+            if error.equals(to: .quotaExceeded) {
                 file.maxRetryCount = 0
-            } else if error == .objectNotFound {
+            } else if error.equals(to: .objectNotFound) {
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
                 UploadQueue.instance.cancelAllOperations(withParent: file.parentDirectoryId, userId: file.userId, driveId: file.driveId)

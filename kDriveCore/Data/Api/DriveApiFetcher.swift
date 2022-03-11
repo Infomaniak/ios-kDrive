@@ -58,7 +58,7 @@ extension ApiFetcher {
         if let result = json.data {
             return (result, json.responseAt)
         } else if let apiError = json.error {
-            throw DriveError(apiError: apiError)
+            throw DriveError.apiError(apiError)
         } else {
             throw DriveError.serverError(statusCode: response.response?.statusCode ?? -1)
         }
@@ -314,7 +314,7 @@ public class DriveApiFetcher: ApiFetcher {
                         request(reloadedToken, nil)
                     }
                 } else {
-                    request(nil, DriveError.unknownToken)
+                    request(nil, DriveError.noToken)
                 }
             } else {
                 request(token, nil)

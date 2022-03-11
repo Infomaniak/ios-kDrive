@@ -482,7 +482,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             do {
                 try await self.viewModel.loadFiles()
             } catch let driveError as DriveError {
-                if driveError == .objectNotFound {
+                if driveError.equals(to: .objectNotFound) {
                     navigationController?.popViewController(animated: true)
                 } else if driveError != .searchCancelled {
                     UIConstants.showSnackBar(message: driveError.localizedDescription)

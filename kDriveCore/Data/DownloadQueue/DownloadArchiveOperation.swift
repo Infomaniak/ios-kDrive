@@ -116,12 +116,12 @@ public class DownloadArchiveOperation: Operation {
                     }
                     task?.resume()
                 } else {
-                    self.error = .localError // Other error?
+                    self.error = .noToken
                     end(sessionUrl: url)
                 }
             }
         } else {
-            error = .localError // Other error?
+            error = .noToken
             end(sessionUrl: url)
         }
     }
@@ -155,12 +155,12 @@ public class DownloadArchiveOperation: Operation {
                 archiveUrl = temporaryUrl
             } catch {
                 DDLogError("[DownloadOperation] Error moving file \(archiveId): \(error)")
-                self.error = .localError
+                self.error = .unknownError
             }
         } else {
             // Server-side error
             DDLogError("[DownloadOperation] Server error for \(archiveId) (code: \(statusCode))")
-            self.error = .serverError
+            self.error = .serverError(statusCode: statusCode)
         }
         end(sessionUrl: task?.originalRequest?.url)
     }

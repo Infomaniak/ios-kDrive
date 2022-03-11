@@ -132,7 +132,8 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     }
 
     func setUploadingError(_ error: DriveError) {
-        switch error {
+        // TODO: Fix this
+        /* switch error {
         case .fileNotFound, .objectNotFound:
             uploadingError = NSFileProviderError(.noSuchItem)
         case .unknownToken:
@@ -143,7 +144,7 @@ class FileProviderItem: NSObject, NSFileProviderItem {
             uploadingError = NSFileProviderError(.filenameCollision)
         default:
             uploadingError = NSFileProviderError(.serverUnreachable)
-        }
+        } */
     }
 
     /*

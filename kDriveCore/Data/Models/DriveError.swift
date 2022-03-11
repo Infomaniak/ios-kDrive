@@ -20,123 +20,73 @@ import Foundation
 import InfomaniakCore
 import kDriveResources
 
-public class ErrorUserInfo: Codable {
-    var intValue: Int?
-    var stringValue: String?
+public enum DriveError: LocalizedError, CustomStringConvertible, Equatable, Codable {
+    case apiError(ApiError)
+    case serverError(statusCode: Int)
+    case fileNotFound(id: Int?)
+    case noToken
+    case unknownError
+    case photoAssetNoLongerExists
+    case refreshToken
+    case networkError
+    case taskCancelled
+    case taskExpirationCancelled
+    case taskRescheduled
+    case searchCancelled
 
-    public required init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if let intValue = try? container.decode(Int.self) {
-            self.intValue = intValue
-        } else if let stringValue = try? container.decode(String.self) {
-            self.stringValue = stringValue
+    public var errorDescription: String? {
+        switch self {
+        case .apiError(let apiError):
+            if let code = ApiErrorCode(rawValue: apiError.code) {
+                return code.localizedDescription
+            }
+            return apiError.description
+        case .networkError:
+            return KDriveResourcesStrings.Localizable.errorNetwork
+        default:
+            return KDriveResourcesStrings.Localizable.errorGeneric
         }
     }
 
-    public init(stringValue: String) {
-        self.stringValue = stringValue
-    }
-
-    public init(intValue: Int) {
-        self.intValue = intValue
-    }
-}
-
-public struct DriveError: Error, Equatable {
-    public enum DriveErrorType: String, Codable {
-        case localError
-        case networkError
-        case serverError
-    }
-
-    public enum UserInfoKey: String, Codable {
-        case fileId
-        case status
-        case photoAssetId
-    }
-
-    public typealias FileId = Int
-    public typealias Status = Int
-    public typealias PhotoAssetId = String
-
-    public let type: DriveErrorType
-    public let code: String
-    public var localizedDescription: String
-    public var userInfo: [UserInfoKey: ErrorUserInfo]?
-
-    private init(type: DriveErrorType, code: String, localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric) {
-        self.type = type
-        self.code = code
-        localizedDescription = localizedString
-    }
-
-    public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
-    public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
-    public static let refreshToken = DriveError(type: .serverError, code: "refreshToken")
-    public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
-    public static let localError = DriveError(type: .localError, code: "localError")
-    public static let serverError = DriveError(type: .serverError, code: "serverError")
-    public static let networkError = DriveError(type: .networkError, code: "networkError", localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
-    public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
-    public static let taskExpirationCancelled = DriveError(type: .localError, code: "taskExpirationCancelled")
-    public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
-    public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")
-    public static let quotaExceeded = DriveError(type: .serverError, code: "quota_exceeded_error", localizedString: KDriveResourcesStrings.Localizable.notEnoughStorageDescription1)
-    public static let shareLinkAlreadyExists = DriveError(type: .serverError, code: "file_share_link_already_exists", localizedString: KDriveResourcesStrings.Localizable.errorShareLink)
-    public static let objectNotFound = DriveError(type: .serverError, code: "object_not_found", localizedString: KDriveResourcesStrings.Localizable.uploadFolderNotFoundError)
-    public static let cannotCreateFileHere = DriveError(type: .serverError, code: "can_not_create_file_here_error", localizedString: KDriveResourcesStrings.Localizable.errorFileCreate)
-    public static let destinationAlreadyExists = DriveError(type: .serverError, code: "destination_already_exists", localizedString: KDriveResourcesStrings.Localizable.errorDestinationAlreadyExists)
-    public static let forbidden = DriveError(type: .serverError, code: "forbidden_error", localizedString: KDriveResourcesStrings.Localizable.accessDeniedTitle)
-    public static let noDrive = DriveError(type: .serverError, code: "no_drive")
-    public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveResourcesStrings.Localizable.errorConflict)
-    public static let maintenance = DriveError(type: .serverError, code: "product_maintenance", localizedString: KDriveResourcesStrings.Localizable.driveMaintenanceDescription)
-    public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
-    public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
-    public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
-
-    public static let unknownError = DriveError(type: .localError, code: "unknownError")
-
-    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists]
-
-    private static let encoder = JSONEncoder()
-    private static let decoder = JSONDecoder()
-
-    public init(apiErrorCode: String, httpStatus: Int = 400) {
-        if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
-            self = error
-        } else {
-            self = .serverError(statusCode: httpStatus)
+    public var description: String {
+        switch self {
+        case .apiError(let apiError):
+            return "DriveError.apiError (\(apiError.code))"
+        case .serverError(statusCode: let statusCode):
+            return "DriveError.serverError (status code: \(statusCode))"
+        default:
+            return "DriveError.\(String(describing: self))"
         }
     }
 
-    public init(apiError: ApiError) {
-        if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiError.code }) {
-            self = error
-        } else {
-            self = .serverError
+    public var code: String {
+        switch self {
+        case .apiError(let apiError):
+            return apiError.code
+        case .serverError(statusCode: let statusCode):
+            return "\(statusCode)"
+        default:
+            return String(describing: self)
         }
+    }
+
+    public func equals(to code: ApiErrorCode) -> Bool {
+        if case .apiError(let apiError) = self {
+            return apiError.code == code.rawValue
+        }
+        return false
     }
 
     func toRealm() -> Data? {
-        return try? DriveError.encoder.encode(self)
+        return try? JSONEncoder().encode(self)
     }
 
     static func from(realmData: Data) -> DriveError {
-        if let error = try? decoder.decode(DriveError.self, from: realmData) {
+        if let error = try? JSONDecoder().decode(DriveError.self, from: realmData) {
             return error
         } else {
             return .unknownError
         }
-    }
-
-    static func errorWithUserInfo(_ error: DriveError, info: [UserInfoKey: ErrorUserInfo]) -> DriveError {
-        var error = error
-        error.userInfo = info
-        return error
-    }
-
-    static func serverError(statusCode: Int) -> DriveError {
-        return errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: statusCode)])
     }
 
     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {
@@ -144,34 +94,202 @@ public struct DriveError: Error, Equatable {
     }
 }
 
-extension DriveError: LocalizedError {
-    public var errorDescription: String? {
-        return localizedDescription
-    }
-}
+public enum ApiErrorCode: String {
+    case quotaExceeded = "quota_exceeded_error"
+    case shareLinkAlreadyExists = "file_share_link_already_exists"
+    case objectNotFound = "object_not_found"
+    case cannotCreateFileHere = "can_not_create_file_here_error"
+    case destinationAlreadyExists = "destination_already_exists"
+    case forbidden = "forbidden_error"
+    case noDrive = "no_drive"
+    case conflict = "conflict_error"
+    case maintenance = "product_maintenance"
+    case lock = "lock_error"
+    case donwloadPermission = "you_must_add_at_least_one_file"
+    case categoryAlreadyExists = "category_already_exist_error"
 
-extension DriveError: Codable {
-    public init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        type = try values.decode(DriveErrorType.self, forKey: .type)
-        code = try values.decode(String.self, forKey: .code)
-        userInfo = try values.decodeIfPresent([UserInfoKey: ErrorUserInfo].self, forKey: .userInfo)
-        localizedDescription = DriveError.unknownError.localizedDescription
-        if let errorDescription = DriveError.allErrors.first(where: { $0.type == type && $0.code == code })?.localizedDescription {
-            localizedDescription = errorDescription
+    var localizedDescription: String {
+        switch self {
+        case .quotaExceeded:
+            return KDriveResourcesStrings.Localizable.notEnoughStorageDescription1
+        case .shareLinkAlreadyExists:
+            return KDriveResourcesStrings.Localizable.errorShareLink
+        case .objectNotFound:
+            return KDriveResourcesStrings.Localizable.uploadFolderNotFoundError
+        case .cannotCreateFileHere:
+            return KDriveResourcesStrings.Localizable.errorFileCreate
+        case .destinationAlreadyExists:
+            return KDriveResourcesStrings.Localizable.errorDestinationAlreadyExists
+        case .forbidden:
+            return KDriveResourcesStrings.Localizable.accessDeniedTitle
+        case .noDrive:
+            return KDriveResourcesStrings.Localizable.errorGeneric
+        case .conflict:
+            return KDriveResourcesStrings.Localizable.errorConflict
+        case .maintenance:
+            return KDriveResourcesStrings.Localizable.driveMaintenanceDescription
+        case .lock:
+            return KDriveResourcesStrings.Localizable.errorFileLocked
+        case .donwloadPermission:
+            return KDriveResourcesStrings.Localizable.errorDownloadPermission
+        case .categoryAlreadyExists:
+            return KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists
         }
     }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(type, forKey: .type)
-        try container.encode(code, forKey: .code)
-        try container.encodeIfPresent(userInfo, forKey: .userInfo)
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case type
-        case code
-        case userInfo
-    }
 }
+
+/* public class ErrorUserInfo: Codable {
+     var intValue: Int?
+     var stringValue: String?
+
+     public required init(from decoder: Decoder) throws {
+         let container = try decoder.singleValueContainer()
+         if let intValue = try? container.decode(Int.self) {
+             self.intValue = intValue
+         } else if let stringValue = try? container.decode(String.self) {
+             self.stringValue = stringValue
+         }
+     }
+
+     public init(stringValue: String) {
+         self.stringValue = stringValue
+     }
+
+     public init(intValue: Int) {
+         self.intValue = intValue
+     }
+ }
+
+ public struct DriveError: Error, Equatable {
+     public enum DriveErrorType: String, Codable {
+         case localError
+         case networkError
+         case serverError
+     }
+
+     public enum UserInfoKey: String, Codable {
+         case fileId
+         case status
+         case photoAssetId
+     }
+
+     public typealias FileId = Int
+     public typealias Status = Int
+     public typealias PhotoAssetId = String
+
+     public let type: DriveErrorType
+     public let code: String
+     public var localizedDescription: String
+     public var userInfo: [UserInfoKey: ErrorUserInfo]?
+
+     private init(type: DriveErrorType, code: String, localizedString: String = KDriveResourcesStrings.Localizable.errorGeneric) {
+         self.type = type
+         self.code = code
+         localizedDescription = localizedString
+     }
+
+     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
+     public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
+     public static let refreshToken = DriveError(type: .serverError, code: "refreshToken")
+     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
+     public static let localError = DriveError(type: .localError, code: "localError")
+     public static let serverError = DriveError(type: .serverError, code: "serverError")
+     public static let networkError = DriveError(type: .networkError, code: "networkError", localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
+     public static let taskCancelled = DriveError(type: .localError, code: "taskCancelled")
+     public static let taskExpirationCancelled = DriveError(type: .localError, code: "taskExpirationCancelled")
+     public static let taskRescheduled = DriveError(type: .localError, code: "taskRescheduled")
+     public static let searchCancelled = DriveError(type: .localError, code: "searchCancelled")
+     public static let quotaExceeded = DriveError(type: .serverError, code: "quota_exceeded_error", localizedString: KDriveResourcesStrings.Localizable.notEnoughStorageDescription1)
+     public static let shareLinkAlreadyExists = DriveError(type: .serverError, code: "file_share_link_already_exists", localizedString: KDriveResourcesStrings.Localizable.errorShareLink)
+     public static let objectNotFound = DriveError(type: .serverError, code: "object_not_found", localizedString: KDriveResourcesStrings.Localizable.uploadFolderNotFoundError)
+     public static let cannotCreateFileHere = DriveError(type: .serverError, code: "can_not_create_file_here_error", localizedString: KDriveResourcesStrings.Localizable.errorFileCreate)
+     public static let destinationAlreadyExists = DriveError(type: .serverError, code: "destination_already_exists", localizedString: KDriveResourcesStrings.Localizable.errorDestinationAlreadyExists)
+     public static let forbidden = DriveError(type: .serverError, code: "forbidden_error", localizedString: KDriveResourcesStrings.Localizable.accessDeniedTitle)
+     public static let noDrive = DriveError(type: .serverError, code: "no_drive")
+     public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveResourcesStrings.Localizable.errorConflict)
+     public static let maintenance = DriveError(type: .serverError, code: "product_maintenance", localizedString: KDriveResourcesStrings.Localizable.driveMaintenanceDescription)
+     public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
+     public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
+     public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
+
+     public static let unknownError = DriveError(type: .localError, code: "unknownError")
+
+     private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists]
+
+     private static let encoder = JSONEncoder()
+     private static let decoder = JSONDecoder()
+
+     public init(apiErrorCode: String, httpStatus: Int = 400) {
+         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiErrorCode }) {
+             self = error
+         } else {
+             self = .serverError(statusCode: httpStatus)
+         }
+     }
+
+     public init(apiError: ApiError) {
+         if let error = DriveError.allErrors.first(where: { $0.type == .serverError && $0.code == apiError.code }) {
+             self = error
+         } else {
+             self = .serverError
+         }
+     }
+
+     func toRealm() -> Data? {
+         return try? DriveError.encoder.encode(self)
+     }
+
+     static func from(realmData: Data) -> DriveError {
+         if let error = try? decoder.decode(DriveError.self, from: realmData) {
+             return error
+         } else {
+             return .unknownError
+         }
+     }
+
+     static func errorWithUserInfo(_ error: DriveError, info: [UserInfoKey: ErrorUserInfo]) -> DriveError {
+         var error = error
+         error.userInfo = info
+         return error
+     }
+
+     static func serverError(statusCode: Int) -> DriveError {
+         return errorWithUserInfo(.serverError, info: [.status: ErrorUserInfo(intValue: statusCode)])
+     }
+
+     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {
+         return lhs.code == rhs.code
+     }
+ }
+
+ extension DriveError: LocalizedError {
+     public var errorDescription: String? {
+         return localizedDescription
+     }
+ }
+
+ extension DriveError: Codable {
+     public init(from decoder: Decoder) throws {
+         let values = try decoder.container(keyedBy: CodingKeys.self)
+         type = try values.decode(DriveErrorType.self, forKey: .type)
+         code = try values.decode(String.self, forKey: .code)
+         userInfo = try values.decodeIfPresent([UserInfoKey: ErrorUserInfo].self, forKey: .userInfo)
+         localizedDescription = DriveError.unknownError.localizedDescription
+         if let errorDescription = DriveError.allErrors.first(where: { $0.type == type && $0.code == code })?.localizedDescription {
+             localizedDescription = errorDescription
+         }
+     }
+
+     public func encode(to encoder: Encoder) throws {
+         var container = encoder.container(keyedBy: CodingKeys.self)
+         try container.encode(type, forKey: .type)
+         try container.encode(code, forKey: .code)
+         try container.encodeIfPresent(userInfo, forKey: .userInfo)
+     }
+
+     enum CodingKeys: String, CodingKey {
+         case type
+         case code
+         case userInfo
+     }
+ } */

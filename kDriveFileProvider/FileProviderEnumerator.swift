@@ -108,7 +108,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                             observer.finishEnumerating(upTo: nil)
                         }
                     } catch {
-                        if let error = error as? DriveError, error == .maintenance {
+                        if let error = error as? DriveError, error.equals(to: .maintenance) {
                             observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found
@@ -155,7 +155,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
                         observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
                     } catch {
-                        if let error = error as? DriveError, error == .maintenance {
+                        if let error = error as? DriveError, error.equals(to: .maintenance) {
                             observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found
