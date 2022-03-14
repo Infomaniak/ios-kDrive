@@ -182,12 +182,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
         #if !ISEXTENSION
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = viewModel.currentDirectory.capabilities.canCreateFile
+            let plusButtonDirectory: File
+            if viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+                plusButtonDirectory = viewModel.currentDirectory
+            } else {
+                plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
+            }
+            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = plusButtonDirectory.capabilities.canCreateFile
         #endif
 
-        tryOrDisplayError {
-            try await self.viewModel.loadFiles()
-        }
+        tryLoadingFilesOrDisplayError()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -474,10 +478,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
     }
 
-    private func tryOrDisplayError(_ block: @escaping () async throws -> Void) {
+    private func tryLoadingFilesOrDisplayError() {
         Task {
             do {
-                try await block()
+                try await self.viewModel.loadFiles()
             } catch let driveError as DriveError {
                 if driveError == .objectNotFound {
                     navigationController?.popViewController(animated: true)
@@ -743,9 +747,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
            let viewModel = getViewModel(viewModelName: viewModelName, driveFileManager: driveFileManager, currentDirectory: maybeCurrentDirectory) {
             self.viewModel = viewModel
             setupViewModel()
-            tryOrDisplayError {
-                try await viewModel.loadFiles()
-            }
+            tryLoadingFilesOrDisplayError()
         } else {
             navigationController?.popViewController(animated: true)
         }
@@ -858,9 +860,7 @@ extension FileListViewController: FileCellDelegate {
             if isDifferentDrive {
                 viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager)
                 bindViewModels()
-                tryOrDisplayError {
-                    try await self.viewModel.loadFiles()
-                }
+                tryLoadingFilesOrDisplayError()
                 navigationController?.popToRootViewController(animated: false)
             } else {
                 viewModel.driveFileManager = newDriveFileManager

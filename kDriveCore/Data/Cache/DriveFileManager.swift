@@ -339,6 +339,28 @@ public class DriveFileManager {
     }
 
     public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
+        let fetchFiles: () async throws -> ([File], Int?)
+        if directory.isRoot {
+            fetchFiles = {
+                let (children, responseAt) = try await self.apiFetcher.rootFiles(drive: self.drive, page: page, sortType: sortType)
+                return (children, responseAt)
+            }
+        } else {
+            fetchFiles = {
+                let (children, responseAt) = try await self.apiFetcher.files(in: directory, page: page, sortType: sortType)
+                return (children, responseAt)
+            }
+        }
+        return try await files(in: directory, fetchFiles: fetchFiles,
+                               page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
+    }
+
+    private func files(in directory: File,
+                       fetchFiles: () async throws -> ([File], Int?),
+                       page: Int,
+                       sortType: SortType,
+                       keepProperties: FilePropertiesOptions,
+                       forceRefresh: Bool) async throws -> (files: [File], moreComing: Bool) {
         let parentId = directory.id
         if let cachedParent = getCachedFile(id: parentId, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
@@ -346,19 +368,11 @@ public class DriveFileManager {
             return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
         } else {
             // Get children from API
-            let children: [File]
-            let responseAt: Int?
-            if directory.isRoot {
-                (children, responseAt) = try await apiFetcher.rootFiles(drive: drive, page: page, sortType: sortType)
-            } else {
-                (children, responseAt) = try await apiFetcher.files(in: directory, page: page, sortType: sortType)
-            }
-
+            let (children, responseAt) = try await fetchFiles()
             let realm = getRealm()
-
             // Keep cached properties for children
             for child in children {
-                keepCacheAttributesForFile(newFile: child, keepProperties: [.standard, .extras], using: realm)
+                keepCacheAttributesForFile(newFile: child, keepProperties: keepProperties, using: realm)
             }
 
             if let managedParent = realm.object(ofType: File.self, forPrimaryKey: parentId) {
@@ -406,40 +420,28 @@ public class DriveFileManager {
         }
     }
 
-    typealias FileApiSignature = (AbstractDrive, Int, SortType) async throws -> [File]
-
-    private func files(at root: File, apiMethod: FileApiSignature, page: Int, sortType: SortType) async throws -> (files: [File], moreComing: Bool) {
-        do {
-            let files = try await apiMethod(drive, page, sortType)
-
-            let localRealm = getRealm()
-            for file in files {
-                keepCacheAttributesForFile(newFile: file, keepProperties: [.standard, .path, .version], using: localRealm)
-            }
-
-            if files.count < Endpoint.itemsPerPage {
-                root.fullyDownloaded = true
-            }
-
-            root.children.insert(objectsIn: files)
-            let updatedFile = try updateFileInDatabase(updatedFile: root, using: localRealm)
-
-            return (getLocalSortedDirectoryFiles(directory: updatedFile, sortType: sortType), files.count == Endpoint.itemsPerPage)
-        } catch {
-            if page == 1, let root = getCachedFile(id: root.id) {
-                return (getLocalSortedDirectoryFiles(directory: root, sortType: sortType), false)
-            } else {
-                throw error
-            }
-        }
+    public func favorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
+        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile),
+                        fetchFiles: {
+                            let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
+                            return (favorites, nil)
+                        },
+                        page: page,
+                        sortType: sortType,
+                        keepProperties: [.standard, .extras],
+                        forceRefresh: forceRefresh)
     }
 
-    public func favorites(page: Int = 1, sortType: SortType = .nameAZ) async throws -> (files: [File], moreComing: Bool) {
-        try await files(at: DriveFileManager.favoriteRootFile, apiMethod: apiFetcher.favorites, page: page, sortType: sortType)
-    }
-
-    public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ) async throws -> (files: [File], moreComing: Bool) {
-        try await files(at: DriveFileManager.mySharedRootFile, apiMethod: apiFetcher.mySharedFiles, page: page, sortType: sortType)
+    public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
+        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile),
+                        fetchFiles: {
+                            let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
+                            return (mySharedFiles, nil)
+                        },
+                        page: page,
+                        sortType: sortType,
+                        keepProperties: [.standard, .path, .version],
+                        forceRefresh: forceRefresh)
     }
 
     public func getAvailableOfflineFiles(sortType: SortType = .nameAZ) -> [File] {
@@ -933,19 +935,15 @@ public class DriveFileManager {
 
     public func setFavorite(file: File, favorite: Bool) async throws {
         let fileId = file.id
+        var response: Bool
         if favorite {
-            let response = try await apiFetcher.favorite(file: file)
-            if response {
-                updateFileProperty(fileId: fileId) { file in
-                    file.isFavorite = true
-                }
-            }
+            response = try await apiFetcher.favorite(file: file)
         } else {
-            let response = try await apiFetcher.unfavorite(file: file)
-            if response {
-                updateFileProperty(fileId: fileId) { file in
-                    file.isFavorite = false
-                }
+            response = try await apiFetcher.unfavorite(file: file)
+        }
+        if response {
+            updateFileProperty(fileId: fileId) { file in
+                file.isFavorite = favorite
             }
         }
     }
@@ -1285,8 +1283,8 @@ public class DriveFileManager {
      Get a live version for the given file (if the file is not cached in realm it is added and then returned)
      - Returns: A realm managed file
      */
-    public func getManagedFile(from file: File) -> File {
-        let realm = getRealm()
+    public func getManagedFile(from file: File, using realm: Realm? = nil) -> File {
+        let realm = realm ?? getRealm()
         if let cachedFile = getCachedFile(id: file.id, freeze: false, using: realm) {
             return cachedFile
         } else {

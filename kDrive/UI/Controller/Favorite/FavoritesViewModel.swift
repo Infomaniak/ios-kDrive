@@ -31,29 +31,27 @@ class FavoritesViewModel: ManagedFileListViewModel {
                                           selectedTabBarIcon: KDriveResourcesAsset.starFill,
                                           emptyViewType: .noFavorite,
                                           matomoViewPath: ["Favorite"])
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.favoriteRootFile)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "isFavorite = true")))
+        let favoritesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.favoriteRootFile)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: favoritesFakeRoot)
+        files = AnyRealmCollection(AnyRealmCollection(favoritesFakeRoot.children.filter(NSPredicate(format: "isFavorite = true")))
+            .filesSorted(by: sortType))
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        startRefreshing(page: page)
+        // Only show loading indicator if we have nothing in cache
+        if !currentDirectory.canLoadChildrenFromCache {
+            startRefreshing(page: page)
+        }
         defer {
             endRefreshing()
         }
 
-        // TODO: there is no force refresh for favorites ?
-        let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType)
+        let (_, moreComing) = try await driveFileManager.favorites(page: page, sortType: sortType, forceRefresh: true)
         endRefreshing()
         if moreComing {
-            try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-        } else if !forceRefresh {
-            try await loadActivities()
+            try await loadFiles(page: page + 1, forceRefresh: true)
         }
-    }
-
-    override func loadActivities() async throws {
-        try await loadFiles(forceRefresh: true)
     }
 }

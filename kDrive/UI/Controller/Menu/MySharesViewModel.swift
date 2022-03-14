@@ -29,29 +29,27 @@ class MySharesViewModel: ManagedFileListViewModel {
                                           rootTitle: KDriveResourcesStrings.Localizable.mySharesTitle,
                                           emptyViewType: .noShared,
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "MyShares"])
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.mySharedRootFile)
-        self.files = AnyRealmCollection(driveFileManager.getRealm().objects(File.self).filter(NSPredicate(format: "users.@count > 0 AND id > 1")))
+        let mySharesFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.mySharedRootFile)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: mySharesFakeRoot)
+        files = AnyRealmCollection(AnyRealmCollection(mySharesFakeRoot.children.filter(NSPredicate(format: "users.@count > 0")))
+            .filesSorted(by: sortType))
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
-        startRefreshing(page: page)
+        // Only show loading indicator if we have nothing in cache
+        if !currentDirectory.canLoadChildrenFromCache {
+            startRefreshing(page: page)
+        }
         defer {
             endRefreshing()
         }
 
-        // TODO: there is no force refresh for my shares ?
-        let (_, moreComing) = try await driveFileManager.mySharedFiles(page: page, sortType: sortType)
+        let (_, moreComing) = try await driveFileManager.mySharedFiles(page: page, sortType: sortType, forceRefresh: true)
         endRefreshing()
         if moreComing {
-            try await loadFiles(page: page + 1, forceRefresh: forceRefresh)
-        } else if !forceRefresh {
-            try await loadActivities()
+            try await loadFiles(page: page + 1, forceRefresh: true)
         }
-    }
-
-    override func loadActivities() async throws {
-        try await loadFiles(forceRefresh: true)
     }
 }
