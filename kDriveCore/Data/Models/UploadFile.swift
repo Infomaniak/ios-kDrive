@@ -128,7 +128,8 @@ public class UploadFile: Object {
         var queryItems = [
             URLQueryItem(name: "conflict", value: conflictOption.rawValue),
             URLQueryItem(name: "file_name", value: name),
-            URLQueryItem(name: "relative_path", value: relativePath),
+            // TODO: Upload route needs relative_path/filename to work correctly, remove when upload is done with apiV2
+            URLQueryItem(name: "relative_path", value: relativePath + name),
             // URLQueryItem(name: "total_size", value: "\(size)")
             URLQueryItem(name: "asV2", value: nil)
         ]
