@@ -52,8 +52,10 @@ public enum DriveError: LocalizedError, CustomStringConvertible, Equatable, Coda
         switch self {
         case .apiError(let apiError):
             return "DriveError.apiError (\(apiError.code))"
-        case .serverError(statusCode: let statusCode):
+        case .serverError(let statusCode):
             return "DriveError.serverError (status code: \(statusCode))"
+        case .fileNotFound(let id):
+            return "DriveError.fileNotFound (id: \(String(describing: id)))"
         default:
             return "DriveError.\(String(describing: self))"
         }
@@ -82,11 +84,7 @@ public enum DriveError: LocalizedError, CustomStringConvertible, Equatable, Coda
     }
 
     static func from(realmData: Data) -> DriveError {
-        if let error = try? JSONDecoder().decode(DriveError.self, from: realmData) {
-            return error
-        } else {
-            return .unknownError
-        }
+        return (try? JSONDecoder().decode(DriveError.self, from: realmData)) ?? .unknownError
     }
 
     public static func == (lhs: DriveError, rhs: DriveError) -> Bool {
