@@ -48,6 +48,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
     var actions = FloatingPanelAction.listActions
 
+    private var addAction = true
     private var success = true
     private var downloadedArchiveUrl: URL?
     private var currentArchiveId: String?
@@ -75,10 +76,10 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) async {
         let action = actions[indexPath.row]
         success = true
-        var addAction = true
+        addAction = true
         let group = DispatchGroup()
 
         switch action {
@@ -104,15 +105,16 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .favorite:
-            let isFavorite = filesAreFavorite
-            addAction = !isFavorite
             group.enter()
             Task {
-                do {
-                    try await toggleFavorite(isFavorite: isFavorite)
-                } catch {
-                    success = false
+                let isFavored = try await FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager) { file in
+                    await MainActor.run {
+                        if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                            self.changedFiles?.append(file)
+                        }
+                    }
                 }
+                addAction = isFavored
                 group.leave()
             }
         case .folderColor:
@@ -211,13 +213,13 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
         group.notify(queue: .main) {
             if self.success {
-                if action == .offline && addAction {
+                if action == .offline && self.addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.filter { !$0.isDirectory }.count))
-                } else if action == .favorite && addAction {
+                } else if action == .favorite && self.addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
                 } else if action == .folderColor {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.isDirectory).count))
-                } else if action == .duplicate && addAction {
+                } else if action == .duplicate && self.addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
                 }
             } else {
@@ -263,22 +265,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     // MARK: - Private methods
-
-    private func toggleFavorite(isFavorite: Bool) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for file in files where file.capabilities.canUseFavorite {
-                group.addTask { [frozenFile = file.freezeIfNeeded()] in
-                    try await self.driveFileManager.setFavorite(file: frozenFile, favorite: !isFavorite)
-                    await MainActor.run {
-                        if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                            self.changedFiles?.append(file)
-                        }
-                    }
-                }
-            }
-            try await group.waitForAll()
-        }
-    }
 
     @MainActor
     private func copy(files: [File], to selectedDirectory: File) async throws {
