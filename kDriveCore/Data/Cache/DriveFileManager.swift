@@ -658,7 +658,7 @@ public class DriveFileManager {
 
     public func lastPictures(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
         do {
-            let files = try await apiFetcher.searchFiles(drive: drive, fileType: .image, categories: [], belongToAllCategories: false, page: page, sortType: .newer)
+            let files = try await apiFetcher.searchFiles(drive: drive, fileTypes: [.image, .video], categories: [], belongToAllCategories: false, page: page, sortType: .newer)
 
             setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: page == 1)
             return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)

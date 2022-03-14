@@ -510,7 +510,7 @@ public extension Endpoint {
 
     // MARK: Search
 
-    static func search(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool) -> Endpoint {
+    static func search(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileTypes: [ConvertedType] = [], categories: [Category], belongToAllCategories: Bool) -> Endpoint {
         // Query items
         var queryItems = [fileMinimalWithQueryItem]
         if let query = query, !query.isBlank {
@@ -523,7 +523,7 @@ public extension Endpoint {
                 URLQueryItem(name: "until", value: "\(Int(date.end.timeIntervalSince1970))")
             ]
         }
-        if let fileType = fileType {
+        for fileType in fileTypes {
             queryItems.append(URLQueryItem(name: "types[]", value: fileType.rawValue))
         }
         if !categories.isEmpty {

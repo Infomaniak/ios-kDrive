@@ -73,7 +73,7 @@ class PhotoListViewModel: FileListViewModel {
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm()
             .objects(File.self)
-            .filter(NSPredicate(format: "extensionType = %@", ConvertedType.image.rawValue))
+            .filter(NSPredicate(format: "extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue]))
             .sorted(by: [SortType.newer.value.sortDescriptor]))
     }
 

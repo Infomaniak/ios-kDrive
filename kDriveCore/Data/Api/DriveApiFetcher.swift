@@ -344,8 +344,8 @@ public class DriveApiFetcher: ApiFetcher {
         return try await perform(request: authenticatedRequest(.restore(file: file), method: .post, parameters: parameters)).data
     }
 
-    public func searchFiles(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
-        try await perform(request: authenticatedRequest(.search(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories).paginated(page: page).sorted(by: [.type, sortType]))).data
+    public func searchFiles(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileTypes: [ConvertedType] = [], categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
+        try await perform(request: authenticatedRequest(.search(drive: drive, query: query, date: date, fileTypes: fileTypes, categories: categories, belongToAllCategories: belongToAllCategories).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
 
     public func add(category: Category, to file: ProxyFile) async throws -> CategoryResponse {
