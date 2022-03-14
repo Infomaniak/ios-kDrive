@@ -20,6 +20,7 @@ import Atlantis
 import CocoaLumberjack
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import InfomaniakLogin
 import RealmSwift
 import Sentry
@@ -64,7 +65,7 @@ public enum Logging {
 
     private static func initNetworkLogging() {
         #if DEBUG
-            if !Constants.isInExtension {
+            if !Bundle.main.isExtension {
                 Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
             }
         #endif
@@ -92,7 +93,7 @@ public enum Logging {
 
     private static func copyDebugInformations() {
         #if DEBUG
-            guard !Constants.isInExtension else { return }
+            guard !Bundle.main.isExtension else { return }
             let fileManager = FileManager.default
             let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("debug", isDirectory: true))!
 

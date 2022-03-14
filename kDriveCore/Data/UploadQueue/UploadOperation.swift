@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
@@ -135,7 +136,7 @@ public class UploadOperation: Operation {
         }
 
         // Start background task
-        if !Constants.isInExtension {
+        if !Bundle.main.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
                 DDLogInfo("[UploadOperation] Background task expired")
                 let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
@@ -297,7 +298,7 @@ public class UploadOperation: Operation {
             // Server-side error
             var error = DriveError.serverError
             if let data = data,
-               let apiError = try? ApiFetcher.decoder.decode(ApiResponse<EmptyResponse>.self, from: data).error {
+               let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
                 error = DriveError(apiError: apiError)
             }
             DDLogError("[UploadOperation] Server error for job \(file.id) (code: \(statusCode)): \(error)")

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Combine
 import DifferenceKit
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import RealmSwift

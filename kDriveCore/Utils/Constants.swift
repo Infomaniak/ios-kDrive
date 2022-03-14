@@ -43,12 +43,6 @@ public struct URLConstants {
 }
 
 public enum Constants {
-    public static let isInExtension: Bool = {
-        let bundleUrl: URL = Bundle.main.bundleURL
-        let bundlePathExtension: String = bundleUrl.pathExtension
-        return bundlePathExtension == "appex"
-    }()
-
     public static let backgroundRefreshIdentifier = "com.infomaniak.background.refresh"
     public static let longBackgroundRefreshIdentifier = "com.infomaniak.background.long-refresh"
 

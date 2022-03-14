@@ -19,6 +19,7 @@
 import Alamofire
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import kDriveCore
 import Sentry
 

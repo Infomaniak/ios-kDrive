@@ -18,6 +18,7 @@
 
 import CoreServices
 import FileProvider
+import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
 
