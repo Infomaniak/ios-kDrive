@@ -84,6 +84,18 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
         switch action {
         case .offline:
+            FileActionsHelper.offline(files: files, driveFileManager: driveFileManager) {
+                self.downloadInProgress = true
+                self.collectionView.reloadItems(at: [indexPath])
+            } completion: { file, error in
+                if error != nil {
+                    self.success = false
+                }
+                if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                    self.changedFiles?.append(file)
+                }
+            }
+
             let isAvailableOffline = filesAvailableOffline
             addAction = !isAvailableOffline
             if !isAvailableOffline {

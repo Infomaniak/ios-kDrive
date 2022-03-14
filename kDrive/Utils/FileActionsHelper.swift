@@ -19,7 +19,8 @@
 import CocoaLumberjackSwift
 import kDriveResources
 import UIKit
-import kDrive
+import kDriveCore
+import InfomaniakCore
 
 @MainActor
 public class FileActionsHelper {
@@ -148,14 +149,32 @@ public class FileActionsHelper {
         return isFavored
     }
 
-    public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController, presentingParent: UIViewController?, completion: (Bool) -> Void) {
+    #if !ISEXTENSION
+
+    public static func offline(files: [File], driveFileManager: DriveFileManager, filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) {
+        let isAvailableOffline = files.allSatisfy(\.isAvailableOffline)
+
+        if !isAvailableOffline {
+            filesNotAvailable?()
+            // Update offline files before setting new file to synchronize them
+            (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
+        }
+
+        for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
+            driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
+                completion(file, error)
+            }
+        }
+    }
+
+    public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController, presentingParent: UIViewController?, completion: @escaping (Bool) -> Void) {
         if driveFileManager.drive.pack == .free {
             let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
             floatingPanelViewController?.actionHandler = { _ in
                 driveFloatingPanelController.dismiss(animated: true) {
-                    StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
+                    StorePresenter.showStore(from: viewController, driveFileManager: driveFileManager)
                 }
             }
             viewController.present(driveFloatingPanelController, animated: true)
@@ -174,4 +193,6 @@ public class FileActionsHelper {
             }
         }
     }
+
+    #endif
 }

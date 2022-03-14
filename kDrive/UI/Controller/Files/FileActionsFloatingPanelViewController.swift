@@ -405,7 +405,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
         case .folderColor:
-            FileActionsHelper.folderColor(files: [file], driveFileManager: driveFileManager, from: self, presentingParent: presentingParent) { <#Bool#> in
+            FileActionsHelper.folderColor(files: [file], driveFileManager: driveFileManager, from: self, presentingParent: presentingParent) { isSuccess in
                 if isSuccess {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(1))
                 }
@@ -415,11 +415,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             FilePresenter(viewController: viewController).presentParent(of: file, driveFileManager: driveFileManager)
             dismiss(animated: true)
         case .offline:
-            if !file.isAvailableOffline {
-                // Update offline files before setting new file to synchronize them
-                (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-            }
-            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
+            FileActionsHelper.offline(files: [file], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
                 if error != nil && error as? DriveError != .taskCancelled && error as? DriveError != .taskRescheduled {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorCache)
                 }
