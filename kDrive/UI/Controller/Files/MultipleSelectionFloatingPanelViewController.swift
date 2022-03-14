@@ -17,11 +17,13 @@
  */
 
 import InfomaniakCore
+import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
 import UIKit
 
-class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewController {
+class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
+    var driveFileManager: DriveFileManager!
     var files = [File]()
     var allItemsSelected = false
     var exceptFileIds: [Int]?
@@ -30,8 +32,10 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
     var downloadInProgress = false
     var reloadAction: (() -> Void)?
 
-    override class var sections: [Section] {
-        return [.actions]
+    weak var presentingParent: UIViewController?
+
+    var sharedWithMe: Bool {
+        return driveFileManager?.drive.sharedWithMe ?? false
     }
 
     var filesAvailableOffline: Bool {
@@ -42,10 +46,16 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         return files.allSatisfy(\.isFavorite)
     }
 
+    var actions = FloatingPanelAction.listActions
+
     private var success = true
     private var downloadedArchiveUrl: URL?
     private var currentArchiveId: String?
     private var downloadError: DriveError?
+
+    convenience init() {
+        self.init(collectionViewLayout: MultipleSelectionFloatingPanelViewController.createLayout())
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,7 +64,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         setupContent()
     }
 
-    override func setupContent() {
+    func setupContent() {
         if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
@@ -64,7 +74,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    override func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         let action = actions[indexPath.row]
         success = true
         var addAction = true
@@ -230,7 +240,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    override func track(action: FloatingPanelAction) {
+    func track(action: FloatingPanelAction) {
         let numberOfFiles = files.count
         switch action {
         // Quick Actions
@@ -248,6 +258,47 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "color_folder", numberOfItems: numberOfFiles)
         default:
             break
+        }
+    }
+
+    internal func save(file: File) {
+        switch file.convertedType {
+        case .image:
+            if let image = UIImage(contentsOfFile: file.localUrl.path) {
+                Task {
+                    do {
+                        try await PhotoLibrarySaver.instance.save(image: image)
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
+                        }
+                    } catch {
+                        DDLogError("Cannot save image: \(error)")
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                        }
+                    }
+                }
+            }
+        case .video:
+            Task {
+                do {
+                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
+                    }
+                } catch {
+                    DDLogError("Cannot save video: \(error)")
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                    }
+                }
+            }
+        case .folder:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
+            present(documentExportViewController, animated: true)
+        default:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
+            present(documentExportViewController, animated: true)
         }
     }
 
@@ -322,17 +373,21 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
+    private static func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { _, _ in
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(53))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+            return NSCollectionLayoutSection(group: group)
+        }
+    }
+
     // MARK: - Collection view data source
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch Self.sections[indexPath.section] {
-        case .actions:
-            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
-            let action = actions[indexPath.item]
-            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
-            return cell
-        default:
-            return super.collectionView(collectionView, cellForItemAt: indexPath)
-        }
+        let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
+        let action = actions[indexPath.item]
+        cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+        return cell
     }
 }
