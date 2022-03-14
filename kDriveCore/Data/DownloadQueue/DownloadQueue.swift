@@ -18,6 +18,7 @@
 
 import FileProvider
 import Foundation
+import InfomaniakCore
 import RealmSwift
 
 public class DownloadTask: Object {
@@ -72,7 +73,7 @@ public class DownloadQueue {
         didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
     private var bestSession: FileDownloadSession {
-        return Constants.isInExtension ? BackgroundDownloadSessionManager.instance : foregroundSession
+        return Bundle.main.isExtension ? BackgroundDownloadSessionManager.instance : foregroundSession
     }
 
     // MARK: - Public methods

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
+import InfomaniakCore
 
 public class DownloadArchiveOperation: Operation {
     // MARK: - Attributes
@@ -81,7 +82,7 @@ public class DownloadArchiveOperation: Operation {
             return
         }
 
-        if !Constants.isInExtension {
+        if !Bundle.main.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 // We don't support task rescheduling for archive download but still need to pass error to diffrentiate from user cancel

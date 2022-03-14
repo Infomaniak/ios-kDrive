@@ -59,7 +59,7 @@ public class UploadQueue {
     private var realm: Realm!
 
     private var bestSession: FileUploadSession {
-        return Constants.isInExtension ? BackgroundUploadSessionManager.instance : foregroundSession
+        return Bundle.main.isExtension ? BackgroundUploadSessionManager.instance : foregroundSession
     }
 
     /// Should suspend operation queue based on network status

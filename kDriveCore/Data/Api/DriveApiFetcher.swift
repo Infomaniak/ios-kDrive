@@ -392,7 +392,7 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     @discardableResult
-    public func undoAction(drive: AbstractDrive, cancelId: String) async throws -> EmptyResponse {
+    public func undoAction(drive: AbstractDrive, cancelId: String) async throws -> Empty {
         try await perform(request: authenticatedRequest(.undoAction(drive: drive), method: .post, parameters: ["cancel_id": cancelId])).data
     }
 
@@ -441,7 +441,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
             let group = DispatchGroup()
             group.enter()
             var taskIdentifier: UIBackgroundTaskIdentifier = .invalid
-            if !Constants.isInExtension {
+            if !Bundle.main.isExtension {
                 // It is absolutely necessary that the app stays awake while we refresh the token
                 taskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Refresh token") {
                     SentrySDK.addBreadcrumb(crumb: (credential as ApiToken).generateBreadcrumb(level: .error, message: "Refreshing token failed - Background task expired"))

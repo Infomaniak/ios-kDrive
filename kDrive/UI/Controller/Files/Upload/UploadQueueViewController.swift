@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import RealmSwift

@@ -18,15 +18,20 @@
 
 import Foundation
 
-public class ObservationToken {
-
-    private let cancellationClosure: () -> Void
-
-    public init(cancellationClosure: @escaping () -> Void) {
-        self.cancellationClosure = cancellationClosure
+public class CancelableResponse: Codable {
+    public let id: String
+    public let validUntil: Int
+    public var offline: Bool {
+        return id.isEmpty
     }
 
-    public func cancel() {
-        cancellationClosure()
+    init() {
+        id = ""
+        validUntil = 0
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id = "cancel_id"
+        case validUntil = "valid_until"
     }
 }

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
+import InfomaniakCore
 import InfomaniakLogin
 
 public class DownloadOperation: Operation {
@@ -97,7 +98,7 @@ public class DownloadOperation: Operation {
             return
         }
 
-        if !Constants.isInExtension {
+        if !Bundle.main.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 DDLogInfo("[DownloadOperation] Background task expired")
