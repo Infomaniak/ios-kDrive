@@ -119,7 +119,9 @@ class DroppableFileListViewModel {
                 do {
                     try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    Task {
+                        UIConstants.showSnackBar(message: error.localizedDescription)
+                    }
                 }
             }
         }
