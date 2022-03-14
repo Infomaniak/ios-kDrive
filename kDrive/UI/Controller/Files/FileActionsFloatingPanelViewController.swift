@@ -448,7 +448,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
         case .download:
             if file.isMostRecentDownloaded {
-                save(file: file)
+                FileActionsHelper.save(file: file, from: self)
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel
                 let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
@@ -457,8 +457,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 present(alert, animated: true)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    if let file = self?.file {
-                        self?.save(file: file)
+                    guard let self = self else { return }
+                    if let file = self.file {
+                        FileActionsHelper.save(file: file, from: self)
                     }
                 }
             }

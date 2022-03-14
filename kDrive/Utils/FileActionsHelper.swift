@@ -19,12 +19,15 @@
 import CocoaLumberjackSwift
 import kDriveResources
 import UIKit
+import kDriveCore
 
 @MainActor
 public class FileActionsHelper {
     public static let instance = FileActionsHelper()
 
     private var interactionController: UIDocumentInteractionController!
+
+    // MARK: - Single file
 
     public func openWith(file: File, from rect: CGRect, in view: UIView, delegate: UIDocumentInteractionControllerDelegate) {
         guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
@@ -85,4 +88,47 @@ public class FileActionsHelper {
             }
         }
     }
+
+    public static func save(file: File, from viewController: UIViewController) {
+        switch file.convertedType {
+        case .image:
+            if let image = UIImage(contentsOfFile: file.localUrl.path) {
+                Task {
+                    do {
+                        try await PhotoLibrarySaver.instance.save(image: image)
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
+                        }
+                    } catch {
+                        DDLogError("Cannot save image: \(error)")
+                        DispatchQueue.main.async {
+                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                        }
+                    }
+                }
+            }
+        case .video:
+            Task {
+                do {
+                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
+                    }
+                } catch {
+                    DDLogError("Cannot save video: \(error)")
+                    DispatchQueue.main.async {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                    }
+                }
+            }
+        case .folder:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
+            viewController.present(documentExportViewController, animated: true)
+        default:
+            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
+            viewController.present(documentExportViewController, animated: true)
+        }
+    }
+
+    // MARK: - Single file or multiselection
 }
