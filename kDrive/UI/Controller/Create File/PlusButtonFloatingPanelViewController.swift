@@ -191,7 +191,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
                     let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle, message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription, action: KDriveResourcesStrings.Localizable.buttonGoToSettings) {
                         if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
-                            UIApplication.shared.open(settingsUrl)
+                            await UIApplication.shared.open(settingsUrl)
                         }
                     }
                     mainTabViewController.present(alert, animated: true)
