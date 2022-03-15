@@ -771,7 +771,7 @@ extension FileDetailViewController: FileUsersDelegate {
 extension FileDetailViewController: FileLocationDelegate {
     func locationButtonTapped() {
         if let driveFileManager = driveFileManager {
-            FilePresenter(viewController: self).presentParent(of: file, driveFileManager: driveFileManager)
+            FilePresenter.presentParent(of: file, driveFileManager: driveFileManager, viewController: self)
         }
     }
 }

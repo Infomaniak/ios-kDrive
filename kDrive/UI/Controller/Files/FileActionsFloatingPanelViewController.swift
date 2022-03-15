@@ -433,7 +433,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
         case .seeFolder:
             guard let viewController = presentingParent else { return }
-            FilePresenter(viewController: viewController).presentParent(of: file, driveFileManager: driveFileManager)
+            FilePresenter.presentParent(of: file, driveFileManager: driveFileManager, viewController: viewController)
             dismiss(animated: true)
         case .offline:
             if !file.isAvailableOffline {

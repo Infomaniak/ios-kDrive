@@ -34,18 +34,43 @@ class FilePresenter {
         self.viewController = viewController
     }
 
-    func presentParent(of file: File, driveFileManager: DriveFileManager) {
+    class func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
+        guard let rootViewController = viewController.view.window?.rootViewController as? MainTabViewController else {
+            return
+        }
+
+        // Pop current navigation stack
+        viewController.navigationController?.popToRootViewController(animated: false)
+        // Dismiss all view controllers presented
+        rootViewController.dismiss(animated: false) {
+            // Select Files tab
+            rootViewController.selectedIndex = 1
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
+            }
+
+            // Pop to root
+            navigationController.popToRootViewController(animated: false)
+            // Present file
+            guard let fileListViewController = navigationController.topViewController as? FileListViewController else { return }
+            let filePresenter = FilePresenter(viewController: fileListViewController)
+            filePresenter.presentParent(of: file, driveFileManager: driveFileManager, animated: false)
+        }
+    }
+
+    func presentParent(of file: File, driveFileManager: DriveFileManager, animated: Bool = true) {
         if var parent = file.parent {
             // Fix for weird bug: root container of shared with me is not what is expected
             if driveFileManager.drive.sharedWithMe && parent.id == DriveFileManager.constants.rootID {
                 parent = DriveFileManager.sharedWithMeRootFile
             }
-            present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
+            present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
         } else if file.parentId != 0 {
             Task {
                 do {
                     let parent = try await driveFileManager.file(id: file.parentId)
-                    present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
+                    present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }
@@ -60,6 +85,7 @@ class FilePresenter {
                  files: [File],
                  normalFolderHierarchy: Bool,
                  fromActivities: Bool = false,
+                 animated: Bool = true,
                  completion: ((Bool) -> Void)? = nil) {
         if file.isDirectory {
             // Show files list
@@ -97,7 +123,7 @@ class FilePresenter {
                     viewController?.present(NoAccessFloatingPanelViewController.instantiatePanel(), animated: true)
                 }
             } else {
-                navigationController?.pushViewController(nextVC, animated: true)
+                navigationController?.pushViewController(nextVC, animated: animated)
             }
             completion?(true)
         } else if file.isBookmark {
@@ -122,7 +148,7 @@ class FilePresenter {
             let files = files.filter { !$0.isDirectory && !$0.isTrashed }
             if let index = files.firstIndex(where: { $0.id == file.id }) {
                 let previewViewController = PreviewViewController.instantiate(files: files, index: Int(index), driveFileManager: driveFileManager, normalFolderHierarchy: normalFolderHierarchy, fromActivities: fromActivities)
-                navigationController?.pushViewController(previewViewController, animated: true)
+                navigationController?.pushViewController(previewViewController, animated: animated)
                 completion?(true)
             }
             if file.isTrashed {
