@@ -395,6 +395,11 @@ public extension Endpoint {
         return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)", queryItems: [fileExtraWithQueryItem])
     }
 
+    static func filesInfo(_ files: [AbstractFile]) -> Endpoint {
+        let filesJoined = files.map { "\($0.id)" }.joined(separator: ",")
+        return .driveInfo(drive: ProxyDrive(id: files[0].driveId)).appending(path: "/files/\(filesJoined)", queryItems: [fileExtraWithQueryItem])
+    }
+
     static func files(of directory: AbstractFile) -> Endpoint {
         return .fileInfo(directory).appending(path: "/files", queryItems: [fileMinimalWithQueryItem])
     }
