@@ -98,11 +98,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         case .favorite:
             group.enter()
             Task {
-                let isFavored = try await FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager) { file in
-                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                        self.changedFiles?.append(file)
-                    }
-                }
+                let isFavored = try await FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager, completion: favorite)
                 addAction = isFavored
                 group.leave()
             }
@@ -271,6 +267,14 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
             return NSCollectionLayoutSection(group: group)
+        }
+    }
+
+    private func favorite(file: File) async {
+        if let file = self.driveFileManager.getCachedFile(id: file.id) {
+            await MainActor.run {
+                self.changedFiles?.append(file)
+            }
         }
     }
 

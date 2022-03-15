@@ -144,31 +144,32 @@ class MatomoUtils {
     #if !ISEXTENSION
 
     static func trackFileAction(action: FloatingPanelAction, file: File, fromPhotoList: Bool) {
+        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
         switch action {
         // Quick Actions
         case .sendCopy:
-            track(eventWithCategory: .fileAction, name: "sendFileCopy")
+            track(eventWithCategory: category, name: "sendFileCopy")
         case .shareLink:
-            track(eventWithCategory: .fileAction, name: "copyShareLink")
+            track(eventWithCategory: category, name: "copyShareLink")
         case .informations:
-            track(eventWithCategory: .fileAction, name: "openFileInfos")
+            track(eventWithCategory: category, name: "openFileInfos")
         // Actions
         case .duplicate:
-            track(eventWithCategory: .fileAction, name: "copy")
+            track(eventWithCategory: category, name: "copy")
         case .move:
-            track(eventWithCategory: .fileAction, name: "move")
+            track(eventWithCategory: category, name: "move")
         case .download:
-            track(eventWithCategory: .fileAction, name: "download")
+            track(eventWithCategory: category, name: "download")
         case .favorite:
-            track(eventWithCategory: .fileAction, name: "favorite", value: !file.isFavorite)
+            track(eventWithCategory: category, name: "favorite", value: !file.isFavorite)
         case .offline:
-            track(eventWithCategory: .fileAction, name: "offline", value: !file.isAvailableOffline)
+            track(eventWithCategory: category, name: "offline", value: !file.isAvailableOffline)
         case .rename:
-            track(eventWithCategory: .fileAction, name: "rename")
+            track(eventWithCategory: category, name: "rename")
         case .delete:
-            track(eventWithCategory: .fileAction, name: "putInTrash")
+            track(eventWithCategory: category, name: "putInTrash")
         case .convertToDropbox:
-            track(eventWithCategory: .fileAction, name: "convertToDropBox")
+            track(eventWithCategory: category, name: "convertToDropBox")
         default:
             break
         }
@@ -176,20 +177,21 @@ class MatomoUtils {
 
     static func trackBuklAction(action: FloatingPanelAction, files: [File], fromPhotoList: Bool) {
         let numberOfFiles = files.count
+        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
         switch action {
         // Quick Actions
         case .duplicate:
-            trackBulkEvent(eventWithCategory: .fileAction, name: "copy", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "copy", numberOfItems: numberOfFiles)
         case .download:
-            trackBulkEvent(eventWithCategory: .fileAction, name: "download", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "download", numberOfItems: numberOfFiles)
         case .favorite:
-            trackBulkEvent(eventWithCategory: .fileAction, name: "add_favorite", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "add_favorite", numberOfItems: numberOfFiles)
         case .offline:
-            trackBulkEvent(eventWithCategory: .fileAction, name: "set_offline", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "set_offline", numberOfItems: numberOfFiles)
         case .delete:
-            trackBulkEvent(eventWithCategory: .fileAction, name: "trash", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "trash", numberOfItems: numberOfFiles)
         case .folderColor:
-            trackBulkEvent(eventWithCategory: .fileAction, name: "color_folder", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "color_folder", numberOfItems: numberOfFiles)
         default:
             break
         }
