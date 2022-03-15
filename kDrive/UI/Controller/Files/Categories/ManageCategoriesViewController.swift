@@ -277,7 +277,7 @@ class ManageCategoriesViewController: UITableViewController {
         if let file = file {
             Task {
                 do {
-                    try await driveFileManager.add(category: category, to: [file])
+                    try await driveFileManager.add(category: category, to: file)
                 } catch {
                     category.isSelected = false
                     tableView.deselectRow(at: indexPath, animated: true)

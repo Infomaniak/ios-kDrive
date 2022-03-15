@@ -853,16 +853,14 @@ public class DriveFileManager {
         return result
     }
 
-    public func add(category: Category, to files: [File]) async throws {
-        let filesId = files.map(\.id)
+    public func add(category: Category, to file: File) async throws {
+        let fileId = file.id
         let categoryId = category.id
-        let response = try await apiFetcher.add(category: category, to: files)
+        let response = try await apiFetcher.add(category: category, to: [file])
         if response {
-            for fileId in filesId {
-                updateFileProperty(fileId: fileId) { file in
-                    let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
-                    file.categories.append(newCategory)
-                }
+            updateFileProperty(fileId: fileId) { file in
+                let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
+                file.categories.append(newCategory)
             }
         }
     }
