@@ -661,7 +661,7 @@ final class DriveApiTests: XCTestCase {
         // 1. Create category
         let category = try await currentApiFetcher.createCategory(drive: proxyDrive, name: "UnitTest-\(Date())", color: "#1abc9c")
         // 2. Add category to folder
-        let addResponse = try await currentApiFetcher.add(category: category, to: testDirectory)
+        let addResponse = try await currentApiFetcher.add(category: category, to: [testDirectory])
         XCTAssertTrue(addResponse, TestsMessages.shouldReturnTrue)
         // 3. Remove category from folder
         let removeResponse = try await currentApiFetcher.remove(category: category, from: testDirectory)

@@ -366,12 +366,13 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.search(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
 
-    public func add(category: Category, to file: File) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .post)).data
+    public func add(category: Category, to files: [File]) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.fileCategory(files: files, category: category), method: .post)).data
     }
 
+    // TODO: remove
     public func remove(category: Category, from file: File) async throws -> Bool {
-        try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .delete)).data
+        try await perform(request: authenticatedRequest(.fileCategory(files: [file], category: category), method: .delete)).data
     }
 
     public func createCategory(drive: AbstractDrive, name: String, color: String) async throws -> Category {
