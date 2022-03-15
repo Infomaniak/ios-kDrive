@@ -76,7 +76,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) async {
+    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         let action = actions[indexPath.row]
         success = true
         addAction = true
@@ -84,7 +84,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
         switch action {
         case .offline:
-            FileActionsHelper.offline(files: files, driveFileManager: driveFileManager) {
+            addAction = FileActionsHelper.offline(files: files, driveFileManager: driveFileManager) {
                 self.downloadInProgress = true
                 self.collectionView.reloadItems(at: [indexPath])
             } completion: { file, error in
@@ -93,27 +93,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
                 if let file = self.driveFileManager.getCachedFile(id: file.id) {
                     self.changedFiles?.append(file)
-                }
-            }
-
-            let isAvailableOffline = filesAvailableOffline
-            addAction = !isAvailableOffline
-            if !isAvailableOffline {
-                downloadInProgress = true
-                collectionView.reloadItems(at: [indexPath])
-                // Update offline files before setting new file to synchronize them
-                (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-            }
-            for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
-                group.enter()
-                driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
-                    if error != nil {
-                        self.success = false
-                    }
-                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                        self.changedFiles?.append(file)
-                    }
-                    group.leave()
                 }
             }
         case .favorite:
@@ -319,7 +298,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    // MARK: - Collection view data source
+    // MARK: - Collection view
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -334,5 +313,12 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         let action = actions[indexPath.item]
         cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
         return cell
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let action = actions[indexPath.item]
+        handleAction(action, at: indexPath)
+        // TODO: Add matomo
+        track(action: action)
     }
 }

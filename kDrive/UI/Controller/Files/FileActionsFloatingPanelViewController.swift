@@ -376,7 +376,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             Task {
                 do {
                     let isFavored = try await FileActionsHelper.favorite(files: [file], driveFileManager: driveFileManager)
-                    if !isFavored {
+                    if isFavored {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
                     }
                 } catch {

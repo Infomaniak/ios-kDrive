@@ -151,20 +151,22 @@ public class FileActionsHelper {
 
     #if !ISEXTENSION
 
-    public static func offline(files: [File], driveFileManager: DriveFileManager, filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) {
-        let isAvailableOffline = files.allSatisfy(\.isAvailableOffline)
-
-        if !isAvailableOffline {
+    public static func offline(files: [File], driveFileManager: DriveFileManager, filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) -> Bool {
+        let areAvailableOffline = files.allSatisfy(\.isAvailableOffline)
+        let makeFilesAvailableOffline = !areAvailableOffline
+        if makeFilesAvailableOffline {
             filesNotAvailable?()
             // Update offline files before setting new file to synchronize them
             (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
         }
 
-        for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
-            driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
+        for file in files where !file.isDirectory && file.isAvailableOffline == areAvailableOffline {
+            driveFileManager.setFileAvailableOffline(file: file, available: makeFilesAvailableOffline) { error in
                 completion(file, error)
             }
         }
+
+        return makeFilesAvailableOffline
     }
 
     public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController, presentingParent: UIViewController?, completion: @escaping (Bool) -> Void) {
