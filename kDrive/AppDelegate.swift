@@ -485,20 +485,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         }
 
         // Dismiss all view controllers presented
-        rootViewController.dismiss(animated: false)
-        // Select Files tab
-        rootViewController.selectedIndex = 1
+        rootViewController.dismiss(animated: false) {
+            // Select Files tab
+            rootViewController.selectedIndex = 1
 
-        guard let navController = rootViewController.selectedViewController as? UINavigationController,
-              let viewController = navController.topViewController as? FileListViewController else {
-            return
-        }
+            guard let navController = rootViewController.selectedViewController as? UINavigationController,
+                  let viewController = navController.topViewController as? FileListViewController else {
+                return
+            }
 
-        if !file.isRoot && viewController.viewModel.currentDirectory.id != file.id {
-            // Pop to root
-            navController.popToRootViewController(animated: false)
-            // Present file
-            FilePresenter(viewController: viewController).present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+            if !file.isRoot && viewController.viewModel.currentDirectory.id != file.id {
+                // Pop to root
+                navController.popToRootViewController(animated: false)
+                // Present file
+                guard let fileListViewController = navController.topViewController as? FileListViewController else { return }
+                let filePresenter = FilePresenter(viewController: fileListViewController)
+                filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+            }
         }
     }
 
