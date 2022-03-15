@@ -84,7 +84,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
 
         switch action {
         case .offline:
-            addAction = FileActionsHelper.offline(files: files, driveFileManager: driveFileManager) {
+            addAction = FileActionsHelper.offline(files: files, driveFileManager: driveFileManager, group: group) {
                 self.downloadInProgress = true
                 self.collectionView.reloadItems(at: [indexPath])
             } completion: { file, error in
@@ -109,10 +109,9 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 group.leave()
             }
         case .folderColor:
-            group.enter()
-            FileActionsHelper.folderColor(files: files, driveFileManager: driveFileManager, from: self, presentingParent: presentingParent) { isSuccess in
+            FileActionsHelper.folderColor(files: files, driveFileManager: driveFileManager, from: self,
+                                          presentingParent: presentingParent, group: group) { isSuccess in
                 self.success = isSuccess
-                group.leave()
             }
         case .download:
             if files.count > Constants.bulkActionThreshold || allItemsSelected || files.contains(where: \.isDirectory) {

@@ -439,6 +439,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             case .multipleSelection:
                 floatingPanelViewController = AdaptiveDriveFloatingPanelController()
                 let selectViewController = MultipleSelectionFloatingPanelViewController()
+                selectViewController.presentingParent = self
 
                 if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
                     selectViewController.allItemsSelected = true

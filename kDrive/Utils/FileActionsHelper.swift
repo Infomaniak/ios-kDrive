@@ -151,7 +151,8 @@ public class FileActionsHelper {
 
     #if !ISEXTENSION
 
-    public static func offline(files: [File], driveFileManager: DriveFileManager, filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) -> Bool {
+    public static func offline(files: [File], driveFileManager: DriveFileManager, group: DispatchGroup? = nil,
+                               filesNotAvailable: (() -> Void)?, completion: @escaping (File, Error?) -> Void) -> Bool {
         let areAvailableOffline = files.allSatisfy(\.isAvailableOffline)
         let makeFilesAvailableOffline = !areAvailableOffline
         if makeFilesAvailableOffline {
@@ -161,15 +162,19 @@ public class FileActionsHelper {
         }
 
         for file in files where !file.isDirectory && file.isAvailableOffline == areAvailableOffline {
+            group?.enter()
             driveFileManager.setFileAvailableOffline(file: file, available: makeFilesAvailableOffline) { error in
                 completion(file, error)
+                group?.leave()
             }
         }
 
         return makeFilesAvailableOffline
     }
 
-    public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController, presentingParent: UIViewController?, completion: @escaping (Bool) -> Void) {
+    public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
+                                   presentingParent: UIViewController?, group: DispatchGroup? = nil, completion: @escaping (Bool) -> Void) {
+        group?.enter()
         if driveFileManager.drive.pack == .free {
             let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
@@ -189,6 +194,7 @@ public class FileActionsHelper {
             colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
             colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
                 completion(isSuccess)
+                group?.leave()
             }
             viewController.dismiss(animated: true) {
                 presentingParent?.present(floatingPanelViewController, animated: true)
