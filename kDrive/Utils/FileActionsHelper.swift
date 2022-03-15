@@ -133,20 +133,22 @@ public class FileActionsHelper {
 
     // MARK: - Single file or multiselection
 
-    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: ((File) async -> Void)? = nil) async throws -> Bool {
+    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: ((File) -> Void)? = nil) async throws -> Bool {
         let areFilesFavorites = files.allSatisfy(\.isFavorite)
-        let isFavored = !areFilesFavorites
+        let areFavored = !areFilesFavorites
         try await withThrowingTaskGroup(of: Void.self) { group in
             for file in files where file.capabilities.canUseFavorite {
                 group.addTask { [frozenFile = file.freezeIfNeeded()] in
-                    try await driveFileManager.setFavorite(file: frozenFile, favorite: isFavored)
-                    await completion?(file)
+                    try await driveFileManager.setFavorite(file: frozenFile, favorite: areFavored)
+                    await MainActor.run {
+                        completion?(file)
+                    }
                 }
             }
             try await group.waitForAll()
         }
 
-        return isFavored
+        return areFavored
     }
 
     #if !ISEXTENSION

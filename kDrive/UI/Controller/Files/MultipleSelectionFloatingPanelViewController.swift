@@ -99,10 +99,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             group.enter()
             Task {
                 let isFavored = try await FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager) { file in
-                    await MainActor.run {
-                        if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                            self.changedFiles?.append(file)
-                        }
+                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                        self.changedFiles?.append(file)
                     }
                 }
                 addAction = isFavored
@@ -212,27 +210,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func track(action: FloatingPanelAction) {
-        let numberOfFiles = files.count
-        switch action {
-        // Quick Actions
-        case .duplicate:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "copy", numberOfItems: numberOfFiles)
-        case .download:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "download", numberOfItems: numberOfFiles)
-        case .favorite:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "add_favorite", numberOfItems: numberOfFiles)
-        case .offline:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "set_offline", numberOfItems: numberOfFiles)
-        case .delete:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "trash", numberOfItems: numberOfFiles)
-        case .folderColor:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "color_folder", numberOfItems: numberOfFiles)
-        default:
-            break
-        }
-    }
-
     // MARK: - Private methods
 
     @MainActor
@@ -317,7 +294,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let action = actions[indexPath.item]
         handleAction(action, at: indexPath)
-        // TODO: Add matomo
-        track(action: action)
+        MatomoUtils.trackBuklAction(action: action, files: files, fromPhotoList: presentingParent is PhotoListViewController)
     }
 }

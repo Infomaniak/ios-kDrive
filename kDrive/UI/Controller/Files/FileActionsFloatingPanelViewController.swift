@@ -548,37 +548,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    internal func track(action: FloatingPanelAction) {
-        switch action {
-        // Quick Actions
-        case .sendCopy:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "sendFileCopy")
-        case .shareLink:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "copyShareLink")
-        case .informations:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "openFileInfos")
-        // Actions
-        case .duplicate:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "copy")
-        case .move:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "move")
-        case .download:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "download")
-        case .favorite:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "favorite", value: !file.isFavorite)
-        case .offline:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "offline", value: !file.isAvailableOffline)
-        case .rename:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "rename")
-        case .delete:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "putInTrash")
-        case .convertToDropbox:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "convertToDropBox")
-        default:
-            break
-        }
-    }
-
     private func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
         action.isLoading = isLoading
         DispatchQueue.main.async { [weak self] in
@@ -675,7 +644,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             action = actions[indexPath.item]
         }
-        track(action: action)
+        MatomoUtils.trackFileAction(action: action, file: file, fromPhotoList: presentingParent is PhotoListViewController)
         handleAction(action, at: indexPath)
     }
 }
