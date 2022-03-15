@@ -133,7 +133,7 @@ public class FileActionsHelper {
 
     // MARK: - Single file or multiselection
 
-    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: ((File) -> async Void)? = nil) async throws -> Bool {
+    public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: ((File) async -> Void)? = nil) async throws -> Bool {
         let areFilesFavorites = files.allSatisfy(\.isFavorite)
         let areFavored = !areFilesFavorites
         try await withThrowingTaskGroup(of: Void.self) { group in
