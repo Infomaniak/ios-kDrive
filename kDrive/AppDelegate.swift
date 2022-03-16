@@ -44,7 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
-        ImageCache.default.memoryStorage.config.totalCostLimit = 20
+        ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         accountManager = AccountManager.instance
         uploadQueue = UploadQueue.instance
