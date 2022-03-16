@@ -146,22 +146,6 @@
 			<string>a effectué une action sur %d fichiers</string>
 		</dict>
 	</dict>
-	<key>fileListAddFavorisConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Un fichier ajouté aux favoris avec succès</string>
-			<key>other</key>
-			<string>%d fichiers ajoutés aux favoris avec succès</string>
-		</dict>
-	</dict>
 	<key>fileListAddOfflineConfirmationSnackbar</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -288,6 +272,54 @@
 			<string>Un fichier restant</string>
 			<key>other</key>
 			<string>%d fichiers restants</string>
+		</dict>
+	</dict>
+	<key>fileListAddFavoritesConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un fichier ajouté aux favoris avec succès</string>
+			<key>other</key>
+			<string>%d fichiers ajoutés aux favoris avec succès</string>
+		</dict>
+	</dict>
+	<key>fileListRemoveFavoritesConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un fichier retiré des favoris avec succès</string>
+			<key>other</key>
+			<string>%d fichiers retirés des favoris avec succès</string>
+		</dict>
+	</dict>
+	<key>fileListRemoveOfflineConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un fichier retiré de la disponibilité hors ligne</string>
+			<key>other</key>
+			<string>%d fichiers retirés de la disponibilité hors ligne</string>
 		</dict>
 	</dict>
 </dict>

@@ -146,22 +146,6 @@
 			<string>performed an action on %d files</string>
 		</dict>
 	</dict>
-	<key>fileListAddFavorisConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file successfully added to favorites</string>
-			<key>other</key>
-			<string>%d files successfully added to favorites</string>
-		</dict>
-	</dict>
 	<key>fileListAddOfflineConfirmationSnackbar</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -288,6 +272,54 @@
 			<string>One file left</string>
 			<key>other</key>
 			<string>%d files left</string>
+		</dict>
+	</dict>
+	<key>fileListAddFavoritesConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>One file successfully added to favorites</string>
+			<key>other</key>
+			<string>%d files successfully added to favorites</string>
+		</dict>
+	</dict>
+	<key>fileListRemoveFavoritesConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>One file successfully removed from favorites</string>
+			<key>other</key>
+			<string>%d files successfully removed from favorites</string>
+		</dict>
+	</dict>
+	<key>fileListRemoveOfflineConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>One file removed from offline availability</string>
+			<key>other</key>
+			<string>%d files removed from offline availability</string>
 		</dict>
 	</dict>
 </dict>
