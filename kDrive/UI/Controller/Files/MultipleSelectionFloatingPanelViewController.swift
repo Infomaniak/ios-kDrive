@@ -116,7 +116,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         operation.cancel()
                     }
                     present(alert, animated: true)
-                    return
                 } else {
                     downloadedArchiveUrl = nil
                     downloadInProgress = true
