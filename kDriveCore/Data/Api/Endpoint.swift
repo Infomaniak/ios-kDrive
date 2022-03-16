@@ -240,7 +240,7 @@ public extension Endpoint {
     }
 
     static func fileCategory(files: [AbstractFile], category: Category) -> Endpoint {
-        return .filesInfo(files).appending(path: "/categories/\(category.id)")
+        return .driveInfo(drive: ProxyDrive(id: files[0].driveId)).appending(path: "/files/categories/\(category.id)")
     }
 
     // MARK: Comment
@@ -393,11 +393,6 @@ public extension Endpoint {
 
     static func fileInfo(_ file: AbstractFile) -> Endpoint {
         return .driveInfo(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)", queryItems: [fileExtraWithQueryItem])
-    }
-
-    static func filesInfo(_ files: [AbstractFile]) -> Endpoint {
-        let filesJoined = files.map { "\($0.id)" }.joined(separator: ",")
-        return .driveInfo(drive: ProxyDrive(id: files[0].driveId)).appending(path: "/files/\(filesJoined)", queryItems: [fileExtraWithQueryItem])
     }
 
     static func files(of directory: AbstractFile) -> Endpoint {

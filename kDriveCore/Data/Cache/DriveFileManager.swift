@@ -857,7 +857,7 @@ public class DriveFileManager {
         let filesId = files.map(\.id)
         let categoryId = category.id
         let response = try await apiFetcher.add(category: category, to: files)
-        if response {
+        if response.allSatisfy(\.success) {
             for fileId in filesId {
                 updateFileProperty(fileId: fileId) { file in
                     let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
