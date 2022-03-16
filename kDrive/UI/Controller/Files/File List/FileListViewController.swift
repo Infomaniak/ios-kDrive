@@ -242,6 +242,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if viewModel.draggableFileListViewModel != nil {
             collectionView.dragDelegate = self
         }
+
+        viewModel.startObservation()
     }
 
     private func bindViewModels() {
