@@ -373,7 +373,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .edit:
             OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
         case .manageCategories:
-            FileActionsHelper.manageCategories(file: file, driveFileManager: driveFileManager, from: self, presentingParent: presentingViewController)
+            FileActionsHelper.manageCategories(files: [file], driveFileManager: driveFileManager, from: self, presentingParent: presentingViewController)
         case .favorite:
             Task {
                 do {

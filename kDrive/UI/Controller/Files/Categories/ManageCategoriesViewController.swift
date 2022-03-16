@@ -30,10 +30,12 @@ class ManageCategoriesViewController: UITableViewController {
     @IBOutlet weak var createButton: UIBarButtonItem!
 
     var driveFileManager: DriveFileManager!
-    var file: File?
+    var files: Set<File>?
     /// Disable category edition (can just add/remove).
     var canEdit = true
     var selectedCategories = [kDriveCore.Category]()
+
+    var completionHandler: (() -> Void)?
 
     weak var delegate: ManageCategoriesDelegate?
     weak var fileListViewController: FileListViewController?
@@ -108,6 +110,7 @@ class ManageCategoriesViewController: UITableViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        completionHandler?()
         Task {
            try await fileListViewController?.viewModel.loadActivities()
         }
@@ -122,10 +125,12 @@ class ManageCategoriesViewController: UITableViewController {
         guard driveFileManager != nil else { return }
         categories = Array(driveFileManager.drive.categories.sorted(by: \.userUsageCount, ascending: false))
         // Select categories
-        if let file = file {
-            for category in file.categories {
-                if let category = categories.first(where: { $0.id == category.categoryId }) {
-                    category.isSelected = true
+        if let files = files {
+            for file in files {
+                for category in file.categories {
+                    if let category = categories.first(where: { $0.id == category.categoryId }) {
+                        category.isSelected = true
+                    }
                 }
             }
         } else {
@@ -148,7 +153,7 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     private func updateTitle() {
-        title = file != nil ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable.addCategoriesTitle
+        title = files != nil ? KDriveResourcesStrings.Localizable.manageCategoriesTitle : KDriveResourcesStrings.Localizable.addCategoriesTitle
     }
 
     private func updateNavigationItem() {
@@ -158,20 +163,23 @@ class ManageCategoriesViewController: UITableViewController {
     }
 
     private func setUpObserver() {
-        guard let file = file else { return }
+        guard let files = files else { return }
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
-        // Observe file changes
-        driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
-            DispatchQueue.main.async { [weak self] in
-                guard !newFile.isInvalidated else {
-                    if self?.presentingViewController != nil && viewControllersCount < 2 {
-                        self?.closeButtonPressed()
-                    } else {
-                        self?.navigationController?.popViewController(animated: true)
+        // Observe files changes
+        for file in files {
+            driveFileManager.observeFileUpdated(self, fileId: file.id) { newFile in
+                DispatchQueue.main.async { [weak self] in
+                    guard !newFile.isInvalidated else {
+                        if self?.presentingViewController != nil && viewControllersCount < 2 {
+                            self?.closeButtonPressed()
+                        } else {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                        return
                     }
-                    return
+                    self?.files?.remove(file)
+                    self?.files?.insert(newFile)
                 }
-                self?.file = newFile
             }
         }
     }
@@ -185,15 +193,17 @@ class ManageCategoriesViewController: UITableViewController {
         tableView.backgroundView = isEmpty ? EmptyTableView.instantiate(type: .noCategories) : nil
     }
 
-    static func instantiate(file: File? = nil, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
+    static func instantiate(files: [File]? = nil, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
-        viewController.file = file
+        if let files = files {
+            viewController.files = Set(files)
+        }
         viewController.driveFileManager = driveFileManager
         return viewController
     }
 
-    static func instantiateInNavigationController(file: File? = nil, driveFileManager: DriveFileManager) -> UINavigationController {
-        let viewController = instantiate(file: file, driveFileManager: driveFileManager)
+    static func instantiateInNavigationController(files: [File]? = nil, driveFileManager: DriveFileManager) -> UINavigationController {
+        let viewController = instantiate(files: files, driveFileManager: driveFileManager)
         return UINavigationController(rootViewController: viewController)
     }
 
@@ -203,8 +213,8 @@ class ManageCategoriesViewController: UITableViewController {
         super.encodeRestorableState(with: coder)
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        if let fileId = file?.id {
-            coder.encode(fileId, forKey: "FileId")
+        if let files = files {
+            coder.encode(files.map(\.id), forKey: "FilesId")
         }
     }
 
@@ -212,13 +222,18 @@ class ManageCategoriesViewController: UITableViewController {
         super.decodeRestorableState(with: coder)
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
-        let fileId = coder.decodeInteger(forKey: "FileId")
+        let filesId = coder.decodeObject(forKey: "FilesId") as! [Int]
 
         guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
             return
         }
         self.driveFileManager = driveFileManager
-        file = driveFileManager.getCachedFile(id: fileId)
+        files = []
+        for fileId in filesId {
+            if let file = driveFileManager.getCachedFile(id: fileId) {
+                files!.insert(file)
+            }
+        }
         // Reload view
         updateTitle()
         updateNavigationItem()
@@ -260,7 +275,7 @@ class ManageCategoriesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let category = category(at: indexPath)
 
-        if file != nil {
+        if files != nil {
             MatomoUtils.track(eventWithCategory: .categories, name: "assign")
         }
 
@@ -274,10 +289,10 @@ class ManageCategoriesViewController: UITableViewController {
         }
 
         category.isSelected = true
-        if let file = file {
+        if let files = files {
             Task {
                 do {
-                    try await driveFileManager.add(category: category, to: file)
+                    try await driveFileManager.add(category: category, to: Array(files))
                 } catch {
                     category.isSelected = false
                     tableView.deselectRow(at: indexPath, animated: true)
@@ -292,15 +307,15 @@ class ManageCategoriesViewController: UITableViewController {
         let category = category(at: indexPath)
         guard category != dummyCategory else { return }
 
-        if file != nil {
+        if files != nil {
             MatomoUtils.track(eventWithCategory: .categories, name: "remove")
         }
 
         category.isSelected = false
-        if let file = file {
+        if let files = files {
             Task {
                 do {
-                    try await driveFileManager.remove(category: category, from: file)
+                    try await driveFileManager.remove(category: category, from: files.first!)
                 } catch {
                     category.isSelected = true
                     tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
