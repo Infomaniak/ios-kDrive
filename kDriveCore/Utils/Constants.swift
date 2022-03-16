@@ -56,6 +56,7 @@ public enum Constants {
     public static let timeout: Double = 30
     public static let bulkActionThreshold = 10
     public static let activitiesReloadTimeOut: Double = 7_776_000 // 90 days
+    public static let memoryCacheSizeLimit = 10 * 1024 * 1024 // 10 Mo
 
     private static var dateFormatter = DateFormatter()
     private static var fileSizeFormatter = MeasurementFormatter()
