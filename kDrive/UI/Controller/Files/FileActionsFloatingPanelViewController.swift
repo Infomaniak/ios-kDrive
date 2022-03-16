@@ -373,10 +373,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             (manageCategoriesViewController.topViewController as? ManageCategoriesViewController)?.fileListViewController = presentingParent as? FileListViewController
             present(manageCategoriesViewController, animated: true)
         case .favorite:
-            Task { [wasFavorited = file.isFavorite] in
+            Task {
                 do {
-                    try await driveFileManager.setFavorite(file: file, favorite: !file.isFavorite)
-                    if !wasFavorited {
+                    let isFavored = try await FileActionsHelper.favorite(files: [file], driveFileManager: driveFileManager)
+                    if isFavored {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(1))
                     }
                 } catch {
@@ -405,30 +405,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             presentingParent?.navigationController?.pushViewController(viewController, animated: true)
             dismiss(animated: true)
         case .folderColor:
-            if driveFileManager.drive.pack == .free {
-                let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
-                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
-                floatingPanelViewController?.actionHandler = { _ in
-                    driveFloatingPanelController.dismiss(animated: true) {
-                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
-                    }
-                }
-                present(driveFloatingPanelController, animated: true)
-            } else {
-                let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(files: [file], driveFileManager: driveFileManager)
-                let floatingPanelViewController = DriveFloatingPanelController()
-                floatingPanelViewController.isRemovalInteractionEnabled = true
-                floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
-                floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
-                colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
-                colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
-                    if isSuccess {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(1))
-                    }
-                }
-                dismiss(animated: true) {
-                    self.presentingParent?.present(floatingPanelViewController, animated: true)
+            FileActionsHelper.folderColor(files: [file], driveFileManager: driveFileManager, from: self, presentingParent: presentingParent) { isSuccess in
+                if isSuccess {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(1))
                 }
             }
         case .seeFolder:
@@ -436,11 +415,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             FilePresenter(viewController: viewController).presentParent(of: file, driveFileManager: driveFileManager)
             dismiss(animated: true)
         case .offline:
-            if !file.isAvailableOffline {
-                // Update offline files before setting new file to synchronize them
-                (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-            }
-            driveFileManager.setFileAvailableOffline(file: file, available: !file.isAvailableOffline) { error in
+            FileActionsHelper.offline(files: [file], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
                 if error != nil && error as? DriveError != .taskCancelled && error as? DriveError != .taskRescheduled {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorCache)
                 }
@@ -448,7 +423,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
         case .download:
             if file.isMostRecentDownloaded {
-                save(file: file)
+                FileActionsHelper.save(file: file, from: self)
             } else if let operation = DownloadQueue.instance.operation(for: file) {
                 // Download is already scheduled, ask to cancel
                 let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
@@ -457,8 +432,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 present(alert, animated: true)
             } else {
                 downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    if let file = self?.file {
-                        self?.save(file: file)
+                    guard let self = self else { return }
+                    if let file = self.file {
+                        FileActionsHelper.save(file: file, from: self)
                     }
                 }
             }
@@ -572,37 +548,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    internal func track(action: FloatingPanelAction) {
-        switch action {
-        // Quick Actions
-        case .sendCopy:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "sendFileCopy")
-        case .shareLink:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "copyShareLink")
-        case .informations:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "openFileInfos")
-        // Actions
-        case .duplicate:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "copy")
-        case .move:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "move")
-        case .download:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "download")
-        case .favorite:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "favorite", value: !file.isFavorite)
-        case .offline:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "offline", value: !file.isAvailableOffline)
-        case .rename:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "rename")
-        case .delete:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "putInTrash")
-        case .convertToDropbox:
-            MatomoUtils.track(eventWithCategory: matomoCategory, name: "convertToDropBox")
-        default:
-            break
-        }
-    }
-
     private func setLoading(_ isLoading: Bool, action: FloatingPanelAction, at indexPath: IndexPath) {
         action.isLoading = isLoading
         DispatchQueue.main.async { [weak self] in
@@ -637,47 +582,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     private func copyShareLinkToPasteboard(_ link: String) {
         UIPasteboard.general.url = URL(string: link)
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileInfoLinkCopiedToClipboard)
-    }
-
-    internal func save(file: File) {
-        switch file.convertedType {
-        case .image:
-            if let image = UIImage(contentsOfFile: file.localUrl.path) {
-                Task {
-                    do {
-                        try await PhotoLibrarySaver.instance.save(image: image)
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
-                        }
-                    } catch {
-                        DDLogError("Cannot save image: \(error)")
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                        }
-                    }
-                }
-            }
-        case .video:
-            Task {
-                do {
-                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
-                    }
-                } catch {
-                    DDLogError("Cannot save video: \(error)")
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                    }
-                }
-            }
-        case .folder:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
-            present(documentExportViewController, animated: true)
-        default:
-            let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
-            present(documentExportViewController, animated: true)
-        }
     }
 
     // MARK: - Collection view data source
@@ -740,7 +644,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .actions:
             action = actions[indexPath.item]
         }
-        track(action: action)
+        MatomoUtils.trackFileAction(action: action, file: file, fromPhotoList: presentingParent is PhotoListViewController)
         handleAction(action, at: indexPath)
     }
 }

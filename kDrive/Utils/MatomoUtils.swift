@@ -138,4 +138,64 @@ class MatomoUtils {
     static func trackMediaPlayer(leaveAt percentage: Double?) {
         track(eventWithCategory: .mediaPlayer, name: "duration", value: Float(percentage ?? 0))
     }
+
+    // MARK: - File action
+
+    #if !ISEXTENSION
+
+    static func trackFileAction(action: FloatingPanelAction, file: File, fromPhotoList: Bool) {
+        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
+        switch action {
+        // Quick Actions
+        case .sendCopy:
+            track(eventWithCategory: category, name: "sendFileCopy")
+        case .shareLink:
+            track(eventWithCategory: category, name: "copyShareLink")
+        case .informations:
+            track(eventWithCategory: category, name: "openFileInfos")
+        // Actions
+        case .duplicate:
+            track(eventWithCategory: category, name: "copy")
+        case .move:
+            track(eventWithCategory: category, name: "move")
+        case .download:
+            track(eventWithCategory: category, name: "download")
+        case .favorite:
+            track(eventWithCategory: category, name: "favorite", value: !file.isFavorite)
+        case .offline:
+            track(eventWithCategory: category, name: "offline", value: !file.isAvailableOffline)
+        case .rename:
+            track(eventWithCategory: category, name: "rename")
+        case .delete:
+            track(eventWithCategory: category, name: "putInTrash")
+        case .convertToDropbox:
+            track(eventWithCategory: category, name: "convertToDropBox")
+        default:
+            break
+        }
+    }
+
+    static func trackBuklAction(action: FloatingPanelAction, files: [File], fromPhotoList: Bool) {
+        let numberOfFiles = files.count
+        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
+        switch action {
+        // Quick Actions
+        case .duplicate:
+            trackBulkEvent(eventWithCategory: category, name: "copy", numberOfItems: numberOfFiles)
+        case .download:
+            trackBulkEvent(eventWithCategory: category, name: "download", numberOfItems: numberOfFiles)
+        case .favorite:
+            trackBulkEvent(eventWithCategory: category, name: "add_favorite", numberOfItems: numberOfFiles)
+        case .offline:
+            trackBulkEvent(eventWithCategory: category, name: "set_offline", numberOfItems: numberOfFiles)
+        case .delete:
+            trackBulkEvent(eventWithCategory: category, name: "trash", numberOfItems: numberOfFiles)
+        case .folderColor:
+            trackBulkEvent(eventWithCategory: category, name: "color_folder", numberOfItems: numberOfFiles)
+        default:
+            break
+        }
+    }
+
+    #endif
 }

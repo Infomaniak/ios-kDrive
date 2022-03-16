@@ -17,11 +17,13 @@
  */
 
 import InfomaniakCore
+import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
 import UIKit
 
-class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewController {
+class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
+    var driveFileManager: DriveFileManager!
     var files = [File]()
     var allItemsSelected = false
     var exceptFileIds: [Int]?
@@ -30,8 +32,10 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
     var downloadInProgress = false
     var reloadAction: (() -> Void)?
 
-    override class var sections: [Section] {
-        return [.actions]
+    weak var presentingParent: UIViewController?
+
+    var sharedWithMe: Bool {
+        return driveFileManager?.drive.sharedWithMe ?? false
     }
 
     var filesAvailableOffline: Bool {
@@ -42,19 +46,27 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         return files.allSatisfy(\.isFavorite)
     }
 
+    var actions = FloatingPanelAction.listActions
+
+    private var addAction = true
     private var success = true
     private var downloadedArchiveUrl: URL?
     private var currentArchiveId: String?
     private var downloadError: DriveError?
 
+    convenience init() {
+        self.init(collectionViewLayout: MultipleSelectionFloatingPanelViewController.createLayout())
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
         setupContent()
     }
 
-    override func setupContent() {
+    func setupContent() {
         if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
@@ -64,72 +76,36 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    override func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
         let action = actions[indexPath.row]
         success = true
-        var addAction = true
+        addAction = true
         let group = DispatchGroup()
 
         switch action {
         case .offline:
-            let isAvailableOffline = filesAvailableOffline
-            addAction = !isAvailableOffline
-            if !isAvailableOffline {
-                downloadInProgress = true
-                collectionView.reloadItems(at: [indexPath])
-                // Update offline files before setting new file to synchronize them
-                (UIApplication.shared.delegate as? AppDelegate)?.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
-            }
-            for file in files where !file.isDirectory && file.isAvailableOffline == isAvailableOffline {
-                group.enter()
-                driveFileManager.setFileAvailableOffline(file: file, available: !isAvailableOffline) { error in
-                    if error != nil {
-                        self.success = false
-                    }
-                    if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                        self.changedFiles?.append(file)
-                    }
-                    group.leave()
+            addAction = FileActionsHelper.offline(files: files, driveFileManager: driveFileManager, group: group) {
+                self.downloadInProgress = true
+                self.collectionView.reloadItems(at: [indexPath])
+            } completion: { file, error in
+                if error != nil {
+                    self.success = false
+                }
+                if let file = self.driveFileManager.getCachedFile(id: file.id) {
+                    self.changedFiles?.append(file)
                 }
             }
         case .favorite:
-            let isFavorite = filesAreFavorite
-            addAction = !isFavorite
             group.enter()
             Task {
-                do {
-                    try await toggleFavorite(isFavorite: isFavorite)
-                } catch {
-                    success = false
-                }
+                let isFavored = try await FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager, completion: favorite)
+                addAction = isFavored
                 group.leave()
             }
         case .folderColor:
-            group.enter()
-            if driveFileManager.drive.pack == .free {
-                let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
-                floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
-                floatingPanelViewController?.actionHandler = { _ in
-                    driveFloatingPanelController.dismiss(animated: true) {
-                        StorePresenter.showStore(from: self, driveFileManager: self.driveFileManager)
-                    }
-                }
-                present(driveFloatingPanelController, animated: true)
-            } else {
-                let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(files: files, driveFileManager: driveFileManager)
-                let floatingPanelViewController = DriveFloatingPanelController()
-                floatingPanelViewController.isRemovalInteractionEnabled = true
-                floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
-                floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
-                colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
-                colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
-                    self.success = isSuccess
-                    group.leave()
-                }
-                dismiss(animated: true) {
-                    self.presentingParent?.present(floatingPanelViewController, animated: true)
-                }
+            FileActionsHelper.folderColor(files: files, driveFileManager: driveFileManager, from: self,
+                                          presentingParent: presentingParent, group: group) { isSuccess in
+                self.success = isSuccess
             }
         case .download:
             if files.count > Constants.bulkActionThreshold || allItemsSelected || files.contains(where: \.isDirectory) {
@@ -140,7 +116,6 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                         operation.cancel()
                     }
                     present(alert, animated: true)
-                    return
                 } else {
                     downloadedArchiveUrl = nil
                     downloadInProgress = true
@@ -161,7 +136,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
             } else {
                 for file in files {
                     if file.isDownloaded {
-                        save(file: file)
+                        FileActionsHelper.save(file: file, from: self)
                     } else {
                         downloadInProgress = true
                         collectionView.reloadItems(at: [indexPath])
@@ -169,7 +144,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
                         DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
-                                    save(file: file)
+                                    FileActionsHelper.save(file: file, from: self)
                                 }
                             } else {
                                 success = false
@@ -200,13 +175,13 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
 
         group.notify(queue: .main) {
             if self.success {
-                if action == .offline && addAction {
+                if action == .offline && self.addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddOfflineConfirmationSnackbar(self.files.filter { !$0.isDirectory }.count))
-                } else if action == .favorite && addAction {
+                } else if action == .favorite && self.addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListAddFavorisConfirmationSnackbar(self.files.count))
                 } else if action == .folderColor {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.isDirectory).count))
-                } else if action == .duplicate && addAction {
+                } else if action == .duplicate && self.addAction {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
                 }
             } else {
@@ -230,44 +205,7 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    override func track(action: FloatingPanelAction) {
-        let numberOfFiles = files.count
-        switch action {
-        // Quick Actions
-        case .duplicate:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "copy", numberOfItems: numberOfFiles)
-        case .download:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "download", numberOfItems: numberOfFiles)
-        case .favorite:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "add_favorite", numberOfItems: numberOfFiles)
-        case .offline:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "set_offline", numberOfItems: numberOfFiles)
-        case .delete:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "trash", numberOfItems: numberOfFiles)
-        case .folderColor:
-            MatomoUtils.trackBulkEvent(eventWithCategory: matomoCategory, name: "color_folder", numberOfItems: numberOfFiles)
-        default:
-            break
-        }
-    }
-
     // MARK: - Private methods
-
-    private func toggleFavorite(isFavorite: Bool) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for file in files where file.capabilities.canUseFavorite {
-                group.addTask { [frozenFile = file.freezeIfNeeded()] in
-                    try await self.driveFileManager.setFavorite(file: frozenFile, favorite: !isFavorite)
-                    await MainActor.run {
-                        if let file = self.driveFileManager.getCachedFile(id: file.id) {
-                            self.changedFiles?.append(file)
-                        }
-                    }
-                }
-            }
-            try await group.waitForAll()
-        }
-    }
 
     @MainActor
     private func copy(files: [File], to selectedDirectory: File) async throws {
@@ -322,17 +260,43 @@ class SelectFloatingPanelTableViewController: FileActionsFloatingPanelViewContro
         }
     }
 
-    // MARK: - Collection view data source
+    private static func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { _, _ in
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(53))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+            return NSCollectionLayoutSection(group: group)
+        }
+    }
+
+    private func favorite(file: File) async {
+        if let file = self.driveFileManager.getCachedFile(id: file.id) {
+            await MainActor.run {
+                self.changedFiles?.append(file)
+            }
+        }
+    }
+
+    // MARK: - Collection view
+
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return actions.count
+    }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch Self.sections[indexPath.section] {
-        case .actions:
-            let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
-            let action = actions[indexPath.item]
-            cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
-            return cell
-        default:
-            return super.collectionView(collectionView, cellForItemAt: indexPath)
-        }
+        let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
+        let action = actions[indexPath.item]
+        cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+        return cell
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let action = actions[indexPath.item]
+        handleAction(action, at: indexPath)
+        MatomoUtils.trackBuklAction(action: action, files: files, fromPhotoList: presentingParent is PhotoListViewController)
     }
 }
