@@ -93,7 +93,7 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionBulkActions: [FloatingPanelAction] {
-        return [download, duplicate].map { $0.reset() }
+        return [offline, download, duplicate].map { $0.reset() }
     }
 
     public static func == (lhs: FloatingPanelAction, rhs: FloatingPanelAction) -> Bool {
