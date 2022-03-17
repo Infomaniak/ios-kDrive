@@ -62,7 +62,8 @@ class PhotoListViewModel: ManagedFileListViewModel {
     var onReloadWithChangeset: ((StagedChangeset<[PhotoListViewModel.Section]>, ([PhotoListViewModel.Section]) -> Void) -> Void)?
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        super.init(configuration: Configuration(showUploadingFiles: false,
+        super.init(configuration: Configuration(normalFolderHierarchy: false,
+                                                showUploadingFiles: false,
                                                 selectAllSupported: false,
                                                 rootTitle: KDriveResourcesStrings.Localizable.allPictures,
                                                 emptyViewType: .noImages,
