@@ -678,6 +678,10 @@ final class DriveApiTests: XCTestCase {
         response = try await currentApiFetcher.remove(category: category, from: [files[2]])
         XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
 
+        // 6. Delete category
+        let deleteResponse = try await currentApiFetcher.deleteCategory(drive: proxyDrive, category: category)
+        XCTAssertTrue(deleteResponse, TestsMessages.shouldReturnTrue)
+
         tearDownTest(directory: testDirectory)
     }
 
