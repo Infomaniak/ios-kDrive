@@ -47,13 +47,14 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         static let docsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeDocs, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.infomaniakColor.color, docType: "docx", matomoName: "createDocument")
         static let pointsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficePoints, image: KDriveResourcesAsset.filePresentation.image, docType: "pptx", matomoName: "createPresentation")
         static let gridsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeGrids, image: KDriveResourcesAsset.fileSheets.image, docType: "xlsx", matomoName: "createTable")
+        static let formAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeForm, image: KDriveResourcesAsset.fileForm.image, docType: "docxf", matomoName: "createForm")
         static let noteAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeNote, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.secondaryTextColor.color, docType: "txt", matomoName: "createText")
     }
 
     private var content: [[PlusButtonMenuAction]] = [
         [],
         [.scanAction, .takePictureAction, .importMediaAction, .importAction, .folderAction],
-        [.docsAction, .gridsAction, .pointsAction, .noteAction]
+        [.docsAction, .gridsAction, .pointsAction, .formAction, .noteAction]
     ]
 
     init(driveFileManager: DriveFileManager, folder: File, presentedFromPlusButton: Bool = true) {
@@ -208,7 +209,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                     print("Source type \(sourceType) is not available on this device")
                 }
             }
-        case .docsAction, .gridsAction, .pointsAction, .noteAction:
+        case .docsAction, .gridsAction, .pointsAction, .formAction, .noteAction:
             let alertViewController = AlertDocViewController(fileType: action.docType,
                                                              directory: currentDirectory.freezeIfNeeded(),
                                                              driveFileManager: driveFileManager)
