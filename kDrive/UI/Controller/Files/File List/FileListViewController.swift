@@ -852,7 +852,13 @@ extension FileListViewController: FileCellDelegate {
                 viewModel.driveFileManager
             }
             set {
-                viewModel?.driveFileManager = newValue
+                guard viewModel != nil else { return }
+                let isDifferentDrive = newValue.drive.objectId != driveFileManager.drive.objectId
+                if isDifferentDrive {
+                    viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newValue)
+                } else {
+                    viewModel.driveFileManager = newValue
+                }
             }
         }
 
