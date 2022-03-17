@@ -178,6 +178,7 @@ class ManageCategoriesViewController: UITableViewController {
                         }
                         return
                     }
+                    // Update with new file
                     self?.files?.remove(file)
                     self?.files?.insert(newFile)
                 }

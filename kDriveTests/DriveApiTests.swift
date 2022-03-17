@@ -664,19 +664,19 @@ final class DriveApiTests: XCTestCase {
 
         // 2. Add category to a single file
         var response = try await currentApiFetcher.add(category: category, to: [files[0]])
-        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 3. Add category to several files
         response = try await currentApiFetcher.add(category: category, to: files)
-        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 4. Remove category from several files
         response = try await currentApiFetcher.remove(category: category, from: [files[0], files[1]])
-        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 5. Remove category from a single file
         response = try await currentApiFetcher.remove(category: category, from: [files[2]])
-        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
 
         tearDownTest(directory: testDirectory)
     }

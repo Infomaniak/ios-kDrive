@@ -23,7 +23,7 @@ public class CategoriesResponse: Codable {
     public var result: Bool
     public var message: String?
 
-    public var isCategorySet: Bool {
+    public var querySucceeded: Bool {
         return result || message == "category_error"
     }
 
