@@ -21,6 +21,11 @@ import Foundation
 public class CategoriesResponse: Codable {
     public var id: Int
     public var success: Bool
+    public var message: String?
+
+    public var isCategorySet: Bool {
+        return success || message == "category_error"
+    }
 
     init() {
         id = 0

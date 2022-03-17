@@ -126,12 +126,18 @@ class ManageCategoriesViewController: UITableViewController {
         categories = Array(driveFileManager.drive.categories.sorted(by: \.userUsageCount, ascending: false))
         // Select categories
         if let files = files {
+            var commonCategories = Set<kDriveCore.Category>(categories)
             for file in files {
+                var fileCategories = Set<kDriveCore.Category>()
                 for category in file.categories {
                     if let category = categories.first(where: { $0.id == category.categoryId }) {
-                        category.isSelected = true
+                        fileCategories.insert(category)
                     }
                 }
+                commonCategories.formIntersection(fileCategories)
+            }
+            for category in commonCategories {
+                category.isSelected = true
             }
         } else {
             for category in selectedCategories {
