@@ -867,14 +867,16 @@ public class DriveFileManager {
         }
     }
 
-    public func remove(category: Category, from file: File) async throws {
-        let fileId = file.id
+    public func remove(category: Category, from files: [File]) async throws {
+        let filesId = files.map(\.id)
         let categoryId = category.id
-        let response = try await apiFetcher.remove(category: category, from: file)
-        if response {
-            updateFileProperty(fileId: fileId) { file in
-                if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
-                    file.categories.remove(at: index)
+        let response = try await apiFetcher.remove(category: category, from: files)
+        if response.allSatisfy(\.isCategorySet) {
+            for fileId in filesId {
+                updateFileProperty(fileId: fileId) { file in
+                    if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
+                        file.categories.remove(at: index)
+                    }
                 }
             }
         }

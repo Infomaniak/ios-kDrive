@@ -224,10 +224,10 @@ final class DriveFileManagerTests: XCTestCase {
     func testCategoriesAndFiles() async throws {
         let (testDirectory, officeFile) = try await initOfficeFile(testName: "Categories and files")
         let category = try await DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227").freeze()
-        try await DriveFileManagerTests.driveFileManager.add(category: category, to: officeFile)
+        try await DriveFileManagerTests.driveFileManager.add(category: category, to: [officeFile])
         let fileWithCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
         XCTAssertTrue(fileWithCategory!.categories.contains { $0.categoryId == category.id }, "File should contain category")
-        try await DriveFileManagerTests.driveFileManager.remove(category: category, from: officeFile)
+        try await DriveFileManagerTests.driveFileManager.remove(category: category, from: [officeFile])
         let fileWithoutCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
         XCTAssertFalse(fileWithoutCategory!.categories.contains { $0.categoryId == category.id }, "File should not contain category")
         let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)

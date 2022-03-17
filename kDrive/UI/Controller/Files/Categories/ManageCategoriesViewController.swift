@@ -146,11 +146,6 @@ class ManageCategoriesViewController: UITableViewController {
                 }
             }
         }
-        for category in selectedCategories {
-            if let category = categories.first(where: { $0.id == category.id }) {
-                category.isSelected = true
-            }
-        }
         if searchController.isActive {
             updateSearchResults(for: searchController)
         } else {
@@ -321,7 +316,7 @@ class ManageCategoriesViewController: UITableViewController {
         if let files = files {
             Task {
                 do {
-                    try await driveFileManager.remove(category: category, from: files.first!)
+                    try await driveFileManager.remove(category: category, from: Array(files))
                 } catch {
                     category.isSelected = true
                     tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)

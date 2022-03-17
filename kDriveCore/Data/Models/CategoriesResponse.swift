@@ -20,15 +20,15 @@ import Foundation
 
 public class CategoriesResponse: Codable {
     public var id: Int
-    public var success: Bool
+    public var result: Bool
     public var message: String?
 
     public var isCategorySet: Bool {
-        return success || message == "category_error"
+        return result || message == "category_error"
     }
 
     init() {
         id = 0
-        success = true
+        result = true
     }
 }

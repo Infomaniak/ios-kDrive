@@ -88,10 +88,10 @@ final class DriveApiTests: XCTestCase {
         return (testDirectory, file)
     }
 
-    func initSeveralFiles(testName: String) async throws -> (File, [File]) {
+    func initSeveralFiles(testName: String, count: Int = 5) async throws -> (File, [File]) {
         let testDirectory = try await setUpTest(testName: testName)
         var files = [File]()
-        for i in 0..<5 {
+        for i in 0..<count {
             let file = try await currentApiFetcher.createFile(in: testDirectory, name: "officeFile-\(i)", type: "docx")
             files.append(file)
         }
@@ -657,18 +657,27 @@ final class DriveApiTests: XCTestCase {
     // MARK: - Complementary tests
 
     func testCategory() async throws {
-        let testDirectory = try await setUpTest(testName: "Categories")
+        let (testDirectory, files) = try await initSeveralFiles(testName: "Categories", count: 3)
+
         // 1. Create category
-        let category = try await currentApiFetcher.createCategory(drive: proxyDrive, name: "UnitTest-\(Date())", color: "#1abc9c")
-        // 2. Add category to folder
-        let addResponse = try await currentApiFetcher.add(category: category, to: [testDirectory])
-        XCTAssertTrue(addResponse, TestsMessages.shouldReturnTrue)
-        // 3. Remove category from folder
-        let removeResponse = try await currentApiFetcher.remove(category: category, from: testDirectory)
-        XCTAssertTrue(removeResponse, TestsMessages.shouldReturnTrue)
-        // 4. Delete category
-        let deleteResponse = try await currentApiFetcher.deleteCategory(drive: proxyDrive, category: category)
-        XCTAssertTrue(deleteResponse, TestsMessages.shouldReturnTrue)
+        let category = try await currentApiFetcher.createCategory(drive: proxyDrive, name: "CategoryOne-\(Date())", color: "#1abc9c")
+
+        // 2. Add category to a single file
+        var response = try await currentApiFetcher.add(category: category, to: [files[0]])
+        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+
+        // 3. Add category to several files
+        response = try await currentApiFetcher.add(category: category, to: files)
+        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+
+        // 4. Remove category from several files
+        response = try await currentApiFetcher.remove(category: category, from: [files[0], files[1]])
+        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+
+        // 5. Remove category from a single file
+        response = try await currentApiFetcher.remove(category: category, from: [files[2]])
+        XCTAssertTrue(response.allSatisfy(\.isCategorySet), TestsMessages.shouldReturnTrue)
+
         tearDownTest(directory: testDirectory)
     }
 
