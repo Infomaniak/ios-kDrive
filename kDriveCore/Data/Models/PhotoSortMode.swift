@@ -46,6 +46,7 @@ public enum PhotoSortMode: String, CaseIterable {
 
     public var dateFormatter: DateFormatter {
         let dateFormatter = DateFormatter()
+        dateFormatter.formattingContext = .standalone
         switch self {
         case .day:
             dateFormatter.dateStyle = .long
