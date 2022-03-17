@@ -25,7 +25,7 @@ public enum ApiEnvironment {
 
     public static let current = ApiEnvironment.prod
 
-    var host: String {
+    public var host: String {
         switch self {
         case .prod:
             return "infomaniak.com"
