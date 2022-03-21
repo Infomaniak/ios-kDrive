@@ -126,7 +126,7 @@ public class DriveFileManager {
         return File(id: -8, name: "Images")
     }
 
-    public func getCachedRootFile(using realm: Realm? = nil) -> File {
+    public func getCachedRootFile(freeze: Bool = true, using realm: Realm? = nil) -> File {
         if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) {
             if root.name != drive.name {
                 let realm = realm ?? getRealm()
@@ -134,7 +134,7 @@ public class DriveFileManager {
                     root.name = drive.name
                 }
             }
-            return root.freeze()
+            return freeze ? root.freeze() : root
         } else {
             return File(id: DriveFileManager.constants.rootID, name: drive.name)
         }

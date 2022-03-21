@@ -77,7 +77,7 @@ class ConcreteFileListViewModel: ManagedFileListViewModel {
     }
 
     override init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File?) {
-        let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile()
+        let currentDirectory = currentDirectory ?? driveFileManager.getCachedRootFile(freeze: false)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
     }
