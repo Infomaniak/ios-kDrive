@@ -365,10 +365,18 @@ public class DriveApiFetcher: ApiFetcher {
     public func searchFiles(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
         try await perform(request: authenticatedRequest(.search(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
+    
+    public func add(category: Category, to file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .post)).data
+    }
 
     public func add(category: Category, to files: [File]) async throws -> [CategoriesResponse] {
         let parameters: Parameters = ["file_ids": files.map(\.id)]
         return try await perform(request: authenticatedRequest(.fileCategory(files: files, category: category), method: .post, parameters: parameters)).data
+    }
+    
+    public func remove(category: Category, from file: File) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .delete)).data
     }
 
     public func remove(category: Category, from files: [File]) async throws -> [CategoriesResponse] {

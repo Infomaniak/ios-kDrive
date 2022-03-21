@@ -852,6 +852,18 @@ public class DriveFileManager {
         }
         return result
     }
+    
+    public func add(category: Category, to file: File) async throws {
+        let fileId = file.id
+        let categoryId = category.id
+        let response = try await apiFetcher.add(category: category, to: file)
+        if response {
+            updateFileProperty(fileId: fileId) { file in
+                let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
+                file.categories.append(newCategory)
+            }
+        }
+    }
 
     public func add(category: Category, to files: [File]) async throws {
         let filesId = files.map(\.id)
@@ -862,6 +874,19 @@ public class DriveFileManager {
                 updateFileProperty(fileId: fileId) { file in
                     let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                     file.categories.append(newCategory)
+                }
+            }
+        }
+    }
+    
+    public func remove(category: Category, from file: File) async throws {
+        let fileId = file.id
+        let categoryId = category.id
+        let response = try await apiFetcher.remove(category: category, from: file)
+        if response {
+            updateFileProperty(fileId: fileId) { file in
+                if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
+                    file.categories.remove(at: index)
                 }
             }
         }

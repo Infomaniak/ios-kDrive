@@ -663,20 +663,20 @@ final class DriveApiTests: XCTestCase {
         let category = try await currentApiFetcher.createCategory(drive: proxyDrive, name: "CategoryOne-\(Date())", color: "#1abc9c")
 
         // 2. Add category to a single file
-        var response = try await currentApiFetcher.add(category: category, to: [files[0]])
-        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
+        let responseAddOne = try await currentApiFetcher.add(category: category, to: files[0])
+        XCTAssertTrue(responseAddOne, TestsMessages.shouldReturnTrue)
 
         // 3. Add category to several files
-        response = try await currentApiFetcher.add(category: category, to: files)
-        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
+        let responseAddSeveral = try await currentApiFetcher.add(category: category, to: files)
+        XCTAssertTrue(responseAddSeveral.allSatisfy(\CategoriesResponse.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 4. Remove category from several files
-        response = try await currentApiFetcher.remove(category: category, from: [files[0], files[1]])
-        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
+        let responseRemoveSeveral = try await currentApiFetcher.remove(category: category, from: [files[0], files[1]])
+        XCTAssertTrue(responseRemoveSeveral.allSatisfy(\CategoriesResponse.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 5. Remove category from a single file
-        response = try await currentApiFetcher.remove(category: category, from: [files[2]])
-        XCTAssertTrue(response.allSatisfy(\.querySucceeded), TestsMessages.shouldReturnTrue)
+        let responseRemoveOne = try await currentApiFetcher.remove(category: category, from: files[2])
+        XCTAssertTrue(responseRemoveOne, TestsMessages.shouldReturnTrue)
 
         // 6. Delete category
         let deleteResponse = try await currentApiFetcher.deleteCategory(drive: proxyDrive, category: category)

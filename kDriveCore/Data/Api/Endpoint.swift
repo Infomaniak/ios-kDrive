@@ -238,7 +238,12 @@ public extension Endpoint {
     static func category(drive: AbstractDrive, category: Category) -> Endpoint {
         return .categories(drive: drive).appending(path: "/\(category.id)")
     }
+    
+    static func fileCategory(file: AbstractFile, category: Category) -> Endpoint {
+        return .fileInfo(file).appending(path: "/categories/\(category.id)")
+    }
 
+    // TODO: Update func with drive
     static func fileCategory(files: [AbstractFile], category: Category) -> Endpoint {
         return .driveInfo(drive: ProxyDrive(id: files[0].driveId)).appending(path: "/files/categories/\(category.id)")
     }

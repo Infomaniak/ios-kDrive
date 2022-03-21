@@ -209,7 +209,7 @@ extension EditCategoryViewController: FooterButtonDelegate {
                     let category = try await driveFileManager.createCategory(name: name, color: color)
                     // If a file was given, add the new category to it
                     if let file = fileToAdd {
-                        try await driveFileManager.add(category: category, to: [file])
+                        try await driveFileManager.add(category: category, to: file)
                     }
                     navigationController?.popViewController(animated: true)
                 }
