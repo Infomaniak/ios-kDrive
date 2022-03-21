@@ -677,7 +677,7 @@ final class DriveApiTests: XCTestCase {
 
         // 5. Remove category from a single file
         let responseRemoveOne = try await currentApiFetcher.remove(category: category, from: files[2])
-        XCTAssertTrue(responseRemoveOne.result, TestsMessages.shouldReturnTrue)
+        XCTAssertTrue(responseRemoveOne, TestsMessages.shouldReturnTrue)
 
         // 6. Delete category
         let deleteResponse = try await currentApiFetcher.deleteCategory(drive: proxyDrive, category: category)

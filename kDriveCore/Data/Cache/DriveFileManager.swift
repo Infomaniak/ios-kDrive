@@ -883,7 +883,7 @@ public class DriveFileManager {
         let fileId = file.id
         let categoryId = category.id
         let response = try await apiFetcher.remove(category: category, from: file)
-        if response.result {
+        if response {
             updateFileProperty(fileId: fileId) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
