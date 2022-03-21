@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: elena willen
- * Exported at: Wed, 12 Jan 2022 16:31:19 +0100
+ * Exported by: Florentin Bekier
+ * Exported at: Thu, 17 Mar 2022 11:36:25 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -142,6 +142,9 @@
 
 /* loco:6049df4d5c2c3a04bc397921 */
 "allOfficeDocs" = "Documento";
+
+/* loco:620b6e7c1a94ac24b002fcd2 */
+"allOfficeForm" = "Modulo";
 
 /* loco:6049df4d5c2c3a04bc397922 */
 "allOfficeGrids" = "Tabella";
@@ -1053,10 +1056,10 @@
 "fileInfoLinkCopiedToClipboard" = "Link copiato negli Appunti";
 
 /* loco:6049df4d5c2c3a04bc397a9e */
-"fileListAddFavorisConfirmationSnackbar" = "File aggiunto ai preferiti con successo";
+"fileListAddFavoritesConfirmationSnackbar" = "File aggiunto ai preferiti con successo";
 
 /* loco:6049df4d5c2c3a04bc397a9f */
-"fileListAddFavorisConfirmationSnackbar-plural" = "%d file aggiunti ai preferiti con successo";
+"fileListAddFavoritesConfirmationSnackbar-plural" = "%d file aggiunti ai preferiti con successo";
 
 /* loco:6049df4d5c2c3a04bc397aa0 */
 "fileListAddOfflineConfirmationSnackbar" = "Un file è disponibile offline";
@@ -1114,6 +1117,18 @@
 
 /* loco:6049df4d5c2c3a04bc397aa7 */
 "fileListMultiSelectedTitle-plural" = "%d selezionati";
+
+/* loco:620a0d7a6e12783968716a82 */
+"fileListRemoveFavoritesConfirmationSnackbar" = "File rimosso ai preferiti con successo";
+
+/* loco:620a0e3949144a2b38548d72 */
+"fileListRemoveFavoritesConfirmationSnackbar-plural" = "%d file rimosso ai preferiti con successo";
+
+/* loco:620a0ee08d5b225e1b1b1962 */
+"fileListRemoveOfflineConfirmationSnackbar" = "Un file rimosso dalla disponibilità offline";
+
+/* loco:620a0f2aeea0c053c14a46e2 */
+"fileListRemoveOfflineConfirmationSnackbar-plural" = "%d file rimossi dalla disponibilità offline";
 
 /* loco:6049df4d5c2c3a04bc3979e1 */
 "fileListTitle" = "File";
@@ -1958,6 +1973,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a81 */
 "uploadErrorTitle" = "Errore di importazione";
+
+/* loco:61e15913fefa9c6c80093ed2 */
+"uploadFileSizeExceeded" = "La dimensione totale consentita del file è stata superata.";
 
 /* loco:6049df4d5c2c3a04bc397a82 */
 "uploadFolderNotFoundError" = "Cartella eliminata o inesistente";

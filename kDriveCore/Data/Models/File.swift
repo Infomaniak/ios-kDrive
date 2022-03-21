@@ -26,7 +26,7 @@ import QuickLook
 import RealmSwift
 
 public enum ConvertedType: String, CaseIterable {
-    case archive, audio, code, folder = "dir", font, image, pdf, presentation, spreadsheet, text, unknown, url, video
+    case archive, audio, code, folder = "dir", font, form, image, pdf, presentation, spreadsheet, text, unknown, url, video
 
     public var icon: UIImage {
         switch self {
@@ -40,6 +40,8 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesAsset.folderFilled.image
         case .font:
             return KDriveResourcesAsset.fileDefault.image
+        case .form:
+            return KDriveResourcesAsset.fileForm.image
         case .image:
             return KDriveResourcesAsset.fileImage.image
         case .pdf:
@@ -78,6 +80,8 @@ public enum ConvertedType: String, CaseIterable {
             return KDriveResourcesStrings.Localizable.allCode
         case .folder:
             return KDriveResourcesStrings.Localizable.allFolder
+        case .form:
+            return KDriveResourcesStrings.Localizable.allOfficeForm
         case .image:
             return KDriveResourcesStrings.Localizable.allPictures
         case .pdf:
@@ -107,6 +111,8 @@ public enum ConvertedType: String, CaseIterable {
             return .folder
         case .font:
             return .font
+        case .form:
+            return .data
         case .image:
             return .image
         case .pdf:
@@ -128,12 +134,12 @@ public enum ConvertedType: String, CaseIterable {
 
     public static func fromUTI(_ uti: UTI) -> ConvertedType {
         var types = ConvertedType.allCases
-        types.removeAll { $0 == .unknown }
+        types.removeAll { $0 == .unknown || $0 == .form }
 
         return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
 
-    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .pdf, .presentation, .spreadsheet, .text, .url, .code)
+    public static let downloadableTypes = Set<ConvertedType>(arrayLiteral: .code, .form, .pdf, .presentation, .spreadsheet, .text, .url)
     public static let remotePlayableTypes = Set<ConvertedType>(arrayLiteral: .audio, .video)
     // Currently it's the same as the downloadableTypes but later this could change
     public static let ignoreThumbnailTypes = downloadableTypes

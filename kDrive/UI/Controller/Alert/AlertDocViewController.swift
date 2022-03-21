@@ -63,6 +63,9 @@ class AlertDocViewController: AlertFieldViewController {
         case "txt":
             typeImage.image = KDriveResourcesAsset.fileText.image
             typeImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        case "docxf":
+            typeImage.image = KDriveResourcesAsset.fileForm.image
+            typeImage.tintColor = KDriveResourcesAsset.iconColor.color
         default:
             break
         }
