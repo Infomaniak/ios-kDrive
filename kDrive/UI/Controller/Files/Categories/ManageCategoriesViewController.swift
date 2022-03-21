@@ -31,6 +31,7 @@ class ManageCategoriesViewController: UITableViewController {
 
     var driveFileManager: DriveFileManager!
     var files: Set<File>?
+    var fromMultiselect = false
     /// Disable category edition (can just add/remove).
     var canEdit = true
     var selectedCategories = [kDriveCore.Category]()
@@ -294,7 +295,11 @@ class ManageCategoriesViewController: UITableViewController {
         if let files = files {
             Task {
                 do {
-                    try await driveFileManager.add(category: category, to: Array(files))
+                    if !fromMultiselect, let file = files.first {
+                        try await driveFileManager.add(category: category, to: file)
+                    } else {
+                        try await driveFileManager.add(category: category, to: Array(files))
+                    }
                 } catch {
                     category.isSelected = false
                     tableView.deselectRow(at: indexPath, animated: true)
@@ -317,7 +322,11 @@ class ManageCategoriesViewController: UITableViewController {
         if let files = files {
             Task {
                 do {
-                    try await driveFileManager.remove(category: category, from: Array(files))
+                    if !fromMultiselect, let file = files.first {
+                        try await driveFileManager.remove(category: category, from: file)
+                    } else {
+                        try await driveFileManager.remove(category: category, from: Array(files))
+                    }
                 } catch {
                     category.isSelected = true
                     tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)

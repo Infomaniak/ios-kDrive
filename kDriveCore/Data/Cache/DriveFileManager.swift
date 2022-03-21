@@ -857,7 +857,7 @@ public class DriveFileManager {
         let fileId = file.id
         let categoryId = category.id
         let response = try await apiFetcher.add(category: category, to: file)
-        if response {
+        if response.result {
             updateFileProperty(fileId: fileId) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
@@ -868,8 +868,8 @@ public class DriveFileManager {
     public func add(category: Category, to files: [File]) async throws {
         let filesId = files.map(\.id)
         let categoryId = category.id
-        let response = try await apiFetcher.add(category: category, to: files)
-        if response.allSatisfy(\.querySucceeded) {
+        let response = try await apiFetcher.add(drive: drive, category: category, to: files)
+        if response.allSatisfy(\CategoryResponse.querySucceeded) {
             for fileId in filesId {
                 updateFileProperty(fileId: fileId) { file in
                     let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
@@ -883,7 +883,7 @@ public class DriveFileManager {
         let fileId = file.id
         let categoryId = category.id
         let response = try await apiFetcher.remove(category: category, from: file)
-        if response {
+        if response.result {
             updateFileProperty(fileId: fileId) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
@@ -895,8 +895,8 @@ public class DriveFileManager {
     public func remove(category: Category, from files: [File]) async throws {
         let filesId = files.map(\.id)
         let categoryId = category.id
-        let response = try await apiFetcher.remove(category: category, from: files)
-        if response.allSatisfy(\.querySucceeded) {
+        let response = try await apiFetcher.remove(drive: drive, category: category, from: files)
+        if response.allSatisfy(\CategoryResponse.querySucceeded) {
             for fileId in filesId {
                 updateFileProperty(fileId: fileId) { file in
                     if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {

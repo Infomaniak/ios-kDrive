@@ -18,7 +18,7 @@
 
 import Foundation
 
-public class CategoriesResponse: Codable {
+public class CategoryResponse: Codable {
     public var id: Int
     public var result: Bool
     public var message: String?

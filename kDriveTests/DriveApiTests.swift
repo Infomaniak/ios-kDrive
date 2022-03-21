@@ -664,19 +664,20 @@ final class DriveApiTests: XCTestCase {
 
         // 2. Add category to a single file
         let responseAddOne = try await currentApiFetcher.add(category: category, to: files[0])
-        XCTAssertTrue(responseAddOne, TestsMessages.shouldReturnTrue)
+        XCTAssertTrue(responseAddOne.result, TestsMessages.shouldReturnTrue)
+        
 
         // 3. Add category to several files
-        let responseAddSeveral = try await currentApiFetcher.add(category: category, to: files)
-        XCTAssertTrue(responseAddSeveral.allSatisfy(\CategoriesResponse.querySucceeded), TestsMessages.shouldReturnTrue)
+        let responseAddSeveral = try await currentApiFetcher.add(drive: proxyDrive, category: category, to: files)
+        XCTAssertTrue(responseAddSeveral.allSatisfy(\CategoryResponse.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 4. Remove category from several files
-        let responseRemoveSeveral = try await currentApiFetcher.remove(category: category, from: [files[0], files[1]])
-        XCTAssertTrue(responseRemoveSeveral.allSatisfy(\CategoriesResponse.querySucceeded), TestsMessages.shouldReturnTrue)
+        let responseRemoveSeveral = try await currentApiFetcher.remove(drive: proxyDrive, category: category, from: [files[0], files[1]])
+        XCTAssertTrue(responseRemoveSeveral.allSatisfy(\CategoryResponse.querySucceeded), TestsMessages.shouldReturnTrue)
 
         // 5. Remove category from a single file
         let responseRemoveOne = try await currentApiFetcher.remove(category: category, from: files[2])
-        XCTAssertTrue(responseRemoveOne, TestsMessages.shouldReturnTrue)
+        XCTAssertTrue(responseRemoveOne.result, TestsMessages.shouldReturnTrue)
 
         // 6. Delete category
         let deleteResponse = try await currentApiFetcher.deleteCategory(drive: proxyDrive, category: category)
