@@ -69,6 +69,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     func setupContent() {
         if sharedWithMe {
             actions = FloatingPanelAction.multipleSelectionSharedWithMeActions
+        } else if allItemsSelected {
+            actions = FloatingPanelAction.selectAllActions
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
             actions = FloatingPanelAction.multipleSelectionBulkActions
         } else {
