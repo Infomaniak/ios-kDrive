@@ -574,8 +574,11 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .count:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.content
+                    // swiftlint:disable empty_count
                     if self.contentCount?.count == 0 {
                         cell.creationLabel.text = KDriveResourcesStrings.Localizable.emptyFolder
+                    } else {
+                        cell.creationLabel.text = "Des choses"
                     }
                     return cell
                 case .sizeAll:
