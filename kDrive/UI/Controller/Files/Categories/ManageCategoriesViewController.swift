@@ -232,8 +232,9 @@ class ManageCategoriesViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
         files = []
+        let realm = driveFileManager.getRealm()
         for fileId in filesId {
-            if let file = driveFileManager.getCachedFile(id: fileId) {
+            if let file = driveFileManager.getCachedFile(id: fileId, using: realm) {
                 files!.insert(file)
             }
         }

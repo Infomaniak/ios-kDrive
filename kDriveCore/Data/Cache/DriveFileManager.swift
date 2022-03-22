@@ -852,7 +852,7 @@ public class DriveFileManager {
         }
         return result
     }
-    
+
     public func add(category: Category, to file: File) async throws {
         let fileId = file.id
         let categoryId = category.id
@@ -866,15 +866,12 @@ public class DriveFileManager {
     }
 
     public func add(category: Category, to files: [File]) async throws {
-        let filesId = files.map(\.id)
         let categoryId = category.id
         let response = try await apiFetcher.add(drive: drive, category: category, to: files)
-        if response.allSatisfy(\CategoryResponse.querySucceeded) {
-            for fileId in filesId {
-                updateFileProperty(fileId: fileId) { file in
-                    let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
-                    file.categories.append(newCategory)
-                }
+        for file in response where file.result {
+            updateFileProperty(fileId: file.id) { file in
+                let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
+                file.categories.append(newCategory)
             }
         }
     }
@@ -1357,7 +1354,6 @@ public extension DriveFileManager {
     typealias FileId = Int
 
     @discardableResult
-
     func observeFileUpdated<T: AnyObject>(_ observer: T, fileId: FileId?, using closure: @escaping (File) -> Void)
         -> ObservationToken {
         let key = UUID()

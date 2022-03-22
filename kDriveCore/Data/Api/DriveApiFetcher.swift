@@ -365,7 +365,7 @@ public class DriveApiFetcher: ApiFetcher {
     public func searchFiles(drive: AbstractDrive, query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
         try await perform(request: authenticatedRequest(.search(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories).paginated(page: page).sorted(by: [.type, sortType]))).data
     }
-    
+
     public func add(category: Category, to file: File) async throws -> CategoryResponse {
         try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .post)).data
     }
