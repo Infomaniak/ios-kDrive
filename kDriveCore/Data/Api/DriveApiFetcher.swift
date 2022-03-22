@@ -374,7 +374,7 @@ public class DriveApiFetcher: ApiFetcher {
         let parameters: Parameters = ["file_ids": files.map(\.id)]
         return try await perform(request: authenticatedRequest(.fileCategory(drive: drive, category: category), method: .post, parameters: parameters)).data
     }
-    
+
     public func remove(category: Category, from file: File) async throws -> Bool {
         try await perform(request: authenticatedRequest(.fileCategory(file: file, category: category), method: .delete)).data
     }

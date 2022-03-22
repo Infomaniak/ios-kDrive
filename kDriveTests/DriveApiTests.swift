@@ -665,7 +665,6 @@ final class DriveApiTests: XCTestCase {
         // 2. Add category to a single file
         let responseAddOne = try await currentApiFetcher.add(category: category, to: files[0])
         XCTAssertTrue(responseAddOne.result, TestsMessages.shouldReturnTrue)
-        
 
         // 3. Add category to several files
         let responseAddSeveral = try await currentApiFetcher.add(drive: proxyDrive, category: category, to: files)

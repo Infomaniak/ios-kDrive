@@ -875,7 +875,7 @@ public class DriveFileManager {
             }
         }
     }
-    
+
     public func remove(category: Category, from file: File) async throws {
         let fileId = file.id
         let categoryId = category.id
