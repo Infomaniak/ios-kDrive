@@ -231,13 +231,8 @@ class ManageCategoriesViewController: UITableViewController {
             return
         }
         self.driveFileManager = driveFileManager
-        files = []
         let realm = driveFileManager.getRealm()
-        for fileId in filesId {
-            if let file = driveFileManager.getCachedFile(id: fileId, using: realm) {
-                files!.insert(file)
-            }
-        }
+        files = Set(filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) })
         // Reload view
         updateTitle()
         updateNavigationItem()

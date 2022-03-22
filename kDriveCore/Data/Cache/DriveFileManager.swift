@@ -868,8 +868,8 @@ public class DriveFileManager {
     public func add(category: Category, to files: [File]) async throws {
         let categoryId = category.id
         let response = try await apiFetcher.add(drive: drive, category: category, to: files)
-        for file in response where file.result {
-            updateFileProperty(fileId: file.id) { file in
+        for fileResponse in response where fileResponse.result {
+            updateFileProperty(fileId: fileResponse.id) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
