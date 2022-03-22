@@ -578,7 +578,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     if self.contentCount?.count == 0 {
                         cell.creationLabel.text = KDriveResourcesStrings.Localizable.emptyFolder
                     } else {
-                        cell.creationLabel.text = "Des choses"
+                        cell.creationLabel.text = KDriveResourcesStrings.Localizable.file(self.contentCount!.files)
                     }
                     return cell
                 case .sizeAll:
