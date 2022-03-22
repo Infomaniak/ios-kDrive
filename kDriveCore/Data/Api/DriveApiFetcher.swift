@@ -24,44 +24,10 @@ import Kingfisher
 import Sentry
 import UIKit
 
-extension ApiFetcher {
-    public convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
+public extension ApiFetcher {
+    convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
         self.init()
         setToken(token, authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate))
-    }
-
-    // MARK: - User methods
-
-    func userProfile() async throws -> UserProfile {
-        try await perform(request: authenticatedSession.request("\(apiURL)profile?with=avatar,phones,emails")).data
-    }
-
-    func userDrives() async throws -> DriveResponse {
-        try await perform(request: authenticatedRequest(.initData)).data
-    }
-
-    // MARK: - New request helpers
-
-    func authenticatedRequest(_ endpoint: Endpoint, method: HTTPMethod = .get, parameters: Parameters? = nil) -> DataRequest {
-        return authenticatedSession
-            .request(endpoint.url, method: method, parameters: parameters, encoding: JSONEncoding.default)
-    }
-
-    func authenticatedRequest<Parameters: Encodable>(_ endpoint: Endpoint, method: HTTPMethod = .get, parameters: Parameters? = nil) -> DataRequest {
-        return authenticatedSession
-            .request(endpoint.url, method: method, parameters: parameters, encoder: JSONParameterEncoder.convertToSnakeCase)
-    }
-
-    func perform<T: Decodable>(request: DataRequest) async throws -> (data: T, responseAt: Int?) {
-        let response = await request.serializingDecodable(ApiResponse<T>.self, automaticallyCancelling: true, decoder: ApiFetcher.decoder).response
-        let json = try response.result.get()
-        if let result = json.data {
-            return (result, json.responseAt)
-        } else if let apiError = json.error {
-            throw DriveError(apiError: apiError)
-        } else {
-            throw DriveError.serverError(statusCode: response.response?.statusCode ?? -1)
-        }
     }
 }
 
@@ -92,7 +58,21 @@ public class DriveApiFetcher: ApiFetcher {
         authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
+    override public func perform<T: Decodable>(request: DataRequest) async throws -> (data: T, responseAt: Int?) {
+        do {
+            return try await super.perform(request: request)
+        } catch let InfomaniakError.apiError(apiError) {
+            throw DriveError(apiError: apiError)
+        } catch let InfomaniakError.serverError(statusCode: statusCode) {
+            throw DriveError.serverError(statusCode: statusCode)
+        }
+    }
+
     // MARK: - API methods
+
+    func userDrives() async throws -> DriveResponse {
+        try await perform(request: authenticatedRequest(.initData)).data
+    }
 
     public func createDirectory(in parentDirectory: File, name: String, onlyForMe: Bool) async throws -> File {
         try await perform(request: authenticatedRequest(.createDirectory(in: parentDirectory), method: .post, parameters: ["name": name, "only_for_me": onlyForMe])).data

@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit

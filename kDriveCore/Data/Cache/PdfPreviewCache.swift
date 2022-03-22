@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 public class PdfPreviewCache {
     public static let shared = PdfPreviewCache()

@@ -18,6 +18,7 @@
 
 import DifferenceKit
 import Foundation
+import InfomaniakCore
 import kDriveCore
 import UIKit
 

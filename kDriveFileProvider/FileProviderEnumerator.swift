@@ -17,6 +17,7 @@
  */
 
 import FileProvider
+import InfomaniakCore
 import kDriveCore
 
 class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
