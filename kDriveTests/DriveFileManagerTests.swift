@@ -84,6 +84,11 @@ final class DriveFileManagerTests: XCTestCase {
         XCTAssertEqual(destination.id, cachedFile!.parentId, "Parent is different from expected destination")
     }
 
+    func containsCategory(file: File, category: kDriveCore.Category) -> Bool {
+        let cachedFile = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
+        return cachedFile!.categories.contains { $0.categoryId == category.id }
+    }
+
     // MARK: - Test methods
 
     func testGetRootFile() async throws {
@@ -224,12 +229,19 @@ final class DriveFileManagerTests: XCTestCase {
     func testCategoriesAndFiles() async throws {
         let (testDirectory, officeFile) = try await initOfficeFile(testName: "Categories and files")
         let category = try await DriveFileManagerTests.driveFileManager.createCategory(name: "testCategory-\(Date())", color: "#001227").freeze()
+
+        // Single file
+        try await DriveFileManagerTests.driveFileManager.add(category: category, to: officeFile)
+        XCTAssertTrue(containsCategory(file: officeFile, category: category), "File should contain category")
+        try await DriveFileManagerTests.driveFileManager.remove(category: category, from: officeFile)
+        XCTAssertFalse(containsCategory(file: officeFile, category: category), "File should not contain category")
+
+        // Bulk action
         try await DriveFileManagerTests.driveFileManager.add(category: category, to: [officeFile])
-        let fileWithCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-        XCTAssertTrue(fileWithCategory!.categories.contains { $0.categoryId == category.id }, "File should contain category")
+        XCTAssertTrue(containsCategory(file: officeFile, category: category), "File should contain category")
         try await DriveFileManagerTests.driveFileManager.remove(category: category, from: [officeFile])
-        let fileWithoutCategory = DriveFileManagerTests.driveFileManager.getCachedFile(id: officeFile.id)
-        XCTAssertFalse(fileWithoutCategory!.categories.contains { $0.categoryId == category.id }, "File should not contain category")
+        XCTAssertFalse(containsCategory(file: officeFile, category: category), "File should not contain category")
+
         let response = try await DriveFileManagerTests.driveFileManager.delete(category: category)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
