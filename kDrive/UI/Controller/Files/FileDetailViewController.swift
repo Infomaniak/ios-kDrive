@@ -48,7 +48,7 @@ class FileDetailViewController: UIViewController {
         case creation
         case added
         case location
-        case count
+        case content
         case size
         case sizeAll
 
@@ -77,7 +77,7 @@ class FileDetailViewController: UIViewController {
                 rows.append(.location)
             }
             if contentCount != nil {
-                rows.append(.count)
+                rows.append(.content)
             }
             if file.size != nil {
                 rows.append(.size)
@@ -571,14 +571,21 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     cell.locationLabel.text = file.path
                     cell.delegate = self
                     return cell
-                case .count:
+                case .content:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.content
                     // swiftlint:disable empty_count
                     if self.contentCount?.count == 0 {
                         cell.creationLabel.text = KDriveResourcesStrings.Localizable.emptyFolder
                     } else {
-                        cell.creationLabel.text = KDriveResourcesStrings.Localizable.file(self.contentCount!.files)
+                        var content = [String]()
+                        if self.contentCount!.directories > 0 {
+                            content.append(KDriveResourcesStrings.Localizable.folder(self.contentCount!.directories))
+                        }
+                        if self.contentCount!.files > 0 {
+                            content.append(KDriveResourcesStrings.Localizable.file(self.contentCount!.files))
+                        }
+                        cell.creationLabel.text = content.joined(separator: " & ")
                     }
                     return cell
                 case .sizeAll:
