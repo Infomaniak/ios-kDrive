@@ -243,6 +243,10 @@ public extension Endpoint {
         return .fileInfo(file).appending(path: "/categories/\(category.id)")
     }
 
+    static func fileCategory(drive: AbstractDrive, category: Category) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "/files/categories/\(category.id)")
+    }
+
     // MARK: Comment
 
     static func comments(file: AbstractFile) -> Endpoint {

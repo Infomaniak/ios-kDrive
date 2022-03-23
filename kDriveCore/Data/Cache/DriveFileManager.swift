@@ -857,8 +857,19 @@ public class DriveFileManager {
         let fileId = file.id
         let categoryId = category.id
         let response = try await apiFetcher.add(category: category, to: file)
-        if response {
+        if response.result {
             updateFileProperty(fileId: fileId) { file in
+                let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
+                file.categories.append(newCategory)
+            }
+        }
+    }
+
+    public func add(category: Category, to files: [File]) async throws {
+        let categoryId = category.id
+        let response = try await apiFetcher.add(drive: drive, category: category, to: files)
+        for fileResponse in response where fileResponse.result {
+            updateFileProperty(fileId: fileResponse.id) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
@@ -871,6 +882,18 @@ public class DriveFileManager {
         let response = try await apiFetcher.remove(category: category, from: file)
         if response {
             updateFileProperty(fileId: fileId) { file in
+                if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
+                    file.categories.remove(at: index)
+                }
+            }
+        }
+    }
+
+    public func remove(category: Category, from files: [File]) async throws {
+        let categoryId = category.id
+        let response = try await apiFetcher.remove(drive: drive, category: category, from: files)
+        for fileResponse in response where fileResponse.result {
+            updateFileProperty(fileId: fileResponse.id) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }

@@ -85,7 +85,7 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionActions: [FloatingPanelAction] {
-        return [offline, favorite, folderColor, download, duplicate].map { $0.reset() }
+        return [offline, favorite, manageCategories, folderColor, download, duplicate].map { $0.reset() }
     }
 
     static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
@@ -373,9 +373,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .edit:
             OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: self)
         case .manageCategories:
-            let manageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(file: file, driveFileManager: driveFileManager)
-            (manageCategoriesViewController.topViewController as? ManageCategoriesViewController)?.fileListViewController = presentingParent as? FileListViewController
-            present(manageCategoriesViewController, animated: true)
+            FileActionsHelper.manageCategories(files: [file], driveFileManager: driveFileManager, from: self, presentingParent: presentingViewController)
         case .favorite:
             Task {
                 do {

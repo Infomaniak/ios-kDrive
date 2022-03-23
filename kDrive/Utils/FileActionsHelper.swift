@@ -149,6 +149,19 @@ public class FileActionsHelper {
         return areFavored
     }
 
+    public static func manageCategories(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
+                                        group: DispatchGroup? = nil, presentingParent: UIViewController?, fromMultiselect: Bool = false) {
+        group?.enter()
+        let navigationManageCategoriesViewController = ManageCategoriesViewController.instantiateInNavigationController(files: files, driveFileManager: driveFileManager)
+        let manageCategoriesViewController = (navigationManageCategoriesViewController.topViewController as? ManageCategoriesViewController)
+        manageCategoriesViewController?.fileListViewController = presentingParent as? FileListViewController
+        manageCategoriesViewController?.fromMultiselect = fromMultiselect
+        manageCategoriesViewController?.completionHandler = {
+            group?.leave()
+        }
+        viewController.present(navigationManageCategoriesViewController, animated: true)
+    }
+
     #if !ISEXTENSION
 
     public static func offline(files: [File], driveFileManager: DriveFileManager, group: DispatchGroup? = nil,

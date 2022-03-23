@@ -104,6 +104,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 addAction = isFavored
                 group.leave()
             }
+        case .manageCategories:
+            FileActionsHelper.manageCategories(files: files, driveFileManager: driveFileManager, from: self, group: group, presentingParent: presentingParent, fromMultiselect: true)
         case .folderColor:
             FileActionsHelper.folderColor(files: files, driveFileManager: driveFileManager, from: self,
                                           presentingParent: presentingParent, group: group) { isSuccess in
