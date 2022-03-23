@@ -335,10 +335,10 @@ public class DriveFileManager {
 
     public func initRoot() async throws {
         let root = try await file(id: DriveFileManager.constants.rootID, forceRefresh: true)
-        _ = try await files(in: root)
+        _ = try await files(in: root.proxify())
     }
 
-    public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
+    public func files(in directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
         let fetchFiles: () async throws -> ([File], Int?)
         if directory.isRoot {
             fetchFiles = {
@@ -347,7 +347,7 @@ public class DriveFileManager {
             }
         } else {
             fetchFiles = {
-                let (children, responseAt) = try await self.apiFetcher.files(in: directory.proxify(), page: page, sortType: sortType)
+                let (children, responseAt) = try await self.apiFetcher.files(in: directory, page: page, sortType: sortType)
                 return (children, responseAt)
             }
         }
@@ -355,14 +355,13 @@ public class DriveFileManager {
                                page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
     }
 
-    private func files(in directory: File,
+    private func files(in directory: ProxyFile,
                        fetchFiles: () async throws -> ([File], Int?),
                        page: Int,
                        sortType: SortType,
                        keepProperties: FilePropertiesOptions,
                        forceRefresh: Bool) async throws -> (files: [File], moreComing: Bool) {
-        let parentId = directory.id
-        if let cachedParent = getCachedFile(id: parentId, freeze: false),
+        if let cachedParent = getCachedFile(id: directory.id, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
            (cachedParent.canLoadChildrenFromCache && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
@@ -375,26 +374,23 @@ public class DriveFileManager {
                 keepCacheAttributesForFile(newFile: child, keepProperties: keepProperties, using: realm)
             }
 
-            if let managedParent = realm.object(ofType: File.self, forPrimaryKey: parentId) {
-                // Update parent
-                try realm.write {
-                    managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
-                    if children.count < Endpoint.itemsPerPage {
-                        managedParent.versionCode = DriveFileManager.constants.currentVersionCode
-                        managedParent.fullyDownloaded = true
-                    }
-                    realm.add(children, update: .modified)
-                    // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with the first page will result in an undefined behavior.
-                    if page == 1 {
-                        managedParent.children.removeAll()
-                    }
-                    managedParent.children.insert(objectsIn: children)
+            let managedParent = try directory.resolve(using: realm)
+            // Update parent
+            try realm.write {
+                managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+                if children.count < Endpoint.itemsPerPage {
+                    managedParent.versionCode = DriveFileManager.constants.currentVersionCode
+                    managedParent.fullyDownloaded = true
                 }
-
-                return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
-            } else {
-                throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: parentId)])
+                realm.add(children, update: .modified)
+                // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with the first page will result in an undefined behavior.
+                if page == 1 {
+                    managedParent.children.removeAll()
+                }
+                managedParent.children.insert(objectsIn: children)
             }
+
+            return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
         }
     }
 
@@ -421,7 +417,7 @@ public class DriveFileManager {
     }
 
     public func favorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile),
+        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
                         fetchFiles: {
                             let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
                             return (favorites, nil)
@@ -433,7 +429,7 @@ public class DriveFileManager {
     }
 
     public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile),
+        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
                         fetchFiles: {
                             let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
                             return (mySharedFiles, nil)

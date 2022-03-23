@@ -92,6 +92,9 @@ public protocol AbstractFile {
 public struct ProxyFile: AbstractFile, Sendable {
     public var driveId: Int
     public var id: Int
+    public var isRoot: Bool {
+        return id <= DriveFileManager.constants.rootID
+    }
 
     public init(driveId: Int, id: Int) {
         self.driveId = driveId
@@ -100,7 +103,7 @@ public struct ProxyFile: AbstractFile, Sendable {
 
     func resolve(using realm: Realm) throws -> File {
         guard let file = realm.object(ofType: File.self, forPrimaryKey: id) else {
-            throw DriveError.fileNotFound
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
         }
         return file
     }

@@ -93,7 +93,7 @@ class ConcreteFileListViewModel: ManagedFileListViewModel {
                 endRefreshing()
             }
 
-            let (_, moreComing) = try await driveFileManager.files(in: currentDirectory, page: page, sortType: sortType, forceRefresh: forceRefresh)
+            let (_, moreComing) = try await driveFileManager.files(in: currentDirectory.proxify(), page: page, sortType: sortType, forceRefresh: forceRefresh)
             endRefreshing()
             if moreComing {
                 try await loadFiles(page: page + 1, forceRefresh: forceRefresh)

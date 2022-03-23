@@ -71,7 +71,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             Task { [forceRefresh] in
                 do {
                     let file = try await driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
-                    let (children, moreComing) = try await driveFileManager.files(in: file, page: pageIndex, forceRefresh: forceRefresh)
+                    let (children, moreComing) = try await driveFileManager.files(in: file.proxify(), page: pageIndex, forceRefresh: forceRefresh)
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
                     for child in children {
