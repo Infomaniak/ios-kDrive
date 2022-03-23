@@ -133,7 +133,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             Task {
                 do {
                     let file = try await driveFileManager.file(id: directoryIdentifier)
-                    let (results, timestamp) = try await driveFileManager.fileActivities(file: file, from: lastTimestamp)
+                    let (results, timestamp) = try await driveFileManager.fileActivities(file: file.proxify(), from: lastTimestamp)
                     let updated = results.inserted + results.updated
                     var updatedItems = [NSFileProviderItem]()
                     for updatedChild in updated {

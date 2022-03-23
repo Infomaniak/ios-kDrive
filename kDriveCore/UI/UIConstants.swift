@@ -52,14 +52,14 @@ public enum UIConstants {
     @discardableResult
     @MainActor
     public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, duration: SnackBar.Duration = .lengthLong, cancelableResponse: CancelableResponse, parentFile: File?, driveFileManager: DriveFileManager) -> IKSnackBar? {
-        let frozenParentFile = parentFile?.freezeIfNeeded()
+        let proxyParentFile = parentFile?.proxify()
         return UIConstants.showSnackBar(message: message, duration: duration, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
             Task {
                 do {
                     let now = Date()
                     try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
-                    if let frozenParentFile = frozenParentFile {
-                        _ = try? await driveFileManager.fileActivities(file: frozenParentFile, from: Int(now.timeIntervalSince1970))
+                    if let proxyParentFile = proxyParentFile {
+                        _ = try? await driveFileManager.fileActivities(file: proxyParentFile, from: Int(now.timeIntervalSince1970))
                     }
 
                     UIConstants.showSnackBar(message: cancelSuccessMessage)

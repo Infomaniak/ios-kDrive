@@ -673,10 +673,9 @@ public class DriveFileManager {
         }
     }
 
-    public func fileActivities(file: File, from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
+    public func fileActivities(file: ProxyFile, from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
         // Get all pages and assemble
-        let fileId = file.id
-        let timestamp = TimeInterval(timestamp ?? file.responseAt)
+        let timestamp = try TimeInterval(timestamp ?? file.resolve(using: getRealm()).responseAt)
         var page = 1
         var moreComing = true
         var pagedActions = [Int: FileActivityType]()
@@ -684,17 +683,15 @@ public class DriveFileManager {
         var responseAt = 0
         while moreComing {
             // Get activities page
-            let (activities, pageResponseAt) = try await apiFetcher.fileActivities(file: file.proxify(), from: Date(timeIntervalSince1970: timestamp), page: page)
+            let (activities, pageResponseAt) = try await apiFetcher.fileActivities(file: file, from: Date(timeIntervalSince1970: timestamp), page: page)
             moreComing = activities.count == Endpoint.itemsPerPage
             page += 1
             responseAt = pageResponseAt ?? Int(Date().timeIntervalSince1970)
             // Get file from Realm
             let realm = getRealm()
-            guard let file = realm.object(ofType: File.self, forPrimaryKey: fileId) else {
-                throw DriveError.fileNotFound
-            }
+            let cachedFile = try file.resolve(using: realm)
             // Apply activities to file
-            let results = apply(activities: activities, to: file, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
+            let results = apply(activities: activities, to: cachedFile, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
             pagedActivities.inserted.insert(contentsOf: results.inserted, at: 0)
             pagedActivities.updated.insert(contentsOf: results.updated, at: 0)
             pagedActivities.deleted.insert(contentsOf: results.deleted, at: 0)
