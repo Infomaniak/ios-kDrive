@@ -88,7 +88,7 @@ public protocol AbstractFile {
     var id: Int { get set }
 }
 
-public class ProxyFile: AbstractFile {
+public struct ProxyFile: AbstractFile, Sendable {
     public var driveId: Int
     public var id: Int
 
