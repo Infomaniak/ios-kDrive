@@ -965,15 +965,14 @@ public class DriveFileManager {
         }
     }
 
-    public func delete(file: File) async throws -> CancelableResponse {
-        let fileId = file.id
-        let response = try await apiFetcher.delete(file: file.proxify())
-        file.signalChanges(userId: drive.userId)
+    public func delete(file: ProxyFile) async throws -> CancelableResponse {
+        let response = try await apiFetcher.delete(file: file)
         backgroundQueue.async { [self] in
             let localRealm = getRealm()
-            let savedFile = getCachedFile(id: fileId, using: localRealm)
-            removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: true, using: localRealm)
+            let savedFile = try? file.resolve(using: localRealm).freeze()
+            removeFileInDatabase(fileId: file.id, cascade: true, withTransaction: true, using: localRealm)
             if let file = savedFile {
+                savedFile?.signalChanges(userId: drive.userId)
                 self.notifyObserversWith(file: file)
             }
             deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)

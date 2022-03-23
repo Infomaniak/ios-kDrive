@@ -206,9 +206,9 @@ extension FileProviderExtension {
         let item = FileProviderItem(file: deletedFile, domain: domain)
         item.isTrashed = true
 
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                _ = try await driveFileManager.delete(file: file)
+                _ = try await driveFileManager.delete(file: proxyFile)
                 FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
                 completionHandler(item, nil)
             } catch {

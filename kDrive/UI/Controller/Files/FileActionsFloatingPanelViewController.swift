@@ -499,11 +499,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
-            let frozenFile = file.freezeIfNeeded()
+            let proxyFile = file.proxify()
+            let filename = file.name
             let frozenParent = file.parent?.freezeIfNeeded()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
                 do {
-                    let response = try await self.driveFileManager.delete(file: frozenFile)
+                    let response = try await self.driveFileManager.delete(file: proxyFile)
                     if let presentingParent = self.presentingParent {
                         // Update file list
                         try await (presentingParent as? FileListViewController)?.viewModel.loadActivities()
@@ -517,7 +518,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     }
                     // Show snackbar
                     UIConstants.showCancelableSnackBar(
-                        message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(frozenFile.name),
+                        message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename),
                         cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                         cancelableResponse: response,
                         parentFile: frozenParent,
@@ -533,10 +534,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)
-            let file = self.file.freeze()
+            let proxyFile = file.proxify()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalLeaveShareTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonLeaveShare, loading: true) {
                 do {
-                    _ = try await self.driveFileManager.delete(file: file)
+                    _ = try await self.driveFileManager.delete(file: proxyFile)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarLeaveShareConfirmation)
                     self.presentingParent?.navigationController?.popViewController(animated: true)
                     self.dismiss(animated: true)

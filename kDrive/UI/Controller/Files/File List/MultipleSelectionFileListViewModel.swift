@@ -261,10 +261,11 @@ class MultipleSelectionFileListViewModel {
             await bulkDeleteFiles(Array(selectedItems))
         } else {
             do {
+                let proxySelectedItems = selectedItems.map { $0.proxify() }
                 try await withThrowingTaskGroup(of: Void.self) { group in
-                    for file in selectedItems {
-                        group.addTask { [frozenFile = file.freezeIfNeeded(), self] in
-                            _ = try await driveFileManager.delete(file: frozenFile)
+                    for proxyFile in proxySelectedItems {
+                        group.addTask { [self] in
+                            _ = try await driveFileManager.delete(file: proxyFile)
                         }
                     }
                     try await group.waitForAll()
