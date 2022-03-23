@@ -1001,23 +1001,16 @@ public class DriveFileManager {
         return (response, file)
     }
 
-    public func rename(file: File, newName: String) async throws -> File {
-        guard file.isManagedByRealm else {
-            throw DriveError.fileNotFound
-        }
-        let safeFile = ThreadSafeReference(to: file)
-        _ = try await apiFetcher.rename(file: file.proxify(), newName: newName)
+    public func rename(file: ProxyFile, newName: String) async throws -> File {
+        _ = try await apiFetcher.rename(file: file, newName: newName)
         let realm = getRealm()
-        if let file = realm.resolve(safeFile) {
-            let newFile = file.detached()
-            newFile.name = newName
-            _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
-            newFile.signalChanges(userId: drive.userId)
-            notifyObserversWith(file: newFile)
-            return file
-        } else {
-            throw DriveError.fileNotFound
-        }
+        let file = try file.resolve(using: realm)
+        let newFile = file.detached()
+        newFile.name = newName
+        _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
+        newFile.signalChanges(userId: drive.userId)
+        notifyObserversWith(file: newFile)
+        return file
     }
 
     public func duplicate(file: File, duplicateName: String) async throws -> File {

@@ -134,9 +134,9 @@ extension FileProviderExtension {
             return
         }
 
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                let file = try await driveFileManager.rename(file: file, newName: itemName)
+                let file = try await driveFileManager.rename(file: proxyFile, newName: itemName)
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
