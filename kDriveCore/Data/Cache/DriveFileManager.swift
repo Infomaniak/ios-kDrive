@@ -980,32 +980,25 @@ public class DriveFileManager {
         return response
     }
 
-    public func move(file: File, to destination: File) async throws -> (CancelableResponse, File) {
-        guard file.isManagedByRealm && destination.isManagedByRealm else {
-            throw DriveError.fileNotFound
-        }
-        let safeFile = ThreadSafeReference(to: file)
-        let safeParent = ThreadSafeReference(to: destination)
-        let response = try await apiFetcher.move(file: file.proxify(), to: destination.proxify())
+    public func move(file: ProxyFile, to destination: ProxyFile) async throws -> (CancelableResponse, File) {
+        let response = try await apiFetcher.move(file: file, to: destination)
         // Add the moved file to Realm
         let realm = getRealm()
-        if let newParent = realm.resolve(safeParent),
-           let file = realm.resolve(safeFile) {
-            let oldParent = file.parent
-            try? realm.write {
-                oldParent?.children.remove(file)
-                newParent.children.insert(file)
-            }
-            if let oldParent = oldParent {
-                oldParent.signalChanges(userId: drive.userId)
-                notifyObserversWith(file: oldParent)
-            }
-            newParent.signalChanges(userId: drive.userId)
-            notifyObserversWith(file: newParent)
-            return (response, file)
-        } else {
-            throw DriveError.unknownError
+        let newParent = try destination.resolve(using: realm)
+        let file = try file.resolve(using: realm)
+
+        let oldParent = file.parent
+        try? realm.write {
+            oldParent?.children.remove(file)
+            newParent.children.insert(file)
         }
+        if let oldParent = oldParent {
+            oldParent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: oldParent)
+        }
+        newParent.signalChanges(userId: drive.userId)
+        notifyObserversWith(file: newParent)
+        return (response, file)
     }
 
     public func rename(file: File, newName: String) async throws -> File {

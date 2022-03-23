@@ -160,9 +160,9 @@ extension FileProviderExtension {
             return
         }
 
-        Task {
+        Task { [proxyFile = file.proxify(), proxyParent = parent.proxify()] in
             do {
-                let (_, file) = try await driveFileManager.move(file: file, to: parent)
+                let (_, file) = try await driveFileManager.move(file: proxyFile, to: proxyParent)
                 completionHandler(FileProviderItem(file: file.freeze(), domain: domain), nil)
             } catch {
                 completionHandler(nil, error)

@@ -237,11 +237,13 @@ class MultipleSelectionFileListViewModel {
             await bulkMoveFiles(Array(selectedItems), destinationId: destinationDirectory.id)
         } else {
             do {
+                // Move files only if needed
+                let proxySelectedItems = selectedItems.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
+                let proxyDestinationDirectory = destinationDirectory.proxify()
                 try await withThrowingTaskGroup(of: Void.self) { group in
-                    // Move files only if needed
-                    for file in selectedItems where file.parentId != destinationDirectory.id {
+                    for proxyFile in proxySelectedItems {
                         group.addTask { [self] in
-                            _ = try await driveFileManager.move(file: file, to: destinationDirectory)
+                            _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
                         }
                     }
                     try await group.waitForAll()
