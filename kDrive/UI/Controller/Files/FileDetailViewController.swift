@@ -201,11 +201,13 @@ class FileDetailViewController: UIViewController {
                 self.file = try await driveFileManager.file(id: file.id, forceRefresh: true)
                 self.fileAccess = try? await driveFileManager.apiFetcher.access(for: file)
                 guard self.file != nil else { return }
-                if self.file.convertedType == .folder {
-                    self.contentCount = try await driveFileManager.apiFetcher.count(of: self.file)
+                if self.file.isDirectory {
+                    contentCount = try await driveFileManager.apiFetcher.count(of: self.file)
                 }
-                self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess,
-                                                                      contentCount: self.contentCount, categoryRights: self.driveFileManager.drive.categoryRights)
+                self.fileInformationRows = FileInformationRow.getRows(for: self.file,
+                                                                      fileAccess: self.fileAccess,
+                                                                      contentCount: self.contentCount,
+                                                                      categoryRights: self.driveFileManager.drive.categoryRights)
                 self.reloadTableView()
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
@@ -469,8 +471,10 @@ class FileDetailViewController: UIViewController {
         }
         Task {
             self.fileAccess = try? await driveFileManager.apiFetcher.access(for: file)
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess,
-                                                                  contentCount: self.contentCount, categoryRights: self.driveFileManager.drive.categoryRights)
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file,
+                                                                  fileAccess: self.fileAccess,
+                                                                  contentCount: self.contentCount,
+                                                                  categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
@@ -575,17 +579,17 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.content
                     // swiftlint:disable empty_count
-                    if self.contentCount?.count == 0 {
+                    if contentCount?.count == 0 {
                         cell.creationLabel.text = KDriveResourcesStrings.Localizable.emptyFolder
                     } else {
                         var content = [String]()
-                        if self.contentCount!.directories > 0 {
-                            content.append(KDriveResourcesStrings.Localizable.folder(self.contentCount!.directories))
+                        if contentCount!.directories > 0 {
+                            content.append(KDriveResourcesStrings.Localizable.folder(contentCount!.directories))
                         }
-                        if self.contentCount!.files > 0 {
-                            content.append(KDriveResourcesStrings.Localizable.file(self.contentCount!.files))
+                        if contentCount!.files > 0 {
+                            content.append(KDriveResourcesStrings.Localizable.file(contentCount!.files))
                         }
-                        cell.creationLabel.text = content.joined(separator: " & ")
+                        cell.creationLabel.text = ListFormatter.localizedString(byJoining: content)
                     }
                     return cell
                 case .sizeAll:
