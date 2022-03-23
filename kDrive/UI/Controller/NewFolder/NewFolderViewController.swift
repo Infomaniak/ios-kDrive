@@ -394,9 +394,9 @@ extension NewFolderViewController: FooterButtonDelegate {
                 onlyForMe = false
                 toShare = false
             }
-            Task {
+            Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDirectory(in: currentDirectory, name: newFolderName, onlyForMe: onlyForMe)
+                    let directory = try await driveFileManager.createDirectory(in: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe)
                     if toShare {
                         let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true

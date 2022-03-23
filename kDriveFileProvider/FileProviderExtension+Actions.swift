@@ -36,9 +36,9 @@ extension FileProviderExtension {
             return
         }
 
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                let directory = try await driveFileManager.createDirectory(in: file, name: directoryName, onlyForMe: false)
+                let directory = try await driveFileManager.createDirectory(in: proxyFile, name: directoryName, onlyForMe: false)
                 completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)

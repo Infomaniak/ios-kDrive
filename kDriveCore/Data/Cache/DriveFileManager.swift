@@ -1030,13 +1030,12 @@ public class DriveFileManager {
         return duplicateFile
     }
 
-    public func createDirectory(in parentDirectory: File, name: String, onlyForMe: Bool) async throws -> File {
-        let parentId = parentDirectory.id
-        let directory = try await apiFetcher.createDirectory(in: parentDirectory.proxify(), name: name, onlyForMe: onlyForMe)
+    public func createDirectory(in parentDirectory: ProxyFile, name: String, onlyForMe: Bool) async throws -> File {
+        let directory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
         let realm = getRealm()
         let createdDirectory = try updateFileInDatabase(updatedFile: directory, using: realm)
         // Add directory to parent
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let parent = try? parentDirectory.resolve(using: realm)
         try realm.safeWrite {
             parent?.children.insert(createdDirectory)
         }
