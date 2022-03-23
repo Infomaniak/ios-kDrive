@@ -290,7 +290,7 @@
 			<string>%d file restanti</string>
 		</dict>
 	</dict>
-	<key>file</key>
+	<key>fileDetailsInfoFile</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@items@</string>
@@ -306,7 +306,7 @@
 			<string>%d file</string>
 		</dict>
 	</dict>
-	<key>folder</key>
+	<key>fileDetailsInfoFolder</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@items@</string>
