@@ -579,7 +579,7 @@ public class DriveFileManager {
         }
     }
 
-    public func setFileDropBox(file: File, dropBox: DropBox?) {
+    public func setFileDropBox(file: ProxyFile, dropBox: DropBox?) {
         updateFileProperty(fileId: file.id) { file in
             file.dropbox = dropBox
             file.capabilities.canBecomeDropbox = dropBox == nil
@@ -1076,13 +1076,12 @@ public class DriveFileManager {
         return directory.freeze()
     }
 
-    public func updateDropBox(directory: File, settings: DropBoxSettings) async throws -> Bool {
-        let proxyFile = File(value: directory)
-        let response = try await apiFetcher.updateDropBox(directory: directory.proxify(), settings: settings)
+    public func updateDropBox(directory: ProxyFile, settings: DropBoxSettings) async throws -> Bool {
+        let response = try await apiFetcher.updateDropBox(directory: directory, settings: settings)
         if response {
             // Update dropbox in Realm
-            let dropbox = try await apiFetcher.getDropBox(directory: proxyFile.proxify())
-            setFileDropBox(file: proxyFile, dropBox: dropbox)
+            let dropbox = try await apiFetcher.getDropBox(directory: directory)
+            setFileDropBox(file: directory, dropBox: dropbox)
         }
         return response
     }

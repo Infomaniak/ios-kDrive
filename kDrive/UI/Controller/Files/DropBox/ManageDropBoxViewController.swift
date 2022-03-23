@@ -253,7 +253,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                     let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: proxyDirectory)
                     if response {
                         self.dismissAndRefreshDataSource()
-                        self.driveFileManager.setFileDropBox(file: self.directory, dropBox: nil)
+                        self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: nil)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                     }
@@ -341,13 +341,13 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                     floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.directory.name)
                     self.navigationController?.popViewController(animated: true)
                     self.navigationController?.topViewController?.present(driveFloatingPanelController, animated: true)
-                    self.driveFileManager.setFileDropBox(file: self.directory, dropBox: dropBox)
+                    self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: dropBox)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             } else {
                 do {
-                    let response = try await driveFileManager.updateDropBox(directory: directory, settings: settings)
+                    let response = try await driveFileManager.updateDropBox(directory: proxyDirectory, settings: settings)
                     if response {
                         self.navigationController?.popViewController(animated: true)
                     } else {
