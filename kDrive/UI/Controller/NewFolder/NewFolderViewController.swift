@@ -440,9 +440,9 @@ extension NewFolderViewController: FooterButtonDelegate {
             }
             let settings = DropBoxSettings(alias: nil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize, password: password, validUntil: validUntil)
             MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
-            Task {
+            Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
+                    let directory = try await driveFileManager.createDropBox(parentDirectory: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
                     if !onlyForMe {
                         let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true

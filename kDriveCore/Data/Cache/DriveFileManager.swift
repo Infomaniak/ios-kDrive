@@ -1056,16 +1056,15 @@ public class DriveFileManager {
         return createdDirectory.freeze()
     }
 
-    public func createDropBox(parentDirectory: File, name: String, onlyForMe: Bool, settings: DropBoxSettings) async throws -> File {
-        let parentId = parentDirectory.id
+    public func createDropBox(parentDirectory: ProxyFile, name: String, onlyForMe: Bool, settings: DropBoxSettings) async throws -> File {
         // Create directory
-        let createdDirectory = try await apiFetcher.createDirectory(in: parentDirectory.proxify(), name: name, onlyForMe: onlyForMe)
+        let createdDirectory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
         // Set up dropbox
         let dropbox = try await apiFetcher.createDropBox(directory: createdDirectory.proxify(), settings: settings)
         let realm = getRealm()
         let directory = try updateFileInDatabase(updatedFile: createdDirectory, using: realm)
 
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let parent = try? parentDirectory.resolve(using: realm)
         try realm.write {
             directory.dropbox = dropbox
             parent?.children.insert(directory)
