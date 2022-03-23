@@ -1013,18 +1013,17 @@ public class DriveFileManager {
         return file
     }
 
-    public func duplicate(file: File, duplicateName: String) async throws -> File {
-        let parentId = file.parent?.id
-        let file = try await apiFetcher.duplicate(file: file.proxify(), duplicateName: duplicateName)
+    public func duplicate(file: ProxyFile, duplicateName: String) async throws -> File {
+        let duplicatedFile = try await apiFetcher.duplicate(file: file, duplicateName: duplicateName)
         let realm = getRealm()
-        let duplicateFile = try updateFileInDatabase(updatedFile: file, using: realm)
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let duplicateFile = try updateFileInDatabase(updatedFile: duplicatedFile, using: realm)
+        let parent = try file.resolve(using: realm).parent
         try realm.safeWrite {
             parent?.children.insert(duplicateFile)
         }
 
         duplicateFile.signalChanges(userId: drive.userId)
-        if let parent = file.parent {
+        if let parent = duplicatedFile.parent {
             parent.signalChanges(userId: drive.userId)
             notifyObserversWith(file: parent)
         }

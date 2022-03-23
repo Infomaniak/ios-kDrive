@@ -456,13 +456,14 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 return
             }
-            let file = self.file.freeze()
-            let pathString = self.file.name as NSString
+            let proxyFile = file.proxify()
+            let filename = file.name
+            let pathString = filename as NSString
             let text = KDriveResourcesStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
             let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate, placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile, text: text, action: KDriveResourcesStrings.Localizable.buttonCopy, loading: true) { duplicateName in
-                guard duplicateName != file.name else { return }
+                guard duplicateName != filename else { return }
                 do {
-                    _ = try await self.driveFileManager.duplicate(file: file, duplicateName: duplicateName)
+                    _ = try await self.driveFileManager.duplicate(file: proxyFile, duplicateName: duplicateName)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
