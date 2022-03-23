@@ -319,7 +319,7 @@
 			<key>one</key>
 			<string>1 folder</string>
 			<key>other</key>
-			<string>%d folders	</string>
+			<string>%d folders</string>
 		</dict>
 	</dict>
 </dict>
