@@ -1086,13 +1086,12 @@ public class DriveFileManager {
         return response
     }
 
-    public func createFile(in parentDirectory: File, name: String, type: String) async throws -> File {
-        let parentId = parentDirectory.id
-        let file = try await apiFetcher.createFile(in: parentDirectory.proxify(), name: name, type: type)
+    public func createFile(in parentDirectory: ProxyFile, name: String, type: String) async throws -> File {
+        let file = try await apiFetcher.createFile(in: parentDirectory, name: name, type: type)
         let realm = getRealm()
         let createdFile = try updateFileInDatabase(updatedFile: file, using: realm)
         // Add file to parent
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let parent = try? parentDirectory.resolve(using: realm)
         try realm.write {
             parent?.children.insert(createdFile)
         }
