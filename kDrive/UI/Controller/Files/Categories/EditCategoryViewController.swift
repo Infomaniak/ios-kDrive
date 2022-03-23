@@ -198,7 +198,7 @@ extension EditCategoryViewController: ColorSelectionDelegate {
 extension EditCategoryViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
         MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
-        Task {
+        Task { [proxyFileToAdd = fileToAdd?.proxify()] in
             do {
                 if let category = category {
                     // Edit category
@@ -208,7 +208,7 @@ extension EditCategoryViewController: FooterButtonDelegate {
                     // Create category
                     let category = try await driveFileManager.createCategory(name: name, color: color)
                     // If a file was given, add the new category to it
-                    if let file = fileToAdd {
+                    if let file = proxyFileToAdd {
                         try await driveFileManager.add(category: category, to: file)
                     }
                     navigationController?.popViewController(animated: true)

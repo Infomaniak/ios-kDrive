@@ -850,21 +850,20 @@ public class DriveFileManager {
         return result
     }
 
-    public func add(category: Category, to file: File) async throws {
-        let fileId = file.id
+    public func add(category: Category, to file: ProxyFile) async throws {
         let categoryId = category.id
-        let response = try await apiFetcher.add(category: category, to: file.proxify())
+        let response = try await apiFetcher.add(category: category, to: file)
         if response.result {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileId: file.id) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
         }
     }
 
-    public func add(category: Category, to files: [File]) async throws {
+    public func add(category: Category, to files: [ProxyFile]) async throws {
         let categoryId = category.id
-        let response = try await apiFetcher.add(drive: drive, category: category, to: files.map { $0.proxify() })
+        let response = try await apiFetcher.add(drive: drive, category: category, to: files)
         for fileResponse in response where fileResponse.result {
             updateFileProperty(fileId: fileResponse.id) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
@@ -873,12 +872,11 @@ public class DriveFileManager {
         }
     }
 
-    public func remove(category: Category, from file: File) async throws {
-        let fileId = file.id
+    public func remove(category: Category, from file: ProxyFile) async throws {
         let categoryId = category.id
-        let response = try await apiFetcher.remove(category: category, from: file.proxify())
+        let response = try await apiFetcher.remove(category: category, from: file)
         if response {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileId: file.id) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
@@ -886,9 +884,9 @@ public class DriveFileManager {
         }
     }
 
-    public func remove(category: Category, from files: [File]) async throws {
+    public func remove(category: Category, from files: [ProxyFile]) async throws {
         let categoryId = category.id
-        let response = try await apiFetcher.remove(drive: drive, category: category, from: files.map { $0.proxify() })
+        let response = try await apiFetcher.remove(drive: drive, category: category, from: files)
         for fileResponse in response where fileResponse.result {
             updateFileProperty(fileId: fileResponse.id) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
