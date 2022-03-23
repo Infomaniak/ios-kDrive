@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import RealmSwift
 
 // MARK: - Type definition
 
@@ -95,6 +96,13 @@ public struct ProxyFile: AbstractFile, Sendable {
     public init(driveId: Int, id: Int) {
         self.driveId = driveId
         self.id = id
+    }
+
+    func resolve(using realm: Realm) throws -> File {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: id) else {
+            throw DriveError.objectNotFound
+        }
+        return file
     }
 }
 
