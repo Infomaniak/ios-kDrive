@@ -577,17 +577,17 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 case .content:
                     let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
-                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.content
+                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfoContent
                     // swiftlint:disable empty_count
                     if contentCount?.count == 0 {
-                        cell.creationLabel.text = KDriveResourcesStrings.Localizable.emptyFolder
+                        cell.creationLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfoEmptyFolder
                     } else {
                         var content = [String]()
                         if contentCount!.directories > 0 {
-                            content.append(KDriveResourcesStrings.Localizable.folder(contentCount!.directories))
+                            content.append(KDriveResourcesStrings.Localizable.fileDetailsInfoFolder(contentCount!.directories))
                         }
                         if contentCount!.files > 0 {
-                            content.append(KDriveResourcesStrings.Localizable.file(contentCount!.files))
+                            content.append(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(contentCount!.files))
                         }
                         cell.creationLabel.text = ListFormatter.localizedString(byJoining: content)
                     }
