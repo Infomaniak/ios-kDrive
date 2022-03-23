@@ -951,16 +951,15 @@ public class DriveFileManager {
         return response
     }
 
-    public func setFavorite(file: File, favorite: Bool) async throws {
-        let fileId = file.id
+    public func setFavorite(file: ProxyFile, favorite: Bool) async throws {
         var response: Bool
         if favorite {
-            response = try await apiFetcher.favorite(file: file.proxify())
+            response = try await apiFetcher.favorite(file: file)
         } else {
-            response = try await apiFetcher.unfavorite(file: file.proxify())
+            response = try await apiFetcher.unfavorite(file: file)
         }
         if response {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileId: file.id) { file in
                 file.isFavorite = favorite
             }
         }

@@ -138,8 +138,8 @@ public class FileActionsHelper {
         let areFavored = !areFilesFavorites
         try await withThrowingTaskGroup(of: Void.self) { group in
             for file in files where file.capabilities.canUseFavorite {
-                group.addTask { [frozenFile = file.freezeIfNeeded()] in
-                    try await driveFileManager.setFavorite(file: frozenFile, favorite: areFavored)
+                group.addTask { [proxyFile = file.proxify()] in
+                    try await driveFileManager.setFavorite(file: proxyFile, favorite: areFavored)
                     await completion?(file)
                 }
             }
