@@ -186,9 +186,9 @@ class MultipleSelectionFileListViewModel {
         isSelectAllModeEnabled = true
         rightBarButtons = [.loading]
         onSelectAll?()
-        Task { [frozenDirectory = currentDirectory.freeze()] in
+        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
             do {
-                let directoryCount = try await driveFileManager.apiFetcher.count(of: frozenDirectory)
+                let directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
                 selectedCount = directoryCount.count
                 rightBarButtons = [.deselectAll]
             } catch {

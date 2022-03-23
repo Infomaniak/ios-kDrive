@@ -29,8 +29,11 @@ class UnmanagedFileListViewModel: FileListViewModel {
         return files.count
     }
 
+    let currentDirectoryProxy: ProxyFile
+
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
-        self.files = [File]()
+        files = [File]()
+        currentDirectoryProxy = currentDirectory.proxify()
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
         driveFileManager.observeFileUpdated(self, fileId: self.currentDirectory.id) { [weak self] _ in
             // FIXME: this suboptimal, we need to improve observation

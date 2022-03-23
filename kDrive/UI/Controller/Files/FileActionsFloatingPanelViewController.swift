@@ -308,7 +308,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .add:
             let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
             let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
-                                                    folder: file, presentedFromPlusButton: false)
+                                                                                       folder: file, presentedFromPlusButton: false)
             floatingPanelViewController.isRemovalInteractionEnabled = true
             floatingPanelViewController.delegate = fileInformationsViewController
 
@@ -339,7 +339,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             } else {
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
-                Task {
+                Task { [proxyFile = file.proxify()] in
                     do {
                         let shareLink = try await driveFileManager.createShareLink(for: file)
                         setLoading(false, action: action, at: indexPath)
@@ -347,7 +347,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     } catch {
                         if let error = error as? DriveError, error == .shareLinkAlreadyExists {
                             // This should never happen
-                            let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: file)
+                            let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: proxyFile)
                             setLoading(false, action: action, at: indexPath)
                             if let shareLink = shareLink {
                                 driveFileManager.setFileShareLink(file: file, shareLink: shareLink)
@@ -499,8 +499,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
-            let frozenFile = self.file.freezeIfNeeded()
-            let frozenParent = self.file.parent?.freezeIfNeeded()
+            let frozenFile = file.freezeIfNeeded()
+            let frozenParent = file.parent?.freezeIfNeeded()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
                 do {
                     let response = try await self.driveFileManager.delete(file: frozenFile)

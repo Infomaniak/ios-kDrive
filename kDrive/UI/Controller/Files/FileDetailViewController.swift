@@ -192,10 +192,10 @@ class FileDetailViewController: UIViewController {
     }
 
     private func loadFileInformation() {
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
                 self.file = try await driveFileManager.file(id: file.id, forceRefresh: true)
-                self.fileAccess = try? await driveFileManager.apiFetcher.access(for: file)
+                self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
                 guard self.file != nil else { return }
                 self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, categoryRights: self.driveFileManager.drive.categoryRights)
                 self.reloadTableView()
@@ -224,9 +224,9 @@ class FileDetailViewController: UIViewController {
 
     private func fetchNextActivities() {
         activitiesInfo.isLoading = true
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                let pagedActivities = try await driveFileManager.apiFetcher.fileActivities(file: file, page: activitiesInfo.page)
+                let pagedActivities = try await driveFileManager.apiFetcher.fileActivities(file: proxyFile, page: activitiesInfo.page)
                 self.orderActivities(data: pagedActivities)
                 self.activitiesInfo.page += 1
                 self.activitiesInfo.hasNextPage = pagedActivities.count == Endpoint.itemsPerPage
@@ -305,9 +305,10 @@ class FileDetailViewController: UIViewController {
 
     @IBAction func addComment(_ sender: UIButton) {
         MatomoUtils.track(eventWithCategory: .comment, name: "add")
+        let proxyFile = file.proxify()
         let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { body in
             do {
-                let newComment = try await self.driveFileManager.apiFetcher.addComment(to: self.file, body: body)
+                let newComment = try await self.driveFileManager.apiFetcher.addComment(to: proxyFile, body: body)
                 self.comments.insert(newComment, at: 0)
                 self.tableView.reloadSections([1], with: .automatic)
             } catch {
@@ -363,9 +364,12 @@ class FileDetailViewController: UIViewController {
     @MainActor
     private func delete(at indexPath: IndexPath, actionCompletion: (Bool) -> Void) async {
         MatomoUtils.track(eventWithCategory: .comment, name: "delete")
+
+        // MainActor should ensure that this call is safe as file was created on the main thread ?
+        let proxyFile = file.proxify()
         let comment = comments[indexPath.row]
         do {
-            let response = try await driveFileManager.apiFetcher.deleteComment(file: file, comment: comment)
+            let response = try await driveFileManager.apiFetcher.deleteComment(file: proxyFile, comment: comment)
             if response {
                 let commentToDelete = comments[indexPath.row]
                 let rowsToDelete = (0...commentToDelete.responsesCount).map { index in
@@ -395,9 +399,12 @@ class FileDetailViewController: UIViewController {
     @MainActor
     private func edit(at indexPath: IndexPath, body: String, actionCompletion: (Bool) -> Void) async {
         MatomoUtils.track(eventWithCategory: .comment, name: "edit")
+
+        // MainActor should ensure that this call is safe as file was created on the main thread ?
+        let proxyFile = file.proxify()
         let comment = comments[indexPath.row]
         do {
-            let response = try await driveFileManager.apiFetcher.editComment(file: file, body: body, comment: comment)
+            let response = try await driveFileManager.apiFetcher.editComment(file: proxyFile, body: body, comment: comment)
             if response {
                 comments[indexPath.row].body = body
                 tableView.reloadRows(at: [indexPath], with: .automatic)
@@ -415,9 +422,12 @@ class FileDetailViewController: UIViewController {
     @MainActor
     private func answer(at indexPath: IndexPath, reply: String, actionCompletion: (Bool) -> Void) async {
         MatomoUtils.track(eventWithCategory: .comment, name: "answer")
+
+        // MainActor should ensure that this call is safe as file was created on the main thread ?
+        let proxyFile = file.proxify()
         let comment = comments[indexPath.row]
         do {
-            let reply = try await driveFileManager.apiFetcher.answerComment(file: file, body: reply, comment: comment)
+            let reply = try await driveFileManager.apiFetcher.answerComment(file: proxyFile, body: reply, comment: comment)
             reply.isResponse = true
             comments.insert(reply, at: indexPath.row + 1)
             let parentComment = comments[indexPath.row]
@@ -459,8 +469,8 @@ class FileDetailViewController: UIViewController {
             navigationController?.popViewController(animated: true)
             return
         }
-        Task {
-            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: file)
+        Task { [proxyFile = file.proxify()] in
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
             self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
@@ -782,9 +792,9 @@ extension FileDetailViewController: FileLocationDelegate {
 extension FileDetailViewController: FileCommentDelegate {
     func didLikeComment(comment: Comment, index: Int) {
         MatomoUtils.track(eventWithCategory: .comment, name: "like")
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                let response = try await driveFileManager.apiFetcher.likeComment(file: file, liked: comment.liked, comment: comment)
+                let response = try await driveFileManager.apiFetcher.likeComment(file: proxyFile, liked: comment.liked, comment: comment)
                 if response {
                     self.comments[index].likesCount = !self.comments[index].liked ? self.comments[index].likesCount + 1 : self.comments[index].likesCount - 1
                     self.comments[index].liked = !self.comments[index].liked

@@ -248,9 +248,9 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.section == 2 {
-            Task {
+            Task { [proxyDirectory = directory.proxify()] in
                 do {
-                    let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: directory)
+                    let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: proxyDirectory)
                     if response {
                         self.dismissAndRefreshDataSource()
                         self.driveFileManager.setFileDropBox(file: self.directory, dropBox: nil)
@@ -331,10 +331,10 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
 
         MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
 
-        Task {
+        Task { [proxyDirectory = directory.proxify()] in
             if convertingFolder {
                 do {
-                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: directory, settings: settings)
+                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: proxyDirectory, settings: settings)
                     let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url

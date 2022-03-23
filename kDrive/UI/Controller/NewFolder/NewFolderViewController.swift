@@ -96,8 +96,8 @@ class NewFolderViewController: UIViewController {
         navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.createFolderTitle
         navigationItem.hideBackButtonText()
 
-        Task {
-            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: currentDirectory)
+        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyCurrentDirectory)
             self.setupTableViewRows()
         }
         setupTableViewRows()

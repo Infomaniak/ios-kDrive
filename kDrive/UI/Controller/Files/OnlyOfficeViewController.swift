@@ -50,9 +50,9 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             }
             floatingPanelViewController.actionHandler = { sender in
                 sender.setLoading(true)
-                Task {
+                Task { [proxyFile = file.proxify()] in
                     do {
-                        let newFile = try await driveFileManager.apiFetcher.convert(file: file)
+                        let newFile = try await driveFileManager.apiFetcher.convert(file: proxyFile)
                         sender.setLoading(false)
                         if let parent = file.parent {
                             driveFileManager.notifyObserversWith(file: parent)

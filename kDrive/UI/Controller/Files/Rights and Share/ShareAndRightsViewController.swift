@@ -79,9 +79,9 @@ class ShareAndRightsViewController: UIViewController {
 
     private func updateShareList() {
         guard driveFileManager != nil else { return }
-        Task {
+        Task { [fileProxy = file.proxify()] in
             do {
-                let fetchedAccess = try await driveFileManager.apiFetcher.access(for: file)
+                let fetchedAccess = try await driveFileManager.apiFetcher.access(for: fileProxy)
                 self.fileAccess = fetchedAccess
                 self.fileAccessElements = fetchedAccess.elements
                 self.ignoredEmails = fetchedAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
@@ -252,7 +252,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         if shareLinkRights {
             let right = ShareLinkPermission(rawValue: value)!
-            Task {
+            Task { [proxyFile = file.proxify()] in
                 do {
                     _ = try await driveFileManager.createOrRemoveShareLink(for: file, right: right)
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
@@ -261,16 +261,16 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                 }
             }
         } else {
-            Task {
+            Task { [proxyFile = file.proxify()] in
                 do {
                     let right = UserPermission(rawValue: value)!
                     var response = false
                     if let user = selectedElement as? UserFileAccess {
-                        response = try await driveFileManager.apiFetcher.updateUserAccess(to: file, user: user, right: right)
+                        response = try await driveFileManager.apiFetcher.updateUserAccess(to: proxyFile, user: user, right: right)
                     } else if let invitation = selectedElement as? ExternInvitationFileAccess {
                         response = try await driveFileManager.apiFetcher.updateInvitationAccess(drive: driveFileManager.drive, invitation: invitation, right: right)
                     } else if let team = selectedElement as? TeamFileAccess {
-                        response = try await driveFileManager.apiFetcher.updateTeamAccess(to: file, team: team, right: right)
+                        response = try await driveFileManager.apiFetcher.updateTeamAccess(to: proxyFile, team: team, right: right)
                     }
                     if response {
                         selectedElement?.right = right
@@ -286,15 +286,15 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
     }
 
     func didDeleteUserRight() {
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
                 var response = false
                 if let user = selectedElement as? UserFileAccess {
-                    response = try await driveFileManager.apiFetcher.removeUserAccess(to: file, user: user)
+                    response = try await driveFileManager.apiFetcher.removeUserAccess(to: proxyFile, user: user)
                 } else if let invitation = selectedElement as? ExternInvitationFileAccess {
                     response = try await driveFileManager.apiFetcher.deleteInvitation(drive: driveFileManager.drive, invitation: invitation)
                 } else if let team = selectedElement as? TeamFileAccess {
-                    response = try await driveFileManager.apiFetcher.removeTeamAccess(to: file, team: team)
+                    response = try await driveFileManager.apiFetcher.removeTeamAccess(to: proxyFile, team: team)
                 }
                 if response {
                     self.tableView.reloadSections([0, 2], with: .automatic)
