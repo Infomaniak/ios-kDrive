@@ -341,7 +341,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 setLoading(true, action: action, at: indexPath)
                 Task { [proxyFile = file.proxify()] in
                     do {
-                        let shareLink = try await driveFileManager.createShareLink(for: file)
+                        let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
                         setLoading(false, action: action, at: indexPath)
                         copyShareLinkToPasteboard(shareLink.url)
                     } catch {
@@ -350,7 +350,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                             let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: proxyFile)
                             setLoading(false, action: action, at: indexPath)
                             if let shareLink = shareLink {
-                                driveFileManager.setFileShareLink(file: file, shareLink: shareLink)
+                                driveFileManager.setFileShareLink(file: proxyFile, shareLink: shareLink)
                                 copyShareLinkToPasteboard(shareLink.url)
                             }
                         } else {

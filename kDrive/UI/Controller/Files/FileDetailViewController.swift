@@ -848,8 +848,8 @@ extension FileDetailViewController: ShareLinkTableViewCellDelegate {
 extension FileDetailViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         let right = ShareLinkPermission(rawValue: value)!
-        Task {
-            _ = try await driveFileManager.createOrRemoveShareLink(for: file, right: right)
+        Task { [proxyFile = file.proxify()] in
+            _ = try await driveFileManager.createOrRemoveShareLink(for: proxyFile, right: right)
             self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
         }
     }

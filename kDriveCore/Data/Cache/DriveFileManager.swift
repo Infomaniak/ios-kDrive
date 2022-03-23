@@ -572,7 +572,7 @@ public class DriveFileManager {
         }
     }
 
-    public func setFileShareLink(file: File, shareLink: ShareLink?) {
+    public func setFileShareLink(file: ProxyFile, shareLink: ShareLink?) {
         updateFileProperty(fileId: file.id) { file in
             file.sharelink = shareLink
             file.capabilities.canBecomeSharelink = shareLink == nil
@@ -1105,7 +1105,7 @@ public class DriveFileManager {
         return createdFile.freeze()
     }
 
-    public func createOrRemoveShareLink(for file: File, right: ShareLinkPermission) async throws -> ShareLink? {
+    public func createOrRemoveShareLink(for file: ProxyFile, right: ShareLinkPermission) async throws -> ShareLink? {
         if right == .restricted {
             // Remove share link
             let response = try await removeShareLink(for: file)
@@ -1124,27 +1124,25 @@ public class DriveFileManager {
     public func createShareLink(for file: File) async throws -> ShareLink {
         let shareLink = try await apiFetcher.createShareLink(for: file.proxify(), isFreeDrive: drive.pack == .free)
         // Fix for API not returning share link activities
-        setFileShareLink(file: proxyFile, shareLink: shareLink)
+        setFileShareLink(file: file, shareLink: shareLink)
         return shareLink.freeze()
     }
 
-    public func updateShareLink(for file: File, settings: ShareLinkSettings) async throws -> Bool {
-        let proxyFile = File(value: file)
-        let response = try await apiFetcher.updateShareLink(for: file.proxify(), settings: settings)
+    public func updateShareLink(for file: ProxyFile, settings: ShareLinkSettings) async throws -> Bool {
+        let response = try await apiFetcher.updateShareLink(for: file, settings: settings)
         if response {
             // Update sharelink in Realm
-            let shareLink = try await apiFetcher.shareLink(for: file.proxify())
-            setFileShareLink(file: proxyFile, shareLink: shareLink)
+            let shareLink = try await apiFetcher.shareLink(for: file)
+            setFileShareLink(file: file, shareLink: shareLink)
         }
         return response
     }
 
-    public func removeShareLink(for file: File) async throws -> Bool {
-        let proxyFile = File(id: file.id, name: file.name)
-        let response = try await apiFetcher.removeShareLink(for: file.proxify())
+    public func removeShareLink(for file: ProxyFile) async throws -> Bool {
+        let response = try await apiFetcher.removeShareLink(for: file)
         if response {
             // Fix for API not returning share link activities
-            setFileShareLink(file: proxyFile, shareLink: nil)
+            setFileShareLink(file: file, shareLink: nil)
         }
         return response
     }
