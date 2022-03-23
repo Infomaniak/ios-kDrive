@@ -301,9 +301,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>fichier</string>
+			<string>1 fichier</string>
 			<key>other</key>
-			<string>fichiers</string>
+			<string>%d fichiers</string>
 		</dict>
 	</dict>
 	<key>folder</key>
@@ -317,9 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>dossier</string>
+			<string>1 dossier</string>
 			<key>other</key>
-			<string>dossiers</string>
+			<string>%d dossiers</string>
 		</dict>
 	</dict>
 </dict>

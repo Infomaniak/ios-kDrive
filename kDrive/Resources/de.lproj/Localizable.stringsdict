@@ -2,38 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>folder</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Ordner</string>
-			<key>other</key>
-			<string>Ordner</string>
-		</dict>
-	</dict>
-	<key>file</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Datei</string>
-			<key>other</key>
-			<string>Dateien</string>
-		</dict>
-	</dict>
 	<key>fileActivityCommentCreate</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -320,6 +288,38 @@
 			<string>Eine übrige Datei</string>
 			<key>other</key>
 			<string>%d übrige Dateien</string>
+		</dict>
+	</dict>
+	<key>file</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>1 Datei</string>
+			<key>other</key>
+			<string>%d Dateien</string>
+		</dict>
+	</dict>
+	<key>folder</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>1 Ordner</string>
+			<key>other</key>
+			<string>%d Ordner</string>
 		</dict>
 	</dict>
 </dict>
