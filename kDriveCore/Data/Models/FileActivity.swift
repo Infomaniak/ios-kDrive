@@ -48,9 +48,13 @@ public enum FileActivityType: String, Codable {
     case commentLike = "comment_like"
     case commentUnlike = "comment_unlike"
     case commentResolve = "comment_resolve"
+    case collaborativeFolderAccess = "collaborative_folder_access"
     case collaborativeFolderCreate = "collaborative_folder_create"
     case collaborativeFolderUpdate = "collaborative_folder_update"
     case collaborativeFolderDelete = "collaborative_folder_delete"
+    case collaborativeUserAccess = "collaborative_user_access"
+    case collaborativeUserCreare = "collaborative_user_create"
+    case collaborativeUserDelete = "collaborative_user_delete"
     case fileColorUpdate = "file_color_update"
     case fileColorDelete = "file_color_delete"
 
