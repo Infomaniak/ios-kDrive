@@ -26,7 +26,7 @@ public struct ArchiveBody: Encodable {
     /// The directory containing the files to include in the request; required without `fileIds`.
     var parentId: Int?
 
-    public init(files: [File]) {
+    public init(files: [ProxyFile]) {
         self.init(exceptFileIds: nil, fileIds: files.map(\.id), parentId: nil)
     }
 

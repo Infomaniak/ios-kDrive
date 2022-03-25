@@ -240,13 +240,13 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     private func downloadArchivedFiles(downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
-        Task {
+        Task { [proxyFiles = files.map { $0.proxify() }] in
             do {
                 let archiveBody: ArchiveBody
                 if allItemsSelected, let parentId = parentId {
                     archiveBody = .init(parentId: parentId, exceptFileIds: exceptFileIds)
                 } else {
-                    archiveBody = .init(files: files)
+                    archiveBody = .init(files: proxyFiles)
                 }
                 let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, body: archiveBody)
                 self.currentArchiveId = response.id
