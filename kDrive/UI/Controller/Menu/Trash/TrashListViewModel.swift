@@ -23,7 +23,7 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class TrashListViewModel: UnmanagedFileListViewModel {
+class TrashListViewModel: InMemoryFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         var configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.trashTitle,
