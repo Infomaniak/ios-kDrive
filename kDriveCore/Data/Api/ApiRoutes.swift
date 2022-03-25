@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 public enum ApiRoutes {
     public static func mobileLogin(url: String) -> URL? {

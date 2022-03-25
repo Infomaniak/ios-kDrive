@@ -20,6 +20,7 @@ import Alamofire
 import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
+import InfomaniakCore
 import kDriveResources
 import Kingfisher
 import QuickLook

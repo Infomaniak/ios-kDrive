@@ -49,6 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         accountManager = AccountManager.instance
         uploadQueue = UploadQueue.instance
         reachabilityListener = ReachabilityListener.instance
+        ApiEnvironment.current = .prod
 
         // Start audio session
         do {

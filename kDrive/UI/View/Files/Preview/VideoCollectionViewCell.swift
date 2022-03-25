@@ -17,6 +17,7 @@
  */
 
 import AVKit
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import Kingfisher
