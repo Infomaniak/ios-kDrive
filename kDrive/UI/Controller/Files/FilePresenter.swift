@@ -60,11 +60,7 @@ class FilePresenter {
     }
 
     func presentParent(of file: File, driveFileManager: DriveFileManager, animated: Bool = true) {
-        if var parent = file.parent {
-            // Fix for weird bug: root container of shared with me is not what is expected
-            if driveFileManager.drive.sharedWithMe && parent.id == DriveFileManager.constants.rootID {
-                parent = DriveFileManager.sharedWithMeRootFile
-            }
+        if let parent = file.parent {
             present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
         } else if file.parentId != 0 {
             Task {
