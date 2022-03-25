@@ -54,12 +54,12 @@ final class DriveApiTests: XCTestCase {
 
     // MARK: - Tests setup
 
-    func setUpTest(testName: String) async throws -> File {
+    func setUpTest(testName: String) async throws -> ProxyFile {
         let rootDirectory = try await getRootDirectory()
         return try await createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootDirectory)
     }
 
-    func tearDownTest(directory: File) {
+    func tearDownTest(directory: ProxyFile) {
         Task {
             _ = try await currentApiFetcher.delete(file: directory)
         }
@@ -67,15 +67,15 @@ final class DriveApiTests: XCTestCase {
 
     // MARK: - Helping methods
 
-    func getRootDirectory() async throws -> File {
-        try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID)).data
+    func getRootDirectory() async throws -> ProxyFile {
+        try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID)).data.proxify()
     }
 
-    func createTestDirectory(name: String, parentDirectory: File) async throws -> File {
-        try await currentApiFetcher.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true)
+    func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {
+        try await currentApiFetcher.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true).proxify()
     }
 
-    func initDropbox(testName: String) async throws -> (File, File) {
+    func initDropbox(testName: String) async throws -> (ProxyFile, ProxyFile) {
         let testDirectory = try await setUpTest(testName: testName)
         let directory = try await createTestDirectory(name: "dropbox-\(Date())", parentDirectory: testDirectory)
         let settings = DropBoxSettings(alias: nil, emailWhenFinished: false, limitFileSize: nil, password: nil, validUntil: nil)
@@ -83,23 +83,23 @@ final class DriveApiTests: XCTestCase {
         return (testDirectory, directory)
     }
 
-    func initOfficeFile(testName: String) async throws -> (File, File) {
+    func initOfficeFile(testName: String) async throws -> (ProxyFile, ProxyFile) {
         let testDirectory = try await setUpTest(testName: testName)
         let file = try await currentApiFetcher.createFile(in: testDirectory, name: "officeFile-\(Date())", type: "docx")
-        return (testDirectory, file)
+        return (testDirectory, file.proxify())
     }
 
-    func initSeveralFiles(testName: String, count: Int = 5) async throws -> (File, [File]) {
+    func initSeveralFiles(testName: String, count: Int = 5) async throws -> (ProxyFile, [ProxyFile]) {
         let testDirectory = try await setUpTest(testName: testName)
-        var files = [File]()
-        for i in 0..<count {
+        var files = [ProxyFile]()
+        for i in 0 ..< count {
             let file = try await currentApiFetcher.createFile(in: testDirectory, name: "officeFile-\(i)", type: "docx")
-            files.append(file)
+            files.append(file.proxify())
         }
         return (testDirectory, files)
     }
 
-    func checkIfFileIsInDestination(file: File, directory: File) async throws {
+    func checkIfFileIsInDestination(file: ProxyFile, directory: ProxyFile) async throws {
         let (files, _) = try await currentApiFetcher.files(in: directory)
         let movedFile = files.contains { $0.id == file.id }
         XCTAssertTrue(movedFile, "File should be in destination")
@@ -113,12 +113,12 @@ final class DriveApiTests: XCTestCase {
 
     func testGetRootFile() async throws {
         let (file, _) = try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: DriveFileManager.constants.rootID))
-        _ = try await currentApiFetcher.files(in: file)
+        _ = try await currentApiFetcher.files(in: file.proxify())
     }
 
     func testGetCommonDocuments() async throws {
         let (file, _) = try await currentApiFetcher.fileInfo(ProxyFile(driveId: Env.driveId, id: Env.commonDocumentsId))
-        _ = try await currentApiFetcher.files(in: file)
+        _ = try await currentApiFetcher.files(in: file.proxify())
     }
 
     func testPerformAuthenticatedRequest() {
@@ -161,7 +161,7 @@ final class DriveApiTests: XCTestCase {
 
     func testCreateCommonDirectory() async throws {
         let testDirectory = try await currentApiFetcher.createCommonDirectory(drive: proxyDrive, name: "Create common directory-\(Date())", forAllUser: true)
-        tearDownTest(directory: testDirectory)
+        tearDownTest(directory: testDirectory.proxify())
     }
 
     func testCreateFile() async throws {
@@ -357,7 +357,7 @@ final class DriveApiTests: XCTestCase {
     }
 
     func testUpdateTeamAccess() async throws {
-        let testDirectory = try await createCommonDirectory(testName: "Update team access")
+        let testDirectory = try await createCommonDirectory(testName: "Update team access").proxify()
         let settings = FileAccessSettings(message: "Test update team access", right: .read, teamIds: [Env.inviteTeam])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let team = response.teams.first { $0.id == Env.inviteTeam }?.access
@@ -374,7 +374,7 @@ final class DriveApiTests: XCTestCase {
     }
 
     func testRemoveTeamAccess() async throws {
-        let testDirectory = try await createCommonDirectory(testName: "Update team access")
+        let testDirectory = try await createCommonDirectory(testName: "Update team access").proxify()
         let settings = FileAccessSettings(message: "Test remove team access", right: .read, teamIds: [Env.inviteTeam])
         let response = try await currentApiFetcher.addAccess(to: testDirectory, settings: settings)
         let team = response.teams.first { $0.id == Env.inviteTeam }?.access
@@ -512,7 +512,7 @@ final class DriveApiTests: XCTestCase {
     func testCopyFile() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Copy file")
         let copiedFile = try await currentApiFetcher.copy(file: file, to: testDirectory)
-        try await checkIfFileIsInDestination(file: copiedFile, directory: testDirectory)
+        try await checkIfFileIsInDestination(file: copiedFile.proxify(), directory: testDirectory)
         tearDownTest(directory: testDirectory)
     }
 
@@ -555,7 +555,7 @@ final class DriveApiTests: XCTestCase {
 
     func testBulkAction() async throws {
         let (testDirectory, files) = try await initSeveralFiles(testName: "Bulk action")
-        let bulkAction = BulkAction(action: .trash, fileIds: files[0...1].map(\.id))
+        let bulkAction = BulkAction(action: .trash, fileIds: files[0 ... 1].map(\.id))
         _ = try await currentApiFetcher.bulkAction(drive: proxyDrive, action: bulkAction)
         tearDownTest(directory: testDirectory)
     }
@@ -588,7 +588,7 @@ final class DriveApiTests: XCTestCase {
 
     func testGetFilesActivities() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Get files activities")
-        let secondFile = try await currentApiFetcher.createFile(in: testDirectory, name: "Get files activities-\(Date())", type: "docx")
+        let secondFile = try await currentApiFetcher.createFile(in: testDirectory, name: "Get files activities-\(Date())", type: "docx").proxify()
         let (activities, _) = try await currentApiFetcher.filesActivities(drive: proxyDrive, files: [file, secondFile], from: Date(timeIntervalSince1970: 0))
         XCTAssertEqual(activities.count, 2, "Array should contain two activities")
         for activity in activities {
