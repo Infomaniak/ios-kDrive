@@ -92,6 +92,8 @@ class FileListViewModel: SelectDelegate {
         var matomoViewPath = ["FileList"]
     }
 
+    var realmObservationToken: NotificationToken?
+
     var currentDirectory: File
     var driveFileManager: DriveFileManager {
         didSet {
@@ -102,12 +104,13 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
+    var files = AnyRealmCollection(List<File>())
     var isEmpty: Bool {
-        return true
+        return files.isEmpty
     }
 
     var fileCount: Int {
-        return 0
+        return files.count
     }
 
     var isLoading: Bool
@@ -192,6 +195,24 @@ class FileListViewModel: SelectDelegate {
     }
 
     func startObservation() {
+        realmObservationToken?.invalidate()
+        realmObservationToken = files
+            .filesSorted(by: sortType)
+            .observe(on: .main) { [weak self] change in
+                switch change {
+                case .initial(let results):
+                    self?.files = AnyRealmCollection(results)
+                    self?.onFileListUpdated?([], [], [], [], results.isEmpty, true)
+                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    self?.files = AnyRealmCollection(results)
+                    self?.onFileListUpdated?(deletions, insertions, modifications, [], results.isEmpty, false)
+                case .error(let error):
+                    DDLogError("[Realm Observation] Error \(error)")
+                }
+            }
+    }
+
+    private func setupObservation() {
         sortTypeObservation = FileListOptions.instance.$currentSortType
             .receive(on: RunLoop.main)
             .sink { [weak self] sortType in
@@ -241,7 +262,7 @@ class FileListViewModel: SelectDelegate {
 
     /// Called when sortType is updated
     func sortingChanged() {
-        // Implemented by subclasses
+        updateDataSource()
     }
 
     func showLoadingIndicatorIfNeeded() {
@@ -316,11 +337,11 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getFile(at indexPath: IndexPath) -> File? {
-        Logging.functionOverrideError(#function)
+        return indexPath.item < fileCount ? files[indexPath.item] : nil
     }
 
     func getAllFiles() -> [File] {
-        Logging.functionOverrideError(#function)
+        return Array(files.freeze())
     }
 
     func getSwipeActions(at indexPath: IndexPath) -> [SwipeCellAction]? {
@@ -365,49 +386,6 @@ class FileListViewModel: SelectDelegate {
         guard let type = option as? SortType else { return }
         MatomoUtils.track(eventWithCategory: .fileList, name: "sort-\(type.rawValue)")
         FileListOptions.instance.currentSortType = type
-    }
-}
-
-class ManagedFileListViewModel: FileListViewModel {
-    var realmObservationToken: NotificationToken?
-
-    var files = AnyRealmCollection(List<File>())
-    override var isEmpty: Bool {
-        return files.isEmpty
-    }
-
-    override var fileCount: Int {
-        return files.count
-    }
-
-    override func sortingChanged() {
-        updateDataSource()
-    }
-
-    func updateDataSource() {
-        realmObservationToken?.invalidate()
-        realmObservationToken = files
-            .filesSorted(by: sortType)
-            .observe(on: .main) { [weak self] change in
-                switch change {
-                case .initial(let results):
-                    self?.files = AnyRealmCollection(results)
-                    self?.onFileListUpdated?([], [], [], [], results.isEmpty, true)
-                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    self?.files = AnyRealmCollection(results)
-                    self?.onFileListUpdated?(deletions, insertions, modifications, [], results.isEmpty, false)
-                case .error(let error):
-                    DDLogError("[Realm Observation] Error \(error)")
-                }
-            }
-    }
-
-    override func getFile(at indexPath: IndexPath) -> File? {
-        return indexPath.item < fileCount ? files[indexPath.item] : nil
-    }
-
-    override func getAllFiles() -> [File] {
-        return Array(files.freeze())
     }
 }
 

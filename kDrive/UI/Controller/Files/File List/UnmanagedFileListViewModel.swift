@@ -22,18 +22,7 @@ import kDriveCore
 import RealmSwift
 
 class UnmanagedFileListViewModel: FileListViewModel {
-    let realm: Realm
-    var realmObservationToken: NotificationToken?
-
-    var files = AnyRealmCollection(List<File>())
-
-    override var isEmpty: Bool {
-        return files.isEmpty
-    }
-
-    override var fileCount: Int {
-        return files.count
-    }
+    private let realm: Realm
 
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         if let realm = currentDirectory.realm {
@@ -58,28 +47,6 @@ class UnmanagedFileListViewModel: FileListViewModel {
         fatalError("init(driveFileManager:currentDirectory:) has not been implemented")
     }
 
-    func updateDataSource() {
-        realmObservationToken?.invalidate()
-        realmObservationToken = files
-            .filesSorted(by: sortType)
-            .observe(on: .main) { [weak self] change in
-                switch change {
-                case .initial(let results):
-                    self?.files = AnyRealmCollection(results)
-                    self?.onFileListUpdated?([], [], [], [], results.isEmpty, true)
-                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    self?.files = AnyRealmCollection(results)
-                    self?.onFileListUpdated?(deletions, insertions, modifications, [], results.isEmpty, false)
-                case .error(let error):
-                    DDLogError("[Realm Observation] Error \(error)")
-                }
-            }
-    }
-
-    override func sortingChanged() {
-        updateDataSource()
-    }
-
     /// Use this method to add fetched files to the file list. It will replace the list on first page and append the files on following pages.
     /// - Parameters:
     ///   - fetchedFiles: The list of files to add.
@@ -101,13 +68,5 @@ class UnmanagedFileListViewModel: FileListViewModel {
                 }
             }
         }
-    }
-
-    override func getFile(at indexPath: IndexPath) -> File? {
-        return indexPath.item < fileCount ? files[indexPath.item] : nil
-    }
-
-    override func getAllFiles() -> [File] {
-        return Array(files.freeze())
     }
 }

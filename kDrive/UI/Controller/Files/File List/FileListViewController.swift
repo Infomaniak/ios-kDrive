@@ -70,7 +70,7 @@ class FileListBarButton: UIBarButtonItem {
     }
 }
 
-class ConcreteFileListViewModel: ManagedFileListViewModel {
+class ConcreteFileListViewModel: FileListViewModel {
     required convenience init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         let configuration = FileListViewModel.Configuration(emptyViewType: .emptyFolder, supportsDrop: true, rightBarButtons: [.search])
         self.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)

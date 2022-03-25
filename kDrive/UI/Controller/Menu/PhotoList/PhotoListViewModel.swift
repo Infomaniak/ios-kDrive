@@ -23,7 +23,7 @@ import kDriveCore
 import kDriveResources
 import RealmSwift
 
-class PhotoListViewModel: ManagedFileListViewModel {
+class PhotoListViewModel: FileListViewModel {
     typealias Section = ArraySection<Group, File>
 
     struct Group: Differentiable {
