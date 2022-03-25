@@ -61,7 +61,7 @@ class RecentSearchesViewModel {
     }
 }
 
-class SearchFilesViewModel: UnmanagedFileListViewModel {
+class SearchFilesViewModel: InMemoryFileListViewModel {
     typealias SearchCompletedCallback = (String?) -> Void
     typealias FiltersChangedCallback = () -> Void
 

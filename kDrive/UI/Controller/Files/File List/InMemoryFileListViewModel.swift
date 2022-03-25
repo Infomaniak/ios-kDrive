@@ -21,7 +21,7 @@ import Foundation
 import kDriveCore
 import RealmSwift
 
-class UnmanagedFileListViewModel: FileListViewModel {
+class InMemoryFileListViewModel: FileListViewModel {
     private let realm: Realm
 
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
