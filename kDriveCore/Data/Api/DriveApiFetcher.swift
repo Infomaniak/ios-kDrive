@@ -130,8 +130,8 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.shareLink(file: file))).data
     }
 
-    public func createShareLink(for file: File) async throws -> ShareLink {
-        try await perform(request: authenticatedRequest(.shareLink(file: file), method: .post, parameters: ShareLinkSettings(right: .public))).data
+    public func createShareLink(for file: File, isFreeDrive: Bool) async throws -> ShareLink {
+        try await perform(request: authenticatedRequest(.shareLink(file: file), method: .post, parameters: ShareLinkSettings(right: .public, isFreeDrive: isFreeDrive))).data
     }
 
     public func updateShareLink(for file: File, settings: ShareLinkSettings) async throws -> Bool {
