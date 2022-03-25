@@ -102,13 +102,13 @@ class PhotoListViewModel: ManagedFileListViewModel {
             case .initial(let results):
                 let results = AnyRealmCollection(results)
                 self.files = results
-                let changeset = self.insertAndSort(pictures: results.freeze(), replace: true)
+                let changeset = self.insertAndSort(pictures: results.freeze())
                 self.onReloadWithChangeset?(changeset) { newSections in
                     self.sections = newSections
                 }
             case .update(let results, deletions: _, insertions: _, modifications: _):
                 self.files = AnyRealmCollection(results)
-                let changeset = self.insertAndSort(pictures: results.freeze(), replace: false)
+                let changeset = self.insertAndSort(pictures: results.freeze())
                 self.onReloadWithChangeset?(changeset) { newSections in
                     self.sections = newSections
                 }
@@ -153,14 +153,14 @@ class PhotoListViewModel: ManagedFileListViewModel {
 
     private func updateSort() {
         UserDefaults.shared.photoSortMode = sortMode
-        let changeset = insertAndSort(pictures: files, replace: true)
+        let changeset = insertAndSort(pictures: files)
         onReloadWithChangeset?(changeset) { newSections in
             self.sections = newSections
         }
     }
 
-    private func insertAndSort(pictures: AnyRealmCollection<File>, replace: Bool) -> StagedChangeset<[PhotoListViewModel.Section]> {
-        var newSections = replace ? PhotoListViewModel.emptySections : sections
+    private func insertAndSort(pictures: AnyRealmCollection<File>) -> StagedChangeset<[PhotoListViewModel.Section]> {
+        var newSections = PhotoListViewModel.emptySections
         for picture in pictures {
             let currentDateComponents = Calendar.current.dateComponents(sortMode.calendarComponents, from: picture.lastModifiedAt)
 
