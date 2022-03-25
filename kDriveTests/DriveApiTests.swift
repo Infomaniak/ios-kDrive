@@ -42,6 +42,7 @@ final class DriveApiTests: XCTestCase {
 
     private let currentApiFetcher = DriveApiFetcher(token: token, delegate: FakeTokenDelegate())
     private let proxyDrive = ProxyDrive(id: Env.driveId)
+    private let isFreeDrive = false
 
     override class func tearDown() {
         Task {
@@ -220,7 +221,7 @@ final class DriveApiTests: XCTestCase {
 
     func testCreateShareLink() async throws {
         let testDirectory = try await setUpTest(testName: "Create share link")
-        let shareLink1 = try await currentApiFetcher.createShareLink(for: testDirectory)
+        let shareLink1 = try await currentApiFetcher.createShareLink(for: testDirectory, isFreeDrive: isFreeDrive)
         let shareLink2 = try await currentApiFetcher.shareLink(for: testDirectory)
         XCTAssertEqual(shareLink1.url, shareLink2.url, "Share link url should match")
         tearDownTest(directory: testDirectory)
@@ -228,8 +229,16 @@ final class DriveApiTests: XCTestCase {
 
     func testUpdateShareLink() async throws {
         let testDirectory = try await setUpTest(testName: "Update share link")
-        _ = try await currentApiFetcher.createShareLink(for: testDirectory)
-        let updatedSettings = ShareLinkSettings(canComment: true, canDownload: false, canEdit: true, canSeeInfo: true, canSeeStats: true, password: "password", right: .password, validUntil: nil)
+        _ = try await currentApiFetcher.createShareLink(for: testDirectory, isFreeDrive: isFreeDrive)
+        let updatedSettings = ShareLinkSettings(canComment: true,
+                                                canDownload: false,
+                                                canEdit: true,
+                                                canSeeInfo: true,
+                                                canSeeStats: true,
+                                                password: "password",
+                                                right: .password,
+                                                validUntil: nil,
+                                                isFreeDrive: isFreeDrive)
         let response = try await currentApiFetcher.updateShareLink(for: testDirectory, settings: updatedSettings)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         let updatedShareLink = try await currentApiFetcher.shareLink(for: testDirectory)
@@ -245,7 +254,7 @@ final class DriveApiTests: XCTestCase {
 
     func testRemoveShareLink() async throws {
         let testDirectory = try await setUpTest(testName: "Remove share link")
-        _ = try await currentApiFetcher.createShareLink(for: testDirectory)
+        _ = try await currentApiFetcher.createShareLink(for: testDirectory, isFreeDrive: isFreeDrive)
         let response = try await currentApiFetcher.removeShareLink(for: testDirectory)
         XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
         tearDownTest(directory: testDirectory)
