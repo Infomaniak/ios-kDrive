@@ -189,11 +189,9 @@ class FileListViewModel: SelectDelegate {
         if configuration.supportsDrop {
             self.droppableFileListViewModel = DroppableFileListViewModel(driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
         }
-
-        setupObservation()
     }
 
-    private func setupObservation() {
+    func startObservation() {
         sortTypeObservation = FileListOptions.instance.$currentSortType
             .receive(on: RunLoop.main)
             .sink { [weak self] sortType in
