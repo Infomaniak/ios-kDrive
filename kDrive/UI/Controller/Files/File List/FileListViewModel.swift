@@ -262,7 +262,7 @@ class FileListViewModel: SelectDelegate {
 
     /// Called when sortType is updated
     func sortingChanged() {
-        updateDataSource()
+        startObservation()
     }
 
     func showLoadingIndicatorIfNeeded() {
