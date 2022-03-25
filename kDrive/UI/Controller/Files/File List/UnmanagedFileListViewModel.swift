@@ -16,11 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import kDriveCore
+import RealmSwift
 
 class UnmanagedFileListViewModel: FileListViewModel {
-    var files: [File]
+    let realm: Realm
+    var realmObservationToken: NotificationToken?
+
+    var files = AnyRealmCollection(List<File>())
+
     override var isEmpty: Bool {
         return files.isEmpty
     }
@@ -29,28 +35,49 @@ class UnmanagedFileListViewModel: FileListViewModel {
         return files.count
     }
 
-    let currentDirectoryProxy: ProxyFile
-
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
-        files = [File]()
-        currentDirectoryProxy = currentDirectory.proxify()
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
-        driveFileManager.observeFileUpdated(self, fileId: self.currentDirectory.id) { [weak self] _ in
-            // FIXME: this suboptimal, we need to improve observation
-            self?.forceRefresh()
+        if let realm = currentDirectory.realm {
+            self.realm = realm
+        } else {
+            let unCachedRealmConfiguration = Realm.Configuration(inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)", objectTypes: DriveFileManager.constants.driveObjectTypes)
+            do {
+                realm = try Realm(configuration: unCachedRealmConfiguration)
+            } catch {
+                Logging.reportRealmOpeningError(error, realmConfiguration: unCachedRealmConfiguration)
+            }
         }
+
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+        try? realm.write {
+            realm.add(currentDirectory)
+        }
+        files = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         fatalError("init(driveFileManager:currentDirectory:) has not been implemented")
     }
 
-    override func sortingChanged() {
-        forceRefresh()
+    func updateDataSource() {
+        realmObservationToken?.invalidate()
+        realmObservationToken = files
+            .filesSorted(by: sortType)
+            .observe(on: .main) { [weak self] change in
+                switch change {
+                case .initial(let results):
+                    self?.files = AnyRealmCollection(results)
+                    self?.onFileListUpdated?([], [], [], [], results.isEmpty, true)
+                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    self?.files = AnyRealmCollection(results)
+                    self?.onFileListUpdated?(deletions, insertions, modifications, [], results.isEmpty, false)
+                case .error(let error):
+                    DDLogError("[Realm Observation] Error \(error)")
+                }
+            }
     }
 
-    override func getFile(at indexPath: IndexPath) -> File? {
-        return indexPath.item < fileCount ? files[indexPath.item] : nil
+    override func sortingChanged() {
+        updateDataSource()
     }
 
     /// Use this method to add fetched files to the file list. It will replace the list on first page and append the files on following pages.
@@ -58,24 +85,29 @@ class UnmanagedFileListViewModel: FileListViewModel {
     ///   - fetchedFiles: The list of files to add.
     ///   - page: The page of the files.
     final func addPage(files fetchedFiles: [File], page: Int) {
-        if page == 1 {
-            files = fetchedFiles
-            onFileListUpdated?([], [], [], [], files.isEmpty, true)
-        } else {
-            let startIndex = fileCount
-            files.append(contentsOf: fetchedFiles)
-            onFileListUpdated?([], Array(startIndex ..< files.count), [], [], files.isEmpty, false)
+        try? realm.write {
+            if page == 1 {
+                realm.delete(currentDirectory.children)
+            }
+            currentDirectory.children.insert(objectsIn: fetchedFiles)
         }
     }
 
-    func removeFile(file: File) {
-        if let fileIndex = files.firstIndex(where: { $0.id == file.id }) {
-            files.remove(at: fileIndex)
-            onFileListUpdated?([fileIndex], [], [], [], files.isEmpty, false)
+    func removeFiles(_ files: [ProxyFile]) {
+        try? realm.write {
+            for file in files {
+                if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+                    realm.delete(file)
+                }
+            }
         }
+    }
+
+    override func getFile(at indexPath: IndexPath) -> File? {
+        return indexPath.item < fileCount ? files[indexPath.item] : nil
     }
 
     override func getAllFiles() -> [File] {
-        return files
+        return Array(files.freeze())
     }
 }

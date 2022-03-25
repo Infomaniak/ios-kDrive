@@ -27,6 +27,7 @@ import SwiftRegex
 
 public class DriveFileManager {
     public class DriveFileManagerConstants {
+        public let driveObjectTypes = [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self, FileVersion.self, ShareLink.self, ShareLinkCapabilities.self, DropBox.self, DropBoxCapabilities.self, DropBoxSize.self, DropBoxValidity.self]
         private let fileManager = FileManager.default
         public let rootDocumentsURL: URL
         public let importDirectoryURL: URL
@@ -247,7 +248,7 @@ public class DriveFileManager {
                     }
                 }
             },
-            objectTypes: [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self, FileVersion.self, ShareLink.self, ShareLinkCapabilities.self, DropBox.self, DropBoxCapabilities.self, DropBoxSize.self, DropBoxValidity.self])
+            objectTypes: DriveFileManager.constants.driveObjectTypes)
 
         // Only compact in the background
         /* if !Constants.isInExtension && UIApplication.shared.applicationState == .background {

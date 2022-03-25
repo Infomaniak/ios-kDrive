@@ -216,7 +216,7 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.trash(drive: drive), method: .delete)).data
     }
 
-    public func deleteDefinitely(file: AbstractFile) async throws -> Bool {
+    public func deleteDefinitely(file: ProxyFile) async throws -> Bool {
         try await perform(request: authenticatedRequest(.trashedInfo(file: file), method: .delete)).data
     }
 
