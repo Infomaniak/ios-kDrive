@@ -36,6 +36,9 @@ class TrashListViewModel: InMemoryFileListViewModel {
             configuration.rightBarButtons = [.emptyTrash]
         }
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
+        sortTypeObservation?.cancel()
+        sortTypeObservation = nil
+        sortType = .newerDelete
         multipleSelectionViewModel = MultipleSelectionTrashViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
     }
 
