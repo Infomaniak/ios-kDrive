@@ -456,11 +456,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 return
             }
-            let proxyFile = file.proxify()
-            let filename = file.name
-            let pathString = filename as NSString
+            let pathString = file.name as NSString
             let text = KDriveResourcesStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
-            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate, placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile, text: text, action: KDriveResourcesStrings.Localizable.buttonCopy, loading: true) { duplicateName in
+            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate,
+                                                 placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile,
+                                                 text: text,
+                                                 action: KDriveResourcesStrings.Localizable.buttonCopy,
+                                                 loading: true) { [proxyFile = file.proxify(), filename = file.name] duplicateName in
                 guard duplicateName != filename else { return }
                 do {
                     _ = try await self.driveFileManager.duplicate(file: proxyFile, duplicateName: duplicateName)
@@ -479,10 +481,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
                 return
             }
-            let filename = file.name
-            let proxyFile = file.proxify()
             let placeholder = file.isDirectory ? KDriveResourcesStrings.Localizable.hintInputDirName : KDriveResourcesStrings.Localizable.hintInputFileName
-            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename, placeholder: placeholder, text: file.name, action: KDriveResourcesStrings.Localizable.buttonSave, loading: true) { newName in
+            let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonRename,
+                                                 placeholder: placeholder, text: file.name,
+                                                 action: KDriveResourcesStrings.Localizable.buttonSave,
+                                                 loading: true) { [proxyFile = file.proxify(), filename = file.name] newName in
                 guard newName != filename else { return }
                 do {
                     _ = try await self.driveFileManager.rename(file: proxyFile, newName: newName)
@@ -501,10 +504,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
-            let proxyFile = file.proxify()
-            let filename = file.name
-            let proxyParent = file.parent?.proxify()
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle,
+                                                message: attrString,
+                                                action: KDriveResourcesStrings.Localizable.buttonMove,
+                                                destructive: true,
+                                                loading: true) { [proxyFile = file.proxify(), filename = file.name, proxyParent = file.parent?.proxify()] in
                 do {
                     let response = try await self.driveFileManager.delete(file: proxyFile)
                     if let presentingParent = self.presentingParent {
@@ -536,8 +540,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)
-            let proxyFile = file.proxify()
-            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalLeaveShareTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonLeaveShare, loading: true) {
+            let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalLeaveShareTitle,
+                                                message: attrString,
+                                                action: KDriveResourcesStrings.Localizable.buttonLeaveShare,
+                                                loading: true) { [proxyFile = file.proxify()] in
                 do {
                     _ = try await self.driveFileManager.delete(file: proxyFile)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarLeaveShareConfirmation)

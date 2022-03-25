@@ -305,8 +305,10 @@ class FileDetailViewController: UIViewController {
 
     @IBAction func addComment(_ sender: UIButton) {
         MatomoUtils.track(eventWithCategory: .comment, name: "add")
-        let proxyFile = file.proxify()
-        let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment, placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName, action: KDriveResourcesStrings.Localizable.buttonSend, loading: true) { body in
+        let messageAlert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonAddComment,
+                                                    placeholder: KDriveResourcesStrings.Localizable.fileDetailsCommentsFieldName,
+                                                    action: KDriveResourcesStrings.Localizable.buttonSend,
+                                                    loading: true) { [proxyFile = file.proxify()] body in
             do {
                 let newComment = try await self.driveFileManager.apiFetcher.addComment(to: proxyFile, body: body)
                 self.comments.insert(newComment, at: 0)
