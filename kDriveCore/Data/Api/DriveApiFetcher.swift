@@ -182,7 +182,7 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.invitation(drive: drive, id: invitation.id), method: .delete)).data
     }
 
-    public func comments(file: File, page: Int) async throws -> [Comment] {
+    public func comments(file: ProxyFile, page: Int) async throws -> [Comment] {
         try await perform(request: authenticatedRequest(.comments(file: file).paginated(page: page))).data
     }
 

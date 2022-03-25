@@ -239,9 +239,9 @@ class FileDetailViewController: UIViewController {
 
     func fetchNextComments() {
         commentsInfo.isLoading = true
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                let pagedPictures = try await driveFileManager.apiFetcher.comments(file: file, page: commentsInfo.page)
+                let pagedPictures = try await driveFileManager.apiFetcher.comments(file: proxyFile, page: commentsInfo.page)
                 for comment in pagedPictures {
                     self.comments.append(comment)
                     if let responses = comment.responses {
