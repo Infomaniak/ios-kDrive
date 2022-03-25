@@ -342,7 +342,7 @@ class MultipleSelectionFileListViewModel {
                                                                cancelSuccessMessage: cancelMessage,
                                                                duration: .infinite,
                                                                cancelableResponse: cancelableResponse,
-                                                               parentFile: currentDirectory,
+                                                               parentFile: currentDirectory.proxify(),
                                                                driveFileManager: driveFileManager)
         return (cancelableResponse.id, progressSnack)
     }

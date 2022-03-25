@@ -503,7 +503,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
             let proxyFile = file.proxify()
             let filename = file.name
-            let frozenParent = file.parent?.freezeIfNeeded()
+            let proxyParent = file.parent?.proxify()
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, message: attrString, action: KDriveResourcesStrings.Localizable.buttonMove, destructive: true, loading: true) {
                 do {
                     let response = try await self.driveFileManager.delete(file: proxyFile)
@@ -523,7 +523,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename),
                         cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                         cancelableResponse: response,
-                        parentFile: frozenParent,
+                        parentFile: proxyParent,
                         driveFileManager: self.driveFileManager)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)

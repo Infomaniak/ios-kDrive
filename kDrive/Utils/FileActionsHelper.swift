@@ -71,7 +71,6 @@ public class FileActionsHelper {
 
     public func move(file: File, to destinationDirectory: File, driveFileManager: DriveFileManager, completion: ((Bool) -> Void)? = nil) {
         guard destinationDirectory.id != file.parentId else { return }
-        let frozenParent = file.parent?.freezeIfNeeded()
         Task { [proxyFile = file.proxify(),
                 proxyParent = file.parent?.proxify(),
                 proxyDestination = destinationDirectory.proxify(),
@@ -82,7 +81,7 @@ public class FileActionsHelper {
                     message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
                     cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
                     cancelableResponse: cancelResponse,
-                    parentFile: frozenParent,
+                    parentFile: proxyParent,
                     driveFileManager: driveFileManager)
                 completion?(true)
             } catch {

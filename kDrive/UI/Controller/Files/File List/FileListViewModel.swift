@@ -296,15 +296,14 @@ class FileListViewModel: SelectDelegate {
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
                 // Keep the filename before it is invalidated
-                let frozenParent = currentDirectory.freezeIfNeeded()
-                Task { [proxyFile = file.proxify(), filename = file.name] in
+                Task { [proxyFile = file.proxify(), proxyParent = currentDirectory.proxify(), filename = file.name] in
                     do {
                         let cancelResponse = try await driveFileManager.delete(file: proxyFile)
                         UIConstants.showCancelableSnackBar(
                             message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename),
                             cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                             cancelableResponse: cancelResponse,
-                            parentFile: frozenParent,
+                            parentFile: proxyParent,
                             driveFileManager: driveFileManager)
                     } catch {
                         UIConstants.showSnackBar(message: error.localizedDescription)
