@@ -537,6 +537,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
         return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
     }
+
+    // MARK: - User activity
+
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        // Get URL components from the incoming user activity.
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let incomingURL = userActivity.webpageURL,
+              let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+            return false
+        }
+
+        // Check for specific URL components that you need.
+        return UniversalLinksHelper.handlePath(components.path, window: window!)
+    }
 }
 
 // MARK: - User notification center delegate
