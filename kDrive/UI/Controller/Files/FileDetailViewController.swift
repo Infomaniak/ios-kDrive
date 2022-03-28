@@ -77,7 +77,7 @@ class FileDetailViewController: UIViewController {
             if file.path?.isEmpty == false {
                 rows.append(.location)
             }
-            if file.isDirectory && contentCount != nil {
+            if contentCount != nil {
                 rows.append(.content)
             }
             if file.size != nil {
@@ -199,14 +199,15 @@ class FileDetailViewController: UIViewController {
     private func loadFileInformation() {
         Task { [proxyFile = file.proxify()] in
             do {
-                async let file = driveFileManager.file(id: file.id, forceRefresh: true)
+                async let file = driveFileManager.file(id: proxyFile.id, forceRefresh: true)
                 async let fileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-                async let contentCount = driveFileManager.apiFetcher.count(of: proxyFile)
+                if try await file.isDirectory {
+                    self.contentCount = try await driveFileManager.apiFetcher.count(of: proxyFile)
+                }
 
-                self.fileInformationRows = try await FileInformationRow.getRows(for: file, fileAccess: fileAccess, contentCount: contentCount, categoryRights: driveFileManager.drive.categoryRights)
+                self.fileInformationRows = try await FileInformationRow.getRows(for: file, fileAccess: fileAccess, contentCount: self.contentCount, categoryRights: driveFileManager.drive.categoryRights)
                 self.file = try await file
                 self.fileAccess = try await fileAccess
-                self.contentCount = try await contentCount
 
                 self.reloadTableView()
             } catch {
@@ -483,7 +484,7 @@ class FileDetailViewController: UIViewController {
         }
         Task { [proxyFile = file.proxify()] in
             async let fileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-            async let contentCount = driveFileManager.apiFetcher.count(of: proxyFile)
+            async let contentCount = file.isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
             self.fileInformationRows = try await FileInformationRow.getRows(for: self.file, fileAccess: fileAccess, contentCount: contentCount, categoryRights: self.driveFileManager.drive.categoryRights)
             self.fileAccess = try await fileAccess
