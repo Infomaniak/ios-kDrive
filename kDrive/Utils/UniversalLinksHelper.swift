@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import kDriveCore
 import SwiftRegex
@@ -43,7 +44,7 @@ class UniversalLinksHelper {
     }
 
     static func handlePath(_ path: String, appDelegate: AppDelegate) -> Bool {
-        print("path = \(path)")
+        DDLogInfo("[UniversalLinksHelper] Trying to open link with path: \(path)")
 
         for link in Link.all {
             let matches = link.regex.matches(in: path)
@@ -52,6 +53,7 @@ class UniversalLinksHelper {
             }
         }
 
+        DDLogWarn("[UniversalLinksHelper] Unable to process link with path: \(path)")
         return false
     }
 
@@ -59,17 +61,18 @@ class UniversalLinksHelper {
         guard let firstMatch = matches.first,
               firstMatch.count > 2,
               let driveId = Int(firstMatch[1]),
-              let fileId = Int(firstMatch[2]) else {
+              let fileId = Int(firstMatch[2]),
+              let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
             return false
         }
-        print("driveId = \(driveId)")
-        print("fileId = \(fileId)")
-        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
-            return false
-        }
+
         Task {
-            guard let file = try? await driveFileManager.file(id: fileId) else { return }
-            await appDelegate.present(file: file, driveFileManager: driveFileManager, office: displayMode == .office)
+            do {
+                let file = try await driveFileManager.file(id: fileId)
+                await appDelegate.present(file: file, driveFileManager: driveFileManager, office: displayMode == .office)
+            } catch {
+                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveId) - \(fileId)]: \(error)")
+            }
         }
 
         return true
