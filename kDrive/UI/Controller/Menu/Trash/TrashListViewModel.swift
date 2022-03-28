@@ -252,11 +252,26 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
     override func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .deletePermanently:
-            guard let firstFilename = selectedItems.first?.name else { return }
-            let alert = TrashViewModelHelper.deleteAlertForFiles(selectedItems.map { $0.proxify() }, firstFilename: firstFilename, driveFileManager: driveFileManager) { [weak self] _ in
-                guard let self = self else { return }
-                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: self.selectedItems.count)
-                self.isMultipleSelectionEnabled = false
+            guard let firstSelectedItem = selectedItems.first,
+                  let realmConfiguration = firstSelectedItem.realm?.configuration else { return }
+            let selectedItemCount = selectedItems.count
+            let alert = TrashViewModelHelper.deleteAlertForFiles(selectedItems.map { $0.proxify() },
+                                                                 firstFilename: firstSelectedItem.name,
+                                                                 driveFileManager: driveFileManager) { deletedFiles in
+                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: selectedItemCount)
+                Task { [weak self] in
+                    self?.isMultipleSelectionEnabled = false
+                    Task.detached {
+                        guard let realm = try? Realm(configuration: realmConfiguration) else { return }
+                        try? realm.write {
+                            for file in deletedFiles {
+                                if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+                                    realm.delete(file)
+                                }
+                            }
+                        }
+                    }
+                }
             }
             onPresentViewController?(.modal, alert, true)
         case .more:
