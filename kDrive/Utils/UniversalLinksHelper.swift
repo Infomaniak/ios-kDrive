@@ -22,6 +22,7 @@ import kDriveCore
 import SwiftRegex
 import UIKit
 
+#if !ISEXTENSION
 class UniversalLinksHelper {
     private struct Link {
         let regex: Regex
@@ -79,3 +80,4 @@ class UniversalLinksHelper {
         return true
     }
 }
+#endif
