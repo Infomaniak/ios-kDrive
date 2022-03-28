@@ -577,7 +577,7 @@ public extension Endpoint {
         // return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
         // Using upload v1 for now
         let queryItems = file.queryItems + [fileMinimalWithQueryItem]
-        return .baseV1.appending(path: "/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
+        return .driveV1.appending(path: "/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
     }
 
     static func uploadStatus(file: AbstractFile, token: String) -> Endpoint {
