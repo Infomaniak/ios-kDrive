@@ -32,7 +32,7 @@ class UniversalLinksHelper {
         /// Matches a directory list link
         static let directoryLink = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+)$"#)!, displayMode: .file)
         /// Matches a file preview link
-        static let filePreview = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/[0-9]+/preview/[a-z]+/([0-9]+)$"#)!, displayMode: .file)
+        static let filePreview = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+/)?preview/[a-z]+/([0-9]+)$"#)!, displayMode: .file)
         /// Matches an office file link
         static let officeLink = Link(regex: Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)!, displayMode: .office)
 
@@ -61,7 +61,8 @@ class UniversalLinksHelper {
         guard let firstMatch = matches.first,
               firstMatch.count > 2,
               let driveId = Int(firstMatch[1]),
-              let fileId = Int(firstMatch[2]),
+              let last = firstMatch.last,
+              let fileId = Int(last),
               let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
             return false
         }
