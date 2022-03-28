@@ -482,13 +482,13 @@ final class DriveApiTests: XCTestCase {
         let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
         let fileInTrash = trashedFiles.first { $0.id == directory.id }
         XCTAssertNotNil(fileInTrash, TestsMessages.notNil("trashed file"))
-        if let file = fileInTrash {
+        if let proxyFile = fileInTrash?.proxify() {
             // Delete definitely
-            let response = try await currentApiFetcher.deleteDefinitely(file: file)
+            let response = try await currentApiFetcher.deleteDefinitely(file: proxyFile)
             XCTAssertTrue(response, TestsMessages.shouldReturnTrue)
             // Check that file is not in trash anymore
             let trashedFiles = try await currentApiFetcher.trashedFiles(drive: proxyDrive, sortType: .newerDelete)
-            let deletedDefinitelyFile = trashedFiles.first { $0.id == file.id }
+            let deletedDefinitelyFile = trashedFiles.first { $0.id == proxyFile.id }
             XCTAssertNil(deletedDefinitelyFile, TestsMessages.notNil("deleted file"))
         }
         tearDownTest(directory: testDirectory)
