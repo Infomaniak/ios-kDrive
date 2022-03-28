@@ -194,7 +194,7 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
-    func startObservation() {
+    func updateRealmObservation() {
         realmObservationToken?.invalidate()
         realmObservationToken = files
             .filesSorted(by: sortType)
@@ -212,7 +212,7 @@ class FileListViewModel: SelectDelegate {
             }
     }
 
-    private func setupObservation() {
+    func startObservation() {
         sortTypeObservation = FileListOptions.instance.$currentSortType
             .receive(on: RunLoop.main)
             .sink { [weak self] sortType in
@@ -262,7 +262,7 @@ class FileListViewModel: SelectDelegate {
 
     /// Called when sortType is updated
     func sortingChanged() {
-        startObservation()
+        updateRealmObservation()
     }
 
     func showLoadingIndicatorIfNeeded() {

@@ -36,10 +36,15 @@ class TrashListViewModel: InMemoryFileListViewModel {
             configuration.rightBarButtons = [.emptyTrash]
         }
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
+        multipleSelectionViewModel = MultipleSelectionTrashViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+    }
+
+    override func startObservation() {
+        super.startObservation()
         sortTypeObservation?.cancel()
         sortTypeObservation = nil
         sortType = .newerDelete
-        multipleSelectionViewModel = MultipleSelectionTrashViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+        sortingChanged()
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
