@@ -77,7 +77,7 @@ class FileDetailViewController: UIViewController {
             if file.path?.isEmpty == false {
                 rows.append(.location)
             }
-            if contentCount != nil {
+            if file.isDirectory && contentCount != nil {
                 rows.append(.content)
             }
             if file.size != nil {
@@ -199,16 +199,15 @@ class FileDetailViewController: UIViewController {
     private func loadFileInformation() {
         Task { [proxyFile = file.proxify()] in
             do {
-                self.file = try await driveFileManager.file(id: file.id, forceRefresh: true)
-                self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
-                guard self.file != nil else { return }
-                if self.file.isDirectory {
-                    contentCount = try await driveFileManager.apiFetcher.count(of: proxyFile)
-                }
-                self.fileInformationRows = FileInformationRow.getRows(for: self.file,
-                                                                      fileAccess: self.fileAccess,
-                                                                      contentCount: self.contentCount,
-                                                                      categoryRights: self.driveFileManager.drive.categoryRights)
+                async let file = driveFileManager.file(id: file.id, forceRefresh: true)
+                async let fileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
+                async let contentCount = driveFileManager.apiFetcher.count(of: proxyFile)
+
+                self.fileInformationRows = try await FileInformationRow.getRows(for: file, fileAccess: fileAccess, contentCount: contentCount, categoryRights: driveFileManager.drive.categoryRights)
+                self.file = try await file
+                self.fileAccess = try await fileAccess
+                self.contentCount = try await contentCount
+
                 self.reloadTableView()
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
@@ -483,11 +482,13 @@ class FileDetailViewController: UIViewController {
             return
         }
         Task { [proxyFile = file.proxify()] in
-            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
-            if file.isDirectory {
-                contentCount = try await driveFileManager.apiFetcher.count(of: proxyFile)
-            }
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, contentCount: self.contentCount, categoryRights: self.driveFileManager.drive.categoryRights)
+            async let fileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
+            async let contentCount = driveFileManager.apiFetcher.count(of: proxyFile)
+
+            self.fileInformationRows = try await FileInformationRow.getRows(for: self.file, fileAccess: fileAccess, contentCount: contentCount, categoryRights: self.driveFileManager.drive.categoryRights)
+            self.fileAccess = try await fileAccess
+            self.contentCount = try await contentCount
+
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
