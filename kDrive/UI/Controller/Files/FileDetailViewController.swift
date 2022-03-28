@@ -203,7 +203,7 @@ class FileDetailViewController: UIViewController {
                 self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
                 guard self.file != nil else { return }
                 if self.file.isDirectory {
-                    contentCount = try await driveFileManager.apiFetcher.count(of: self.file)
+                    contentCount = try await driveFileManager.apiFetcher.count(of: proxyFile)
                 }
                 self.fileInformationRows = FileInformationRow.getRows(for: self.file,
                                                                       fileAccess: self.fileAccess,
@@ -484,7 +484,10 @@ class FileDetailViewController: UIViewController {
         }
         Task { [proxyFile = file.proxify()] in
             self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, categoryRights: self.driveFileManager.drive.categoryRights)
+            if file.isDirectory {
+                contentCount = try await driveFileManager.apiFetcher.count(of: proxyFile)
+            }
+            self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, contentCount: self.contentCount, categoryRights: self.driveFileManager.drive.categoryRights)
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
