@@ -105,13 +105,6 @@ class FileListViewModel: SelectDelegate {
     }
 
     var files = AnyRealmCollection(List<File>())
-    var isEmpty: Bool {
-        return files.isEmpty
-    }
-
-    var fileCount: Int {
-        return files.count
-    }
 
     var isLoading: Bool
 
@@ -337,7 +330,7 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getFile(at indexPath: IndexPath) -> File? {
-        return indexPath.item < fileCount ? files[indexPath.item] : nil
+        return indexPath.item < files.count ? files[indexPath.item] : nil
     }
 
     func getAllFiles() -> [File] {

@@ -83,7 +83,7 @@ class RecentActivityFilesViewController: FileListViewController {
         headerView.activityListView.isHidden = false
         headerView.activityAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
 
-        let count = viewModel.fileCount
+        let count = viewModel.files.count
         let isDirectory = activity.file?.isDirectory ?? false
 
         if let user = activity.user {
