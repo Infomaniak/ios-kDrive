@@ -42,12 +42,12 @@ class UniversalLinksHelper {
         case office, file
     }
 
-    static func handlePath(_ path: String, window: UIWindow) -> Bool {
+    static func handlePath(_ path: String, appDelegate: AppDelegate) -> Bool {
         print("path = \(path)")
 
         for link in Link.all {
             let matches = link.regex.matches(in: path)
-            if processRegex(matches: matches, displayMode: link.displayMode, window: window) {
+            if processRegex(matches: matches, displayMode: link.displayMode, appDelegate: appDelegate) {
                 return true
             }
         }
@@ -55,7 +55,7 @@ class UniversalLinksHelper {
         return false
     }
 
-    private static func processRegex(matches: [[String]], displayMode: DisplayMode, window: UIWindow) -> Bool {
+    private static func processRegex(matches: [[String]], displayMode: DisplayMode, appDelegate: AppDelegate) -> Bool {
         guard let firstMatch = matches.first,
               firstMatch.count > 2,
               let driveId = Int(firstMatch[1]),
@@ -69,22 +69,9 @@ class UniversalLinksHelper {
         }
         Task {
             guard let file = try? await driveFileManager.file(id: fileId) else { return }
-            await present(driveFileManager: driveFileManager, file: file, displayMode: displayMode, window: window)
+            await appDelegate.present(file: file, driveFileManager: driveFileManager, office: displayMode == .office)
         }
 
         return true
-    }
-
-    @MainActor private static func present(driveFileManager: DriveFileManager, file: File, displayMode: DisplayMode, window: UIWindow) {
-        let rootViewController = window.rootViewController as? MainTabViewController
-        let navigationController = rootViewController?.selectedViewController as? UINavigationController
-        let viewController = navigationController?.topViewController
-        switch displayMode {
-        case .office:
-            OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: viewController!)
-        case .file:
-            let filePresenter = FilePresenter(viewController: viewController!)
-            filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
-        }
     }
 }
