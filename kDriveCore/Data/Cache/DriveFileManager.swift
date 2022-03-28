@@ -1117,8 +1117,8 @@ public class DriveFileManager {
         }
     }
 
-    public func createShareLink(for file: File) async throws -> ShareLink {
-        let shareLink = try await apiFetcher.createShareLink(for: file.proxify(), isFreeDrive: drive.pack == .free)
+    public func createShareLink(for file: ProxyFile) async throws -> ShareLink {
+        let shareLink = try await apiFetcher.createShareLink(for: file, isFreeDrive: drive.pack == .free)
         // Fix for API not returning share link activities
         setFileShareLink(file: file, shareLink: shareLink)
         return shareLink.freeze()
