@@ -119,13 +119,11 @@ class SearchFilesViewModel: InMemoryFileListViewModel {
                                                                                belongToAllCategories: filters.belongToAllCategories,
                                                                                page: page,
                                                                                sortType: sortType)
-        let detachedFiles = fetchedFiles.map { $0.detached() }
-
         guard isDisplayingSearchResults else {
             throw DriveError.searchCancelled
         }
 
-        addPage(files: detachedFiles, page: page)
+        addPage(files: fetchedFiles, copyInRealm: true, page: page)
         if moreComing {
             try await loadFiles(page: page + 1)
         }
