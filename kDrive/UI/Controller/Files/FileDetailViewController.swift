@@ -177,7 +177,10 @@ class FileDetailViewController: UIViewController {
         guard file != nil else { return }
 
         // Set initial rows
-        fileInformationRows = FileInformationRow.getRows(for: file, fileAccess: fileAccess, contentCount: contentCount, categoryRights: driveFileManager.drive.categoryRights)
+        fileInformationRows = FileInformationRow.getRows(for: file,
+                                                         fileAccess: fileAccess,
+                                                         contentCount: contentCount,
+                                                         categoryRights: driveFileManager.drive.categoryRights)
 
         // Load file informations
         loadFileInformation()
@@ -197,17 +200,19 @@ class FileDetailViewController: UIViewController {
     }
 
     private func loadFileInformation() {
-        Task { [proxyFile = file.proxify()] in
+        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
-                async let file = driveFileManager.file(id: proxyFile.id, forceRefresh: true)
-                async let fileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-                if try await file.isDirectory {
-                    self.contentCount = try await driveFileManager.apiFetcher.count(of: proxyFile)
-                }
+                async let currentFile = driveFileManager.file(id: proxyFile.id, forceRefresh: true)
+                async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
+                async let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
-                self.fileInformationRows = try await FileInformationRow.getRows(for: file, fileAccess: fileAccess, contentCount: self.contentCount, categoryRights: driveFileManager.drive.categoryRights)
-                self.file = try await file
-                self.fileAccess = try await fileAccess
+                self.fileInformationRows = try await FileInformationRow.getRows(for: currentFile,
+                                                                                fileAccess: currentFileAccess,
+                                                                                contentCount: folderContentCount,
+                                                                                categoryRights: driveFileManager.drive.categoryRights)
+                self.file = try await currentFile
+                self.fileAccess = try await currentFileAccess
+                self.contentCount = try await folderContentCount
 
                 self.reloadTableView()
             } catch {
@@ -483,12 +488,15 @@ class FileDetailViewController: UIViewController {
             return
         }
         Task { [proxyFile = file.proxify()] in
-            async let fileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-            async let contentCount = file.isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
+            async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
+            async let folderContentCount = file.isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
-            self.fileInformationRows = try await FileInformationRow.getRows(for: self.file, fileAccess: fileAccess, contentCount: contentCount, categoryRights: self.driveFileManager.drive.categoryRights)
-            self.fileAccess = try await fileAccess
-            self.contentCount = try await contentCount
+            self.fileInformationRows = try await FileInformationRow.getRows(for: self.file,
+                                                                            fileAccess: currentFileAccess,
+                                                                            contentCount: folderContentCount,
+                                                                            categoryRights: self.driveFileManager.drive.categoryRights)
+            self.fileAccess = try await currentFileAccess
+            self.contentCount = try await folderContentCount
 
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
