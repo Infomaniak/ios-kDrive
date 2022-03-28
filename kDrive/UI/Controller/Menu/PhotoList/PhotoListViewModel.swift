@@ -94,7 +94,7 @@ class PhotoListViewModel: FileListViewModel {
         return pictures[indexPath.row]
     }
 
-    override func startObservation() {
+    override func updateRealmObservation() {
         realmObservationToken?.invalidate()
         realmObservationToken = files.observe(on: .main) { [weak self] change in
             guard let self = self else { return }
