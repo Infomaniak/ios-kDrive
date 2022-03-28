@@ -54,7 +54,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     private var content: [[PlusButtonMenuAction]] = [
         [],
         [.scanAction, .takePictureAction, .importMediaAction, .importAction, .folderAction],
-        [.docsAction, .gridsAction, .pointsAction, .formAction, .noteAction]
+        [.docsAction, .gridsAction, .pointsAction, .noteAction]
     ]
 
     init(driveFileManager: DriveFileManager, folder: File, presentedFromPlusButton: Bool = true) {

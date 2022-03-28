@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import Sentry
@@ -49,9 +50,9 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             }
             floatingPanelViewController.actionHandler = { sender in
                 sender.setLoading(true)
-                Task {
+                Task { [proxyFile = file.proxify()] in
                     do {
-                        let newFile = try await driveFileManager.apiFetcher.convert(file: file)
+                        let newFile = try await driveFileManager.apiFetcher.convert(file: proxyFile)
                         sender.setLoading(false)
                         if let parent = file.parent {
                             driveFileManager.notifyObserversWith(file: parent)
@@ -162,7 +163,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             let urlString = url.absoluteString
             if url == file.officeUrl
                 || urlString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
-                || urlString.starts(with: "https://documentserver.\(ApiEnvironment.current.driveHost)") {
+                || urlString.starts(with: "https://documentserver.\(ApiEnvironment.current.host)") {
                 // HACK: Print/download a file if the URL contains "/output." because `shouldPerformDownload` doesn't work
                 if urlString.contains("/output.") {
                     if UIPrintInteractionController.canPrint(url) {

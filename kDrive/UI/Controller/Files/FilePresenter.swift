@@ -60,11 +60,7 @@ class FilePresenter {
     }
 
     func presentParent(of file: File, driveFileManager: DriveFileManager, animated: Bool = true) {
-        if var parent = file.parent {
-            // Fix for weird bug: root container of shared with me is not what is expected
-            if driveFileManager.drive.sharedWithMe && parent.id == DriveFileManager.constants.rootID {
-                parent = DriveFileManager.sharedWithMeRootFile
-            }
+        if let parent = file.parent {
             present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
         } else if file.parentId != 0 {
             Task {
@@ -104,9 +100,9 @@ class FilePresenter {
                     let floatingPanelViewController = accessFileDriveFloatingPanelController.contentViewController as? AccessFileFloatingPanelViewController
                     floatingPanelViewController?.actionHandler = { [unowned self] _ in
                         floatingPanelViewController?.rightButton.setLoading(true)
-                        Task {
+                        Task { [proxyFile = file.proxify()] in
                             do {
-                                let response = try await driveFileManager.apiFetcher.forceAccess(to: file)
+                                let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
                                 if response {
                                     accessFileDriveFloatingPanelController.dismiss(animated: true)
                                     self.navigationController?.pushViewController(nextVC, animated: true)

@@ -36,9 +36,9 @@ extension FileProviderExtension {
             return
         }
 
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                let directory = try await driveFileManager.createDirectory(in: file, name: directoryName, onlyForMe: false)
+                let directory = try await driveFileManager.createDirectory(in: proxyFile, name: directoryName, onlyForMe: false)
                 completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
@@ -134,9 +134,9 @@ extension FileProviderExtension {
             return
         }
 
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                let file = try await driveFileManager.rename(file: file, newName: itemName)
+                let file = try await driveFileManager.rename(file: proxyFile, newName: itemName)
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
             } catch {
                 completionHandler(nil, error)
@@ -160,9 +160,9 @@ extension FileProviderExtension {
             return
         }
 
-        Task {
+        Task { [proxyFile = file.proxify(), proxyParent = parent.proxify()] in
             do {
-                let (_, file) = try await driveFileManager.move(file: file, to: parent)
+                let (_, file) = try await driveFileManager.move(file: proxyFile, to: proxyParent)
                 completionHandler(FileProviderItem(file: file.freeze(), domain: domain), nil)
             } catch {
                 completionHandler(nil, error)
@@ -206,9 +206,9 @@ extension FileProviderExtension {
         let item = FileProviderItem(file: deletedFile, domain: domain)
         item.isTrashed = true
 
-        Task {
+        Task { [proxyFile = file.proxify()] in
             do {
-                _ = try await driveFileManager.delete(file: file)
+                _ = try await driveFileManager.delete(file: proxyFile)
                 FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
                 completionHandler(item, nil)
             } catch {
@@ -234,7 +234,7 @@ extension FileProviderExtension {
                     parent = nil
                 }
                 // Restore in given parent
-                _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: parent)
+                _ = try await self.driveFileManager.apiFetcher.restore(file: file.proxify(), in: parent)
                 let item = FileProviderItem(file: file, domain: self.domain)
                 if let parentItemIdentifier = parentItemIdentifier {
                     item.parentItemIdentifier = parentItemIdentifier

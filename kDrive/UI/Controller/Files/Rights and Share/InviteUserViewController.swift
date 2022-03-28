@@ -122,8 +122,8 @@ class InviteUserViewController: UIViewController {
 
     func shareAndDismiss() {
         let settings = FileAccessSettings(message: message, right: newPermission, emails: emails, teamIds: teamIds, userIds: userIds)
-        Task {
-            _ = try await driveFileManager.apiFetcher.addAccess(to: file, settings: settings)
+        Task { [proxyFile = file.proxify()] in
+            _ = try await driveFileManager.apiFetcher.addAccess(to: proxyFile, settings: settings)
         }
         dismiss(animated: true)
     }
@@ -335,8 +335,8 @@ extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton() {
         MatomoUtils.track(eventWithCategory: .shareAndRights, name: "inviteUser")
         let settings = FileAccessSettings(message: message, right: newPermission, emails: emails, teamIds: teamIds, userIds: userIds)
-        Task {
-            let results = try await driveFileManager.apiFetcher.checkAccessChange(to: file, settings: settings)
+        Task { [proxyFile = file.proxify()] in
+            let results = try await driveFileManager.apiFetcher.checkAccessChange(to: proxyFile, settings: settings)
             let conflictList = results.filter { !$0.needChange }
             if conflictList.isEmpty {
                 self.shareAndDismiss()

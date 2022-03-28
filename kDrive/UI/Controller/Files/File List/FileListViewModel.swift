@@ -189,11 +189,9 @@ class FileListViewModel: SelectDelegate {
         if configuration.supportsDrop {
             self.droppableFileListViewModel = DroppableFileListViewModel(driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
         }
-
-        setupObservation()
     }
 
-    private func setupObservation() {
+    func startObservation() {
         sortTypeObservation = FileListOptions.instance.$currentSortType
             .receive(on: RunLoop.main)
             .sink { [weak self] sortType in
@@ -298,16 +296,14 @@ class FileListViewModel: SelectDelegate {
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
                 // Keep the filename before it is invalidated
-                let frozenFile = file.freezeIfNeeded()
-                let frozenParent = currentDirectory.freezeIfNeeded()
-                Task {
+                Task { [proxyFile = file.proxify(), proxyParent = currentDirectory.proxify(), filename = file.name] in
                     do {
-                        let cancelResponse = try await driveFileManager.delete(file: frozenFile)
+                        let cancelResponse = try await driveFileManager.delete(file: proxyFile)
                         UIConstants.showCancelableSnackBar(
-                            message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(frozenFile.name),
+                            message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename),
                             cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                             cancelableResponse: cancelResponse,
-                            parentFile: frozenParent,
+                            parentFile: proxyParent,
                             driveFileManager: driveFileManager)
                     } catch {
                         UIConstants.showSnackBar(message: error.localizedDescription)

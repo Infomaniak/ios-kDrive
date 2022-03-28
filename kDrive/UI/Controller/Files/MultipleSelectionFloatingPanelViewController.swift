@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCore
 import CocoaLumberjackSwift
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -225,10 +225,13 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             let navigationController = tabBarController?.selectedViewController as? UINavigationController
             await (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?.performAndObserve(bulkAction: action)
         } else {
+            // MainActor should ensure that this call is safe as file was created on the main thread ?
+            let proxyFiles = files.map { $0.proxify() }
+            let proxySelectedDirectory = selectedDirectory.proxify()
             try await withThrowingTaskGroup(of: Void.self) { group in
-                for file in files {
+                for proxyFile in proxyFiles {
                     group.addTask {
-                        _ = try await self.driveFileManager.apiFetcher.copy(file: file, to: selectedDirectory)
+                        _ = try await self.driveFileManager.apiFetcher.copy(file: proxyFile, to: proxySelectedDirectory)
                     }
                 }
                 try await group.waitForAll()
@@ -237,13 +240,13 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     private func downloadArchivedFiles(downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
-        Task {
+        Task { [proxyFiles = files.map { $0.proxify() }] in
             do {
                 let archiveBody: ArchiveBody
                 if allItemsSelected, let parentId = parentId {
                     archiveBody = .init(parentId: parentId, exceptFileIds: exceptFileIds)
                 } else {
-                    archiveBody = .init(files: files)
+                    archiveBody = .init(files: proxyFiles)
                 }
                 let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, body: archiveBody)
                 self.currentArchiveId = response.id
@@ -274,7 +277,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     private func favorite(file: File) async {
-        if let file = self.driveFileManager.getCachedFile(id: file.id) {
+        if let file = driveFileManager.getCachedFile(id: file.id) {
             await MainActor.run {
                 self.changedFiles?.append(file)
             }

@@ -17,33 +17,14 @@
  */
 
 import Foundation
+import InfomaniakCore
+import RealmSwift
 
 // MARK: - Type definition
 
-public enum ApiEnvironment {
-    case prod, preprod
-
-    public static let current = ApiEnvironment.prod
-
-    var host: String {
-        switch self {
-        case .prod:
-            return "infomaniak.com"
-        case .preprod:
-            return "preprod.dev.infomaniak.ch"
-        }
-    }
-
-    var apiHost: String {
-        return "api.\(host)"
-    }
-
-    public var driveHost: String {
+public extension ApiEnvironment {
+    var driveHost: String {
         return "drive.\(host)"
-    }
-
-    public var managerHost: String {
-        return "manager.\(host)"
     }
 
     var mqttHost: String {
@@ -65,35 +46,8 @@ public enum ApiEnvironment {
     }
 }
 
-public struct Endpoint {
-    public static let itemsPerPage = 200
-
-    let path: String
-    let queryItems: [URLQueryItem]?
-    let apiEnvironment: ApiEnvironment
-
-    public var url: URL {
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = apiEnvironment.apiHost
-        components.path = path
-        components.queryItems = queryItems
-
-        guard let url = components.url else {
-            fatalError("Invalid endpoint URL: \(self)")
-        }
-        return url
-    }
-
-    init(path: String, queryItems: [URLQueryItem]? = nil, apiEnvironment: ApiEnvironment = .current) {
-        self.path = path
-        self.queryItems = queryItems
-        self.apiEnvironment = apiEnvironment
-    }
-
-    func appending(path: String, queryItems: [URLQueryItem]? = nil) -> Endpoint {
-        return Endpoint(path: self.path + path, queryItems: queryItems, apiEnvironment: apiEnvironment)
-    }
+public extension Endpoint {
+    static let itemsPerPage = 200
 
     func paginated(page: Int = 1) -> Endpoint {
         let paginationQueryItems = [
@@ -135,13 +89,23 @@ public protocol AbstractFile {
     var id: Int { get set }
 }
 
-public class ProxyFile: AbstractFile {
+public struct ProxyFile: AbstractFile, Sendable {
     public var driveId: Int
     public var id: Int
+    public var isRoot: Bool {
+        return id <= DriveFileManager.constants.rootID
+    }
 
     public init(driveId: Int, id: Int) {
         self.driveId = driveId
         self.id = id
+    }
+
+    func resolve(using realm: Realm) throws -> File {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: id) else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
+        }
+        return file
     }
 }
 
@@ -153,8 +117,8 @@ public extension Endpoint {
     private static let fileMinimalWithQueryItem = URLQueryItem(name: "with", value: "capabilities,categories,conversion,dropbox,is_favorite,sharelink,sorted_name")
     private static let fileExtraWithQueryItem = URLQueryItem(name: "with", value: fileMinimalWithQueryItem.value?.appending(",path,users,version"))
 
-    private static var base: Endpoint {
-        return Endpoint(path: "/2/drive")
+    private static var drive: Endpoint {
+        return .baseV2.appending(path: "/drive")
     }
 
     static let fileActivitiesWithQueryItem = URLQueryItem(name: "with", value: "file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name")
@@ -165,16 +129,16 @@ public extension Endpoint {
 
     // MARK: V1
 
-    private static var baseV1: Endpoint {
-        return Endpoint(path: "/drive")
+    private static var driveV1: Endpoint {
+        return .baseV1.appending(path: "/drive")
     }
 
     static var initData: Endpoint {
-        return .baseV1.appending(path: "/init", queryItems: [URLQueryItem(name: "with", value: "drives,users,teams,categories")])
+        return .driveV1.appending(path: "/init", queryItems: [URLQueryItem(name: "with", value: "drives,users,teams,categories")])
     }
 
     static func uploadToken(drive: AbstractDrive) -> Endpoint {
-        return .baseV1.appending(path: "/\(drive.id)/file/1/upload/token")
+        return .driveV1.appending(path: "/\(drive.id)/file/1/upload/token")
     }
 
     // MARK: Action
@@ -272,7 +236,7 @@ public extension Endpoint {
     // MARK: Drive (complete me)
 
     static func driveInfo(drive: AbstractDrive) -> Endpoint {
-        return .base.appending(path: "/\(drive.id)")
+        return .drive.appending(path: "/\(drive.id)")
     }
 
     static func driveUsers(drive: AbstractDrive) -> Endpoint {
@@ -477,7 +441,7 @@ public extension Endpoint {
     // MARK: Preferences
 
     static var userPreferences: Endpoint {
-        return .base.appending(path: "/preferences")
+        return .drive.appending(path: "/preferences")
     }
 
     static func preferences(drive: AbstractDrive) -> Endpoint {

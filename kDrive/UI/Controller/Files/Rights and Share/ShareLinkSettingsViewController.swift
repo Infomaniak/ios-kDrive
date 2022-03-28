@@ -356,10 +356,18 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
         let canEdit = editRightValue == EditPermission.write.rawValue
-        let settings = ShareLinkSettings(canComment: canEdit, canDownload: getSetting(for: .optionDownload), canEdit: canEdit, canSeeInfo: true, canSeeStats: true, password: password, right: right, validUntil: validUntil)
-        Task { [frozenFile = file.freeze()] in
+        let settings = ShareLinkSettings(canComment: canEdit,
+                                         canDownload: getSetting(for: .optionDownload),
+                                         canEdit: canEdit,
+                                         canSeeInfo: true,
+                                         canSeeStats: true,
+                                         password: password,
+                                         right: right,
+                                         validUntil: validUntil,
+                                         isFreeDrive: driveFileManager.drive.pack == .free)
+        Task { [proxyFile = file.proxify()] in
             do {
-                let response = try await driveFileManager.updateShareLink(for: frozenFile, settings: settings)
+                let response = try await driveFileManager.updateShareLink(for: proxyFile, settings: settings)
                 if response {
                     self.navigationController?.popViewController(animated: true)
                 }

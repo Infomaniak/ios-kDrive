@@ -110,12 +110,20 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = "fileDetailsActivityFileCommentResolve"
         case .fileMoveIn, .fileMoveOut:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderMove" : "fileDetailsActivityFileMove"
+        case .collaborativeFolderAccess:
+            localizedKey = "fileActivityCollaborativeFolderAccess"
         case .collaborativeFolderCreate:
             localizedKey = "fileActivityCollaborativeFolderCreate"
         case .collaborativeFolderUpdate:
             localizedKey = "fileActivityCollaborativeFolderUpdate"
         case .collaborativeFolderDelete:
             localizedKey = "fileActivityCollaborativeFolderDelete"
+        case .collaborativeUserAccess:
+            localizedKey = "fileActivityCollaborativeUserAccess"
+        case .collaborativeUserCreare:
+            localizedKey = "fileActivityCollaborativeUserCreate"
+        case .collaborativeUserDelete:
+            localizedKey = "fileActivityCollaborativeUserDelete"
         case .fileColorUpdate:
             localizedKey = "fileDetailsActivityFileColorUpdate"
         case .fileColorDelete:

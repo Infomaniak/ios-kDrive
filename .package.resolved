@@ -1,376 +1,374 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "abseil",
-        "repositoryURL": "https://github.com/firebase/abseil-cpp-SwiftPM.git",
-        "state": {
-          "branch": null,
-          "revision": "fffc3c2729be5747390ad02d5100291a0d9ad26a",
-          "version": "0.20200225.4"
-        }
-      },
-      {
-        "package": "Alamofire",
-        "repositoryURL": "https://github.com/Alamofire/Alamofire.git",
-        "state": {
-          "branch": null,
-          "revision": "f82c23a8a7ef8dc1a49a8bfc6a96883e79121864",
-          "version": "5.5.0"
-        }
-      },
-      {
-        "package": "Atlantis",
-        "repositoryURL": "https://github.com/ProxymanApp/atlantis",
-        "state": {
-          "branch": null,
-          "revision": "b60ef22babc5cc8997841b378bb2993229fac9eb",
-          "version": "1.16.0"
-        }
-      },
-      {
-        "package": "BoringSSL-GRPC",
-        "repositoryURL": "https://github.com/firebase/boringssl-SwiftPM.git",
-        "state": {
-          "branch": null,
-          "revision": "734a8247442fde37df4364c21f6a0085b6a36728",
-          "version": "0.7.2"
-        }
-      },
-      {
-        "package": "CocoaLumberjack",
-        "repositoryURL": "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
-        "state": {
-          "branch": null,
-          "revision": "80ada1f753b0d53d9b57c465936a7c4169375002",
-          "version": "3.7.4"
-        }
-      },
-      {
-        "package": "DifferenceKit",
-        "repositoryURL": "https://github.com/ra1028/DifferenceKit",
-        "state": {
-          "branch": null,
-          "revision": "62745d7780deef4a023a792a1f8f763ec7bf9705",
-          "version": "1.2.0"
-        }
-      },
-      {
-        "package": "DropDown",
-        "repositoryURL": "https://github.com/RomanTysiachnik/DropDown.git",
-        "state": {
-          "branch": "master",
-          "revision": "d040a7d331a978d0e6b6568a40bb017aac127720",
-          "version": null
-        }
-      },
-      {
-        "package": "DTFoundation",
-        "repositoryURL": "https://github.com/Cocoanetics/DTFoundation.git",
-        "state": {
-          "branch": null,
-          "revision": "76062513434421cb6c8a1ae1d4f8368a7ebc2da3",
-          "version": "1.7.18"
-        }
-      },
-      {
-        "package": "Firebase",
-        "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
-        "state": {
-          "branch": null,
-          "revision": "d4c4e8c7b8898ea771e90beab71112ea279d73a5",
-          "version": "8.13.0"
-        }
-      },
-      {
-        "package": "FloatingPanel",
-        "repositoryURL": "https://github.com/SCENEE/FloatingPanel",
-        "state": {
-          "branch": null,
-          "revision": "fe30e60235c5cc753e2ee2a3eebc8e654971634d",
-          "version": "2.5.2"
-        }
-      },
-      {
-        "package": "GoogleAppMeasurement",
-        "repositoryURL": "https://github.com/google/GoogleAppMeasurement.git",
-        "state": {
-          "branch": null,
-          "revision": "6cc2991c11872510a5314bc112cc7558dd9d046a",
-          "version": "8.12.0"
-        }
-      },
-      {
-        "package": "GoogleDataTransport",
-        "repositoryURL": "https://github.com/google/GoogleDataTransport.git",
-        "state": {
-          "branch": null,
-          "revision": "15ccdfd25ac55b9239b82809531ff26605e7556e",
-          "version": "9.1.2"
-        }
-      },
-      {
-        "package": "GoogleUtilities",
-        "repositoryURL": "https://github.com/google/GoogleUtilities.git",
-        "state": {
-          "branch": null,
-          "revision": "b3bb0c5551fb3f80ca939829639ab5b093edd14f",
-          "version": "7.7.0"
-        }
-      },
-      {
-        "package": "gRPC",
-        "repositoryURL": "https://github.com/firebase/grpc-SwiftPM.git",
-        "state": {
-          "branch": null,
-          "revision": "fb405dd2c7901485f7e158b24e3a0a47e4efd8b5",
-          "version": "1.28.4"
-        }
-      },
-      {
-        "package": "GTMSessionFetcher",
-        "repositoryURL": "https://github.com/google/gtm-session-fetcher.git",
-        "state": {
-          "branch": null,
-          "revision": "bc6a19702ac76ac4e488b68148710eb815f9bc56",
-          "version": "1.7.0"
-        }
-      },
-      {
-        "package": "Highlightr",
-        "repositoryURL": "https://github.com/raspu/Highlightr",
-        "state": {
-          "branch": null,
-          "revision": "93199b9e434f04bda956a613af8f571933f9f037",
-          "version": "2.1.2"
-        }
-      },
-      {
-        "package": "HorizonCalendar",
-        "repositoryURL": "https://github.com/airbnb/HorizonCalendar.git",
-        "state": {
-          "branch": null,
-          "revision": "1e98736e42fe4e5bea39ce8b89838641f2261c32",
-          "version": "1.13.3"
-        }
-      },
-      {
-        "package": "InfomaniakCore",
-        "repositoryURL": "https://github.com/Infomaniak/ios-core.git",
-        "state": {
-          "branch": null,
-          "revision": "333b3e03e6b871c922fce161d6332418893911a3",
-          "version": "1.1.7"
-        }
-      },
-      {
-        "package": "InfomaniakLogin",
-        "repositoryURL": "https://github.com/Infomaniak/ios-login.git",
-        "state": {
-          "branch": null,
-          "revision": "9ac704e603cb9b11654f78e65ae2031dc584c341",
-          "version": "1.5.7"
-        }
-      },
-      {
-        "package": "Kingfisher",
-        "repositoryURL": "https://github.com/onevcat/Kingfisher",
-        "state": {
-          "branch": null,
-          "revision": "32e4acdf6971f58f5ad552389cf2d7d016334eaf",
-          "version": "7.2.0"
-        }
-      },
-      {
-        "package": "Kvitto",
-        "repositoryURL": "https://github.com/Cocoanetics/Kvitto",
-        "state": {
-          "branch": null,
-          "revision": "88888674d772ddcf19671159ed0022cb0bc37be2",
-          "version": "1.0.6"
-        }
-      },
-      {
-        "package": "leveldb",
-        "repositoryURL": "https://github.com/firebase/leveldb.git",
-        "state": {
-          "branch": null,
-          "revision": "0706abcc6b0bd9cedfbb015ba840e4a780b5159b",
-          "version": "1.22.2"
-        }
-      },
-      {
-        "package": "LocalizeKit",
-        "repositoryURL": "https://github.com/immortal79/LocalizeKit",
-        "state": {
-          "branch": null,
-          "revision": "1abb86ce614ae8d925bf82123c7360ab95827975",
-          "version": "1.0.1"
-        }
-      },
-      {
-        "package": "Lottie",
-        "repositoryURL": "https://github.com/airbnb/lottie-ios.git",
-        "state": {
-          "branch": null,
-          "revision": "4a6058cbbdfe4f74aeae92c8bd51ad3b0de2a1ee",
-          "version": "3.3.0"
-        }
-      },
-      {
-        "package": "MarkdownKit",
-        "repositoryURL": "https://github.com/bmoliveira/MarkdownKit.git",
-        "state": {
-          "branch": null,
-          "revision": "5056f3305d3499f44d8815530d560b87082e0cf5",
-          "version": "1.7.1"
-        }
-      },
-      {
-        "package": "MaterialOutlinedTextField",
-        "repositoryURL": "https://github.com/flowbe/MaterialOutlinedTextField",
-        "state": {
-          "branch": null,
-          "revision": "0e60b562be2cdc8b3fddc4e95930a245fb804a64",
-          "version": "0.1.1"
-        }
-      },
-      {
-        "package": "MatomoTracker",
-        "repositoryURL": "https://github.com/matomo-org/matomo-sdk-ios.git",
-        "state": {
-          "branch": null,
-          "revision": "cea4a1cfcb05d49c5745801e05fff1cfed7a14e3",
-          "version": "7.5.1"
-        }
-      },
-      {
-        "package": "mqtt-nio",
-        "repositoryURL": "https://github.com/adam-fowler/mqtt-nio",
-        "state": {
-          "branch": null,
-          "revision": "ca8af7a30c4690456ce7de276cd0f037489ba707",
-          "version": "2.5.3"
-        }
-      },
-      {
-        "package": "nanopb",
-        "repositoryURL": "https://github.com/firebase/nanopb.git",
-        "state": {
-          "branch": null,
-          "revision": "7ee9ef9f627d85cbe1b8c4f49a3ed26eed216c77",
-          "version": "2.30908.0"
-        }
-      },
-      {
-        "package": "Promises",
-        "repositoryURL": "https://github.com/google/promises.git",
-        "state": {
-          "branch": null,
-          "revision": "611337c330350c9c1823ad6d671e7f936af5ee13",
-          "version": "2.0.0"
-        }
-      },
-      {
-        "package": "Realm",
-        "repositoryURL": "https://github.com/realm/realm-cocoa",
-        "state": {
-          "branch": null,
-          "revision": "2380340c876da7a2d17b0b59e21e339120d09bb3",
-          "version": "10.24.0"
-        }
-      },
-      {
-        "package": "RealmDatabase",
-        "repositoryURL": "https://github.com/realm/realm-core",
-        "state": {
-          "branch": null,
-          "revision": "e9eec444d13ebebc062202407e79b9833428a24e",
-          "version": "11.11.0"
-        }
-      },
-      {
-        "package": "Sentry",
-        "repositoryURL": "https://github.com/getsentry/sentry-cocoa",
-        "state": {
-          "branch": null,
-          "revision": "6e20ea06950ea871b70b6a82e8b42248ee2176e5",
-          "version": "7.10.0"
-        }
-      },
-      {
-        "package": "SnackBar",
-        "repositoryURL": "https://github.com/PhilippeWeidmann/SnackBar.swift",
-        "state": {
-          "branch": null,
-          "revision": "8d61e42b2e4a73ea04728c25b10150f6ecc995b6",
-          "version": "0.1.4"
-        }
-      },
-      {
-        "package": "SnapKit",
-        "repositoryURL": "https://github.com/SnapKit/SnapKit.git",
-        "state": {
-          "branch": null,
-          "revision": "d458564516e5676af9c70b4f4b2a9178294f1bc6",
-          "version": "5.0.1"
-        }
-      },
-      {
-        "package": "swift-log",
-        "repositoryURL": "https://github.com/apple/swift-log.git",
-        "state": {
-          "branch": null,
-          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-          "version": "1.4.2"
-        }
-      },
-      {
-        "package": "swift-nio",
-        "repositoryURL": "https://github.com/apple/swift-nio.git",
-        "state": {
-          "branch": null,
-          "revision": "154f1d32366449dcccf6375a173adf4ed2a74429",
-          "version": "2.38.0"
-        }
-      },
-      {
-        "package": "swift-nio-ssl",
-        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
-        "state": {
-          "branch": null,
-          "revision": "52a486ff6de9bc3e26bf634c5413c41c5fa89ca5",
-          "version": "2.17.2"
-        }
-      },
-      {
-        "package": "swift-nio-transport-services",
-        "repositoryURL": "https://github.com/apple/swift-nio-transport-services.git",
-        "state": {
-          "branch": null,
-          "revision": "8ab824b140d0ebcd87e9149266ddc353e3705a3e",
-          "version": "1.11.4"
-        }
-      },
-      {
-        "package": "SwiftProtobuf",
-        "repositoryURL": "https://github.com/apple/swift-protobuf.git",
-        "state": {
-          "branch": null,
-          "revision": "e1499bc69b9040b29184f7f2996f7bab467c1639",
-          "version": "1.19.0"
-        }
-      },
-      {
-        "package": "SwiftRegex",
-        "repositoryURL": "https://github.com/flowbe/SwiftRegex.git",
-        "state": {
-          "branch": null,
-          "revision": "d8c4846dfbbe04aa8196ae5a5a3cdc6cd7f9f6bc",
-          "version": "1.0.0"
-        }
+  "pins" : [
+    {
+      "identity" : "abseil-cpp-swiftpm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/firebase/abseil-cpp-SwiftPM.git",
+      "state" : {
+        "revision" : "fffc3c2729be5747390ad02d5100291a0d9ad26a",
+        "version" : "0.20200225.4"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire.git",
+      "state" : {
+        "revision" : "f82c23a8a7ef8dc1a49a8bfc6a96883e79121864",
+        "version" : "5.5.0"
+      }
+    },
+    {
+      "identity" : "atlantis",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ProxymanApp/atlantis",
+      "state" : {
+        "revision" : "b60ef22babc5cc8997841b378bb2993229fac9eb",
+        "version" : "1.16.0"
+      }
+    },
+    {
+      "identity" : "boringssl-swiftpm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/firebase/boringssl-SwiftPM.git",
+      "state" : {
+        "revision" : "734a8247442fde37df4364c21f6a0085b6a36728",
+        "version" : "0.7.2"
+      }
+    },
+    {
+      "identity" : "cocoalumberjack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
+      "state" : {
+        "revision" : "80ada1f753b0d53d9b57c465936a7c4169375002",
+        "version" : "3.7.4"
+      }
+    },
+    {
+      "identity" : "differencekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ra1028/DifferenceKit",
+      "state" : {
+        "revision" : "62745d7780deef4a023a792a1f8f763ec7bf9705",
+        "version" : "1.2.0"
+      }
+    },
+    {
+      "identity" : "dropdown",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RomanTysiachnik/DropDown.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "d040a7d331a978d0e6b6568a40bb017aac127720"
+      }
+    },
+    {
+      "identity" : "dtfoundation",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Cocoanetics/DTFoundation.git",
+      "state" : {
+        "revision" : "76062513434421cb6c8a1ae1d4f8368a7ebc2da3",
+        "version" : "1.7.18"
+      }
+    },
+    {
+      "identity" : "firebase-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/firebase/firebase-ios-sdk.git",
+      "state" : {
+        "revision" : "ccb2bccb82e62ad9e8a4e757a43ce6a04ceae1c9",
+        "version" : "8.14.0"
+      }
+    },
+    {
+      "identity" : "floatingpanel",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SCENEE/FloatingPanel",
+      "state" : {
+        "revision" : "fe30e60235c5cc753e2ee2a3eebc8e654971634d",
+        "version" : "2.5.2"
+      }
+    },
+    {
+      "identity" : "googleappmeasurement",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GoogleAppMeasurement.git",
+      "state" : {
+        "revision" : "9b74e6a3f875208c04c22b39b580a21d4de0f4f9",
+        "version" : "8.14.0"
+      }
+    },
+    {
+      "identity" : "googledatatransport",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GoogleDataTransport.git",
+      "state" : {
+        "revision" : "15ccdfd25ac55b9239b82809531ff26605e7556e",
+        "version" : "9.1.2"
+      }
+    },
+    {
+      "identity" : "googleutilities",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GoogleUtilities.git",
+      "state" : {
+        "revision" : "b3bb0c5551fb3f80ca939829639ab5b093edd14f",
+        "version" : "7.7.0"
+      }
+    },
+    {
+      "identity" : "grpc-swiftpm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/firebase/grpc-SwiftPM.git",
+      "state" : {
+        "revision" : "fb405dd2c7901485f7e158b24e3a0a47e4efd8b5",
+        "version" : "1.28.4"
+      }
+    },
+    {
+      "identity" : "gtm-session-fetcher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/gtm-session-fetcher.git",
+      "state" : {
+        "revision" : "eca9404a18f53727e4698211aaf2615eb93b962a",
+        "version" : "1.7.1"
+      }
+    },
+    {
+      "identity" : "highlightr",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/raspu/Highlightr",
+      "state" : {
+        "revision" : "93199b9e434f04bda956a613af8f571933f9f037",
+        "version" : "2.1.2"
+      }
+    },
+    {
+      "identity" : "horizoncalendar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/airbnb/HorizonCalendar.git",
+      "state" : {
+        "revision" : "1e98736e42fe4e5bea39ce8b89838641f2261c32",
+        "version" : "1.13.3"
+      }
+    },
+    {
+      "identity" : "ios-core",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-core.git",
+      "state" : {
+        "revision" : "74c05e7bb5bb02f8ed5a64ed3ca16ba94c800cec",
+        "version" : "1.1.9"
+      }
+    },
+    {
+      "identity" : "ios-login",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-login.git",
+      "state" : {
+        "revision" : "9ac704e603cb9b11654f78e65ae2031dc584c341",
+        "version" : "1.5.7"
+      }
+    },
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher",
+      "state" : {
+        "revision" : "32e4acdf6971f58f5ad552389cf2d7d016334eaf",
+        "version" : "7.2.0"
+      }
+    },
+    {
+      "identity" : "kvitto",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Cocoanetics/Kvitto",
+      "state" : {
+        "revision" : "88888674d772ddcf19671159ed0022cb0bc37be2",
+        "version" : "1.0.6"
+      }
+    },
+    {
+      "identity" : "leveldb",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/firebase/leveldb.git",
+      "state" : {
+        "revision" : "0706abcc6b0bd9cedfbb015ba840e4a780b5159b",
+        "version" : "1.22.2"
+      }
+    },
+    {
+      "identity" : "localizekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/immortal79/LocalizeKit",
+      "state" : {
+        "revision" : "1abb86ce614ae8d925bf82123c7360ab95827975",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "lottie-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/airbnb/lottie-ios.git",
+      "state" : {
+        "revision" : "4a6058cbbdfe4f74aeae92c8bd51ad3b0de2a1ee",
+        "version" : "3.3.0"
+      }
+    },
+    {
+      "identity" : "markdownkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bmoliveira/MarkdownKit.git",
+      "state" : {
+        "revision" : "5056f3305d3499f44d8815530d560b87082e0cf5",
+        "version" : "1.7.1"
+      }
+    },
+    {
+      "identity" : "materialoutlinedtextfield",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/flowbe/MaterialOutlinedTextField",
+      "state" : {
+        "revision" : "0e60b562be2cdc8b3fddc4e95930a245fb804a64",
+        "version" : "0.1.1"
+      }
+    },
+    {
+      "identity" : "matomo-sdk-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/matomo-org/matomo-sdk-ios.git",
+      "state" : {
+        "revision" : "cea4a1cfcb05d49c5745801e05fff1cfed7a14e3",
+        "version" : "7.5.1"
+      }
+    },
+    {
+      "identity" : "mqtt-nio",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adam-fowler/mqtt-nio",
+      "state" : {
+        "revision" : "ca8af7a30c4690456ce7de276cd0f037489ba707",
+        "version" : "2.5.3"
+      }
+    },
+    {
+      "identity" : "nanopb",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/firebase/nanopb.git",
+      "state" : {
+        "revision" : "7ee9ef9f627d85cbe1b8c4f49a3ed26eed216c77",
+        "version" : "2.30908.0"
+      }
+    },
+    {
+      "identity" : "promises",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/promises.git",
+      "state" : {
+        "revision" : "611337c330350c9c1823ad6d671e7f936af5ee13",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "realm-cocoa",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/realm/realm-cocoa",
+      "state" : {
+        "revision" : "628cf20632d65d3a3e90ae8aaf52bce596d7ad8f",
+        "version" : "10.24.2"
+      }
+    },
+    {
+      "identity" : "realm-core",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/realm/realm-core",
+      "state" : {
+        "revision" : "dcd3788f75bafb0cc397d145e1651aab3ad4bf0e",
+        "version" : "11.12.0"
+      }
+    },
+    {
+      "identity" : "sentry-cocoa",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/getsentry/sentry-cocoa",
+      "state" : {
+        "revision" : "0c9efc707a8a62b8b6a6fb03431cc74a9ea8cc51",
+        "version" : "7.11.0"
+      }
+    },
+    {
+      "identity" : "snackbar.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PhilippeWeidmann/SnackBar.swift",
+      "state" : {
+        "revision" : "8d61e42b2e4a73ea04728c25b10150f6ecc995b6",
+        "version" : "0.1.4"
+      }
+    },
+    {
+      "identity" : "snapkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SnapKit/SnapKit.git",
+      "state" : {
+        "revision" : "d458564516e5676af9c70b4f4b2a9178294f1bc6",
+        "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+        "version" : "1.4.2"
+      }
+    },
+    {
+      "identity" : "swift-nio",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio.git",
+      "state" : {
+        "revision" : "d6e3762e0a5f7ede652559f53623baf11006e17c",
+        "version" : "2.39.0"
+      }
+    },
+    {
+      "identity" : "swift-nio-ssl",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio-ssl.git",
+      "state" : {
+        "revision" : "b5260a31c2a72a89fa684f5efb3054d8725a2316",
+        "version" : "2.18.0"
+      }
+    },
+    {
+      "identity" : "swift-nio-transport-services",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio-transport-services.git",
+      "state" : {
+        "revision" : "8ab824b140d0ebcd87e9149266ddc353e3705a3e",
+        "version" : "1.11.4"
+      }
+    },
+    {
+      "identity" : "swift-protobuf",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-protobuf.git",
+      "state" : {
+        "revision" : "e1499bc69b9040b29184f7f2996f7bab467c1639",
+        "version" : "1.19.0"
+      }
+    },
+    {
+      "identity" : "swiftregex",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/flowbe/SwiftRegex.git",
+      "state" : {
+        "revision" : "d8c4846dfbbe04aa8196ae5a5a3cdc6cd7f9f6bc",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 2
 }

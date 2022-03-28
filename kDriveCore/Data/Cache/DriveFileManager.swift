@@ -335,10 +335,10 @@ public class DriveFileManager {
 
     public func initRoot() async throws {
         let root = try await file(id: DriveFileManager.constants.rootID, forceRefresh: true)
-        _ = try await files(in: root)
+        _ = try await files(in: root.proxify())
     }
 
-    public func files(in directory: File, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
+    public func files(in directory: ProxyFile, page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
         let fetchFiles: () async throws -> ([File], Int?)
         if directory.isRoot {
             fetchFiles = {
@@ -355,14 +355,13 @@ public class DriveFileManager {
                                page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
     }
 
-    private func files(in directory: File,
+    private func files(in directory: ProxyFile,
                        fetchFiles: () async throws -> ([File], Int?),
                        page: Int,
                        sortType: SortType,
                        keepProperties: FilePropertiesOptions,
                        forceRefresh: Bool) async throws -> (files: [File], moreComing: Bool) {
-        let parentId = directory.id
-        if let cachedParent = getCachedFile(id: parentId, freeze: false),
+        if let cachedParent = getCachedFile(id: directory.id, freeze: false),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have anyway
            (cachedParent.canLoadChildrenFromCache && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
@@ -375,26 +374,23 @@ public class DriveFileManager {
                 keepCacheAttributesForFile(newFile: child, keepProperties: keepProperties, using: realm)
             }
 
-            if let managedParent = realm.object(ofType: File.self, forPrimaryKey: parentId) {
-                // Update parent
-                try realm.write {
-                    managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
-                    if children.count < Endpoint.itemsPerPage {
-                        managedParent.versionCode = DriveFileManager.constants.currentVersionCode
-                        managedParent.fullyDownloaded = true
-                    }
-                    realm.add(children, update: .modified)
-                    // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with the first page will result in an undefined behavior.
-                    if page == 1 {
-                        managedParent.children.removeAll()
-                    }
-                    managedParent.children.insert(objectsIn: children)
+            let managedParent = try directory.resolve(using: realm)
+            // Update parent
+            try realm.write {
+                managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+                if children.count < Endpoint.itemsPerPage {
+                    managedParent.versionCode = DriveFileManager.constants.currentVersionCode
+                    managedParent.fullyDownloaded = true
                 }
-
-                return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
-            } else {
-                throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: parentId)])
+                realm.add(children, update: .modified)
+                // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with the first page will result in an undefined behavior.
+                if page == 1 {
+                    managedParent.children.removeAll()
+                }
+                managedParent.children.insert(objectsIn: children)
             }
+
+            return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
         }
     }
 
@@ -421,7 +417,7 @@ public class DriveFileManager {
     }
 
     public func favorites(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile),
+        try await files(in: getManagedFile(from: DriveFileManager.favoriteRootFile).proxify(),
                         fetchFiles: {
                             let favorites = try await apiFetcher.favorites(drive: drive, page: page, sortType: sortType)
                             return (favorites, nil)
@@ -433,7 +429,7 @@ public class DriveFileManager {
     }
 
     public func mySharedFiles(page: Int = 1, sortType: SortType = .nameAZ, forceRefresh: Bool = false) async throws -> (files: [File], moreComing: Bool) {
-        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile),
+        try await files(in: getManagedFile(from: DriveFileManager.mySharedRootFile).proxify(),
                         fetchFiles: {
                             let mySharedFiles = try await apiFetcher.mySharedFiles(drive: drive, page: page, sortType: sortType)
                             return (mySharedFiles, nil)
@@ -572,14 +568,14 @@ public class DriveFileManager {
         }
     }
 
-    public func setFileShareLink(file: File, shareLink: ShareLink?) {
+    public func setFileShareLink(file: ProxyFile, shareLink: ShareLink?) {
         updateFileProperty(fileId: file.id) { file in
             file.sharelink = shareLink
             file.capabilities.canBecomeSharelink = shareLink == nil
         }
     }
 
-    public func setFileDropBox(file: File, dropBox: DropBox?) {
+    public func setFileDropBox(file: ProxyFile, dropBox: DropBox?) {
         updateFileProperty(fileId: file.id) { file in
             file.dropbox = dropBox
             file.capabilities.canBecomeDropbox = dropBox == nil
@@ -673,10 +669,9 @@ public class DriveFileManager {
         }
     }
 
-    public func fileActivities(file: File, from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
+    public func fileActivities(file: ProxyFile, from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
         // Get all pages and assemble
-        let fileId = file.id
-        let timestamp = TimeInterval(timestamp ?? file.responseAt)
+        let timestamp = try TimeInterval(timestamp ?? file.resolve(using: getRealm()).responseAt)
         var page = 1
         var moreComing = true
         var pagedActions = [Int: FileActivityType]()
@@ -690,11 +685,9 @@ public class DriveFileManager {
             responseAt = pageResponseAt ?? Int(Date().timeIntervalSince1970)
             // Get file from Realm
             let realm = getRealm()
-            guard let file = realm.object(ofType: File.self, forPrimaryKey: fileId) else {
-                throw DriveError.fileNotFound
-            }
+            let cachedFile = try file.resolve(using: realm)
             // Apply activities to file
-            let results = apply(activities: activities, to: file, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
+            let results = apply(activities: activities, to: cachedFile, pagedActions: &pagedActions, timestamp: responseAt, using: realm)
             pagedActivities.inserted.insert(contentsOf: results.inserted, at: 0)
             pagedActivities.updated.insert(contentsOf: results.updated, at: 0)
             pagedActivities.deleted.insert(contentsOf: results.deleted, at: 0)
@@ -785,7 +778,7 @@ public class DriveFileManager {
     }
 
     public func filesActivities(files: [File], from date: Date) async throws -> [ActivitiesForFile] {
-        let (result, responseAt) = try await apiFetcher.filesActivities(drive: drive, files: files, from: date)
+        let (result, responseAt) = try await apiFetcher.filesActivities(drive: drive, files: files.map { $0.proxify() }, from: date)
         // Update last sync date
         if let responseAt = responseAt {
             UserDefaults.shared.lastSyncDateOfflineFiles = responseAt
@@ -853,19 +846,18 @@ public class DriveFileManager {
         return result
     }
 
-    public func add(category: Category, to file: File) async throws {
-        let fileId = file.id
+    public func add(category: Category, to file: ProxyFile) async throws {
         let categoryId = category.id
         let response = try await apiFetcher.add(category: category, to: file)
         if response.result {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileId: file.id) { file in
                 let newCategory = FileCategory(categoryId: categoryId, userId: self.drive.userId)
                 file.categories.append(newCategory)
             }
         }
     }
 
-    public func add(category: Category, to files: [File]) async throws {
+    public func add(category: Category, to files: [ProxyFile]) async throws {
         let categoryId = category.id
         let response = try await apiFetcher.add(drive: drive, category: category, to: files)
         for fileResponse in response where fileResponse.result {
@@ -876,12 +868,11 @@ public class DriveFileManager {
         }
     }
 
-    public func remove(category: Category, from file: File) async throws {
-        let fileId = file.id
+    public func remove(category: Category, from file: ProxyFile) async throws {
         let categoryId = category.id
         let response = try await apiFetcher.remove(category: category, from: file)
         if response {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileId: file.id) { file in
                 if let index = file.categories.firstIndex(where: { $0.categoryId == categoryId }) {
                     file.categories.remove(at: index)
                 }
@@ -889,7 +880,7 @@ public class DriveFileManager {
         }
     }
 
-    public func remove(category: Category, from files: [File]) async throws {
+    public func remove(category: Category, from files: [ProxyFile]) async throws {
         let categoryId = category.id
         let response = try await apiFetcher.remove(drive: drive, category: category, from: files)
         for fileResponse in response where fileResponse.result {
@@ -956,8 +947,7 @@ public class DriveFileManager {
         return response
     }
 
-    public func setFavorite(file: File, favorite: Bool) async throws {
-        let fileId = file.id
+    public func setFavorite(file: ProxyFile, favorite: Bool) async throws {
         var response: Bool
         if favorite {
             response = try await apiFetcher.favorite(file: file)
@@ -965,21 +955,20 @@ public class DriveFileManager {
             response = try await apiFetcher.unfavorite(file: file)
         }
         if response {
-            updateFileProperty(fileId: fileId) { file in
+            updateFileProperty(fileId: file.id) { file in
                 file.isFavorite = favorite
             }
         }
     }
 
-    public func delete(file: File) async throws -> CancelableResponse {
-        let fileId = file.id
+    public func delete(file: ProxyFile) async throws -> CancelableResponse {
         let response = try await apiFetcher.delete(file: file)
-        file.signalChanges(userId: drive.userId)
         backgroundQueue.async { [self] in
             let localRealm = getRealm()
-            let savedFile = getCachedFile(id: fileId, using: localRealm)
-            removeFileInDatabase(fileId: fileId, cascade: true, withTransaction: true, using: localRealm)
+            let savedFile = try? file.resolve(using: localRealm).freeze()
+            removeFileInDatabase(fileId: file.id, cascade: true, withTransaction: true, using: localRealm)
             if let file = savedFile {
+                savedFile?.signalChanges(userId: drive.userId)
                 self.notifyObserversWith(file: file)
             }
             deleteOrphanFiles(root: DriveFileManager.homeRootFile, DriveFileManager.lastPicturesRootFile, DriveFileManager.lastModificationsRootFile, DriveFileManager.searchFilesRootFile, using: localRealm)
@@ -987,78 +976,62 @@ public class DriveFileManager {
         return response
     }
 
-    public func move(file: File, to destination: File) async throws -> (CancelableResponse, File) {
-        guard file.isManagedByRealm && destination.isManagedByRealm else {
-            throw DriveError.fileNotFound
-        }
-        let safeFile = ThreadSafeReference(to: file)
-        let safeParent = ThreadSafeReference(to: destination)
+    public func move(file: ProxyFile, to destination: ProxyFile) async throws -> (CancelableResponse, File) {
         let response = try await apiFetcher.move(file: file, to: destination)
         // Add the moved file to Realm
         let realm = getRealm()
-        if let newParent = realm.resolve(safeParent),
-           let file = realm.resolve(safeFile) {
-            let oldParent = file.parent
-            try? realm.write {
-                oldParent?.children.remove(file)
-                newParent.children.insert(file)
-            }
-            if let oldParent = oldParent {
-                oldParent.signalChanges(userId: drive.userId)
-                notifyObserversWith(file: oldParent)
-            }
-            newParent.signalChanges(userId: drive.userId)
-            notifyObserversWith(file: newParent)
-            return (response, file)
-        } else {
-            throw DriveError.unknownError
+        let newParent = try destination.resolve(using: realm)
+        let file = try file.resolve(using: realm)
+
+        let oldParent = file.parent
+        try? realm.write {
+            oldParent?.children.remove(file)
+            newParent.children.insert(file)
         }
+        if let oldParent = oldParent {
+            oldParent.signalChanges(userId: drive.userId)
+            notifyObserversWith(file: oldParent)
+        }
+        newParent.signalChanges(userId: drive.userId)
+        notifyObserversWith(file: newParent)
+        return (response, file)
     }
 
-    public func rename(file: File, newName: String) async throws -> File {
-        guard file.isManagedByRealm else {
-            throw DriveError.fileNotFound
-        }
-        let safeFile = ThreadSafeReference(to: file)
+    public func rename(file: ProxyFile, newName: String) async throws -> File {
         _ = try await apiFetcher.rename(file: file, newName: newName)
         let realm = getRealm()
-        if let file = realm.resolve(safeFile) {
-            let newFile = file.detached()
-            newFile.name = newName
-            _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
-            newFile.signalChanges(userId: drive.userId)
-            notifyObserversWith(file: newFile)
-            return file
-        } else {
-            throw DriveError.fileNotFound
-        }
+        let file = try file.resolve(using: realm)
+        let newFile = file.detached()
+        newFile.name = newName
+        _ = try updateFileInDatabase(updatedFile: newFile, oldFile: file, using: realm)
+        newFile.signalChanges(userId: drive.userId)
+        notifyObserversWith(file: newFile)
+        return file
     }
 
-    public func duplicate(file: File, duplicateName: String) async throws -> File {
-        let parentId = file.parent?.id
-        let file = try await apiFetcher.duplicate(file: file, duplicateName: duplicateName)
+    public func duplicate(file: ProxyFile, duplicateName: String) async throws -> File {
+        let duplicatedFile = try await apiFetcher.duplicate(file: file, duplicateName: duplicateName)
         let realm = getRealm()
-        let duplicateFile = try updateFileInDatabase(updatedFile: file, using: realm)
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let duplicateFile = try updateFileInDatabase(updatedFile: duplicatedFile, using: realm)
+        let parent = try file.resolve(using: realm).parent
         try realm.safeWrite {
             parent?.children.insert(duplicateFile)
         }
 
         duplicateFile.signalChanges(userId: drive.userId)
-        if let parent = file.parent {
+        if let parent = duplicatedFile.parent {
             parent.signalChanges(userId: drive.userId)
             notifyObserversWith(file: parent)
         }
         return duplicateFile
     }
 
-    public func createDirectory(in parentDirectory: File, name: String, onlyForMe: Bool) async throws -> File {
-        let parentId = parentDirectory.id
+    public func createDirectory(in parentDirectory: ProxyFile, name: String, onlyForMe: Bool) async throws -> File {
         let directory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
         let realm = getRealm()
         let createdDirectory = try updateFileInDatabase(updatedFile: directory, using: realm)
         // Add directory to parent
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let parent = try? parentDirectory.resolve(using: realm)
         try realm.safeWrite {
             parent?.children.insert(createdDirectory)
         }
@@ -1079,16 +1052,15 @@ public class DriveFileManager {
         return createdDirectory.freeze()
     }
 
-    public func createDropBox(parentDirectory: File, name: String, onlyForMe: Bool, settings: DropBoxSettings) async throws -> File {
-        let parentId = parentDirectory.id
+    public func createDropBox(parentDirectory: ProxyFile, name: String, onlyForMe: Bool, settings: DropBoxSettings) async throws -> File {
         // Create directory
         let createdDirectory = try await apiFetcher.createDirectory(in: parentDirectory, name: name, onlyForMe: onlyForMe)
         // Set up dropbox
-        let dropbox = try await apiFetcher.createDropBox(directory: createdDirectory, settings: settings)
+        let dropbox = try await apiFetcher.createDropBox(directory: createdDirectory.proxify(), settings: settings)
         let realm = getRealm()
         let directory = try updateFileInDatabase(updatedFile: createdDirectory, using: realm)
 
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let parent = try? parentDirectory.resolve(using: realm)
         try realm.write {
             directory.dropbox = dropbox
             parent?.children.insert(directory)
@@ -1100,24 +1072,22 @@ public class DriveFileManager {
         return directory.freeze()
     }
 
-    public func updateDropBox(directory: File, settings: DropBoxSettings) async throws -> Bool {
-        let proxyFile = File(value: directory)
+    public func updateDropBox(directory: ProxyFile, settings: DropBoxSettings) async throws -> Bool {
         let response = try await apiFetcher.updateDropBox(directory: directory, settings: settings)
         if response {
             // Update dropbox in Realm
-            let dropbox = try await apiFetcher.getDropBox(directory: proxyFile)
-            setFileDropBox(file: proxyFile, dropBox: dropbox)
+            let dropbox = try await apiFetcher.getDropBox(directory: directory)
+            setFileDropBox(file: directory, dropBox: dropbox)
         }
         return response
     }
 
-    public func createFile(in parentDirectory: File, name: String, type: String) async throws -> File {
-        let parentId = parentDirectory.id
+    public func createFile(in parentDirectory: ProxyFile, name: String, type: String) async throws -> File {
         let file = try await apiFetcher.createFile(in: parentDirectory, name: name, type: type)
         let realm = getRealm()
         let createdFile = try updateFileInDatabase(updatedFile: file, using: realm)
         // Add file to parent
-        let parent = realm.object(ofType: File.self, forPrimaryKey: parentId)
+        let parent = try? parentDirectory.resolve(using: realm)
         try realm.write {
             parent?.children.insert(createdFile)
         }
@@ -1131,7 +1101,7 @@ public class DriveFileManager {
         return createdFile.freeze()
     }
 
-    public func createOrRemoveShareLink(for file: File, right: ShareLinkPermission) async throws -> ShareLink? {
+    public func createOrRemoveShareLink(for file: ProxyFile, right: ShareLinkPermission) async throws -> ShareLink? {
         if right == .restricted {
             // Remove share link
             let response = try await removeShareLink(for: file)
@@ -1147,31 +1117,28 @@ public class DriveFileManager {
         }
     }
 
-    public func createShareLink(for file: File) async throws -> ShareLink {
-        let proxyFile = File(id: file.id, name: file.name)
-        let shareLink = try await apiFetcher.createShareLink(for: file)
+    public func createShareLink(for file: ProxyFile) async throws -> ShareLink {
+        let shareLink = try await apiFetcher.createShareLink(for: file, isFreeDrive: drive.pack == .free)
         // Fix for API not returning share link activities
-        setFileShareLink(file: proxyFile, shareLink: shareLink)
+        setFileShareLink(file: file, shareLink: shareLink)
         return shareLink.freeze()
     }
 
-    public func updateShareLink(for file: File, settings: ShareLinkSettings) async throws -> Bool {
-        let proxyFile = File(value: file)
+    public func updateShareLink(for file: ProxyFile, settings: ShareLinkSettings) async throws -> Bool {
         let response = try await apiFetcher.updateShareLink(for: file, settings: settings)
         if response {
             // Update sharelink in Realm
             let shareLink = try await apiFetcher.shareLink(for: file)
-            setFileShareLink(file: proxyFile, shareLink: shareLink)
+            setFileShareLink(file: file, shareLink: shareLink)
         }
         return response
     }
 
-    public func removeShareLink(for file: File) async throws -> Bool {
-        let proxyFile = File(id: file.id, name: file.name)
+    public func removeShareLink(for file: ProxyFile) async throws -> Bool {
         let response = try await apiFetcher.removeShareLink(for: file)
         if response {
             // Fix for API not returning share link activities
-            setFileShareLink(file: proxyFile, shareLink: nil)
+            setFileShareLink(file: file, shareLink: nil)
         }
         return response
     }
@@ -1325,7 +1292,7 @@ public class DriveFileManager {
 
     public func updateColor(directory: File, color: String) async throws -> Bool {
         let fileId = directory.id
-        let result = try await apiFetcher.updateColor(directory: directory, color: color)
+        let result = try await apiFetcher.updateColor(directory: directory.proxify(), color: color)
         if result {
             updateFileProperty(fileId: fileId) { file in
                 file.color = color

@@ -20,6 +20,7 @@ import Alamofire
 import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
+import InfomaniakCore
 import kDriveResources
 import Kingfisher
 import QuickLook
@@ -600,6 +601,10 @@ public class File: Object, Codable {
             manager.signalEnumerator(for: .workingSet) { _ in }
             manager.signalEnumerator(for: identifier) { _ in }
         }
+    }
+
+    public func proxify() -> ProxyFile {
+        return ProxyFile(driveId: driveId, id: id)
     }
 
     public required init(from decoder: Decoder) throws {

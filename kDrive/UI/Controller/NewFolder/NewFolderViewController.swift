@@ -96,8 +96,8 @@ class NewFolderViewController: UIViewController {
         navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.createFolderTitle
         navigationItem.hideBackButtonText()
 
-        Task {
-            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: currentDirectory)
+        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyCurrentDirectory)
             self.setupTableViewRows()
         }
         setupTableViewRows()
@@ -394,9 +394,9 @@ extension NewFolderViewController: FooterButtonDelegate {
                 onlyForMe = false
                 toShare = false
             }
-            Task {
+            Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDirectory(in: currentDirectory, name: newFolderName, onlyForMe: onlyForMe)
+                    let directory = try await driveFileManager.createDirectory(in: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe)
                     if toShare {
                         let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true
@@ -440,9 +440,9 @@ extension NewFolderViewController: FooterButtonDelegate {
             }
             let settings = DropBoxSettings(alias: nil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize, password: password, validUntil: validUntil)
             MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
-            Task {
+            Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
                 do {
-                    let directory = try await driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
+                    let directory = try await driveFileManager.createDropBox(parentDirectory: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
                     if !onlyForMe {
                         let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true
