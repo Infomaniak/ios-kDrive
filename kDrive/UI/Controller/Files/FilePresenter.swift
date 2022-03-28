@@ -100,9 +100,9 @@ class FilePresenter {
                     let floatingPanelViewController = accessFileDriveFloatingPanelController.contentViewController as? AccessFileFloatingPanelViewController
                     floatingPanelViewController?.actionHandler = { [unowned self] _ in
                         floatingPanelViewController?.rightButton.setLoading(true)
-                        Task {
+                        Task { [proxyFile = file.proxify()] in
                             do {
-                                let response = try await driveFileManager.apiFetcher.forceAccess(to: file)
+                                let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
                                 if response {
                                     accessFileDriveFloatingPanelController.dismiss(animated: true)
                                     self.navigationController?.pushViewController(nextVC, animated: true)

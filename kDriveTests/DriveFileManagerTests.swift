@@ -38,12 +38,12 @@ final class DriveFileManagerTests: XCTestCase {
 
     // MARK: - Tests setup
 
-    func setUpTest(testName: String) async throws -> File {
+    func setUpTest(testName: String) async throws -> ProxyFile {
         let rootDirectory = try await getRootDirectory()
         return try await createTestDirectory(name: "UnitTest - \(testName)", parentDirectory: rootDirectory)
     }
 
-    func tearDownTest(directory: File) {
+    func tearDownTest(directory: ProxyFile) {
         Task {
             _ = try await DriveFileManagerTests.driveFileManager.delete(file: directory)
         }
@@ -51,40 +51,45 @@ final class DriveFileManagerTests: XCTestCase {
 
     // MARK: - Helping methods
 
-    func getRootDirectory() async throws -> File {
-        try await DriveFileManagerTests.driveFileManager.file(id: DriveFileManager.constants.rootID)
+    func getRootDirectory() async throws -> ProxyFile {
+        try await DriveFileManagerTests.driveFileManager.file(id: DriveFileManager.constants.rootID).proxify()
     }
 
-    func createTestDirectory(name: String, parentDirectory: File) async throws -> File {
-        try await DriveFileManagerTests.driveFileManager.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true)
+    func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {
+        try await DriveFileManagerTests.driveFileManager.createDirectory(in: parentDirectory, name: "\(name) - \(Date())", onlyForMe: true).proxify()
     }
 
-    func initOfficeFile(testName: String) async throws -> (File, File) {
+    func initOfficeFile(testName: String) async throws -> (ProxyFile, ProxyFile) {
+        let (testDirectory, file) = try await initOfficeFileCached(testName: testName)
+        return (testDirectory, file.proxify())
+    }
+
+    func initOfficeFileCached(testName: String) async throws -> (ProxyFile, File) {
         let testDirectory = try await setUpTest(testName: testName)
         let file = try await DriveFileManagerTests.driveFileManager.createFile(in: testDirectory, name: "officeFile-\(Date())", type: "docx")
         return (testDirectory, file)
     }
 
-    func initOfficeFile(testName: String, completion: @escaping (File, File) -> Void) {
+    func initOfficeFile(testName: String, completion: @escaping (ProxyFile, File) -> Void) {
         Task {
-            let (testDirectory, file) = try await initOfficeFile(testName: testName)
+            let (testDirectory, file) = try await initOfficeFileCached(testName: testName)
             completion(testDirectory, file)
         }
     }
 
-    func checkIfFileIsInFavorites(file: File, shouldBePresent: Bool = true) async throws {
+    func checkIfFileIsInFavorites(file: ProxyFile, shouldBePresent: Bool = true) async throws {
         let (favorites, _) = try await DriveFileManagerTests.driveFileManager.favorites()
         let isInFavoritesFiles = favorites.contains { $0.id == file.id }
         XCTAssertEqual(isInFavoritesFiles, shouldBePresent, "File should\(shouldBePresent ? "" : "n't") be in favorites files")
     }
 
-    func checkIfFileIsInDestination(file: File, destination: File) {
+    func checkIfFileIsInDestination(file: ProxyFile, destination: ProxyFile) {
         let cachedFile = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
         XCTAssertNotNil(cachedFile, TestsMessages.notNil("cached file"))
         XCTAssertEqual(destination.id, cachedFile!.parentId, "Parent is different from expected destination")
     }
 
-    func containsCategory(file: File, category: kDriveCore.Category) -> Bool {
+    func containsCategory(file: ProxyFile, category: kDriveCore.Category) -> Bool {
         let cachedFile = DriveFileManagerTests.driveFileManager.getCachedFile(id: file.id)
         return cachedFile!.categories.contains { $0.categoryId == category.id }
     }
@@ -117,9 +122,10 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     func testSearchFile() async throws {
-        let (testDirectory, file) = try await initOfficeFile(testName: "Search file")
+        let (testDirectory, file) = try await initOfficeFileCached(testName: "Search file")
+        let fileProxy = file.proxify()
         let (files, _) = try await DriveFileManagerTests.driveFileManager.searchFile(query: file.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ)
-        let searchedFile = files.contains { $0.id == file.id }
+        let searchedFile = files.contains { $0.id == fileProxy.id }
         XCTAssertTrue(searchedFile, TestsMessages.notNil("searched file"))
         tearDownTest(directory: testDirectory)
     }
@@ -130,7 +136,7 @@ final class DriveFileManagerTests: XCTestCase {
             (name: "Set available offline", expectation: XCTestExpectation(description: "Set available offline")),
             (name: "Get available offline", expectation: XCTestExpectation(description: "Get available offline"))
         ]
-        var rootFile = File()
+        var rootFile = ProxyFile(driveId: 0, id: 0)
 
         initOfficeFile(testName: testName) { root, officeFile in
             rootFile = root
@@ -158,7 +164,7 @@ final class DriveFileManagerTests: XCTestCase {
 
     func testUndoAction() async throws {
         let (testDirectory, file) = try await initOfficeFile(testName: "Undo action")
-        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(in: testDirectory, name: "directory", onlyForMe: true)
+        let directory = try await DriveFileManagerTests.driveFileManager.createDirectory(in: testDirectory, name: "directory", onlyForMe: true).proxify()
         let (moveResponse, _) = try await DriveFileManagerTests.driveFileManager.move(file: file, to: directory)
         try await DriveFileManagerTests.driveFileManager.undoAction(cancelId: moveResponse.id)
         checkIfFileIsInDestination(file: file, destination: testDirectory)
@@ -248,7 +254,7 @@ final class DriveFileManagerTests: XCTestCase {
     }
 
     func testCreateCommonDirectory() async throws {
-        let directory = try await DriveFileManagerTests.driveFileManager.createCommonDirectory(name: "Create common directory - \(Date())", forAllUser: false)
+        let directory = try await DriveFileManagerTests.driveFileManager.createCommonDirectory(name: "Create common directory - \(Date())", forAllUser: false).proxify()
         let cached = DriveFileManagerTests.driveFileManager.getCachedFile(id: directory.id)
         XCTAssertNotNil(cached, TestsMessages.notNil("cached root"))
         tearDownTest(directory: directory)

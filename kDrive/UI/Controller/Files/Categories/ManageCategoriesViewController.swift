@@ -289,12 +289,12 @@ class ManageCategoriesViewController: UITableViewController {
 
         category.isSelected = true
         if let files = files {
-            Task {
+            Task { [proxyFiles = files.map { $0.proxify() }] in
                 do {
-                    if !fromMultiselect, let file = files.first {
-                        try await driveFileManager.add(category: category, to: file)
+                    if !fromMultiselect, let proxyFile = proxyFiles.first {
+                        try await driveFileManager.add(category: category, to: proxyFile)
                     } else {
-                        try await driveFileManager.add(category: category, to: Array(files))
+                        try await driveFileManager.add(category: category, to: proxyFiles)
                     }
                 } catch {
                     category.isSelected = false
@@ -316,12 +316,12 @@ class ManageCategoriesViewController: UITableViewController {
 
         category.isSelected = false
         if let files = files {
-            Task {
+            Task { [proxyFiles = files.map { $0.proxify() }] in
                 do {
-                    if !fromMultiselect, let file = files.first {
-                        try await driveFileManager.remove(category: category, from: file)
+                    if !fromMultiselect, let proxyFile = proxyFiles.first {
+                        try await driveFileManager.remove(category: category, from: proxyFile)
                     } else {
-                        try await driveFileManager.remove(category: category, from: Array(files))
+                        try await driveFileManager.remove(category: category, from: proxyFiles)
                     }
                 } catch {
                     category.isSelected = true

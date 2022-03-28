@@ -186,9 +186,9 @@ class MultipleSelectionFileListViewModel {
         isSelectAllModeEnabled = true
         rightBarButtons = [.loading]
         onSelectAll?()
-        Task { [frozenDirectory = currentDirectory.freeze()] in
+        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
             do {
-                let directoryCount = try await driveFileManager.apiFetcher.count(of: frozenDirectory)
+                let directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
                 selectedCount = directoryCount.count
                 rightBarButtons = [.deselectAll]
             } catch {
@@ -237,11 +237,13 @@ class MultipleSelectionFileListViewModel {
             await bulkMoveFiles(Array(selectedItems), destinationId: destinationDirectory.id)
         } else {
             do {
+                // Move files only if needed
+                let proxySelectedItems = selectedItems.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
+                let proxyDestinationDirectory = destinationDirectory.proxify()
                 try await withThrowingTaskGroup(of: Void.self) { group in
-                    // Move files only if needed
-                    for file in selectedItems where file.parentId != destinationDirectory.id {
+                    for proxyFile in proxySelectedItems {
                         group.addTask { [self] in
-                            _ = try await driveFileManager.move(file: file, to: destinationDirectory)
+                            _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
                         }
                     }
                     try await group.waitForAll()
@@ -261,10 +263,11 @@ class MultipleSelectionFileListViewModel {
             await bulkDeleteFiles(Array(selectedItems))
         } else {
             do {
+                let proxySelectedItems = selectedItems.map { $0.proxify() }
                 try await withThrowingTaskGroup(of: Void.self) { group in
-                    for file in selectedItems {
-                        group.addTask { [frozenFile = file.freezeIfNeeded(), self] in
-                            _ = try await driveFileManager.delete(file: frozenFile)
+                    for proxyFile in proxySelectedItems {
+                        group.addTask { [self] in
+                            _ = try await driveFileManager.delete(file: proxyFile)
                         }
                     }
                     try await group.waitForAll()
@@ -339,7 +342,7 @@ class MultipleSelectionFileListViewModel {
                                                                cancelSuccessMessage: cancelMessage,
                                                                duration: .infinite,
                                                                cancelableResponse: cancelableResponse,
-                                                               parentFile: currentDirectory,
+                                                               parentFile: currentDirectory.proxify(),
                                                                driveFileManager: driveFileManager)
         return (cancelableResponse.id, progressSnack)
     }
@@ -392,7 +395,7 @@ class MultipleSelectionFileListViewModel {
 
     private func loadActivitiesForCurrentDirectory() {
         Task {
-            _ = try await driveFileManager.fileActivities(file: currentDirectory)
+            _ = try await driveFileManager.fileActivities(file: currentDirectory.proxify())
             driveFileManager.notifyObserversWith(file: currentDirectory)
         }
     }

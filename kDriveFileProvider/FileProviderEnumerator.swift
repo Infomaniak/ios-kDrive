@@ -71,7 +71,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             Task { [forceRefresh] in
                 do {
                     let file = try await driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
-                    let (children, moreComing) = try await driveFileManager.files(in: file, page: pageIndex, forceRefresh: forceRefresh)
+                    let (children, moreComing) = try await driveFileManager.files(in: file.proxify(), page: pageIndex, forceRefresh: forceRefresh)
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
                     for child in children {
@@ -92,7 +92,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                     // Maybe this is a trashed file
                     do {
                         let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
-                        let children = try await driveFileManager.apiFetcher.trashedFiles(of: file, page: pageIndex)
+                        let children = try await driveFileManager.apiFetcher.trashedFiles(of: file.proxify(), page: pageIndex)
                         var containerItems = [FileProviderItem]()
                         for child in children {
                             autoreleasepool {
@@ -133,7 +133,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             Task {
                 do {
                     let file = try await driveFileManager.file(id: directoryIdentifier)
-                    let (results, timestamp) = try await driveFileManager.fileActivities(file: file, from: lastTimestamp)
+                    let (results, timestamp) = try await driveFileManager.fileActivities(file: file.proxify(), from: lastTimestamp)
                     let updated = results.inserted + results.updated
                     var updatedItems = [NSFileProviderItem]()
                     for updatedChild in updated {

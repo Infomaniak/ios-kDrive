@@ -248,12 +248,12 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.section == 2 {
-            Task {
+            Task { [proxyDirectory = directory.proxify()] in
                 do {
-                    let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: directory)
+                    let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: proxyDirectory)
                     if response {
                         self.dismissAndRefreshDataSource()
-                        self.driveFileManager.setFileDropBox(file: self.directory, dropBox: nil)
+                        self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: nil)
                     } else {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                     }
@@ -331,23 +331,23 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
 
         MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
 
-        Task {
+        Task { [proxyDirectory = directory.proxify()] in
             if convertingFolder {
                 do {
-                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: directory, settings: settings)
+                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: proxyDirectory, settings: settings)
                     let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url
                     floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.directory.name)
                     self.navigationController?.popViewController(animated: true)
                     self.navigationController?.topViewController?.present(driveFloatingPanelController, animated: true)
-                    self.driveFileManager.setFileDropBox(file: self.directory, dropBox: dropBox)
+                    self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: dropBox)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             } else {
                 do {
-                    let response = try await driveFileManager.updateDropBox(directory: directory, settings: settings)
+                    let response = try await driveFileManager.updateDropBox(directory: proxyDirectory, settings: settings)
                     if response {
                         self.navigationController?.popViewController(animated: true)
                     } else {

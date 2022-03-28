@@ -92,10 +92,10 @@ class AlertDocViewController: AlertFieldViewController {
         }
 
         setLoading(true)
-        Task {
+        Task { [proxyDirectory = directory.proxify()] in
             var file: File?
             do {
-                file = try await driveFileManager.createFile(in: directory, name: name.addingExtension(fileType), type: fileType)
+                file = try await driveFileManager.createFile(in: proxyDirectory, name: name.addingExtension(fileType), type: fileType)
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarFileCreateConfirmation)
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)

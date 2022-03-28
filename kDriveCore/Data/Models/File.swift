@@ -603,6 +603,10 @@ public class File: Object, Codable {
         }
     }
 
+    public func proxify() -> ProxyFile {
+        return ProxyFile(driveId: driveId, id: id)
+    }
+
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)

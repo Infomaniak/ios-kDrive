@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import RealmSwift
 
 // MARK: - Type definition
 
@@ -88,13 +89,23 @@ public protocol AbstractFile {
     var id: Int { get set }
 }
 
-public class ProxyFile: AbstractFile {
+public struct ProxyFile: AbstractFile, Sendable {
     public var driveId: Int
     public var id: Int
+    public var isRoot: Bool {
+        return id <= DriveFileManager.constants.rootID
+    }
 
     public init(driveId: Int, id: Int) {
         self.driveId = driveId
         self.id = id
+    }
+
+    func resolve(using realm: Realm) throws -> File {
+        guard let file = realm.object(ofType: File.self, forPrimaryKey: id) else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: id)])
+        }
+        return file
     }
 }
 

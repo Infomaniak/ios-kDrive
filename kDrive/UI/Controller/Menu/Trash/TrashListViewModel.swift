@@ -53,7 +53,7 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         if currentDirectory.id == DriveFileManager.trashRootFile.id {
             fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(drive: driveFileManager.drive, page: page, sortType: sortType)
         } else {
-            fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory, page: page, sortType: sortType)
+            fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory.proxify(), page: page, sortType: sortType)
         }
 
         addPage(files: fetchedFiles, page: page)
@@ -125,7 +125,7 @@ class TrashListViewModel: UnmanagedFileListViewModel {
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for file in restoredFiles {
                     group.addTask { [self] in
-                        _ = try await driveFileManager.apiFetcher.restore(file: file, in: directory)
+                        _ = try await driveFileManager.apiFetcher.restore(file: file.proxify(), in: directory?.proxify())
                         // We don't have an alert for moving multiple files, snackbar is spammed until end
                         if let directory = directory {
                             await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))

@@ -365,9 +365,9 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
                                          right: right,
                                          validUntil: validUntil,
                                          isFreeDrive: driveFileManager.drive.pack == .free)
-        Task { [frozenFile = file.freeze()] in
+        Task { [proxyFile = file.proxify()] in
             do {
-                let response = try await driveFileManager.updateShareLink(for: frozenFile, settings: settings)
+                let response = try await driveFileManager.updateShareLink(for: proxyFile, settings: settings)
                 if response {
                     self.navigationController?.popViewController(animated: true)
                 }
