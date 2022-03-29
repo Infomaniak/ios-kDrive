@@ -490,7 +490,7 @@ public class File: Object, Codable {
                 case .isSharedSpace:
                     return KDriveResourcesAsset.folderShared.image
                 default:
-                    return KDriveResourcesAsset.folderFill.image
+                    return KDriveResourcesAsset.folderFilledTemplate.image
                 }
             }
         } else {
