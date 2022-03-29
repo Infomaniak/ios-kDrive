@@ -451,6 +451,8 @@ public class File: Object, Codable {
     public var tintColor: UIColor? {
         if let color = color {
             return UIColor(hex: color)
+        } else if visibility == .isTeamSpaceFolder {
+            return KDriveResourcesAsset.blueFolderColor.color
         } else {
             return convertedType.tintColor
         }
@@ -475,17 +477,19 @@ public class File: Object, Codable {
 
     public var icon: UIImage {
         if isDirectory {
-            switch visibility {
-            case .isTeamSpace:
-                return KDriveResourcesAsset.folderCommonDocuments.image
-            case .isSharedSpace:
-                return KDriveResourcesAsset.folderShared.image
-            default:
-                if isDisabled {
-                    return KDriveResourcesAsset.folderDisable.image
-                } else if isDropbox {
-                    return KDriveResourcesAsset.folderDropBox1.image
-                } else {
+            if isDisabled {
+                return KDriveResourcesAsset.folderDisable.image
+            } else if isDropbox {
+                return KDriveResourcesAsset.folderDropBoxTemplate.image
+            } else {
+                switch visibility {
+                case .isTeamSpace:
+                    return KDriveResourcesAsset.folderCommonDocuments.image
+                case .isTeamSpaceFolder:
+                    return KDriveResourcesAsset.folderCommonDocumentsTemplate.image
+                case .isSharedSpace:
+                    return KDriveResourcesAsset.folderShared.image
+                default:
                     return KDriveResourcesAsset.folderFill.image
                 }
             }
