@@ -454,7 +454,7 @@ public class DriveFileManager {
             return (localFiles, false)
         } else {
             do {
-                let files = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
+                let files = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileTypes: [fileType].compactMap { $0 }, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
                 let searchRoot = DriveFileManager.searchFilesRootFile
                 if files.count < Endpoint.itemsPerPage {
                     searchRoot.fullyDownloaded = true
@@ -644,7 +644,7 @@ public class DriveFileManager {
 
     public func lastPictures(page: Int = 1) async throws -> (files: [File], moreComing: Bool) {
         do {
-            let files = try await apiFetcher.searchFiles(drive: drive, fileType: .image, categories: [], belongToAllCategories: false, page: page, sortType: .newer)
+            let files = try await apiFetcher.searchFiles(drive: drive, fileTypes: [.image, .video], categories: [], belongToAllCategories: false, page: page, sortType: .newer)
 
             setLocalFiles(files, root: DriveFileManager.lastPicturesRootFile, deleteOrphans: page == 1)
             return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
