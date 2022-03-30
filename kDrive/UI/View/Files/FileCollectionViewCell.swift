@@ -28,7 +28,7 @@ protocol FileCellDelegate: AnyObject {
 
 @MainActor class FileViewModel {
     var file: File
-    private var selectionMode: Bool
+    var selectionMode: Bool
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     var thumbnailDownloadTask: Kingfisher.DownloadTask?
@@ -240,7 +240,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
         logoImage.image = viewModel.icon
         logoImage.tintColor = viewModel.iconTintColor
-        viewModel.setThumbnail(on: logoImage)
+        if !viewModel.selectionMode || checkmarkImage != logoImage {
+            // In list mode, we don't fetch the thumbnail if we are in selection mode
+            viewModel.setThumbnail(on: logoImage)
+        }
         titleLabel.text = viewModel.title
         detailLabel?.text = viewModel.subtitle
         favoriteImageView?.isHidden = !viewModel.isFavorite
@@ -263,11 +266,11 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     }
 
     private func configureForSelection() {
-        /* guard selectionMode else { return }
-         accessoryImage?.isHidden = true
-         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
-         checkmarkImage?.isAccessibilityElement = true
-         checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : "" */
+        guard viewModel?.selectionMode == true else { return }
+        checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+        checkmarkImage?.isAccessibilityElement = true
+        checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
+        // checkmarkImage?.contentMode = .scaleAspectFit
     }
 
     func configureLoading() {
