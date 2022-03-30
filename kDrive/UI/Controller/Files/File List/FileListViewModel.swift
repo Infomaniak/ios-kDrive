@@ -190,7 +190,6 @@ class FileListViewModel: SelectDelegate {
     func updateRealmObservation() {
         realmObservationToken?.invalidate()
         realmObservationToken = files
-            .filesSorted(by: sortType)
             .observe(on: .main) { [weak self] change in
                 guard let self = self else { return }
                 switch change {
@@ -256,6 +255,7 @@ class FileListViewModel: SelectDelegate {
 
     /// Called when sortType is updated
     func sortingChanged() {
+        files = AnyRealmCollection(files.filesSorted(by: sortType))
         updateRealmObservation()
     }
 

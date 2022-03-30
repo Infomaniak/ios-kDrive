@@ -47,23 +47,9 @@ class TrashListViewModel: InMemoryFileListViewModel {
         sortingChanged()
     }
 
-    override func updateRealmObservation() {
-        realmObservationToken?.invalidate()
-        realmObservationToken = files
-            .sorted(by: [sortType.value.sortDescriptor])
-            .observe(on: .main) { [weak self] change in
-                guard let self = self else { return }
-                switch change {
-                case .initial(let results):
-                    self.files = AnyRealmCollection(results)
-                    self.onFileListUpdated?([], [], [], [], self.currentDirectory.fullyDownloaded && results.isEmpty, true)
-                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
-                    self.files = AnyRealmCollection(results)
-                    self.onFileListUpdated?(deletions, insertions, modifications, [], self.currentDirectory.fullyDownloaded && results.isEmpty, false)
-                case .error(let error):
-                    DDLogError("[Realm Observation] Error \(error)")
-                }
-            }
+    override func sortingChanged() {
+        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
+        updateRealmObservation()
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
