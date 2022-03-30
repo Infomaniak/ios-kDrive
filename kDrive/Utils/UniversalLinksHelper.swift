@@ -19,11 +19,12 @@
 import CocoaLumberjackSwift
 import Foundation
 import kDriveCore
+import kDriveResources
 import SwiftRegex
 import UIKit
 
 #if !ISEXTENSION
-class UniversalLinksHelper {
+enum UniversalLinksHelper {
     private struct Link {
         let regex: Regex
         let displayMode: DisplayMode
@@ -64,20 +65,25 @@ class UniversalLinksHelper {
               let driveId = Int(firstMatch[1]),
               let last = firstMatch.last,
               let fileId = Int(last),
-              let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId) else {
-            return false
-        }
+              let driveFileManager = AccountManager.instance.getDriveFileManager(for: driveId,
+                                                                                 userId: AccountManager.instance.currentUserId)
+        else { return false }
 
-        Task {
-            do {
-                let file = try await driveFileManager.file(id: fileId)
-                await appDelegate.present(file: file, driveFileManager: driveFileManager, office: displayMode == .office)
-            } catch {
-                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveId) - \(fileId)]: \(error)")
-            }
-        }
+        openFile(id: fileId, driveFileManager: driveFileManager, office: displayMode == .office, appDelegate: appDelegate)
 
         return true
+    }
+
+    private static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool, appDelegate: AppDelegate) {
+        Task {
+            do {
+                let file = try await driveFileManager.file(id: id)
+                await appDelegate.present(file: file, driveFileManager: driveFileManager, office: office)
+            } catch {
+                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.drive.id) - \(id)]: \(error)")
+                await UIConstants.showSnackBar(message: error.localizedDescription)
+            }
+        }
     }
 }
 #endif
