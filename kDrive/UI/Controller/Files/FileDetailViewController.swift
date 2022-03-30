@@ -487,9 +487,9 @@ class FileDetailViewController: UIViewController {
             navigationController?.popViewController(animated: true)
             return
         }
-        Task { [proxyFile = file.proxify()] in
+        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-            async let folderContentCount = file.isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
+            async let folderContentCount = isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
             self.fileInformationRows = try await FileInformationRow.getRows(for: self.file,
                                                                             fileAccess: currentFileAccess,
