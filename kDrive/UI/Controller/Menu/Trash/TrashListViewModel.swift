@@ -263,27 +263,31 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
             let selectedItemCount = selectedItems.count
             let alert = TrashViewModelHelper.deleteAlertForFiles(selectedItems.map { $0.proxify() },
                                                                  firstFilename: firstSelectedItem.name,
-                                                                 driveFileManager: driveFileManager) { deletedFiles in
+                                                                 driveFileManager: driveFileManager) { [weak self] deletedFiles in
                 MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: selectedItemCount)
-                Task { [weak self] in
-                    self?.isMultipleSelectionEnabled = false
-                    Task.detached {
-                        guard let realm = try? Realm(configuration: realmConfiguration) else { return }
-                        try? realm.write {
-                            for file in deletedFiles {
-                                if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
-                                    realm.delete(file)
-                                }
-                            }
-                        }
-                    }
-                }
+                self?.removeFromRealm(realmConfiguration, deletedFiles: deletedFiles)
             }
             onPresentViewController?(.modal, alert, true)
         case .more:
             onPresentQuickActionPanel?(Array(selectedItems), .trash)
         default:
             break
+        }
+    }
+
+    private func removeFromRealm(_ realmConfiguration: Realm.Configuration, deletedFiles: [ProxyFile]) {
+        Task {
+            isMultipleSelectionEnabled = false
+            Task.detached {
+                guard let realm = try? Realm(configuration: realmConfiguration) else { return }
+                try? realm.write {
+                    for file in deletedFiles {
+                        if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+                            realm.delete(file)
+                        }
+                    }
+                }
+            }
         }
     }
 }
