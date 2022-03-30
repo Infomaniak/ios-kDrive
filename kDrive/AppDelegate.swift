@@ -480,7 +480,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
     }
 
-    func present(file: File, driveFileManager: DriveFileManager) {
+    func present(file: File, driveFileManager: DriveFileManager, office: Bool = false) {
         guard let rootViewController = window?.rootViewController as? MainTabViewController else {
             return
         }
@@ -500,8 +500,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 navController.popToRootViewController(animated: false)
                 // Present file
                 guard let fileListViewController = navController.topViewController as? FileListViewController else { return }
-                let filePresenter = FilePresenter(viewController: fileListViewController)
-                filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+                if office {
+                    OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: fileListViewController)
+                } else {
+                    let filePresenter = FilePresenter(viewController: fileListViewController)
+                    filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+                }
             }
         }
     }
@@ -536,6 +540,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
         return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
+    }
+
+    // MARK: - User activity
+
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        // Get URL components from the incoming user activity.
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let incomingURL = userActivity.webpageURL,
+              let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+            return false
+        }
+
+        // Check for specific URL components that you need.
+        return UniversalLinksHelper.handlePath(components.path, appDelegate: self)
     }
 }
 
