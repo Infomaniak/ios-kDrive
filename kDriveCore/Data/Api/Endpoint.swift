@@ -377,7 +377,7 @@ public extension Endpoint {
 
     static func thumbnail(file: AbstractFile, at date: Date) -> Endpoint {
         return .fileInfo(file).appending(path: "/thumbnail", queryItems: [
-            URLQueryItem(name: "t", value: "\(date.timeIntervalSince1970)")
+            URLQueryItem(name: "t", value: "\(Int(date.timeIntervalSince1970))")
         ])
     }
 
@@ -386,7 +386,7 @@ public extension Endpoint {
             URLQueryItem(name: "width", value: "2500"),
             URLQueryItem(name: "height", value: "1500"),
             URLQueryItem(name: "quality", value: "80"),
-            URLQueryItem(name: "t", value: "\(date.timeIntervalSince1970)")
+            URLQueryItem(name: "t", value: "\(Int(date.timeIntervalSince1970))")
         ])
     }
 
@@ -558,7 +558,7 @@ public extension Endpoint {
 
     static func trashThumbnail(file: AbstractFile, at date: Date) -> Endpoint {
         return .trashedInfo(file: file).appending(path: "/thumbnail", queryItems: [
-            URLQueryItem(name: "t", value: "\(date.timeIntervalSince1970)")
+            URLQueryItem(name: "t", value: "\(Int(date.timeIntervalSince1970))")
         ])
     }
 
