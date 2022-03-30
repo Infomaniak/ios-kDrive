@@ -27,11 +27,11 @@ protocol FileCellDelegate: AnyObject {
 }
 
 @MainActor class FileViewModel {
-    private var file: File
+    var file: File
     private var selectionMode: Bool
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
-    private var thumbnailDownloadTask: Kingfisher.DownloadTask?
+    var thumbnailDownloadTask: Kingfisher.DownloadTask?
 
     var title: String { file.name }
 
@@ -256,8 +256,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
 
         configureForSelection()
-
-        // WTF is accessory image?
     }
 
     func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
