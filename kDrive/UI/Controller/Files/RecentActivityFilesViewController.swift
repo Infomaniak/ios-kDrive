@@ -27,7 +27,7 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
     convenience init(driveFileManager: DriveFileManager, activities: [FileActivity]) {
         self.init(driveFileManager: driveFileManager)
         activity = activities.first
-        addPage(files: activities.compactMap(\.file), page: 1)
+        addPage(files: activities.compactMap(\.file), fullyDownloaded: true, page: 1)
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
@@ -53,7 +53,7 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
         let realm = driveFileManager.getRealm()
         activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)?.freeze()
         let cachedFiles = fileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }.map { $0.detached() }
-        addPage(files: cachedFiles, page: 1)
+        addPage(files: cachedFiles, fullyDownloaded: true, page: 1)
 
         forceRefresh()
     }

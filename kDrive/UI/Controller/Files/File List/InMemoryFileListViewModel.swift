@@ -51,7 +51,7 @@ class InMemoryFileListViewModel: FileListViewModel {
     /// - Parameters:
     ///   - fetchedFiles: The list of files to add.
     ///   - page: The page of the files.
-    final func addPage(files fetchedFiles: [File], copyInRealm: Bool = false, page: Int) {
+    final func addPage(files fetchedFiles: [File], fullyDownloaded: Bool, copyInRealm: Bool = false, page: Int) {
         try? realm.write {
             if page == 1 {
                 let allFilesExceptRoot = realm.objects(File.self).filter(NSPredicate(format: "id != %d", currentDirectory.id))
@@ -67,6 +67,8 @@ class InMemoryFileListViewModel: FileListViewModel {
             } else {
                 currentDirectory.children.insert(objectsIn: fetchedFiles)
             }
+
+            currentDirectory.fullyDownloaded = fullyDownloaded
         }
     }
 

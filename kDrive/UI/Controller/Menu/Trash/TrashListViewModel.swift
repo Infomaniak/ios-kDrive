@@ -62,9 +62,10 @@ class TrashListViewModel: InMemoryFileListViewModel {
             fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory.proxify(), page: page, sortType: sortType)
         }
 
-        addPage(files: fetchedFiles, page: page)
+        let moreComing = files.count == Endpoint.itemsPerPage
+        addPage(files: fetchedFiles, fullyDownloaded: !moreComing, page: page)
         endRefreshing()
-        if files.count == Endpoint.itemsPerPage {
+        if moreComing {
             try await loadFiles(page: page + 1)
         }
     }

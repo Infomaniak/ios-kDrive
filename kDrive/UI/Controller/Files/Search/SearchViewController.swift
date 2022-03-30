@@ -123,7 +123,7 @@ class SearchFilesViewModel: InMemoryFileListViewModel {
             throw DriveError.searchCancelled
         }
 
-        addPage(files: fetchedFiles, copyInRealm: true, page: page)
+        addPage(files: fetchedFiles, fullyDownloaded: !moreComing, copyInRealm: true, page: page)
         if moreComing {
             try await loadFiles(page: page + 1)
         }
