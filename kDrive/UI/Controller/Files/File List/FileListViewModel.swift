@@ -196,10 +196,10 @@ class FileListViewModel: SelectDelegate {
                 switch change {
                 case .initial(let results):
                     self.files = AnyRealmCollection(results)
-                    self.onFileListUpdated?([], [], [], [], self.currentDirectory.responseAt > 0 && results.isEmpty, true)
+                    self.onFileListUpdated?([], [], [], [], self.currentDirectory.fullyDownloaded && results.isEmpty, true)
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
                     self.files = AnyRealmCollection(results)
-                    self.onFileListUpdated?(deletions, insertions, modifications, [], self.currentDirectory.responseAt > 0 && results.isEmpty, false)
+                    self.onFileListUpdated?(deletions, insertions, modifications, [], self.currentDirectory.fullyDownloaded && results.isEmpty, false)
                 case .error(let error):
                     DDLogError("[Realm Observation] Error \(error)")
                 }
@@ -280,7 +280,7 @@ class FileListViewModel: SelectDelegate {
     func endRefreshing() {
         isLoading = false
         isRefreshing = false
-        onFileListUpdated?([], [], [], [], currentDirectory.responseAt > 0 && files.isEmpty, false)
+        onFileListUpdated?([], [], [], [], currentDirectory.fullyDownloaded && files.isEmpty, false)
     }
 
     func loadActivities() async throws {
