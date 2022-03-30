@@ -47,6 +47,25 @@ class TrashListViewModel: InMemoryFileListViewModel {
         sortingChanged()
     }
 
+    override func updateRealmObservation() {
+        realmObservationToken?.invalidate()
+        realmObservationToken = files
+            .sorted(by: [sortType.value.sortDescriptor])
+            .observe(on: .main) { [weak self] change in
+                guard let self = self else { return }
+                switch change {
+                case .initial(let results):
+                    self.files = AnyRealmCollection(results)
+                    self.onFileListUpdated?([], [], [], [], self.currentDirectory.fullyDownloaded && results.isEmpty, true)
+                case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    self.files = AnyRealmCollection(results)
+                    self.onFileListUpdated?(deletions, insertions, modifications, [], self.currentDirectory.fullyDownloaded && results.isEmpty, false)
+                case .error(let error):
+                    DDLogError("[Realm Observation] Error \(error)")
+                }
+            }
+    }
+
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard !isLoading || page > 1 else { return }
 
@@ -62,7 +81,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
             fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory.proxify(), page: page, sortType: sortType)
         }
 
-        let moreComing = files.count == Endpoint.itemsPerPage
+        let moreComing = fetchedFiles.count == Endpoint.itemsPerPage
         addPage(files: fetchedFiles, fullyDownloaded: !moreComing, page: page)
         endRefreshing()
         if moreComing {
