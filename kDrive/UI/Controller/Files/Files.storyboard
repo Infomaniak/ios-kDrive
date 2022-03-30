@@ -350,7 +350,7 @@
         <scene sceneID="5PS-aw-ccj">
             <objects>
                 <navigationController storyboardIdentifier="FilesVC" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="IDg-cP-myB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCore" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="" image="folder" selectedImage="folder-filled-template" id="FVI-Sh-h25">
+                    <tabBarItem key="tabBarItem" title="" image="folder" selectedImage="folder-filled-tab" id="FVI-Sh-h25">
                         <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
                     </tabBarItem>
                     <toolbarItems/>
@@ -637,7 +637,7 @@
         <image name="add" width="24" height="24"/>
         <image name="close" width="24" height="24"/>
         <image name="folder" width="24" height="24"/>
-        <image name="folder-filled-template" width="24" height="24"/>
+        <image name="folder-filled-tab" width="24" height="24"/>
         <image name="retry" width="24" height="24"/>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -646,7 +646,7 @@
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="previewBackgroundColor">
             <color red="0.066666666666666666" green="0.10980392156862745" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

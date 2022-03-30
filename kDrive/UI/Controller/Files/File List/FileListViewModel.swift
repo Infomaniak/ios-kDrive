@@ -78,7 +78,7 @@ class FileListViewModel: SelectDelegate {
         /// An icon displayed in the tabBar
         var tabBarIcon = KDriveResourcesAsset.folder
         /// An selected icon displayed in the tabBar
-        var selectedTabBarIcon = KDriveResourcesAsset.folderFilledTemplate
+        var selectedTabBarIcon = KDriveResourcesAsset.folderFilledTab
         /// Type of empty view to display
         var emptyViewType: EmptyTableView.EmptyTableViewType
         /// Does this folder support importing files with drop from external app

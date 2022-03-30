@@ -480,17 +480,17 @@ public class File: Object, Codable {
             if isDisabled {
                 return KDriveResourcesAsset.folderDisable.image
             } else if isDropbox {
-                return KDriveResourcesAsset.folderDropBoxTemplate.image
+                return KDriveResourcesAsset.folderDropBox.image.withRenderingMode(.alwaysTemplate)
             } else {
                 switch visibility {
                 case .isTeamSpace:
                     return KDriveResourcesAsset.folderCommonDocuments.image
                 case .isTeamSpaceFolder:
-                    return KDriveResourcesAsset.folderCommonDocumentsTemplate.image
+                    return KDriveResourcesAsset.folderCommonDocuments.image.withRenderingMode(.alwaysTemplate)
                 case .isSharedSpace:
                     return KDriveResourcesAsset.folderShared.image
                 default:
-                    return KDriveResourcesAsset.folderFilledTemplate.image
+                    return KDriveResourcesAsset.folderFilled.image.withRenderingMode(.alwaysTemplate)
                 }
             }
         } else {
