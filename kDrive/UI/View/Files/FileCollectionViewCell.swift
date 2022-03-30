@@ -78,7 +78,7 @@ protocol FileCellDelegate: AnyObject {
         downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                handler(self.file.isAvailableOffline != true || progress < 1, progress >= 1 || progress == 0, progress)
+                handler(!self.file.isAvailableOffline || progress < 1, progress >= 1 || progress == 0, progress)
             }
         }
         downloadObserver?.cancel()
@@ -270,7 +270,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
         checkmarkImage?.isAccessibilityElement = true
         checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
-        // checkmarkImage?.contentMode = .scaleAspectFit
     }
 
     func configureLoading() {
