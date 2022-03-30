@@ -354,6 +354,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     private func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
+        guard !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty && moved.isEmpty) else { return }
+
         collectionView.performBatchUpdates {
             // Always apply updates in the following order: deletions, insertions, then modifications.
             // Handling insertions before deletions may result in unexpected behavior.

@@ -124,6 +124,7 @@ class SearchFilesViewModel: InMemoryFileListViewModel {
         }
 
         addPage(files: fetchedFiles, fullyDownloaded: !moreComing, copyInRealm: true, page: page)
+        endRefreshing()
         if moreComing {
             try await loadFiles(page: page + 1)
         }

@@ -53,20 +53,20 @@ class InMemoryFileListViewModel: FileListViewModel {
     ///   - page: The page of the files.
     final func addPage(files fetchedFiles: [File], fullyDownloaded: Bool, copyInRealm: Bool = false, page: Int) {
         try? realm.write {
-            if page == 1 {
-                let allFilesExceptRoot = realm.objects(File.self).filter(NSPredicate(format: "id != %d", currentDirectory.id))
-                realm.delete(allFilesExceptRoot)
+            var children = [File]()
+            if copyInRealm {
+                for file in fetchedFiles {
+                    children.append(realm.create(File.self, value: file, update: .modified))
+                }
+            } else {
+                realm.add(fetchedFiles, update: .modified)
+                children = fetchedFiles
             }
 
-            if copyInRealm {
-                var createdFiles = [File]()
-                for file in fetchedFiles {
-                    createdFiles.append(realm.create(File.self, value: file, update: .all))
-                }
-                currentDirectory.children.insert(objectsIn: createdFiles)
-            } else {
-                currentDirectory.children.insert(objectsIn: fetchedFiles)
+            if page == 1 {
+                currentDirectory.children.removeAll()
             }
+            currentDirectory.children.insert(objectsIn: children)
 
             currentDirectory.fullyDownloaded = fullyDownloaded
         }
