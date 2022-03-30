@@ -86,7 +86,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
         timeLabel.text = Constants.formatDate(file.lastModifiedAt, style: .datetime, relative: true)
     }
 
-    override func setThumbnailFor(file: File) {
+    /* override func setThumbnailFor(file: File) {
         let fileId = file.id
         logoImage.image = nil
         logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
@@ -96,7 +96,7 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
                 self.logoImage.backgroundColor = nil
             }
         }
-    }
+    } */
 
     override func configureLoading() {
         super.configureLoading()
