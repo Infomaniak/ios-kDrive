@@ -752,6 +752,8 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             setupViewModel()
             tryLoadingFilesOrDisplayError()
         } else {
+            // We need some view model to restore the view controller and pop it...
+            viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: driveFileManager.getCachedRootFile())
             navigationController?.popViewController(animated: true)
         }
     }
