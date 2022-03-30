@@ -28,6 +28,7 @@ class FileDetailViewController: UIViewController {
     var file: File!
     var driveFileManager: DriveFileManager!
     var fileAccess: FileAccess?
+    var contentCount: FileCount?
 
     private var activities = [[FileActivity]]()
     private var activitiesInfo = (page: 1, hasNextPage: true, isLoading: true)
@@ -48,6 +49,7 @@ class FileDetailViewController: UIViewController {
         case creation
         case added
         case location
+        case content
         case size
         case sizeAll
 
@@ -56,7 +58,7 @@ class FileDetailViewController: UIViewController {
         ///   - file: File for which to build the array
         ///   - fileAccess: Shared file related to `file`
         /// - Returns: Array of row
-        static func getRows(for file: File, fileAccess: FileAccess?, categoryRights: CategoryRights) -> [FileInformationRow] {
+        static func getRows(for file: File, fileAccess: FileAccess?, contentCount: FileCount?, categoryRights: CategoryRights) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
             if fileAccess != nil || !file.users.isEmpty {
                 rows.append(.users)
@@ -74,6 +76,9 @@ class FileDetailViewController: UIViewController {
             rows.append(.added)
             if file.path?.isEmpty == false {
                 rows.append(.location)
+            }
+            if contentCount != nil {
+                rows.append(.content)
             }
             if file.size != nil {
                 rows.append(.size)
@@ -172,7 +177,10 @@ class FileDetailViewController: UIViewController {
         guard file != nil else { return }
 
         // Set initial rows
-        fileInformationRows = FileInformationRow.getRows(for: file, fileAccess: fileAccess, categoryRights: driveFileManager.drive.categoryRights)
+        fileInformationRows = FileInformationRow.getRows(for: file,
+                                                         fileAccess: fileAccess,
+                                                         contentCount: contentCount,
+                                                         categoryRights: driveFileManager.drive.categoryRights)
 
         // Load file informations
         loadFileInformation()
@@ -192,12 +200,20 @@ class FileDetailViewController: UIViewController {
     }
 
     private func loadFileInformation() {
-        Task { [proxyFile = file.proxify()] in
+        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
-                self.file = try await driveFileManager.file(id: file.id, forceRefresh: true)
-                self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
-                guard self.file != nil else { return }
-                self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, categoryRights: self.driveFileManager.drive.categoryRights)
+                async let currentFile = driveFileManager.file(id: proxyFile.id, forceRefresh: true)
+                async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
+                async let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
+
+                self.fileInformationRows = try await FileInformationRow.getRows(for: currentFile,
+                                                                                fileAccess: currentFileAccess,
+                                                                                contentCount: folderContentCount,
+                                                                                categoryRights: driveFileManager.drive.categoryRights)
+                self.file = try await currentFile
+                self.fileAccess = try await currentFileAccess
+                self.contentCount = try await folderContentCount
+
                 self.reloadTableView()
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
@@ -472,8 +488,16 @@ class FileDetailViewController: UIViewController {
             return
         }
         Task { [proxyFile = file.proxify()] in
-            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyFile)
-            self.fileInformationRows = FileInformationRow.getRows(for: self.file, fileAccess: self.fileAccess, categoryRights: self.driveFileManager.drive.categoryRights)
+            async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
+            async let folderContentCount = file.isDirectory ? driveFileManager.apiFetcher.count(of: proxyFile) : nil
+
+            self.fileInformationRows = try await FileInformationRow.getRows(for: self.file,
+                                                                            fileAccess: currentFileAccess,
+                                                                            contentCount: folderContentCount,
+                                                                            categoryRights: self.driveFileManager.drive.categoryRights)
+            self.fileAccess = try await currentFileAccess
+            self.contentCount = try await folderContentCount
+
             if self.currentTab == .informations {
                 DispatchQueue.main.async {
                     self.reloadTableView()
@@ -573,6 +597,23 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                     cell.locationLabel.text = file.path
                     cell.delegate = self
+                    return cell
+                case .content:
+                    let cell = tableView.dequeueReusableCell(type: FileInformationCreationTableViewCell.self, for: indexPath)
+                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfoContent
+                    // swiftlint:disable empty_count
+                    if contentCount?.count == 0 {
+                        cell.creationLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfoEmptyFolder
+                    } else {
+                        var content = [String]()
+                        if contentCount!.directories > 0 {
+                            content.append(KDriveResourcesStrings.Localizable.fileDetailsInfoFolder(contentCount!.directories))
+                        }
+                        if contentCount!.files > 0 {
+                            content.append(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(contentCount!.files))
+                        }
+                        cell.creationLabel.text = ListFormatter.localizedString(byJoining: content)
+                    }
                     return cell
                 case .sizeAll:
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)
