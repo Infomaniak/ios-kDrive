@@ -42,7 +42,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         static let importMediaAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo, image: KDriveResourcesAsset.images.image, matomoName: "uploadMedia")
         static let importAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadFile, image: KDriveResourcesAsset.upload.image, matomoName: "uploadFile")
         static let scanAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonDocumentScanning, image: KDriveResourcesAsset.scan.image, matomoName: "scan")
-        static let folderAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allFolder, image: KDriveResourcesAsset.folderFill.image)
+        static let folderAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allFolder, image: KDriveResourcesAsset.folderFilled.image.withRenderingMode(.alwaysTemplate))
 
         static let docsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeDocs, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.infomaniakColor.color, docType: "docx", matomoName: "createDocument")
         static let pointsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficePoints, image: KDriveResourcesAsset.filePresentation.image, docType: "pptx", matomoName: "createPresentation")
