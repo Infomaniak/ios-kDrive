@@ -108,7 +108,7 @@ class DroppableFileListViewModel {
     func handleExternalDrop(externalFiles: [NSItemProvider], destinationDirectory: File) {
         if !externalFiles.isEmpty {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
-            _ = FileImportHelper.instance.importItems(externalFiles) { [weak self] importedFiles, errorCount in
+            _ = FileImportHelper.instance.importItems(externalFiles) { [weak self, frozenDestination = destinationDirectory.freeze()] importedFiles, errorCount in
                 guard let self = self else { return }
                 if errorCount > 0 {
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
@@ -117,7 +117,7 @@ class DroppableFileListViewModel {
                     return
                 }
                 do {
-                    try FileImportHelper.instance.upload(files: importedFiles, in: destinationDirectory, drive: self.driveFileManager.drive)
+                    try FileImportHelper.instance.upload(files: importedFiles, in: frozenDestination, drive: self.driveFileManager.drive)
                 } catch {
                     Task {
                         UIConstants.showSnackBar(message: error.localizedDescription)
