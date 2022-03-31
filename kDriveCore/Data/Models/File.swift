@@ -533,9 +533,10 @@ public class File: Object, Codable {
         return nil
     }
 
-    public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) {
+    @discardableResult
+    public func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
         if hasThumbnail, let currentDriveFileManager = AccountManager.instance.currentDriveFileManager {
-            KingfisherManager.shared.retrieveImage(with: thumbnailURL, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
+            return KingfisherManager.shared.retrieveImage(with: thumbnailURL, options: [.requestModifier(currentDriveFileManager.apiFetcher.authenticatedKF)]) { result in
                 if let image = try? result.get().image {
                     completion(image, true)
                 } else {
@@ -544,6 +545,7 @@ public class File: Object, Codable {
             }
         } else {
             completion(icon, false)
+            return nil
         }
     }
 
