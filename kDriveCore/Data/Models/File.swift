@@ -212,7 +212,7 @@ public enum FileStatus: String {
 }
 
 public enum FileImportStatus: String, PersistableEnum, Codable {
-    case waiting, inProgress = "in_progress"
+    case waiting, inProgress = "in_progress", canceling
 }
 
 public class FileExternalImport: EmbeddedObject, Codable {

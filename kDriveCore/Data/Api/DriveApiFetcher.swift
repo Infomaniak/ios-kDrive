@@ -407,6 +407,10 @@ public class DriveApiFetcher: ApiFetcher {
     public func updateColor(directory: ProxyFile, color: String) async throws -> Bool {
         try await perform(request: authenticatedRequest(.directoryColor(file: directory), method: .post, parameters: ["color": color])).data
     }
+
+    public func cancelImport(drive: AbstractDrive, id: Int) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.cancelImport(drive: drive, id: id), method: .put)).data
+    }
 }
 
 class SyncedAuthenticator: OAuthAuthenticator {

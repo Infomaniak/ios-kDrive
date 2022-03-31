@@ -448,6 +448,12 @@ public extension Endpoint {
         return .fileInfo(file).appending(path: "/color")
     }
 
+    // MARK: - Import
+
+    static func cancelImport(drive: AbstractDrive, id: Int) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "/imports/\(id)/cancel")
+    }
+
     // MARK: Preferences
 
     static var userPreferences: Endpoint {
