@@ -211,6 +211,38 @@ public enum FileStatus: String {
     case uploading
 }
 
+public enum FileImportStatus: String, PersistableEnum, Codable {
+    case waiting, inProgress = "in_progress"
+}
+
+public class FileExternalImport: EmbeddedObject, Codable {
+    @Persisted public var id: Int
+    @Persisted public var directoryId: Int
+    @Persisted public var accountName: String
+    @Persisted public var application: String
+    @Persisted public var createdAt: Date
+    @Persisted public var updatedAt: Date
+    @Persisted public var path: String
+    @Persisted public var status: FileImportStatus
+    @Persisted public var countFailedFiles: Int
+    @Persisted public var countSuccessFiles: Int
+    @Persisted public var hasSharedFiles: String
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case directoryId = "directory_id"
+        case accountName = "account_name"
+        case application
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case path
+        case status
+        case countFailedFiles = "count_failed_files"
+        case countSuccessFiles = "count_success_files"
+        case hasSharedFiles = "has_shared_files"
+    }
+}
+
 public class FileConversion: EmbeddedObject, Codable {
     /// File can be converted to another extension
     @Persisted public var whenDownload: Bool
@@ -291,6 +323,7 @@ public class File: Object, Codable {
     /// Color of the directory for the user requesting it
     @Persisted public var color: String?
     @Persisted public var dropbox: DropBox?
+    @Persisted public var externalImport: FileExternalImport?
 
     // File only
     /// Size of File (byte unit)
@@ -345,6 +378,7 @@ public class File: Object, Codable {
         case hasThumbnail = "has_thumbnail"
         case hasOnlyoffice = "has_onlyoffice"
         case extensionType = "extension_type"
+        case externalImport = "external_import"
         case version
         case conversion = "conversion_capabilities"
     }
@@ -638,6 +672,7 @@ public class File: Object, Codable {
         categories = try container.decodeIfPresent(List<FileCategory>.self, forKey: .categories) ?? List<FileCategory>()
         color = try container.decodeIfPresent(String.self, forKey: .color)
         dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)
+        externalImport = try container.decodeIfPresent(FileExternalImport.self, forKey: .externalImport)
         size = try container.decodeIfPresent(Int.self, forKey: .size)
         hasThumbnail = try container.decodeIfPresent(Bool.self, forKey: .hasThumbnail) ?? false
         hasOnlyoffice = try container.decodeIfPresent(Bool.self, forKey: .hasOnlyoffice) ?? false

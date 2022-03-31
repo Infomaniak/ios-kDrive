@@ -27,7 +27,7 @@ import SwiftRegex
 
 public class DriveFileManager {
     public class DriveFileManagerConstants {
-        public let driveObjectTypes = [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self, FileVersion.self, ShareLink.self, ShareLinkCapabilities.self, DropBox.self, DropBoxCapabilities.self, DropBoxSize.self, DropBoxValidity.self]
+        public let driveObjectTypes = [File.self, Rights.self, FileActivity.self, FileCategory.self, FileConversion.self, FileVersion.self, FileExternalImport.self, ShareLink.self, ShareLinkCapabilities.self, DropBox.self, DropBoxCapabilities.self, DropBoxSize.self, DropBoxValidity.self]
         private let fileManager = FileManager.default
         public let rootDocumentsURL: URL
         public let importDirectoryURL: URL
@@ -166,7 +166,7 @@ public class DriveFileManager {
         let realmName = "\(drive.userId)-\(drive.id).realm"
         realmConfiguration = Realm.Configuration(
             fileURL: DriveFileManager.constants.rootDocumentsURL.appendingPathComponent(realmName),
-            schemaVersion: 8,
+            schemaVersion: 9,
             migrationBlock: { migration, oldSchemaVersion in
                 if oldSchemaVersion < 1 {
                     // Migration to version 1: migrating rights

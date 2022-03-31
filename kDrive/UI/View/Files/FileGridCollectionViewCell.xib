@@ -7,6 +7,7 @@
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -39,6 +40,14 @@
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="j9K-4i-jdP">
                                                 <rect key="frame" x="0.0" y="0.0" width="174" height="95"/>
                                             </imageView>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Zy-Gh-iuT" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
+                                                <rect key="frame" x="67.5" y="28" width="39" height="39"/>
+                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="28" id="Rqv-OB-r3Q"/>
+                                                    <constraint firstAttribute="width" secondItem="4Zy-Gh-iuT" secondAttribute="height" multiplier="1:1" id="bOA-aF-G1E"/>
+                                                </constraints>
+                                            </view>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="5Sk-df-fP8">
                                                 <rect key="frame" x="63.5" y="24" width="47" height="47"/>
                                                 <constraints>
@@ -69,10 +78,14 @@
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="4Zy-Gh-iuT" secondAttribute="bottom" priority="999" constant="28" id="5S9-Mg-T8s"/>
                                             <constraint firstAttribute="trailing" secondItem="j9K-4i-jdP" secondAttribute="trailing" id="5mg-Am-8nv"/>
                                             <constraint firstItem="5Sk-df-fP8" firstAttribute="centerY" secondItem="4Ut-eJ-Jw7" secondAttribute="centerY" id="9YD-zp-2bb"/>
                                             <constraint firstAttribute="trailing" secondItem="tJz-u0-DMk" secondAttribute="trailing" constant="5" id="AvA-Uq-QVt"/>
                                             <constraint firstItem="j9K-4i-jdP" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="top" id="CoW-df-XO9"/>
+                                            <constraint firstItem="4Zy-Gh-iuT" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="top" priority="999" constant="28" id="GyK-TC-BRB"/>
+                                            <constraint firstItem="4Zy-Gh-iuT" firstAttribute="centerX" secondItem="4Ut-eJ-Jw7" secondAttribute="centerX" id="Kkh-j7-QSh"/>
+                                            <constraint firstItem="4Zy-Gh-iuT" firstAttribute="centerY" secondItem="4Ut-eJ-Jw7" secondAttribute="centerY" id="UEq-l3-6d9"/>
                                             <constraint firstItem="5Sk-df-fP8" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="top" priority="999" constant="24" id="Use-uk-95I"/>
                                             <constraint firstItem="3zY-sM-q0Y" firstAttribute="leading" secondItem="4Ut-eJ-Jw7" secondAttribute="leading" constant="8" id="Wno-m3-fdw"/>
                                             <constraint firstAttribute="bottom" secondItem="j9K-4i-jdP" secondAttribute="bottom" id="Y72-Ln-rOb"/>
@@ -194,6 +207,7 @@
                 <outlet property="favoriteImageView" destination="ffD-D7-NRt" id="4mW-nJ-9jj"/>
                 <outlet property="highlightedView" destination="z0E-HT-fIs" id="MK3-dU-BxN"/>
                 <outlet property="iconImageView" destination="m0U-12-qPF" id="5uU-yD-5hK"/>
+                <outlet property="importProgressView" destination="4Zy-Gh-iuT" id="onL-lH-DeB"/>
                 <outlet property="largeIconImageView" destination="5Sk-df-fP8" id="q19-Hr-dG3"/>
                 <outlet property="logoImage" destination="j9K-4i-jdP" id="kHe-3O-R1o"/>
                 <outlet property="moreButton" destination="tJz-u0-DMk" id="T8v-YL-DVg"/>
@@ -235,5 +249,8 @@
         <namedColor name="titleColor">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>
