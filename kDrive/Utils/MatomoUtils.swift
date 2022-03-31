@@ -28,7 +28,13 @@ class MatomoUtils {
     }()
 
     // Enable or disable Matomo tracking
-    static let isEnabled = true
+    static var isEnabled: Bool {
+        #if DEBUG
+            false
+        #else
+            true
+        #endif
+    }
 
     enum Views: String {
         case shareAndRights, save, search, uploadQueue, preview, menu, settings, store, security
