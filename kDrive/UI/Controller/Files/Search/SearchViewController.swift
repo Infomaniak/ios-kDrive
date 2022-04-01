@@ -130,8 +130,13 @@ class SearchFilesViewModel: FileListViewModel {
                                                                    page: page,
                                                                    sortType: sortType)
             } catch {
-                // Maybe warn the user that the search will be incomplete ?
-                searchOffline()
+                if let error = error as? DriveError,
+                   error == .networkError {
+                    // Maybe warn the user that the search will be incomplete ?
+                    searchOffline()
+                } else {
+                    throw error
+                }
             }
         }
 
