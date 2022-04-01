@@ -23,12 +23,12 @@ import kDriveCore
 class MatomoUtils {
     static let shared: MatomoTracker = {
         let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
+        #if DEBUG
+        tracker.isOptedOut = true
+        #endif
         tracker.userId = String(AccountManager.instance.currentUserId)
         return tracker
     }()
-
-    // Enable or disable Matomo tracking
-    static let isEnabled = true
 
     enum Views: String {
         case shareAndRights, save, search, uploadQueue, preview, menu, settings, store, security
@@ -53,17 +53,14 @@ class MatomoUtils {
     }
 
     static func connectUser() {
-        guard isEnabled else { return }
         shared.userId = String(AccountManager.instance.currentUserId)
     }
 
     static func track(view: [String]) {
-        guard isEnabled else { return }
         shared.track(view: view)
     }
 
     static func track(eventWithCategory category: EventCategory, action: UserAction = .click, name: String, value: Float? = nil) {
-        guard isEnabled else { return }
         shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: value)
     }
 
