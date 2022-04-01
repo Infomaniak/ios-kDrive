@@ -20,6 +20,7 @@ import Alamofire
 import DifferenceKit
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
 
 extension String: Differentiable {}
@@ -61,7 +62,7 @@ class RecentSearchesViewModel {
     }
 }
 
-class SearchFilesViewModel: InMemoryFileListViewModel {
+class SearchFilesViewModel: FileListViewModel {
     typealias SearchCompletedCallback = (String?) -> Void
     typealias FiltersChangedCallback = () -> Void
 
@@ -99,7 +100,9 @@ class SearchFilesViewModel: InMemoryFileListViewModel {
                                           rightBarButtons: [.searchFilters],
                                           matomoViewPath: [MatomoUtils.Views.search.displayName])
         filters = Filters()
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.searchFilesRootFile)
+        let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
+        files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
         // Overriding default behavior to change list style in recent searches
         listStyleObservation?.cancel()
         listStyleObservation = nil
@@ -112,7 +115,7 @@ class SearchFilesViewModel: InMemoryFileListViewModel {
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard isDisplayingSearchResults else { return }
-        let (fetchedFiles, moreComing) = try await driveFileManager.searchFile(query: currentSearchText,
+        let (_, moreComing) = try await driveFileManager.searchFile(query: currentSearchText,
                                                                                date: filters.date?.dateInterval,
                                                                                fileType: filters.fileType,
                                                                                categories: Array(filters.categories),
@@ -123,7 +126,6 @@ class SearchFilesViewModel: InMemoryFileListViewModel {
             throw DriveError.searchCancelled
         }
 
-        addPage(files: fetchedFiles, fullyDownloaded: !moreComing, copyInRealm: true, page: page)
         endRefreshing()
         if moreComing {
             try await loadFiles(page: page + 1)

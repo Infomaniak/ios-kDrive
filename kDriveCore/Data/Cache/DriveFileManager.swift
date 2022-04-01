@@ -356,6 +356,38 @@ public class DriveFileManager {
                                page: page, sortType: sortType, keepProperties: [.standard, .extras], forceRefresh: forceRefresh)
     }
 
+    private func remoteFiles(in directory: ProxyFile,
+                             fetchFiles: () async throws -> ([File], Int?),
+                             page: Int,
+                             sortType: SortType,
+                             keepProperties: FilePropertiesOptions) async throws -> (files: [File], moreComing: Bool) {
+        // Get children from API
+        let (children, responseAt) = try await fetchFiles()
+        let realm = getRealm()
+        // Keep cached properties for children
+        for child in children {
+            keepCacheAttributesForFile(newFile: child, keepProperties: keepProperties, using: realm)
+        }
+
+        let managedParent = try directory.resolve(using: realm)
+        // Update parent
+        try realm.write {
+            managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
+            if children.count < Endpoint.itemsPerPage {
+                managedParent.versionCode = DriveFileManager.constants.currentVersionCode
+                managedParent.fullyDownloaded = true
+            }
+            realm.add(children, update: .modified)
+            // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with the first page will result in an undefined behavior.
+            if page == 1 {
+                managedParent.children.removeAll()
+            }
+            managedParent.children.insert(objectsIn: children)
+        }
+
+        return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
+    }
+
     private func files(in directory: ProxyFile,
                        fetchFiles: () async throws -> ([File], Int?),
                        page: Int,
@@ -367,31 +399,7 @@ public class DriveFileManager {
            (cachedParent.canLoadChildrenFromCache && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return (getLocalSortedDirectoryFiles(directory: cachedParent, sortType: sortType), false)
         } else {
-            // Get children from API
-            let (children, responseAt) = try await fetchFiles()
-            let realm = getRealm()
-            // Keep cached properties for children
-            for child in children {
-                keepCacheAttributesForFile(newFile: child, keepProperties: keepProperties, using: realm)
-            }
-
-            let managedParent = try directory.resolve(using: realm)
-            // Update parent
-            try realm.write {
-                managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
-                if children.count < Endpoint.itemsPerPage {
-                    managedParent.versionCode = DriveFileManager.constants.currentVersionCode
-                    managedParent.fullyDownloaded = true
-                }
-                realm.add(children, update: .modified)
-                // ⚠️ this is important because we are going to add all the children again. However, failing to start the request with the first page will result in an undefined behavior.
-                if page == 1 {
-                    managedParent.children.removeAll()
-                }
-                managedParent.children.insert(objectsIn: children)
-            }
-
-            return (getLocalSortedDirectoryFiles(directory: managedParent, sortType: sortType), children.count == Endpoint.itemsPerPage)
+            return try await remoteFiles(in: directory, fetchFiles: fetchFiles, page: page, sortType: sortType, keepProperties: keepProperties)
         }
     }
 
@@ -455,14 +463,14 @@ public class DriveFileManager {
             return (localFiles, false)
         } else {
             do {
-                let files = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
-                let searchRoot = DriveFileManager.searchFilesRootFile
-                if files.count < Endpoint.itemsPerPage {
-                    searchRoot.fullyDownloaded = true
-                }
-
-                setLocalFiles(files, root: searchRoot, deleteOrphans: page == 1)
-                return (files.map { $0.freeze() }, files.count == Endpoint.itemsPerPage)
+                return try await remoteFiles(in: DriveFileManager.searchFilesRootFile.proxify(),
+                                             fetchFiles: {
+                                                 let searchResults = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
+                                                 return (searchResults, nil)
+                                             },
+                                             page: page,
+                                             sortType: sortType,
+                                             keepProperties: [.standard, .extras])
             } catch {
                 if error.asAFError?.isExplicitlyCancelledError == true {
                     throw DriveError.searchCancelled
@@ -506,9 +514,6 @@ public class DriveFileManager {
             searchResults = searchResults.sorted(by: [sortType.value.sortDescriptor])
             for child in searchResults.freeze() { allFiles.append(child.freeze()) }
         }
-
-        let searchRoot = DriveFileManager.searchFilesRootFile
-        searchRoot.fullyDownloaded = true
 
         return allFiles
     }
