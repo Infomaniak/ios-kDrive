@@ -124,8 +124,9 @@ final class DriveFileManagerTests: XCTestCase {
     func testSearchFile() async throws {
         let (testDirectory, file) = try await initOfficeFileCached(testName: "Search file")
         let fileProxy = file.proxify()
-        let (files, _) = try await DriveFileManagerTests.driveFileManager.searchFile(query: file.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ)
-        let searchedFile = files.contains { $0.id == fileProxy.id }
+        _ = try await DriveFileManagerTests.driveFileManager.searchFile(query: file.name, categories: [], belongToAllCategories: true, page: 1, sortType: .nameAZ)
+        let children = DriveFileManagerTests.driveFileManager.getCachedFile(id: DriveFileManager.searchFilesRootFile.id)?.children
+        let searchedFile = children?.contains { $0.id == fileProxy.id } ?? false
         XCTAssertTrue(searchedFile, TestsMessages.notNil("searched file"))
         tearDownTest(directory: testDirectory)
     }
