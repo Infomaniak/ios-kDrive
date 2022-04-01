@@ -104,6 +104,10 @@ class SearchFilesViewModel: FileListViewModel {
         let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
         files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
+    }
+
+    override func startObservation() {
+        super.startObservation()
         // Overriding default behavior to change list style in recent searches
         listStyleObservation?.cancel()
         listStyleObservation = nil
@@ -112,6 +116,7 @@ class SearchFilesViewModel: FileListViewModel {
         sortTypeObservation?.cancel()
         sortTypeObservation = nil
         sortType = .newer
+        sortingChanged()
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
