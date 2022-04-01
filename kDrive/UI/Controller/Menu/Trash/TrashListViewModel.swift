@@ -25,17 +25,14 @@ import UIKit
 
 class TrashListViewModel: InMemoryFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
-        var configuration = Configuration(selectAllSupported: false,
+        let configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.trashTitle,
                                           emptyViewType: .noTrash,
                                           sortingOptions: [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest],
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "TrashList"])
-        var currentDirectory = currentDirectory
-        if currentDirectory == nil {
-            currentDirectory = DriveFileManager.trashRootFile
-            configuration.rightBarButtons = [.emptyTrash]
-        }
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
+        super.init(configuration: configuration,
+                   driveFileManager: driveFileManager,
+                   currentDirectory: currentDirectory == nil ? DriveFileManager.trashRootFile : currentDirectory!)
         multipleSelectionViewModel = MultipleSelectionTrashViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
     }
 
@@ -70,6 +67,10 @@ class TrashListViewModel: InMemoryFileListViewModel {
         let moreComing = fetchedFiles.count == Endpoint.itemsPerPage
         addPage(files: fetchedFiles, fullyDownloaded: !moreComing, page: page)
         endRefreshing()
+
+        if currentDirectory.id == DriveFileManager.trashRootFile.id {
+            currentRightBarButtons = files.isEmpty ? nil : [.emptyTrash]
+        }
         if moreComing {
             try await loadFiles(page: page + 1)
         }
