@@ -17,10 +17,11 @@
  */
 
 import CocoaLumberjackSwift
-import kDriveResources
-import UIKit
-import kDriveCore
 import InfomaniakCore
+import kDriveCore
+import kDriveResources
+import Photos
+import UIKit
 
 @MainActor
 public class FileActionsHelper {
@@ -75,60 +76,54 @@ public class FileActionsHelper {
                 proxyParent = file.parent?.proxify(),
                 proxyDestination = destinationDirectory.proxify(),
                 destinationName = destinationDirectory.name] in
-            do {
-                let (cancelResponse, _) = try await driveFileManager.move(file: proxyFile, to: proxyDestination)
-                UIConstants.showCancelableSnackBar(
-                    message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
-                    cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
-                    cancelableResponse: cancelResponse,
-                    parentFile: proxyParent,
-                    driveFileManager: driveFileManager)
-                completion?(true)
-            } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
-                completion?(false)
-            }
+                do {
+                    let (cancelResponse, _) = try await driveFileManager.move(file: proxyFile, to: proxyDestination)
+                    UIConstants.showCancelableSnackBar(
+                        message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
+                        cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
+                        cancelableResponse: cancelResponse,
+                        parentFile: proxyParent,
+                        driveFileManager: driveFileManager)
+                    completion?(true)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    completion?(false)
+                }
         }
     }
 
     public static func save(file: File, from viewController: UIViewController) {
         switch file.convertedType {
         case .image:
-            if let image = UIImage(contentsOfFile: file.localUrl.path) {
-                Task {
-                    do {
-                        try await PhotoLibrarySaver.instance.save(image: image)
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
-                        }
-                    } catch {
-                        DDLogError("Cannot save image: \(error)")
-                        DispatchQueue.main.async {
-                            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                        }
-                    }
-                }
-            }
+            saveMedia(url: file.localUrl,
+                      type: .image,
+                      successMessage: KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation)
         case .video:
-            Task {
-                do {
-                    try await PhotoLibrarySaver.instance.save(videoUrl: file.localUrl)
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
-                    }
-                } catch {
-                    DDLogError("Cannot save video: \(error)")
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                    }
-                }
-            }
+            saveMedia(url: file.localUrl,
+                      type: .video,
+                      successMessage: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
         case .folder:
             let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
             viewController.present(documentExportViewController, animated: true)
         default:
             let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
             viewController.present(documentExportViewController, animated: true)
+        }
+    }
+
+    private static func saveMedia(url: URL, type: PHAssetMediaType, successMessage: String) {
+        Task {
+            do {
+                try await PhotoLibrarySaver.instance.save(url: url, type: type)
+                DispatchQueue.main.async {
+                    UIConstants.showSnackBar(message: successMessage)
+                }
+            } catch {
+                DDLogError("Cannot save media: \(error)")
+                DispatchQueue.main.async {
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                }
+            }
         }
     }
 
