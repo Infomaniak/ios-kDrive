@@ -18,6 +18,7 @@
 
 import Alamofire
 import DifferenceKit
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -115,13 +116,25 @@ class SearchFilesViewModel: FileListViewModel {
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard isDisplayingSearchResults else { return }
-        let (_, moreComing) = try await driveFileManager.searchFile(query: currentSearchText,
-                                                                               date: filters.date?.dateInterval,
-                                                                               fileType: filters.fileType,
-                                                                               categories: Array(filters.categories),
-                                                                               belongToAllCategories: filters.belongToAllCategories,
-                                                                               page: page,
-                                                                               sortType: sortType)
+
+        var moreComing = false
+        if ReachabilityListener.instance.currentStatus == .offline {
+            searchOffline()
+        } else {
+            do {
+                moreComing = try await driveFileManager.searchFile(query: currentSearchText,
+                                                                   date: filters.date?.dateInterval,
+                                                                   fileType: filters.fileType,
+                                                                   categories: Array(filters.categories),
+                                                                   belongToAllCategories: filters.belongToAllCategories,
+                                                                   page: page,
+                                                                   sortType: sortType)
+            } catch {
+                // Maybe warn the user that the search will be incomplete ?
+                searchOffline()
+            }
+        }
+
         guard isDisplayingSearchResults else {
             throw DriveError.searchCancelled
         }
@@ -130,6 +143,16 @@ class SearchFilesViewModel: FileListViewModel {
         if moreComing {
             try await loadFiles(page: page + 1)
         }
+    }
+
+    private func searchOffline() {
+        files = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,
+                                                                  date: filters.date?.dateInterval,
+                                                                  fileType: filters.fileType,
+                                                                  categories: Array(filters.categories),
+                                                                  belongToAllCategories: filters.belongToAllCategories,
+                                                                  sortType: sortType))
+        startObservation()
     }
 
     override func barButtonPressed(type: FileListBarButtonType) {

@@ -457,32 +457,37 @@ public class DriveFileManager {
         return offlineFiles.map { $0.freeze() }
     }
 
-    public func searchFile(query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, page: Int = 1, sortType: SortType = .nameAZ) async throws -> (files: [File], moreComing: Bool) {
-        if ReachabilityListener.instance.currentStatus == .offline {
-            let localFiles = searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType)
-            return (localFiles, false)
-        } else {
-            do {
-                return try await remoteFiles(in: DriveFileManager.searchFilesRootFile.proxify(),
-                                             fetchFiles: {
-                                                 let searchResults = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
-                                                 return (searchResults, nil)
-                                             },
-                                             page: page,
-                                             sortType: sortType,
-                                             keepProperties: [.standard, .extras])
-            } catch {
-                if error.asAFError?.isExplicitlyCancelledError == true {
-                    throw DriveError.searchCancelled
-                } else {
-                    let localFiles = searchOffline(query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, sortType: sortType)
-                    return (localFiles, false)
-                }
+    public func searchFile(query: String? = nil,
+                           date: DateInterval? = nil,
+                           fileType: ConvertedType? = nil,
+                           categories: [Category],
+                           belongToAllCategories: Bool,
+                           page: Int = 1,
+                           sortType: SortType = .nameAZ) async throws -> Bool {
+        do {
+            return try await remoteFiles(in: DriveFileManager.searchFilesRootFile.proxify(),
+                                         fetchFiles: {
+                                             let searchResults = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
+                                             return (searchResults, nil)
+                                         },
+                                         page: page,
+                                         sortType: sortType,
+                                         keepProperties: [.standard, .extras]).moreComing
+        } catch {
+            if error.asAFError?.isExplicitlyCancelledError == true {
+                throw DriveError.searchCancelled
+            } else {
+                throw DriveError.networkError
             }
         }
     }
 
-    private func searchOffline(query: String? = nil, date: DateInterval? = nil, fileType: ConvertedType? = nil, categories: [Category], belongToAllCategories: Bool, sortType: SortType = .nameAZ) -> [File] {
+    public func searchOffline(query: String? = nil,
+                              date: DateInterval? = nil,
+                              fileType: ConvertedType? = nil,
+                              categories: [Category],
+                              belongToAllCategories: Bool,
+                              sortType: SortType = .nameAZ) -> Results<File> {
         let realm = getRealm()
         var searchResults = realm.objects(File.self).filter("id > 0")
         if let query = query, !query.isBlank {
@@ -508,14 +513,8 @@ public class DriveFileManager {
             }
             searchResults = searchResults.filter(predicate)
         }
-        var allFiles = [File]()
 
-        if query != nil || fileType != nil {
-            searchResults = searchResults.sorted(by: [sortType.value.sortDescriptor])
-            for child in searchResults.freeze() { allFiles.append(child.freeze()) }
-        }
-
-        return allFiles
+        return searchResults.sorted(by: [sortType.value.sortDescriptor])
     }
 
     public func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
