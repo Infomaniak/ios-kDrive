@@ -121,7 +121,7 @@ class PhotoListViewController: FileListViewController {
     }
 
     func showEmptyView(_ type: EmptyTableView.EmptyTableViewType, showButton: Bool = false) {
-        if viewModel.isEmpty {
+        if viewModel.files.isEmpty {
             let background = EmptyTableView.instantiate(type: type, button: showButton, setCenteringEnabled: true)
             background.actionHandler = { [weak self] _ in
                 self?.viewModel.forceRefresh()

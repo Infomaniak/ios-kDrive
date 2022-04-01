@@ -20,9 +20,10 @@ import CocoaLumberjackSwift
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
 
-class TrashListViewModel: UnmanagedFileListViewModel {
+class TrashListViewModel: InMemoryFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         var configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.trashTitle,
@@ -35,10 +36,20 @@ class TrashListViewModel: UnmanagedFileListViewModel {
             configuration.rightBarButtons = [.emptyTrash]
         }
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory!)
+        multipleSelectionViewModel = MultipleSelectionTrashViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+    }
+
+    override func startObservation() {
+        super.startObservation()
         sortTypeObservation?.cancel()
         sortTypeObservation = nil
         sortType = .newerDelete
-        multipleSelectionViewModel = MultipleSelectionTrashViewModel(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: self.currentDirectory)
+        sortingChanged()
+    }
+
+    override func sortingChanged() {
+        files = AnyRealmCollection(files.sorted(by: [sortType.value.sortDescriptor]))
+        updateRealmObservation()
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
@@ -56,9 +67,10 @@ class TrashListViewModel: UnmanagedFileListViewModel {
             fetchedFiles = try await driveFileManager.apiFetcher.trashedFiles(of: currentDirectory.proxify(), page: page, sortType: sortType)
         }
 
-        addPage(files: fetchedFiles, page: page)
+        let moreComing = fetchedFiles.count == Endpoint.itemsPerPage
+        addPage(files: fetchedFiles, fullyDownloaded: !moreComing, page: page)
         endRefreshing()
-        if files.count == Endpoint.itemsPerPage {
+        if moreComing {
             try await loadFiles(page: page + 1)
         }
     }
@@ -120,29 +132,33 @@ class TrashListViewModel: UnmanagedFileListViewModel {
         sortingChanged()
     }
 
-    private func restoreTrashedFiles(_ restoredFiles: [File], in directory: File? = nil) async {
+    private func restoreTrashedFiles(_ restoredFiles: [ProxyFile], firstFilename: String, in directory: ProxyFile? = nil, directoryName: String? = nil) async {
         do {
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for file in restoredFiles {
                     group.addTask { [self] in
-                        _ = try await driveFileManager.apiFetcher.restore(file: file.proxify(), in: directory?.proxify())
+                        _ = try await driveFileManager.apiFetcher.restore(file: file, in: directory)
                         // We don't have an alert for moving multiple files, snackbar is spammed until end
-                        if let directory = directory {
-                            await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(file.name, directory.name))
+                        if let directoryName = directoryName {
+                            await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(firstFilename, directoryName))
 
                         } else {
-                            await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(file.name))
+                            await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileToOriginalPlaceSuccess(firstFilename))
                         }
                     }
                 }
                 try await group.waitForAll()
             }
-            directory?.signalChanges(userId: driveFileManager.drive.userId)
-
         } catch {
             UIConstants.showSnackBar(message: error.localizedDescription)
         }
+    }
+
+    private func removeFilesAndDisableMultiSelection(_ deletedFiles: [ProxyFile]) {
         multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+        Task.detached { [weak self] in
+            await self?.removeFiles(deletedFiles)
+        }
     }
 }
 
@@ -150,26 +166,32 @@ class TrashListViewModel: UnmanagedFileListViewModel {
 
 extension TrashListViewModel: TrashOptionsDelegate {
     func didClickOnTrashOption(option: TrashOption, files: [File]) {
+        guard !files.isEmpty, let firstFilename = files.first?.name else { return }
+        let proxyFiles = files.map { $0.proxify() }
+
         switch option {
         case .restoreIn:
             MatomoUtils.track(eventWithCategory: .trash, name: "restoreGivenFolder")
             let selectFolderNavigationViewController: TitleSizeAdjustingNavigationController
-            selectFolderNavigationViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager) { [self] directory in
-                Task {
-                    await restoreTrashedFiles(files, in: directory)
+            selectFolderNavigationViewController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager) { directory in
+                Task { [weak self, directoryProxy = directory.proxify(), directoryName = directory.name] in
+                    await self?.restoreTrashedFiles(proxyFiles, firstFilename: firstFilename, in: directoryProxy, directoryName: directoryName)
+                    self?.removeFilesAndDisableMultiSelection(proxyFiles)
                 }
             }
             onPresentViewController?(.modal, selectFolderNavigationViewController, true)
         case .restore:
             MatomoUtils.track(eventWithCategory: .trash, name: "restoreOriginFolder")
-            Task {
-                await restoreTrashedFiles(files)
+            Task { [weak self] in
+                await restoreTrashedFiles(proxyFiles, firstFilename: firstFilename)
+                self?.removeFilesAndDisableMultiSelection(proxyFiles)
             }
         case .delete:
-            let alert = TrashViewModelHelper.deleteAlertForFiles(files, driveFileManager: driveFileManager) { [weak self] deletedFiles in
+            let alert = TrashViewModelHelper.deleteAlertForFiles(proxyFiles, firstFilename: firstFilename, driveFileManager: driveFileManager) { [weak self] _ in
                 MatomoUtils.track(eventWithCategory: .trash, name: "deleteFromTrash")
-                deletedFiles.forEach { self?.removeFile(file: $0) }
-                self?.multipleSelectionViewModel?.isMultipleSelectionEnabled = false
+                Task { [weak self] in
+                    self?.removeFilesAndDisableMultiSelection(proxyFiles)
+                }
             }
             onPresentViewController?(.modal, alert, true)
         }
@@ -177,11 +199,10 @@ extension TrashListViewModel: TrashOptionsDelegate {
 }
 
 private enum TrashViewModelHelper {
-    static func deleteAlertForFiles(_ files: [File], driveFileManager: DriveFileManager, completion: @escaping ([File]) -> Void) -> AlertTextViewController {
+    static func deleteAlertForFiles(_ files: [ProxyFile], firstFilename: String, driveFileManager: DriveFileManager, completion: @MainActor @escaping ([ProxyFile]) -> Void) -> AlertTextViewController {
         let message: NSMutableAttributedString
-        if files.count == 1,
-           let firstFile = files.first {
-            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescription(firstFile.name), boldText: firstFile.name)
+        if files.count == 1 {
+            message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescription(firstFilename), boldText: firstFilename)
         } else {
             message = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalDeleteDescriptionPlural(files.count))
         }
@@ -190,23 +211,22 @@ private enum TrashViewModelHelper {
                                        message: message,
                                        action: KDriveResourcesStrings.Localizable.buttonDelete,
                                        destructive: true, loading: true) {
-            let files = await deleteFiles(files, driveFileManager: driveFileManager)
-            completion(files)
+            let files = await deleteFiles(files, firstFilename: firstFilename, driveFileManager: driveFileManager)
+            await completion(files)
         }
     }
 
-    private static func deleteFiles(_ deletedFiles: [File], driveFileManager: DriveFileManager) async -> [File] {
+    private static func deleteFiles(_ deletedFiles: [ProxyFile], firstFilename: String, driveFileManager: DriveFileManager) async -> [ProxyFile] {
         do {
-            let definitelyDeletedFiles = try await withThrowingTaskGroup(of: File.self) { group -> [File] in
+            let definitelyDeletedFiles = try await withThrowingTaskGroup(of: ProxyFile.self) { group -> [ProxyFile] in
                 for file in deletedFiles {
                     group.addTask {
                         _ = try await driveFileManager.apiFetcher.deleteDefinitely(file: file)
-                        file.signalChanges(userId: driveFileManager.drive.userId)
                         return file
                     }
                 }
 
-                var successFullyDeletedFile = [File]()
+                var successFullyDeletedFile = [ProxyFile]()
                 for try await file in group {
                     successFullyDeletedFile.append(file)
                 }
@@ -215,7 +235,7 @@ private enum TrashViewModelHelper {
 
             let message: String
             if definitelyDeletedFiles.count == 1 {
-                message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(definitelyDeletedFiles[0].name)
+                message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(firstFilename)
             } else {
                 message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(definitelyDeletedFiles.count)
             }
@@ -238,17 +258,36 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
     override func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .deletePermanently:
-            let alert = TrashViewModelHelper.deleteAlertForFiles(Array(selectedItems), driveFileManager: driveFileManager) { [weak self] _ in
-                guard let self = self else { return }
-                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: self.selectedItems.count)
-                self.driveFileManager.notifyObserversWith(file: DriveFileManager.trashRootFile)
-                self.isMultipleSelectionEnabled = false
+            guard let firstSelectedItem = selectedItems.first,
+                  let realmConfiguration = firstSelectedItem.realm?.configuration else { return }
+            let selectedItemCount = selectedItems.count
+            let alert = TrashViewModelHelper.deleteAlertForFiles(selectedItems.map { $0.proxify() },
+                                                                 firstFilename: firstSelectedItem.name,
+                                                                 driveFileManager: driveFileManager) { [weak self] deletedFiles in
+                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: selectedItemCount)
+                self?.removeFromRealm(realmConfiguration, deletedFiles: deletedFiles)
             }
             onPresentViewController?(.modal, alert, true)
         case .more:
             onPresentQuickActionPanel?(Array(selectedItems), .trash)
         default:
             break
+        }
+    }
+
+    private func removeFromRealm(_ realmConfiguration: Realm.Configuration, deletedFiles: [ProxyFile]) {
+        Task {
+            isMultipleSelectionEnabled = false
+            Task.detached {
+                guard let realm = try? Realm(configuration: realmConfiguration) else { return }
+                try? realm.write {
+                    for file in deletedFiles {
+                        if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+                            realm.delete(file)
+                        }
+                    }
+                }
+            }
         }
     }
 }

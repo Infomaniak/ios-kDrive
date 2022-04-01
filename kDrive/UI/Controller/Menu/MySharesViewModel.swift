@@ -21,7 +21,7 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class MySharesViewModel: ManagedFileListViewModel {
+class MySharesViewModel: FileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         let configuration = Configuration(normalFolderHierarchy: false,
                                           showUploadingFiles: false,

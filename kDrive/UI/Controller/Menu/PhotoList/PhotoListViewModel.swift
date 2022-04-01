@@ -23,7 +23,7 @@ import kDriveCore
 import kDriveResources
 import RealmSwift
 
-class PhotoListViewModel: ManagedFileListViewModel {
+class PhotoListViewModel: FileListViewModel {
     typealias Section = ArraySection<Group, File>
 
     struct Group: Differentiable {
@@ -94,7 +94,7 @@ class PhotoListViewModel: ManagedFileListViewModel {
         return pictures[indexPath.row]
     }
 
-    override func updateDataSource() {
+    override func updateRealmObservation() {
         realmObservationToken?.invalidate()
         realmObservationToken = files.observe(on: .main) { [weak self] change in
             guard let self = self else { return }

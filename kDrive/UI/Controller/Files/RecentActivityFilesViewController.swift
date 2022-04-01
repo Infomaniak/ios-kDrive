@@ -21,13 +21,13 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class RecentActivityFilesViewModel: UnmanagedFileListViewModel {
+class RecentActivityFilesViewModel: InMemoryFileListViewModel {
     var activity: FileActivity?
 
     convenience init(driveFileManager: DriveFileManager, activities: [FileActivity]) {
         self.init(driveFileManager: driveFileManager)
         activity = activities.first
-        files = sort(files: activities.compactMap(\.file))
+        addPage(files: activities.compactMap(\.file), fullyDownloaded: true, page: 1)
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
@@ -41,23 +41,9 @@ class RecentActivityFilesViewModel: UnmanagedFileListViewModel {
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.homeRootFile)
     }
 
-    override func sortingChanged() {
-        let sortedFiles = sort(files: files)
-        let stagedChangeset = StagedChangeset(source: files, target: sortedFiles)
-        for changeset in stagedChangeset {
-            files = changeset.data
-            onFileListUpdated?(changeset.elementDeleted.map(\.element),
-                               changeset.elementInserted.map(\.element),
-                               changeset.elementUpdated.map(\.element),
-                               changeset.elementMoved.map { (source: $0.source.element, target: $0.target.element) },
-                               sortedFiles.isEmpty,
-                               false)
-        }
-    }
-
     func encodeRestorableState(with coder: NSCoder) {
         coder.encode(activity?.id ?? 0, forKey: "ActivityId")
-        coder.encode(files.map(\.id), forKey: "Files")
+        coder.encode(getAllFiles().map(\.id), forKey: "Files")
     }
 
     func decodeRestorableState(with coder: NSCoder) {
@@ -66,38 +52,18 @@ class RecentActivityFilesViewModel: UnmanagedFileListViewModel {
 
         let realm = driveFileManager.getRealm()
         activity = realm.object(ofType: FileActivity.self, forPrimaryKey: activityId)?.freeze()
-        files = fileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
+        let cachedFiles = fileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }.map { $0.detached() }
+        addPage(files: cachedFiles, fullyDownloaded: true, page: 1)
 
         forceRefresh()
     }
 
     override func getFile(at indexPath: IndexPath) -> File? {
         if let file = super.getFile(at: indexPath) {
-            // We need a managed instance to present the file list as a live object
+            // We need the real managed instance to present the file list as coming from the cached realm
             return driveFileManager.getManagedFile(from: file)
         } else {
             return nil
-        }
-    }
-
-    private func sort(files: [File]) -> [File] {
-        return files.sorted { firstFile, secondFile -> Bool in
-            switch sortType {
-            case .nameAZ:
-                return firstFile.name.lowercased() < secondFile.name.lowercased()
-            case .nameZA:
-                return firstFile.name.lowercased() > secondFile.name.lowercased()
-            case .older:
-                return firstFile.lastModifiedAt < secondFile.lastModifiedAt
-            case .newer:
-                return firstFile.lastModifiedAt > secondFile.lastModifiedAt
-            case .biggest:
-                return firstFile.size ?? 0 > secondFile.size ?? 0
-            case .smallest:
-                return firstFile.size ?? 0 < secondFile.size ?? 0
-            default:
-                return true
-            }
         }
     }
 }
@@ -117,7 +83,7 @@ class RecentActivityFilesViewController: FileListViewController {
         headerView.activityListView.isHidden = false
         headerView.activityAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
 
-        let count = viewModel.fileCount
+        let count = viewModel.files.count
         let isDirectory = activity.file?.isDirectory ?? false
 
         if let user = activity.user {

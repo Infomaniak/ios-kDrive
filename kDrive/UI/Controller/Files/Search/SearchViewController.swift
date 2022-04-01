@@ -18,8 +18,10 @@
 
 import Alamofire
 import DifferenceKit
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import RealmSwift
 import UIKit
 
 extension String: Differentiable {}
@@ -61,7 +63,7 @@ class RecentSearchesViewModel {
     }
 }
 
-class SearchFilesViewModel: UnmanagedFileListViewModel {
+class SearchFilesViewModel: FileListViewModel {
     typealias SearchCompletedCallback = (String?) -> Void
     typealias FiltersChangedCallback = () -> Void
 
@@ -99,7 +101,13 @@ class SearchFilesViewModel: UnmanagedFileListViewModel {
                                           rightBarButtons: [.searchFilters],
                                           matomoViewPath: [MatomoUtils.Views.search.displayName])
         filters = Filters()
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: DriveFileManager.searchFilesRootFile)
+        let searchFakeRoot = driveFileManager.getManagedFile(from: DriveFileManager.searchFilesRootFile)
+        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: searchFakeRoot)
+        files = AnyRealmCollection(AnyRealmCollection(searchFakeRoot.children).filesSorted(by: sortType))
+    }
+
+    override func startObservation() {
+        super.startObservation()
         // Overriding default behavior to change list style in recent searches
         listStyleObservation?.cancel()
         listStyleObservation = nil
@@ -108,26 +116,53 @@ class SearchFilesViewModel: UnmanagedFileListViewModel {
         sortTypeObservation?.cancel()
         sortTypeObservation = nil
         sortType = .newer
+        sortingChanged()
     }
 
     override func loadFiles(page: Int = 1, forceRefresh: Bool = false) async throws {
         guard isDisplayingSearchResults else { return }
-        let (fetchedFiles, moreComing) = try await driveFileManager.searchFile(query: currentSearchText,
-                                                                               date: filters.date?.dateInterval,
-                                                                               fileType: filters.fileType,
-                                                                               categories: Array(filters.categories),
-                                                                               belongToAllCategories: filters.belongToAllCategories,
-                                                                               page: page,
-                                                                               sortType: sortType)
+
+        var moreComing = false
+        if ReachabilityListener.instance.currentStatus == .offline {
+            searchOffline()
+        } else {
+            do {
+                moreComing = try await driveFileManager.searchFile(query: currentSearchText,
+                                                                   date: filters.date?.dateInterval,
+                                                                   fileType: filters.fileType,
+                                                                   categories: Array(filters.categories),
+                                                                   belongToAllCategories: filters.belongToAllCategories,
+                                                                   page: page,
+                                                                   sortType: sortType)
+            } catch {
+                if let error = error as? DriveError,
+                   error == .networkError {
+                    // Maybe warn the user that the search will be incomplete ?
+                    searchOffline()
+                } else {
+                    throw error
+                }
+            }
+        }
 
         guard isDisplayingSearchResults else {
             throw DriveError.searchCancelled
         }
 
-        addPage(files: fetchedFiles, page: page)
+        endRefreshing()
         if moreComing {
             try await loadFiles(page: page + 1)
         }
+    }
+
+    private func searchOffline() {
+        files = AnyRealmCollection(driveFileManager.searchOffline(query: currentSearchText,
+                                                                  date: filters.date?.dateInterval,
+                                                                  fileType: filters.fileType,
+                                                                  categories: Array(filters.categories),
+                                                                  belongToAllCategories: filters.belongToAllCategories,
+                                                                  sortType: sortType))
+        startObservation()
     }
 
     override func barButtonPressed(type: FileListBarButtonType) {
