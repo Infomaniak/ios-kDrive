@@ -139,7 +139,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private var headerView: FilesHeaderView?
     var selectView: SelectView?
     private var gridColumns: Int {
-        let screenWidth = UIScreen.main.bounds.width
+        let screenWidth = collectionView.bounds.width
         let maxColumns = Int(screenWidth / gridCellMaxWidth)
         return max(gridMinColumns, maxColumns)
     }

@@ -34,7 +34,7 @@ class PhotoListViewController: FileListViewController {
     private var isLargeTitle = true
 
     private var numberOfColumns: Int {
-        let screenWidth = UIScreen.main.bounds.width
+        let screenWidth = collectionView.bounds.width
         let maxColumns = Int(screenWidth / cellMaxWidth)
         return max(minColumns, maxColumns)
     }
