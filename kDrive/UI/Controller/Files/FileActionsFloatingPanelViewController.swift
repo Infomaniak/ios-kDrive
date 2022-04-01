@@ -63,11 +63,11 @@ public class FloatingPanelAction: Equatable {
     static let leaveShare = FloatingPanelAction(id: 14, name: KDriveResourcesStrings.Localizable.buttonLeaveShare, image: KDriveResourcesAsset.linkBroken.image)
 
     static var listActions: [FloatingPanelAction] {
-        return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, leaveShare, delete].map { $0.reset() }
     }
 
     static var folderListActions: [FloatingPanelAction] {
-        return [manageCategories, favorite, convertToDropbox, folderColor, manageDropbox, seeFolder, download, move, duplicate, rename, delete, leaveShare].map { $0.reset() }
+        return [manageCategories, favorite, folderColor, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, leaveShare, delete].map { $0.reset() }
     }
 
     static let informations = FloatingPanelAction(id: 15, name: KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, image: KDriveResourcesAsset.info.image)
@@ -85,7 +85,7 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionActions: [FloatingPanelAction] {
-        return [offline, favorite, manageCategories, folderColor, download, duplicate].map { $0.reset() }
+        return [manageCategories, favorite, folderColor, offline, download, duplicate].map { $0.reset() }
     }
 
     static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
