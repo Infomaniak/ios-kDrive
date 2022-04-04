@@ -632,6 +632,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             navigationController?.navigationBar.prefersLargeTitles = true
             navigationItem.title = viewModel.title
         }
+        collectionView.collectionViewLayout.invalidateLayout()
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
 
