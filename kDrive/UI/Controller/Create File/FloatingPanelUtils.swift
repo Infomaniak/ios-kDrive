@@ -55,7 +55,7 @@ class AdaptiveDriveFloatingPanelController: DriveFloatingPanelController {
 
     func updateLayout(size: CGSize) {
         guard let trackingScrollView = trackingScrollView else { return }
-        layout = PlusButtonFloatingPanelLayout(height: min(trackingScrollView.contentSize.height + view.safeAreaInsets.bottom, size.height - 48))
+        layout = PlusButtonFloatingPanelLayout(height: min(trackingScrollView.contentSize.height + surfaceView.contentPadding.top, size.height - 48))
         invalidateLayout()
     }
 
