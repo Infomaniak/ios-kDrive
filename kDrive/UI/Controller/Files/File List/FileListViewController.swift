@@ -166,6 +166,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
         collectionViewLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         collectionViewLayout?.sectionHeadersPinToVisibleBounds = true
+        collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
+        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+        collectionView.dropDelegate = self
+        collectionView.dragDelegate = self
 
         // Set up observers
         observeNetwork()
@@ -226,21 +230,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     private func setupViewModel() {
         bindViewModels()
         if viewModel.configuration.isRefreshControlEnabled {
-            refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
             collectionView.refreshControl = refreshControl
-        }
-        // Set up multiple selection gesture
-        if viewModel.multipleSelectionViewModel != nil {
-            let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-            collectionView.addGestureRecognizer(longPressGesture)
-        }
-
-        if viewModel.droppableFileListViewModel != nil {
-            collectionView.dropDelegate = self
-        }
-
-        if viewModel.draggableFileListViewModel != nil {
-            collectionView.dragDelegate = self
         }
 
         viewModel.startObservation()
@@ -872,7 +862,7 @@ extension FileListViewController: FileCellDelegate {
             let isDifferentDrive = newDriveFileManager.drive.objectId != driveFileManager.drive.objectId
             if isDifferentDrive {
                 viewModel = (type(of: viewModel) as FileListViewModel.Type).init(driveFileManager: newDriveFileManager)
-                bindViewModels()
+                setupViewModel()
                 tryLoadingFilesOrDisplayError()
                 navigationController?.popToRootViewController(animated: false)
             } else {
