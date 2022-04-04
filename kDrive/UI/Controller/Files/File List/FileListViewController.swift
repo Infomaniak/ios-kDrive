@@ -134,7 +134,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     // MARK: - Properties
 
     @IBOutlet weak var collectionView: UICollectionView!
-    var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
     var selectView: SelectView?
@@ -172,8 +171,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listPaddingBottom, right: 0)
         (collectionView as? SwipableCollectionView)?.swipeDataSource = self
         (collectionView as? SwipableCollectionView)?.swipeDelegate = self
-        collectionViewLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
-        collectionViewLayout?.sectionHeadersPinToVisibleBounds = true
+        collectionView.collectionViewLayout = createLayout()
         collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
         collectionView.dropDelegate = self
@@ -185,6 +183,44 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
         if viewModel != nil {
             setupViewModel()
+        }
+    }
+
+    private func getHeaderLayout() -> NSCollectionLayoutBoundarySupplementaryItem {
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(55))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        header.pinToVisibleBounds = true
+        return header
+    }
+
+    func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { [weak self] _, layoutEnvironment in
+            guard let self = self else { return nil }
+            var section: NSCollectionLayoutSection
+            switch self.viewModel.listStyle {
+            case .list:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(UIConstants.fileListCellHeight))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
+                section = NSCollectionLayoutSection(group: group)
+            case .grid:
+                let width = layoutEnvironment.container.effectiveContentSize.width
+                let maxColumns = Int(width / self.gridCellMaxWidth)
+                let columns = max(self.gridMinColumns, maxColumns)
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(131))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(131))
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
+                group.interItemSpacing = .fixed(self.gridInnerSpacing)
+                group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
+                section = NSCollectionLayoutSection(group: group)
+                section.interGroupSpacing = self.gridInnerSpacing
+            }
+            section.boundarySupplementaryItems = [self.getHeaderLayout()]
+            return section
         }
     }
 
@@ -783,56 +819,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func removeFilterButtonPressed(_ filter: Filterable) {
         // Overriden in subclasses
-    }
-}
-
-// MARK: - Collection view delegate flow layout
-
-extension FileListViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let effectiveContentWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView.safeAreaInsets.right - leftRightInset * 2
-        switch viewModel.listStyle {
-        case .list:
-            // Important: subtract safe area insets
-            return CGSize(width: effectiveContentWidth, height: UIConstants.fileListCellHeight)
-        case .grid:
-            // Adjust cell size based on screen size
-            let cellWidth = floor((effectiveContentWidth - gridInnerSpacing * CGFloat(gridColumns - 1)) / CGFloat(gridColumns))
-            return CGSize(width: cellWidth, height: floor(cellWidth * gridCellRatio))
-        }
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        switch viewModel.listStyle {
-        case .list:
-            return 0
-        case .grid:
-            return gridInnerSpacing
-        }
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        switch viewModel.listStyle {
-        case .list:
-            return 0
-        case .grid:
-            return gridInnerSpacing
-        }
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: leftRightInset, bottom: 0, right: leftRightInset)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        if headerView == nil {
-            headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: IndexPath(row: 0, section: section)) as? FilesHeaderView
-        }
-        return headerView!.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, targetIndexPathForMoveOfItemFromOriginalIndexPath originalIndexPath: IndexPath, atCurrentIndexPath currentIndexPath: IndexPath, toProposedIndexPath proposedIndexPath: IndexPath) -> IndexPath {
-        return originalIndexPath
     }
 }
 

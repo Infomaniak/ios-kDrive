@@ -310,7 +310,7 @@ class SearchViewController: FileListViewController {
             guard let self = self, self.isViewLoaded else { return }
             // Update UI
             self.collectionView.refreshControl = self.searchViewModel.isDisplayingSearchResults ? self.refreshControl : nil
-            self.collectionViewLayout?.sectionHeadersPinToVisibleBounds = self.searchViewModel.isDisplayingSearchResults
+            // self.collectionViewLayout?.sectionHeadersPinToVisibleBounds = self.searchViewModel.isDisplayingSearchResults
             self.collectionView.backgroundView = nil
             self.collectionView.collectionViewLayout.invalidateLayout()
             self.collectionView.reloadData()
@@ -385,7 +385,7 @@ class SearchViewController: FileListViewController {
 
     // MARK: - Collection view delegate flow layout
 
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    /* override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         if searchViewModel.isDisplayingSearchResults {
             return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
         } else {
@@ -396,7 +396,7 @@ class SearchViewController: FileListViewController {
                 return view.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
             }
         }
-    }
+    } */
 
     // MARK: - Files header view delegate
 

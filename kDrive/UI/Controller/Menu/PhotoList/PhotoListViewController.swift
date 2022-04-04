@@ -40,6 +40,7 @@ class PhotoListViewController: FileListViewController {
     }
 
     private let minColumns = 3
+    private let innerSpacing = 4.0
     private let cellMaxWidth = 150.0
     private let footerIdentifier = "LoadingFooterView"
     private let headerIdentifier = "PhotoSectionHeaderView"
@@ -64,6 +65,34 @@ class PhotoListViewController: FileListViewController {
         selectView = headerView
         selectView?.delegate = self
         bindPhotoListViewModel()
+    }
+
+    private func getHeaderLayout() -> NSCollectionLayoutBoundarySupplementaryItem {
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(50))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        header.pinToVisibleBounds = true
+        return header
+    }
+
+    override func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { [weak self] sectionIndex, layoutEnvironment in
+            guard let self = self else { return nil }
+            let width = layoutEnvironment.container.effectiveContentSize.width
+            let maxColumns = Int(width / self.cellMaxWidth)
+            let columns = max(self.minColumns, maxColumns)
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalWidth(1 / Double(columns)))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
+            group.interItemSpacing = .fixed(self.innerSpacing)
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = self.innerSpacing
+            if sectionIndex > 0 {
+                section.boundarySupplementaryItems = [self.getHeaderLayout()]
+            }
+            return section
+        }
     }
 
     private func bindPhotoListViewModel() {
@@ -226,21 +255,13 @@ class PhotoListViewController: FileListViewController {
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
-        if section == numberOfSections(in: collectionView) - 1 && viewModel.isLoading {
-            return CGSize(width: collectionView.frame.width, height: 80)
-        } else {
-            return .zero
-        }
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        if section == 0 {
-            return .zero
-        } else {
-            return CGSize(width: collectionView.frame.width, height: 50)
-        }
-    }
+    /* func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+         if section == numberOfSections(in: collectionView) - 1 && viewModel.isLoading {
+             return CGSize(width: collectionView.frame.width, height: 80)
+         } else {
+             return .zero
+         }
+     } */
 
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionFooter {
@@ -268,28 +289,5 @@ class PhotoListViewController: FileListViewController {
             }
             return photoSectionHeaderView
         }
-    }
-
-    // MARK: - UICollectionViewDelegateFlowLayout
-
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        guard let collectionViewLayout = collectionViewLayout as? UICollectionViewFlowLayout else {
-            return .zero
-        }
-        let width = collectionView.frame.width - collectionViewLayout.minimumInteritemSpacing * CGFloat(numberOfColumns - 1)
-        let cellWidth = floor(width / CGFloat(numberOfColumns))
-        return CGSize(width: cellWidth, height: cellWidth)
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 4
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 4
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return .zero
     }
 }
