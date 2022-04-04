@@ -393,6 +393,16 @@ class SearchViewController: FileListViewController {
         }
         collectionView.collectionViewLayout.invalidateLayout()
     }
+
+    // MARK: - UICollectionViewDragDelegate
+
+    override func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        if searchViewModel.isDisplayingSearchResults {
+            return super.collectionView(collectionView, itemsForBeginning: session, at: indexPath)
+        } else {
+            return []
+        }
+    }
 }
 
 // MARK: - Search results updating
