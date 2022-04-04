@@ -91,6 +91,10 @@ class PhotoListViewController: FileListViewController {
             if sectionIndex > 0 {
                 section.boundarySupplementaryItems = [self.getHeaderLayout()]
             }
+            section.visibleItemsInvalidationHandler = { [weak self] _, _, _ in
+                guard let self = self else { return }
+                self.scrollViewDidScroll(self.collectionView)
+            }
             return section
         }
     }
