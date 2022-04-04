@@ -118,7 +118,7 @@ class ConcreteFileListViewModel: FileListViewModel {
     }
 }
 
-class FileListViewController: UIViewController, UICollectionViewDataSource, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
+class FileListViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, SwipeActionCollectionViewDelegate, SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate {
     class var storyboard: UIStoryboard { Storyboard.files }
     class var storyboardIdentifier: String { "FileListViewController" }
 
