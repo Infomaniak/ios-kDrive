@@ -124,6 +124,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     // MARK: - Constants
 
+    private let gridMinColumns = 2
+    private let gridCellMaxWidth = 200.0
+    private let gridCellRatio = 3.0 / 4.0
     private let leftRightInset = 12.0
     private let gridInnerSpacing = 16.0
     private let headerViewIdentifier = "FilesHeaderView"
@@ -135,6 +138,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     var refreshControl = UIRefreshControl()
     private var headerView: FilesHeaderView?
     var selectView: SelectView?
+    private var gridColumns: Int {
+        let screenWidth = collectionView.bounds.width
+        let maxColumns = Int(screenWidth / gridCellMaxWidth)
+        return max(gridMinColumns, maxColumns)
+    }
 
     #if !ISEXTENSION
         lazy var filePresenter = FilePresenter(viewController: self)
@@ -791,16 +799,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
 extension FileListViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let effectiveContentWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView.safeAreaInsets.right - leftRightInset * 2
         switch viewModel.listStyle {
         case .list:
             // Important: subtract safe area insets
-            let cellWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView.safeAreaInsets.right - leftRightInset * 2
-            return CGSize(width: cellWidth, height: UIConstants.fileListCellHeight)
+            return CGSize(width: effectiveContentWidth, height: UIConstants.fileListCellHeight)
         case .grid:
             // Adjust cell size based on screen size
-            let totalWidth = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-            let cellWidth = floor((totalWidth - gridInnerSpacing) / 2 - leftRightInset)
-            return CGSize(width: min(cellWidth, 174), height: min(floor(cellWidth * 130 / 174), 130))
+            let cellWidth = floor((effectiveContentWidth - gridInnerSpacing * CGFloat(gridColumns - 1)) / CGFloat(gridColumns))
+            return CGSize(width: cellWidth, height: floor(cellWidth * gridCellRatio))
         }
     }
 

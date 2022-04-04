@@ -360,7 +360,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func createLayout() -> UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { [weak self] section, _ in
+        let layout = UICollectionViewCompositionalLayout { [weak self] section, layoutEnvironment in
             guard let self = self else { return nil }
             switch HomeSection.allCases[section] {
             case .top:
@@ -370,7 +370,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                     if recentFilesController.empty {
                         return recentFilesController.getEmptyLayout()
                     } else {
-                        return recentFilesController.getLayout(for: UserDefaults.shared.homeListStyle)
+                        return recentFilesController.getLayout(for: UserDefaults.shared.homeListStyle, layoutEnvironment: layoutEnvironment)
                     }
                 } else {
                     return nil

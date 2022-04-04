@@ -118,7 +118,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         return resultActivities
     }
 
-    override func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
+    override func getLayout(for style: ListStyle, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(200))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])

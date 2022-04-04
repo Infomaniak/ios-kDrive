@@ -34,9 +34,13 @@ class PhotoListViewController: FileListViewController {
     private var isLargeTitle = true
 
     private var numberOfColumns: Int {
-        return UIDevice.current.orientation.isLandscape ? 5 : 3
+        let screenWidth = collectionView.bounds.width
+        let maxColumns = Int(screenWidth / cellMaxWidth)
+        return max(minColumns, maxColumns)
     }
 
+    private let minColumns = 3
+    private let cellMaxWidth = 150.0
     private let footerIdentifier = "LoadingFooterView"
     private let headerIdentifier = "PhotoSectionHeaderView"
 
@@ -273,8 +277,8 @@ class PhotoListViewController: FileListViewController {
             return .zero
         }
         let width = collectionView.frame.width - collectionViewLayout.minimumInteritemSpacing * CGFloat(numberOfColumns - 1)
-        let cellWidth = width / CGFloat(numberOfColumns)
-        return CGSize(width: floor(cellWidth), height: floor(cellWidth))
+        let cellWidth = floor(width / CGFloat(numberOfColumns))
+        return CGSize(width: cellWidth, height: cellWidth)
     }
 
     override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
