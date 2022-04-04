@@ -33,6 +33,7 @@ public enum UIConstants {
     public static let homeListPaddingTop = 16.0
     public static let floatingPanelHeaderHeight = 70.0
     public static let fileListCellHeight = 60.0
+    public static let fileListGridCellEstimatedHeight = 131.0
     public static let largeTitleHeight = 96.0
     public static let insufficientStorageMinimumPercentage = 90.0
     public static let dropDelay = -1.0
