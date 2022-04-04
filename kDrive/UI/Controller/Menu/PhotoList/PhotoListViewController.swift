@@ -69,9 +69,18 @@ class PhotoListViewController: FileListViewController {
 
     private func getHeaderLayout() -> NSCollectionLayoutBoundarySupplementaryItem {
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(50))
-        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize,
+                                                                 elementKind: UICollectionView.elementKindSectionHeader,
+                                                                 alignment: .top)
         header.pinToVisibleBounds = true
         return header
+    }
+
+    private func getFooterLayout() -> NSCollectionLayoutBoundarySupplementaryItem {
+        let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(80))
+        return NSCollectionLayoutBoundarySupplementaryItem(layoutSize: footerSize,
+                                                           elementKind: UICollectionView.elementKindSectionFooter,
+                                                           alignment: .bottom)
     }
 
     override func createLayout() -> UICollectionViewLayout {
@@ -89,7 +98,10 @@ class PhotoListViewController: FileListViewController {
             let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = self.innerSpacing
             if sectionIndex > 0 {
-                section.boundarySupplementaryItems = [self.getHeaderLayout()]
+                section.boundarySupplementaryItems.append(self.getHeaderLayout())
+            }
+            if sectionIndex == self.numberOfSections(in: self.collectionView) - 1 && self.viewModel.isLoading {
+                section.boundarySupplementaryItems.append(self.getFooterLayout())
             }
             section.visibleItemsInvalidationHandler = { [weak self] _, _, _ in
                 guard let self = self else { return }
@@ -258,14 +270,6 @@ class PhotoListViewController: FileListViewController {
         cell.configureWith(file: viewModel.getFile(at: indexPath)!, roundedCorners: false, selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
         return cell
     }
-
-    /* func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
-         if section == numberOfSections(in: collectionView) - 1 && viewModel.isLoading {
-             return CGSize(width: collectionView.frame.width, height: 80)
-         } else {
-             return .zero
-         }
-     } */
 
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionFooter {
