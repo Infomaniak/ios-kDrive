@@ -126,7 +126,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
 
     private let gridMinColumns = 2
     private let gridCellMaxWidth = 200.0
-    private let gridCellRatio = 3.0 / 4.0
     private let leftRightInset = 12.0
     private let gridInnerSpacing = 16.0
     private let headerViewIdentifier = "FilesHeaderView"
@@ -203,7 +202,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
             case .list:
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(UIConstants.fileListCellHeight))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
                 group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
                 section = NSCollectionLayoutSection(group: group)
@@ -211,10 +209,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
                 let width = layoutEnvironment.container.effectiveContentSize.width
                 let maxColumns = Int(width / self.gridCellMaxWidth)
                 let columns = max(self.gridMinColumns, maxColumns)
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(131))
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(131))
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
                 group.interItemSpacing = .fixed(self.gridInnerSpacing)
                 group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
