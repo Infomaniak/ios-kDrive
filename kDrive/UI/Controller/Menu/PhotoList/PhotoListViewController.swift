@@ -48,8 +48,8 @@ class PhotoListViewController: FileListViewController {
         return isLargeTitle ? .default : .lightContent
     }
 
-    private var photoListViewModel: PhotoListViewModel {
-        return viewModel as! PhotoListViewModel
+    private var photoListViewModel: PhotoListViewModel! {
+        return viewModel as? PhotoListViewModel
     }
 
     override func viewDidLoad() {
@@ -67,7 +67,7 @@ class PhotoListViewController: FileListViewController {
     }
 
     private func bindPhotoListViewModel() {
-        photoListViewModel.onReloadWithChangeset = { [weak self] changeset, completion in
+        photoListViewModel?.onReloadWithChangeset = { [weak self] changeset, completion in
             self?.collectionView.reload(using: changeset, interrupt: { $0.changeCount > Endpoint.itemsPerPage }, setData: completion)
             self?.showEmptyView(.noImages)
         }
@@ -173,7 +173,7 @@ class PhotoListViewController: FileListViewController {
     // MARK: - Scroll view delegate
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let viewModel = photoListViewModel
+        guard let viewModel = photoListViewModel else { return }
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
         headerView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
