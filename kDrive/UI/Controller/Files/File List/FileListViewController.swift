@@ -677,6 +677,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
            viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) != true {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         }
+        (cell as? FileCollectionViewCell)?.setSelectionMode(viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
     }
 
     // MARK: - Collection view delegate
