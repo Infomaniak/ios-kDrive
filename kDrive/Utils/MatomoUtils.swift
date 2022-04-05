@@ -70,7 +70,7 @@ class MatomoUtils {
 
     static func trackBulkEvent(eventWithCategory category: EventCategory, name: String, numberOfItems number: Int) {
         track(eventWithCategory: category, action: .click,
-              name: "bulk\(number == 1 ? "Single" : "")\(name.capitalized)", value: Float(number))
+              name: "bulk\(number == 1 ? "Single" : "")\(name)", value: Float(number))
     }
 
     // MARK: - DropBox
@@ -178,17 +178,17 @@ class MatomoUtils {
         switch action {
         // Quick Actions
         case .duplicate:
-            trackBulkEvent(eventWithCategory: category, name: "copy", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "Copy", numberOfItems: numberOfFiles)
         case .download:
-            trackBulkEvent(eventWithCategory: category, name: "download", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "Download", numberOfItems: numberOfFiles)
         case .favorite:
-            trackBulkEvent(eventWithCategory: category, name: "add_favorite", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "Add_favorite", numberOfItems: numberOfFiles)
         case .offline:
-            trackBulkEvent(eventWithCategory: category, name: "set_offline", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "Set_offline", numberOfItems: numberOfFiles)
         case .delete:
-            trackBulkEvent(eventWithCategory: category, name: "trash", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "Trash", numberOfItems: numberOfFiles)
         case .folderColor:
-            trackBulkEvent(eventWithCategory: category, name: "color_folder", numberOfItems: numberOfFiles)
+            trackBulkEvent(eventWithCategory: category, name: "Color_folder", numberOfItems: numberOfFiles)
         default:
             break
         }
