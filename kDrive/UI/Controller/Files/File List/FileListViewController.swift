@@ -733,10 +733,10 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         #if ISEXTENSION
             maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
         #else
-            if !(viewModel is SharedWithMeViewModel) {
-                maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
-            } else {
+            if viewModelName == String(describing: SharedWithMeViewModel.self) {
                 maybeDriveFileManager = AccountManager.instance.getDriveFileManager(for: driveId, userId: AccountManager.instance.currentUserId)
+            } else {
+                maybeDriveFileManager = (tabBarController as? MainTabViewController)?.driveFileManager
             }
         #endif
         guard let driveFileManager = maybeDriveFileManager else {
