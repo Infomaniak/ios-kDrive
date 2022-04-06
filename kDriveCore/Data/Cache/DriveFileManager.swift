@@ -461,6 +461,7 @@ public class DriveFileManager {
         let realm = getRealm()
         let searchRoot = getManagedFile(from: DriveFileManager.searchFilesRootFile, using: realm)
         try? realm.write {
+            searchRoot.fullyDownloaded = false
             searchRoot.children.removeAll()
         }
     }
