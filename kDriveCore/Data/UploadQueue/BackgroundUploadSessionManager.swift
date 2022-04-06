@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import Sentry
 
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
@@ -180,6 +181,23 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         progressObservers[taskIdentifier] = nil
         tasksData[taskIdentifier] = nil
         tasksCompletionHandler[taskIdentifier] = nil
+    }
+
+    public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
+        DDLogError("[BackgroundUploadSession] Session didBecomeInvalidWithError \(session.identifier) \(error?.localizedDescription ?? "")")
+        if let error = error {
+            SentrySDK.capture(error: error) { scope in
+                scope.setContext(value: [
+                    "Session Id": session.identifier
+                ], key: "Session")
+            }
+        } else {
+            SentrySDK.capture(message: "URLSession didBecomeInvalid - No Error") { scope in
+                scope.setContext(value: [
+                    "Session Id": session.identifier
+                ], key: "Session")
+            }
+        }
     }
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
