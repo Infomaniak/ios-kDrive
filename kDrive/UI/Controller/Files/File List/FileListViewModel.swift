@@ -190,7 +190,7 @@ class FileListViewModel: SelectDelegate {
     func updateRealmObservation() {
         realmObservationToken?.invalidate()
         realmObservationToken = files
-            .observe(on: .main) { [weak self] change in
+            .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
                 guard let self = self else { return }
                 switch change {
                 case .initial(let results):
