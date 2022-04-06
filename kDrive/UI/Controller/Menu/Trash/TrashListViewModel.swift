@@ -265,7 +265,7 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
             let alert = TrashViewModelHelper.deleteAlertForFiles(selectedItems.map { $0.proxify() },
                                                                  firstFilename: firstSelectedItem.name,
                                                                  driveFileManager: driveFileManager) { [weak self] deletedFiles in
-                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "deleteFromTrash", numberOfItems: selectedItemCount)
+                MatomoUtils.trackBulkEvent(eventWithCategory: .trash, name: "DeleteFromTrash", numberOfItems: selectedItemCount)
                 self?.removeFromRealm(realmConfiguration, deletedFiles: deletedFiles)
             }
             onPresentViewController?(.modal, alert, true)

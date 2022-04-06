@@ -308,9 +308,11 @@ class FileListViewModel: SelectDelegate {
         if let file = getFile(at: indexPath) {
             switch action {
             case .share:
+                MatomoUtils.track(eventWithCategory: .fileListFileAction, name: "swipeShareAndRights")
                 let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, file: file)
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
+                MatomoUtils.track(eventWithCategory: .fileListFileAction, name: "swipePutInTrash")
                 // Keep the filename before it is invalidated
                 Task { [proxyFile = file.proxify(), proxyParent = currentDirectory.proxify(), filename = file.name] in
                     do {
