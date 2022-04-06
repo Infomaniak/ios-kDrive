@@ -457,6 +457,14 @@ public class DriveFileManager {
         return offlineFiles.map { $0.freeze() }
     }
 
+    public func removeSearchChildren() {
+        let realm = getRealm()
+        let searchRoot = getManagedFile(from: DriveFileManager.searchFilesRootFile, using: realm)
+        try? realm.write {
+            searchRoot.children.removeAll()
+        }
+    }
+
     public func searchFile(query: String? = nil,
                            date: DateInterval? = nil,
                            fileType: ConvertedType? = nil,

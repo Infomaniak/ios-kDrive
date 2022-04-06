@@ -193,6 +193,9 @@ class SearchFilesViewModel: FileListViewModel {
         onFiltersChanged?()
         currentTask?.cancel()
         listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
+        if currentSearchText?.isEmpty != false {
+            driveFileManager.removeSearchChildren()
+        }
         if isDisplayingSearchResults {
             currentTask = Task { [currentSearchText] in
                 try? await loadFiles(page: 1, forceRefresh: true)
@@ -317,6 +320,13 @@ class SearchViewController: FileListViewController {
             guard let searchTerm = searchTerm else { return }
             self?.recentSearchesViewModel.add(searchTerm: searchTerm)
         }
+    }
+
+    override func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
+        guard searchViewModel.isDisplayingSearchResults else {
+            return
+        }
+        super.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
     }
 
     // MARK: - Collection view data source
