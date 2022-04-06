@@ -266,6 +266,14 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         configure(with: FileViewModel(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode))
     }
 
+    /// Update the cell selection mode.
+    /// - Parameter selectionMode: The new selection mode (enabled/disabled).
+    func setSelectionMode(_ selectionMode: Bool) {
+        guard viewModel != nil else { return }
+        viewModel.selectionMode = selectionMode
+        configure(with: viewModel)
+    }
+
     private func configureForSelection() {
         guard viewModel?.selectionMode == true else { return }
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
