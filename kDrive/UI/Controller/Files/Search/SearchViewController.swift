@@ -329,6 +329,13 @@ class SearchViewController: FileListViewController {
         super.updateFileList(deletions: deletions, insertions: insertions, modifications: modifications, moved: moved)
     }
 
+    override func showEmptyView(_ isHidden: Bool) {
+        guard searchViewModel.isDisplayingSearchResults else {
+            return
+        }
+        super.showEmptyView(isHidden)
+    }
+
     // MARK: - Collection view data source
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
