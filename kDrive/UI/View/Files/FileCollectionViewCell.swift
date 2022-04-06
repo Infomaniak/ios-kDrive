@@ -70,7 +70,7 @@ protocol FileCellDelegate: AnyObject {
         file.isAvailableOffline && FileManager.default.fileExists(atPath: file.localUrl.path)
     }
 
-    var isImporting: Bool { file.externalImport?.status == .inProgress }
+    var isImporting: Bool { file.isImporting }
 
     init(driveFileManager: DriveFileManager, file: File, selectionMode: Bool) {
         self.file = file

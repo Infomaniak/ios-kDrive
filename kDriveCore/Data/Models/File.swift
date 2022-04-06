@@ -555,6 +555,11 @@ public class File: Object, Codable {
         return fullyDownloaded && versionCode == DriveFileManager.constants.currentVersionCode
     }
 
+    /// Is this File currently importing
+    public var isImporting: Bool {
+        return externalImport?.status == .inProgress
+    }
+
     public func applyLastModifiedDateToLocalFile() {
         try? FileManager.default.setAttributes([.modificationDate: lastModifiedAt], ofItemAtPath: localUrl.path)
     }

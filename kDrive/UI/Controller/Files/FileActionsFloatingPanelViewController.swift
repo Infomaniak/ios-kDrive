@@ -281,13 +281,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .duplicate:
                 return !sharedWithMe && file.capabilities.canRead && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
             case .rename:
-                return file.capabilities.canRename && !sharedWithMe
+                return file.capabilities.canRename && !sharedWithMe && !file.isImporting
             case .delete:
-                return file.capabilities.canDelete
+                return file.capabilities.canDelete && !file.isImporting
             case .leaveShare:
                 return file.capabilities.canLeave
             case .cancelImport:
-                return file.externalImport?.status == .inProgress
+                return file.isImporting
             default:
                 return true
             }
