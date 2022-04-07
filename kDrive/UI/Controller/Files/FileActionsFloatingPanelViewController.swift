@@ -565,6 +565,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             Task {
                 do {
                     _ = try await driveFileManager.apiFetcher.cancelImport(drive: driveFileManager.drive, id: importId)
+                    // Dismiss panel
+                    self.dismiss(animated: true)
                 } catch {
                     UIConstants.showSnackBar(message: error.localizedDescription)
                 }

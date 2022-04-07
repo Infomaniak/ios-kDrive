@@ -1168,6 +1168,27 @@ public class DriveFileManager {
         return response
     }
 
+    func updateExternalImport(id: Int, action: ExternalImportAction) {
+        let realm = getRealm()
+        guard let file = realm.objects(File.self).where({ $0.externalImport.id == id }).first else {
+            // No file corresponding to external import, ignore it
+            return
+        }
+
+        switch action {
+        case .importFinish:
+            try? realm.write {
+                file.externalImport?.status = .done
+            }
+        case .cancel:
+            try? realm.write {
+                file.externalImport?.status = .failed
+            }
+        default:
+            break
+        }
+    }
+
     // MARK: - Utilities
 
     public func getLocalSortedDirectoryFiles(directory: File, sortType: SortType) -> [File] {
