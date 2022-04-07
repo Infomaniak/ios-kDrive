@@ -195,30 +195,43 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
     }
 
     func createLayout() -> UICollectionViewLayout {
-        return UICollectionViewCompositionalLayout { [weak self] _, layoutEnvironment in
+        return UICollectionViewCompositionalLayout { [weak self] sectionIndex, layoutEnvironment in
             guard let self = self else { return nil }
             var section: NSCollectionLayoutSection
-            switch self.viewModel.listStyle {
-            case .list:
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(UIConstants.fileListCellHeight))
+            if sectionIndex == 0 {
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                      heightDimension: .absolute(92))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: self.leftRightInset, bottom: 8, trailing: self.leftRightInset)
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-                group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
                 section = NSCollectionLayoutSection(group: group)
-            case .grid:
-                let width = layoutEnvironment.container.effectiveContentSize.width
-                let maxColumns = Int(width / self.gridCellMaxWidth)
-                let columns = max(self.gridMinColumns, maxColumns)
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
-                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
-                group.interItemSpacing = .fixed(self.gridInnerSpacing)
-                group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
-                section = NSCollectionLayoutSection(group: group)
-                section.interGroupSpacing = self.gridInnerSpacing
+            } else {
+                let insets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
+                switch self.viewModel.listStyle {
+                case .list:
+                    let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                          heightDimension: .absolute(UIConstants.fileListCellHeight))
+                    let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                    let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+                    group.contentInsets = insets
+                    section = NSCollectionLayoutSection(group: group)
+                case .grid:
+                    let width = layoutEnvironment.container.effectiveContentSize.width
+                    let maxColumns = Int(width / self.gridCellMaxWidth)
+                    let columns = max(self.gridMinColumns, maxColumns)
+                    let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                          heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
+                    let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                    let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                           heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
+                    let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
+                    group.interItemSpacing = .fixed(self.gridInnerSpacing)
+                    group.contentInsets = insets
+                    section = NSCollectionLayoutSection(group: group)
+                    section.interGroupSpacing = self.gridInnerSpacing
+                }
+                section.boundarySupplementaryItems = [self.getHeaderLayout()]
             }
-            section.boundarySupplementaryItems = [self.getHeaderLayout()]
             return section
         }
     }
@@ -363,7 +376,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
 
         viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
             for i in 0 ..< (self?.viewModel.files.count ?? 0) {
-                self?.collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: true, scrollPosition: [])
+                self?.collectionView.selectItem(at: IndexPath(row: i, section: 1), animated: true, scrollPosition: [])
             }
         }
 
@@ -392,11 +405,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
         collectionView.performBatchUpdates {
             // Always apply updates in the following order: deletions, insertions, then modifications.
             // Handling insertions before deletions may result in unexpected behavior.
-            collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 0) })
-            collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 0) })
-            collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 0) })
+            collectionView.deleteItems(at: deletions.map { IndexPath(item: $0, section: 1) })
+            collectionView.insertItems(at: insertions.map { IndexPath(item: $0, section: 1) })
+            collectionView.reloadItems(at: modifications.map { IndexPath(item: $0, section: 1) })
             for (source, target) in moved {
-                collectionView.moveItem(at: IndexPath(item: source, section: 0), to: IndexPath(item: target, section: 0))
+                collectionView.moveItem(at: IndexPath(item: source, section: 1), to: IndexPath(item: target, section: 1))
             }
         }
         // Reload corners (outside of batch to prevent incompatible operations)
@@ -431,18 +444,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
     }
 
     private func updateUploadCard(uploadCount: Int) {
-        let shouldHideUploadCard: Bool
-        if uploadCount > 0 {
-            headerView?.uploadCardView.setUploadCount(uploadCount)
-            shouldHideUploadCard = false
-        } else {
-            shouldHideUploadCard = true
-        }
-        // Only perform reload if needed
-        if shouldHideUploadCard != headerView?.uploadCardView.isHidden {
-            headerView?.uploadCardView.isHidden = shouldHideUploadCard
-            collectionView.performBatchUpdates(nil)
-        }
+        collectionView.reloadSections([0])
     }
 
     private func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
@@ -574,13 +576,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
             headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
             headerView.listOrGridButton.layoutIfNeeded()
         }
-
-        if let uploadViewModel = viewModel.uploadViewModel {
-            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
-            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
-            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
-            headerView.uploadCardView.progressView.enableIndeterminate()
-        }
     }
 
     private func observeNetwork() {
@@ -615,16 +610,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
     func reloadCorners(insertions: [Int], deletions: [Int], count: Int) {
         var modifications = Set<IndexPath>()
         if insertions.contains(0) {
-            modifications.insert(IndexPath(row: 1, section: 0))
+            modifications.insert(IndexPath(row: 1, section: 1))
         }
         if deletions.contains(0) {
-            modifications.insert(IndexPath(row: 0, section: 0))
+            modifications.insert(IndexPath(row: 0, section: 1))
         }
         if insertions.contains(count - 1) {
-            modifications.insert(IndexPath(row: count - 2, section: 0))
+            modifications.insert(IndexPath(row: count - 2, section: 1))
         }
         if deletions.contains(count) {
-            modifications.insert(IndexPath(row: count - 1, section: 0))
+            modifications.insert(IndexPath(row: count - 1, section: 1))
         }
         collectionView.reloadItems(at: Array(modifications))
     }
@@ -655,12 +650,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
         guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
         if multipleSelectionViewModel.isSelectAllModeEnabled {
             for i in 0 ..< viewModel.files.count {
-                collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: [])
+                collectionView.selectItem(at: IndexPath(row: i, section: 1), animated: false, scrollPosition: [])
             }
         } else {
             if multipleSelectionViewModel.isMultipleSelectionEnabled && !multipleSelectionViewModel.selectedItems.isEmpty {
-                for i in 0 ..< viewModel.files.count where multipleSelectionViewModel.selectedItems.contains(viewModel.getFile(at: IndexPath(item: i, section: 0))!) {
-                    collectionView.selectItem(at: IndexPath(item: i, section: 0), animated: false, scrollPosition: .centeredVertically)
+                for i in 0 ..< viewModel.files.count where multipleSelectionViewModel.selectedItems.contains(viewModel.getFile(at: IndexPath(item: i, section: 1))!) {
+                    collectionView.selectItem(at: IndexPath(item: i, section: 1), animated: false, scrollPosition: .centeredVertically)
                 }
             }
         }
@@ -668,8 +663,22 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
 
     // MARK: - Collection view data source
 
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.files.count
+        switch section {
+        case 0:
+            if let uploadViewModel = viewModel.uploadViewModel, uploadViewModel.uploadCount > 0 {
+                return 1
+            }
+            return 0
+        case 1:
+            return viewModel.files.count
+        default:
+            return 0
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -682,32 +691,40 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cellType: UICollectionViewCell.Type
-        switch viewModel.listStyle {
-        case .list:
-            cellType = FileCollectionViewCell.self
-        case .grid:
-            cellType = FileGridCollectionViewCell.self
-        }
-        let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
-
-        let file = viewModel.getFile(at: indexPath)!
-        cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.files.count - 1)
-        cell.configureWith(driveFileManager: viewModel.driveFileManager, file: file, selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
-        cell.delegate = self
-        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
-            cell.setEnabled(false)
+        if indexPath.section == 0 {
+            let cell = collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
+            cell.initStyle(isFirst: true, isLast: true)
+            cell.configure(with: viewModel.uploadViewModel!)
+            return cell
         } else {
-            cell.setEnabled(true)
-        }
-        if viewModel.configuration.fromActivities {
-            cell.moreButton.isHidden = true
-        }
+            let cellType: UICollectionViewCell.Type
+            switch viewModel.listStyle {
+            case .list:
+                cellType = FileCollectionViewCell.self
+            case .grid:
+                cellType = FileGridCollectionViewCell.self
+            }
+            let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
 
-        return cell
+            let file = viewModel.getFile(at: indexPath)!
+            cell.initStyle(isFirst: indexPath.item == 0, isLast: indexPath.item == viewModel.files.count - 1)
+            cell.configureWith(driveFileManager: viewModel.driveFileManager, file: file, selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
+            cell.delegate = self
+            if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
+                cell.setEnabled(false)
+            } else {
+                cell.setEnabled(true)
+            }
+            if viewModel.configuration.fromActivities {
+                cell.moreButton.isHidden = true
+            }
+
+            return cell
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard indexPath.section > 0 else { return }
         if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true,
            let file = viewModel.getFile(at: indexPath),
            viewModel.multipleSelectionViewModel?.exceptItemIds.contains(file.id) != true {
@@ -719,10 +736,18 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
     // MARK: - Collection view delegate
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
-            viewModel.multipleSelectionViewModel?.didSelectFile(viewModel.getFile(at: indexPath)!, at: indexPath)
+        if indexPath.section == 0 {
+            #if !ISEXTENSION
+                let uploadViewController = UploadQueueViewController.instantiate()
+                uploadViewController.currentDirectory = viewModel.currentDirectory
+                navigationController?.pushViewController(uploadViewController, animated: true)
+            #endif
         } else {
-            viewModel.didSelectFile(at: indexPath)
+            if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+                viewModel.multipleSelectionViewModel?.didSelectFile(viewModel.getFile(at: indexPath)!, at: indexPath)
+            } else {
+                viewModel.didSelectFile(at: indexPath)
+            }
         }
     }
 
@@ -804,14 +829,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
     func gridButtonPressed() {
         viewModel.listStyleButtonPressed()
     }
-
-    #if !ISEXTENSION
-        func uploadCardSelected() {
-            let uploadViewController = UploadQueueViewController.instantiate()
-            uploadViewController.currentDirectory = viewModel.currentDirectory
-            navigationController?.pushViewController(uploadViewController, animated: true)
-        }
-    #endif
 
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton) {
         viewModel.multipleSelectionViewModel?.actionButtonPressed(action: button.action)

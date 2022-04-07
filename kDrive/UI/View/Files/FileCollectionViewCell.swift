@@ -126,7 +126,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var accessoryImage: UIImageView?
     @IBOutlet weak var moreButton: UIButton!
     @IBOutlet weak var favoriteImageView: UIImageView?
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var collectionView: UICollectionView?
     @IBOutlet weak var availableOfflineImageView: UIImageView!
     @IBOutlet weak var centerTitleConstraint: NSLayoutConstraint!
     @IBOutlet weak var innerViewTrailingConstraint: NSLayoutConstraint!
@@ -134,6 +134,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var swipeActionsView: UIStackView?
     @IBOutlet weak var stackViewTrailingConstraint: NSLayoutConstraint?
     @IBOutlet weak var detailsStackView: UIStackView?
+    @IBOutlet weak var importProgressView: RPCircularProgress!
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
@@ -176,6 +177,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        importProgressView.setInfomaniakStyle()
+        importProgressView.isHidden = true
+        logoImage.isHidden = false
         favoriteImageView?.isAccessibilityElement = true
         favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         availableOfflineImageView?.isAccessibilityElement = true
@@ -194,6 +198,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         centerTitleConstraint?.isActive = false
         resetSwipeActions()
         detailLabel?.text = ""
+        importProgressView.isHidden = true
+        logoImage.isHidden = false
         logoImage.image = nil
         logoImage.backgroundColor = nil
         logoImage.contentMode = .scaleAspectFit
@@ -266,6 +272,18 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         configure(with: FileViewModel(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode))
     }
 
+    func configure(with uploadViewModel: UploadCardViewModel) {
+        viewModel = nil
+        logoImage.isHidden = true
+        importProgressView.isHidden = false
+        importProgressView.enableIndeterminate()
+        titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
+        detailLabel?.text = KDriveResourcesStrings.Localizable.uploadInProgressNumberFile(uploadViewModel.uploadCount)
+        favoriteImageView?.isHidden = true
+        collectionView?.isHidden = true
+        moreButton.isHidden = true
+    }
+
     /// Update the cell selection mode.
     /// - Parameter selectionMode: The new selection mode (enabled/disabled).
     func setSelectionMode(_ selectionMode: Bool) {
@@ -302,7 +320,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
 extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return min(viewModel.categories.count, 3)
+        return min(viewModel?.categories.count ?? 0, 3)
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

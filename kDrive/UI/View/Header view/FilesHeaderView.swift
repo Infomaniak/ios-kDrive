@@ -24,20 +24,14 @@ import UIKit
 protocol FilesHeaderViewDelegate: AnyObject {
     func sortButtonPressed()
     func gridButtonPressed()
-    func uploadCardSelected()
     func removeFilterButtonPressed(_ filter: Filterable)
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton)
-}
-
-extension FilesHeaderViewDelegate {
-    func uploadCardSelected() {}
 }
 
 class FilesHeaderView: UICollectionReusableView {
     @IBOutlet weak var sortView: UIView!
     @IBOutlet weak var sortButton: UIButton!
     @IBOutlet weak var listOrGridButton: UIButton!
-    @IBOutlet weak var uploadCardView: UploadCardView!
     @IBOutlet weak var selectView: SelectView!
     @IBOutlet weak var filterView: FilterView!
     @IBOutlet weak var offlineView: UIView!
@@ -64,15 +58,6 @@ class FilesHeaderView: UICollectionReusableView {
         if ReachabilityListener.instance.currentStatus == .offline {
             offlineView.isHidden = false
         }
-        uploadCardView.iconView.isHidden = true
-        uploadCardView.progressView.setInfomaniakStyle()
-        uploadCardView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10)
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
-        uploadCardView.addGestureRecognizer(tapGestureRecognizer)
-    }
-
-    @objc private func didTapOnCard() {
-        delegate?.uploadCardSelected()
     }
 
     @IBAction func filterButtonPressed(_ sender: UIButton) {

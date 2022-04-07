@@ -257,7 +257,7 @@ class PhotoListViewController: FileListViewController {
 
     // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return photoListViewModel.sections.count
     }
 
