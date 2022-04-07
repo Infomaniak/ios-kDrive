@@ -93,10 +93,11 @@ public struct DriveError: Error, Equatable {
     public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
     public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
     public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
+    public static let stillUploadingError = DriveError(type: .serverError, code: "still_uploading_error", localizedString: KDriveResourcesStrings.Localizable.errorStillUploading)
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
-    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists]
+    private static let allErrors: [DriveError] = [fileNotFound, photoAssetNoLongerExists, refreshToken, unknownToken, localError, serverError, networkError, taskCancelled, taskExpirationCancelled, taskRescheduled, quotaExceeded, shareLinkAlreadyExists, objectNotFound, cannotCreateFileHere, destinationAlreadyExists, forbidden, noDrive, conflict, maintenance, lock, donwloadPermission, categoryAlreadyExists, stillUploadingError]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
