@@ -6,7 +6,6 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -127,83 +126,6 @@
                                 <outlet property="collectionView" destination="t6S-yz-hdt" id="WFa-Vt-Vqo"/>
                             </connections>
                         </view>
-                        <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bvI-A7-USF" customClass="UploadCardView" customModule="kDrive" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="0.0" width="272" height="68"/>
-                            <subviews>
-                                <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="DyE-08-LRW">
-                                    <rect key="frame" x="16" y="13" width="220" height="42"/>
-                                    <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xiY-Ct-w9c" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
-                                            <rect key="frame" x="0.0" y="9" width="24" height="24"/>
-                                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="24" id="07h-7G-RJk"/>
-                                                <constraint firstAttribute="height" constant="24" id="7RS-pR-Cfr"/>
-                                            </constraints>
-                                        </view>
-                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XQm-FH-k7g">
-                                            <rect key="frame" x="32" y="2" width="38" height="38"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="38" id="wa9-hZ-S9j"/>
-                                                <constraint firstAttribute="width" constant="38" id="yGL-IJ-iOw"/>
-                                            </constraints>
-                                        </imageView>
-                                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="BcR-qh-Ym5">
-                                            <rect key="frame" x="78" y="0.0" width="142" height="42"/>
-                                            <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YIY-ah-68A" customClass="IKLabel" customModule="InfomaniakCore">
-                                                    <rect key="frame" x="0.0" y="0.0" width="142" height="18"/>
-                                                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
-                                                    <color key="textColor" name="titleColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                    <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
-                                                    </userDefinedRuntimeAttributes>
-                                                </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uYH-Mq-qZt" customClass="IKLabel" customModule="InfomaniakCore">
-                                                    <rect key="frame" x="0.0" y="26" width="142" height="16"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                    <color key="textColor" name="secondaryTextColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                    <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
-                                                    </userDefinedRuntimeAttributes>
-                                                </label>
-                                            </subviews>
-                                        </stackView>
-                                    </subviews>
-                                </stackView>
-                                <stackView opaque="NO" contentMode="scaleToFill" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="sqn-AP-75R">
-                                    <rect key="frame" x="244" y="28" width="12" height="12"/>
-                                    <subviews>
-                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="1Hf-fp-SIT">
-                                            <rect key="frame" x="0.0" y="0.0" width="12" height="12"/>
-                                            <color key="tintColor" name="secondaryTextColor"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="12" id="13r-lM-bCo"/>
-                                                <constraint firstAttribute="width" constant="12" id="xW5-Hw-Y7G"/>
-                                            </constraints>
-                                        </imageView>
-                                    </subviews>
-                                    <color key="tintColor" name="fileDescColor"/>
-                                </stackView>
-                            </subviews>
-                            <color key="backgroundColor" name="backgroundCardViewColor"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="68" id="1r9-8s-ZPa"/>
-                                <constraint firstItem="sqn-AP-75R" firstAttribute="leading" secondItem="DyE-08-LRW" secondAttribute="trailing" constant="8" id="3lz-CW-BKx"/>
-                                <constraint firstItem="DyE-08-LRW" firstAttribute="leading" secondItem="bvI-A7-USF" secondAttribute="leading" constant="16" id="Hcf-zp-3Pi"/>
-                                <constraint firstAttribute="trailing" secondItem="sqn-AP-75R" secondAttribute="trailing" constant="16" id="SNh-ob-wBm"/>
-                                <constraint firstItem="sqn-AP-75R" firstAttribute="centerY" secondItem="bvI-A7-USF" secondAttribute="centerY" id="emH-Bu-S4K"/>
-                                <constraint firstItem="DyE-08-LRW" firstAttribute="centerY" secondItem="bvI-A7-USF" secondAttribute="centerY" id="kHj-ZW-iMz"/>
-                            </constraints>
-                            <connections>
-                                <outlet property="detailsLabel" destination="uYH-Mq-qZt" id="DKZ-05-f2R"/>
-                                <outlet property="iconView" destination="XQm-FH-k7g" id="UMh-rl-0oR"/>
-                                <outlet property="progressView" destination="xiY-Ct-w9c" id="IQP-4Q-KBk"/>
-                                <outlet property="titleLabel" destination="YIY-ah-68A" id="8Se-1v-hXK"/>
-                            </connections>
-                        </view>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZS5-h5-V8H" userLabel="ActivityList View">
                             <rect key="frame" x="0.0" y="0.0" width="272" height="24"/>
                             <subviews>
@@ -302,7 +224,6 @@
                 <outlet property="selectView" destination="e6M-e1-pOF" id="BO0-S2-nem"/>
                 <outlet property="sortButton" destination="bAx-uw-yHB" id="EtT-hC-zAS"/>
                 <outlet property="sortView" destination="M4N-HE-jPw" id="4AD-gs-ort"/>
-                <outlet property="uploadCardView" destination="bvI-A7-USF" id="PGL-OM-pgZ"/>
             </connections>
             <point key="canvasLocation" x="-317.39130434782612" y="240.06696428571428"/>
         </collectionReusableView>
@@ -317,31 +238,18 @@
         <designable name="Ug6-Jg-W6r">
             <size key="intrinsicContentSize" width="167.5" height="26.5"/>
         </designable>
-        <designable name="YIY-ah-68A">
-            <size key="intrinsicContentSize" width="38.5" height="18"/>
-        </designable>
         <designable name="bAx-uw-yHB">
             <size key="intrinsicContentSize" width="57" height="24"/>
-        </designable>
-        <designable name="uYH-Mq-qZt">
-            <size key="intrinsicContentSize" width="33" height="16"/>
         </designable>
     </designables>
     <resources>
         <image name="chevron-down" width="24" height="24"/>
-        <image name="chevron-right" width="24" height="24"/>
         <image name="list" width="24" height="24"/>
         <image name="menu" width="24" height="24"/>
         <image name="offline" width="24" height="24"/>
         <image name="placeholder_avatar" width="512" height="512"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <namedColor name="backgroundColor">
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="fileDescColor">
-            <color red="0.57647058823529407" green="0.5725490196078431" blue="0.5725490196078431" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="iconColor">
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -349,14 +257,5 @@
         <namedColor name="primaryTextColor">
             <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
     </resources>
 </document>

@@ -19,24 +19,24 @@
 import UIKit
 
 protocol RoundedCornersList {
-    func reloadCorners(insertions: [Int], deletions: [Int], count: Int)
+    func reloadCorners(insertions: [Int], deletions: [Int], count: Int, section: Int)
     func reloadList(with modifications: [IndexPath])
 }
 
 extension RoundedCornersList {
-    func reloadCorners(insertions: [Int], deletions: [Int], count: Int) {
+    func reloadCorners(insertions: [Int], deletions: [Int], count: Int, section: Int = 0) {
         var modifications = Set<IndexPath>()
         if insertions.contains(0) {
-            modifications.insert(IndexPath(row: 1, section: 0))
+            modifications.insert(IndexPath(row: 1, section: section))
         }
         if deletions.contains(0) {
-            modifications.insert(IndexPath(row: 0, section: 0))
+            modifications.insert(IndexPath(row: 0, section: section))
         }
         if insertions.contains(count - 1) {
-            modifications.insert(IndexPath(row: count - 2, section: 0))
+            modifications.insert(IndexPath(row: count - 2, section: section))
         }
         if deletions.contains(count) {
-            modifications.insert(IndexPath(row: count - 1, section: 0))
+            modifications.insert(IndexPath(row: count - 1, section: section))
         }
         reloadList(with: Array(modifications))
     }
