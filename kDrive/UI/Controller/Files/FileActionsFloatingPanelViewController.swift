@@ -62,7 +62,7 @@ public class FloatingPanelAction: Equatable {
     static let rename = FloatingPanelAction(id: 12, name: KDriveResourcesStrings.Localizable.buttonRename, image: KDriveResourcesAsset.edit.image)
     static let delete = FloatingPanelAction(id: 13, name: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, image: KDriveResourcesAsset.delete.image, tintColor: KDriveResourcesAsset.binColor.color)
     static let leaveShare = FloatingPanelAction(id: 14, name: KDriveResourcesStrings.Localizable.buttonLeaveShare, image: KDriveResourcesAsset.linkBroken.image)
-    static let cancelImport = FloatingPanelAction(id: 15, name: "Annuler l’import", image: KDriveResourcesAsset.remove.image)
+    static let cancelImport = FloatingPanelAction(id: 15, name: KDriveResourcesStrings.Localizable.buttonCancelImport, image: KDriveResourcesAsset.remove.image)
 
     static var listActions: [FloatingPanelAction] {
         return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, leaveShare, delete].map { $0.reset() }
