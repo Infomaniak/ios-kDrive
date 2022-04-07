@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -13,7 +13,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <collectionReusableView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="FilesHeaderView" id="U6b-Vx-4bR" customClass="FilesHeaderView" customModule="kDrive" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="320" height="401"/>
+            <rect key="frame" x="0.0" y="0.0" width="320" height="92"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="78X-Zy-20d">
@@ -288,7 +288,7 @@
             <color key="backgroundColor" name="backgroundColor"/>
             <constraints>
                 <constraint firstItem="78X-Zy-20d" firstAttribute="leading" secondItem="VXr-Tz-HHm" secondAttribute="leading" constant="24" id="1t6-eQ-o9Y"/>
-                <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="78X-Zy-20d" secondAttribute="bottom" constant="16" id="GCp-kJ-qbz"/>
+                <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" secondItem="78X-Zy-20d" secondAttribute="bottom" priority="999" constant="16" id="GCp-kJ-qbz"/>
                 <constraint firstItem="78X-Zy-20d" firstAttribute="top" secondItem="VXr-Tz-HHm" secondAttribute="top" constant="8" id="YtW-Hs-8f0"/>
                 <constraint firstItem="VXr-Tz-HHm" firstAttribute="trailing" secondItem="78X-Zy-20d" secondAttribute="trailing" constant="24" id="ugX-4N-pEj"/>
             </constraints>
@@ -304,7 +304,7 @@
                 <outlet property="sortView" destination="M4N-HE-jPw" id="4AD-gs-ort"/>
                 <outlet property="uploadCardView" destination="bvI-A7-USF" id="PGL-OM-pgZ"/>
             </connections>
-            <point key="canvasLocation" x="-317.39130434782612" y="225.33482142857142"/>
+            <point key="canvasLocation" x="-317.39130434782612" y="240.06696428571428"/>
         </collectionReusableView>
     </objects>
     <designables>
@@ -347,7 +347,7 @@
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
