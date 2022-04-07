@@ -351,7 +351,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
-    private func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
+    func updateFileList(deletions: [Int], insertions: [Int], modifications: [Int], moved: [(source: Int, target: Int)]) {
         guard !(deletions.isEmpty && insertions.isEmpty && modifications.isEmpty && moved.isEmpty) else { return }
 
         collectionView.performBatchUpdates {
@@ -560,7 +560,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         }
     }
 
-    private func showEmptyView(_ isHidden: Bool) {
+    func showEmptyView(_ isHidden: Bool) {
         let emptyView = EmptyTableView.instantiate(type: viewModel.configuration.emptyViewType, button: false)
         emptyView.actionHandler = { [weak self] _ in
             self?.forceRefresh()
