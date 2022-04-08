@@ -152,6 +152,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     private var recentFilesControllersCache = [String: HomeRecentFilesController]()
     private let recentFilesControllers = [HomeRecentActivitiesController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
 
+    private let reloadQueue = DispatchQueue(label: "com.infomaniak.drive.reloadQueue", qos: .userInitiated)
     private lazy var viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
     private var showInsufficientStorage = true
     private var filesObserver: ObservationToken?
@@ -287,10 +288,17 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func reload(newViewModel: HomeViewModel) {
-        var newViewModel = newViewModel
-        let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
-        collectionView.reload(using: changeset) { data in
-            self.viewModel = HomeViewModel(changeSet: data)
+        reloadQueue.async { [weak self] in
+            guard let self = self else { return }
+            var newViewModel = newViewModel
+            let newChangeset = newViewModel.changeSet
+            let oldChangeset = self.viewModel.changeSet
+            let changeset = StagedChangeset(source: oldChangeset, target: newChangeset)
+            DispatchQueue.main.sync {
+                self.collectionView.reload(using: changeset) { data in
+                    self.viewModel = HomeViewModel(changeSet: data)
+                }
+            }
         }
     }
 
