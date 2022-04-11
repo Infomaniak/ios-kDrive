@@ -280,7 +280,7 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
         Task {
             isMultipleSelectionEnabled = false
             Task.detached {
-                guard let realm = try? Realm(configuration: realmConfiguration) else { return }
+                guard let realm = try? await Realm(configuration: realmConfiguration) else { return }
                 try? realm.write {
                     for file in deletedFiles {
                         if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
