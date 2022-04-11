@@ -212,7 +212,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
             operations.append(operation)
             return operation.uploadCompletion
         } else {
-            SentrySDK.capture(message: "URLSession getCompletionHandler - Completion handler is nil") { scope in
+            SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
                 scope.setContext(value: [
                     "Session Id": session.identifier,
                     "Task url": task.originalRequest?.url ?? "",
