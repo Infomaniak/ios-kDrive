@@ -641,7 +641,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             case .video:
                 let cell = collectionView.dequeueReusableCell(type: VideoCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
-                cell.parentViewController = floatingPanelViewController
+                cell.parentViewController = self
                 cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
                 return cell

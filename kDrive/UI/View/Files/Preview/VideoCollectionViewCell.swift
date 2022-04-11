@@ -17,6 +17,7 @@
  */
 
 import AVKit
+import FloatingPanel
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
@@ -37,7 +38,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet weak var playButton: UIButton!
 
     var driveFileManager: DriveFileManager!
-    var parentViewController: UIViewController?
+    weak var parentViewController: UIViewController?
+    weak var floatingPanelController: FloatingPanelController?
 
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
@@ -102,12 +104,16 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         navController.disappearCallback = { [weak self] in
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
             self?.player?.pause()
+            if let floatingPanelController = self?.floatingPanelController {
+                self?.parentViewController?.present(floatingPanelController, animated: true)
+            }
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
         navController.modalTransitionStyle = .crossDissolve
 
-        parentViewController?.presentedViewController?.dismiss(animated: true)
+        floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController
+        floatingPanelController?.dismiss(animated: true)
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
         }
