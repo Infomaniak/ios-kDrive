@@ -197,43 +197,51 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, UICo
     func createLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { [weak self] sectionIndex, layoutEnvironment in
             guard let self = self else { return nil }
-            var section: NSCollectionLayoutSection
             if sectionIndex == 0 {
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                      heightDimension: .absolute(92))
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                item.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: self.leftRightInset, bottom: 8, trailing: self.leftRightInset)
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-                section = NSCollectionLayoutSection(group: group)
+                return self.createFirstSection()
             } else {
-                let insets = NSDirectionalEdgeInsets(top: 0, leading: self.leftRightInset, bottom: 0, trailing: self.leftRightInset)
-                switch self.viewModel.listStyle {
-                case .list:
-                    let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                          heightDimension: .absolute(UIConstants.fileListCellHeight))
-                    let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                    let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-                    group.contentInsets = insets
-                    section = NSCollectionLayoutSection(group: group)
-                case .grid:
-                    let width = layoutEnvironment.container.effectiveContentSize.width
-                    let maxColumns = Int(width / self.gridCellMaxWidth)
-                    let columns = max(self.gridMinColumns, maxColumns)
-                    let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                          heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
-                    let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                    let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                           heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
-                    let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
-                    group.interItemSpacing = .fixed(self.gridInnerSpacing)
-                    group.contentInsets = insets
-                    section = NSCollectionLayoutSection(group: group)
-                    section.interGroupSpacing = self.gridInnerSpacing
-                }
-                section.boundarySupplementaryItems = [self.getHeaderLayout()]
+                return self.createSecondSection(layoutEnvironment: layoutEnvironment)
             }
-            return section
         }
+    }
+
+    func createFirstSection() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                              heightDimension: .absolute(92))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: leftRightInset, bottom: 8, trailing: leftRightInset)
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+        return NSCollectionLayoutSection(group: group)
+    }
+
+    func createSecondSection(layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
+        let section: NSCollectionLayoutSection
+        let insets = NSDirectionalEdgeInsets(top: 0, leading: leftRightInset, bottom: 0, trailing: leftRightInset)
+        switch viewModel.listStyle {
+        case .list:
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                  heightDimension: .absolute(UIConstants.fileListCellHeight))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+            group.contentInsets = insets
+            section = NSCollectionLayoutSection(group: group)
+        case .grid:
+            let width = layoutEnvironment.container.effectiveContentSize.width
+            let maxColumns = Int(width / gridCellMaxWidth)
+            let columns = max(gridMinColumns, maxColumns)
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                  heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(UIConstants.fileListGridCellEstimatedHeight))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
+            group.interItemSpacing = .fixed(gridInnerSpacing)
+            group.contentInsets = insets
+            section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = gridInnerSpacing
+        }
+        section.boundarySupplementaryItems = [getHeaderLayout()]
+        return section
     }
 
     override func viewWillAppear(_ animated: Bool) {
