@@ -152,6 +152,25 @@ class StorageTableViewController: UITableViewController {
         return size
     }
 
+    private func delete(file: File) {
+        let isDirectory = file.isDirectory
+        do {
+            try fileManager.removeItem(atPath: file.path)
+            if isDirectory {
+                // Recreate directory to avoid any issue
+                try fileManager.createDirectory(atPath: file.path, withIntermediateDirectories: true)
+            }
+        } catch {
+            DDLogError("Failed to remove item for path: \(file.path) with error: \(error)")
+        }
+
+        // Reload data
+        reload()
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadData()
+        }
+    }
+
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -228,19 +247,10 @@ class StorageTableViewController: UITableViewController {
             file = files[indexPath.row]
             message = KDriveResourcesStrings.Localizable.modalClearCacheFileDescription(file.name)
         }
-        let alertViewController = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalClearCacheTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonClear, destructive: true) {
-            let isDirectory = file.isDirectory
-            do {
-                try self.fileManager.removeItem(atPath: file.path)
-                if isDirectory {
-                    // Recreate directory to avoid any issue
-                    try self.fileManager.createDirectory(atPath: file.path, withIntermediateDirectories: true)
-                }
-            } catch {
-                DDLogError("Failed to remove item for path: \(file.path) with error: \(error)")
+        let alertViewController = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalClearCacheTitle, message: message, action: KDriveResourcesStrings.Localizable.buttonClear, destructive: true) { [weak self] in
+            DispatchQueue.global(qos: .utility).async {
+                self?.delete(file: file)
             }
-            self.reload()
-            self.tableView.reloadData()
         }
         present(alertViewController, animated: true)
         tableView.deselectRow(at: indexPath, animated: true)
