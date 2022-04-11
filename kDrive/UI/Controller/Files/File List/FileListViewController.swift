@@ -561,6 +561,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func showEmptyView(_ isHidden: Bool) {
+        guard (collectionView.backgroundView == nil) != isHidden else { return }
         let emptyView = EmptyTableView.instantiate(type: viewModel.configuration.emptyViewType, button: false)
         emptyView.actionHandler = { [weak self] _ in
             self?.forceRefresh()
