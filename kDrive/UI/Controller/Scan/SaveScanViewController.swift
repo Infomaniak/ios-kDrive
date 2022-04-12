@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
 import PDFKit
@@ -31,6 +32,7 @@ class SaveScanViewController: SaveFileViewController {
         tableView.register(cellView: ScanTypeTableViewCell.self)
         super.viewDidLoad()
         sections = [.fileName, .fileType, .directorySelection]
+        detectFileName()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -96,5 +98,35 @@ class SaveScanViewController: SaveFileViewController {
         let viewController = Storyboard.scan.instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
+    }
+
+    private func detectFileName() {
+        // Get the first page
+        guard let cgImage = scan.imageOfPage(at: 0).cgImage else { return }
+
+        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
+        let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
+
+        do {
+            // Perform the text-recognition request
+            try requestHandler.perform([request])
+        } catch {
+            DDLogInfo("[Scan] Unable to perform the requests: \(error).")
+        }
+    }
+
+    func recognizeTextHandler(request: VNRequest, error: Error?) {
+        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+            return
+        }
+        let recognizedStrings = observations.compactMap { observation in
+            // Return the string of the top VNRecognizedText instance
+            observation.topCandidates(1).first?.string
+        }
+
+        // Use the first string as the filename
+        guard let firstResult = recognizedStrings.first else { return }
+        items.first?.name = firstResult.localizedCapitalized
+        tableView.reloadData()
     }
 }
