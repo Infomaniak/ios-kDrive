@@ -47,9 +47,10 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
 
     // swiftlint:disable cyclomatic_complexity
     func configure(with activity: FileActivity, file: File) {
-        titleLabel.text = activity.user?.displayName ?? KDriveResourcesStrings.Localizable.allUserAnonymous
+        let user = activity.user
+        titleLabel.text = user?.displayName ?? KDriveResourcesStrings.Localizable.allUserAnonymous
 
-        if let user = activity.user {
+        if let user = user {
             user.getAvatar { image in
                 self.accessoryImageView.image = image
                     .resize(size: CGSize(width: 35, height: 35))
