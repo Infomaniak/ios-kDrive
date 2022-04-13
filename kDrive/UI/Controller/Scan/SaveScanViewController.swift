@@ -119,9 +119,15 @@ class SaveScanViewController: SaveFileViewController {
         guard let observations = request.results as? [VNRecognizedTextObservation] else {
             return
         }
-        let recognizedStrings = observations.compactMap { observation in
+        let minConfidence: Float = 0.6
+        let recognizedStrings: [String] = observations.compactMap { observation in
             // Return the string of the top VNRecognizedText instance
-            observation.topCandidates(1).first?.string
+            let topCandidate = observation.topCandidates(1).first
+            if let topCandidate = topCandidate, topCandidate.confidence >= minConfidence {
+                return topCandidate.string
+            } else {
+                return nil
+            }
         }
 
         // Use the first string as the filename
