@@ -16,16 +16,35 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import Foundation
 import RealmSwift
 import Sentry
 
 public class BackgroundRealm {
+    private struct WriteOperation: Equatable, Hashable {
+        let parent: File?
+        let file: File
+
+        func hash(into hasher: inout Hasher) {
+            if let parentId = parent?.id {
+                hasher.combine(parentId)
+            }
+            hasher.combine(file.id)
+        }
+
+        static func == (lhs: WriteOperation, rhs: WriteOperation) -> Bool {
+            return lhs.parent?.id == rhs.parent?.id && lhs.file.id == rhs.file.id && lhs.file.lastModifiedAt == rhs.file.lastModifiedAt
+        }
+    }
+
     public static let uploads = getQueue(for: DriveFileManager.constants.uploadsRealmConfiguration)
     private static var instances: [String: BackgroundRealm] = [:]
 
     private let realm: Realm
     private let queue: DispatchQueue
+    private var buffer = Set<WriteOperation>()
+    private var debouncedBufferWrite: DispatchWorkItem?
 
     public class func getQueue(for configuration: Realm.Configuration) -> BackgroundRealm {
         guard let fileURL = configuration.fileURL else {
@@ -60,5 +79,37 @@ public class BackgroundRealm {
         queue.sync {
             block(realm)
         }
+    }
+
+    public func bufferedWrite(in parent: File?, file: File) {
+        buffer.insert(WriteOperation(parent: parent, file: file))
+        DDLogInfo("[BackgroundRealm] Buffer size \(buffer.count)")
+        if buffer.count > 20 {
+            DDLogInfo("[BackgroundRealm] Buffer size exceeded \(buffer.count)")
+            debouncedBufferWrite?.cancel()
+            debouncedBufferWrite = nil
+            writeBuffer()
+        }
+
+        if debouncedBufferWrite == nil {
+            let debouncedWorkItem = DispatchWorkItem { [weak self] in
+                DDLogInfo("[BackgroundRealm] Buffer expired writing data...")
+                self?.writeBuffer()
+                self?.debouncedBufferWrite = nil
+            }
+            queue.asyncAfter(deadline: .now() + 1, execute: debouncedWorkItem)
+            debouncedBufferWrite = debouncedWorkItem
+        }
+    }
+
+    private func writeBuffer() {
+        try? realm.safeWrite {
+            for write in buffer {
+                realm.add(write.file, update: .all)
+                write.parent?.children.insert(write.file)
+            }
+        }
+        buffer.removeAll()
+        DDLogInfo("[BackgroundRealm] Buffer written")
     }
 }

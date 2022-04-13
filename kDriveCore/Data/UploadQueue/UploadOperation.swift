@@ -278,18 +278,11 @@ public class UploadOperation: Operation {
             file.error = nil
             if let driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: file.userId) {
                 // File is already or has parent in DB let's update it
-                BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
+                let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
+                queue.execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || file.relativePath.isEmpty {
                         let parent = driveFileManager.getCachedFile(id: file.parentDirectoryId, freeze: false, using: realm)
-                        try? realm.safeWrite {
-                            realm.add(driveFile, update: .all)
-                            if file.relativePath.isEmpty && parent != nil && !parent!.children.contains(driveFile) {
-                                parent?.children.insert(driveFile)
-                            }
-                        }
-                        if let parent = parent {
-                            driveFileManager.notifyObserversWith(file: parent)
-                        }
+                        queue.bufferedWrite(in: parent, file: driveFile)
                         result.driveFile = File(value: driveFile)
                     }
                 }
