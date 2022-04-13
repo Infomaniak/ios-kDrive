@@ -27,7 +27,7 @@ import UIKit
 extension PhotoSortMode: Selectable {}
 
 class PhotoListViewController: FileListViewController {
-    @IBOutlet weak var headerView: SelectView!
+    @IBOutlet weak var photoHeaderView: SelectView!
     @IBOutlet weak var headerImageView: UIImageView!
     @IBOutlet weak var headerTitleLabel: IKLabel!
 
@@ -56,12 +56,12 @@ class PhotoListViewController: FileListViewController {
         super.viewDidLoad()
 
         headerTitleLabel.textColor = .white
-        headerView.buttonTint = .white
+        photoHeaderView.buttonTint = .white
 
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
         collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: footerIdentifier)
         collectionView.register(UINib(nibName: "PhotoSectionHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
-        selectView = headerView
+        selectView = photoHeaderView
         selectView?.delegate = self
         bindPhotoListViewModel()
     }
@@ -147,7 +147,7 @@ class PhotoListViewController: FileListViewController {
     override func toggleMultipleSelection(_ on: Bool) {
         if on {
             navigationItem.title = nil
-            headerView.actionsView.isHidden = false
+            photoHeaderView.actionsView.isHidden = false
             headerTitleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
             collectionView.allowsMultipleSelection = true
             navigationController?.navigationBar.prefersLargeTitles = false
@@ -155,7 +155,7 @@ class PhotoListViewController: FileListViewController {
             generator.prepare()
             generator.impactOccurred()
         } else {
-            headerView.actionsView.isHidden = true
+            photoHeaderView.actionsView.isHidden = true
             headerTitleLabel.style = .header2
             headerTitleLabel.textColor = .white
             collectionView.allowsMultipleSelection = false
@@ -175,7 +175,7 @@ class PhotoListViewController: FileListViewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let viewModel = photoListViewModel else { return }
         isLargeTitle = (view.window?.windowScene?.interfaceOrientation.isPortrait == true) ? (scrollView.contentOffset.y <= -UIConstants.largeTitleHeight) : false
-        headerView.isHidden = isLargeTitle
+        photoHeaderView.isHidden = isLargeTitle
         (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = isLargeTitle
         navigationController?.navigationBar.tintColor = isLargeTitle ? nil : .white
         navigationController?.setNeedsStatusBarAppearanceUpdate()

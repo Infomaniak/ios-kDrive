@@ -136,7 +136,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     @IBOutlet weak var collectionView: UICollectionView!
     var collectionViewLayout: UICollectionViewFlowLayout!
     var refreshControl = UIRefreshControl()
-    private var headerView: FilesHeaderView?
+    var headerView: FilesHeaderView?
     var selectView: SelectView?
     private var gridColumns: Int {
         let screenWidth = collectionView.bounds.width
@@ -561,7 +561,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     func showEmptyView(_ isHidden: Bool) {
-        guard (collectionView.backgroundView == nil) != isHidden else { return }
+        guard (collectionView.backgroundView == nil) != isHidden || headerView?.sortView.isHidden == isHidden else { return }
         let emptyView = EmptyTableView.instantiate(type: viewModel.configuration.emptyViewType, button: false)
         emptyView.actionHandler = { [weak self] _ in
             self?.forceRefresh()
