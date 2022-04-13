@@ -75,8 +75,8 @@ public class FileActivity: Object, Decodable {
     @Persisted public var oldPath: String
     /// Logged file identifier
     @Persisted public var fileId: Int
-    /// Use `user` instead
-    @Persisted private var userId: Int?
+    /// Use `user` to access the complete object
+    @Persisted public var userId: Int?
     /// Associated File or Directory, null is element was deleted
     @Persisted public var file: File?
 
