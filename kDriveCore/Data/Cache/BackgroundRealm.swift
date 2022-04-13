@@ -38,6 +38,9 @@ public class BackgroundRealm {
         }
     }
 
+    private static let writeBufferSize = 20
+    private static let writeBufferExpiration = 1.0
+
     public static let uploads = getQueue(for: DriveFileManager.constants.uploadsRealmConfiguration)
     private static var instances: [String: BackgroundRealm] = [:]
 
@@ -81,11 +84,19 @@ public class BackgroundRealm {
         }
     }
 
+    /**
+     Differ File write in realm for bulk write.
+
+     - Parameter parent: Parent of the file, the file is inserted as a child
+     - Parameter file: The file to write in realm
+
+     Writes in realm are differed until either the buffer grows to 20 write operations or 1 second passes.
+     - Warning: As the buffer is kept in memory, writes can be lost if the app is terminated eg. case of crash
+
+     */
     public func bufferedWrite(in parent: File?, file: File) {
         buffer.insert(WriteOperation(parent: parent, file: file))
-        DDLogInfo("[BackgroundRealm] Buffer size \(buffer.count)")
-        if buffer.count > 20 {
-            DDLogInfo("[BackgroundRealm] Buffer size exceeded \(buffer.count)")
+        if buffer.count > BackgroundRealm.writeBufferSize {
             debouncedBufferWrite?.cancel()
             debouncedBufferWrite = nil
             writeBuffer()
@@ -93,11 +104,10 @@ public class BackgroundRealm {
 
         if debouncedBufferWrite == nil {
             let debouncedWorkItem = DispatchWorkItem { [weak self] in
-                DDLogInfo("[BackgroundRealm] Buffer expired writing data...")
                 self?.writeBuffer()
                 self?.debouncedBufferWrite = nil
             }
-            queue.asyncAfter(deadline: .now() + 1, execute: debouncedWorkItem)
+            queue.asyncAfter(deadline: .now() + BackgroundRealm.writeBufferExpiration, execute: debouncedWorkItem)
             debouncedBufferWrite = debouncedWorkItem
         }
     }
@@ -110,6 +120,5 @@ public class BackgroundRealm {
             }
         }
         buffer.removeAll()
-        DDLogInfo("[BackgroundRealm] Buffer written")
     }
 }
