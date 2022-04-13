@@ -253,8 +253,13 @@ public class FileImportHelper {
         case .pdf:
             let pdfDocument = PDFDocument()
             for i in 0 ..< scan.pageCount {
-                let pdfPage = PDFPage(image: scan.imageOfPage(at: i))
-                pdfDocument.insert(pdfPage!, at: i)
+                let pageImage = scan.imageOfPage(at: i)
+                // Compress page image before adding it to the PDF
+                if let pageData = pageImage.jpegData(compressionQuality: imageCompression),
+                   let compressedPageImage = UIImage(data: pageData),
+                   let pdfPage = PDFPage(image: compressedPageImage) {
+                    pdfDocument.insert(pdfPage, at: i)
+                }
             }
             data = pdfDocument.dataRepresentation()
         case .image:
