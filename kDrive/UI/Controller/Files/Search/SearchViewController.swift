@@ -192,7 +192,10 @@ class SearchFilesViewModel: FileListViewModel {
     private func search() {
         onFiltersChanged?()
         currentTask?.cancel()
-        // listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
+        let newListStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
+        if listStyle != newListStyle {
+            listStyle = newListStyle
+        }
         if currentSearchText?.isEmpty != false {
             driveFileManager.removeSearchChildren()
         }
