@@ -93,14 +93,7 @@ class UploadQueueViewController: UIViewController {
                         self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     } completion: { _ in
                         // Update cell corners
-                        var modifications = [Int]()
-                        if !results.isEmpty {
-                            modifications.append(0)
-                        }
-                        if results.count > 2 {
-                            modifications.append(results.count - 1)
-                        }
-                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self?.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
                     }
                     if results.isEmpty {
                         self?.navigationController?.popViewController(animated: true)
@@ -109,6 +102,23 @@ class UploadQueueViewController: UIViewController {
                     DDLogError("Realm observer error: \(error)")
                 }
             }
+    }
+
+    func reloadCorners(insertions: [Int], deletions: [Int], count: Int) {
+        var modifications = Set<IndexPath>()
+        if insertions.contains(0) {
+            modifications.insert(IndexPath(row: 1, section: 0))
+        }
+        if deletions.contains(0) {
+            modifications.insert(IndexPath(row: 0, section: 0))
+        }
+        if insertions.contains(count - 1) {
+            modifications.insert(IndexPath(row: count - 2, section: 0))
+        }
+        if deletions.contains(count) {
+            modifications.insert(IndexPath(row: count - 1, section: 0))
+        }
+        tableView.reloadRows(at: Array(modifications), with: .fade)
     }
 
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
