@@ -192,7 +192,10 @@ class SearchFilesViewModel: FileListViewModel {
     private func search() {
         onFiltersChanged?()
         currentTask?.cancel()
-        listStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
+        let newListStyle = isDisplayingSearchResults ? UserDefaults.shared.listStyle : .list
+        if listStyle != newListStyle {
+            listStyle = newListStyle
+        }
         if currentSearchText?.isEmpty != false {
             driveFileManager.removeSearchChildren()
         }
@@ -274,12 +277,7 @@ class SearchViewController: FileListViewController {
     override func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         super.setUpHeaderView(headerView, isEmptyViewHidden: isEmptyViewHidden)
         // Set up filter header view
-        if searchViewModel.filters.hasFilters {
-            headerView.filterView.isHidden = false
-            headerView.filterView.configure(with: searchViewModel.filters)
-        } else {
-            headerView.filterView.isHidden = true
-        }
+        updateFilters(headerView: headerView)
     }
 
     static func instantiateInNavigationController(viewModel: SearchFilesViewModel) -> UINavigationController {
@@ -312,13 +310,24 @@ class SearchViewController: FileListViewController {
             self.collectionView.refreshControl = self.searchViewModel.isDisplayingSearchResults ? self.refreshControl : nil
             self.collectionViewLayout?.sectionHeadersPinToVisibleBounds = self.searchViewModel.isDisplayingSearchResults
             self.collectionView.backgroundView = nil
-            self.collectionView.collectionViewLayout.invalidateLayout()
-            self.collectionView.reloadData()
+            if let headerView = self.headerView {
+                self.updateFilters(headerView: headerView)
+            }
+            self.collectionView.performBatchUpdates(nil)
         }
 
         searchViewModel.onSearchCompleted = { [weak self] searchTerm in
             guard let searchTerm = searchTerm else { return }
             self?.recentSearchesViewModel.add(searchTerm: searchTerm)
+        }
+    }
+
+    private func updateFilters(headerView: FilesHeaderView) {
+        if searchViewModel.filters.hasFilters {
+            headerView.filterView.isHidden = false
+            headerView.filterView.configure(with: searchViewModel.filters)
+        } else {
+            headerView.filterView.isHidden = true
         }
     }
 
