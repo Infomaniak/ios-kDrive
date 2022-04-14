@@ -540,7 +540,8 @@ public class File: Object, Codable {
                 if let image = try? result.get().image {
                     completion(image, true)
                 } else {
-                    completion(self.icon, false)
+                    // The file can become invalidated while retrieving the icon online
+                    completion(self.isInvalidated ? ConvertedType.unknown.icon : self.icon, false)
                 }
             }
         } else {

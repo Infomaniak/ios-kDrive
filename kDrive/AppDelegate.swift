@@ -61,6 +61,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         registerBackgroundTasks()
 
+        // In some cases the application can show the old Nextcloud import notification badge
+        UIApplication.shared.applicationIconBadgeNumber = 0
         NotificationsHelper.askForPermissions()
         NotificationsHelper.registerCategories()
         UNUserNotificationCenter.current().delegate = self
