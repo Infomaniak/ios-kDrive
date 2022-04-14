@@ -293,7 +293,7 @@ class SearchViewController: FileListViewController {
         recentSearchesViewModel.onReloadWithChangeset = { [weak self] stagedChangeset, setData in
             if self?.searchViewModel.isDisplayingSearchResults == false {
                 self?.collectionView.reload(using: stagedChangeset, setData: setData)
-                self?.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
+                self?.collectionView.reloadCorners(insertions: stagedChangeset.last?.elementInserted.map(\.element) ?? [],
                                     deletions: stagedChangeset.last?.elementDeleted.map(\.element) ?? [],
                                     count: self?.recentSearchesViewModel.recentSearches.count ?? 0)
             } else {

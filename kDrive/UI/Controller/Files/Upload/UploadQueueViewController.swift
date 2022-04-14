@@ -93,14 +93,7 @@ class UploadQueueViewController: UIViewController {
                         self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     } completion: { _ in
                         // Update cell corners
-                        var modifications = [Int]()
-                        if !results.isEmpty {
-                            modifications.append(0)
-                        }
-                        if results.count > 2 {
-                            modifications.append(results.count - 1)
-                        }
-                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                        self?.tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
                     }
                     if results.isEmpty {
                         self?.navigationController?.popViewController(animated: true)

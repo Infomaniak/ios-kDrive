@@ -69,7 +69,7 @@ protocol FileCellDelegate: AnyObject {
     }
 
     init(driveFileManager: DriveFileManager, file: File, selectionMode: Bool) {
-        self.file = file.freezeIfNeeded()
+        self.file = file
         self.selectionMode = selectionMode
         categories = driveFileManager.drive.categories(for: file)
     }

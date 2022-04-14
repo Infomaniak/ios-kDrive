@@ -465,7 +465,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     private func reloadFileCorners(insertions: [Int], deletions: [Int]) {
-        reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.files.count)
+        collectionView.reloadCorners(insertions: insertions, deletions: deletions, count: viewModel.files.count)
     }
 
     private func updateEmptyView(_ emptyBackground: EmptyTableView) {
@@ -576,23 +576,6 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         let viewController = storyboard.instantiateViewController(withIdentifier: storyboardIdentifier) as! Self
         viewController.viewModel = viewModel
         return viewController
-    }
-
-    func reloadCorners(insertions: [Int], deletions: [Int], count: Int) {
-        var modifications = Set<IndexPath>()
-        if insertions.contains(0) {
-            modifications.insert(IndexPath(row: 1, section: 0))
-        }
-        if deletions.contains(0) {
-            modifications.insert(IndexPath(row: 0, section: 0))
-        }
-        if insertions.contains(count - 1) {
-            modifications.insert(IndexPath(row: count - 2, section: 0))
-        }
-        if deletions.contains(count) {
-            modifications.insert(IndexPath(row: count - 1, section: 0))
-        }
-        collectionView.reloadItems(at: Array(modifications))
     }
 
     // MARK: - Multiple selection
