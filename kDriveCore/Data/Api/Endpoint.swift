@@ -27,6 +27,10 @@ public extension ApiEnvironment {
         return "drive.\(host)"
     }
 
+    var apiDriveHost: String {
+        return "api.\(driveHost)"
+    }
+
     var mqttHost: String {
         switch self {
         case .prod:
@@ -55,7 +59,10 @@ public extension Endpoint {
             URLQueryItem(name: "per_page", value: "\(Endpoint.itemsPerPage)")
         ]
 
-        return Endpoint(path: path, queryItems: (queryItems ?? []) + paginationQueryItems, apiEnvironment: apiEnvironment)
+        return Endpoint(hostKeypath: hostKeypath,
+                        path: path,
+                        queryItems: (queryItems ?? []) + paginationQueryItems,
+                        apiEnvironment: apiEnvironment)
     }
 
     func sorted(by sortTypes: [SortType] = [.type, .nameAZ]) -> Endpoint {
@@ -64,7 +71,10 @@ public extension Endpoint {
         ]
         sortQueryItems.append(contentsOf: sortTypes.map { URLQueryItem(name: "order_for[\($0.value.apiValue)]", value: $0.value.order) })
 
-        return Endpoint(path: path, queryItems: (queryItems ?? []) + sortQueryItems, apiEnvironment: apiEnvironment)
+        return Endpoint(hostKeypath: hostKeypath,
+                        path: path,
+                        queryItems: (queryItems ?? []) + sortQueryItems,
+                        apiEnvironment: apiEnvironment)
     }
 }
 
@@ -118,7 +128,7 @@ public extension Endpoint {
     private static let fileExtraWithQueryItem = URLQueryItem(name: "with", value: fileMinimalWithQueryItem.value?.appending(",path,users,version"))
 
     private static var drive: Endpoint {
-        return .baseV2.appending(path: "/drive")
+        return Endpoint(hostKeypath: \.apiDriveHost, path: "/2/drive")
     }
 
     static let fileActivitiesWithQueryItem = URLQueryItem(name: "with", value: "file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name")
@@ -130,7 +140,7 @@ public extension Endpoint {
     // MARK: V1
 
     private static var driveV1: Endpoint {
-        return .baseV1.appending(path: "/drive")
+        return Endpoint(hostKeypath: \.apiDriveHost, path: "/1/drive")
     }
 
     static var initData: Endpoint {
