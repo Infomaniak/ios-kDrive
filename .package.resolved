@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/abseil-cpp-SwiftPM.git",
       "state" : {
-        "revision" : "fffc3c2729be5747390ad02d5100291a0d9ad26a",
-        "version" : "0.20200225.4"
+        "revision" : "d302de612e3d57c6f4afaf087da18fba8eac72a7",
+        "version" : "0.20220203.1"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Alamofire/Alamofire.git",
       "state" : {
-        "revision" : "f82c23a8a7ef8dc1a49a8bfc6a96883e79121864",
-        "version" : "5.5.0"
+        "revision" : "354dda32d89fc8cd4f5c46487f64957d355f53d8",
+        "version" : "5.6.1"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/boringssl-SwiftPM.git",
       "state" : {
-        "revision" : "734a8247442fde37df4364c21f6a0085b6a36728",
-        "version" : "0.7.2"
+        "revision" : "79db6516894a932d0ddaff3b05b9da1e4f6c4069",
+        "version" : "0.9.0"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/firebase-ios-sdk.git",
       "state" : {
-        "revision" : "ccb2bccb82e62ad9e8a4e757a43ce6a04ceae1c9",
-        "version" : "8.14.0"
+        "revision" : "111d8d6ad1a1afd6c8e9561d26e55ab1e74fcb42",
+        "version" : "8.15.0"
       }
     },
     {
@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/GoogleAppMeasurement.git",
       "state" : {
-        "revision" : "9b74e6a3f875208c04c22b39b580a21d4de0f4f9",
-        "version" : "8.14.0"
+        "revision" : "ef819db8c58657a6ca367322e73f3b6322afe0a2",
+        "version" : "8.15.0"
       }
     },
     {
@@ -118,12 +118,12 @@
       }
     },
     {
-      "identity" : "grpc-swiftpm",
+      "identity" : "grpc-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/firebase/grpc-SwiftPM.git",
+      "location" : "https://github.com/grpc/grpc-ios.git",
       "state" : {
-        "revision" : "fb405dd2c7901485f7e158b24e3a0a47e4efd8b5",
-        "version" : "1.28.4"
+        "revision" : "abd2d5a4347efa0454606a788678a5d8ec223738",
+        "version" : "1.44.0-grpc"
       }
     },
     {
@@ -158,8 +158,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core.git",
       "state" : {
-        "revision" : "45faa9ca9d90d3bbf992b9e47d090aeda0f4fdbc",
-        "version" : "1.1.10"
+        "revision" : "da78c9ccd7645ceb0441831499dc5b8410236229",
+        "version" : "1.1.11"
       }
     },
     {
@@ -176,8 +176,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher",
       "state" : {
-        "revision" : "32e4acdf6971f58f5ad552389cf2d7d016334eaf",
-        "version" : "7.2.0"
+        "revision" : "1a7b5480eb750a8e171654b9b1cb0a2cbeb27a55",
+        "version" : "7.2.1"
       }
     },
     {
@@ -275,8 +275,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-cocoa",
       "state" : {
-        "revision" : "f9400ca044844701ea32491a4c6c4b06d74ab24d",
-        "version" : "10.25.0"
+        "revision" : "98024648651fff3d111a340e38fff3b703d1c3f0",
+        "version" : "10.25.1"
       }
     },
     {
@@ -284,8 +284,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-core",
       "state" : {
-        "revision" : "3c78cccdc0d9f967c5c15b7f3ea081814e2b3ef2",
-        "version" : "11.13.0"
+        "revision" : "33dd84212b64cd0788590a93be0dde64d2869abb",
+        "version" : "11.14.0"
       }
     },
     {
@@ -293,8 +293,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "c348f6e884873143282e7c6cd2c856fac971ea8c",
-        "version" : "7.12.0"
+        "revision" : "ccb6c292a202eb9366c87889509ef5a793d7137a",
+        "version" : "7.13.0"
       }
     },
     {
@@ -311,8 +311,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SnapKit/SnapKit.git",
       "state" : {
-        "revision" : "d458564516e5676af9c70b4f4b2a9178294f1bc6",
-        "version" : "5.0.1"
+        "revision" : "f222cbdf325885926566172f6f5f06af95473158",
+        "version" : "5.6.0"
       }
     },
     {
