@@ -86,7 +86,7 @@ protocol FileCellDelegate: AnyObject {
         downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                handler(self.isAvailableOffline, true, 1)
+                handler(!self.isAvailableOffline, true, 1)
             }
         }
     }
