@@ -85,6 +85,11 @@ class UploadQueueViewController: UIViewController {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    guard !results.isEmpty else {
+                        self?.navigationController?.popViewController(animated: true)
+                        return
+                    }
+
                     self?.tableView.performBatchUpdates {
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
@@ -94,9 +99,6 @@ class UploadQueueViewController: UIViewController {
                     } completion: { _ in
                         // Update cell corners
                         self?.tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
-                    }
-                    if results.isEmpty {
-                        self?.navigationController?.popViewController(animated: true)
                     }
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
