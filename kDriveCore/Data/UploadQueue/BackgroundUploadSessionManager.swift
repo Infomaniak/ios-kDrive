@@ -212,11 +212,23 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
             operations.append(operation)
             return operation.uploadCompletion
         } else {
+            var filename: String?
+            var hasUploadDate = false
+
+            if let sessionUrl = task.originalRequest?.url?.absoluteString,
+               let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+               .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first {
+                filename = file.name
+                hasUploadDate = file.uploadDate != nil
+            }
+
             SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
                 scope.setContext(value: [
                     "Session Id": session.identifier,
-                    "Task url": task.originalRequest?.url ?? "",
-                    "Task error": task.error?.localizedDescription ?? ""
+                    "Task url": task.originalRequest?.url?.absoluteString ?? "",
+                    "Task error": task.error?.localizedDescription ?? "",
+                    "Upload file": filename ?? "",
+                    "Has Upload Date": hasUploadDate
                 ], key: "Session")
             }
             return nil
