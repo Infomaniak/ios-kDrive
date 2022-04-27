@@ -74,6 +74,8 @@ public class UploadOperation: Operation {
 
     public var result: UploadCompletionResult
 
+    private let completionLock = DispatchGroup()
+
     private var _executing = false {
         willSet {
             willChangeValue(forKey: "isExecuting")
@@ -137,28 +139,8 @@ public class UploadOperation: Operation {
 
         // Start background task
         if !Bundle.main.isExtension {
-            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
-                DDLogInfo("[UploadOperation] Background task expired")
-                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                breadcrumb.message = "Rescheduling file \(self.file.name)"
-                breadcrumb.data = ["File id": self.file.id,
-                                   "File name": self.file.name,
-                                   "File size": self.file.size,
-                                   "File type": self.file.type.rawValue]
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
-                let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
-                if let sessionId = rescheduledSessionId {
-                    self.file.sessionId = sessionId
-                    self.file.error = .taskRescheduled
-                } else {
-                    self.file.sessionUrl = ""
-                    self.file.error = .taskExpirationCancelled
-                    UploadQueue.instance.sendPausedNotificationIfNeeded()
-                }
-                UploadQueue.instance.suspendAllOperations()
-                self.task?.cancel()
-                self.end()
-            }
+            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader",
+                                                                                expirationHandler: backgroundTaskExpired)
         }
 
         getUploadTokenSync()
@@ -250,6 +232,11 @@ public class UploadOperation: Operation {
     }
 
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
+        completionLock.wait()
+        // Task has called end() in backgroundTaskExpired
+        guard !isFinished else { return }
+        completionLock.enter()
+
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {
@@ -259,6 +246,7 @@ public class UploadOperation: Operation {
                 file.sessionUrl = ""
             } else {
                 // We return because we don't want end() to be called as it is already called in the expiration handler
+                completionLock.leave()
                 return
             }
             if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
@@ -311,10 +299,41 @@ public class UploadOperation: Operation {
         }
 
         end()
+        completionLock.leave()
+    }
+
+    private func backgroundTaskExpired() {
+        completionLock.wait()
+        // Task has called end() in uploadCompletion
+        guard !isFinished else { return }
+        completionLock.enter()
+
+        DDLogInfo("[UploadOperation] Background task expired")
+        let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+        breadcrumb.message = "Rescheduling file \(file.name)"
+        breadcrumb.data = ["File id": file.id,
+                           "File name": file.name,
+                           "File size": file.size,
+                           "File type": file.type.rawValue]
+        SentrySDK.addBreadcrumb(crumb: breadcrumb)
+        let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: task, fileUrl: file.pathURL)
+        if let sessionId = rescheduledSessionId {
+            file.sessionId = sessionId
+            file.error = .taskRescheduled
+        } else {
+            file.sessionUrl = ""
+            file.error = .taskExpirationCancelled
+            UploadQueue.instance.sendPausedNotificationIfNeeded()
+        }
+        UploadQueue.instance.suspendAllOperations()
+        task?.cancel()
+        end()
+        completionLock.leave()
+        DDLogInfo("[UploadOperation] Expiration handler end block job \(file.id)")
     }
 
     private func end() {
-        DDLogInfo("[UploadOperation] Job \(file.id) ended")
+        DDLogInfo("[UploadOperation] Job \(file.id) ended error: \(file.error?.code ?? "")")
 
         if let path = file.pathURL,
            file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
