@@ -27,7 +27,8 @@ class ActionNavigationController: TitleSizeAdjustingNavigationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        // Modify sheet size on iPadOS, property is ignored on iOS
+        preferredContentSize = CGSize(width: 540, height: 620)
         Logging.initLogging()
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         accountManager = AccountManager.instance
