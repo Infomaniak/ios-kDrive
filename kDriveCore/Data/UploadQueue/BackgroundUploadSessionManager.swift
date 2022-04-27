@@ -222,6 +222,7 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
                 hasUploadDate = file.uploadDate != nil
             }
 
+            DDLogError("[BackgroundUploadSession] No completion handler found for session \(session.identifier) task url \(task.originalRequest?.url?.absoluteString ?? "")")
             SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
                 scope.setContext(value: [
                     "Session Id": session.identifier,
