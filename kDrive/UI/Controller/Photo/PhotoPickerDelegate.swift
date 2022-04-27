@@ -55,7 +55,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
             guard let image = info[.originalImage] as? UIImage else {
                 return
             }
-            let filename = FileImportHelper.instance.getDefaultFileName()
+            let filename = FileImportHelper.getDefaultFileName()
             do {
                 try FileImportHelper.instance.upload(photo: image, name: filename, format: .jpg, in: currentDirectory, drive: driveFileManager.drive)
                 showUploadSnackbar(count: 1, filename: filename)
@@ -66,7 +66,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
             guard let selectedVideo = info[.mediaURL] as? URL else {
                 return
             }
-            let filename = FileImportHelper.instance.getDefaultFileName()
+            let filename = FileImportHelper.getDefaultFileName()
             do {
                 try FileImportHelper.instance.upload(videoUrl: selectedVideo, name: filename, in: currentDirectory, drive: driveFileManager.drive)
                 showUploadSnackbar(count: 1, filename: filename)
