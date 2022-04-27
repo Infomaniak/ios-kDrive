@@ -316,17 +316,20 @@ public class UploadOperation: Operation {
                            "File size": file.size,
                            "File type": file.type.rawValue]
         SentrySDK.addBreadcrumb(crumb: breadcrumb)
+
+        file.error = .taskRescheduled
+        // Cancel the task before creating a background upload task to avoid duplicated files
+        task?.cancel()
+
         let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: task, fileUrl: file.pathURL)
         if let sessionId = rescheduledSessionId {
             file.sessionId = sessionId
-            file.error = .taskRescheduled
         } else {
             file.sessionUrl = ""
             file.error = .taskExpirationCancelled
             UploadQueue.instance.sendPausedNotificationIfNeeded()
         }
         UploadQueue.instance.suspendAllOperations()
-        task?.cancel()
         end()
         completionLock.leave()
         DDLogInfo("[UploadOperation] Expiration handler end block job \(file.id)")
