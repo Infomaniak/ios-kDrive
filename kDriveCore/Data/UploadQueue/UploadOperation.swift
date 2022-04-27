@@ -336,7 +336,7 @@ public class UploadOperation: Operation {
     }
 
     private func end() {
-        DDLogInfo("[UploadOperation] Job \(file.id) ended error: \(file.error?.code ?? "")")
+        DDLogInfo("[UploadOperation] Job \(file.id) ended")
 
         if let path = file.pathURL,
            file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {
