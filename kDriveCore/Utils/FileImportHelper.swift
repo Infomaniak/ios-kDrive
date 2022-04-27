@@ -328,7 +328,7 @@ public class FileImportHelper {
             } else if let url = url {
                 // Save the URL as a webloc file (plist)
                 let content = ["URL": url.absoluteString]
-                let targetURL = self.generateImportURL(for: nil)
+                let targetURL = self.generateImportURL(for: nil).appendingPathExtension("webloc")
                 do {
                     let encoder = PropertyListEncoder()
                     let data = try encoder.encode(content)
@@ -404,7 +404,7 @@ public class FileImportHelper {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    let targetURL = self.generateImportURL(for: UTI.image)
+                    let targetURL = self.generateImportURL(for: UTI.png)
 
                     if let image = coding as? UIImage,
                        let data = image.pngData() {
