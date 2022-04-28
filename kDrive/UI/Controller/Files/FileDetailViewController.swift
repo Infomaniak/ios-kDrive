@@ -837,10 +837,23 @@ extension FileDetailViewController: FileCommentDelegate {
         MatomoUtils.track(eventWithCategory: .comment, name: "like")
         Task { [proxyFile = file.proxify()] in
             do {
+                let shouldLike = !comment.liked
                 let response = try await driveFileManager.apiFetcher.likeComment(file: proxyFile, liked: comment.liked, comment: comment)
                 if response {
-                    self.comments[index].likesCount = !self.comments[index].liked ? self.comments[index].likesCount + 1 : self.comments[index].likesCount - 1
-                    self.comments[index].liked = !self.comments[index].liked
+                    let comment = self.comments[index]
+                    comment.liked.toggle()
+                    if shouldLike {
+                        let driveUser = DriveUser(user: AccountManager.instance.currentAccount.user)
+                        if comment.likes == nil {
+                            comment.likes = [driveUser]
+                        } else {
+                            comment.likes?.append(driveUser)
+                        }
+                        comment.likesCount += 1
+                    } else {
+                        comment.likes?.removeAll { $0.id == AccountManager.instance.currentAccount.user.id }
+                        comment.likesCount -= 1
+                    }
                     self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)
                 }
             } catch {
