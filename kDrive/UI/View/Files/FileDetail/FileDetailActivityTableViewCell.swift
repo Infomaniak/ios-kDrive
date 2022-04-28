@@ -46,10 +46,11 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    func configureWith(activity: FileDetailActivity, file: File) {
-        titleLabel.text = activity.user?.displayName ?? KDriveResourcesStrings.Localizable.allUserAnonymous
+    func configure(with activity: FileActivity, file: File) {
+        let user = activity.user
+        titleLabel.text = user?.displayName ?? KDriveResourcesStrings.Localizable.allUserAnonymous
 
-        if let user = activity.user {
+        if let user = user {
             user.getAvatar { image in
                 self.accessoryImageView.image = image
                     .resize(size: CGSize(width: 35, height: 35))
@@ -59,7 +60,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         }
 
         let localizedKey: String
-        switch activity.type {
+        switch activity.action {
         case .fileAccess:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderAccess" : "fileDetailsActivityFileAccess"
         case .fileCreate:
@@ -99,23 +100,31 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         case .commentCreate:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderCommentCreate" : "fileDetailsActivityFileCommentCreate"
         case .commentUpdate:
-            localizedKey = "fileDetailsActivityCommentUpdate"
+            localizedKey = "fileDetailsActivityFileCommentUpdate"
         case .commentDelete:
-            localizedKey = "fileDetailsActivityCommentDelete"
+            localizedKey = "fileDetailsActivityFileCommentDelete"
         case .commentLike:
-            localizedKey = "fileDetailsActivityCommentLike"
+            localizedKey = "fileDetailsActivityFileCommentLike"
         case .commentUnlike:
-            localizedKey = "fileDetailsActivityCommentUnlike"
+            localizedKey = "fileDetailsActivityFileCommentUnlike"
         case .commentResolve:
-            localizedKey = "fileDetailsActivityCommentResolve"
+            localizedKey = "fileDetailsActivityFileCommentResolve"
         case .fileMoveIn, .fileMoveOut:
             localizedKey = file.isDirectory ? "fileDetailsActivityFolderMove" : "fileDetailsActivityFileMove"
+        case .collaborativeFolderAccess:
+            localizedKey = "fileActivityCollaborativeFolderAccess"
         case .collaborativeFolderCreate:
             localizedKey = "fileActivityCollaborativeFolderCreate"
         case .collaborativeFolderUpdate:
             localizedKey = "fileActivityCollaborativeFolderUpdate"
         case .collaborativeFolderDelete:
             localizedKey = "fileActivityCollaborativeFolderDelete"
+        case .collaborativeUserAccess:
+            localizedKey = "fileActivityCollaborativeUserAccess"
+        case .collaborativeUserCreare:
+            localizedKey = "fileActivityCollaborativeUserCreate"
+        case .collaborativeUserDelete:
+            localizedKey = "fileActivityCollaborativeUserDelete"
         case .fileColorUpdate:
             localizedKey = "fileDetailsActivityFileColorUpdate"
         case .fileColorDelete:
@@ -125,6 +134,6 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         }
         detailLabel.text = localizedKey.localized
 
-        timeLabel.text = Constants.formatTimestamp(TimeInterval(activity.createdAt), style: .time, relative: true)
+        timeLabel.text = Constants.formatDate(activity.createdAt, style: .time, relative: true)
     }
 }

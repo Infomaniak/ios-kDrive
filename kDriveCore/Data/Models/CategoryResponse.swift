@@ -18,15 +18,17 @@
 
 import Foundation
 
-public class ObservationToken {
+public class CategoryResponse: Codable {
+    public var id: Int
+    public var result: Bool
+    public var message: String?
 
-    private let cancellationClosure: () -> Void
-
-    public init(cancellationClosure: @escaping () -> Void) {
-        self.cancellationClosure = cancellationClosure
+    public var querySucceeded: Bool {
+        return result || message == "category_error"
     }
 
-    public func cancel() {
-        cancellationClosure()
+    init() {
+        id = 0
+        result = true
     }
 }

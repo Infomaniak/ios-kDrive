@@ -30,17 +30,8 @@ class FileInformationUsersTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var shareButton: ImageButton!
 
-    var sharedFile: SharedFile?
-    var fallbackUsers = [DriveUser]()
+    var fileAccessElements = [FileAccessElement]()
     weak var delegate: FileUsersDelegate?
-
-    var shareables: [Shareable] {
-        if let sharedFile = sharedFile {
-            return sharedFile.teams + sharedFile.users
-        } else {
-            return fallbackUsers
-        }
-    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -64,12 +55,12 @@ extension FileInformationUsersTableViewCell: UICollectionViewDelegate, UICollect
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return shareables.count
+        return fileAccessElements.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: FileDetailInformationUserCollectionViewCell.self, for: indexPath)
-        cell.configureWith(moreValue: 0, shareable: shareables[indexPath.row])
+        cell.configureWith(moreValue: 0, fileAccessElement: fileAccessElements[indexPath.row])
         return cell
     }
 

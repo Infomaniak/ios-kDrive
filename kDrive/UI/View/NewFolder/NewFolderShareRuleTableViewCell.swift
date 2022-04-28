@@ -26,7 +26,7 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
     @IBOutlet weak var imageStackViewWidth: NSLayoutConstraint!
     @IBOutlet weak var descriptionLabel: UILabel!
     var rights = true
-    var shareables: [Shareable] = []
+    var fileAccessElements = [FileAccessElement]()
     var plusUser: Int = 0
 
     override func awakeFromNib() {
@@ -68,16 +68,16 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configureParentsRights(folderName: String, sharedFile: SharedFile?) {
+    func configureParentsRights(folderName: String, fileAccess: FileAccess?) {
         rights = true
-        if let sharedFile = sharedFile {
-            shareables = sharedFile.teams + sharedFile.users
+        if let fileAccess = fileAccess {
+            fileAccessElements = fileAccess.teams + fileAccess.users
         } else {
-            shareables = []
+            fileAccessElements = []
         }
 
-        if shareables.count > 3 {
-            plusUser = shareables.count - 3
+        if fileAccessElements.count > 3 {
+            plusUser = fileAccessElements.count - 3
         }
         imageStackViewWidth.constant = 30
         accessoryImageView.isHidden = true
@@ -114,7 +114,7 @@ extension NewFolderShareRuleTableViewCell: UICollectionViewDelegate, UICollectio
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if rights {
-            return plusUser == 0 ? shareables.count : 3
+            return plusUser == 0 ? fileAccessElements.count : 3
         }
         return 0
     }
@@ -122,12 +122,12 @@ extension NewFolderShareRuleTableViewCell: UICollectionViewDelegate, UICollectio
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: NewFolderShareRuleUserCollectionViewCell.self, for: indexPath)
         if plusUser == 0 {
-            cell.configure(with: shareables[indexPath.row])
+            cell.configure(with: fileAccessElements[indexPath.row])
         } else {
             if indexPath.row == 2 {
                 cell.configureWith(moreValue: plusUser)
             } else {
-                cell.configure(with: shareables[indexPath.row])
+                cell.configure(with: fileAccessElements[indexPath.row])
             }
         }
         return cell

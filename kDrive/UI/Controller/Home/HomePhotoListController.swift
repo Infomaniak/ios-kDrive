@@ -22,6 +22,9 @@ import kDriveResources
 import UIKit
 
 class HomePhotoListController: HomeRecentFilesController {
+    private let minColumns = 3
+    private let cellMaxWidth = 150.0
+
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager, homeViewController: homeViewController,
                   listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self, emptyCellType: .noImages,
@@ -29,22 +32,23 @@ class HomePhotoListController: HomeRecentFilesController {
                   listStyleEnabled: false)
     }
 
-    override func getFiles(completion: @escaping ([File]?) -> Void) {
-        driveFileManager.getLastPictures(page: page) { fetchedFiles, _ in
-            completion(fetchedFiles)
-        }
+    override func getFiles() async throws -> [File] {
+        return try await driveFileManager.lastPictures(page: page).files
     }
 
-    override func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
-        var section: NSCollectionLayoutSection
+    override func getLayout(for style: ListStyle, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
+        // Compute number of columns based on collection view size
+        let screenWidth = layoutEnvironment.container.effectiveContentSize.width
+        let maxColumns = Int(screenWidth / cellMaxWidth)
+        let columns = max(minColumns, maxColumns)
+
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalWidth(1 / 3))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 3)
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalWidth(1 / Double(columns)))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
         group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-        section = NSCollectionLayoutSection(group: group)
-
+        let section = NSCollectionLayoutSection(group: group)
         section.boundarySupplementaryItems = [getHeaderLayout()]
         return section
     }

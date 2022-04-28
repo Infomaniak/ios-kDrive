@@ -48,9 +48,13 @@ public enum FileActivityType: String, Codable {
     case commentLike = "comment_like"
     case commentUnlike = "comment_unlike"
     case commentResolve = "comment_resolve"
+    case collaborativeFolderAccess = "collaborative_folder_access"
     case collaborativeFolderCreate = "collaborative_folder_create"
     case collaborativeFolderUpdate = "collaborative_folder_update"
     case collaborativeFolderDelete = "collaborative_folder_delete"
+    case collaborativeUserAccess = "collaborative_user_access"
+    case collaborativeUserCreare = "collaborative_user_create"
+    case collaborativeUserDelete = "collaborative_user_delete"
     case fileColorUpdate = "file_color_update"
     case fileColorDelete = "file_color_delete"
 
@@ -59,25 +63,28 @@ public enum FileActivityType: String, Codable {
     }
 }
 
-public class FileActivity: Object, Codable {
-    @Persisted private var rawAction: String = ""
+public class FileActivity: Object, Decodable {
     @Persisted(primaryKey: true) public var id: Int = 0
-    @Persisted public var path: String = ""
-    @Persisted private var userId: Int?
-    @Persisted public var createdAt: Int = 0
-    @Persisted public var fileId: Int = 0
+    /// Date Activity File was created at
+    @Persisted public var createdAt: Date
+    /// Use `action` instead
+    @Persisted private var rawAction: String
+    /// Current path of the activity file/directory
+    @Persisted public var newPath: String
+    /// Previous path of the activity file/directory
+    @Persisted public var oldPath: String
+    /// Logged file identifier
+    @Persisted public var fileId: Int
+    /// Use `user` to access the complete object
+    @Persisted public var userId: Int?
+    /// Associated File or Directory, null is element was deleted
     @Persisted public var file: File?
-    @Persisted public var pathNew: String = ""
-    @Persisted public var oldPath: String = ""
+
     public var mergedFileActivities: [FileActivity] = []
 
-    public var action: FileActivityType {
-        get {
-            return FileActivityType(rawValue: rawAction)!
-        }
-        set {
-            rawAction = newValue.rawValue
-        }
+    /// Activity type
+    public var action: FileActivityType? {
+        return FileActivityType(rawValue: rawAction)
     }
 
     public var user: DriveUser? {
@@ -89,30 +96,35 @@ public class FileActivity: Object, Codable {
     }
 
     public required init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        rawAction = (try values.decodeIfPresent(String.self, forKey: .rawAction)) ?? ""
-        id = try values.decode(Int.self, forKey: .id)
-        path = (try values.decodeIfPresent(String.self, forKey: .path)) ?? ""
-        userId = (try values.decodeIfPresent(DriveUser.self, forKey: .userId))?.id
-        createdAt = (try values.decodeIfPresent(Int.self, forKey: .createdAt)) ?? 0
-        fileId = (try values.decodeIfPresent(Int.self, forKey: .fileId)) ?? 0
-        pathNew = (try values.decodeIfPresent(String.self, forKey: .pathNew)) ?? ""
-        oldPath = (try values.decodeIfPresent(String.self, forKey: .oldPath)) ?? ""
-        file = try values.decodeIfPresent(File.self, forKey: .file)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let userContainer = try? container.nestedContainer(keyedBy: UserCodingKeys.self, forKey: .user)
+        id = try container.decode(Int.self, forKey: .id)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        rawAction = try container.decode(String.self, forKey: .action)
+        newPath = try container.decode(String.self, forKey: .newPath)
+        oldPath = try container.decode(String.self, forKey: .oldPath)
+        fileId = try container.decode(Int.self, forKey: .fileId)
+        userId = try userContainer?.decode(Int.self, forKey: .id)
+        file = try container.decodeIfPresent(File.self, forKey: .file)
     }
 
-    override public init() {}
+    override public init() {
+        // We have to keep it for Realm
+    }
 
-    enum CodingKeys: String, CodingKey {
-        case rawAction = "action"
+    private enum CodingKeys: String, CodingKey {
         case id
-        case path
-        case userId = "user"
-        case file
         case createdAt = "created_at"
-        case fileId = "file_id"
-        case pathNew = "new_path"
+        case action
+        case newPath = "new_path"
         case oldPath = "old_path"
+        case fileId = "file_id"
+        case user
+        case file
+    }
+
+    enum UserCodingKeys: String, CodingKey {
+        case id
     }
 }
 
@@ -122,61 +134,10 @@ extension FileActivity: ContentIdentifiable, ContentEquatable {
     }
 }
 
-public class FileDetailActivity: Codable {
-    public var action: String
-    public var id: Int = 0
-    public var path: String
-    public var user: DriveUser?
-    public var createdAt: Int
-    public var newPath: String?
-    public var oldPath: String?
-
-    public var type: FileActivityType? {
-        return FileActivityType(rawValue: action)
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case action
-        case id
-        case path
-        case user
-        case createdAt = "created_at"
-        case newPath = "new_path"
-        case oldPath = "old_path"
-    }
-}
-
-public class FilesActivities: Codable {
-    public var activities: [Int: FilesActivitiesContent]
-
-    struct DynamicCodingKeys: CodingKey {
-        var stringValue: String
-
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        var intValue: Int?
-
-        init?(intValue: Int) {
-            return nil
-        }
-    }
-
-    public required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-        var activities = [Int: FilesActivitiesContent]()
-        for key in container.allKeys {
-            guard let id = Int(key.stringValue) else { continue }
-            activities[id] = try container.decode(FilesActivitiesContent.self, forKey: key)
-        }
-        self.activities = activities
-    }
-}
-
-public class FilesActivitiesContent: Codable {
-    public var status: ApiResult
-    public var activities: [FileActivity]?
-    public var error: ApiError?
+public class ActivitiesForFile: Decodable {
+    public var id: Int
+    public var result: Bool
+    public var message: String?
+    public var file: File?
+    public var activities: [FileActivity]
 }

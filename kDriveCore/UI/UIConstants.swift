@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
+import kDriveResources
 import SnackBar
 import UIKit
 
@@ -36,6 +38,7 @@ public enum UIConstants {
     public static let dropDelay = -1.0
 
     @discardableResult
+    @MainActor
     public static func showSnackBar(message: String, duration: SnackBar.Duration = .lengthLong, action: IKSnackBar.Action? = nil) -> IKSnackBar? {
         let snackbar = IKSnackBar.make(message: message, duration: duration)
         if let action = action {
@@ -44,6 +47,26 @@ public enum UIConstants {
             snackbar?.show()
         }
         return snackbar
+    }
+
+    @discardableResult
+    @MainActor
+    public static func showCancelableSnackBar(message: String, cancelSuccessMessage: String, duration: SnackBar.Duration = .lengthLong, cancelableResponse: CancelableResponse, parentFile: ProxyFile?, driveFileManager: DriveFileManager) -> IKSnackBar? {
+        return UIConstants.showSnackBar(message: message, duration: duration, action: .init(title: KDriveResourcesStrings.Localizable.buttonCancel) {
+            Task {
+                do {
+                    let now = Date()
+                    try await driveFileManager.undoAction(cancelId: cancelableResponse.id)
+                    if let parentFile = parentFile {
+                        _ = try? await driveFileManager.fileActivities(file: parentFile, from: Int(now.timeIntervalSince1970))
+                    }
+
+                    UIConstants.showSnackBar(message: cancelSuccessMessage)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                }
+            }
+        })
     }
 
     public static func openUrl(_ string: String, from viewController: UIViewController) {

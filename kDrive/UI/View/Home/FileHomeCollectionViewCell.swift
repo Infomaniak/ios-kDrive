@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -28,73 +29,15 @@ class FileHomeCollectionViewCell: FileGridCollectionViewCell {
         return nil
     }
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        logoImage.layer.masksToBounds = true
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        contentInsetView.cornerRadius = UIConstants.cornerRadius
-    }
-
     override func prepareForReuse() {
         super.prepareForReuse()
-        titleLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
-        titleLabel.textAlignment = .natural
-        largeIconImageView.image = nil
-        largeIconImageView.isHidden = true
-        logoImage.isHidden = false
-        logoImage.image = nil
-        logoImage.backgroundColor = nil
-        iconImageView.backgroundColor = nil
         timeLabel.text = ""
         timeStackView.isHidden = false
     }
 
-    override func initStyle(isFirst: Bool, isLast: Bool) {}
-
     override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
         super.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
-        iconImageView.isHidden = file.isDirectory
-        if file.isDirectory || !file.hasThumbnail {
-            logoImage.isHidden = true
-            largeIconImageView.isHidden = false
-            moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
-            moreButton.backgroundColor = nil
-        } else {
-            logoImage.isHidden = false
-            largeIconImageView.isHidden = true
-            iconImageView.isHidden = false
-            moreButton.tintColor = .white
-            moreButton.backgroundColor = UIColor.black.withAlphaComponent(0.3)
-            moreButton.cornerRadius = moreButton.frame.width / 2
-        }
-        logoImage.contentMode = .scaleAspectFill
-        titleLabel.textAlignment = file.isDirectory ? .center : .natural
-        checkmarkImage?.isHidden = !selectionMode
-        iconImageView.image = file.icon
-        iconImageView.tintColor = file.tintColor
-        largeIconImageView.image = file.icon
-        largeIconImageView.tintColor = file.tintColor
-        if file.isDirectory {
-            file.getThumbnail { image, _ in
-                self.largeIconImageView.image = image
-            }
-        }
-        timeLabel.text = Constants.formatDate(file.lastModifiedDate, style: .datetime, relative: true)
-    }
-
-    override func setThumbnailFor(file: File) {
-        let fileId = file.id
-        logoImage.image = nil
-        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
-        file.getThumbnail { image, _ in
-            if fileId == self.file.id {
-                self.logoImage.image = image
-                self.logoImage.backgroundColor = nil
-            }
-        }
+        timeLabel.text = Constants.formatDate(file.lastModifiedAt, style: .datetime, relative: true)
     }
 
     override func configureLoading() {

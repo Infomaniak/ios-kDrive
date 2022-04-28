@@ -74,24 +74,22 @@ class FileProviderItem: NSObject, NSFileProviderItem {
 
     init(file: File, domain: NSFileProviderDomain?) {
         self.itemIdentifier = NSFileProviderItemIdentifier(file.id)
-        self.filename = file.name
+        self.filename = file.name.isEmpty ? "Root" : file.name
         self.typeIdentifier = file.typeIdentifier
-        if let rights = file.rights {
-            let rights = !rights.isManagedByRealm ? rights : rights.freeze()
-            self.capabilities = FileProviderItem.rightsToCapabilities(rights)
-        } else {
-            self.capabilities = [.allowsContentEnumerating, .allowsReading]
-        }
+        let rights = !file.capabilities.isManagedByRealm ? file.capabilities : file.capabilities.freeze()
+        self.capabilities = FileProviderItem.rightsToCapabilities(rights)
         // Every file should have a parent, root file parent should not be called
         self.parentItemIdentifier = NSFileProviderItemIdentifier(file.parent?.id ?? 1)
         let tmpChildren = FileProviderExtensionState.shared.importedDocuments(forParent: itemIdentifier)
         self.childItemCount = file.isDirectory ? NSNumber(value: file.children.count + tmpChildren.count) : nil
-        self.documentSize = file.size == 0 ? nil : NSNumber(value: file.size)
+        if let size = file.size {
+            self.documentSize = NSNumber(value: size)
+        }
         self.isTrashed = file.isTrashed
-        self.creationDate = file.fileCreatedAtDate ?? file.createdAtDate
-        self.contentModificationDate = file.lastModifiedAt == 0 ? nil : file.lastModifiedDate
+        self.creationDate = file.createdAt
+        self.contentModificationDate = file.lastModifiedAt
         self.versionIdentifier = Data(bytes: &contentModificationDate, count: MemoryLayout.size(ofValue: contentModificationDate))
-        self.isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote()
+        self.isMostRecentVersionDownloaded = !file.isLocalVersionOlderThanRemote
         let storageUrl = FileProviderItem.createStorageUrl(identifier: itemIdentifier, filename: filename, domain: domain)
         if DownloadQueue.instance.hasOperation(for: file) {
             self.isDownloading = true
@@ -100,14 +98,14 @@ class FileProviderItem: NSObject, NSFileProviderItem {
             self.isDownloading = false
             self.isDownloaded = file.isDownloaded
         }
-        if file.visibility == .isShared {
+        if file.users.count > 1 {
             self.isShared = true
             self.isSharedByCurrentUser = file.createdBy == AccountManager.instance.currentUserId
         } else {
             self.isShared = false
             self.isSharedByCurrentUser = false
         }
-        if let user = DriveInfosManager.instance.getUser(id: file.createdBy) {
+        if let user = file.creator {
             var ownerNameComponents = PersonNameComponents()
             ownerNameComponents.nickname = user.displayName
             self.ownerNameComponents = ownerNameComponents
@@ -160,26 +158,26 @@ class FileProviderItem: NSObject, NSFileProviderItem {
      */
     private class func rightsToCapabilities(_ rights: Rights) -> NSFileProviderItemCapabilities {
         var capabilities: NSFileProviderItemCapabilities = []
-        if rights.write {
+        if rights.canWrite {
             capabilities.insert(.allowsWriting)
         }
-        if rights.read {
+        if rights.canRead {
             capabilities.insert(.allowsReading)
         }
-        if rights.rename {
+        if rights.canRename {
             capabilities.insert(.allowsRenaming)
         }
-        if rights.delete {
+        if rights.canDelete {
             capabilities.insert(.allowsDeleting)
             capabilities.insert(.allowsTrashing)
         }
-        if rights.move {
+        if rights.canMove {
             capabilities.insert(.allowsReparenting)
         }
-        if rights.moveInto || rights.createNewFolder || rights.createNewFile || rights.uploadNewFile {
+        if rights.canMoveInto || rights.canCreateDirectory || rights.canCreateFile || rights.canUpload {
             capabilities.insert(.allowsAddingSubItems)
         }
-        if rights.show {
+        if rights.canShow {
             capabilities.insert(.allowsContentEnumerating)
         }
         return capabilities

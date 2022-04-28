@@ -78,28 +78,22 @@ public class PhotoLibrarySaver: NSObject {
         return nil
     }
 
-    public func save(image: UIImage) async throws {
+    public func save(url: URL, type: PHAssetMediaType) async throws {
         try await requestAuthorizationAndCreateAlbum()
         try await PHPhotoLibrary.shared().performChanges {
-            let assetChangeRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
-            let assetPlaceHolder = assetChangeRequest.placeholderForCreatedAsset
-
-            if let assetCollection = self.assetCollection, let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection) {
-                let enumeration: NSArray = [assetPlaceHolder!]
-                albumChangeRequest.addAssets(enumeration)
+            let assetChangeRequest: PHAssetChangeRequest?
+            switch type {
+            case .image:
+                assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+            case .video:
+                assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+            default:
+                assetChangeRequest = nil
             }
-        }
-    }
-
-    public func save(videoUrl: URL) async throws {
-        try await requestAuthorizationAndCreateAlbum()
-        try await PHPhotoLibrary.shared().performChanges {
-            if let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl) {
-                let assetPlaceHolder = assetChangeRequest.placeholderForCreatedAsset
-                if let assetCollection = self.assetCollection, let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection) {
-                    let enumeration: NSArray = [assetPlaceHolder!]
-                    albumChangeRequest.addAssets(enumeration)
-                }
+            if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset,
+               let assetCollection = self.assetCollection,
+               let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection) {
+                albumChangeRequest.addAssets([assetPlaceholder] as NSFastEnumeration)
             }
         }
     }

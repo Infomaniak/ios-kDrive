@@ -23,12 +23,12 @@ import kDriveCore
 class MatomoUtils {
     static let shared: MatomoTracker = {
         let tracker = MatomoTracker(siteId: "8", baseURL: URLConstants.matomo.url)
+        #if DEBUG
+        tracker.isOptedOut = true
+        #endif
         tracker.userId = String(AccountManager.instance.currentUserId)
         return tracker
     }()
-
-    // Enable or disable Matomo tracking
-    static let isEnabled = true
 
     enum Views: String {
         case shareAndRights, save, search, uploadQueue, preview, menu, settings, store, security
@@ -53,17 +53,14 @@ class MatomoUtils {
     }
 
     static func connectUser() {
-        guard isEnabled else { return }
         shared.userId = String(AccountManager.instance.currentUserId)
     }
 
     static func track(view: [String]) {
-        guard isEnabled else { return }
         shared.track(view: view)
     }
 
     static func track(eventWithCategory category: EventCategory, action: UserAction = .click, name: String, value: Float? = nil) {
-        guard isEnabled else { return }
         shared.track(eventWithCategory: category.rawValue, action: action.rawValue, name: name, value: value)
     }
 
@@ -73,18 +70,18 @@ class MatomoUtils {
 
     static func trackBulkEvent(eventWithCategory category: EventCategory, name: String, numberOfItems number: Int) {
         track(eventWithCategory: category, action: .click,
-              name: "bulk\(number == 1 ? "Single" : "")\(name.capitalized)", value: Float(number))
+              name: "bulk\(number == 1 ? "Single" : "")\(name)", value: Float(number))
     }
 
     // MARK: - DropBox
 
-    static func trackDropBoxSettings(emailEnabled: Bool, passwordEnabled: Bool, dateEnabled: Bool, sizeEnabled: Bool, size: Int?) {
-        track(eventWithCategory: .dropbox, name: "switchEmailOnFileImport", value: emailEnabled)
+    static func trackDropBoxSettings(_ settings: DropBoxSettings, passwordEnabled: Bool) {
+        track(eventWithCategory: .dropbox, name: "switchEmailOnFileImport", value: settings.emailWhenFinished)
         track(eventWithCategory: .dropbox, name: "switchProtectWithPassword", value: passwordEnabled)
-        track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: dateEnabled)
-        track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: sizeEnabled)
-        if sizeEnabled, let size = size {
-            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size))
+        track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: settings.validUntil != nil)
+        track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: settings.limitFileSize != nil)
+        if let size = settings.limitFileSize {
+            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size.toGigabytes))
         }
     }
 
@@ -138,4 +135,64 @@ class MatomoUtils {
     static func trackMediaPlayer(leaveAt percentage: Double?) {
         track(eventWithCategory: .mediaPlayer, name: "duration", value: Float(percentage ?? 0))
     }
+
+    // MARK: - File action
+
+    #if !ISEXTENSION
+
+    static func trackFileAction(action: FloatingPanelAction, file: File, fromPhotoList: Bool) {
+        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
+        switch action {
+        // Quick Actions
+        case .sendCopy:
+            track(eventWithCategory: category, name: "sendFileCopy")
+        case .shareLink:
+            track(eventWithCategory: category, name: "copyShareLink")
+        case .informations:
+            track(eventWithCategory: category, name: "openFileInfos")
+        // Actions
+        case .duplicate:
+            track(eventWithCategory: category, name: "copy")
+        case .move:
+            track(eventWithCategory: category, name: "move")
+        case .download:
+            track(eventWithCategory: category, name: "download")
+        case .favorite:
+            track(eventWithCategory: category, name: "favorite", value: !file.isFavorite)
+        case .offline:
+            track(eventWithCategory: category, name: "offline", value: !file.isAvailableOffline)
+        case .rename:
+            track(eventWithCategory: category, name: "rename")
+        case .delete:
+            track(eventWithCategory: category, name: "putInTrash")
+        case .convertToDropbox:
+            track(eventWithCategory: category, name: "convertToDropBox")
+        default:
+            break
+        }
+    }
+
+    static func trackBuklAction(action: FloatingPanelAction, files: [File], fromPhotoList: Bool) {
+        let numberOfFiles = files.count
+        let category: EventCategory = fromPhotoList ? .picturesFileAction : .fileListFileAction
+        switch action {
+        // Quick Actions
+        case .duplicate:
+            trackBulkEvent(eventWithCategory: category, name: "Copy", numberOfItems: numberOfFiles)
+        case .download:
+            trackBulkEvent(eventWithCategory: category, name: "Download", numberOfItems: numberOfFiles)
+        case .favorite:
+            trackBulkEvent(eventWithCategory: category, name: "Add_favorite", numberOfItems: numberOfFiles)
+        case .offline:
+            trackBulkEvent(eventWithCategory: category, name: "Set_offline", numberOfItems: numberOfFiles)
+        case .delete:
+            trackBulkEvent(eventWithCategory: category, name: "Trash", numberOfItems: numberOfFiles)
+        case .folderColor:
+            trackBulkEvent(eventWithCategory: category, name: "Color_folder", numberOfItems: numberOfFiles)
+        default:
+            break
+        }
+    }
+
+    #endif
 }

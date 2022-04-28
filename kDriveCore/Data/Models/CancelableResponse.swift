@@ -16,17 +16,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Alamofire
 import Foundation
 
-public extension JSONParameterEncoder {
-    static var convertToSnakeCase: JSONParameterEncoder {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        encoder.dateEncodingStrategy = .custom { date, encoder in
-            var container = encoder.singleValueContainer()
-            try container.encode(Int(date.timeIntervalSince1970))
-        }
-        return JSONParameterEncoder(encoder: encoder)
+public class CancelableResponse: Codable {
+    public let id: String
+    public let validUntil: Int
+    public var offline: Bool {
+        return id.isEmpty
+    }
+
+    init() {
+        id = ""
+        validUntil = 0
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id = "cancel_id"
+        case validUntil = "valid_until"
     }
 }

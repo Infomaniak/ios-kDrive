@@ -114,7 +114,8 @@ class PhotoSyncSettingsViewController: UIViewController {
                 selectedDirectory = photoSyncDirectory
                 updateSaveButtonState()
             } else {
-                driveFileManager?.getFile(id: newSyncSettings.parentDirectoryId) { file, _, _ in
+                Task {
+                    let file = try await driveFileManager?.file(id: newSyncSettings.parentDirectoryId)
                     self.selectedDirectory = file?.freeze()
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .none)
                 }
@@ -418,7 +419,7 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
                 navigationController?.pushViewController(selectDriveViewController, animated: true)
             } else if row == .folderSelection {
                 if let driveFileManager = driveFileManager {
-                    let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, disabledDirectoriesSelection: [driveFileManager.getRootFile()], delegate: self)
+                    let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, disabledDirectoriesSelection: [driveFileManager.getCachedRootFile()], delegate: self)
                     navigationController?.present(selectFolderNavigationController, animated: true)
                 }
             }

@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
+import InfomaniakCore
 
 public class DownloadArchiveOperation: Operation {
     // MARK: - Attributes
@@ -81,7 +82,7 @@ public class DownloadArchiveOperation: Operation {
             return
         }
 
-        if !Constants.isInExtension {
+        if !Bundle.main.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Archive Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 // We don't support task rescheduling for archive download but still need to pass error to diffrentiate from user cancel
@@ -99,7 +100,7 @@ public class DownloadArchiveOperation: Operation {
     override public func main() {
         DDLogInfo("[DownloadOperation] Downloading Archive of files \(archiveId) with session \(urlSession.identifier)")
 
-        let url = URL(string: ApiRoutes.downloadArchive(driveId: driveFileManager.drive.id, archiveId: archiveId))!
+        let url = Endpoint.getArchive(drive: driveFileManager.drive, uuid: archiveId).url
 
         if let userToken = AccountManager.instance.getTokenForUserId(driveFileManager.drive.userId) {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: userToken) { [self] token, _ in

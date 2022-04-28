@@ -17,12 +17,13 @@
  */
 
 import Foundation
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
 
 class HomeRecentActivitiesController: HomeRecentFilesController {
-    private let mergeFileCreateDelay = 43_200 // 12h
+    private let mergeFileCreateDelay = 43_200.0 // 12h
 
     private var mergedActivities = [FileActivity]()
 
@@ -51,38 +52,40 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         }
         loading = true
 
-        driveFileManager.apiFetcher.getRecentActivity(driveId: driveFileManager.drive.id, page: page) { response, _ in
-            self.loading = false
-            if let activities = response?.data {
+        Task {
+            do {
+                let activities = try await driveFileManager.apiFetcher.recentActivity(drive: driveFileManager.drive, page: page)
                 self.empty = self.page == 1 && activities.isEmpty
-                self.moreComing = activities.count == DriveApiFetcher.itemPerPage
-                self.page += 1
+                self.moreComing = activities.count == Endpoint.itemsPerPage
 
-                DispatchQueue.global(qos: .utility).async {
-                    let mergedActivities = self.mergeAndClean(activities: activities)
-                    self.mergedActivities.append(contentsOf: mergedActivities)
-
-                    guard !self.invalidated else {
-                        return
-                    }
-                    self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
-                }
+                display(activities: activities)
                 // Update cache
                 if self.page == 1 {
                     self.driveFileManager.setLocalRecentActivities(activities)
                 }
-            } else {
-                DispatchQueue.global(qos: .utility).async {
-                    let activities = self.driveFileManager.getLocalRecentActivities()
-                    self.mergedActivities = self.mergeAndClean(activities: activities)
+                self.page += 1
+            } catch {
+                let activities = self.driveFileManager.getLocalRecentActivities()
+                self.empty = activities.isEmpty
+                self.moreComing = false
 
-                    self.empty = self.mergedActivities.isEmpty
-                    self.moreComing = false
-                    guard !self.invalidated else {
-                        return
-                    }
-                    self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(self.mergedActivities), isEmpty: self.empty)
-                }
+                display(activities: activities)
+            }
+        }
+    }
+
+    private func display(activities: [FileActivity]) {
+        DispatchQueue.global(qos: .utility).async {
+            let pagedActivities = self.mergeAndClean(activities: activities)
+            self.mergedActivities.append(contentsOf: pagedActivities)
+
+            guard !self.invalidated else {
+                self.loading = false
+                return
+            }
+            Task { [activities = self.mergedActivities] in
+                self.homeViewController?.reloadWith(fetchedFiles: .fileActivity(activities), isEmpty: self.empty)
+                self.loading = false
             }
         }
     }
@@ -94,12 +97,12 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         var ignoredActivityIds = [Int]()
 
         for (index, activity) in activities.enumerated() {
-            let ignoreActivity = !resultActivities.isEmpty && resultActivities.last?.user?.id == activity.user?.id && resultActivities.last?.action == activity.action && resultActivities.last?.file?.id == activity.file?.id
+            let ignoreActivity = !resultActivities.isEmpty && resultActivities.last?.userId == activity.userId && resultActivities.last?.action == activity.action && resultActivities.last?.file?.id == activity.file?.id
             if !ignoredActivityIds.contains(activity.id) && !ignoreActivity {
                 var i = index + 1
                 var mergedFilesTemp = [activity.fileId: activity.file]
-                while i < activities.count && activity.createdAt - activities[i].createdAt <= mergeFileCreateDelay {
-                    if activity.user?.id == activities[i].user?.id && activity.action == activities[i].action && activity.file?.type == activities[i].file?.type {
+                while i < activities.count && activities[i].createdAt.distance(to: activity.createdAt) <= mergeFileCreateDelay {
+                    if activity.userId == activities[i].userId && activity.action == activities[i].action && activity.file?.type == activities[i].file?.type {
                         ignoredActivityIds.append(activities[i].id)
                         if mergedFilesTemp[activities[i].fileId] == nil {
                             activity.mergedFileActivities.append(activities[i])
@@ -115,7 +118,7 @@ class HomeRecentActivitiesController: HomeRecentFilesController {
         return resultActivities
     }
 
-    override func getLayout(for style: ListStyle) -> NSCollectionLayoutSection {
+    override func getLayout(for style: ListStyle, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(200))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])

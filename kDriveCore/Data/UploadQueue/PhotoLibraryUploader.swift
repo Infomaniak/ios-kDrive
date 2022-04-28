@@ -81,10 +81,10 @@ public class PhotoLibraryUploader {
                 return resources.first
             }
         } else if asset.mediaType == .image {
-            if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizePhoto }) {
-                return modifiedVideoResource
-            } else if let originalVideoResource = resources.first(where: { $0.type == .photo }) {
-                return originalVideoResource
+            if let modifiedImageResource = resources.first(where: { $0.type == .fullSizePhoto }) {
+                return modifiedImageResource
+            } else if let originalImageResource = resources.first(where: { $0.type == .photo }) {
+                return originalImageResource
             } else {
                 return resources.first
             }
@@ -191,12 +191,8 @@ public class PhotoLibraryUploader {
                 }
                 var correctName = "No-name-\(Date().timeIntervalSince1970)"
                 var fileExtension = ""
-                for resource in PHAssetResource.assetResources(for: asset) {
-                    if resource.type == .photo && asset.mediaType == .image {
-                        fileExtension = (resource.originalFilename as NSString).pathExtension
-                    } else if resource.type == .video && asset.mediaType == .video {
-                        fileExtension = (resource.originalFilename as NSString).pathExtension
-                    }
+                if let resource = bestResource(for: asset) {
+                    fileExtension = (resource.originalFilename as NSString).pathExtension
                 }
                 if let creationDate = asset.creationDate {
                     correctName = dateFormatter.string(from: creationDate)

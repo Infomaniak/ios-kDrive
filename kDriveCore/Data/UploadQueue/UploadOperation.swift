@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
@@ -37,10 +38,15 @@ public class UploadTokenManager {
         } else if let userToken = AccountManager.instance.getTokenForUserId(userId),
                   let drive = AccountManager.instance.getDrive(for: userId, driveId: driveId),
                   let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            driveFileManager.apiFetcher.getPublicUploadTokenWithToken(userToken, driveId: drive.id) { response, _ in
-                let token = response?.data
-                self.tokens[userId] = token
-                completionHandler(token)
+            driveFileManager.apiFetcher.getPublicUploadToken(with: userToken, drive: drive) { result in
+                switch result {
+                case .success(let token):
+                    self.tokens[userId] = token
+                    completionHandler(token)
+                case .failure(let error):
+                    DDLogError("[UploadOperation] Error while trying to get upload token: \(error)")
+                    completionHandler(nil)
+                }
                 self.lock.leave()
             }
         } else {
@@ -67,6 +73,8 @@ public class UploadOperation: Operation {
     private var progressObservation: NSKeyValueObservation?
 
     public var result: UploadCompletionResult
+
+    private let completionLock = DispatchGroup()
 
     private var _executing = false {
         willSet {
@@ -130,29 +138,9 @@ public class UploadOperation: Operation {
         }
 
         // Start background task
-        if !Constants.isInExtension {
-            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader") {
-                DDLogInfo("[UploadOperation] Background task expired")
-                let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
-                breadcrumb.message = "Rescheduling file \(self.file.name)"
-                breadcrumb.data = ["File id": self.file.id,
-                                   "File name": self.file.name,
-                                   "File size": self.file.size,
-                                   "File type": self.file.type.rawValue]
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
-                let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: self.task, fileUrl: self.file.pathURL)
-                if let sessionId = rescheduledSessionId {
-                    self.file.sessionId = sessionId
-                    self.file.error = .taskRescheduled
-                } else {
-                    self.file.sessionUrl = ""
-                    self.file.error = .taskExpirationCancelled
-                    UploadQueue.instance.sendPausedNotificationIfNeeded()
-                }
-                UploadQueue.instance.suspendAllOperations()
-                self.task?.cancel()
-                self.end()
-            }
+        if !Bundle.main.isExtension {
+            backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Uploader",
+                                                                                expirationHandler: backgroundTaskExpired)
         }
 
         getUploadTokenSync()
@@ -173,7 +161,7 @@ public class UploadOperation: Operation {
             return
         }
 
-        let url = URL(string: ApiRoutes.uploadFile(file: file))!
+        let url = Endpoint.directUpload(file: file).url
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("Bearer \(token.token)", forHTTPHeaderField: "Authorization")
@@ -244,6 +232,11 @@ public class UploadOperation: Operation {
     }
 
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
+        completionLock.wait()
+        // Task has called end() in backgroundTaskExpired
+        guard !isFinished else { return }
+        completionLock.enter()
+
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
         if let error = error {
@@ -253,6 +246,7 @@ public class UploadOperation: Operation {
                 file.sessionUrl = ""
             } else {
                 // We return because we don't want end() to be called as it is already called in the expiration handler
+                completionLock.leave()
                 return
             }
             if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorCancelled {
@@ -272,18 +266,11 @@ public class UploadOperation: Operation {
             file.error = nil
             if let driveFileManager = AccountManager.instance.getDriveFileManager(for: file.driveId, userId: file.userId) {
                 // File is already or has parent in DB let's update it
-                BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration).execute { realm in
+                let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
+                queue.execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || file.relativePath.isEmpty {
                         let parent = driveFileManager.getCachedFile(id: file.parentDirectoryId, freeze: false, using: realm)
-                        try? realm.safeWrite {
-                            realm.add(driveFile, update: .all)
-                            if file.relativePath.isEmpty && parent != nil && !parent!.children.contains(driveFile) {
-                                parent?.children.append(driveFile)
-                            }
-                        }
-                        if let parent = parent {
-                            driveFileManager.notifyObserversWith(file: parent)
-                        }
+                        queue.bufferedWrite(in: parent, file: driveFile)
                         result.driveFile = File(value: driveFile)
                     }
                 }
@@ -292,7 +279,7 @@ public class UploadOperation: Operation {
             // Server-side error
             var error = DriveError.serverError
             if let data = data,
-               let apiError = try? ApiFetcher.decoder.decode(ApiResponse<EmptyResponse>.self, from: data).error {
+               let apiError = try? ApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
                 error = DriveError(apiError: apiError)
             }
             DDLogError("[UploadOperation] Server error for job \(file.id) (code: \(statusCode)): \(error)")
@@ -312,10 +299,41 @@ public class UploadOperation: Operation {
         }
 
         end()
+        completionLock.leave()
+    }
+
+    private func backgroundTaskExpired() {
+        completionLock.wait()
+        // Task has called end() in uploadCompletion
+        guard !isFinished else { return }
+        completionLock.enter()
+
+        DDLogInfo("[UploadOperation] Background task expired")
+        let breadcrumb = Breadcrumb(level: .info, category: "BackgroundUploadTask")
+        breadcrumb.message = "Rescheduling file \(file.name)"
+        breadcrumb.data = ["File id": file.id,
+                           "File name": file.name,
+                           "File size": file.size,
+                           "File type": file.type.rawValue]
+        SentrySDK.addBreadcrumb(crumb: breadcrumb)
+        let rescheduledSessionId = BackgroundUploadSessionManager.instance.rescheduleForBackground(task: task, fileUrl: file.pathURL)
+        if let sessionId = rescheduledSessionId {
+            file.sessionId = sessionId
+            file.error = .taskRescheduled
+        } else {
+            file.sessionUrl = ""
+            file.error = .taskExpirationCancelled
+            UploadQueue.instance.sendPausedNotificationIfNeeded()
+        }
+        UploadQueue.instance.suspendAllOperations()
+        task?.cancel()
+        end()
+        completionLock.leave()
+        DDLogInfo("[UploadOperation] Expiration handler end block job \(file.id)")
     }
 
     private func end() {
-        DDLogInfo("[UploadOperation] Job \(file.id) ended")
+        DDLogInfo("[UploadOperation] Job \(file.id) ended error: \(file.error?.code ?? "")")
 
         if let path = file.pathURL,
            file.shouldRemoveAfterUpload && (file.error == nil || file.error == .taskCancelled) {

@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import MQTTNIO
 
 public class MQService {
@@ -28,17 +29,18 @@ public class MQService {
     }()
 
     private let queue = DispatchQueue(label: "com.infomaniak.drive.mqservice")
+    private static let environment = ApiEnvironment.current
     private static let configuration = MQTTClient.Configuration(
         keepAliveInterval: .seconds(30),
         connectTimeout: .seconds(20),
         userName: "ips:ips-public",
-        password: "8QC5EwBqpZ2Z",
+        password: environment.mqttPass,
         useSSL: true,
         useWebSockets: true,
         webSocketURLPath: "/ws"
     )
     private let client = MQTTClient(
-        host: "info-mq.infomaniak.com",
+        host: environment.mqttHost,
         port: 443,
         identifier: generateClientIdentifier(),
         eventLoopGroupProvider: .createNew,

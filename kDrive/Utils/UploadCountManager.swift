@@ -24,6 +24,7 @@ class UploadCountManager {
     private let driveFileManager: DriveFileManager
     private let didUploadCountChange: () -> Void
     private let uploadCountThrottler = Throttler<Int>(timeInterval: 1, queue: .main)
+    private let observeQueue = DispatchQueue(label: "com.infomaniak.drive.uploadThrottler", qos: .utility, autoreleaseFrequency: .workItem)
 
     private lazy var userId = driveFileManager.drive.userId
     private lazy var driveIds = [driveFileManager.drive.id] + DriveInfosManager.instance.getDrives(for: userId, sharedWithMe: true).map(\.id)
@@ -57,7 +58,7 @@ class UploadCountManager {
             self?.didUploadCountChange()
         }
 
-        uploadsObserver = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds).observe { [weak self] change in
+        uploadsObserver = UploadQueue.instance.getUploadingFiles(userId: userId, driveIds: driveIds).observe(on: observeQueue) { [weak self] change in
             switch change {
             case .initial(let results):
                 self?.uploadCountThrottler.call(results.count)

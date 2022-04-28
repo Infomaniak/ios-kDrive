@@ -21,5 +21,5 @@ import Foundation
 public class FileCount: Codable {
     public let count: Int
     public let files: Int
-    public let folders: Int
+    public let directories: Int
 }

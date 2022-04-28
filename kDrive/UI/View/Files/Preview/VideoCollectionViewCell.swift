@@ -17,6 +17,8 @@
  */
 
 import AVKit
+import FloatingPanel
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import Kingfisher
@@ -36,7 +38,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
     @IBOutlet weak var playButton: UIButton!
 
     var driveFileManager: DriveFileManager!
-    var parentViewController: UIViewController?
+    weak var parentViewController: UIViewController?
+    weak var floatingPanelController: FloatingPanelController?
 
     private var previewDownloadTask: Kingfisher.DownloadTask?
     private var file: File!
@@ -64,19 +67,19 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         file.getThumbnail { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
-        if !file.isLocalVersionOlderThanRemote() {
+        if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 if let token = token {
-                    let url = URL(string: ApiRoutes.downloadFile(file: file))!
+                    let url = Endpoint.download(file: file).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     DispatchQueue.main.async {
                         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
                     }
                 } else {
-                    DispatchQueue.main.async {
+                    Task {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
                     }
                 }
@@ -101,12 +104,16 @@ class VideoCollectionViewCell: PreviewCollectionViewCell {
         navController.disappearCallback = { [weak self] in
             MatomoUtils.track(eventWithCategory: .mediaPlayer, name: "pause")
             self?.player?.pause()
+            if let floatingPanelController = self?.floatingPanelController {
+                self?.parentViewController?.present(floatingPanelController, animated: true)
+            }
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
         navController.modalTransitionStyle = .crossDissolve
 
-        parentViewController?.presentedViewController?.dismiss(animated: true)
+        floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController
+        floatingPanelController?.dismiss(animated: true)
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
         }

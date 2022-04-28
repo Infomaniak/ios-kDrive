@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import FileProvider
 import Foundation
+import InfomaniakCore
 import InfomaniakLogin
 
 public class DownloadOperation: Operation {
@@ -97,7 +98,7 @@ public class DownloadOperation: Operation {
             return
         }
 
-        if !Constants.isInExtension {
+        if !Bundle.main.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
                 DownloadQueue.instance.suspendAllOperations()
                 DDLogInfo("[DownloadOperation] Background task expired")
@@ -143,7 +144,7 @@ public class DownloadOperation: Operation {
     override public func main() {
         DDLogInfo("[DownloadOperation] Downloading \(file.id) with session \(urlSession.identifier)")
 
-        let url = URL(string: ApiRoutes.downloadFile(file: file))!
+        let url = Endpoint.download(file: file).url
 
         // Add download task to Realm
         let downloadTask = DownloadTask(fileId: file.id, isDirectory: file.isDirectory, driveId: file.driveId, userId: driveFileManager.drive.userId, sessionId: urlSession.identifier, sessionUrl: url.absoluteString)

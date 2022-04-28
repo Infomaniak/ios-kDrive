@@ -56,14 +56,6 @@ public class UploadFile: Object {
 
     private var localAsset: PHAsset?
 
-    var urlEncodedName: String {
-        return name.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
-    }
-
-    var urlEncodedRelativePath: String {
-        return relativePath.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
-    }
-
     public var pathURL: URL? {
         get {
             return url == nil ? nil : URL(fileURLWithPath: url!)
@@ -136,8 +128,10 @@ public class UploadFile: Object {
         var queryItems = [
             URLQueryItem(name: "conflict", value: conflictOption.rawValue),
             URLQueryItem(name: "file_name", value: name),
-            URLQueryItem(name: "relative_path", value: relativePath),
-            URLQueryItem(name: "total_size", value: "\(size)")
+            // TODO: Upload route needs relative_path/filename to work correctly, remove when upload is done with apiV2
+            URLQueryItem(name: "relative_path", value: relativePath + name),
+            // URLQueryItem(name: "total_size", value: "\(size)")
+            URLQueryItem(name: "asV2", value: nil)
         ]
         if let creationDate = creationDate {
             queryItems.append(URLQueryItem(name: "file_created_at", value: "\(Int(creationDate.timeIntervalSince1970))"))

@@ -23,7 +23,6 @@ import kDriveResources
 import UIKit
 
 class MainTabViewController: UITabBarController, MainTabBarDelegate {
-    var floatingPanelViewController: DriveFloatingPanelController?
     // swiftlint:disable weak_delegate
     var photoPickerDelegate = PhotoPickerDelegate()
 
@@ -38,12 +37,25 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         setDriveFileManager(AccountManager.instance.currentDriveFileManager) { currentDriveFileManager in
             self.driveFileManager = currentDriveFileManager
         }
-        for viewController in viewControllers ?? [] {
-            ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+
+        if driveFileManager != nil {
+            configureRootViewController(at: 1, with: ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+            configureRootViewController(at: 3, with: FavoritesViewModel(driveFileManager: driveFileManager, currentDirectory: nil))
+
+            for viewController in viewControllers ?? [] {
+                ((viewController as? UINavigationController)?.viewControllers.first as? SwitchDriveDelegate)?.driveFileManager = driveFileManager
+            }
         }
 
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         delegate = self
+    }
+
+    private func configureRootViewController(at index: Int, with viewModel: FileListViewModel) {
+        let rootNavigationViewController = (viewControllers?[index] as? UINavigationController)
+        (rootNavigationViewController?.viewControllers.first as? FileListViewController)?.viewModel = viewModel
+        rootNavigationViewController?.tabBarItem.image = viewModel.configuration.tabBarIcon.image
+        rootNavigationViewController?.tabBarItem.selectedImage = viewModel.configuration.selectedTabBarIcon.image
     }
 
     override func viewDidLayoutSubviews() {
@@ -122,31 +134,25 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func plusButtonPressed() {
-        getCurrentDirectory { driveFileManager, currentDirectory in
-            let floatingPanelViewController = DriveFloatingPanelController()
-            let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager, folder: currentDirectory)
-            plusButtonFloatingPanel.floatingPanelController = floatingPanelViewController
-            floatingPanelViewController.isRemovalInteractionEnabled = true
-            floatingPanelViewController.delegate = plusButtonFloatingPanel
+        let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
+        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+        let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(driveFileManager: currentDriveFileManager, folder: currentDirectory)
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = plusButtonFloatingPanel
 
-            floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
-            floatingPanelViewController.track(scrollView: plusButtonFloatingPanel.tableView)
-            self.present(floatingPanelViewController, animated: true)
-        }
+        floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
+        floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
+        present(floatingPanelViewController, animated: true)
     }
 
-    func getCurrentDirectory(completion: @escaping (DriveFileManager, File) -> Void) {
+    func getCurrentDirectory() -> (DriveFileManager, File) {
         if let filesViewController = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController,
            let driveFileManager = filesViewController.driveFileManager,
-           let directory = filesViewController.currentDirectory,
-           directory.id >= DriveFileManager.constants.rootID {
-            completion(driveFileManager, directory)
+           filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+            return (driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
-            driveFileManager.getFile(id: DriveFileManager.constants.rootID) { file, _, _ in
-                if let file = file {
-                    completion(self.driveFileManager, file)
-                }
-            }
+            let file = driveFileManager.getCachedRootFile()
+            return (driveFileManager, file)
         }
     }
 
@@ -187,9 +193,8 @@ extension MainTabViewController: UITabBarControllerDelegate {
     }
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        getCurrentDirectory { _, currentDirectory in
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.rights?.createNewFile ?? false
-        }
+        let (_, currentDirectory) = getCurrentDirectory()
+        (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.capabilities.canCreateFile
     }
 }
 

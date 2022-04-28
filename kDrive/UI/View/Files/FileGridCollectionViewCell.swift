@@ -20,6 +20,24 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+class FileGridViewModel: FileViewModel {
+    var iconImageHidden: Bool { file.isDirectory }
+
+    var hasThumbnail: Bool { !file.isDirectory && file.hasThumbnail }
+
+    var shouldCenterTitle: Bool { file.isDirectory }
+
+    override func setThumbnail(on imageView: UIImageView) {
+        imageView.image = nil
+        imageView.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
+        thumbnailDownloadTask?.cancel()
+        thumbnailDownloadTask = file.getThumbnail { image, _ in
+            imageView.image = image
+            imageView.backgroundColor = nil
+        }
+    }
+}
+
 class FileGridCollectionViewCell: FileCollectionViewCell {
     @IBOutlet weak var _checkmarkImage: UIImageView!
     @IBOutlet weak var largeIconImageView: UIImageView!
@@ -53,47 +71,35 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
 
     override func initStyle(isFirst: Bool, isLast: Bool) {}
 
-    override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
-        super.configureWith(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode)
-        iconImageView.isHidden = file.isDirectory
-        if file.isDirectory || !file.hasThumbnail {
-            logoImage.isHidden = true
-            largeIconImageView.isHidden = false
-            moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
-            moreButton.backgroundColor = nil
-        } else {
+    override func configure(with viewModel: FileViewModel) {
+        super.configure(with: viewModel)
+        guard let viewModel = viewModel as? FileGridViewModel else { return }
+        iconImageView.isHidden = viewModel.iconImageHidden
+        if viewModel.hasThumbnail {
             logoImage.isHidden = false
             largeIconImageView.isHidden = true
             iconImageView.isHidden = false
             moreButton.tintColor = .white
             moreButton.backgroundColor = UIColor.black.withAlphaComponent(0.3)
             moreButton.cornerRadius = moreButton.frame.width / 2
+        } else {
+            logoImage.isHidden = true
+            largeIconImageView.isHidden = false
+            moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+            moreButton.backgroundColor = nil
         }
         logoImage.contentMode = .scaleAspectFill
-        stackViewCenterConstraint?.isActive = file.isDirectory
-        titleLabel.textAlignment = file.isDirectory ? .center : .natural
-        checkmarkImage?.isHidden = !selectionMode
-        iconImageView.image = file.icon
-        iconImageView.tintColor = file.tintColor
-        largeIconImageView.image = file.icon
-        largeIconImageView.tintColor = file.tintColor
-        if file.isDirectory {
-            file.getThumbnail { image, _ in
-                self.largeIconImageView.image = image
-            }
-        }
+        stackViewCenterConstraint?.isActive = viewModel.shouldCenterTitle
+        titleLabel.textAlignment = viewModel.shouldCenterTitle ? .center : .natural
+        checkmarkImage?.isHidden = !viewModel.selectionMode
+        iconImageView.image = viewModel.icon
+        iconImageView.tintColor = viewModel.iconTintColor
+        largeIconImageView.image = viewModel.icon
+        largeIconImageView.tintColor = viewModel.iconTintColor
     }
 
-    override func setThumbnailFor(file: File) {
-        let fileId = file.id
-        logoImage.image = nil
-        logoImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
-        file.getThumbnail { image, _ in
-            if fileId == self.file.id {
-                self.logoImage.image = image
-                self.logoImage.backgroundColor = nil
-            }
-        }
+    override func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
+        configure(with: FileGridViewModel(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode))
     }
 
     override func configureLoading() {

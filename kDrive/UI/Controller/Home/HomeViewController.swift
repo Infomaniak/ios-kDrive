@@ -146,12 +146,13 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private var floatingPanelViewController: DriveFloatingPanelController?
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
-    private lazy var filePresenter = FilePresenter(viewController: self, floatingPanelViewController: floatingPanelViewController)
+    private lazy var filePresenter = FilePresenter(viewController: self)
 
     private var currentRecentFilesController: HomeRecentFilesController!
     private var recentFilesControllersCache = [String: HomeRecentFilesController]()
     private let recentFilesControllers = [HomeRecentActivitiesController.self, HomeOfflineFilesController.self, HomePhotoListController.self]
 
+    private let reloadQueue = DispatchQueue(label: "com.infomaniak.drive.reloadQueue", qos: .userInitiated)
     private lazy var viewModel = HomeViewModel(topRows: getTopRows(), recentFiles: .file([]), recentFilesEmpty: false, isLoading: false)
     private var showInsufficientStorage = true
     private var filesObserver: ObservationToken?
@@ -185,7 +186,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
-            self?.reloadTopRows()
+            Task { [weak self] in
+                self?.reloadTopRows()
+            }
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
@@ -274,11 +277,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     func reloadWith(fetchedFiles: HomeFileType, isEmpty: Bool) {
-        DispatchQueue.main.async { [self] in
-            refreshControl.endRefreshing()
-            let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
-            headerView?.switchLayoutButton.isEnabled = !isEmpty
-        }
+        refreshControl.endRefreshing()
+        let headerView = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).compactMap { $0 as? HomeRecentFilesHeaderView }.first
+        headerView?.switchLayoutButton.isEnabled = !isEmpty
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
                                          recentFilesEmpty: isEmpty,
@@ -287,11 +288,16 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func reload(newViewModel: HomeViewModel) {
-        DispatchQueue.main.async { [self] in
+        reloadQueue.async { [weak self] in
+            guard let self = self else { return }
             var newViewModel = newViewModel
-            let changeset = StagedChangeset(source: viewModel.changeSet, target: newViewModel.changeSet)
-            collectionView.reload(using: changeset) { data in
-                self.viewModel = HomeViewModel(changeSet: data)
+            let newChangeset = newViewModel.changeSet
+            let oldChangeset = self.viewModel.changeSet
+            let changeset = StagedChangeset(source: oldChangeset, target: newChangeset)
+            DispatchQueue.main.sync {
+                self.collectionView.reload(using: changeset) { data in
+                    self.viewModel = HomeViewModel(changeSet: data)
+                }
             }
         }
     }
@@ -362,7 +368,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     }
 
     private func createLayout() -> UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { [weak self] section, _ in
+        let layout = UICollectionViewCompositionalLayout { [weak self] section, layoutEnvironment in
             guard let self = self else { return nil }
             switch HomeSection.allCases[section] {
             case .top:
@@ -372,7 +378,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                     if recentFilesController.empty {
                         return recentFilesController.getEmptyLayout()
                     } else {
-                        return recentFilesController.getLayout(for: UserDefaults.shared.homeListStyle)
+                        return recentFilesController.getLayout(for: UserDefaults.shared.homeListStyle, layoutEnvironment: layoutEnvironment)
                     }
                 } else {
                     return nil
@@ -603,7 +609,8 @@ extension HomeViewController {
                 let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
                 navigationController?.pushViewController(uploadViewController, animated: true)
             case .search:
-                present(SearchViewController.instantiateInNavigationController(driveFileManager: driveFileManager), animated: true)
+                let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+                present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
             }
         case .recentFiles:
             if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1) && !viewModel.recentFilesEmpty {
@@ -633,7 +640,7 @@ extension HomeViewController {
 // MARK: - FileCellDelegate
 
 extension HomeViewController: FileCellDelegate {
-    @objc func didTapMoreButton(_ cell: FileCollectionViewCell) {
+    func didTapMoreButton(_ cell: FileCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
         }
@@ -675,7 +682,7 @@ extension HomeViewController: RecentActivityDelegate {
             let nextVC = RecentActivityFilesViewController.instantiate(activities: activities, driveFileManager: driveFileManager)
             filePresenter.navigationController?.pushViewController(nextVC, animated: true)
         } else {
-            filePresenter.present(driveFileManager: driveFileManager, file: file, files: activities.compactMap(\.file), normalFolderHierarchy: false)
+            filePresenter.present(driveFileManager: driveFileManager, file: driveFileManager.getManagedFile(from: file), files: activities.compactMap(\.file), normalFolderHierarchy: false)
         }
     }
 }

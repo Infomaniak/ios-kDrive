@@ -90,7 +90,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
             selectItem(at: index)
         }
 
-        dropDown.dataSource = results.map(\.shareableName)
+        dropDown.dataSource = results.map(\.displayName)
     }
 
     @IBAction func editingDidChanged(_ sender: UITextField) {
@@ -109,7 +109,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         } else {
             // Filter the users based on the text
             results = shareables.filter { shareable in
-                !ignoredShareables.contains { $0.id == shareable.id } && (shareable.shareableName.lowercased().contains(text) || (shareable as? DriveUser)?.email.contains(text) ?? false)
+                !ignoredShareables.contains { $0.id == shareable.id } && (shareable.displayName.lowercased().contains(text) || (shareable as? DriveUser)?.email.contains(text) ?? false)
             }
         }
         dropDown.dataSource.removeAll()
@@ -119,7 +119,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
         } else {
             email = nil
         }
-        dropDown.dataSource.append(contentsOf: results.map(\.shareableName))
+        dropDown.dataSource.append(contentsOf: results.map(\.displayName))
     }
 
     private func isValidEmail(_ email: String) -> Bool {

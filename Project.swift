@@ -22,7 +22,7 @@ import ProjectDescriptionHelpers
 let project = Project(name: "kDrive",
                       packages: [
                           .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.2.2")),
-                          .package(url: "https://github.com/Infomaniak/ios-core.git", .upToNextMajor(from: "1.1.2")),
+                          .package(url: "https://github.com/Infomaniak/ios-core.git", .upToNextMajor(from: "1.1.7")),
                           .package(url: "https://github.com/Infomaniak/ios-login.git", .upToNextMajor(from: "1.4.0")),
                           .package(url: "https://github.com/realm/realm-cocoa", .upToNextMajor(from: "10.0.0")),
                           .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
@@ -43,7 +43,8 @@ let project = Project(name: "kDrive",
                           .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
                           .package(url: "https://github.com/raspu/Highlightr", .upToNextMajor(from: "2.1.0")),
                           .package(url: "https://github.com/bmoliveira/MarkdownKit.git", .upToNextMajor(from: "1.7.0")),
-                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios.git", .upToNextMajor(from: "7.5.1"))
+                          .package(url: "https://github.com/matomo-org/matomo-sdk-ios.git", .upToNextMajor(from: "7.5.1")),
+                          .package(url: "https://github.com/flowbe/SwiftRegex.git", .upToNextMajor(from: "1.0.0"))
                       ],
                       targets: [
                           Target(name: "kDrive",
@@ -78,6 +79,7 @@ let project = Project(name: "kDrive",
                                      .package(product: "Highlightr"),
                                      .package(product: "MarkdownKit"),
                                      .package(product: "MatomoTracker"),
+                                     .package(product: "SwiftRegex"),
                                      .sdk(name: "StoreKit.framework", status: .required)
                                  ],
                                  settings: .settings(base: Constants.baseSettings)),

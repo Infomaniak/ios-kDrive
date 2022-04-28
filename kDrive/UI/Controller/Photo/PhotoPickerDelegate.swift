@@ -27,11 +27,13 @@ class PhotoPickerDelegate: NSObject {
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
 
+    @MainActor
     private func handleError(_ error: Error) {
         DDLogError("Error while uploading file: \(error)")
         UIConstants.showSnackBar(message: error.localizedDescription)
     }
 
+    @MainActor
     private func showUploadSnackbar(count: Int, filename: String) {
         let message = count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(count) : KDriveResourcesStrings.Localizable.allUploadInProgress(filename)
         UIConstants.showSnackBar(message: message)
@@ -53,7 +55,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
             guard let image = info[.originalImage] as? UIImage else {
                 return
             }
-            let filename = FileImportHelper.instance.getDefaultFileName()
+            let filename = FileImportHelper.getDefaultFileName()
             do {
                 try FileImportHelper.instance.upload(photo: image, name: filename, format: .jpg, in: currentDirectory, drive: driveFileManager.drive)
                 showUploadSnackbar(count: 1, filename: filename)
@@ -64,7 +66,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
             guard let selectedVideo = info[.mediaURL] as? URL else {
                 return
             }
-            let filename = FileImportHelper.instance.getDefaultFileName()
+            let filename = FileImportHelper.getDefaultFileName()
             do {
                 try FileImportHelper.instance.upload(videoUrl: selectedVideo, name: filename, in: currentDirectory, drive: driveFileManager.drive)
                 showUploadSnackbar(count: 1, filename: filename)
@@ -85,24 +87,22 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
         picker.dismiss(animated: true)
 
         if !results.isEmpty {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
+            Task {
+                await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
+            }
             _ = FileImportHelper.instance.importItems(results.map(\.itemProvider)) { importedFiles, errorCount in
-                if errorCount > 0 {
-                    DispatchQueue.main.async {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
+                Task {
+                    if errorCount > 0 {
+                        await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
                     }
-                }
-                guard !importedFiles.isEmpty else {
-                    return
-                }
-                do {
-                    try FileImportHelper.instance.upload(files: importedFiles, in: self.currentDirectory, drive: self.driveFileManager.drive)
-                    DispatchQueue.main.async {
-                        self.showUploadSnackbar(count: importedFiles.count, filename: importedFiles[0].name)
+                    guard !importedFiles.isEmpty else {
+                        return
                     }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.handleError(error)
+                    do {
+                        try FileImportHelper.instance.upload(files: importedFiles, in: self.currentDirectory, drive: self.driveFileManager.drive)
+                        await self.showUploadSnackbar(count: importedFiles.count, filename: importedFiles[0].name)
+                    } catch {
+                        await self.handleError(error)
                     }
                 }
             }

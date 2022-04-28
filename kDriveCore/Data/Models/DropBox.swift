@@ -17,23 +17,102 @@
  */
 
 import Foundation
+import RealmSwift
 
-public class DropBox: Codable {
-    public var id: Int
-    public var alias: String
-    public var emailWhenFinished: Bool
-    public var limitFileSize: Int?
-    public var password: Bool
-    public var url: String
-    public var validUntil: Date?
+public class DropBox: EmbeddedObject, Codable {
+    @Persisted public var id: Int
+    @Persisted public var url: String
+    @Persisted public var capabilities: DropBoxCapabilities!
+}
+
+public class DropBoxCapabilities: EmbeddedObject, Codable {
+    @Persisted public var hasPassword: Bool
+    @Persisted public var hasNotification: Bool
+    @Persisted public var hasValidity: Bool
+    @Persisted public var hasSizeLimit: Bool
+    @Persisted public var validity: DropBoxValidity!
+    @Persisted public var size: DropBoxSize!
 
     enum CodingKeys: String, CodingKey {
-        case id
-        case alias
-        case emailWhenFinished = "email_when_finished"
-        case limitFileSize = "limit_file_size"
-        case password
-        case url
-        case validUntil = "valid_until"
+        case hasPassword = "has_password"
+        case hasNotification = "has_notification"
+        case hasValidity = "has_validity"
+        case hasSizeLimit = "has_size_limit"
+        case validity
+        case size
+    }
+}
+
+public class DropBoxValidity: EmbeddedObject, Codable {
+    @Persisted public var date: Date?
+    @Persisted public var hasExpired: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case hasExpired = "has_expired"
+    }
+}
+
+public class DropBoxSize: EmbeddedObject, Codable {
+    @Persisted public var limit: Int?
+    @Persisted public var remaining: Int?
+}
+
+public enum BinarySize: Encodable {
+    case bytes(Int)
+    case kilobytes(Int)
+    case megabytes(Int)
+    case gigabytes(Int)
+
+    public var toBytes: Int {
+        switch self {
+        case .bytes(let bytes):
+            return bytes
+        case .kilobytes(let kilobytes):
+            return kilobytes * 1_024
+        case .megabytes(let megabytes):
+            return megabytes * 1_048_576
+        case .gigabytes(let gigabytes):
+            return gigabytes * 1_073_741_824
+        }
+    }
+
+    public var toGigabytes: Int {
+        switch self {
+        case .bytes(let bytes):
+            return bytes / 1_073_741_824
+        case .kilobytes(let kilobytes):
+            return kilobytes / 1_048_576
+        case .megabytes(let megabytes):
+            return megabytes / 1_024
+        case .gigabytes(let gigabytes):
+            return gigabytes
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(toBytes)
+    }
+}
+
+public struct DropBoxSettings: Encodable {
+    /// Alias of the dropbox
+    @NullEncodable public var alias: String?
+    /// Send an email when done
+    public var emailWhenFinished: Bool
+    /// Limit total size of folder (bytes)
+    @NullEncodable public var limitFileSize: BinarySize?
+    /// Password for protecting the dropbox
+    public var password: String?
+    /// Date of validity
+    @NullEncodable public var validUntil: Date?
+
+    public init(alias: String?, emailWhenFinished: Bool, limitFileSize: BinarySize?, password: String?, validUntil: Date?) {
+        self.alias = alias
+        self.emailWhenFinished = emailWhenFinished
+        self.limitFileSize = limitFileSize
+        self.password = password
+        self.validUntil = validUntil
     }
 }

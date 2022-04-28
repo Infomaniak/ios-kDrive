@@ -68,6 +68,11 @@ class UploadQueueFoldersViewController: UITableViewController {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    guard !results.isEmpty else {
+                        self?.navigationController?.popViewController(animated: true)
+                        return
+                    }
+
                     self?.tableView.performBatchUpdates {
                         self?.updateFolders(from: results)
                         // Always apply updates in the following order: deletions, insertions, then modifications.
@@ -75,9 +80,6 @@ class UploadQueueFoldersViewController: UITableViewController {
                         self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                         self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                         self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                    }
-                    if results.isEmpty {
-                        self?.navigationController?.popViewController(animated: true)
                     }
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")

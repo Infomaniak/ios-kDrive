@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import RealmSwift
@@ -84,6 +85,11 @@ class UploadQueueViewController: UIViewController {
                         self?.navigationController?.popViewController(animated: true)
                     }
                 case .update(let results, deletions: let deletions, insertions: let insertions, modifications: let modifications):
+                    guard !results.isEmpty else {
+                        self?.navigationController?.popViewController(animated: true)
+                        return
+                    }
+
                     self?.tableView.performBatchUpdates {
                         // Always apply updates in the following order: deletions, insertions, then modifications.
                         // Handling insertions before deletions may result in unexpected behavior.
@@ -92,17 +98,7 @@ class UploadQueueViewController: UIViewController {
                         self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     } completion: { _ in
                         // Update cell corners
-                        var modifications = [Int]()
-                        if !results.isEmpty {
-                            modifications.append(0)
-                        }
-                        if results.count > 2 {
-                            modifications.append(results.count - 1)
-                        }
-                        self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                    }
-                    if results.isEmpty {
-                        self?.navigationController?.popViewController(animated: true)
+                        self?.tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
                     }
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")

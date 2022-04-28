@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import UIKit
 
 /// Alert with text content
@@ -32,7 +33,7 @@ public class AlertTextViewController: AlertViewController {
         - handler: Closure to execute when the action button is tapped
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
-    public convenience init(title: String, message: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public convenience init(title: String, message: String, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() async -> Void)?, cancelHandler: (() -> Void)? = nil) {
         let attributedText = NSAttributedString(string: message)
         self.init(title: title, message: attributedText, action: action, hasCancelButton: hasCancelButton, destructive: destructive, loading: loading, handler: handler, cancelHandler: cancelHandler)
     }
@@ -49,7 +50,7 @@ public class AlertTextViewController: AlertViewController {
         - handler: Closure to execute when the action button is tapped
         - cancelHandler: Closure to execute when the cancel button is tapped
      */
-    public init(title: String, message: NSAttributedString, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() -> Void)?, cancelHandler: (() -> Void)? = nil) {
+    public init(title: String, message: NSAttributedString, action: String, hasCancelButton: Bool = true, destructive: Bool = false, loading: Bool = false, handler: (() async -> Void)?, cancelHandler: (() -> Void)? = nil) {
         let label = IKLabel()
         label.attributedText = message
         label.numberOfLines = 0

@@ -36,22 +36,18 @@ class FileDetailInformationUserCollectionViewCell: UICollectionViewCell {
         avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
-    func configureWith(moreValue: Int, shareable: Shareable) {
+    func configureWith(moreValue: Int, fileAccessElement: FileAccessElement) {
         if moreValue > 0 {
             moreLabel.isHidden = false
             moreLabel.text = "+\(moreValue)"
-            accessibilityLabel = "\(shareable.shareableName) +\(moreValue)"
+            accessibilityLabel = "\(fileAccessElement.name) +\(moreValue)"
         } else {
-            accessibilityLabel = shareable.shareableName
+            accessibilityLabel = fileAccessElement.name
         }
         isAccessibilityElement = true
 
-        if let user = shareable as? DriveUser {
-            user.getAvatar { image in
-                self.avatarImage.image = image
-            }
-        } else if let team = shareable as? Team {
-            avatarImage.image = team.icon
+        Task {
+            avatarImage.image = await fileAccessElement.icon
         }
     }
 }

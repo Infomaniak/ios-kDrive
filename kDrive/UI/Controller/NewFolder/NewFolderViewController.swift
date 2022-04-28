@@ -38,7 +38,7 @@ class NewFolderViewController: UIViewController {
     var dropBoxUrl: String?
     var folderName: String?
 
-    private var sharedFile: SharedFile?
+    private var fileAccess: FileAccess?
     private var showSettings = false
     private var settings: [OptionsRow: Bool] = [
         .optionMail: true,
@@ -61,7 +61,7 @@ class NewFolderViewController: UIViewController {
     }
 
     private var permissionSelection: Bool {
-        return currentDirectory?.rights?.share == true
+        return currentDirectory?.capabilities.canShare == true
     }
 
     private enum Section: CaseIterable {
@@ -96,10 +96,8 @@ class NewFolderViewController: UIViewController {
         navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.createFolderTitle
         navigationItem.hideBackButtonText()
 
-        driveFileManager.apiFetcher.getShareListFor(file: currentDirectory) { response, _ in
-            if let sharedFile = response?.data {
-                self.sharedFile = sharedFile
-            }
+        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
+            self.fileAccess = try? await driveFileManager.apiFetcher.access(for: proxyCurrentDirectory)
             self.setupTableViewRows()
         }
         setupTableViewRows()
@@ -131,8 +129,8 @@ class NewFolderViewController: UIViewController {
             if permissionSelection {
                 sections.append(.permissions)
                 permissionsRows = [.meOnly]
-                if let sharedFile = sharedFile {
-                    permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+                if let fileAccess = fileAccess {
+                    permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
                 }
             }
         case .commonFolder:
@@ -141,15 +139,15 @@ class NewFolderViewController: UIViewController {
         case .dropbox:
             sections = [.header, .permissions, .options]
             permissionsRows = [.meOnly]
-            if let sharedFile = sharedFile {
-                permissionsRows.append(canInherit(sharedFile: sharedFile) ? .parentsRights : .someUser)
+            if let fileAccess = fileAccess {
+                permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
             }
         }
         tableView.reloadData()
     }
 
-    private func canInherit(sharedFile: SharedFile) -> Bool {
-        return sharedFile.users.count > 1 || !sharedFile.teams.isEmpty
+    private func canInherit(fileAccess: FileAccess) -> Bool {
+        return fileAccess.users.count > 1 || !fileAccess.teams.isEmpty
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {
@@ -319,7 +317,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             case .someUser:
                 cell.configureSomeUser()
             case .parentsRights:
-                cell.configureParentsRights(folderName: currentDirectory.name, sharedFile: sharedFile)
+                cell.configureParentsRights(folderName: currentDirectory.name, fileAccess: fileAccess)
             }
             return cell
         case .location:
@@ -396,64 +394,68 @@ extension NewFolderViewController: FooterButtonDelegate {
                 onlyForMe = false
                 toShare = false
             }
-            driveFileManager.createDirectory(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe) { file, error in
-                footer.footerButton.setLoading(false)
-                if let createdFile = file {
+            Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
+                do {
+                    let directory = try await driveFileManager.createDirectory(in: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe)
                     if toShare {
-                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: createdFile)
+                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
                         self.dismissAndRefreshDataSource()
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createPrivateFolderSucces)
                     }
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
+                footer.footerButton.setLoading(false)
             }
         case .commonFolder:
             let forAllUser = tableView.indexPathForSelectedRow?.row == 0
-            driveFileManager.createCommonDirectory(name: newFolderName, forAllUser: forAllUser) { file, error in
-                footer.footerButton.setLoading(false)
-                if let createdFile = file {
+            Task {
+                do {
+                    let directory = try await driveFileManager.createCommonDirectory(name: newFolderName, forAllUser: forAllUser)
                     if !forAllUser {
-                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: createdFile)
+                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
                         self.dismissAndRefreshDataSource()
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createCommonFolderSucces)
                     }
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
+                footer.footerButton.setLoading(false)
             }
         case .dropbox:
-            MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail),
-                                             passwordEnabled: getSetting(for: .optionPassword),
-                                             dateEnabled: getSetting(for: .optionDate),
-                                             sizeEnabled: getSetting(for: .optionSize),
-                                             size: getValue(for: .optionSize) as? Int)
-
             let onlyForMe = tableView.indexPathForSelectedRow?.row == 0
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-            let limitFileSize: Int? = getSetting(for: .optionSize) ? (getValue(for: .optionSize) as? Int) : nil
-            driveFileManager.createDropBox(parentDirectory: currentDirectory, name: newFolderName, onlyForMe: onlyForMe, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { file, dropBox, error in
-                footer.footerButton.setLoading(false)
-                if let createdFile = file {
+            let limitFileSize: BinarySize?
+            if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Int {
+                limitFileSize = .gigabytes(size)
+            } else {
+                limitFileSize = nil
+            }
+            let settings = DropBoxSettings(alias: nil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize, password: password, validUntil: validUntil)
+            MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
+            Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
+                do {
+                    let directory = try await driveFileManager.createDropBox(parentDirectory: proxyCurrentDirectory, name: newFolderName, onlyForMe: onlyForMe, settings: settings)
                     if !onlyForMe {
-                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: createdFile)
+                        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: self.driveFileManager, file: directory)
                         self.folderCreated = true
-                        self.dropBoxUrl = dropBox?.url
-                        self.folderName = createdFile.name
+                        self.dropBoxUrl = directory.dropbox?.url ?? ""
+                        self.folderName = directory.name
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
-                        self.showDropBoxLink(url: dropBox?.url ?? "", fileName: createdFile.name)
+                        self.showDropBoxLink(url: directory.dropbox?.url ?? "", fileName: directory.name)
                     }
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
+                footer.footerButton.setLoading(false)
             }
         }
     }

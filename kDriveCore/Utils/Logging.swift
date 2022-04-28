@@ -20,6 +20,7 @@ import Atlantis
 import CocoaLumberjack
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCore
 import InfomaniakLogin
 import RealmSwift
 import Sentry
@@ -45,7 +46,15 @@ public enum Logging {
                 "File URL": realmConfiguration.fileURL?.absoluteString ?? ""
             ], key: "Realm")
         }
+        #if DEBUG
+            DDLogError("Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch")
+            _ = try? Realm.deleteFiles(for: realmConfiguration)
+        #endif
         fatalError("Failed creating realm \(error.localizedDescription)")
+    }
+
+    public static func functionOverrideError(_ function: String) -> Never {
+        fatalError(function + " needs to be overridden")
     }
 
     private static func initLogger() {
@@ -60,7 +69,7 @@ public enum Logging {
 
     private static func initNetworkLogging() {
         #if DEBUG
-            if !Constants.isInExtension {
+            if !Bundle.main.isExtension {
                 Atlantis.start(hostName: ProcessInfo.processInfo.environment["hostname"])
             }
         #endif
@@ -88,7 +97,7 @@ public enum Logging {
 
     private static func copyDebugInformations() {
         #if DEBUG
-            guard !Constants.isInExtension else { return }
+            guard !Bundle.main.isExtension else { return }
             let fileManager = FileManager.default
             let debugDirectory = (fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("debug", isDirectory: true))!
 

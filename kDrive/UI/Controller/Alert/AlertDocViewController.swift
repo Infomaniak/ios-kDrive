@@ -63,6 +63,9 @@ class AlertDocViewController: AlertFieldViewController {
         case "txt":
             typeImage.image = KDriveResourcesAsset.fileText.image
             typeImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        case "docxf":
+            typeImage.image = KDriveResourcesAsset.fileForm.image
+            typeImage.tintColor = KDriveResourcesAsset.iconColor.color
         default:
             break
         }
@@ -89,20 +92,21 @@ class AlertDocViewController: AlertFieldViewController {
         }
 
         setLoading(true)
-        driveFileManager.createOfficeFile(parentDirectory: directory, name: name.addingExtension(fileType), type: fileType) { file, error in
+        Task { [proxyDirectory = directory.proxify()] in
+            var file: File?
+            do {
+                file = try await driveFileManager.createFile(in: proxyDirectory, name: name.addingExtension(fileType), type: fileType)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarFileCreateConfirmation)
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
+            }
             self.setLoading(false)
-
             let currentRootViewController = self.view.window?.rootViewController
             self.dismiss(animated: true) {
-                let message: String
-                if error == nil, let file = file {
-                    guard let mainTabViewController = currentRootViewController as? MainTabViewController else { return }
+                if let file = file,
+                   let mainTabViewController = currentRootViewController as? MainTabViewController {
                     OnlyOfficeViewController.open(driveFileManager: self.driveFileManager, file: file, viewController: mainTabViewController)
-                    message = KDriveResourcesStrings.Localizable.snackbarFileCreateConfirmation
-                } else {
-                    message = KDriveResourcesStrings.Localizable.errorFileCreate
                 }
-                UIConstants.showSnackBar(message: message)
             }
         }
     }

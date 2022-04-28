@@ -22,34 +22,53 @@ import SafariServices
 import Sentry
 import UIKit
 
+@MainActor
 class FilePresenter {
     weak var viewController: UIViewController?
-    weak var driveFloatingPanelController: DriveFloatingPanelController?
-
-    var listType: FileListViewController.Type = FileListViewController.self
 
     var navigationController: UINavigationController? {
         return viewController?.navigationController
     }
 
-    init(viewController: UIViewController, floatingPanelViewController: DriveFloatingPanelController?) {
+    init(viewController: UIViewController) {
         self.viewController = viewController
-        self.driveFloatingPanelController = floatingPanelViewController
     }
 
-    func presentParent(of file: File, driveFileManager: DriveFileManager) {
-        if var parent = file.parent {
-            // Fix for weird bug: root container of shared with me is not what is expected
-            if driveFileManager.drive.sharedWithMe && parent.id == DriveFileManager.constants.rootID {
-                parent = DriveFileManager.sharedWithMeRootFile
+    class func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
+        guard let rootViewController = viewController.view.window?.rootViewController as? MainTabViewController else {
+            return
+        }
+
+        // Pop current navigation stack
+        viewController.navigationController?.popToRootViewController(animated: false)
+        // Dismiss all view controllers presented
+        rootViewController.dismiss(animated: false) {
+            // Select Files tab
+            rootViewController.selectedIndex = 1
+
+            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+                return
             }
-            present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
+
+            // Pop to root
+            navigationController.popToRootViewController(animated: false)
+            // Present file
+            guard let fileListViewController = navigationController.topViewController as? FileListViewController else { return }
+            let filePresenter = FilePresenter(viewController: fileListViewController)
+            filePresenter.presentParent(of: file, driveFileManager: driveFileManager, animated: false)
+        }
+    }
+
+    func presentParent(of file: File, driveFileManager: DriveFileManager, animated: Bool = true) {
+        if let parent = file.parent {
+            present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
         } else if file.parentId != 0 {
-            driveFileManager.getFile(id: file.parentId) { parent, _, error in
-                if let parent = parent {
-                    self.present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true)
-                } else {
-                    UIConstants.showSnackBar(message: error?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
+            Task {
+                do {
+                    let parent = try await driveFileManager.file(id: file.parentId)
+                    present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
         } else {
@@ -62,40 +81,45 @@ class FilePresenter {
                  files: [File],
                  normalFolderHierarchy: Bool,
                  fromActivities: Bool = false,
+                 animated: Bool = true,
                  completion: ((Bool) -> Void)? = nil) {
         if file.isDirectory {
             // Show files list
-            let nextVC: FileListViewController
+            let viewModel: FileListViewModel
             if driveFileManager.drive.sharedWithMe {
-                nextVC = SharedWithMeViewController.instantiate(driveFileManager: driveFileManager)
-            } else if file.isTrashed {
-                nextVC = TrashViewController.instantiate(driveFileManager: driveFileManager)
+                viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+            } else if file.isTrashed || file.deletedAt != nil {
+                viewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
             } else {
-                nextVC = listType.instantiate(driveFileManager: driveFileManager)
+                viewModel = ConcreteFileListViewModel(driveFileManager: driveFileManager, currentDirectory: file)
             }
-            nextVC.currentDirectory = file
+            let nextVC = FileListViewController.instantiate(viewModel: viewModel)
             if file.isDisabled {
                 if driveFileManager.drive.isUserAdmin {
-                    driveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
-                    let floatingPanelViewController = driveFloatingPanelController?.contentViewController as? AccessFileFloatingPanelViewController
-                    floatingPanelViewController?.actionHandler = { [weak self] _ in
+                    let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
+                    let floatingPanelViewController = accessFileDriveFloatingPanelController.contentViewController as? AccessFileFloatingPanelViewController
+                    floatingPanelViewController?.actionHandler = { [unowned self] _ in
                         floatingPanelViewController?.rightButton.setLoading(true)
-                        driveFileManager.apiFetcher.requireFileAccess(file: file) { _, error in
-                            if error != nil {
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
-                            } else {
-                                self?.driveFloatingPanelController?.dismiss(animated: true)
-                                self?.navigationController?.pushViewController(nextVC, animated: true)
+                        Task { [proxyFile = file.proxify()] in
+                            do {
+                                let response = try await driveFileManager.apiFetcher.forceAccess(to: proxyFile)
+                                if response {
+                                    accessFileDriveFloatingPanelController.dismiss(animated: true)
+                                    self.navigationController?.pushViewController(nextVC, animated: true)
+                                } else {
+                                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
+                                }
+                            } catch {
+                                UIConstants.showSnackBar(message: error.localizedDescription)
                             }
                         }
                     }
-                    presentFloatingPanel()
+                    viewController?.present(accessFileDriveFloatingPanelController, animated: true)
                 } else {
-                    driveFloatingPanelController = NoAccessFloatingPanelViewController.instantiatePanel()
-                    presentFloatingPanel()
+                    viewController?.present(NoAccessFloatingPanelViewController.instantiatePanel(), animated: true)
                 }
             } else {
-                navigationController?.pushViewController(nextVC, animated: true)
+                navigationController?.pushViewController(nextVC, animated: animated)
             }
             completion?(true)
         } else if file.isBookmark {
@@ -105,7 +129,7 @@ class FilePresenter {
             } else {
                 // Download file
                 DownloadQueue.instance.temporaryDownload(file: file) { error in
-                    DispatchQueue.main.async {
+                    Task {
                         if let error = error {
                             UIConstants.showSnackBar(message: error.localizedDescription)
                             completion?(false)
@@ -120,19 +144,13 @@ class FilePresenter {
             let files = files.filter { !$0.isDirectory && !$0.isTrashed }
             if let index = files.firstIndex(where: { $0.id == file.id }) {
                 let previewViewController = PreviewViewController.instantiate(files: files, index: Int(index), driveFileManager: driveFileManager, normalFolderHierarchy: normalFolderHierarchy, fromActivities: fromActivities)
-                navigationController?.pushViewController(previewViewController, animated: true)
+                navigationController?.pushViewController(previewViewController, animated: animated)
                 completion?(true)
             }
             if file.isTrashed {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPreviewTrash)
                 completion?(false)
             }
-        }
-    }
-
-    private func presentFloatingPanel(animated: Bool = true) {
-        if let driveFloatingPanelController = driveFloatingPanelController {
-            viewController?.present(driveFloatingPanelController, animated: animated)
         }
     }
 

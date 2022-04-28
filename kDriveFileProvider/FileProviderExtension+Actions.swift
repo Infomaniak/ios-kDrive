@@ -36,10 +36,11 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.createDirectory(parentDirectory: file, name: directoryName, onlyForMe: false) { file, error in
-            if let file = file {
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
-            } else {
+        Task { [proxyFile = file.proxify()] in
+            do {
+                let directory = try await driveFileManager.createDirectory(in: proxyFile, name: directoryName, onlyForMe: false)
+                completionHandler(FileProviderItem(file: directory, domain: self.domain), nil)
+            } catch {
                 completionHandler(nil, error)
             }
         }
@@ -51,17 +52,19 @@ extension FileProviderExtension {
             return
         }
 
-        // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
-            if let file = response?.data {
-                self.driveFileManager.apiFetcher.deleteFileDefinitely(file: file) { _, error in
+        Task {
+            do {
+                let response = try await driveFileManager.apiFetcher.deleteDefinitely(file: ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
+                if response {
                     FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
                     self.manager.signalEnumerator(for: .workingSet) { _ in }
                     self.manager.signalEnumerator(for: itemIdentifier) { _ in }
-                    completionHandler(error)
+                    completionHandler(nil)
+                } else {
+                    completionHandler(self.nsError(code: .serverUnreachable))
                 }
-            } else {
-                completionHandler(self.nsError(code: .noSuchItem))
+            } catch {
+                completionHandler(error)
             }
         }
     }
@@ -131,10 +134,11 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.renameFile(file: file, newName: itemName) { file, error in
-            if let file = file {
+        Task { [proxyFile = file.proxify()] in
+            do {
+                let file = try await driveFileManager.rename(file: proxyFile, newName: itemName)
                 completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
-            } else {
+            } catch {
                 completionHandler(nil, error)
             }
         }
@@ -156,10 +160,11 @@ extension FileProviderExtension {
             return
         }
 
-        driveFileManager.moveFile(file: file, newParent: parent) { _, file, error in
-            if let file = file {
-                completionHandler(FileProviderItem(file: file.freeze(), domain: self.domain), nil)
-            } else {
+        Task { [proxyFile = file.proxify(), proxyParent = parent.proxify()] in
+            do {
+                let (_, file) = try await driveFileManager.move(file: proxyFile, to: proxyParent)
+                completionHandler(FileProviderItem(file: file.freeze(), domain: domain), nil)
+            } catch {
                 completionHandler(nil, error)
             }
         }
@@ -197,17 +202,17 @@ extension FileProviderExtension {
         }
 
         // Make deleted file copy
-        let deletedFile = File(value: file)
-        deletedFile.rights = Rights(value: file.rights as Any)
+        let deletedFile = file.detached()
         let item = FileProviderItem(file: deletedFile, domain: domain)
         item.isTrashed = true
 
-        driveFileManager.deleteFile(file: file) { _, error in
-            FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
-            if let error = error {
-                completionHandler(nil, error)
-            } else {
+        Task { [proxyFile = file.proxify()] in
+            do {
+                _ = try await driveFileManager.delete(file: proxyFile)
+                FileProviderExtensionState.shared.workingSet[itemIdentifier] = item
                 completionHandler(item, nil)
+            } catch {
+                completionHandler(nil, error)
             }
         }
     }
@@ -219,40 +224,27 @@ extension FileProviderExtension {
         }
 
         // Trashed items are not cached so we call the API
-        driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: driveFileManager.drive.id, fileId: fileId) { response, error in
-            if let file = response?.data {
-                if let parentItemIdentifier = parentItemIdentifier,
-                   let parentId = parentItemIdentifier.toFileId() {
-                    // Restore in given parent
-                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file, in: parentId) { _, error in
-                        let item = FileProviderItem(file: file, domain: self.domain)
-                        item.parentItemIdentifier = parentItemIdentifier
-                        item.isTrashed = false
-                        FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                        self.manager.signalEnumerator(for: .workingSet) { _ in }
-                        self.manager.signalEnumerator(for: parentItemIdentifier) { _ in }
-                        if let error = error {
-                            completionHandler(nil, error)
-                        } else {
-                            completionHandler(item, nil)
-                        }
-                    }
+        Task {
+            do {
+                let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: driveFileManager.drive.id, id: fileId))
+                let parent: ProxyFile?
+                if let id = parentItemIdentifier?.toFileId() {
+                    parent = ProxyFile(driveId: self.driveFileManager.drive.id, id: id)
                 } else {
-                    // Restore in original parent
-                    self.driveFileManager.apiFetcher.restoreTrashedFile(file: file) { _, error in
-                        let item = FileProviderItem(file: file, domain: self.domain)
-                        item.isTrashed = false
-                        FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
-                        self.manager.signalEnumerator(for: .workingSet) { _ in }
-                        self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
-                        if let error = error {
-                            completionHandler(nil, error)
-                        } else {
-                            completionHandler(item, nil)
-                        }
-                    }
+                    parent = nil
                 }
-            } else {
+                // Restore in given parent
+                _ = try await self.driveFileManager.apiFetcher.restore(file: file.proxify(), in: parent)
+                let item = FileProviderItem(file: file, domain: self.domain)
+                if let parentItemIdentifier = parentItemIdentifier {
+                    item.parentItemIdentifier = parentItemIdentifier
+                }
+                item.isTrashed = false
+                FileProviderExtensionState.shared.workingSet.removeValue(forKey: itemIdentifier)
+                self.manager.signalEnumerator(for: .workingSet) { _ in }
+                self.manager.signalEnumerator(for: item.parentItemIdentifier) { _ in }
+                completionHandler(item, nil)
+            } catch {
                 completionHandler(nil, self.nsError(code: .noSuchItem))
             }
         }

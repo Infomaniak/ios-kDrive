@@ -16,12 +16,102 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import Kingfisher
 import UIKit
 
 protocol FileCellDelegate: AnyObject {
     func didTapMoreButton(_ cell: FileCollectionViewCell)
+}
+
+@MainActor class FileViewModel {
+    static let observedProperties = ["name", "rawType", "_capabilities", "dropbox", "rawVisibility", "extensionType", "isFavorite", "deletedAt", "lastModifiedAt", "isAvailableOffline", "categories", "size", "hasThumbnail"]
+    var file: File
+    var selectionMode: Bool
+    private var downloadProgressObserver: ObservationToken?
+    private var downloadObserver: ObservationToken?
+    var thumbnailDownloadTask: Kingfisher.DownloadTask?
+
+    var title: String { file.name }
+
+    var icon: UIImage { file.icon }
+
+    var iconTintColor: UIColor? { file.tintColor }
+
+    var iconAccessibilityLabel: String { file.convertedType.title }
+
+    var isFavorite: Bool { file.isFavorite }
+
+    var moreButtonHidden: Bool { selectionMode }
+
+    var categories = [kDriveCore.Category]()
+
+    private var formattedDate: String {
+        if let deletedAt = file.deletedAt {
+            return Constants.formatFileDeletionRelativeDate(deletedAt)
+        } else {
+            return Constants.formatFileLastModifiedRelativeDate(file.lastModifiedAt)
+        }
+    }
+
+    var subtitle: String {
+        if let fileSize = file.getFileSize() {
+            return fileSize + " • " + formattedDate
+        } else {
+            return formattedDate
+        }
+    }
+
+    var isAvailableOffline: Bool {
+        file.isAvailableOffline && FileManager.default.fileExists(atPath: file.localUrl.path)
+    }
+
+    init(driveFileManager: DriveFileManager, file: File, selectionMode: Bool) {
+        self.file = file
+        self.selectionMode = selectionMode
+        categories = driveFileManager.drive.categories(for: file)
+    }
+
+    func setUpDownloadObserver(_ handler: @escaping (Bool, Bool, Double) -> Void) {
+        downloadProgressObserver?.cancel()
+        downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                handler(!self.file.isAvailableOffline || progress < 1, progress >= 1 || progress == 0, progress)
+            }
+        }
+        downloadObserver?.cancel()
+        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                handler(!self.isAvailableOffline, true, 1)
+            }
+        }
+    }
+
+    func setThumbnail(on imageView: UIImageView) {
+        guard (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail else { return }
+        // Configure placeholder
+        imageView.image = nil
+        imageView.contentMode = .scaleAspectFill
+        imageView.layer.cornerRadius = UIConstants.imageCornerRadius
+        imageView.layer.masksToBounds = true
+        imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
+        // Fetch thumbnail
+        thumbnailDownloadTask?.cancel()
+        thumbnailDownloadTask = file.getThumbnail { image, _ in
+            imageView.image = image
+            imageView.backgroundColor = nil
+        }
+    }
+
+    deinit {
+        downloadProgressObserver?.cancel()
+        downloadObserver?.cancel()
+        thumbnailDownloadTask?.cancel()
+    }
 }
 
 class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
@@ -47,8 +137,8 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
-    var downloadProgressObserver: ObservationToken?
-    var downloadObserver: ObservationToken?
+    private var viewModel: FileViewModel!
+
     weak var delegate: FileCellDelegate?
 
     override var isSelected: Bool {
@@ -66,11 +156,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     var checkmarkImage: UIImageView? {
         return logoImage
     }
-
-    var selectionMode = false
-
-    internal var file: File!
-    private var categories = [kDriveCore.Category]()
 
     static var emptyCheckmarkImage: UIImage = {
         let size = CGSize(width: 24, height: 24)
@@ -104,7 +189,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        categories.removeAll()
         collectionView?.isHidden = true
         collectionView?.reloadData()
         centerTitleConstraint?.isActive = false
@@ -119,8 +203,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         availableOfflineImageView?.isHidden = true
         downloadProgressView?.isHidden = true
         downloadProgressView?.updateProgress(0, animated: false)
-        downloadProgressObserver?.cancel()
-        downloadObserver?.cancel()
     }
 
     func initStyle(isFirst: Bool, isLast: Bool) {
@@ -153,99 +235,47 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         highlightedView?.isHidden = !isHighlighted
     }
 
-    func setThumbnailFor(file: File) {
-        let fileId = file.id
-        if (file.convertedType == .image || file.convertedType == .video) && file.hasThumbnail {
-            logoImage.image = nil
-            logoImage.contentMode = .scaleAspectFill
-            logoImage.layer.cornerRadius = UIConstants.imageCornerRadius
-            logoImage.layer.masksToBounds = true
-            logoImage.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
-            file.getThumbnail { image, _ in
-                if fileId == self.file.id {
-                    self.logoImage.image = image
-                    self.logoImage.backgroundColor = nil
-                }
-            }
+    func configure(with viewModel: FileViewModel) {
+        self.viewModel = viewModel
+        logoImage.isAccessibilityElement = true
+        logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
+        logoImage.image = viewModel.icon
+        logoImage.tintColor = viewModel.iconTintColor
+        if !viewModel.selectionMode || checkmarkImage != logoImage {
+            // In list mode, we don't fetch the thumbnail if we are in selection mode
+            viewModel.setThumbnail(on: logoImage)
         }
+        titleLabel.text = viewModel.title
+        detailLabel?.text = viewModel.subtitle
+        favoriteImageView?.isHidden = !viewModel.isFavorite
+        availableOfflineImageView.isHidden = !viewModel.isAvailableOffline
+        moreButton.isHidden = viewModel.moreButtonHidden
+        collectionView?.isHidden = viewModel.categories.isEmpty
+        collectionView?.reloadData()
+
+        viewModel.setUpDownloadObserver { [weak self] availableOfflineHidden, downloadProgressHidden, progress in
+            self?.availableOfflineImageView?.isHidden = availableOfflineHidden
+            self?.downloadProgressView?.isHidden = downloadProgressHidden
+            self?.downloadProgressView?.updateProgress(progress)
+        }
+
+        configureForSelection()
     }
 
     func configureWith(driveFileManager: DriveFileManager, file: File, selectionMode: Bool = false) {
-        self.file = file.isFrozen || !file.isManagedByRealm ? file : file.freeze()
-        categories = driveFileManager.drive.categories(for: file)
-        self.selectionMode = selectionMode
-        collectionView?.isHidden = file.categories.isEmpty
-        collectionView?.reloadData()
-
-        titleLabel.text = file.name
-        favoriteImageView?.isHidden = !file.isFavorite
-        favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
-        logoImage.image = file.icon
-        logoImage.isAccessibilityElement = true
-        logoImage.accessibilityLabel = file.convertedType.title
-        logoImage.tintColor = file.tintColor
-        moreButton.isHidden = selectionMode
-        if !selectionMode || checkmarkImage != logoImage {
-            // We don't fetch the thumbnail if we are in selection mode. In list mode we fetch thumbnail for images only
-            setThumbnailFor(file: file)
-        }
-
-        availableOfflineImageView?.isHidden = !file.isAvailableOffline || !FileManager.default.fileExists(atPath: file.localUrl.path)
-        availableOfflineImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.offlineFileTitle
-        downloadProgressObserver = DownloadQueue.instance.observeFileDownloadProgress(self, fileId: file.id) { [weak self] _, progress in
-            DispatchQueue.main.async {
-                self?.downloadProgressView?.isHidden = progress >= 1 || progress == 0
-                self?.downloadProgressView?.updateProgress(progress)
-                self?.availableOfflineImageView?.isHidden = self?.file.isAvailableOffline != true || progress < 1
-            }
-        }
-        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, _ in
-            DispatchQueue.main.async {
-                self?.downloadProgressView?.isHidden = true
-            }
-        }
-
-        let formattedDate: String
-        if let deletedAtDate = file.deletedAtDate {
-            formattedDate = Constants.formatFileDeletionRelativeDate(deletedAtDate)
-        } else {
-            formattedDate = Constants.formatFileLastModifiedRelativeDate(file.lastModifiedDate)
-        }
-
-        if file.type == "file" {
-            stackViewTrailingConstraint?.constant = -12
-            detailLabel?.text = file.getFileSize() + " • " + formattedDate
-        } else {
-            stackViewTrailingConstraint?.constant = 16
-            detailLabel?.text = formattedDate
-        }
-
-        configureForSelection()
+        configure(with: FileViewModel(driveFileManager: driveFileManager, file: file, selectionMode: selectionMode))
     }
 
-    func configureWith(trashedFile: File) {
-        file = trashedFile
-        titleLabel.text = trashedFile.name
-        favoriteImageView?.isHidden = true
-        logoImage.image = trashedFile.icon
-        logoImage.tintColor = trashedFile.tintColor
-
-        let formattedDate = Constants.formatFileLastModifiedDate(trashedFile.lastModifiedDate)
-
-        if trashedFile.type == "file" {
-            accessoryImage?.isHidden = true
-            detailLabel?.text = trashedFile.getFileSize() + " • " + formattedDate
-        } else {
-            accessoryImage?.isHidden = false
-            detailLabel?.text = formattedDate
-        }
-
-        configureForSelection()
+    /// Update the cell selection mode.
+    /// - Parameter selectionMode: The new selection mode (enabled/disabled).
+    func setSelectionMode(_ selectionMode: Bool) {
+        guard viewModel != nil else { return }
+        viewModel.selectionMode = selectionMode
+        configure(with: viewModel)
     }
 
     private func configureForSelection() {
-        guard selectionMode else { return }
-        accessoryImage?.isHidden = true
+        guard viewModel?.selectionMode == true else { return }
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
         checkmarkImage?.isAccessibilityElement = true
         checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
@@ -272,13 +302,13 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
 extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return min(categories.count, 3)
+        return min(viewModel.categories.count, 3)
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: CategoryBadgeCollectionViewCell.self, for: indexPath)
-        let category = categories[indexPath.row]
-        let more = indexPath.item == 2 && categories.count > 3 ? categories.count - 3 : nil
+        let category = viewModel.categories[indexPath.row]
+        let more = indexPath.item == 2 && viewModel.categories.count > 3 ? viewModel.categories.count - 3 : nil
         cell.configure(with: category, more: more)
         return cell
     }

@@ -49,7 +49,7 @@ class FileDetailHeaderAltTableViewCell: UITableViewCell {
 
     func configureWith(file: File) {
         fileNameLabel.text = file.name
-        fileDetailLabel.text = Constants.formatFileLastModifiedDate(file.lastModifiedDate)
+        fileDetailLabel.text = Constants.formatFileLastModifiedDate(file.lastModifiedAt)
         logoImage.image = file.icon
         logoImage.tintColor = file.tintColor
 

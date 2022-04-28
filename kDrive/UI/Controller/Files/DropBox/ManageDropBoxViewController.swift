@@ -25,7 +25,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     @IBOutlet weak var tableView: UITableView!
 
     private var driveFileManager: DriveFileManager!
-    private var folder: File! {
+    private var directory: File! {
         didSet {
             setTitle()
             getSettings()
@@ -50,7 +50,6 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
     private let optionsRows = OptionsRow.allCases
 
-    private var dropBox: DropBox?
     private var settings = [OptionsRow: Bool]()
     private var settingsValue = [OptionsRow: Any?]()
     private var newPassword = false
@@ -87,7 +86,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageDropBoxViewController") as! ManageDropBoxViewController
         viewController.convertingFolder = convertingFolder
         viewController.driveFileManager = driveFileManager
-        viewController.folder = folder
+        viewController.directory = folder
         return viewController
     }
 
@@ -109,14 +108,14 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     private func setTitle() {
-        guard folder != nil else { return }
+        guard directory != nil else { return }
         let truncatedName: String
-        if folder.name.count > 20 {
-            truncatedName = folder.name[folder.name.startIndex ..< folder.name.index(folder.name.startIndex, offsetBy: 20)] + "…"
+        if directory.name.count > 20 {
+            truncatedName = directory.name[directory.name.startIndex ..< directory.name.index(directory.name.startIndex, offsetBy: 20)] + "…"
         } else {
-            truncatedName = folder.name
+            truncatedName = directory.name
         }
-        navigationItem.title = convertingFolder ? KDriveResourcesStrings.Localizable.convertToDropboxTitle(truncatedName) : KDriveResourcesStrings.Localizable.manageDropboxTitle(folder.name)
+        navigationItem.title = convertingFolder ? KDriveResourcesStrings.Localizable.convertToDropboxTitle(truncatedName) : KDriveResourcesStrings.Localizable.manageDropboxTitle(directory.name)
     }
 
     private func getSettings() {
@@ -133,26 +132,27 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                 .optionSize: nil
             ]
             newPassword = false
-        } else {
-            driveFileManager.apiFetcher.getDropBoxSettings(directory: folder) { response, _ in
-                self.dropBox = response?.data
-                if let dropBox = response?.data {
-                    self.settings = [
-                        .optionMail: dropBox.emailWhenFinished,
-                        .optionPassword: dropBox.password,
-                        .optionDate: dropBox.validUntil != nil,
-                        .optionSize: dropBox.limitFileSize != nil
-                    ]
-                    self.settingsValue = [
-                        .optionPassword: nil,
-                        .optionDate: dropBox.validUntil,
-                        .optionSize: dropBox.limitFileSize != nil ? dropBox.limitFileSize! / 1_073_741_824 : nil
-                    ]
-                    self.newPassword = dropBox.password
-                } else {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
-                }
-                self.tableView.reloadData()
+        } else if let dropBox = directory.dropbox {
+            settings = [
+                .optionMail: dropBox.capabilities.hasNotification,
+                .optionPassword: dropBox.capabilities.hasPassword,
+                .optionDate: dropBox.capabilities.hasValidity,
+                .optionSize: dropBox.capabilities.hasSizeLimit
+            ]
+            let sizeLimit: BinarySize?
+            if let size = dropBox.capabilities.size.limit {
+                sizeLimit = .bytes(size)
+            } else {
+                sizeLimit = nil
+            }
+            settingsValue = [
+                .optionPassword: nil,
+                .optionDate: dropBox.capabilities.validity.date,
+                .optionSize: sizeLimit?.toGigabytes
+            ]
+            newPassword = dropBox.capabilities.hasPassword
+            if isViewLoaded {
+                tableView.reloadData()
             }
         }
     }
@@ -170,7 +170,9 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         let fileNavigationController = mainTabViewController?.selectedViewController as? UINavigationController
         if let viewControllers = fileNavigationController?.viewControllers, viewControllers.count > 1 {
             let fileListViewController = viewControllers[viewControllers.count - 2] as? FileListViewController
-            fileListViewController?.getNewChanges()
+            Task {
+                try await fileListViewController?.viewModel.loadActivities()
+            }
         }
         navigationController?.popViewController(animated: true)
     }
@@ -208,7 +210,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             let cell = tableView.dequeueReusableCell(type: DropBoxLinkTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.delegate = self
-            cell.copyTextField.text = dropBox?.url
+            cell.copyTextField.text = directory.dropbox?.url
             return cell
         case .options:
             let option = optionsRows[indexPath.row]
@@ -246,12 +248,17 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.section == 2 {
-            driveFileManager.apiFetcher.disableDropBox(directory: folder) { _, error in
-                if error == nil {
-                    self.dismissAndRefreshDataSource()
-                    self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: nil)
-                } else {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+            Task { [proxyDirectory = directory.proxify()] in
+                do {
+                    let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: proxyDirectory)
+                    if response {
+                        self.dismissAndRefreshDataSource()
+                        self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: nil)
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+                    }
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
         }
@@ -263,7 +270,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         super.encodeRestorableState(with: coder)
 
         coder.encode(driveFileManager.drive.id, forKey: "DriveId")
-        coder.encode(folder.id, forKey: "FolderId")
+        coder.encode(directory.id, forKey: "FolderId")
         coder.encode(convertingFolder, forKey: "ConvertingFolder")
     }
 
@@ -278,7 +285,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         }
         self.driveFileManager = driveFileManager
         self.convertingFolder = convertingFolder
-        folder = driveFileManager.getCachedFile(id: folderId)
+        directory = driveFileManager.getCachedFile(id: folderId)
     }
 }
 
@@ -314,34 +321,40 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-        let limitFileSize = getSetting(for: .optionSize) ? (getValue(for: .optionSize) as? Int) : nil
+        let limitFileSize: BinarySize?
+        if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Int {
+            limitFileSize = .gigabytes(size)
+        } else {
+            limitFileSize = nil
+        }
+        let settings = DropBoxSettings(alias: nil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize, password: password, validUntil: validUntil)
 
-        MatomoUtils.trackDropBoxSettings(emailEnabled: getSetting(for: .optionMail),
-                                         passwordEnabled: getSetting(for: .optionPassword),
-                                         dateEnabled: getSetting(for: .optionDate),
-                                         sizeEnabled: getSetting(for: .optionSize),
-                                         size: getValue(for: .optionSize) as? Int)
+        MatomoUtils.trackDropBoxSettings(settings, passwordEnabled: getSetting(for: .optionPassword))
 
-        if convertingFolder {
-            driveFileManager.apiFetcher.setupDropBox(directory: folder, password: (password?.isEmpty ?? false) ? nil : password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { response, _ in
-                if let dropBox = response?.data {
+        Task { [proxyDirectory = directory.proxify()] in
+            if convertingFolder {
+                do {
+                    let dropBox = try await driveFileManager.apiFetcher.createDropBox(directory: proxyDirectory, settings: settings)
                     let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
                     let floatingPanelViewController = driveFloatingPanelController.contentViewController as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url
-                    floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.folder.name)
+                    floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(self.directory.name)
                     self.navigationController?.popViewController(animated: true)
                     self.navigationController?.topViewController?.present(driveFloatingPanelController, animated: true)
-                    self.driveFileManager.setFileCollaborativeFolder(file: self.folder, collaborativeFolder: dropBox.url)
-                } else {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                    self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: dropBox)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
-            }
-        } else {
-            driveFileManager.apiFetcher.updateDropBox(directory: folder, password: password, validUntil: validUntil, emailWhenFinished: getSetting(for: .optionMail), limitFileSize: limitFileSize) { _, error in
-                if error == nil {
-                    self.navigationController?.popViewController(animated: true)
-                } else {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+            } else {
+                do {
+                    let response = try await driveFileManager.updateDropBox(directory: proxyDirectory, settings: settings)
+                    if response {
+                        self.navigationController?.popViewController(animated: true)
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
+                    }
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
                 }
             }
         }

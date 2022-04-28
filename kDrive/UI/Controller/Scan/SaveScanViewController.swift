@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CocoaLumberjackSwift
 import kDriveCore
 import kDriveResources
 import PDFKit
@@ -31,6 +32,7 @@ class SaveScanViewController: SaveFileViewController {
         tableView.register(cellView: ScanTypeTableViewCell.self)
         super.viewDidLoad()
         sections = [.fileName, .fileType, .directorySelection]
+        detectFileName()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -74,7 +76,7 @@ class SaveScanViewController: SaveFileViewController {
         DispatchQueue.global(qos: .userInteractive).async { [self] in
             do {
                 try FileImportHelper.instance.upload(scan: scan, name: filename, scanType: scanType, in: selectedDirectory, drive: selectedDriveFileManager.drive)
-                DispatchQueue.main.async {
+                Task {
                     let parent = presentingViewController
                     footer.footerButton.setLoading(false)
                     dismiss(animated: true) {
@@ -84,7 +86,7 @@ class SaveScanViewController: SaveFileViewController {
                     }
                 }
             } catch {
-                DispatchQueue.main.async {
+                Task {
                     footer.footerButton.setLoading(false)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorUpload)
                 }
@@ -96,5 +98,41 @@ class SaveScanViewController: SaveFileViewController {
         let viewController = Storyboard.scan.instantiateViewController(withIdentifier: "SaveScanViewController") as! SaveScanViewController
         viewController.selectedDriveFileManager = driveFileManager
         return viewController
+    }
+
+    private func detectFileName() {
+        // Get the first page
+        guard let cgImage = scan.imageOfPage(at: 0).cgImage else { return }
+
+        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
+        let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
+
+        do {
+            // Perform the text-recognition request
+            try requestHandler.perform([request])
+        } catch {
+            DDLogInfo("[Scan] Unable to perform the requests: \(error).")
+        }
+    }
+
+    func recognizeTextHandler(request: VNRequest, error: Error?) {
+        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+            return
+        }
+        let minConfidence: Float = 0.6
+        let recognizedStrings: [String] = observations.compactMap { observation in
+            // Return the string of the top VNRecognizedText instance
+            let topCandidate = observation.topCandidates(1).first
+            if let topCandidate = topCandidate, topCandidate.confidence >= minConfidence {
+                return topCandidate.string
+            } else {
+                return nil
+            }
+        }
+
+        // Use the first string as the filename
+        guard let firstResult = recognizedStrings.first else { return }
+        items.first?.name = firstResult.localizedCapitalized
+        tableView.reloadData()
     }
 }

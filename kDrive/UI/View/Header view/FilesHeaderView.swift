@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -25,16 +26,11 @@ protocol FilesHeaderViewDelegate: AnyObject {
     func gridButtonPressed()
     func uploadCardSelected()
     func removeFilterButtonPressed(_ filter: Filterable)
-    func moveButtonPressed()
-    func deleteButtonPressed()
-    func menuButtonPressed()
+    func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton)
 }
 
 extension FilesHeaderViewDelegate {
     func uploadCardSelected() {}
-    func moveButtonPressed() {}
-    func deleteButtonPressed() {}
-    func menuButtonPressed() {}
 }
 
 class FilesHeaderView: UICollectionReusableView {
@@ -48,8 +44,6 @@ class FilesHeaderView: UICollectionReusableView {
     @IBOutlet weak var activityListView: UIView!
     @IBOutlet weak var activityAvatar: UIImageView!
     @IBOutlet weak var activityLabel: UILabel!
-    @IBOutlet weak var moveButton: UIButton!
-    @IBOutlet weak var deleteButton: UIButton!
 
     weak var delegate: FilesHeaderViewDelegate? {
         didSet {

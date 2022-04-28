@@ -17,6 +17,7 @@
  */
 
 import FileProvider
+import InfomaniakCore
 import kDriveCore
 
 class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
@@ -67,8 +68,10 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 forceRefresh = lastResponseAt < anchorExpireTimestamp
             }
 
-            driveFileManager.getFile(id: fileId, withExtras: !isDirectory, page: pageIndex, forceRefresh: forceRefresh) { containerFile, childrenFiles, error in
-                if let folder = containerFile, let children = childrenFiles {
+            Task { [forceRefresh] in
+                do {
+                    let file = try await driveFileManager.file(id: fileId, forceRefresh: forceRefresh)
+                    let (children, moreComing) = try await driveFileManager.files(in: file.proxify(), page: pageIndex, forceRefresh: forceRefresh)
                     // No need to freeze $0 it should already be frozen
                     var containerItems = [FileProviderItem]()
                     for child in children {
@@ -77,34 +80,36 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                         }
                     }
                     containerItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
-                    containerItems.append(FileProviderItem(file: folder, domain: self.domain))
+                    containerItems.append(FileProviderItem(file: file, domain: self.domain))
                     observer.didEnumerate(containerItems)
 
-                    if self.isDirectory && !folder.fullyDownloaded {
+                    if self.isDirectory && moreComing {
                         observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
                     } else {
                         observer.finishEnumerating(upTo: nil)
                     }
-                } else {
+                } catch {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: fileId, page: pageIndex) { response, error in
-                        if let file = response?.data {
-                            var containerItems = [FileProviderItem]()
-                            for child in file.children {
-                                autoreleasepool {
-                                    let item = FileProviderItem(file: child, domain: self.domain)
-                                    item.parentItemIdentifier = self.containerItemIdentifier
-                                    containerItems.append(item)
-                                }
+                    do {
+                        let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: self.driveFileManager.drive.id, id: fileId))
+                        let children = try await driveFileManager.apiFetcher.trashedFiles(of: file.proxify(), page: pageIndex)
+                        var containerItems = [FileProviderItem]()
+                        for child in children {
+                            autoreleasepool {
+                                let item = FileProviderItem(file: child, domain: self.domain)
+                                item.parentItemIdentifier = self.containerItemIdentifier
+                                containerItems.append(item)
                             }
-                            containerItems.append(FileProviderItem(file: file, domain: self.domain))
-                            observer.didEnumerate(containerItems)
-                            if self.isDirectory && file.children.count == DriveApiFetcher.itemPerPage {
-                                observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
-                            } else {
-                                observer.finishEnumerating(upTo: nil)
-                            }
-                        } else if let error = error as? DriveError, error == .maintenance {
+                        }
+                        containerItems.append(FileProviderItem(file: file, domain: self.domain))
+                        observer.didEnumerate(containerItems)
+                        if self.isDirectory && children.count == Endpoint.itemsPerPage {
+                            observer.finishEnumerating(upTo: NSFileProviderPage(pageIndex + 1))
+                        } else {
+                            observer.finishEnumerating(upTo: nil)
+                        }
+                    } catch {
+                        if let error = error as? DriveError, error == .maintenance {
                             observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found
@@ -125,38 +130,33 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
                 return
             }
 
-            driveFileManager.getFile(id: directoryIdentifier) { file, _, _ in
-                if let file = file {
-                    self.driveFileManager.getFolderActivities(file: file, date: lastTimestamp) { results, timestamp, error in
-                        if let results = results, let timestamp = timestamp {
-                            let updated = results.inserted + results.updated
-                            var updatedItems = [NSFileProviderItem]()
-                            for updatedChild in updated {
-                                autoreleasepool {
-                                    updatedItems.append(FileProviderItem(file: updatedChild, domain: self.domain))
-                                }
-                            }
-                            updatedItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
-                            observer.didUpdate(updatedItems)
-
-                            var deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
-                            deletedItems += FileProviderExtensionState.shared.deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)
-                            observer.didDeleteItems(withIdentifiers: deletedItems)
-
-                            observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(timestamp), moreComing: false)
-                        } else if let error = error as? DriveError, error == .maintenance {
-                            observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
-                        } else {
-                            observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem))
+            Task {
+                do {
+                    let file = try await driveFileManager.file(id: directoryIdentifier)
+                    let (results, timestamp) = try await driveFileManager.fileActivities(file: file.proxify(), from: lastTimestamp)
+                    let updated = results.inserted + results.updated
+                    var updatedItems = [NSFileProviderItem]()
+                    for updatedChild in updated {
+                        autoreleasepool {
+                            updatedItems.append(FileProviderItem(file: updatedChild, domain: self.domain))
                         }
                     }
-                } else {
+                    updatedItems += FileProviderExtensionState.shared.unenumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    observer.didUpdate(updatedItems)
+
+                    var deletedItems = results.deleted.map { NSFileProviderItemIdentifier("\($0.id)") }
+                    deletedItems += FileProviderExtensionState.shared.deleteAlreadyEnumeratedImportedDocuments(forParent: self.containerItemIdentifier)
+                    observer.didDeleteItems(withIdentifiers: deletedItems)
+
+                    observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(timestamp), moreComing: false)
+                } catch {
                     // Maybe this is a trashed file
-                    self.driveFileManager.apiFetcher.getChildrenTrashedFiles(driveId: self.driveFileManager.drive.id, fileId: directoryIdentifier) { response, error in
-                        if let file = response?.data {
-                            observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
-                            observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
-                        } else if let error = error as? DriveError, error == .maintenance {
+                    do {
+                        let file = try await driveFileManager.apiFetcher.trashedFile(ProxyFile(driveId: driveFileManager.drive.id, id: directoryIdentifier))
+                        observer.didUpdate([FileProviderItem(file: file, domain: self.domain)])
+                        observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(file.responseAt), moreComing: false)
+                    } catch {
+                        if let error = error as? DriveError, error == .maintenance {
                             observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
                         } else {
                             // File not found

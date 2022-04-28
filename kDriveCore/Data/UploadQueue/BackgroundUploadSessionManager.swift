@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import Sentry
 
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
@@ -182,6 +183,23 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         tasksCompletionHandler[taskIdentifier] = nil
     }
 
+    public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
+        DDLogError("[BackgroundUploadSession] Session didBecomeInvalidWithError \(session.identifier) \(error?.localizedDescription ?? "")")
+        if let error = error {
+            SentrySDK.capture(error: error) { scope in
+                scope.setContext(value: [
+                    "Session Id": session.identifier
+                ], key: "Session")
+            }
+        } else {
+            SentrySDK.capture(message: "URLSession didBecomeInvalid - No Error") { scope in
+                scope.setContext(value: [
+                    "Session Id": session.identifier
+                ], key: "Session")
+            }
+        }
+    }
+
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
         let taskIdentifier = session.identifier(for: task)
         if let completionHandler = tasksCompletionHandler[taskIdentifier] {
@@ -194,6 +212,26 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
             operations.append(operation)
             return operation.uploadCompletion
         } else {
+            var filename: String?
+            var hasUploadDate = false
+
+            if let sessionUrl = task.originalRequest?.url?.absoluteString,
+               let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+               .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first {
+                filename = file.name
+                hasUploadDate = file.uploadDate != nil
+            }
+
+            DDLogError("[BackgroundUploadSession] No completion handler found for session \(session.identifier) task url \(task.originalRequest?.url?.absoluteString ?? "")")
+            SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
+                scope.setContext(value: [
+                    "Session Id": session.identifier,
+                    "Task url": task.originalRequest?.url?.absoluteString ?? "",
+                    "Task error": task.error?.localizedDescription ?? "",
+                    "Upload file": filename ?? "",
+                    "Has Upload Date": hasUploadDate
+                ], key: "Session")
+            }
             return nil
         }
     }

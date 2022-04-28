@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="9yd-Vx-ISo">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="9yd-Vx-ISo">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -67,10 +67,10 @@
             </objects>
             <point key="canvasLocation" x="-680" y="1111"/>
         </scene>
-        <!--FavoriteVC-->
+        <!--FilesVC-->
         <scene sceneID="Dwi-k2-d1o">
             <objects>
-                <viewControllerPlaceholder storyboardName="Favorite" referencedIdentifier="FavoriteVC" id="CYM-Sz-GTs" sceneMemberID="viewController">
+                <viewControllerPlaceholder storyboardName="Files" referencedIdentifier="FilesVC" id="CYM-Sz-GTs" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Item" image="star" selectedImage="star-fill" id="eRF-aR-lyz"/>
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pZD-6L-YOq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -361,7 +361,7 @@
                                     <constraint firstAttribute="height" constant="62" id="a9W-Hv-uK5"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vous n’avez pas encore de kDrive !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="gpt-af-Fsa" customClass="IKLabel" customModule="kDriveCore">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vous n’avez pas encore de kDrive !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="gpt-af-Fsa" customClass="IKLabel" customModule="InfomaniakCore">
                                 <rect key="frame" x="24" y="505.66666666666669" width="342" height="21.666666666666686"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <color key="textColor" name="titleColor"/>
@@ -371,8 +371,8 @@
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="aqN-bN-aqi" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="543.33333333333337" width="342" height="17"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="aqN-bN-aqi" customClass="IKLabel" customModule="InfomaniakCore">
+                                <rect key="frame" x="24" y="543.33333333333337" width="342" height="33.666666666666629"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -518,8 +518,8 @@
                                     <action selector="unlockAppButtonClicked:" destination="KGa-QI-iN2" eventType="touchUpInside" id="YgE-k8-Di3"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Application verrouillée" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="eyg-Oq-wrC" customClass="IKLabel" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="497.33333333333331" width="342" height="16.999999999999943"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Application verrouillée" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="eyg-Oq-wrC" customClass="IKLabel" customModule="InfomaniakCore">
+                                <rect key="frame" x="24" y="497.33333333333331" width="342" height="21.666666666666686"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -579,7 +579,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Zkn-3x-vMJ">
-                                <rect key="frame" x="0.0" y="0.0" width="390" height="658.66666666666663"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="657.66666666666663"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="9Im-hm-zse">
                                     <size key="itemSize" width="128" height="128"/>
@@ -594,10 +594,10 @@
                                 </connections>
                             </collectionView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="y3W-9c-Z7I">
-                                <rect key="frame" x="24" y="746.66666666666663" width="342" height="47.333333333333371"/>
+                                <rect key="frame" x="24" y="745.66666666666663" width="342" height="48.333333333333371"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Migration en cours, veuillez patienter..." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d35-jP-p8E" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="0.0" width="342" height="19.333333333333332"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Migration en cours, veuillez patienter..." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d35-jP-p8E" customClass="IKLabel" customModule="InfomaniakCore">
+                                        <rect key="frame" x="0.0" y="0.0" width="342" height="20.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="secondaryTextColor"/>
                                         <nil key="highlightedColor"/>
@@ -607,7 +607,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="NFo-sA-fCC">
-                                        <rect key="frame" x="161" y="27.333333333333371" width="20" height="20"/>
+                                        <rect key="frame" x="161" y="28.333333333333371" width="20" height="20"/>
                                     </activityIndicatorView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -627,10 +627,10 @@
                                 </constraints>
                             </imageView>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bca-Af-84s">
-                                <rect key="frame" x="24" y="638.66666666666663" width="342" height="171.33333333333337"/>
+                                <rect key="frame" x="24" y="637.66666666666663" width="342" height="172.33333333333337"/>
                                 <subviews>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tdc-Rl-QKP" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="111.33333333333337" width="342" height="60"/>
+                                        <rect key="frame" x="0.0" y="112.33333333333337" width="342" height="60"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="60" id="1Ff-bX-m3E"/>
@@ -653,8 +653,8 @@
                                             <action selector="retryButtonPressed:" destination="Mc1-Q4-Zh6" eventType="touchUpInside" id="ihv-mZ-x3p"/>
                                         </connections>
                                     </button>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="La migration a échoué." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0jU-Cm-uht" customClass="IKLabel" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="0.0" width="342" height="19.333333333333332"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="La migration a échoué." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0jU-Cm-uht" customClass="IKLabel" customModule="InfomaniakCore">
+                                        <rect key="frame" x="0.0" y="0.0" width="342" height="20.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -664,7 +664,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t82-BD-FpT" customClass="IKLargeButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="35.333333333333371" width="342" height="60"/>
+                                        <rect key="frame" x="0.0" y="36.333333333333371" width="342" height="60"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="60" id="4jS-Fu-yaJ"/>
                                         </constraints>
@@ -777,43 +777,43 @@
     </scenes>
     <designables>
         <designable name="0jU-Cm-uht">
-            <size key="intrinsicContentSize" width="111" height="19.333333333333332"/>
+            <size key="intrinsicContentSize" width="173" height="20.333333333333332"/>
         </designable>
         <designable name="1Ws-Ei-OPK">
-            <size key="intrinsicContentSize" width="83" height="29"/>
+            <size key="intrinsicContentSize" width="138" height="34"/>
         </designable>
         <designable name="1ka-pK-vme">
-            <size key="intrinsicContentSize" width="172" height="32"/>
+            <size key="intrinsicContentSize" width="163" height="34"/>
         </designable>
         <designable name="53t-Hq-IZI">
             <size key="intrinsicContentSize" width="24" height="24"/>
         </designable>
         <designable name="OXD-Rc-0Y2">
-            <size key="intrinsicContentSize" width="176" height="29"/>
+            <size key="intrinsicContentSize" width="273" height="34"/>
         </designable>
         <designable name="QKz-Y6-C7W">
             <size key="intrinsicContentSize" width="101" height="32"/>
         </designable>
         <designable name="Tdc-Rl-QKP">
-            <size key="intrinsicContentSize" width="77" height="29"/>
+            <size key="intrinsicContentSize" width="85" height="34"/>
         </designable>
         <designable name="aqN-bN-aqi">
-            <size key="intrinsicContentSize" width="123.66666666666667" height="17"/>
+            <size key="intrinsicContentSize" width="513" height="17"/>
         </designable>
         <designable name="d35-jP-p8E">
-            <size key="intrinsicContentSize" width="145.66666666666666" height="19.333333333333332"/>
+            <size key="intrinsicContentSize" width="292.66666666666669" height="20.333333333333332"/>
         </designable>
         <designable name="eyg-Oq-wrC">
-            <size key="intrinsicContentSize" width="79.666666666666671" height="17"/>
+            <size key="intrinsicContentSize" width="102" height="21.666666666666668"/>
         </designable>
         <designable name="gpt-af-Fsa">
-            <size key="intrinsicContentSize" width="100" height="21.666666666666668"/>
+            <size key="intrinsicContentSize" width="285.33333333333331" height="21.666666666666668"/>
         </designable>
         <designable name="iEM-pL-yBh">
-            <size key="intrinsicContentSize" width="90" height="32"/>
+            <size key="intrinsicContentSize" width="110" height="34"/>
         </designable>
         <designable name="t82-BD-FpT">
-            <size key="intrinsicContentSize" width="159" height="32"/>
+            <size key="intrinsicContentSize" width="86" height="34"/>
         </designable>
     </designables>
     <resources>
@@ -841,13 +841,13 @@
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

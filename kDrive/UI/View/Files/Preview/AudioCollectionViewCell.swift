@@ -17,6 +17,7 @@
  */
 
 import AVKit
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import MediaPlayer
@@ -88,13 +89,13 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
     override func configureWith(file: File) {
         setUpPlayButtons()
         self.file = file
-        if !file.isLocalVersionOlderThanRemote() {
+        if !file.isLocalVersionOlderThanRemote {
             player = AVPlayer(url: file.localUrl)
             setUpObservers()
         } else if let token = driveFileManager.apiFetcher.currentToken {
             driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                 if let token = token {
-                    let url = URL(string: ApiRoutes.downloadFile(file: file))!
+                    let url = Endpoint.download(file: file).url
                     let headers = ["Authorization": "Bearer \(token.accessToken)"]
                     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
                     DispatchQueue.main.async {
@@ -102,7 +103,7 @@ class AudioCollectionViewCell: PreviewCollectionViewCell {
                         self.setUpObservers()
                     }
                 } else {
-                    DispatchQueue.main.async {
+                    Task {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.previewLoadError)
                     }
                 }

@@ -225,7 +225,7 @@ public class AccountManager: RefreshTokenDelegate {
         addAccount(account: newAccount)
         setCurrentAccount(account: newAccount)
 
-        let apiFetcher = ApiFetcher(token: token, delegate: self)
+        let apiFetcher = DriveApiFetcher(token: token, delegate: self)
         let user = try await apiFetcher.userProfile()
         newAccount.user = user
 
@@ -294,7 +294,6 @@ public class AccountManager: RefreshTokenDelegate {
                 let data = try Data(contentsOf: groupDirectoryURL.appendingPathComponent("accounts.json"))
                 let savedAccounts = try decoder.decode([Account].self, from: data)
                 accounts = savedAccounts
-
             } catch {
                 DDLogError("Error loading accounts \(error)")
             }

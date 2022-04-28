@@ -25,7 +25,7 @@ import UIKit
 import Vision
 import VisionKit
 
-class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, FloatingPanelControllerDelegate {
+class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
     var currentDirectory: File!
     var driveFileManager: DriveFileManager!
 
@@ -42,11 +42,12 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         static let importMediaAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo, image: KDriveResourcesAsset.images.image, matomoName: "uploadMedia")
         static let importAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonUploadFile, image: KDriveResourcesAsset.upload.image, matomoName: "uploadFile")
         static let scanAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.buttonDocumentScanning, image: KDriveResourcesAsset.scan.image, matomoName: "scan")
-        static let folderAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allFolder, image: KDriveResourcesAsset.folderFill.image)
+        static let folderAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allFolder, image: KDriveResourcesAsset.folderFilled.image.withRenderingMode(.alwaysTemplate))
 
         static let docsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeDocs, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.infomaniakColor.color, docType: "docx", matomoName: "createDocument")
         static let pointsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficePoints, image: KDriveResourcesAsset.filePresentation.image, docType: "pptx", matomoName: "createPresentation")
         static let gridsAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeGrids, image: KDriveResourcesAsset.fileSheets.image, docType: "xlsx", matomoName: "createTable")
+        static let formAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeForm, image: KDriveResourcesAsset.fileForm.image, docType: "docxf", matomoName: "createForm")
         static let noteAction = PlusButtonMenuAction(name: KDriveResourcesStrings.Localizable.allOfficeNote, image: KDriveResourcesAsset.fileText.image, color: KDriveResourcesAsset.secondaryTextColor.color, docType: "txt", matomoName: "createText")
     }
 
@@ -154,7 +155,7 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
         switch action {
         case .importAction:
             let documentPicker = DriveImportDocumentPickerViewController(documentTypes: [UTI.data.identifier], in: .import)
-            documentPicker.importDriveDirectory = currentDirectory
+            documentPicker.importDriveDirectory = currentDirectory.freezeIfNeeded()
             documentPicker.delegate = mainTabViewController
             mainTabViewController.present(documentPicker, animated: true)
         case .folderAction:
@@ -166,7 +167,7 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
                 let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
                 navigationViewController.modalPresentationStyle = .fullScreen
                 navigationViewController.currentDriveFileManager = driveFileManager
-                navigationViewController.currentDirectory = currentDirectory
+                navigationViewController.currentDirectory = currentDirectory.freezeIfNeeded()
                 scanDoc.delegate = navigationViewController
                 mainTabViewController.present(navigationViewController, animated: true)
             } else {
@@ -174,7 +175,7 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
             }
         case .takePictureAction, .importMediaAction:
             mainTabViewController.photoPickerDelegate.driveFileManager = driveFileManager
-            mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory
+            mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory.freezeIfNeeded()
 
             if #available(iOS 14, *), action == .importMediaAction {
                 // Present new photo picker
@@ -191,7 +192,7 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
                 guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
                     let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle, message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription, action: KDriveResourcesStrings.Localizable.buttonGoToSettings) {
                         if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
-                            UIApplication.shared.open(settingsUrl)
+                            await UIApplication.shared.open(settingsUrl)
                         }
                     }
                     mainTabViewController.present(alert, animated: true)
@@ -208,8 +209,10 @@ class PlusButtonFloatingPanelViewController: TableFloatingPanelViewController, F
                     print("Source type \(sourceType) is not available on this device")
                 }
             }
-        case .docsAction, .gridsAction, .pointsAction, .noteAction:
-            let alertViewController = AlertDocViewController(fileType: action.docType, directory: currentDirectory, driveFileManager: driveFileManager)
+        case .docsAction, .gridsAction, .pointsAction, .formAction, .noteAction:
+            let alertViewController = AlertDocViewController(fileType: action.docType,
+                                                             directory: currentDirectory.freezeIfNeeded(),
+                                                             driveFileManager: driveFileManager)
             mainTabViewController.present(alertViewController, animated: true)
         default:
             break

@@ -320,7 +320,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     }
 
     func updateNavigationBar() {
-        if !currentFile.isLocalVersionOlderThanRemote() {
+        if !currentFile.isLocalVersionOlderThanRemote {
             switch currentFile.convertedType {
             case .pdf:
                 if let pdfCell = (collectionView.cellForItem(at: currentIndex) as? PdfPreviewCollectionViewCell),
@@ -330,8 +330,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 } else {
                     setNavbarStandard()
                 }
-            case .text, .presentation, .spreadsheet:
-                if currentFile.rights?.write ?? false {
+            case .text, .presentation, .spreadsheet, .form:
+                if currentFile.capabilities.canWrite {
                     setNavbarForEditing()
                 } else {
                     setNavbarStandard()
@@ -392,7 +392,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     @objc private func openFile() {
         if currentFile.isBookmark {
             floatingPanelViewController.dismiss(animated: false)
-            FilePresenter(viewController: self, floatingPanelViewController: nil).present(
+            FilePresenter(viewController: self).present(
                 driveFileManager: driveFileManager,
                 file: currentFile,
                 files: [],
@@ -477,7 +477,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
     func openWith(from: UIView) {
         let frame = from.convert(from.bounds, to: view)
         floatingPanelViewController.dismiss(animated: true)
-        if currentFile.isDownloaded && !currentFile.isLocalVersionOlderThanRemote() {
+        if currentFile.isMostRecentDownloaded {
             FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
         } else {
             downloadToOpenWith { [weak self] in
@@ -510,7 +510,7 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         previewErrors.values.forEach { $0.downloadTask?.cancel() }
         currentDownloadOperation?.cancel()
         currentDownloadOperation = nil
-        if currentFile.isLocalVersionOlderThanRemote() && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
+        if currentFile.isLocalVersionOlderThanRemote && ConvertedType.downloadableTypes.contains(currentFile.convertedType) {
             DownloadQueue.instance.temporaryDownload(
                 file: currentFile,
                 onOperationCreated: { operation in
@@ -622,7 +622,7 @@ extension PreviewViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
         // File is already downloaded and up to date OR we can remote play it (audio / video)
-        if previewErrors[file.id] == nil && (!file.isLocalVersionOlderThanRemote() || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
+        if previewErrors[file.id] == nil && (!file.isLocalVersionOlderThanRemote || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
             switch file.convertedType {
             case .image:
                 if let image = UIImage(contentsOfFile: file.localUrl.path) {
@@ -641,7 +641,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             case .video:
                 let cell = collectionView.dequeueReusableCell(type: VideoCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
-                cell.parentViewController = floatingPanelViewController
+                cell.parentViewController = self
                 cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
                 return cell

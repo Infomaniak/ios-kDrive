@@ -43,12 +43,6 @@ public struct URLConstants {
 }
 
 public enum Constants {
-    public static let isInExtension: Bool = {
-        let bundleUrl: URL = Bundle.main.bundleURL
-        let bundlePathExtension: String = bundleUrl.pathExtension
-        return bundlePathExtension == "appex"
-    }()
-
     public static let backgroundRefreshIdentifier = "com.infomaniak.background.refresh"
     public static let longBackgroundRefreshIdentifier = "com.infomaniak.background.long-refresh"
 
@@ -61,6 +55,8 @@ public enum Constants {
 
     public static let timeout: Double = 30
     public static let bulkActionThreshold = 10
+    public static let activitiesReloadTimeOut: Double = 7_776_000 // 90 days
+    public static let memoryCacheSizeLimit = 10 * 1024 * 1024 // 10 Mo
 
     private static var dateFormatter = DateFormatter()
     private static var fileSizeFormatter = MeasurementFormatter()
@@ -96,10 +92,6 @@ public enum Constants {
         }
         dateFormatter.doesRelativeDateFormatting = relative
         return dateFormatter.string(from: date)
-    }
-
-    public static func formatTimestamp(_ timeInterval: TimeInterval, style: DateTimeStyle = .datetime, relative: Bool = false) -> String {
-        return formatDate(Date(timeIntervalSince1970: timeInterval), style: style, relative: relative)
     }
 
     public static func formatFileLastModifiedRelativeDate(_ lastModified: Date) -> String {

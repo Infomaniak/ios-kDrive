@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -57,15 +58,6 @@ class SharedDrivesViewController: UIViewController {
             tableView.backgroundView = nil
         }
     }
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "toSharedWithMeSegue",
-           let nextVC = segue.destination as? SharedWithMeViewController,
-           let drive = sender as? Drive,
-           let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
-            nextVC.driveFileManager = driveFileManager
-        }
-    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
@@ -94,8 +86,13 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
             floatingPanelViewController?.setTitleLabel(with: drive.name)
             tableView.deselectRow(at: indexPath, animated: true)
             present(driveFloatingPanelController, animated: true)
+        } else if let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
+            let viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: nil)
+            let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
+            fileListViewController.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(fileListViewController, animated: true)
         } else {
-            performSegue(withIdentifier: "toSharedWithMeSegue", sender: drive)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
         }
     }
 }

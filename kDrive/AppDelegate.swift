@@ -38,17 +38,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     private var accountManager: AccountManager!
     private var uploadQueue: UploadQueue!
     private var reachabilityListener: ReachabilityListener!
-    private static let currentStateVersion = 1
+    private static let currentStateVersion = 2
     private static let appStateVersionKey = "appStateVersionKey"
 
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
-        ImageCache.default.memoryStorage.config.totalCostLimit = 20
+        ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
         InfomaniakLogin.initWith(clientId: DriveApiFetcher.clientId)
         accountManager = AccountManager.instance
         uploadQueue = UploadQueue.instance
         reachabilityListener = ReachabilityListener.instance
+        ApiEnvironment.current = .prod
 
         // Start audio session
         do {
@@ -60,6 +61,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         registerBackgroundTasks()
 
+        // In some cases the application can show the old Nextcloud import notification badge
+        UIApplication.shared.applicationIconBadgeNumber = 0
         NotificationsHelper.askForPermissions()
         NotificationsHelper.registerCategories()
         UNUserNotificationCenter.current().delegate = self
@@ -393,7 +396,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     // Compare modification date
                     let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
                     let modificationDate = attributes?[.modificationDate] as? Date ?? Date(timeIntervalSince1970: 0)
-                    if modificationDate > file.lastModifiedDate {
+                    if modificationDate > file.lastModifiedAt {
                         // Copy and upload file
                         let uploadFile = UploadFile(parentDirectoryId: file.parentId,
                                                     userId: accountManager.currentUserId,
@@ -410,10 +413,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                 DDLogError("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)")
                             } else {
                                 // Update file to get the new modification date
-                                driveFileManager.getFile(id: fileId, forceRefresh: true) { file, _, _ in
-                                    if let file = file {
-                                        driveFileManager.notifyObserversWith(file: file)
-                                    }
+                                Task {
+                                    let file = try await driveFileManager.file(id: fileId, forceRefresh: true)
+                                    driveFileManager.notifyObserversWith(file: file)
                                 }
                             }
                             group.leave()
@@ -442,50 +444,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 continue
             }
 
-            let offlineFiles = driveFileManager.getAvailableOfflineFiles()
-            guard !offlineFiles.isEmpty else { continue }
-            driveFileManager.getFilesActivities(driveId: drive.id, files: offlineFiles, from: UserDefaults.shared.lastSyncDateOfflineFiles) { result in
-                switch result {
-                case .success(let filesActivities):
-                    for (fileId, content) in filesActivities {
-                        guard let file = offlineFiles.first(where: { $0.id == fileId }) else {
-                            continue
-                        }
-
-                        if let activities = content.activities {
-                            // Apply activities to file
-                            var handledActivities = Set<FileActivityType>()
-                            for activity in activities where !handledActivities.contains(activity.action) {
-                                switch activity.action {
-                                case .fileRename:
-                                    // Rename file
-                                    driveFileManager.getFile(id: file.id, withExtras: true) { newFile, _, _ in
-                                        if let newFile = newFile {
-                                            try? driveFileManager.renameCachedFile(updatedFile: newFile, oldFile: file)
-                                        }
-                                    }
-                                case .fileUpdate:
-                                    // Download new version
-                                    DownloadQueue.instance.addToQueue(file: file, userId: driveFileManager.drive.userId)
-                                case .fileDelete:
-                                    // File has been deleted -- remove it from offline files
-                                    driveFileManager.setFileAvailableOffline(file: file, available: false) { _ in }
-                                default:
-                                    break
-                                }
-                                handledActivities.insert(activity.action)
-                            }
-                        } else if let error = content.error {
-                            if DriveError(apiError: error) == .objectNotFound {
-                                driveFileManager.setFileAvailableOffline(file: file, available: false) { _ in }
-                            } else {
-                                SentrySDK.capture(error: error)
-                            }
-                            // Silently handle error
-                            DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(drive.id) - \(drive.name)]: \(error)")
-                        }
-                    }
-                case .failure(let error):
+            Task {
+                do {
+                    try await driveFileManager.updateAvailableOfflineFiles()
+                } catch {
                     // Silently handle error
                     DDLogError("Error while fetching offline files activities in [\(drive.id) - \(drive.name)]: \(error)")
                 }
@@ -509,7 +471,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func setRootViewController(_ vc: UIViewController, animated: Bool = true) {
-        guard animated, let window = self.window else {
+        guard animated, let window = window else {
             self.window?.rootViewController = vc
             self.window?.makeKeyAndVisible()
             return
@@ -520,27 +482,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
     }
 
-    func present(file: File, driveFileManager: DriveFileManager) {
+    func present(file: File, driveFileManager: DriveFileManager, office: Bool = false) {
         guard let rootViewController = window?.rootViewController as? MainTabViewController else {
             return
         }
 
         // Dismiss all view controllers presented
-        rootViewController.dismiss(animated: false)
-        // Select Files tab
-        rootViewController.selectedIndex = 1
+        rootViewController.dismiss(animated: false) {
+            // Select Files tab
+            rootViewController.selectedIndex = 1
 
-        guard let navController = rootViewController.selectedViewController as? UINavigationController,
-              let viewController = navController.topViewController as? FileListViewController else {
-            return
-        }
+            guard let navController = rootViewController.selectedViewController as? UINavigationController,
+                  let viewController = navController.topViewController as? FileListViewController else {
+                return
+            }
 
-        if !file.isRoot && viewController.currentDirectory?.id != file.id {
-            // Pop to root
-            navController.popToRootViewController(animated: false)
-            // Present file
-            let filePresenter = FilePresenter(viewController: viewController, floatingPanelViewController: nil)
-            filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+            if !file.isRoot && viewController.viewModel.currentDirectory.id != file.id {
+                // Pop to root
+                navController.popToRootViewController(animated: false)
+                // Present file
+                guard let fileListViewController = navController.topViewController as? FileListViewController else { return }
+                if office {
+                    OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: fileListViewController)
+                } else {
+                    let filePresenter = FilePresenter(viewController: fileListViewController)
+                    filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+                }
+            }
         }
     }
 
@@ -574,6 +542,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
         let encodedVersion = coder.decodeInteger(forKey: AppDelegate.appStateVersionKey)
         return AppDelegate.currentStateVersion == encodedVersion && !(UserDefaults.shared.isFirstLaunch || accountManager.accounts.isEmpty)
+    }
+
+    // MARK: - User activity
+
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        // Get URL components from the incoming user activity.
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let incomingURL = userActivity.webpageURL,
+              let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+            return false
+        }
+
+        // Check for specific URL components that you need.
+        return UniversalLinksHelper.handlePath(components.path, appDelegate: self)
     }
 }
 

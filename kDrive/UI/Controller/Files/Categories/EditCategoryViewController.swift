@@ -198,33 +198,23 @@ extension EditCategoryViewController: ColorSelectionDelegate {
 extension EditCategoryViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
         MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
-        if let category = category {
-            // Edit category
-            driveFileManager.editCategory(id: category.id, name: category.isPredefined ? nil : category.name, color: category.colorHex) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    UIConstants.showSnackBar(message: error.localizedDescription)
-                }
-            }
-        } else {
-            // Create category
-            driveFileManager.createCategory(name: name, color: color) { [weak self] result in
-                switch result {
-                case .success(let category):
+        Task { [proxyFileToAdd = fileToAdd?.proxify()] in
+            do {
+                if let category = category {
+                    // Edit category
+                    _ = try await driveFileManager.edit(category: category, name: category.isPredefined ? nil : category.name, color: category.colorHex)
+                    navigationController?.popViewController(animated: true)
+                } else {
+                    // Create category
+                    let category = try await driveFileManager.createCategory(name: name, color: color)
                     // If a file was given, add the new category to it
-                    if let file = self?.fileToAdd {
-                        self?.driveFileManager.addCategory(file: file, category: category) { error in
-                            if let error = error {
-                                UIConstants.showSnackBar(message: error.localizedDescription)
-                            }
-                        }
+                    if let file = proxyFileToAdd {
+                        try await driveFileManager.add(category: category, to: file)
                     }
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    navigationController?.popViewController(animated: true)
                 }
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
             }
         }
     }

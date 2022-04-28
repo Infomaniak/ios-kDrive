@@ -33,7 +33,7 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="qT7-Rf-w44">
                                 <rect key="frame" x="48" y="16" width="188" height="43"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Importation en cours" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UNq-hI-wtf" customClass="IKLabel" customModule="kDriveCore">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Importation en cours" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UNq-hI-wtf" customClass="IKLabel" customModule="InfomaniakCore">
                                         <rect key="frame" x="0.0" y="0.0" width="188" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -43,7 +43,7 @@
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="uploadInProgressTitle"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" ambiguous="YES" text="2649 fichiers restants" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yi9-hz-m6I" customClass="IKLabel" customModule="kDriveCore">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="2649 fichiers restants" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yi9-hz-m6I" customClass="IKLabel" customModule="InfomaniakCore">
                                         <rect key="frame" x="0.0" y="28.5" width="188" height="14.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -99,10 +99,10 @@
     </objects>
     <designables>
         <designable name="UNq-hI-wtf">
-            <size key="intrinsicContentSize" width="144.5" height="17"/>
+            <size key="intrinsicContentSize" width="158" height="20.5"/>
         </designable>
         <designable name="Yi9-hz-m6I">
-            <size key="intrinsicContentSize" width="125" height="14.5"/>
+            <size key="intrinsicContentSize" width="167.5" height="20.5"/>
         </designable>
     </designables>
     <resources>
