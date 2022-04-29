@@ -234,33 +234,29 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
         Task {
             do {
                 _ = try await AccountManager.instance.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
-                Task {
-                    // Download root files
-                    try await AccountManager.instance.currentDriveFileManager?.initRoot()
-                    self.signInButton.setLoading(false)
-                    self.registerButton.isEnabled = true
-                    MatomoUtils.connectUser()
-                    self.goToMainScreen()
-                }
+                // Download root files
+                try await AccountManager.instance.currentDriveFileManager?.initRoot()
+                signInButton.setLoading(false)
+                registerButton.isEnabled = true
+                MatomoUtils.connectUser()
+                goToMainScreen()
             } catch {
-                if previousAccount != nil {
-                    AccountManager.instance.switchAccount(newAccount: previousAccount!)
+                if let previousAccount = previousAccount {
+                    AccountManager.instance.switchAccount(newAccount: previousAccount)
                 }
-                DispatchQueue.main.async {
-                    self.signInButton.setLoading(false)
-                    self.registerButton.isEnabled = true
-                    if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
-                        let driveErrorVC = DriveErrorViewController.instantiate()
-                        driveErrorVC.driveErrorViewType = .noDrive
-                        self.present(driveErrorVC, animated: true)
-                    } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance {
-                        let driveErrorVC = DriveErrorViewController.instantiate()
-                        driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
-                        self.present(driveErrorVC, animated: true)
-                    } else {
-                        SentrySDK.capture(error: error)
-                        self.okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection)
-                    }
+                signInButton.setLoading(false)
+                registerButton.isEnabled = true
+                if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
+                    let driveErrorVC = DriveErrorViewController.instantiate()
+                    driveErrorVC.driveErrorViewType = .noDrive
+                    present(driveErrorVC, animated: true)
+                } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance {
+                    let driveErrorVC = DriveErrorViewController.instantiate()
+                    driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
+                    present(driveErrorVC, animated: true)
+                } else {
+                    SentrySDK.capture(error: error)
+                    okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection)
                 }
             }
         }
