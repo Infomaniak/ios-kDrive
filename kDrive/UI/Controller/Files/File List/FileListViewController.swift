@@ -890,6 +890,11 @@ extension FileListViewController: UICollectionViewDragDelegate {
 // MARK: - UICollectionViewDropDelegate
 
 extension FileListViewController: UICollectionViewDropDelegate {
+    func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
+        // Prevent dropping a session with only folders
+        return !session.items.allSatisfy { $0.itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) }
+    }
+
     func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
         if let droppableViewModel = viewModel.droppableFileListViewModel {
             let file = destinationIndexPath != nil ? viewModel.getFile(at: destinationIndexPath!) : nil
