@@ -60,33 +60,33 @@ public class DropBoxSize: EmbeddedObject, Codable {
 
 public enum BinarySize: Encodable {
     case bytes(Int)
-    case kilobytes(Int)
-    case megabytes(Int)
-    case gigabytes(Int)
+    case kilobytes(Double)
+    case megabytes(Double)
+    case gigabytes(Double)
 
     public var toBytes: Int {
         switch self {
         case .bytes(let bytes):
             return bytes
         case .kilobytes(let kilobytes):
-            return kilobytes * 1_024
+            return Int(kilobytes * 1_024)
         case .megabytes(let megabytes):
-            return megabytes * 1_048_576
+            return Int(megabytes * 1_048_576)
         case .gigabytes(let gigabytes):
-            return gigabytes * 1_073_741_824
+            return Int(gigabytes * 1_073_741_824)
         }
     }
 
-    public var toGigabytes: Int {
+    public var toGigabytes: Double {
         switch self {
         case .bytes(let bytes):
-            return bytes / 1_073_741_824
+            return Double(bytes) / 1_073_741_824
         case .kilobytes(let kilobytes):
-            return kilobytes / 1_048_576
+            return Double(kilobytes) / 1_048_576
         case .megabytes(let megabytes):
-            return megabytes / 1_024
+            return Double(megabytes) / 1_024
         case .gigabytes(let gigabytes):
-            return gigabytes
+            return Double(gigabytes)
         }
     }
 

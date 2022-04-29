@@ -433,7 +433,7 @@ extension NewFolderViewController: FooterButtonDelegate {
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
             let limitFileSize: BinarySize?
-            if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Int {
+            if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Double {
                 limitFileSize = .gigabytes(size)
             } else {
                 limitFileSize = nil

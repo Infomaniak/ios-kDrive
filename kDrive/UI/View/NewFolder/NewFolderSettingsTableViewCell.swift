@@ -42,7 +42,11 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
     var datePickerView = UIDatePicker()
 
     weak var delegate: NewFolderSettingsDelegate?
-    var index: Int!
+    var cellType: CellType!
+
+    enum CellType: Int {
+        case mail, password, date, size
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -62,9 +66,9 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
 
         textField.rightView = nil
 
-        datePickerView.datePickerMode = UIDatePicker.Mode.date
+        datePickerView.datePickerMode = .date
         let toolBar = UIToolbar()
-        toolBar.barStyle = UIBarStyle.default
+        toolBar.barStyle = .default
         toolBar.isTranslucent = true
         toolBar.sizeToFit()
 
@@ -97,39 +101,46 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
 
     @objc func handleDatePicker() {
         dateTextField.text = Constants.formatDate(datePickerView.date, style: .date)
-        delegate?.didUpdateSettingsValue(index: index, content: datePickerView.date)
+        delegate?.didUpdateSettingsValue(index: cellType.rawValue, content: datePickerView.date)
     }
 
     @IBAction func settingSwitchChanged(_ sender: UISwitch) {
-        delegate?.didUpdateSettings(index: index, isOn: settingSwitch.isOn)
+        delegate?.didUpdateSettings(index: cellType.rawValue, isOn: settingSwitch.isOn)
     }
 
     @IBAction func textFieldUpdated(_ sender: MaterialOutlinedTextField) {
         textField.borderColor = KDriveResourcesAsset.infomaniakColor.color
-        let content = textField.text?.count ?? 0 > 0 ? textField.text : nil
-        delegate?.didUpdateSettingsValue(index: index, content: index == 3 ? Int(textField.text ?? "0") : content)
+        let content: Any?
+        switch cellType {
+        case .size:
+            content = NumberFormatter().number(from: textField.text ?? "")?.doubleValue
+        default:
+            content = textField.text?.isEmpty == false ? textField.text : nil
+        }
+        delegate?.didUpdateSettingsValue(index: cellType.rawValue, content: content)
     }
 
     @IBAction func actionButtonTapped(_ sender: UIButton) {
-        delegate?.didTapOnActionButton(index: index)
+        delegate?.didTapOnActionButton(index: cellType.rawValue)
     }
 
     @IBAction func datePickerUpdated(_ sender: UIDatePicker) {
-        delegate?.didUpdateSettingsValue(index: index, content: datePicker.date)
+        delegate?.didUpdateSettingsValue(index: cellType.rawValue, content: datePicker.date)
     }
 
     func configureFor(index: Int, switchValue: Bool, actionButtonVisible: Bool = false, settingValue: Any?) {
-        self.index = index
+        guard let cellType = CellType(rawValue: index) else { return }
+        self.cellType = cellType
         settingSwitch.isOn = switchValue
 
-        switch index {
-        case 0:
+        switch cellType {
+        case .mail:
             configureMail()
-        case 1:
+        case .password:
             configurePassword(switchValue: switchValue, newPassword: actionButtonVisible, setting: settingValue)
-        case 2:
+        case .date:
             configureDate(switchValue: switchValue, setting: settingValue)
-        default:
+        case .size:
             configureSize(switchValue: switchValue, setting: settingValue)
         }
     }
@@ -198,11 +209,11 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
         textField.isHidden = !switchValue
         textFieldStackView.isHidden = !switchValue
         textField.isSecureTextEntry = false
-        textField.keyboardType = .numberPad
+        textField.keyboardType = .decimalPad
         textField.setHint(nil)
         if switchValue {
-            let value = setting as? Int ?? 0
-            textField.text = String(value)
+            let value = setting as? Double ?? 0
+            textField.text = NumberFormatter.localizedString(from: NSNumber(value: value), number: .decimal)
             textFieldUpdated(textField)
         }
 
@@ -220,7 +231,7 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
 extension NewFolderSettingsTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         textField.borderColor = KDriveResourcesAsset.infomaniakColor.color
-        if index == 3 && textField.text == "0" {
+        if cellType == .size && textField.text == "0" {
             textField.selectAll(nil)
         }
     }
