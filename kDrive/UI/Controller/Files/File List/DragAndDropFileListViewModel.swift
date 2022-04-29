@@ -111,7 +111,9 @@ class DroppableFileListViewModel {
             _ = FileImportHelper.instance.importItems(externalFiles) { [weak self, frozenDestination = destinationDirectory.freeze()] importedFiles, errorCount in
                 guard let self = self else { return }
                 if errorCount > 0 {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
+                    Task {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
+                    }
                 }
                 guard !importedFiles.isEmpty else {
                     return

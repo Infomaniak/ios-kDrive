@@ -315,8 +315,11 @@ public class FileImportHelper {
             return UTI.heic.identifier
         } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
             return UTI.jpeg.identifier
-        } else {
+        } else if !itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
+            // We cannot upload folders so we ignore them
             return itemProvider.registeredTypeIdentifiers.first
+        } else {
+            return nil
         }
     }
 
