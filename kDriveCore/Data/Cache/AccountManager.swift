@@ -221,19 +221,19 @@ public class AccountManager: RefreshTokenDelegate {
     }
 
     public func createAndSetCurrentAccount(token: ApiToken) async throws -> Account {
-        let newAccount = Account(apiToken: token)
-        addAccount(account: newAccount)
-        setCurrentAccount(account: newAccount)
-
         let apiFetcher = DriveApiFetcher(token: token, delegate: self)
         let user = try await apiFetcher.userProfile()
-        newAccount.user = user
 
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.main.isEmpty else {
-            removeAccount(toDeleteAccount: newAccount)
             throw DriveError.noDrive
         }
+
+        let newAccount = Account(apiToken: token)
+        newAccount.user = user
+        addAccount(account: newAccount)
+        setCurrentAccount(account: newAccount)
+
         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
         guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
             removeAccount(toDeleteAccount: newAccount)
