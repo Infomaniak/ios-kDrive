@@ -96,10 +96,9 @@ class UploadQueueViewController: UIViewController {
                         self?.tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                         self?.tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                         self?.tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
-                    } completion: { _ in
-                        // Update cell corners
-                        self?.tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
                     }
+                    // Update cell corners
+                    self?.tableView.reloadCorners(insertions: insertions, deletions: deletions, count: results.count)
                 case .error(let error):
                     DDLogError("Realm observer error: \(error)")
                 }
