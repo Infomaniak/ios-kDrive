@@ -127,6 +127,12 @@ public class DriveFileManager {
         return File(id: -8, name: "Images")
     }
 
+    public static var offlineRoot: File {
+        let offlineRoot = File(id: -9, name: "Offline")
+        offlineRoot.fullyDownloaded = true
+        return offlineRoot
+    }
+
     public func getCachedRootFile(freeze: Bool = true, using realm: Realm? = nil) -> File {
         if let root = getCachedFile(id: DriveFileManager.constants.rootID, freeze: false) {
             if root.name != drive.name {
