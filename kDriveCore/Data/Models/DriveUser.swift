@@ -81,4 +81,12 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case displayName = "display_name"
         case type
     }
+
+    public convenience init(user: InfomaniakCore.UserProfile) {
+        self.init()
+        self.id = user.id
+        self.email = user.email
+        self._avatar = user.avatar
+        self.displayName = user.displayName
+    }
 }
