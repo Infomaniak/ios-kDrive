@@ -27,7 +27,7 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
     convenience init(driveFileManager: DriveFileManager, activities: [FileActivity]) {
         self.init(driveFileManager: driveFileManager)
         activity = activities.first
-        addPage(files: activities.compactMap(\.file), fullyDownloaded: true, page: 1)
+        addPage(files: activities.compactMap(\.file).map { $0.detached() }, fullyDownloaded: true, page: 1)
     }
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
