@@ -116,7 +116,9 @@ public class BackgroundRealm {
         try? realm.safeWrite {
             for write in buffer {
                 realm.add(write.file, update: .all)
-                write.parent?.children.insert(write.file)
+                if write.parent?.isInvalidated == false {
+                    write.parent?.children.insert(write.file)
+                }
             }
         }
         buffer.removeAll()
