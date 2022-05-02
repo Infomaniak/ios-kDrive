@@ -47,6 +47,7 @@ public enum Logging {
             ], key: "Realm")
         }
         #if DEBUG
+            copyDebugInformations()
             DDLogError("Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch")
             _ = try? Realm.deleteFiles(for: realmConfiguration)
         #endif
