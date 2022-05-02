@@ -183,20 +183,8 @@ public class DriveFileManager {
                     }
                 }
                 if oldSchemaVersion < 5 {
-                    // Get file ids
-                    var fileIds = Set<Int>()
-                    migration.enumerateObjects(ofType: File.className()) { oldObject, _ in
-                        if let id = oldObject?["id"] as? Int {
-                            fileIds.insert(id)
-                        }
-                    }
-                    // Remove dangling rights
-                    migration.enumerateObjects(ofType: Rights.className()) { oldObject, newObject in
-                        guard let newObject = newObject, let fileId = oldObject?["fileId"] as? Int else { return }
-                        if !fileIds.contains(fileId) {
-                            migration.delete(newObject)
-                        }
-                    }
+                    // Remove rights
+                    migration.deleteData(forType: Rights.className())
                     // Delete file categories for migration
                     migration.deleteData(forType: FileCategory.className())
                 }
