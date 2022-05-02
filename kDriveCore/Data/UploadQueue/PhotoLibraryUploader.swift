@@ -59,12 +59,17 @@ public class PhotoLibraryUploader {
     }
 
     private func updateLastSyncDate(_ date: Date, using realm: Realm = DriveFileManager.constants.uploadsRealm) {
-        realm.refresh()
         if let settings = realm.objects(PhotoSyncSettings.self).first {
             try? realm.safeWrite {
-                settings.lastSync = date
+                if !settings.isInvalidated {
+                    settings.lastSync = date
+                }
             }
-            self.settings = PhotoSyncSettings(value: settings)
+            if settings.isInvalidated {
+                self.settings = nil
+            } else {
+                self.settings = PhotoSyncSettings(value: settings)
+            }
         }
     }
 
