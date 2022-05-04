@@ -268,7 +268,11 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                     driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
                     present(driveErrorVC, animated: true)
                 } else {
-                    SentrySDK.capture(error: error)
+                    SentrySDK.capture(error: error) { scope in
+                        scope.setContext(value: [
+                            "Underlying Error": error.asAFError?.underlyingError.debugDescription ?? "Not an AFError"
+                        ], key: "Error")
+                    }
                     okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection)
                 }
             }
