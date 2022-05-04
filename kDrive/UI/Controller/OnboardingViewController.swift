@@ -41,6 +41,8 @@ class OnboardingViewController: UIViewController {
 
     var addUser = false
     var slides: [Slide] = []
+    
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -109,6 +111,10 @@ class OnboardingViewController: UIViewController {
 
     @IBAction func signInButtonPressed(_ sender: Any) {
         MatomoUtils.track(eventWithCategory: .account, name: "openLoginWebview")
+        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "Login WebView") { [weak self] in
+            SentrySDK.capture(message: "Background task expired while logging in")
+            self?.endBackgroundTask()
+        }
         InfomaniakLogin.webviewLoginFrom(viewController: self, delegate: self)
     }
 
@@ -176,6 +182,13 @@ class OnboardingViewController: UIViewController {
                            description: KDriveResourcesStrings.Localizable.onBoardingDescription3)
 
         return [slide1, slide2, slide3]
+    }
+    
+    private func endBackgroundTask() {
+        if backgroundTaskIdentifier != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+            backgroundTaskIdentifier = .invalid
+        }
     }
 
     class func instantiate() -> OnboardingViewController {
@@ -259,6 +272,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                     okAlert(title: KDriveResourcesStrings.Localizable.errorTitle, message: KDriveResourcesStrings.Localizable.errorConnection)
                 }
             }
+            endBackgroundTask()
         }
     }
 
