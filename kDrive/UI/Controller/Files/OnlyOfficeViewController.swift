@@ -163,7 +163,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
             let urlString = url.absoluteString
             if url == file.officeUrl
                 || urlString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
-                || urlString.starts(with: "https://documentserver.\(ApiEnvironment.current.host)") {
+                || urlString.starts(with: "https://documentserver.\(ApiEnvironment.current.driveHost)") {
                 // HACK: Print/download a file if the URL contains "/output." because `shouldPerformDownload` doesn't work
                 if urlString.contains("/output.") {
                     if UIPrintInteractionController.canPrint(url) {
