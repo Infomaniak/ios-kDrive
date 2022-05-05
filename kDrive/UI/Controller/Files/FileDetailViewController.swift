@@ -30,10 +30,28 @@ class FileDetailViewController: UIViewController {
     var fileAccess: FileAccess?
     var contentCount: FileCount?
 
-    private var activities = [[FileActivity]]()
+    private var activities = [ActivitySection]()
     private var activitiesInfo = (page: 1, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
+
+    private struct ActivitySection {
+        let referenceDate: Date
+        var elements: [FileActivity]
+
+        var dateComponents: DateComponents {
+            return Calendar.current.dateComponents([.year, .month, .day], from: referenceDate)
+        }
+
+        var formattedDate: String {
+            return Constants.formatDate(referenceDate, style: .date, relative: true)
+        }
+
+        init(referenceDate: Date) {
+            self.referenceDate = referenceDate
+            self.elements = []
+        }
+    }
 
     private enum Tabs: Int {
         case informations
@@ -281,39 +299,20 @@ class FileDetailViewController: UIViewController {
     }
 
     func orderActivities(data: [FileActivity]) {
-        guard !data.isEmpty else {
-            tableView.reloadData()
-            return
-        }
-
-        var currentDate: String
-        var lastDate: String
-        var notEmpty = true
-
-        var index = activities.count - 1
-        if activities.isEmpty {
-            notEmpty = false
-            index = 0
-            activities.append([FileActivity]())
-            activities[index].append(data[0])
-            lastDate = Constants.formatDate(Date(timeIntervalSince1970: TimeInterval()), style: .date)
-        } else {
-            lastDate = Constants.formatDate(activities[index][0].createdAt, style: .date)
-        }
-
-        for (i, activity) in data.enumerated() {
-            if i != 0 || notEmpty {
-                currentDate = Constants.formatDate(activity.createdAt, style: .date)
-                if currentDate == lastDate {
-                    activities[index].append(activity)
-                } else {
-                    index += 1
-                    activities.append([FileActivity]())
-                    activities[index].append(activity)
-                    lastDate = currentDate
-                }
+        for activity in data {
+            let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day], from: activity.createdAt)
+            let currentSectionIndex: Int
+            if activities.last?.dateComponents == currentDateComponents {
+                currentSectionIndex = activities.count - 1
+            } else if let yearMonthIndex = activities.firstIndex(where: { $0.dateComponents == currentDateComponents }) {
+                currentSectionIndex = yearMonthIndex
+            } else {
+                activities.append(ActivitySection(referenceDate: activity.createdAt))
+                currentSectionIndex = activities.count - 1
             }
+            activities[currentSectionIndex].elements.append(activity)
         }
+
         if currentTab == .activity {
             reloadTableView()
         }
@@ -525,7 +524,7 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
         case .informations:
             return fileInformationRows.count
         case .activity:
-            return activities[section - 1].count + 1
+            return activities[section - 1].elements.count + 1
         case .comments:
             if !comments.isEmpty {
                 return comments.count
@@ -627,16 +626,17 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     return cell
                 }
             case .activity:
+                let section = activities[indexPath.section - 1]
                 if indexPath.row == 0 {
                     let cell = tableView.dequeueReusableCell(type: FileDetailActivitySeparatorTableViewCell.self, for: indexPath)
                     if indexPath.section == 1 {
                         cell.topSeparatorHeight.constant = 0
                     }
-                    cell.dateLabel.text = Constants.formatDate(activities[indexPath.section - 1][0].createdAt, style: .date, relative: true)
+                    cell.dateLabel.text = section.formattedDate
                     return cell
                 }
                 let cell = tableView.dequeueReusableCell(type: FileDetailActivityTableViewCell.self, for: indexPath)
-                cell.configure(with: activities[indexPath.section - 1][indexPath.row - 1], file: file)
+                cell.configure(with: section.elements[indexPath.row - 1], file: file)
                 return cell
             case .comments:
                 if file.isOfficeFile {
