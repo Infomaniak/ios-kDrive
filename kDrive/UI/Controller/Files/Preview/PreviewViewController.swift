@@ -586,11 +586,14 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
         let previewFileIds = coder.decodeObject(forKey: "Files") as? [Int] ?? []
         let realm = driveFileManager.getRealm()
         previewFiles = previewFileIds.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
-        currentIndex = IndexPath(row: coder.decodeInteger(forKey: "CurrentIndex"), section: 0)
-        if currentIndex.row >= previewFiles.count {
+
+        let decodedIndex = coder.decodeInteger(forKey: "CurrentIndex")
+        if decodedIndex >= previewFiles.count {
             navigationController?.popViewController(animated: true)
             return
         }
+        currentIndex = IndexPath(row: decodedIndex, section: 0)
+
         // Update UI
         DispatchQueue.main.async { [self] in
             collectionView.reloadData()
