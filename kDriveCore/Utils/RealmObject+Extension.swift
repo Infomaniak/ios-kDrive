@@ -61,3 +61,31 @@ extension EmbeddedObject: DetachableObject {
         return detached
     }
 }
+
+extension List: DetachableObject {
+    public func detached() -> Self {
+        let detached = type(of: self).init()
+        for value in self {
+            if let detachable = value as? DetachableObject {
+                detached.append(detachable.detached() as! Element)
+            } else {
+                detached.append(value)
+            }
+        }
+        return detached
+    }
+}
+
+extension MutableSet: DetachableObject {
+    public func detached() -> Self {
+        let detached = type(of: self).init()
+        for value in self {
+            if let detachable = value as? DetachableObject {
+                detached.insert(detachable.detached() as! Element)
+            } else {
+                detached.insert(value)
+            }
+        }
+        return detached
+    }
+}
