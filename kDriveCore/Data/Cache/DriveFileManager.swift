@@ -679,7 +679,9 @@ public class DriveFileManager {
 
     public func fileActivities(file: ProxyFile, from timestamp: Int? = nil) async throws -> (result: ActivitiesResult, responseAt: Int) {
         // Get all pages and assemble
-        let timestamp = try TimeInterval(timestamp ?? file.resolve(using: getRealm()).responseAt)
+        let realm = getRealm()
+        realm.refresh()
+        let timestamp = try TimeInterval(timestamp ?? file.resolve(using: realm).responseAt)
         var page = 1
         var moreComing = true
         var pagedActions = [Int: FileActivityType]()
