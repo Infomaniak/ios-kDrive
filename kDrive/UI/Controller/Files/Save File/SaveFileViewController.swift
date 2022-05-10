@@ -30,6 +30,7 @@ class SaveFileViewController: UIViewController {
         case fileType
         case driveSelection
         case directorySelection
+        case imageFormat
         case importing
     }
 
