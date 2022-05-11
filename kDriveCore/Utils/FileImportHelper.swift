@@ -122,7 +122,7 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
-    public func importItems(_ itemProviders: [NSItemProvider], completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
+    public func importItems(_ itemProviders: [NSItemProvider], userPreferredPhotoFormat: UTI? = nil, completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
         let perItemUnitCount: Int64 = 10
         let progress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
         let dispatchGroup = DispatchGroup()
@@ -310,12 +310,15 @@ public class FileImportHelper {
         }
     }
 
-    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider) -> String? {
-        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) {
-            return UTI.heic.identifier
-        } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
-            return UTI.jpeg.identifier
-        } else if !itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
+    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider, userPreferredPhotoFormat: UTI?) -> String? {
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
+            if let userPreferredPhotoFormat = userPreferredPhotoFormat {
+                return userPreferredPhotoFormat.identifier
+            }
+            return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
+        }
+
+        if !itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
             // We cannot upload folders so we ignore them
             return itemProvider.registeredTypeIdentifiers.first
         } else {

@@ -30,7 +30,7 @@ class SaveFileViewController: UIViewController {
         case fileType
         case driveSelection
         case directorySelection
-        case imageFormat
+        case photoFormat
         case importing
     }
 
@@ -40,6 +40,12 @@ class SaveFileViewController: UIViewController {
     private var originalUserId = AccountManager.instance.currentUserId
     var selectedDriveFileManager: DriveFileManager?
     var selectedDirectory: File?
+    var photoFormat = PhotoFileFormat.jpg
+    var itemProviders: [NSItemProvider]? {
+        didSet {
+            setItemProviders()
+        }
+    }
     var items = [ImportedFile]()
     private var errorCount = 0
     private var importProgress: Progress?
@@ -121,7 +127,8 @@ class SaveFileViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    func setItemProviders(_ itemProviders: [NSItemProvider]) {
+    func setItemProviders() {
+        guard let itemProviders = itemProviders else { return }
         sections = [.importing]
         importProgress = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
@@ -148,6 +155,9 @@ class SaveFileViewController: UIViewController {
                 newSections.append(contentsOf: [.fileName, .driveSelection])
             } else {
                 newSections.append(contentsOf: [.fileName, .driveSelection, .directorySelection])
+            }
+            if items.contains(where: { $0.uti == .image }) {
+                newSections.append(.photoFormat)
             }
         }
         sections = newSections
@@ -334,6 +344,14 @@ extension SaveFileViewController: SelectDriveDelegate {
             sections = [.fileName, .driveSelection, .directorySelection]
         }
         updateButton()
+    }
+}
+
+// MARK: - SelectPhotoFormatDelegate
+
+extension SaveFileViewController: SelectPhotoFormatDelegate {
+    func didSelectPhotoFormat(_ format: PhotoFileFormat) {
+
     }
 }
 

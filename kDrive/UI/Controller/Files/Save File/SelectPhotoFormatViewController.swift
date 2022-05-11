@@ -16,20 +16,21 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 
-protocol SelectImageFormatDelegate: AnyObject {
-    func didSelectImageFormat(shouldBeHeic: Bool)
+protocol SelectPhotoFormatDelegate: AnyObject {
+    func didSelectPhotoFormat(_ format: PhotoFileFormat)
 }
 
-class SelectImageFormatViewController: UIViewController {
+class SelectPhotoFormatViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
     }
 
-    func instantiate() -> SelectImageFormatViewController {
-        return Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectImageFormatViewController
+    func instantiate() -> SelectPhotoFormatViewController {
+        return Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectPhotoFormatViewController
     }
 }

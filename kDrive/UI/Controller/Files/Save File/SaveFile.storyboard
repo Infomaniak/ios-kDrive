@@ -126,10 +126,10 @@
             </objects>
             <point key="canvasLocation" x="1594" y="-550"/>
         </scene>
-        <!--Select Image Format View Controller-->
+        <!--Select Photo Format View Controller-->
         <scene sceneID="kvU-CS-18l">
             <objects>
-                <viewController storyboardIdentifier="SelectImageFormatViewController" id="pj3-xM-nmc" customClass="SelectImageFormatViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SelectImageFormatViewController" id="pj3-xM-nmc" customClass="SelectPhotoFormatViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="6Ra-Sm-OfL">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
