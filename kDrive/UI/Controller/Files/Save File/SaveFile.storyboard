@@ -126,7 +126,7 @@
             </objects>
             <point key="canvasLocation" x="1594" y="-550"/>
         </scene>
-        <!--Select Photo Format View Controller-->
+        <!--Sélectionner un format de photo-->
         <scene sceneID="kvU-CS-18l">
             <objects>
                 <viewController storyboardIdentifier="SelectImageFormatViewController" id="pj3-xM-nmc" customClass="SelectPhotoFormatViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
@@ -148,6 +148,11 @@
                             <constraint firstItem="nwh-Is-go9" firstAttribute="leading" secondItem="2fO-wu-MvI" secondAttribute="leading" id="hww-Aw-yhb"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" title="Sélectionner un format de photo" id="YRC-hf-LiG">
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="selectPhotoFormat"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
                     <connections>
                         <outlet property="tableView" destination="nwh-Is-go9" id="ou6-UX-Ljm"/>
                     </connections>
@@ -204,7 +209,7 @@
     </scenes>
     <designables>
         <designable name="gLb-rt-aBR">
-            <size key="intrinsicContentSize" width="57" height="34"/>
+            <size key="intrinsicContentSize" width="85" height="32"/>
         </designable>
     </designables>
     <resources>

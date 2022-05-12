@@ -277,7 +277,7 @@ extension SaveFileViewController: UITableViewDataSource {
         case .directorySelection:
             return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.allPathTitle)
         case .photoFormat:
-            return HomeTitleView.instantiate(title: "Format d'enregistrement des photos")
+            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.photoFormatTitle)
         default:
             return nil
         }
