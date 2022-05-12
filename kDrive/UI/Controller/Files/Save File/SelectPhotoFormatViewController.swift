@@ -30,7 +30,7 @@ class SelectPhotoFormatViewController: UIViewController {
         super.viewDidLoad()
     }
 
-    func instantiate() -> SelectPhotoFormatViewController {
+    static func instantiate() -> SelectPhotoFormatViewController {
         return Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectPhotoFormatViewController
     }
 }

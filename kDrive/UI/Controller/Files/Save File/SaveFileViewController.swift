@@ -327,6 +327,9 @@ extension SaveFileViewController: UITableViewDelegate {
             guard let driveFileManager = selectedDriveFileManager else { return }
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, delegate: self)
             present(selectFolderNavigationController, animated: true)
+        case .photoFormat:
+            let selectPhotoFormatViewController = SelectPhotoFormatViewController.instantiate()
+            navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
         default:
             break
         }
