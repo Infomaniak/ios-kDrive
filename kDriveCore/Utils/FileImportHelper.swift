@@ -73,6 +73,19 @@ public enum PhotoFileFormat: Int, CaseIterable {
     public var `extension`: String {
         return uti.preferredFilenameExtension!
     }
+
+    public init?(uti: UTI) {
+        switch uti {
+        case .jpeg:
+            self = .jpg
+        case .heic:
+            self = .heic
+        case .png:
+            self = .png
+        default:
+            return nil
+        }
+    }
 }
 
 public enum ScanFileFormat: Int, CaseIterable {
@@ -122,7 +135,7 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
-    public func importItems(_ itemProviders: [NSItemProvider], userPreferredPhotoFormat: UTI? = nil, completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
+    public func importItems(_ itemProviders: [NSItemProvider], userPreferredPhotoFormat: PhotoFileFormat? = nil, completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
         let perItemUnitCount: Int64 = 10
         let progress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
         let dispatchGroup = DispatchGroup()
@@ -164,7 +177,7 @@ public class FileImportHelper {
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider) {
+            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider, userPreferredPhotoFormat: userPreferredPhotoFormat) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
                     switch result {
                     case .success((let filename, let fileURL)):
@@ -310,10 +323,10 @@ public class FileImportHelper {
         }
     }
 
-    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider, userPreferredPhotoFormat: UTI?) -> String? {
+    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider, userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
         if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
             if let userPreferredPhotoFormat = userPreferredPhotoFormat {
-                return userPreferredPhotoFormat.identifier
+                return userPreferredPhotoFormat.uti.identifier
             }
             return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
         }

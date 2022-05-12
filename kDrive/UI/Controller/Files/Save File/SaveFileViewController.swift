@@ -47,6 +47,7 @@ class SaveFileViewController: UIViewController {
         }
     }
     var items = [ImportedFile]()
+    var userPreferredPhotoFormat: PhotoFileFormat?
     private var errorCount = 0
     private var importProgress: Progress?
     private var enableButton = false {
@@ -90,6 +91,7 @@ class SaveFileViewController: UIViewController {
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: ImportingTableViewCell.self)
         tableView.register(cellView: LocationTableViewCell.self)
+        tableView.register(cellView: PhotoFormatTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
@@ -156,7 +158,11 @@ class SaveFileViewController: UIViewController {
             } else {
                 newSections.append(contentsOf: [.fileName, .driveSelection, .directorySelection])
             }
-            if items.contains(where: { $0.uti == .image }) {
+
+            let itemsContainsPhotoInHEICAndJPEG = itemProviders?.contains {
+                $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier) && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
+            }
+            if itemsContainsPhotoInHEICAndJPEG == true {
                 newSections.append(.photoFormat)
             }
         }
@@ -248,6 +254,11 @@ extension SaveFileViewController: UITableViewDataSource {
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.configure(with: selectedDirectory, drive: selectedDriveFileManager!.drive)
             return cell
+        case .photoFormat:
+            let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.configure(with: userPreferredPhotoFormat ?? .jpg)
+            return cell
         case .importing:
             let cell = tableView.dequeueReusableCell(type: ImportingTableViewCell.self, for: indexPath)
             cell.importationProgressView.observedProgress = importProgress
@@ -265,6 +276,8 @@ extension SaveFileViewController: UITableViewDataSource {
             return HomeTitleView.instantiate(title: "kDrive")
         case .directorySelection:
             return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.allPathTitle)
+        case .photoFormat:
+            return HomeTitleView.instantiate(title: "Format d'enregistrement des photos")
         default:
             return nil
         }
