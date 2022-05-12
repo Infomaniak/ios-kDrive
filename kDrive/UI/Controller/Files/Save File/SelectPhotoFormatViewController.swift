@@ -29,12 +29,14 @@ class SelectPhotoFormatViewController: UIViewController {
     private var tableContent: [PhotoFileFormat] = [.jpg, .heic]
     private var selectedFormat: PhotoFileFormat!
 
+    weak var delegate: SelectPhotoFormatDelegate?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: SelectionTableViewCell.self)
     }
 
-    static func instantiate(selectedFormat: PhotoFileFormat?) -> SelectPhotoFormatViewController {
+    static func instantiate(selectedFormat: PhotoFileFormat) -> SelectPhotoFormatViewController {
         let viewController = Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectPhotoFormatViewController
         viewController.selectedFormat = selectedFormat
         return viewController
@@ -52,6 +54,9 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(type: SelectionTableViewCell.self, for: indexPath)
         let currentFormat = tableContent[indexPath.row]
         cell.label.text = currentFormat.title
+        if currentFormat == selectedFormat {
+            cell.setSelected(true, animated: true)
+        }
         return cell
     }
 }
@@ -59,5 +64,8 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 
 extension SelectPhotoFormatViewController: UITableViewDelegate {
-
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        delegate?.didSelectPhotoFormat(tableContent[indexPath.row])
+        navigationController?.popViewController(animated: true)
+    }
 }

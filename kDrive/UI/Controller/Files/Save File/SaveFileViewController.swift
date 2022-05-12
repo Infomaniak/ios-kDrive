@@ -47,7 +47,11 @@ class SaveFileViewController: UIViewController {
         }
     }
     var items = [ImportedFile]()
-    var userPreferredPhotoFormat: PhotoFileFormat?
+    var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
+        didSet {
+            UserDefaults.shared.importPhotoFormat = userPreferredPhotoFormat
+        }
+    }
     private var errorCount = 0
     private var importProgress: Progress?
     private var enableButton = false {
@@ -329,6 +333,7 @@ extension SaveFileViewController: UITableViewDelegate {
             present(selectFolderNavigationController, animated: true)
         case .photoFormat:
             let selectPhotoFormatViewController = SelectPhotoFormatViewController.instantiate(selectedFormat: userPreferredPhotoFormat)
+            selectPhotoFormatViewController.delegate = self
             navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
         default:
             break
@@ -367,7 +372,7 @@ extension SaveFileViewController: SelectDriveDelegate {
 
 extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
-
+        userPreferredPhotoFormat = format
     }
 }
 
