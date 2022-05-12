@@ -26,11 +26,38 @@ protocol SelectPhotoFormatDelegate: AnyObject {
 class SelectPhotoFormatViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
+    private var tableContent: [PhotoFileFormat] = [.jpg, .heic]
+    private var selectedFormat: PhotoFileFormat!
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.register(cellView: SelectionTableViewCell.self)
     }
 
-    static func instantiate() -> SelectPhotoFormatViewController {
-        return Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectPhotoFormatViewController
+    static func instantiate(selectedFormat: PhotoFileFormat?) -> SelectPhotoFormatViewController {
+        let viewController = Storyboard.saveFile.instantiateViewController(withIdentifier: "SelectImageFormatViewController") as! SelectPhotoFormatViewController
+        viewController.selectedFormat = selectedFormat
+        return viewController
     }
+}
+
+// MARK: - UITableViewDataSource
+
+extension SelectPhotoFormatViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        tableContent.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: SelectionTableViewCell.self, for: indexPath)
+        let currentFormat = tableContent[indexPath.row]
+        cell.label.text = currentFormat.title
+        return cell
+    }
+}
+
+// MARK: - UITableViewDelegate
+
+extension SelectPhotoFormatViewController: UITableViewDelegate {
+
 }

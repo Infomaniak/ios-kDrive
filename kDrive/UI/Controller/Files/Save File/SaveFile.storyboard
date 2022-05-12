@@ -6,7 +6,6 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -134,16 +133,20 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="nwh-Is-go9">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="nwh-Is-go9">
+                                <rect key="frame" x="0.0" y="44" width="414" height="852"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="pj3-xM-nmc" id="5iz-I0-lYb"/>
+                                    <outlet property="delegate" destination="pj3-xM-nmc" id="llC-0k-UpU"/>
+                                </connections>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="2fO-wu-MvI"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
-                            <constraint firstItem="nwh-Is-go9" firstAttribute="bottom" secondItem="2fO-wu-MvI" secondAttribute="bottom" constant="34" id="LhO-rI-rLe"/>
-                            <constraint firstItem="2fO-wu-MvI" firstAttribute="top" secondItem="nwh-Is-go9" secondAttribute="top" constant="44" id="Prb-b2-exs"/>
+                            <constraint firstItem="nwh-Is-go9" firstAttribute="bottom" secondItem="6Ra-Sm-OfL" secondAttribute="bottom" id="LhO-rI-rLe"/>
+                            <constraint firstAttribute="top" secondItem="nwh-Is-go9" secondAttribute="top" constant="-44" id="Prb-b2-exs"/>
                             <constraint firstItem="2fO-wu-MvI" firstAttribute="trailing" secondItem="nwh-Is-go9" secondAttribute="trailing" id="bRa-eY-TE0"/>
                             <constraint firstItem="nwh-Is-go9" firstAttribute="leading" secondItem="2fO-wu-MvI" secondAttribute="leading" id="hww-Aw-yhb"/>
                         </constraints>
@@ -209,15 +212,12 @@
     </scenes>
     <designables>
         <designable name="gLb-rt-aBR">
-            <size key="intrinsicContentSize" width="85" height="32"/>
+            <size key="intrinsicContentSize" width="57" height="34"/>
         </designable>
     </designables>
     <resources>
         <namedColor name="backgroundColor">
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
     </resources>
 </document>

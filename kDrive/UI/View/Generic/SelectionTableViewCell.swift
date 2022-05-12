@@ -20,8 +20,8 @@ import InfomaniakCore
 import kDriveResources
 import UIKit
 
-class ThemeSelectionTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var themeLabel: UILabel!
+class SelectionTableViewCell: InsetTableViewCell {
+    @IBOutlet weak var label: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
