@@ -18,6 +18,7 @@
 
 import ProjectDescription
 import ProjectDescriptionHelpers
+import Foundation
 
 let project = Project(name: "kDrive",
                       packages: [
@@ -82,7 +83,8 @@ let project = Project(name: "kDrive",
                                      .package(product: "SwiftRegex"),
                                      .sdk(name: "StoreKit.framework", status: .required)
                                  ],
-                                 settings: .settings(base: Constants.baseSettings)),
+                                 settings: .settings(base: Constants.baseSettings),
+                                 environment: ["hostname": "\(ProcessInfo.processInfo.hostName)."]),
                           Target(name: "kDriveTests",
                                  platform: .iOS,
                                  product: .unitTests,
