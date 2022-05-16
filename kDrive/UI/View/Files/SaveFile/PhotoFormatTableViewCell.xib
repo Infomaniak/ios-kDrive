@@ -13,50 +13,52 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="71" id="KGk-i7-Jjw" customClass="PhotoFormatTableViewCell" customModule="kDrive" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="320" height="71"/>
+            <rect key="frame" x="0.0" y="0.0" width="469" height="71"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="320" height="71"/>
+                <rect key="frame" x="0.0" y="0.0" width="469" height="71"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9Hs-QR-xW6">
-                        <rect key="frame" x="24" y="8" width="272" height="55"/>
+                        <rect key="frame" x="24" y="8" width="421" height="55"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mjN-cZ-Wri">
-                                <rect key="frame" x="0.0" y="54" width="272" height="1"/>
+                                <rect key="frame" x="0.0" y="54" width="421" height="1"/>
                                 <color key="backgroundColor" name="separatorColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="KsY-zl-YGp"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfG-Jw-ucY" customClass="IKLabel" customModule="InfomaniakCore">
-                                <rect key="frame" x="24" y="18" width="40.5" height="19.5"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HEIC" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfG-Jw-ucY" customClass="IKLabel" customModule="InfomaniakCore">
+                                <rect key="frame" x="357" y="18" width="40" height="19.5"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="40" id="Xm8-s7-ym6"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                <color key="textColor" name="titleColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="selectPhotoFormat" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3f6-YG-Zjx" customClass="IKLabel" customModule="InfomaniakCore">
+                                <rect key="frame" x="24" y="18" width="142" height="19.5"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="selectPhotoFormat"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="tpf-Dl-9yr">
-                                <rect key="frame" x="238" y="22.5" width="10" height="10"/>
-                                <color key="tintColor" name="secondaryTextColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="10" id="awS-Yx-lJ6"/>
-                                    <constraint firstAttribute="width" secondItem="tpf-Dl-9yr" secondAttribute="height" multiplier="1:1" id="drM-9e-7sm"/>
-                                </constraints>
-                            </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="mjN-cZ-Wri" secondAttribute="trailing" id="2sH-Dq-ET7"/>
+                            <constraint firstItem="3f6-YG-Zjx" firstAttribute="leading" secondItem="9Hs-QR-xW6" secondAttribute="leading" constant="24" id="35x-ou-qFS"/>
                             <constraint firstItem="CfG-Jw-ucY" firstAttribute="centerY" secondItem="9Hs-QR-xW6" secondAttribute="centerY" id="A22-R0-SNx"/>
-                            <constraint firstAttribute="trailing" secondItem="tpf-Dl-9yr" secondAttribute="trailing" constant="24" id="Ahv-CE-ylR"/>
-                            <constraint firstItem="tpf-Dl-9yr" firstAttribute="centerY" secondItem="CfG-Jw-ucY" secondAttribute="centerY" id="Pi8-sG-V5V"/>
-                            <constraint firstItem="tpf-Dl-9yr" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="CfG-Jw-ucY" secondAttribute="trailing" constant="16" id="Z7k-Ru-L3j"/>
                             <constraint firstAttribute="height" constant="55" id="e8z-ob-zPn"/>
+                            <constraint firstAttribute="trailing" secondItem="CfG-Jw-ucY" secondAttribute="trailing" constant="24" id="gB1-Sg-bec"/>
                             <constraint firstItem="mjN-cZ-Wri" firstAttribute="leading" secondItem="9Hs-QR-xW6" secondAttribute="leading" id="hWk-td-TXv"/>
-                            <constraint firstItem="CfG-Jw-ucY" firstAttribute="leading" secondItem="9Hs-QR-xW6" secondAttribute="leading" constant="24" id="m9V-oC-lIk"/>
+                            <constraint firstItem="3f6-YG-Zjx" firstAttribute="centerY" secondItem="CfG-Jw-ucY" secondAttribute="centerY" id="ik8-HD-X7S"/>
+                            <constraint firstItem="CfG-Jw-ucY" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="3f6-YG-Zjx" secondAttribute="trailing" constant="16" id="kKE-z5-iij"/>
                             <constraint firstAttribute="bottom" secondItem="mjN-cZ-Wri" secondAttribute="bottom" id="spJ-Hd-bHw"/>
                         </constraints>
                     </view>
@@ -72,29 +74,27 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
-                <outlet property="accessoryImageView" destination="tpf-Dl-9yr" id="Gm0-gS-Sm3"/>
                 <outlet property="contentInsetView" destination="9Hs-QR-xW6" id="0tD-wH-cX6"/>
                 <outlet property="separator" destination="mjN-cZ-Wri" id="txW-4E-ejQ"/>
                 <outlet property="titleLabel" destination="CfG-Jw-ucY" id="q5Y-xD-VTO"/>
             </connections>
-            <point key="canvasLocation" x="131.8840579710145" y="95.424107142857139"/>
+            <point key="canvasLocation" x="239.85507246376812" y="95.424107142857139"/>
         </tableViewCell>
     </objects>
     <designables>
+        <designable name="3f6-YG-Zjx">
+            <size key="intrinsicContentSize" width="142" height="19.5"/>
+        </designable>
         <designable name="CfG-Jw-ucY">
-            <size key="intrinsicContentSize" width="40.5" height="19.5"/>
+            <size key="intrinsicContentSize" width="37" height="19.5"/>
         </designable>
     </designables>
     <resources>
-        <image name="chevron-right" width="24" height="24"/>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <namedColor name="separatorColor">
             <color red="0.96862745098039216" green="0.96862745098039216" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

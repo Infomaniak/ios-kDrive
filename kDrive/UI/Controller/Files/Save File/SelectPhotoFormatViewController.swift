@@ -55,7 +55,7 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
         let currentFormat = tableContent[indexPath.row]
         cell.label.text = currentFormat.title
         if currentFormat == selectedFormat {
-            cell.setSelected(true, animated: true)
+            tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
         return cell
     }

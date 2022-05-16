@@ -212,7 +212,7 @@
     </scenes>
     <designables>
         <designable name="gLb-rt-aBR">
-            <size key="intrinsicContentSize" width="57" height="34"/>
+            <size key="intrinsicContentSize" width="85" height="32"/>
         </designable>
     </designables>
     <resources>

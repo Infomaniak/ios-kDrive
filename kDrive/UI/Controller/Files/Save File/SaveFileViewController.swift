@@ -30,7 +30,7 @@ class SaveFileViewController: UIViewController {
         case fileType
         case driveSelection
         case directorySelection
-        case photoFormat
+        case photoFormatOption
         case importing
     }
 
@@ -51,6 +51,12 @@ class SaveFileViewController: UIViewController {
         didSet {
             UserDefaults.shared.importPhotoFormat = userPreferredPhotoFormat
         }
+    }
+    var itemProvidersContainsHeicPhotos: Bool {
+        itemProviders?.contains {
+            $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
+            && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
+        } ?? false
     }
     private var errorCount = 0
     private var importProgress: Progress?
@@ -136,7 +142,8 @@ class SaveFileViewController: UIViewController {
     func setItemProviders() {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles, errorCount in
+        importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) {
+            [weak self] importedFiles, errorCount in
             self?.items = importedFiles
             self?.errorCount = errorCount
             DispatchQueue.main.async {
@@ -163,11 +170,8 @@ class SaveFileViewController: UIViewController {
                 newSections.append(contentsOf: [.fileName, .driveSelection, .directorySelection])
             }
 
-            let itemsContainsPhotoInHEICAndJPEG = itemProviders?.contains {
-                $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier) && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
-            }
-            if itemsContainsPhotoInHEICAndJPEG == true {
-                newSections.append(.photoFormat)
+            if itemProvidersContainsHeicPhotos {
+                newSections.append(.photoFormatOption)
             }
         }
         sections = newSections
@@ -258,10 +262,10 @@ extension SaveFileViewController: UITableViewDataSource {
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.configure(with: selectedDirectory, drive: selectedDriveFileManager!.drive)
             return cell
-        case .photoFormat:
+        case .photoFormatOption:
             let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.configure(with: userPreferredPhotoFormat ?? .jpg)
+            cell.configure(with: userPreferredPhotoFormat)
             return cell
         case .importing:
             let cell = tableView.dequeueReusableCell(type: ImportingTableViewCell.self, for: indexPath)
@@ -280,7 +284,7 @@ extension SaveFileViewController: UITableViewDataSource {
             return HomeTitleView.instantiate(title: "kDrive")
         case .directorySelection:
             return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.allPathTitle)
-        case .photoFormat:
+        case .photoFormatOption:
             return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.photoFormatTitle)
         default:
             return nil
@@ -331,7 +335,7 @@ extension SaveFileViewController: UITableViewDelegate {
             guard let driveFileManager = selectedDriveFileManager else { return }
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, delegate: self)
             present(selectFolderNavigationController, animated: true)
-        case .photoFormat:
+        case .photoFormatOption:
             let selectPhotoFormatViewController = SelectPhotoFormatViewController.instantiate(selectedFormat: userPreferredPhotoFormat)
             selectPhotoFormatViewController.delegate = self
             navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
@@ -363,6 +367,9 @@ extension SaveFileViewController: SelectDriveDelegate {
             self.selectedDriveFileManager = selectedDriveFileManager
             selectedDirectory = selectedDriveFileManager.getCachedRootFile()
             sections = [.fileName, .driveSelection, .directorySelection]
+            if itemProvidersContainsHeicPhotos {
+                sections.append(.photoFormatOption)
+            }
         }
         updateButton()
     }
@@ -373,6 +380,7 @@ extension SaveFileViewController: SelectDriveDelegate {
 extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         userPreferredPhotoFormat = format
+        setItemProviders()
     }
 }
 
