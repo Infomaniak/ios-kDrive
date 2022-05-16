@@ -139,16 +139,33 @@ class SaveFileViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    func setItemProviders() {
+    private func setItemProviders(updateItems: Bool = false) {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) {
-            [weak self] importedFiles, errorCount in
+        importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
+            let oldItems = self?.items
             self?.items = importedFiles
+            if updateItems, let oldItems = oldItems {
+                self?.renameImportedFiles(oldImportedFiles: oldItems)
+            }
             self?.errorCount = errorCount
             DispatchQueue.main.async {
                 self?.updateTableViewAfterImport()
             }
+        }
+    }
+
+    private func renameImportedFiles(oldImportedFiles: [ImportedFile]) {
+        guard oldImportedFiles.count == items.count else { return }
+        for index in 0 ..< items.count {
+            let nameComponents = items[index].name.split(separator: ".")
+            if nameComponents.count < 2 {
+                continue
+            }
+
+            let nameWithoutExtension = oldImportedFiles[index].name.split(separator: ".").dropLast().joined(separator: ".")
+            let fileExtension = nameComponents.last!
+            items[index].name = "\(nameWithoutExtension).\(fileExtension)"
         }
     }
 
@@ -380,7 +397,7 @@ extension SaveFileViewController: SelectDriveDelegate {
 extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         userPreferredPhotoFormat = format
-        setItemProviders()
+        setItemProviders(updateItems: true)
     }
 }
 

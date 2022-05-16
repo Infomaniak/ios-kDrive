@@ -73,19 +73,6 @@ public enum PhotoFileFormat: Int, CaseIterable {
     public var `extension`: String {
         return uti.preferredFilenameExtension!
     }
-
-    public init?(uti: UTI) {
-        switch uti {
-        case .jpeg:
-            self = .jpg
-        case .heic:
-            self = .heic
-        case .png:
-            self = .png
-        default:
-            return nil
-        }
-    }
 }
 
 public enum ScanFileFormat: Int, CaseIterable {
