@@ -92,7 +92,9 @@ public class MQService {
                                     observer(message)
                                 }
                             } else if let notification = try? self.decoder.decode(ActionNotification.self, from: data) {
-                                handleNotification(notification)
+                                self.handleNotification(notification)
+                            } else if let notification = try? self.decoder.decode(ExternalImportNotification.self, from: data) {
+                                self.handleExternalImportNotification(notification)
                             }
                         }
                     case .failure(let error):
@@ -101,7 +103,7 @@ public class MQService {
                 }
                 client.addCloseListener(named: "Drive close listener") { _ in
                     DDLogWarn("[MQService] Connection closed")
-                    reconnect()
+                    self.reconnect()
                 }
             } catch {
                 DDLogError("[MQService] Error while subscribing: \(error)")
@@ -132,6 +134,13 @@ public class MQService {
         if notification.action == .reload {
             NotificationCenter.default.post(name: .reloadDrive, object: nil, userInfo: ["driveId": notification.driveId as Any])
         }
+    }
+
+    private func handleExternalImportNotification(_ notification: ExternalImportNotification) {
+        guard let driveFileManager = AccountManager.instance.getDriveFileManager(for: notification.driveId,
+                                                                                 userId: notification.userId)
+        else { return }
+        driveFileManager.updateExternalImport(id: notification.importId, action: notification.action)
     }
 
     private static func generateClientIdentifier() -> String {

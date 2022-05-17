@@ -124,7 +124,7 @@ extension File: AbstractFile {}
 // MARK: - Endpoints
 
 public extension Endpoint {
-    private static let fileMinimalWithQueryItem = URLQueryItem(name: "with", value: "capabilities,categories,conversion,dropbox,is_favorite,sharelink,sorted_name")
+    private static let fileMinimalWithQueryItem = URLQueryItem(name: "with", value: "capabilities,categories,conversion,dropbox,external_import,is_favorite,sharelink,sorted_name")
     private static let fileExtraWithQueryItem = URLQueryItem(name: "with", value: fileMinimalWithQueryItem.value?.appending(",path,users,version"))
 
     private static var drive: Endpoint {
@@ -446,6 +446,12 @@ public extension Endpoint {
 
     static func directoryColor(file: AbstractFile) -> Endpoint {
         return .fileInfo(file).appending(path: "/color")
+    }
+
+    // MARK: - Import
+
+    static func cancelImport(drive: AbstractDrive, id: Int) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "/imports/\(id)/cancel")
     }
 
     // MARK: Preferences
