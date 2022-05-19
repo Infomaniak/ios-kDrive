@@ -102,6 +102,19 @@ public class PhotoLibraryUploader {
         guard let resource = bestResource(for: asset) else {
             return nil
         }
+
+//        Obtenir l’image JPEG et l’enregistrer
+//        if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
+//            PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
+//
+//            } completionHandler: { error in
+//                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+//                breadcrumb.message = error?.localizedDescription
+//                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+//            }
+//        }
+//        return nil
+
         let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
         do {
             try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
