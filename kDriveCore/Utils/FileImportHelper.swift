@@ -21,6 +21,7 @@ import Foundation
 import kDriveResources
 import PDFKit
 import Photos
+import RealmSwift
 import QuickLookThumbnailing
 import VisionKit
 
@@ -45,7 +46,7 @@ public class ImportedFile {
     }
 }
 
-public enum PhotoFileFormat: Int, CaseIterable {
+@objc public enum PhotoFileFormat: Int, CaseIterable, RealmEnum {
     case jpg, heic, png
 
     public var title: String {

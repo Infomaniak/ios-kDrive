@@ -49,6 +49,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         case importScreenshotsSwitch
         case createDatedSubFolders
         case deleteAssetsAfterImport
+        case photoFormat
     }
 
     private enum PhotoSyncDeniedRows: CaseIterable {
@@ -93,6 +94,7 @@ class PhotoSyncSettingsViewController: UIViewController {
         tableView.register(cellView: MenuTableViewCell.self)
         tableView.register(cellView: PhotoAccessDeniedTableViewCell.self)
         tableView.register(cellView: PhotoSyncSettingsTableViewCell.self)
+        tableView.register(cellView: PhotoFormatTableViewCell.self)
 
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
@@ -394,6 +396,11 @@ extension PhotoSyncSettingsViewController: UITableViewDataSource {
                     cell.datePicker.isHidden = true
                 }
                 return cell
+            case .photoFormat:
+                let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
+                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
+                cell.configure(with: newSyncSettings.photoFormat)
+                return cell
             }
         case .syncDenied:
             switch deniedRows[indexPath.row] {
@@ -426,13 +433,20 @@ extension PhotoSyncSettingsViewController: UITableViewDelegate {
 
         } else if section == .syncSettings {
             let row = settingsRows[indexPath.row]
-            if row == .syncMode {
+            switch row {
+            case .syncMode:
                 let alert = AlertChoiceViewController(title: KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate, choices: [KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue2, KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue, KDriveResourcesStrings.Localizable.syncSettingsSaveDateFromDateValue2], selected: newSyncSettings.syncMode.rawValue, action: KDriveResourcesStrings.Localizable.buttonValid) { selectedIndex in
                     self.newSyncSettings.syncMode = PhotoSyncMode(rawValue: selectedIndex) ?? .new
                     self.updateSaveButtonState()
                     self.tableView.reloadRows(at: [indexPath], with: .fade)
                 }
                 present(alert, animated: true)
+            case .photoFormat:
+                let selectPhotoFormatViewController = SelectPhotoFormatViewController.instantiate(selectedFormat: newSyncSettings.photoFormat)
+                selectPhotoFormatViewController.delegate = self
+                navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
+            default:
+                break
             }
         }
     }
@@ -456,6 +470,15 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
         selectedDirectory = folder
         updateSaveButtonState()
         tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .fade)
+    }
+}
+
+// MARK: - Select photo format delegate
+
+extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
+    func didSelectPhotoFormat(_ format: PhotoFileFormat) {
+        newSyncSettings.photoFormat = format
+        tableView.reloadData()
     }
 }
 

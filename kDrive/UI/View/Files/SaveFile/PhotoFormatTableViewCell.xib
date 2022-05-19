@@ -74,9 +74,11 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
+                <outlet property="bottomConstraint" destination="bUR-tp-ueX" id="N1d-bc-yGu"/>
                 <outlet property="contentInsetView" destination="9Hs-QR-xW6" id="0tD-wH-cX6"/>
                 <outlet property="separator" destination="mjN-cZ-Wri" id="txW-4E-ejQ"/>
                 <outlet property="titleLabel" destination="CfG-Jw-ucY" id="q5Y-xD-VTO"/>
+                <outlet property="topConstraint" destination="9qh-EN-kuI" id="n5T-ij-Fmv"/>
             </connections>
             <point key="canvasLocation" x="239.85507246376812" y="95.424107142857139"/>
         </tableViewCell>
