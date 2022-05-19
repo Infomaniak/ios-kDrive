@@ -60,6 +60,17 @@ public class ImportedFile {
         }
     }
 
+    public var selectionTitle: String {
+        switch self {
+        case .jpg:
+            return "JPG \(KDriveResourcesStrings.Localizable.savePhotoJpegDetail)"
+        case .heic:
+            return "HEIF"
+        case .png:
+            return "PNG"
+        }
+    }
+
     public var uti: UTI {
         switch self {
         case .jpg:
