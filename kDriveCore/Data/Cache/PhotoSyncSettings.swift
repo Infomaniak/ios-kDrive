@@ -49,7 +49,7 @@ public class PhotoSyncSettings: Object {
     @objc public dynamic var syncScreenshotsEnabled = true
     @objc public dynamic var createDatedSubFolders = false
     @objc public dynamic var deleteAssetsAfterImport = false
-    @objc public dynamic var photoFormat: PhotoFileFormat = .heic
+    @objc public dynamic var photoFormat: PhotoFileFormat = .jpg
 
     public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, fromDate: Date, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool, createDatedSubFolders: Bool, deleteAssetsAfterImport: Bool, photoFormat: PhotoFileFormat) {
         self.userId = userId

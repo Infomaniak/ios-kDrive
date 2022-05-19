@@ -134,7 +134,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="nwh-Is-go9">
-                                <rect key="frame" x="0.0" y="44" width="414" height="852"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="pj3-xM-nmc" id="5iz-I0-lYb"/>
@@ -146,9 +146,9 @@
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="nwh-Is-go9" firstAttribute="bottom" secondItem="6Ra-Sm-OfL" secondAttribute="bottom" id="LhO-rI-rLe"/>
-                            <constraint firstAttribute="top" secondItem="nwh-Is-go9" secondAttribute="top" constant="-44" id="Prb-b2-exs"/>
-                            <constraint firstItem="2fO-wu-MvI" firstAttribute="trailing" secondItem="nwh-Is-go9" secondAttribute="trailing" id="bRa-eY-TE0"/>
-                            <constraint firstItem="nwh-Is-go9" firstAttribute="leading" secondItem="2fO-wu-MvI" secondAttribute="leading" id="hww-Aw-yhb"/>
+                            <constraint firstAttribute="top" secondItem="nwh-Is-go9" secondAttribute="top" id="Prb-b2-exs"/>
+                            <constraint firstAttribute="trailing" secondItem="nwh-Is-go9" secondAttribute="trailing" id="bRa-eY-TE0"/>
+                            <constraint firstItem="nwh-Is-go9" firstAttribute="leading" secondItem="6Ra-Sm-OfL" secondAttribute="leading" id="hww-Aw-yhb"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Sélectionner un format de photo" id="YRC-hf-LiG">
@@ -212,7 +212,7 @@
     </scenes>
     <designables>
         <designable name="gLb-rt-aBR">
-            <size key="intrinsicContentSize" width="85" height="32"/>
+            <size key="intrinsicContentSize" width="57" height="34"/>
         </designable>
     </designables>
     <resources>
