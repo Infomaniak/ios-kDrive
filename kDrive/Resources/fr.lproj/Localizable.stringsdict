@@ -317,9 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Un archivo añadido a favoritos correctamente</string>
+			<string>Un fichier ajouté aux favoris avec succès</string>
 			<key>other</key>
-			<string>%d archivos añadidos a favoritos correctamente</string>
+			<string>%d fichiers ajoutés aux favoris avec succès</string>
 		</dict>
 	</dict>
 	<key>fileListRemoveFavoritesConfirmationSnackbar</key>
@@ -333,9 +333,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Un archivo ha sido eliminado de favoritos correctamente</string>
+			<string>Un fichier retiré des favoris avec succès</string>
 			<key>other</key>
-			<string>%d archivos han sido eliminados de favoritos correctamente</string>
+			<string>%d fichiers retirés des favoris avec succès</string>
 		</dict>
 	</dict>
 	<key>fileListRemoveOfflineConfirmationSnackbar</key>
@@ -349,9 +349,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Un archivo eliminado de la disponibilidad sin conexión</string>
+			<string>Un fichier retiré de la disponibilité hors ligne</string>
 			<key>other</key>
-			<string>%d archivos eliminados de la disponibilidad sin conexión</string>
+			<string>%d fichiers retirés de la disponibilité hors ligne</string>
 		</dict>
 	</dict>
 </dict>
