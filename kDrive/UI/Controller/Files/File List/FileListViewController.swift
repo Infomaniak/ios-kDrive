@@ -275,16 +275,9 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             self?.updateListStyle(listStyle)
         }
 
-        #if !ISEXTENSION
-            viewModel.onFilePresented = { [weak self] file in
-                guard let self = self else { return }
-                self.filePresenter.present(driveFileManager: self.viewModel.driveFileManager,
-                                           file: file,
-                                           files: self.viewModel.getAllFiles(),
-                                           normalFolderHierarchy: self.viewModel.configuration.normalFolderHierarchy,
-                                           fromActivities: self.viewModel.configuration.fromActivities)
-            }
-        #endif
+        viewModel.onFilePresented = { [weak self] file in
+            self?.onFilePresented(file)
+        }
 
         viewModel.$currentLeftBarButtons.receiveOnMain(store: &bindStore) { [weak self] leftBarButtons in
             guard let self = self else { return }
@@ -526,6 +519,16 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     }
 
     // MARK: - Public methods
+
+    func onFilePresented(_ file: File) {
+        #if !ISEXTENSION
+            filePresenter.present(driveFileManager: viewModel.driveFileManager,
+                                  file: file,
+                                  files: viewModel.getAllFiles(),
+                                  normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
+                                  fromActivities: viewModel.configuration.fromActivities)
+        #endif
+    }
 
     func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
         headerView.delegate = self

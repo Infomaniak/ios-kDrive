@@ -57,15 +57,6 @@ class RecentActivityFilesViewModel: InMemoryFileListViewModel {
 
         forceRefresh()
     }
-
-    override func getFile(at indexPath: IndexPath) -> File? {
-        if let file = super.getFile(at: indexPath) {
-            // We need the real managed instance to present the file list as coming from the cached realm
-            return driveFileManager.getManagedFile(from: file)
-        } else {
-            return nil
-        }
-    }
 }
 
 class RecentActivityFilesViewController: FileListViewController {
@@ -109,6 +100,21 @@ class RecentActivityFilesViewController: FileListViewController {
                 headerView.activityAvatar.image = image.withRenderingMode(.alwaysOriginal)
             }
         }
+    }
+
+    override func onFilePresented(_ file: File) {
+        #if !ISEXTENSION
+        if file.isDirectory {
+            let managedFile = driveFileManager.getManagedFile(from: file.detached())
+            filePresenter.present(driveFileManager: viewModel.driveFileManager,
+                                  file: managedFile,
+                                  files: viewModel.getAllFiles(),
+                                  normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
+                                  fromActivities: viewModel.configuration.fromActivities)
+        } else {
+            super.onFilePresented(file)
+        }
+        #endif
     }
 
     class func instantiate(activities: [FileActivity], driveFileManager: DriveFileManager) -> RecentActivityFilesViewController {
