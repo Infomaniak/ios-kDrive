@@ -41,7 +41,7 @@ class OnboardingViewController: UIViewController {
 
     var addUser = false
     var slides: [Slide] = []
-    
+
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     override func viewDidLoad() {
@@ -183,7 +183,7 @@ class OnboardingViewController: UIViewController {
 
         return [slide1, slide2, slide3]
     }
-    
+
     private func endBackgroundTask() {
         if backgroundTaskIdentifier != .invalid {
             UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
@@ -280,7 +280,7 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
         }
     }
 
-    func didFailLoginWith(error: String) {
+    func didFailLoginWith(error: Error) {
         signInButton.setLoading(false)
         registerButton.isEnabled = true
     }
