@@ -82,6 +82,7 @@ public class PhotoSyncSettings: Object {
             createDatedSubFolders == settings.createDatedSubFolders &&
             deleteAssetsAfterImport == settings.deleteAssetsAfterImport &&
             syncMode == settings.syncMode &&
-            fromDate == settings.fromDate
+            fromDate == settings.fromDate &&
+            photoFormat == settings.photoFormat
     }
 }
