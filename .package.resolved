@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "b60ef22babc5cc8997841b378bb2993229fac9eb",
-        "version" : "1.16.0"
+        "revision" : "c5039f6d2a8999842a36311b135e84c7b4a45392",
+        "version" : "1.17.0"
       }
     },
     {
@@ -104,8 +104,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/GoogleDataTransport.git",
       "state" : {
-        "revision" : "15ccdfd25ac55b9239b82809531ff26605e7556e",
-        "version" : "9.1.2"
+        "revision" : "b905c49326b72211531ed9d7baa02d724828a8dc",
+        "version" : "9.1.4"
       }
     },
     {
@@ -122,8 +122,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/grpc/grpc-ios.git",
       "state" : {
-        "revision" : "abd2d5a4347efa0454606a788678a5d8ec223738",
-        "version" : "1.44.0-grpc"
+        "revision" : "2af4f6e9c2b18beae228f50b1198c641be859d2b",
+        "version" : "1.44.2-grpc"
       }
     },
     {
@@ -131,8 +131,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/gtm-session-fetcher.git",
       "state" : {
-        "revision" : "eca9404a18f53727e4698211aaf2615eb93b962a",
-        "version" : "1.7.1"
+        "revision" : "4e9bbf2808b8fee444e84a48f5f3c12641987d3e",
+        "version" : "1.7.2"
       }
     },
     {
@@ -149,8 +149,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/airbnb/HorizonCalendar.git",
       "state" : {
-        "revision" : "1e98736e42fe4e5bea39ce8b89838641f2261c32",
-        "version" : "1.13.3"
+        "revision" : "93b188c52650b3999eeb20cf256b69715de515ef",
+        "version" : "1.13.4"
       }
     },
     {
@@ -158,8 +158,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core.git",
       "state" : {
-        "revision" : "da78c9ccd7645ceb0441831499dc5b8410236229",
-        "version" : "1.1.11"
+        "revision" : "829242a713df05e308443557202abdceef99fee8",
+        "version" : "1.1.13"
       }
     },
     {
@@ -167,8 +167,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login.git",
       "state" : {
-        "revision" : "9ac704e603cb9b11654f78e65ae2031dc584c341",
-        "version" : "1.5.7"
+        "revision" : "65776b8c2b22dbdea53474794431d09fbc842ae5",
+        "version" : "2.0.0"
       }
     },
     {
@@ -176,8 +176,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher",
       "state" : {
-        "revision" : "1a7b5480eb750a8e171654b9b1cb0a2cbeb27a55",
-        "version" : "7.2.1"
+        "revision" : "59eb199fdb8dd47733624e8b0277822d0232579e",
+        "version" : "7.2.2"
       }
     },
     {
@@ -248,8 +248,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/adam-fowler/mqtt-nio",
       "state" : {
-        "revision" : "ca8af7a30c4690456ce7de276cd0f037489ba707",
-        "version" : "2.5.3"
+        "revision" : "53d307b580f78354f3523a6cfde7cb3dbabfdde4",
+        "version" : "2.6.0"
       }
     },
     {
@@ -271,21 +271,21 @@
       }
     },
     {
-      "identity" : "realm-cocoa",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/realm/realm-cocoa",
-      "state" : {
-        "revision" : "98024648651fff3d111a340e38fff3b703d1c3f0",
-        "version" : "10.25.1"
-      }
-    },
-    {
       "identity" : "realm-core",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-core",
       "state" : {
-        "revision" : "33dd84212b64cd0788590a93be0dde64d2869abb",
-        "version" : "11.14.0"
+        "revision" : "d97eed3ae7dff2f2e2ffbda83fa8f3b8c445c6ba",
+        "version" : "11.17.0"
+      }
+    },
+    {
+      "identity" : "realm-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/realm/realm-swift",
+      "state" : {
+        "revision" : "7f123e48ec12926bb5080e449df360127ee0352d",
+        "version" : "10.26.0"
       }
     },
     {
@@ -293,8 +293,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "ccb6c292a202eb9366c87889509ef5a793d7137a",
-        "version" : "7.13.0"
+        "revision" : "b34ce9048e6b8b082ea6b15e6b50583d46c936ea",
+        "version" : "7.16.0"
       }
     },
     {
@@ -329,8 +329,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "d6e3762e0a5f7ede652559f53623baf11006e17c",
-        "version" : "2.39.0"
+        "revision" : "124119f0bb12384cef35aa041d7c3a686108722d",
+        "version" : "2.40.0"
       }
     },
     {
@@ -338,8 +338,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "b5260a31c2a72a89fa684f5efb3054d8725a2316",
-        "version" : "2.18.0"
+        "revision" : "1750873bce84b4129b5303655cce2c3d35b9ed3a",
+        "version" : "2.19.0"
       }
     },
     {
@@ -347,8 +347,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-transport-services.git",
       "state" : {
-        "revision" : "8ab824b140d0ebcd87e9149266ddc353e3705a3e",
-        "version" : "1.11.4"
+        "revision" : "1a4692acb88156e3da1b0c6732a8a38b2a744166",
+        "version" : "1.12.0"
       }
     },
     {

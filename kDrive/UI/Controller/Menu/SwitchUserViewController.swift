@@ -160,7 +160,7 @@ extension SwitchUserViewController: InfomaniakLoginDelegate {
         }
     }
 
-    func didFailLoginWith(error: String) {
+    func didFailLoginWith(error: Error) {
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorConnection)
     }
 }
