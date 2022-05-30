@@ -279,6 +279,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
         checkmarkImage?.isAccessibilityElement = true
         checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
+        checkmarkImage?.backgroundColor = nil
+        checkmarkImage?.contentMode = .scaleAspectFit
+        checkmarkImage?.layer.cornerRadius = 0
+        checkmarkImage?.layer.masksToBounds = false
     }
 
     func configureLoading() {
