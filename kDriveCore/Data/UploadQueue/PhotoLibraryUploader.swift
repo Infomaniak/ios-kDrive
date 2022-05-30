@@ -103,19 +103,21 @@ public class PhotoLibraryUploader {
             return nil
         }
 
-//        Obtenir l’image JPEG et l’enregistrer
-//        if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
-//            PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
-//
-//            } completionHandler: { error in
-//                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
-//                breadcrumb.message = error?.localizedDescription
-//                SentrySDK.addBreadcrumb(crumb: breadcrumb)
-//            }
-//        }
-//        return nil
-
         let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
+
+        if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
+            let jpegData = await getJpegImage(resource: resource)
+            do {
+                try jpegData?.write(to: targetURL)
+                return targetURL
+            } catch {
+                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+                breadcrumb.message = error.localizedDescription
+                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+                return nil
+            }
+        }
+
         do {
             try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
             return targetURL
@@ -124,6 +126,23 @@ public class PhotoLibraryUploader {
             breadcrumb.message = error.localizedDescription
             SentrySDK.addBreadcrumb(crumb: breadcrumb)
             return nil
+        }
+    }
+
+    func getJpegImage(resource: PHAssetResource) async -> Data? {
+        return await withCheckedContinuation { continuation in
+            PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
+                let image = UIImage(data: data)
+                let jpegData = image?.jpegData(compressionQuality: 1.0)
+                continuation.resume(returning: jpegData)
+            } completionHandler: { error in
+                if let error = error {
+                    let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+                    breadcrumb.message = error.localizedDescription
+                    SentrySDK.addBreadcrumb(crumb: breadcrumb)
+                }
+            }
+
         }
     }
 
@@ -211,6 +230,9 @@ public class PhotoLibraryUploader {
                 var fileExtension = ""
                 if let resource = bestResource(for: asset) {
                     fileExtension = (resource.originalFilename as NSString).pathExtension
+                    if fileExtension.lowercased() == "heic" && settings.photoFormat == .jpg {
+                        fileExtension = "jpg"
+                    }
                 }
                 if let creationDate = asset.creationDate {
                     correctName = dateFormatter.string(from: creationDate)
