@@ -106,7 +106,7 @@ public class PhotoLibraryUploader {
         let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
 
         if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
-            let jpegData = await getJpegImage(resource: resource)
+            let jpegData = await getJpegData(for: resource)
             do {
                 try jpegData?.write(to: targetURL)
                 return targetURL
@@ -129,12 +129,12 @@ public class PhotoLibraryUploader {
         }
     }
 
-    func getJpegImage(resource: PHAssetResource) async -> Data? {
+    func getJpegData(for resource: PHAssetResource) async -> Data? {
         return await withCheckedContinuation { continuation in
             PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
                 let image = UIImage(data: data)
                 let jpegData = image?.jpegData(compressionQuality: 1.0)
-                continuation.resume(returning: jpegData)
+                continuation.resume(returning: jpegData?.isEmpty == true ? nil : jpegData)
             } completionHandler: { error in
                 if let error = error {
                     let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
