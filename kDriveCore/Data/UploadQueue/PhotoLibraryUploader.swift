@@ -106,8 +106,8 @@ public class PhotoLibraryUploader {
         let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
 
         if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
-            let jpegData = await getJpegData(for: resource)
             do {
+                let jpegData = try await getJpegData(for: resource)
                 try jpegData?.write(to: targetURL)
                 return targetURL
             } catch {
@@ -129,20 +129,19 @@ public class PhotoLibraryUploader {
         }
     }
 
-    func getJpegData(for resource: PHAssetResource) async -> Data? {
-        return await withCheckedContinuation { continuation in
+    func getJpegData(for resource: PHAssetResource) async throws -> Data? {
+        return try await withCheckedThrowingContinuation { continuation in
+            var imageData = Data()
             PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
-                let image = UIImage(data: data)
-                let jpegData = image?.jpegData(compressionQuality: 1.0)
-                continuation.resume(returning: jpegData?.isEmpty == true ? nil : jpegData)
+                imageData.append(data)
             } completionHandler: { error in
                 if let error = error {
-                    let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
-                    breadcrumb.message = error.localizedDescription
-                    SentrySDK.addBreadcrumb(crumb: breadcrumb)
+                    continuation.resume(throwing: error)
                 }
+                let image = UIImage(data: imageData)
+                let jpegData = image?.jpegData(compressionQuality: 1.0)
+                continuation.resume(returning: jpegData?.isEmpty == true ? nil : jpegData)
             }
-
         }
     }
 
