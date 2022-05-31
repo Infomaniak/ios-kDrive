@@ -19,6 +19,8 @@
 import kDriveCore
 import kDriveResources
 import UIKit
+import SafariServices
+import WebKit
 
 class ParameterTableViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
@@ -31,6 +33,7 @@ class ParameterTableViewController: UITableViewController {
         case wifi
         case storage
         case about
+        case deleteAccount
 
         var title: String {
             switch self {
@@ -48,6 +51,8 @@ class ParameterTableViewController: UITableViewController {
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
             case .about:
                 return KDriveResourcesStrings.Localizable.aboutTitle
+            case .deleteAccount:
+                return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
         }
 
@@ -65,6 +70,8 @@ class ParameterTableViewController: UITableViewController {
                 return nil
             case .about:
                 return "aboutSegue"
+            case .deleteAccount:
+                return "deleteAccountSegue"
             }
         }
     }
@@ -92,6 +99,14 @@ class ParameterTableViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName])
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "deleteAccountSegue" {
+            if let viewController = segue.destination as? DeleteAccountViewController {
+                viewController.driveFileManager = driveFileManager
+            }
+        }
     }
 
     private func getNotificationText() -> String {
@@ -136,7 +151,7 @@ class ParameterTableViewController: UITableViewController {
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell
-        case .security, .storage, .about:
+        case .security, .storage, .about, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
             cell.titleLabel.text = row.title
@@ -146,6 +161,7 @@ class ParameterTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let row = tableContent[indexPath.row]
+        tableView.deselectRow(at: indexPath, animated: true)
         if let segueIdentifier = row.segue {
             performSegue(withIdentifier: segueIdentifier, sender: self)
         } else if row == .storage {
