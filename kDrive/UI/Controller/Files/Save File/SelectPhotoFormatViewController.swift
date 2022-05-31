@@ -52,9 +52,9 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: SelectionTableViewCell.self, for: indexPath)
-        let currentFormat = tableContent[indexPath.row]
-        cell.label.text = currentFormat.selectionTitle
-        if currentFormat == selectedFormat {
+        let photoFormat = tableContent[indexPath.row]
+        cell.label.text = photoFormat.selectionTitle
+        if photoFormat == selectedFormat {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
         return cell

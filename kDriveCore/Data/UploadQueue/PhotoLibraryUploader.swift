@@ -107,15 +107,16 @@ public class PhotoLibraryUploader {
 
         if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
             do {
-                let jpegData = try await getJpegData(for: resource)
-                try jpegData?.write(to: targetURL)
-                return targetURL
+                if let jpegData = try await getJpegData(for: resource) {
+                    try jpegData.write(to: targetURL)
+                    return targetURL
+                }
             } catch {
-                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
                 breadcrumb.message = error.localizedDescription
                 SentrySDK.addBreadcrumb(crumb: breadcrumb)
-                return nil
             }
+            return nil
         }
 
         do {

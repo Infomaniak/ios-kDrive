@@ -52,7 +52,7 @@ class SaveFileViewController: UIViewController {
             UserDefaults.shared.importPhotoFormat = userPreferredPhotoFormat
         }
     }
-    var itemProvidersContainsHeicPhotos: Bool {
+    var itemProvidersContainHeicPhotos: Bool {
         itemProviders?.contains {
             $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
             && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
@@ -139,7 +139,7 @@ class SaveFileViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    private func setItemProviders(updateItems: Bool = false) {
+    private func setItemProviders() {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
         importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
@@ -169,7 +169,7 @@ class SaveFileViewController: UIViewController {
                 newSections.append(contentsOf: [.fileName, .driveSelection, .directorySelection])
             }
 
-            if itemProvidersContainsHeicPhotos {
+            if itemProvidersContainHeicPhotos {
                 newSections.append(.photoFormatOption)
             }
         }
@@ -366,7 +366,7 @@ extension SaveFileViewController: SelectDriveDelegate {
             self.selectedDriveFileManager = selectedDriveFileManager
             selectedDirectory = selectedDriveFileManager.getCachedRootFile()
             sections = [.fileName, .driveSelection, .directorySelection]
-            if itemProvidersContainsHeicPhotos {
+            if itemProvidersContainHeicPhotos {
                 sections.append(.photoFormatOption)
             }
         }
@@ -379,7 +379,7 @@ extension SaveFileViewController: SelectDriveDelegate {
 extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         userPreferredPhotoFormat = format
-        setItemProviders(updateItems: true)
+        setItemProviders()
     }
 }
 
