@@ -324,7 +324,8 @@ public class FileImportHelper {
 
     private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider, userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
         if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
-            if let userPreferredPhotoFormat = userPreferredPhotoFormat {
+            if let userPreferredPhotoFormat = userPreferredPhotoFormat,
+               itemProvider.hasItemConformingToTypeIdentifier(userPreferredPhotoFormat.uti.identifier) {
                 return userPreferredPhotoFormat.uti.identifier
             }
             return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
