@@ -134,14 +134,21 @@ public class PhotoLibraryUploader {
         return try await withCheckedThrowingContinuation { continuation in
             var imageData = Data()
             PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
+                // Get all pieces of data
                 imageData.append(data)
             } completionHandler: { error in
                 if let error = error {
                     continuation.resume(throwing: error)
+                    return
                 }
-                let image = UIImage(data: imageData)
-                let jpegData = image?.jpegData(compressionQuality: 1.0)
-                continuation.resume(returning: jpegData?.isEmpty == true ? nil : jpegData)
+
+                if let image = CIImage(data: imageData) {
+                    let context = CIContext()
+                    let jpegData = context.jpegRepresentation(of: image, colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!)
+                    continuation.resume(returning: jpegData)
+                } else {
+                    continuation.resume(returning: nil)
+                }
             }
         }
     }
