@@ -46,7 +46,7 @@ public class ImportedFile {
     }
 }
 
-@objc public enum PhotoFileFormat: Int, CaseIterable, RealmEnum {
+public enum PhotoFileFormat: Int, CaseIterable, PersistableEnum {
     case jpg, heic, png
 
     public var title: String {
