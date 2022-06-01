@@ -478,6 +478,7 @@ extension PhotoSyncSettingsViewController: SelectFolderDelegate {
 extension PhotoSyncSettingsViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         newSyncSettings.photoFormat = format
+        updateSaveButtonState()
         tableView.reloadData()
     }
 }
