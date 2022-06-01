@@ -58,6 +58,12 @@ public class DriveFileManager {
                         newObject!["conflictOption"] = ConflictOption.replace.rawValue
                     }
                 }
+
+                if oldSchemaVersion < 12 {
+                    migration.enumerateObjects(ofType: PhotoSyncSettings.className()) { _, newObject in
+                        newObject!["photoFormat"] = PhotoFileFormat.heic.rawValue
+                    }
+                }
             }
         }
 
