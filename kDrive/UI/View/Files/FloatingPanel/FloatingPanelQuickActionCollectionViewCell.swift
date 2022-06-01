@@ -61,7 +61,7 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
         // Configuration
         if action == .shareLink {
             if file.isDropbox {
-                actionLabel.text = KDriveResourcesStrings.Localizable.buttonCopyLink
+                actionLabel.text = KDriveResourcesStrings.Localizable.buttonShareDropboxLink
             } else if file.hasSharelink {
                 actionLabel.text = action.reverseName
             }

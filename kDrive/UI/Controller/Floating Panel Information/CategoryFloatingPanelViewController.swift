@@ -26,8 +26,6 @@ class CategoryFloatingPanelViewController: InformationFloatingPanelViewControlle
         imageView.image = KDriveResourcesAsset.illuCategories.image
         imageViewHeightConstraint.constant = 190
         animationView.isHidden = true
-        titleLabel.text = KDriveResourcesStrings.Localizable.categoriesPanelTitle
-        descriptionLabel.text = KDriveResourcesStrings.Localizable.categoriesPanelDescription
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
         leftButton.isHidden = true

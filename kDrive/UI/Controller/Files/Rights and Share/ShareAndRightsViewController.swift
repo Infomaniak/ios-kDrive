@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import DropDown
 import kDriveCore
 import kDriveResources
+import LinkPresentation
 import UIKit
 
 class ShareAndRightsViewController: UIViewController {
@@ -310,10 +311,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
 
 extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
     func shareLinkSharedButtonPressed(link: String, sender: UIView) {
-        let items = [URL(string: link)!]
-        let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        ac.popoverPresentationController?.sourceView = sender
-        present(ac, animated: true)
+        UIConstants.presentLinkPreviewForFile(file, link: link, from: self, sourceView: sender)
     }
 
     func shareLinkSettingsButtonPressed() {

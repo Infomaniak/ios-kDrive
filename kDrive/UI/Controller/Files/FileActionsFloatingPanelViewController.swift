@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import InfomaniakCore
 import kDriveCore
 import kDriveResources
+import LinkPresentation
 import Sentry
 import UIKit
 
@@ -74,7 +75,10 @@ public class FloatingPanelAction: Equatable {
     static let add = FloatingPanelAction(id: 16, name: KDriveResourcesStrings.Localizable.buttonAdd, image: KDriveResourcesAsset.add.image)
     static let sendCopy = FloatingPanelAction(id: 17, name: KDriveResourcesStrings.Localizable.buttonSendCopy, image: KDriveResourcesAsset.exportIos.image)
     static let shareAndRights = FloatingPanelAction(id: 18, name: KDriveResourcesStrings.Localizable.buttonFileRights, image: KDriveResourcesAsset.share.image)
-    static let shareLink = FloatingPanelAction(id: 19, name: KDriveResourcesStrings.Localizable.buttonCreatePublicLink, reverseName: KDriveResourcesStrings.Localizable.buttonCopyPublicLink, image: KDriveResourcesAsset.link.image)
+    static let shareLink = FloatingPanelAction(id: 19,
+                                               name: KDriveResourcesStrings.Localizable.buttonCreatePublicLink,
+                                               reverseName: KDriveResourcesStrings.Localizable.buttonSharePublicLink,
+                                               image: KDriveResourcesAsset.link.image)
 
     static var quickActions: [FloatingPanelAction] {
         return [informations, sendCopy, shareAndRights, shareLink].map { $0.reset() }
@@ -136,6 +140,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     private var fileObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     private var interactionController: UIDocumentInteractionController!
+    var shareSheetLinkMetadata: LPLinkMetadata?
 
     // MARK: - Public methods
 
@@ -332,10 +337,10 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .shareLink:
             if let link = file.dropbox?.url {
                 // Copy share link
-                copyShareLinkToPasteboard(link)
+                copyShareLinkToPasteboard(from: indexPath, link: link)
             } else if let link = file.sharelink?.url {
                 // Copy share link
-                copyShareLinkToPasteboard(link)
+                copyShareLinkToPasteboard(from: indexPath, link: link)
             } else {
                 // Create share link
                 setLoading(true, action: action, at: indexPath)
@@ -343,7 +348,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     do {
                         let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
                         setLoading(false, action: action, at: indexPath)
-                        copyShareLinkToPasteboard(shareLink.url)
+                        copyShareLinkToPasteboard(from: indexPath, link: shareLink.url)
                     } catch {
                         if let error = error as? DriveError, error == .shareLinkAlreadyExists {
                             // This should never happen
@@ -351,7 +356,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                             setLoading(false, action: action, at: indexPath)
                             if let shareLink = shareLink {
                                 driveFileManager.setFileShareLink(file: proxyFile, shareLink: shareLink)
-                                copyShareLinkToPasteboard(shareLink.url)
+                                copyShareLinkToPasteboard(from: indexPath, link: shareLink.url)
                             }
                         } else {
                             setLoading(false, action: action, at: indexPath)
@@ -592,9 +597,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         DownloadQueue.instance.addToQueue(file: file)
     }
 
-    private func copyShareLinkToPasteboard(_ link: String) {
-        UIPasteboard.general.url = URL(string: link)
-        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileInfoLinkCopiedToClipboard)
+    private func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {
+        UIConstants.presentLinkPreviewForFile(file, link: link, from: self, sourceView: collectionView.cellForItem(at: indexPath) ?? collectionView)
     }
 
     // MARK: - Collection view data source
@@ -689,5 +693,21 @@ extension FileActionsFloatingPanelViewController: UIDocumentInteractionControlle
     func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
         // Dismiss interaction controller when the user taps an app
         controller.dismissMenu(animated: true)
+    }
+}
+
+// MARK: - Share sheet link preview - UIActivityItemSource
+
+extension FileActionsFloatingPanelViewController: UIActivityItemSource {
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        return String()
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+        return shareSheetLinkMetadata?.url
+    }
+
+    func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
+        return shareSheetLinkMetadata
     }
 }

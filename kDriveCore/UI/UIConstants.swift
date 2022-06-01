@@ -18,6 +18,7 @@
 
 import InfomaniakCore
 import kDriveResources
+import LinkPresentation
 import SnackBar
 import UIKit
 
@@ -81,5 +82,54 @@ public enum UIConstants {
         #else
             UIApplication.shared.open(url)
         #endif
+    }
+
+    public static func presentLinkPreviewForFile(_ file: File, link: String, from viewController: UIViewController, sourceView: UIView) {
+        guard let url = URL(string: link) else { return }
+        createLinkPreviewForFile(file, link: url) { linkPreviewMetadata in
+            let activityViewController = UIActivityViewController(activityItems: [ShareLinkPreviewDelegate(shareSheetLinkMetadata: linkPreviewMetadata)],
+                                                                  applicationActivities: nil)
+            activityViewController.popoverPresentationController?.sourceView = sourceView
+            viewController.present(activityViewController, animated: true)
+        }
+    }
+
+    private static func createLinkPreviewForFile(_ file: File, link: URL, completion: @escaping (LPLinkMetadata) -> Void) {
+        if ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) || !file.hasThumbnail {
+            completion(createLinkMetadata(file: file, url: link, thumbnail: file.icon))
+        } else {
+            file.getThumbnail { thumbnail, _ in
+                completion(createLinkMetadata(file: file, url: link, thumbnail: thumbnail))
+            }
+        }
+    }
+
+    private static func createLinkMetadata(file: File, url: URL, thumbnail: UIImage) -> LPLinkMetadata {
+        let metadata = LPLinkMetadata()
+        metadata.originalURL = url
+        metadata.url = metadata.originalURL
+        metadata.title = file.isDropbox ? KDriveResourcesStrings.Localizable.buttonShareDropboxLink : KDriveResourcesStrings.Localizable.buttonSharePublicLink
+        metadata.iconProvider = NSItemProvider(object: thumbnail)
+        return metadata
+    }
+}
+
+private class ShareLinkPreviewDelegate: NSObject, UIActivityItemSource {
+    private var shareSheetLinkMetadata: LPLinkMetadata
+
+    init(shareSheetLinkMetadata: LPLinkMetadata) {
+        self.shareSheetLinkMetadata = shareSheetLinkMetadata
+    }
+
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        return String()
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+        return shareSheetLinkMetadata.url
+    }
+
+    func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
+        return shareSheetLinkMetadata
     }
 }
