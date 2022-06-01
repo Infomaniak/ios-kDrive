@@ -36,7 +36,7 @@ public class PhotoLibraryUploader {
     private init() {
         requestResourceOption.isNetworkAccessAllowed = true
 
-        dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+        dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
 
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
             self.settings = PhotoSyncSettings(value: settings)
