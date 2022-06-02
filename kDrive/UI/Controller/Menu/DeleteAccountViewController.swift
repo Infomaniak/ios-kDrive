@@ -32,13 +32,12 @@ class DeleteAccountViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let url = ApiRoutes.mobileLogin(url: URLConstants.deleteAccount.url.absoluteString) {
-            if let token = driveFileManager.apiFetcher.currentToken {
-                var request = URLRequest(url: url)
-                request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                webView.load(request)
-                setUpWebview()
-            }
+        if let url = ApiRoutes.mobileLogin(url: URLConstants.deleteAccount.url.absoluteString),
+           let token = driveFileManager.apiFetcher.currentToken {
+            var request = URLRequest(url: url)
+            request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
+            webView.load(request)
+            setUpWebview()
         }
 
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "DeleteAccount"])
@@ -46,6 +45,10 @@ class DeleteAccountViewController: UIViewController {
 
     deinit {
         progressObserver?.invalidate()
+    }
+
+    @IBAction func close(_ sender: Any) {
+        dismiss(animated: true)
     }
 
     private func setUpWebview() {
@@ -56,10 +59,6 @@ class DeleteAccountViewController: UIViewController {
         }
 
         webView.navigationDelegate = self
-    }
-
-    @IBAction func close(_ sender: Any) {
-        dismiss(animated: true)
     }
 }
 

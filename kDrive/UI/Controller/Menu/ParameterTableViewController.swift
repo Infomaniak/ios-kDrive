@@ -102,10 +102,9 @@ class ParameterTableViewController: UITableViewController {
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "deleteAccountSegue" {
-            if let viewController = segue.destination as? DeleteAccountViewController {
-                viewController.driveFileManager = driveFileManager
-            }
+        if segue.identifier == "deleteAccountSegue",
+           let viewController = segue.destination as? DeleteAccountViewController {
+            viewController.driveFileManager = driveFileManager
         }
     }
 
