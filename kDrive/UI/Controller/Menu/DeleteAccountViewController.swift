@@ -18,6 +18,8 @@
 
 import InfomaniakCore
 import kDriveCore
+import kDriveResources
+import Sentry
 import UIKit
 import WebKit
 
@@ -32,12 +34,17 @@ class DeleteAccountViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let url = ApiRoutes.mobileLogin(url: URLConstants.deleteAccount.url.absoluteString),
-           let token = driveFileManager.apiFetcher.currentToken {
-            var request = URLRequest(url: url)
-            request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-            webView.load(request)
-            setUpWebview()
+        if let url = ApiRoutes.mobileLogin(url: URLConstants.deleteAccount.url.absoluteString) {
+            if let token = driveFileManager.apiFetcher.currentToken {
+                var request = URLRequest(url: url)
+                request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
+                webView.load(request)
+                setUpWebview()
+            } else {
+                showErrorMessage()
+            }
+        } else {
+            showErrorMessage(context: ["URL" : "nil"])
         }
 
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName, "DeleteAccount"])
@@ -60,6 +67,15 @@ class DeleteAccountViewController: UIViewController {
 
         webView.navigationDelegate = self
     }
+
+    private func showErrorMessage(context: [String: Any] = [:]) {
+        SentrySDK.capture(message: "Failed to load Infomaniak Manager") { scope in
+            scope.setContext(value: context, key: "link")
+        }
+        dismiss(animated: true) {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorLoadingInfomaniakManager)
+        }
+    }
 }
 
 // MARK: - WKNavigationDelegate
@@ -77,5 +93,28 @@ extension DeleteAccountViewController: WKNavigationDelegate {
         }
         decisionHandler(.cancel)
         dismiss(animated: true)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        guard let statusCode = (navigationResponse.response as? HTTPURLResponse)?.statusCode else {
+            decisionHandler(.allow)
+            return
+        }
+
+        if statusCode == 200 {
+            decisionHandler(.allow)
+        } else {
+            decisionHandler(.cancel)
+            let context: [String: Any] = [
+                "URL": navigationResponse.response.url?.absoluteString ?? "",
+                "Status code": statusCode
+            ]
+            showErrorMessage(context: context)
+        }
+    }
+
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        showErrorMessage(context: ["Error": error.localizedDescription])
     }
 }
