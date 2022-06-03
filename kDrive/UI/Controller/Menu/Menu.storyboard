@@ -82,7 +82,7 @@
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgD-0d-5ra">
-                                <rect key="frame" x="24" y="332.5" width="366" height="231"/>
+                                <rect key="frame" x="24" y="302" width="366" height="292"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="order-success" translatesAutoresizingMaskIntoConstraints="NO" id="vmx-9Y-v0i">
                                         <rect key="frame" x="108" y="0.0" width="150" height="150"/>
@@ -92,7 +92,7 @@
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="InfomaniakCore">
-                                        <rect key="frame" x="0.0" y="174" width="366" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="174" width="366" height="41"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -102,7 +102,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nous sommes en train de finaliser la commande, vous serez notifié par mail lorsque votre kDrive sera disponible." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bwo-OH-mV3" customClass="IKLabel" customModule="InfomaniakCore">
-                                        <rect key="frame" x="0.0" y="210.5" width="366" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="231" width="366" height="61"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -345,7 +345,6 @@
                         <segue destination="gfb-Up-kOo" kind="show" identifier="notificationsSegue" id="reO-Fp-cjy"/>
                         <segue destination="MCZ-rj-Suy" kind="show" identifier="themeSelectionSegue" id="bgg-d7-ne2"/>
                         <segue destination="zSd-it-dsI" kind="show" identifier="securitySegue" id="hul-F5-HkZ"/>
-                        <segue destination="BhA-Dh-c3V" kind="presentation" identifier="deleteAccountSegue" id="xcx-7w-Q9F"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4Kq-PW-o7g" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -713,7 +712,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cuo-YB-vAU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="9693" y="1669"/>
+            <point key="canvasLocation" x="8778" y="1669"/>
         </scene>
         <!--Select Theme Table View Controller-->
         <scene sceneID="pbm-gZ-Aoh">
@@ -734,70 +733,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GuQ-eD-LUX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="7200" y="1669"/>
-        </scene>
-        <!--Delete Account View Controller-->
-        <scene sceneID="6ik-lG-brX">
-            <objects>
-                <viewController id="BhA-Dh-c3V" customClass="DeleteAccountViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="WTc-HM-xg6">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ycR-8f-56w">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="56"/>
-                                <items>
-                                    <navigationItem id="Y8V-NH-F3F">
-                                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="WvP-nE-dOq">
-                                            <connections>
-                                                <action selector="close:" destination="BhA-Dh-c3V" id="5ml-C3-MTU"/>
-                                            </connections>
-                                        </barButtonItem>
-                                    </navigationItem>
-                                </items>
-                            </navigationBar>
-                            <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7Az-S3-V3k">
-                                <rect key="frame" x="0.0" y="56" width="414" height="786"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
-                                <wkWebViewConfiguration key="configuration">
-                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
-                                    <wkPreferences key="preferences"/>
-                                </wkWebViewConfiguration>
-                            </wkWebView>
-                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="44y-Gb-dBl">
-                                <rect key="frame" x="0.0" y="52" width="414" height="4"/>
-                                <color key="tintColor" name="infomaniakColor"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
-                                        <real key="value" value="0.0"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                            </progressView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="4Bk-gD-Zn8"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="7Az-S3-V3k" firstAttribute="leading" secondItem="4Bk-gD-Zn8" secondAttribute="leading" id="2Js-Z6-HR0"/>
-                            <constraint firstItem="7Az-S3-V3k" firstAttribute="trailing" secondItem="4Bk-gD-Zn8" secondAttribute="trailing" id="5Q1-kw-TbD"/>
-                            <constraint firstItem="7Az-S3-V3k" firstAttribute="top" secondItem="ycR-8f-56w" secondAttribute="bottom" id="8fX-mK-x14"/>
-                            <constraint firstItem="44y-Gb-dBl" firstAttribute="bottom" secondItem="ycR-8f-56w" secondAttribute="bottom" id="Fbm-lF-idq"/>
-                            <constraint firstItem="44y-Gb-dBl" firstAttribute="trailing" secondItem="4Bk-gD-Zn8" secondAttribute="trailing" id="Fpg-rB-FJ6"/>
-                            <constraint firstItem="ycR-8f-56w" firstAttribute="trailing" secondItem="4Bk-gD-Zn8" secondAttribute="trailing" id="K0r-5q-CUE"/>
-                            <constraint firstItem="44y-Gb-dBl" firstAttribute="leading" secondItem="4Bk-gD-Zn8" secondAttribute="leading" id="OKB-OY-ioW"/>
-                            <constraint firstAttribute="bottom" secondItem="7Az-S3-V3k" secondAttribute="bottom" id="Tca-71-2hc"/>
-                            <constraint firstItem="ycR-8f-56w" firstAttribute="top" secondItem="4Bk-gD-Zn8" secondAttribute="top" id="eMx-kc-cSA"/>
-                            <constraint firstItem="ycR-8f-56w" firstAttribute="leading" secondItem="4Bk-gD-Zn8" secondAttribute="leading" id="mql-rR-dBR"/>
-                        </constraints>
-                    </view>
-                    <toolbarItems/>
-                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
-                    <connections>
-                        <outlet property="progressView" destination="44y-Gb-dBl" id="O3J-nd-cj8"/>
-                        <outlet property="webView" destination="7Az-S3-V3k" id="3xq-zn-3eO"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="x0c-xO-k5p" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="8785.507246376812" y="1668.75"/>
         </scene>
         <!--Sécurité-->
         <scene sceneID="Tt7-mj-zPY">
@@ -865,7 +800,7 @@
             <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="lightTextColor">
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>

@@ -16,10 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import UIKit
 import SafariServices
+import Sentry
 import WebKit
 
 class ParameterTableViewController: UITableViewController {
@@ -66,12 +68,10 @@ class ParameterTableViewController: UITableViewController {
                 return "notificationsSegue"
             case .security:
                 return "securitySegue"
-            case .wifi, .storage:
+            case .wifi, .storage, .deleteAccount:
                 return nil
             case .about:
                 return "aboutSegue"
-            case .deleteAccount:
-                return "deleteAccountSegue"
             }
         }
     }
@@ -99,13 +99,6 @@ class ParameterTableViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         MatomoUtils.track(view: [MatomoUtils.Views.menu.displayName, MatomoUtils.Views.settings.displayName])
-    }
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "deleteAccountSegue",
-           let viewController = segue.destination as? DeleteAccountViewController {
-            viewController.driveFileManager = driveFileManager
-        }
     }
 
     private func getNotificationText() -> String {
@@ -165,6 +158,14 @@ class ParameterTableViewController: UITableViewController {
             performSegue(withIdentifier: segueIdentifier, sender: self)
         } else if row == .storage {
             navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
+        } else if row == .deleteAccount {
+            let deleteAccountDeletionViewController = DeleteAccountViewController.instantiateInViewController(
+                delegate: self,
+                accessToken: driveFileManager.apiFetcher.currentToken?.accessToken ?? "",
+                navBarColor: KDriveResourcesAsset.backgroundColor.color,
+                navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
+            )
+            navigationController?.present(deleteAccountDeletionViewController, animated: true)
         }
     }
 
@@ -184,5 +185,24 @@ class ParameterTableViewController: UITableViewController {
             return
         }
         self.driveFileManager = driveFileManager
+    }
+}
+
+extension ParameterTableViewController: DeleteAccountDelegate {
+    func didCompleteDeleteAccount() {
+        AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
+        if let nextAccount = AccountManager.instance.accounts.first {
+            AccountManager.instance.switchAccount(newAccount: nextAccount)
+            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+        } else {
+            SentrySDK.setUser(nil)
+            tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
+        }
+    }
+
+    func didFailDeleteAccount(context: [String : Any]?) {
+        SentrySDK.capture(message: "Failed to load Infomaniak Manager") { scope in
+            scope.setContext(value: context ?? [:], key: "link")
+        }
     }
 }
