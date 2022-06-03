@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -110,13 +110,13 @@
                                                 </subviews>
                                             </stackView>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WCm-bJ-flM">
-                                                <rect key="frame" x="329" y="17" width="26" height="26"/>
+                                                <rect key="frame" x="323" y="12" width="36" height="36"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="26" id="nYH-U5-wgC"/>
-                                                    <constraint firstAttribute="width" constant="26" id="qFm-XY-DEq"/>
+                                                    <constraint firstAttribute="height" constant="36" id="nYH-U5-wgC"/>
+                                                    <constraint firstAttribute="width" constant="36" id="qFm-XY-DEq"/>
                                                 </constraints>
                                                 <color key="tintColor" name="primaryTextColor"/>
-                                                <inset key="imageEdgeInsets" minX="4" minY="4" maxX="4" maxY="4"/>
+                                                <inset key="imageEdgeInsets" minX="10" minY="9" maxX="8" maxY="9"/>
                                                 <state key="normal" image="menu"/>
                                                 <connections>
                                                     <action selector="moreButtonTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="LxQ-eF-Hoo"/>
@@ -131,7 +131,7 @@
                                             <constraint firstAttribute="bottom" secondItem="dkb-OK-TmO" secondAttribute="bottom" priority="499" constant="10" id="4zY-gu-lum"/>
                                             <constraint firstItem="WCm-bJ-flM" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="dkb-OK-TmO" secondAttribute="trailing" constant="8" id="BzQ-oU-cOt"/>
                                             <constraint firstAttribute="bottom" secondItem="id8-ZX-iUQ" secondAttribute="bottom" id="Hhv-Om-4gw"/>
-                                            <constraint firstAttribute="trailing" secondItem="WCm-bJ-flM" secondAttribute="trailing" constant="9" id="HqD-Bd-IRt"/>
+                                            <constraint firstAttribute="trailing" secondItem="WCm-bJ-flM" secondAttribute="trailing" constant="5" id="HqD-Bd-IRt"/>
                                             <constraint firstAttribute="trailing" secondItem="mDo-EL-lhP" secondAttribute="trailing" id="I5R-2Z-fLB"/>
                                             <constraint firstItem="mDo-EL-lhP" firstAttribute="leading" secondItem="hE6-GN-a4l" secondAttribute="leading" id="Kxw-bK-V1q"/>
                                             <constraint firstItem="MLs-rs-LMm" firstAttribute="top" secondItem="hE6-GN-a4l" secondAttribute="top" priority="499" constant="10" id="Rft-OZ-X1a"/>
@@ -231,13 +231,13 @@
             <color red="0.24300000071525574" green="0.74900001287460327" blue="0.30199998617172241" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

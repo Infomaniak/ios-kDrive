@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
@@ -54,13 +54,13 @@
                                                 </constraints>
                                             </imageView>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tJz-u0-DMk">
-                                                <rect key="frame" x="140" y="8" width="26" height="26"/>
+                                                <rect key="frame" x="137" y="5" width="32" height="32"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="26" id="Fcs-6n-8ik"/>
-                                                    <constraint firstAttribute="width" constant="26" id="vAs-tt-Xbq"/>
+                                                    <constraint firstAttribute="height" constant="32" id="Fcs-6n-8ik"/>
+                                                    <constraint firstAttribute="width" constant="32" id="vAs-tt-Xbq"/>
                                                 </constraints>
                                                 <color key="tintColor" name="primaryTextColor"/>
-                                                <inset key="imageEdgeInsets" minX="4" minY="4" maxX="4" maxY="4"/>
+                                                <inset key="imageEdgeInsets" minX="7" minY="7" maxX="7" maxY="7"/>
                                                 <state key="normal" image="menu"/>
                                                 <connections>
                                                     <action selector="moreButtonTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="bLk-d8-1DS"/>
@@ -71,12 +71,12 @@
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="j9K-4i-jdP" secondAttribute="trailing" id="5mg-Am-8nv"/>
                                             <constraint firstItem="5Sk-df-fP8" firstAttribute="centerY" secondItem="4Ut-eJ-Jw7" secondAttribute="centerY" id="9YD-zp-2bb"/>
-                                            <constraint firstAttribute="trailing" secondItem="tJz-u0-DMk" secondAttribute="trailing" constant="8" id="AvA-Uq-QVt"/>
+                                            <constraint firstAttribute="trailing" secondItem="tJz-u0-DMk" secondAttribute="trailing" constant="5" id="AvA-Uq-QVt"/>
                                             <constraint firstItem="j9K-4i-jdP" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="top" id="CoW-df-XO9"/>
                                             <constraint firstItem="5Sk-df-fP8" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="top" priority="999" constant="24" id="Use-uk-95I"/>
                                             <constraint firstItem="3zY-sM-q0Y" firstAttribute="leading" secondItem="4Ut-eJ-Jw7" secondAttribute="leading" constant="8" id="Wno-m3-fdw"/>
                                             <constraint firstAttribute="bottom" secondItem="j9K-4i-jdP" secondAttribute="bottom" id="Y72-Ln-rOb"/>
-                                            <constraint firstItem="tJz-u0-DMk" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="top" constant="8" id="Ygo-cN-IMH"/>
+                                            <constraint firstItem="tJz-u0-DMk" firstAttribute="top" secondItem="4Ut-eJ-Jw7" secondAttribute="top" constant="5" id="Ygo-cN-IMH"/>
                                             <constraint firstItem="5Sk-df-fP8" firstAttribute="centerX" secondItem="4Ut-eJ-Jw7" secondAttribute="centerX" id="fNj-YC-Zse"/>
                                             <constraint firstItem="j9K-4i-jdP" firstAttribute="leading" secondItem="4Ut-eJ-Jw7" secondAttribute="leading" id="g44-CH-gO5"/>
                                             <constraint firstAttribute="bottom" secondItem="5Sk-df-fP8" secondAttribute="bottom" priority="999" constant="24" id="hFG-Do-X0t"/>
@@ -230,10 +230,10 @@
             <color red="0.24300000071525574" green="0.74900001287460327" blue="0.30199998617172241" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>
