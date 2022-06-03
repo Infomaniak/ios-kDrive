@@ -888,10 +888,7 @@ extension FileDetailViewController: FileCommentDelegate {
 
 extension FileDetailViewController: ShareLinkTableViewCellDelegate {
     func shareLinkSharedButtonPressed(link: String, sender: UIView) {
-        let items = [URL(string: link)!]
-        let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        ac.popoverPresentationController?.sourceView = sender
-        present(ac, animated: true)
+        UIConstants.presentLinkPreviewForFile(file, link: link, from: self, sourceView: sender)
     }
 
     func shareLinkSettingsButtonPressed() {
