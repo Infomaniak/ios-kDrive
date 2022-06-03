@@ -82,20 +82,6 @@ class LaunchPanelsController {
             displayCondition: AccountManager.instance.currentDriveFileManager != nil && UserDefaults.shared.numberOfConnections == 1 && !PhotoLibraryUploader.instance.isSyncEnabled,
             priority: 3
         ),
-        // Category feature
-        LaunchPanel(
-            makePanelController: {
-                let driveFloatingPanelController = CategoryFloatingPanelViewController.instantiatePanel()
-                let floatingPanelViewController = driveFloatingPanelController.contentViewController as? CategoryFloatingPanelViewController
-                floatingPanelViewController?.actionHandler = { _ in
-                    driveFloatingPanelController.dismiss(animated: true)
-                }
-                return driveFloatingPanelController
-            },
-            displayCondition: !UserDefaults.shared.categoryPanelDisplayed,
-            onDisplay: { UserDefaults.shared.categoryPanelDisplayed = true },
-            priority: 2
-        ),
         // Beta invitation
         LaunchPanel(
             makePanelController: {
