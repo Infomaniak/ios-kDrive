@@ -122,7 +122,8 @@ private class ShareLinkPreviewDelegate: NSObject, UIActivityItemSource {
     }
 
     func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
-        return URLConstants.appStore.url
+        // We force unwrap because URL is safe and created before
+        return shareSheetLinkMetadata.url!
     }
 
     func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
