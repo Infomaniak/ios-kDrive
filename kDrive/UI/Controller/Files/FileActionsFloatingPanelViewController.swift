@@ -140,7 +140,6 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     private var fileObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     private var interactionController: UIDocumentInteractionController!
-    var shareSheetLinkMetadata: LPLinkMetadata?
 
     // MARK: - Public methods
 
@@ -693,21 +692,5 @@ extension FileActionsFloatingPanelViewController: UIDocumentInteractionControlle
     func documentInteractionController(_ controller: UIDocumentInteractionController, willBeginSendingToApplication application: String?) {
         // Dismiss interaction controller when the user taps an app
         controller.dismissMenu(animated: true)
-    }
-}
-
-// MARK: - Share sheet link preview - UIActivityItemSource
-
-extension FileActionsFloatingPanelViewController: UIActivityItemSource {
-    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
-        return String()
-    }
-
-    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
-        return shareSheetLinkMetadata?.url
-    }
-
-    func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
-        return shareSheetLinkMetadata
     }
 }
