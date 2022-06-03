@@ -66,6 +66,7 @@ class DeleteAccountViewController: UIViewController {
         }
 
         webView.navigationDelegate = self
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
     }
 
     private func showErrorMessage(context: [String: Any] = [:]) {
@@ -84,14 +85,17 @@ extension DeleteAccountViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let url = navigationAction.request.url {
             let urlString = url.absoluteString
-            if urlString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
-                || urlString.starts(with: "https://manager.infomaniak.com")
-                || navigationAction.targetFrame?.isMainFrame == false {
+            if urlString.starts(with: "https://login.\(ApiEnvironment.preprod.managerHost)") {
+                // Disconnect user
+                decisionHandler(.allow)
+                return
+            }
+            if urlString.contains(ApiEnvironment.preprod.host) {
                 decisionHandler(.allow)
                 return
             }
         }
-        decisionHandler(.cancel)
+        decisionHandler(.allow)
         dismiss(animated: true)
     }
 

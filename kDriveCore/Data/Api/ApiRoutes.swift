@@ -23,7 +23,7 @@ public enum ApiRoutes {
     public static func mobileLogin(url: String) -> URL? {
         var components = URLComponents()
         components.scheme = "https"
-        components.host = ApiEnvironment.current.managerHost
+        components.host = ApiEnvironment.preprod.managerHost
         components.path = "/v3/mobile_login"
         components.queryItems = [URLQueryItem(name: "url", value: url)]
         return components.url

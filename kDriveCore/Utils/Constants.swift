@@ -31,7 +31,7 @@ public struct URLConstants {
     public static let support = URLConstants(urlString: "https://support.infomaniak.com")
     public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2631")
     public static let matomo = URLConstants(urlString: "https://analytics.infomaniak.com/matomo.php")
-    public static let deleteAccount = URLConstants(urlString: "https://manager.infomaniak.com/v3/ng/profile/user/dashboard?open-terminate-account-modal")
+    public static let deleteAccount = URLConstants(urlString: "https://manager.preprod.dev.infomaniak.ch/v3/ng/profile/user/dashboard?open-terminate-account-modal")
 
     private var urlString: String
 
