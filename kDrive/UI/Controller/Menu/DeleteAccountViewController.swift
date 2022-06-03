@@ -86,8 +86,18 @@ extension DeleteAccountViewController: WKNavigationDelegate {
         if let url = navigationAction.request.url {
             let urlString = url.absoluteString
             if urlString.starts(with: "https://login.\(ApiEnvironment.preprod.managerHost)") {
-                // Disconnect user
+                // Remove account
+                AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
+                if let nextAccount = AccountManager.instance.accounts.first {
+                    AccountManager.instance.switchAccount(newAccount: nextAccount)
+                    (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+                } else {
+                    SentrySDK.setUser(nil)
+                    tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
+                }
+
                 decisionHandler(.allow)
+                dismiss(animated: true)
                 return
             }
             if urlString.contains(ApiEnvironment.preprod.host) {
@@ -95,7 +105,7 @@ extension DeleteAccountViewController: WKNavigationDelegate {
                 return
             }
         }
-        decisionHandler(.allow)
+        decisionHandler(.cancel)
         dismiss(animated: true)
     }
 
