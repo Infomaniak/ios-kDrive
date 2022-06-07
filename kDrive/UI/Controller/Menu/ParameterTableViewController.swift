@@ -198,9 +198,10 @@ extension ParameterTableViewController: DeleteAccountDelegate {
             SentrySDK.setUser(nil)
             tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
         }
+        AccountManager.instance.saveAccounts()
     }
 
-    func didFailDeleteAccount(context: [String : Any]?) {
+    func didFailDeleteAccount(context: [String:Any]?) {
         SentrySDK.capture(message: "Failed to load Infomaniak Manager") { scope in
             scope.setContext(value: context ?? [:], key: "link")
         }
