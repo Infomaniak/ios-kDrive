@@ -161,7 +161,7 @@ class ParameterTableViewController: UITableViewController {
         } else if row == .deleteAccount {
             let deleteAccountDeletionViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
-                accessToken: driveFileManager.apiFetcher.currentToken?.accessToken ?? "",
+                accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
                 navBarColor: KDriveResourcesAsset.backgroundColor.color,
                 navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
             )
@@ -194,6 +194,7 @@ extension ParameterTableViewController: DeleteAccountDelegate {
         if let nextAccount = AccountManager.instance.accounts.first {
             AccountManager.instance.switchAccount(newAccount: nextAccount)
             (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
         } else {
             SentrySDK.setUser(nil)
             tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
@@ -201,9 +202,10 @@ extension ParameterTableViewController: DeleteAccountDelegate {
         AccountManager.instance.saveAccounts()
     }
 
-    func didFailDeleteAccount(context: [String:Any]?) {
+    func didFailDeleteAccount(context: [String: Any]?) {
         SentrySDK.capture(message: "Failed to load Infomaniak Manager") { scope in
             scope.setContext(value: context ?? [:], key: "link")
         }
+        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarErrorAccountDeletionErrorWhileDeleting)
     }
 }
