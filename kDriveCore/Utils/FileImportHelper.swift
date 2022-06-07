@@ -134,7 +134,9 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
-    public func importItems(_ itemProviders: [NSItemProvider], userPreferredPhotoFormat: PhotoFileFormat? = nil, completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
+    public func importItems(_ itemProviders: [NSItemProvider],
+                            userPreferredPhotoFormat: PhotoFileFormat? = nil,
+                            completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
         let perItemUnitCount: Int64 = 10
         let progress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
         let dispatchGroup = DispatchGroup()
@@ -176,7 +178,8 @@ public class FileImportHelper {
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider, userPreferredPhotoFormat: userPreferredPhotoFormat) {
+            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider,
+                                                                      userPreferredPhotoFormat: userPreferredPhotoFormat) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
                     switch result {
                     case .success((let filename, let fileURL)):

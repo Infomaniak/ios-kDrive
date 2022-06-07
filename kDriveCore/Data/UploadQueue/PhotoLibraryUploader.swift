@@ -144,7 +144,8 @@ public class PhotoLibraryUploader {
 
                 if let image = CIImage(data: imageData) {
                     let context = CIContext()
-                    let jpegData = context.jpegRepresentation(of: image, colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!)
+                    let jpegData = context.jpegRepresentation(of: image,
+                                                              colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!)
                     continuation.resume(returning: jpegData)
                 } else {
                     continuation.resume(returning: nil)

@@ -142,7 +142,7 @@ class SaveFileViewController: UIViewController {
     private func setItemProviders() {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
+        importProgress = FileImportHelper.instance.importItems(itemProviders,userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
             self?.errorCount = errorCount
             DispatchQueue.main.async {

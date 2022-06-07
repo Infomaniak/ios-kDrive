@@ -51,7 +51,18 @@ public class PhotoSyncSettings: Object {
     @Persisted public var deleteAssetsAfterImport = false
     @Persisted public var photoFormat: PhotoFileFormat = .jpg
 
-    public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, fromDate: Date, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool, createDatedSubFolders: Bool, deleteAssetsAfterImport: Bool, photoFormat: PhotoFileFormat) {
+    public init(userId: Int,
+                driveId: Int,
+                parentDirectoryId: Int,
+                lastSync: Date,
+                syncMode: PhotoSyncMode,
+                fromDate: Date,
+                syncPictures: Bool,
+                syncVideos: Bool,
+                syncScreenshots: Bool,
+                createDatedSubFolders: Bool,
+                deleteAssetsAfterImport: Bool,
+                photoFormat: PhotoFileFormat) {
         self.userId = userId
         self.driveId = driveId
         self.parentDirectoryId = parentDirectoryId
