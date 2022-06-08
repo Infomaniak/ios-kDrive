@@ -54,7 +54,7 @@ public enum PhotoFileFormat: Int, CaseIterable, PersistableEnum {
         case .jpg:
             return "JPG"
         case .heic:
-            return "HEIF"
+            return "HEIC"
         case .png:
             return "PNG"
         }
@@ -65,7 +65,7 @@ public enum PhotoFileFormat: Int, CaseIterable, PersistableEnum {
         case .jpg:
             return "JPG \(KDriveResourcesStrings.Localizable.savePhotoJpegDetail)"
         case .heic:
-            return "HEIF"
+            return "HEIC"
         case .png:
             return "PNG"
         }

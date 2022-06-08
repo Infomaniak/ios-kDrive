@@ -237,9 +237,12 @@ public class PhotoLibraryUploader {
                 var correctName = "No-name-\(Date().timeIntervalSince1970)"
                 var fileExtension = ""
                 if let resource = bestResource(for: asset) {
-                    fileExtension = (resource.originalFilename as NSString).pathExtension
-                    if fileExtension.lowercased() == "heic" && settings.photoFormat == .jpg {
-                        fileExtension = "jpg"
+                    if resource.uniformTypeIdentifier == UTI.heic.identifier,
+                       let preferredFilenameExtension = settings.photoFormat.uti.preferredFilenameExtension {
+                        fileExtension = preferredFilenameExtension
+                    } else {
+                        fileExtension = UTI(resource.uniformTypeIdentifier)?.preferredFilenameExtension
+                            ?? (resource.originalFilename as NSString).pathExtension
                     }
                 }
                 if let creationDate = asset.creationDate {
