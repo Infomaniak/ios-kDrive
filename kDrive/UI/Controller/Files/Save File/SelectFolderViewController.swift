@@ -32,7 +32,7 @@ class SelectFolderViewModel: ConcreteFileListViewModel {
         let configuration = Configuration(showUploadingFiles: false,
                                           isMultipleSelectionEnabled: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.selectFolderTitle,
-                                          emptyViewType: .emptyFolder,
+                                          emptyViewType: .emptyFolderSelectFolder,
                                           leftBarButtons: currentDirectory.id == DriveFileManager.constants.rootID ? [.cancel] : nil,
                                           rightBarButtons: currentDirectory.capabilities.canCreateDirectory ? [.addFolder] : nil,
                                           matomoViewPath: [MatomoUtils.Views.save.displayName, "SelectFolder"])
