@@ -20,9 +20,7 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import UIKit
-import SafariServices
 import Sentry
-import WebKit
 
 class ParameterTableViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
@@ -159,7 +157,7 @@ class ParameterTableViewController: UITableViewController {
         } else if row == .storage {
             navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
         } else if row == .deleteAccount {
-            let deleteAccountDeletionViewController = DeleteAccountViewController.instantiateInViewController(
+            let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
                 accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
                 navBarColor: KDriveResourcesAsset.backgroundColor.color,
