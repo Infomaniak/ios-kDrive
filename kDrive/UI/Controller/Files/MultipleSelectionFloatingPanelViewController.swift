@@ -142,10 +142,11 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     if file.isDownloaded {
                         FileActionsHelper.save(file: file, from: self)
                     } else {
+                        guard let rootViewController = view.window?.rootViewController else { return }
                         downloadInProgress = true
                         collectionView.reloadItems(at: [indexPath])
                         group.enter()
-                        DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [unowned self] _, error in
+                        DownloadQueue.instance.observeFileDownloaded(rootViewController, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
                                     FileActionsHelper.save(file: file, from: self)
@@ -211,8 +212,12 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             self.collectionView.reloadItems(at: [indexPath])
             if action == .download {
                 if let downloadedArchiveUrl = self.downloadedArchiveUrl {
+                    var rootViewController: UIViewController? = self
+                    if self.view.window == nil {
+                        rootViewController = UIApplication.shared.windows.first?.rootViewController
+                    }
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
-                    self.present(documentExportViewController, animated: true)
+                    rootViewController?.present(documentExportViewController, animated: true)
                 }
             } else {
                 self.dismiss(animated: true)
@@ -263,7 +268,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
                 let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, body: archiveBody)
                 self.currentArchiveId = response.id
-                DownloadQueue.instance.observeArchiveDownloaded(self, archiveId: response.id) { _, archiveUrl, error in
+                guard let rootViewController = view.window?.rootViewController else { return }
+                DownloadQueue.instance.observeArchiveDownloaded(rootViewController, archiveId: response.id) { _, archiveUrl, error in
                     if let archiveUrl = archiveUrl {
                         completion(.success(archiveUrl))
                     } else {
