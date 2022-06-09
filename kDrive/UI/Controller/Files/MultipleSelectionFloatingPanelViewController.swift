@@ -142,11 +142,11 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     if file.isDownloaded {
                         FileActionsHelper.save(file: file, from: self)
                     } else {
-                        guard let rootViewController = view.window?.rootViewController else { return }
+                        guard let observerViewController = view.window?.rootViewController else { return }
                         downloadInProgress = true
                         collectionView.reloadItems(at: [indexPath])
                         group.enter()
-                        DownloadQueue.instance.observeFileDownloaded(rootViewController, fileId: file.id) { [unowned self] _, error in
+                        DownloadQueue.instance.observeFileDownloaded(observerViewController, fileId: file.id) { [unowned self] _, error in
                             if error == nil {
                                 DispatchQueue.main.async {
                                     FileActionsHelper.save(file: file, from: self)
@@ -212,12 +212,10 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             self.collectionView.reloadItems(at: [indexPath])
             if action == .download {
                 if let downloadedArchiveUrl = self.downloadedArchiveUrl {
-                    var rootViewController: UIViewController? = self
-                    if self.view.window == nil {
-                        rootViewController = UIApplication.shared.windows.first?.rootViewController
-                    }
+                    // Present from root view controller if the panel is no longer presented
+                    let viewController = self.view.window != nil ? self : UIApplication.shared.windows.first?.rootViewController
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
-                    rootViewController?.present(documentExportViewController, animated: true)
+                    viewController?.present(documentExportViewController, animated: true)
                 }
             } else {
                 self.dismiss(animated: true)

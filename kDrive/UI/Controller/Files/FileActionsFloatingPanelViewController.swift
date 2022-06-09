@@ -577,11 +577,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     private func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
+        guard let observerViewController = UIApplication.shared.windows.first?.rootViewController else { return }
         downloadAction = action
         setLoading(true, action: action, at: indexPath)
         downloadObserver?.cancel()
-        guard let rootViewController = view.window?.rootViewController else { return }
-        downloadObserver = DownloadQueue.instance.observeFileDownloaded(rootViewController, fileId: file.id) { [weak self] _, error in
+        downloadObserver = DownloadQueue.instance.observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
             self?.downloadAction = nil
             self?.setLoading(true, action: action, at: indexPath)
             DispatchQueue.main.async {
