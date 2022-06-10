@@ -4,8 +4,8 @@
  * Release: Working copy
  * Locale: de, German
  * Tagged: ios
- * Exported by: Philippe Weidmann
- * Exported at: Wed, 01 Jun 2022 14:06:21 +0200
+ * Exported by: Valentin Perignon
+ * Exported at: Tue, 07 Jun 2022 11:35:29 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -767,6 +767,9 @@
 /* loco:605b1457dbf343111f56d112 */
 "errorLeaveShare" = "Fehler beim Abbrechen der Freigabe";
 
+/* loco:6298868323a9de35a129f1f2 */
+"errorLoadingInfomaniakManager" = "Der Infomaniak-Manager kann nicht geladen werden";
+
 /* loco:6049df4d5c2c3a04bc39799b */
 "errorLoadingOfficeEditor" = "Der Dokumenteneditor kann nicht geladen werden";
 
@@ -1262,6 +1265,12 @@
 /* loco:614c87900f32e257ec7c34b5 */
 "importDirectory" = "Einfuhren";
 
+/* loco:62989ec01960bf009c5ca342 */
+"importFailedDescription" = "%1$s konnte nicht importiert werden";
+
+/* loco:62989ee53bb1931c832ecd62 */
+"importFailedDescription-plural" = "%1$d Dateien konnten nicht importiert werden";
+
 /* loco:6049df4d5c2c3a04bc3979fb */
 "inputExpirationDate" = "Ablaufdatum";
 
@@ -1736,8 +1745,14 @@
 /* loco:6049df4d5c2c3a04bc397a3d */
 "sharedWithMeTitle" = "Mit mir geteilt";
 
+/* loco:629f1ad12117e31124690d64 */
+"snackBarAccountDeleted" = "Gelöschtes Konto";
+
 /* loco:6169601e8934a0564732b7d2 */
 "snackBarCategoryDeleted" = "Kategorie erfolgreich gelöscht";
+
+/* loco:629f1b5bfc67572038545e23 */
+"snackBarErrorAccountDeletion-Error-while-deleting" = "Fehler beim Löschen des Kontos";
 
 /* loco:619f6999f44e9d3a394a6d62 */
 "snackBarUploadError" = "Eine Datei konnte nicht importiert werden";

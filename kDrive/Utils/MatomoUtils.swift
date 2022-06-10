@@ -147,7 +147,7 @@ class MatomoUtils {
         case .sendCopy:
             track(eventWithCategory: category, name: "sendFileCopy")
         case .shareLink:
-            track(eventWithCategory: category, name: "copyShareLink")
+            track(eventWithCategory: category, name: "shareLink")
         case .informations:
             track(eventWithCategory: category, name: "openFileInfos")
         // Actions
