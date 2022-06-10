@@ -163,7 +163,7 @@ class ParameterTableViewController: UITableViewController {
                 navBarColor: KDriveResourcesAsset.backgroundColor.color,
                 navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
             )
-            navigationController?.present(deleteAccountDeletionViewController, animated: true)
+            navigationController?.present(deleteAccountViewController, animated: true)
         }
     }
 
@@ -201,10 +201,8 @@ extension ParameterTableViewController: DeleteAccountDelegate {
         AccountManager.instance.saveAccounts()
     }
 
-    func didFailDeleteAccount(context: [String: Any]?) {
-        SentrySDK.capture(message: "Failed to load Infomaniak Manager") { scope in
-            scope.setContext(value: context ?? [:], key: "link")
-        }
+    func didFailDeleteAccount(error: InfomaniakLoginError) {
+        SentrySDK.capture(error: error)
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarErrorAccountDeletionErrorWhileDeleting)
     }
 }

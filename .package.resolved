@@ -167,8 +167,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login.git",
       "state" : {
-        "revision" : "73a0c2586dae7c97ee2888e5a2ca9fee267fb53c",
-        "version" : "2.0.0"
+        "revision" : "b1336feaf2f71924d559364c074b7130cf357882",
+        "version" : "2.1.0"
       }
     },
     {
