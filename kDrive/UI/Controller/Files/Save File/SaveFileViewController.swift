@@ -378,8 +378,10 @@ extension SaveFileViewController: SelectDriveDelegate {
 
 extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
-        userPreferredPhotoFormat = format
-        setItemProviders()
+        if userPreferredPhotoFormat != format {
+            userPreferredPhotoFormat = format
+            setItemProviders()
+        }
     }
 }
 
