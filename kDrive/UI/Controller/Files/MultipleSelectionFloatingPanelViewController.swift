@@ -73,6 +73,9 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             actions = FloatingPanelAction.selectAllActions
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
             actions = FloatingPanelAction.multipleSelectionBulkActions
+            if files.contains(where: { $0.parentId != files.first?.parentId }) {
+                actions.removeAll { $0 == .download }
+            }
         } else {
             actions = FloatingPanelAction.multipleSelectionActions
         }
