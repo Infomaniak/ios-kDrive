@@ -87,7 +87,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
             setEnabled(!filesAreDirectory)
         } else if action == .download {
             if let archiveId = archiveId {
-                observeProgress(true, archiveId: archiveId)
+                observeProgress(showProgress, archiveId: archiveId)
             } else {
                 setProgress(showProgress ? -1 : nil)
             }
