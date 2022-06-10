@@ -16,9 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import UIKit
+import Sentry
 
 class ParameterTableViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
@@ -31,6 +33,7 @@ class ParameterTableViewController: UITableViewController {
         case wifi
         case storage
         case about
+        case deleteAccount
 
         var title: String {
             switch self {
@@ -48,6 +51,8 @@ class ParameterTableViewController: UITableViewController {
                 return KDriveResourcesStrings.Localizable.manageStorageTitle
             case .about:
                 return KDriveResourcesStrings.Localizable.aboutTitle
+            case .deleteAccount:
+                return KDriveResourcesStrings.Localizable.deleteMyAccount
             }
         }
 
@@ -61,7 +66,7 @@ class ParameterTableViewController: UITableViewController {
                 return "notificationsSegue"
             case .security:
                 return "securitySegue"
-            case .wifi, .storage:
+            case .wifi, .storage, .deleteAccount:
                 return nil
             case .about:
                 return "aboutSegue"
@@ -136,7 +141,7 @@ class ParameterTableViewController: UITableViewController {
                 UserDefaults.shared.isWifiOnly = sender.isOn
             }
             return cell
-        case .security, .storage, .about:
+        case .security, .storage, .about, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == tableContent.count - 1)
             cell.titleLabel.text = row.title
@@ -146,10 +151,19 @@ class ParameterTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let row = tableContent[indexPath.row]
+        tableView.deselectRow(at: indexPath, animated: true)
         if let segueIdentifier = row.segue {
             performSegue(withIdentifier: segueIdentifier, sender: self)
         } else if row == .storage {
             navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
+        } else if row == .deleteAccount {
+            let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
+                delegate: self,
+                accessToken: driveFileManager.apiFetcher.currentToken?.accessToken,
+                navBarColor: KDriveResourcesAsset.backgroundColor.color,
+                navBarButtonColor: KDriveResourcesAsset.infomaniakColor.color
+            )
+            navigationController?.present(deleteAccountViewController, animated: true)
         }
     }
 
@@ -169,5 +183,26 @@ class ParameterTableViewController: UITableViewController {
             return
         }
         self.driveFileManager = driveFileManager
+    }
+}
+
+extension ParameterTableViewController: DeleteAccountDelegate {
+    func didCompleteDeleteAccount() {
+        AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
+        if let nextAccount = AccountManager.instance.accounts.first {
+            AccountManager.instance.switchAccount(newAccount: nextAccount)
+            (UIApplication.shared.delegate as? AppDelegate)?.refreshCacheData(preload: true, isSwitching: true)
+            driveFileManager = AccountManager.instance.currentDriveFileManager
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
+        } else {
+            SentrySDK.setUser(nil)
+            tabBarController?.present(OnboardingViewController.instantiate(), animated: true)
+        }
+        AccountManager.instance.saveAccounts()
+    }
+
+    func didFailDeleteAccount(error: InfomaniakLoginError) {
+        SentrySDK.capture(error: error)
+        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarErrorAccountDeletionErrorWhileDeleting)
     }
 }
