@@ -218,7 +218,9 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
             if action == .download {
                 if let downloadedArchiveUrl = self.downloadedArchiveUrl {
                     // Present from root view controller if the panel is no longer presented
-                    let viewController = self.view.window != nil ? self : UIApplication.shared.windows.first?.rootViewController
+                    let viewController = self.view.window != nil
+                    ? self
+                    : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
                     viewController?.present(documentExportViewController, animated: true)
                 }

@@ -94,7 +94,9 @@ public class FileActionsHelper {
 
     #if !ISEXTENSION
     public static func save(file: File, from viewController: UIViewController? = nil) {
-        let presenterViewController = viewController != nil ? viewController : UIApplication.shared.windows.first?.rootViewController
+        let presenterViewController = viewController != nil
+        ? viewController
+        : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
         switch file.convertedType {
         case .image:
             saveMedia(url: file.localUrl,
