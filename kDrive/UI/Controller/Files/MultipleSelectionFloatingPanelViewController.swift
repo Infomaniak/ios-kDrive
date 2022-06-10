@@ -116,8 +116,10 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 if downloadInProgress,
                    let currentArchiveId = currentArchiveId,
                    let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
+                    group.enter()
                     let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
                         operation.cancel()
+                        group.leave()
                     }
                     present(alert, animated: true)
                 } else {
