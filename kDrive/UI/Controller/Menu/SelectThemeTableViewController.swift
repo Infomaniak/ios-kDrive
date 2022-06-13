@@ -29,7 +29,7 @@ class SelectThemeTableViewController: UITableViewController {
 
         title = KDriveResourcesStrings.Localizable.themeSettingsTitle
 
-        tableView.register(cellView: ThemeSelectionTableViewCell.self)
+        tableView.register(cellView: SelectionTableViewCell.self)
         tableView.separatorColor = .clear
         tableView.allowsMultipleSelection = false
 
@@ -50,12 +50,12 @@ class SelectThemeTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(type: ThemeSelectionTableViewCell.self, for: indexPath)
+        let cell = tableView.dequeueReusableCell(type: SelectionTableViewCell.self, for: indexPath)
         let currentTheme = tableContent[indexPath.row]
         if currentTheme == selectedTheme {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
-        cell.themeLabel.text = currentTheme.selectionTitle
+        cell.label.text = currentTheme.selectionTitle
         return cell
     }
 

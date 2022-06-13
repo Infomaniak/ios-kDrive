@@ -20,7 +20,7 @@ import Foundation
 import kDriveResources
 import RealmSwift
 
-@objc public enum PhotoSyncMode: Int, RealmEnum {
+public enum PhotoSyncMode: Int, PersistableEnum {
     case new = 0
     case all = 1
     case fromDate = 2
@@ -38,19 +38,31 @@ import RealmSwift
 }
 
 public class PhotoSyncSettings: Object {
-    @objc public dynamic var userId: Int = -1
-    @objc public dynamic var driveId: Int = -1
-    @objc public dynamic var parentDirectoryId: Int = -1
-    @objc public dynamic var lastSync = Date(timeIntervalSince1970: 0)
-    @objc public dynamic var syncMode: PhotoSyncMode = .new
-    @objc public dynamic var fromDate = Date()
-    @objc public dynamic var syncPicturesEnabled = true
-    @objc public dynamic var syncVideosEnabled = true
-    @objc public dynamic var syncScreenshotsEnabled = true
-    @objc public dynamic var createDatedSubFolders = false
-    @objc public dynamic var deleteAssetsAfterImport = false
+    @Persisted public var userId: Int = -1
+    @Persisted public var driveId: Int = -1
+    @Persisted public var parentDirectoryId: Int = -1
+    @Persisted public var lastSync = Date(timeIntervalSince1970: 0)
+    @Persisted public var syncMode: PhotoSyncMode = .new
+    @Persisted public var fromDate = Date()
+    @Persisted public var syncPicturesEnabled = true
+    @Persisted public var syncVideosEnabled = true
+    @Persisted public var syncScreenshotsEnabled = true
+    @Persisted public var createDatedSubFolders = false
+    @Persisted public var deleteAssetsAfterImport = false
+    @Persisted public var photoFormat: PhotoFileFormat = .jpg
 
-    public init(userId: Int, driveId: Int, parentDirectoryId: Int, lastSync: Date, syncMode: PhotoSyncMode, fromDate: Date, syncPictures: Bool, syncVideos: Bool, syncScreenshots: Bool, createDatedSubFolders: Bool, deleteAssetsAfterImport: Bool) {
+    public init(userId: Int,
+                driveId: Int,
+                parentDirectoryId: Int,
+                lastSync: Date,
+                syncMode: PhotoSyncMode,
+                fromDate: Date,
+                syncPictures: Bool,
+                syncVideos: Bool,
+                syncScreenshots: Bool,
+                createDatedSubFolders: Bool,
+                deleteAssetsAfterImport: Bool,
+                photoFormat: PhotoFileFormat) {
         self.userId = userId
         self.driveId = driveId
         self.parentDirectoryId = parentDirectoryId
@@ -62,6 +74,7 @@ public class PhotoSyncSettings: Object {
         self.syncScreenshotsEnabled = syncScreenshots
         self.createDatedSubFolders = createDatedSubFolders
         self.deleteAssetsAfterImport = deleteAssetsAfterImport
+        self.photoFormat = photoFormat
     }
 
     override public init() {}
@@ -80,6 +93,7 @@ public class PhotoSyncSettings: Object {
             createDatedSubFolders == settings.createDatedSubFolders &&
             deleteAssetsAfterImport == settings.deleteAssetsAfterImport &&
             syncMode == settings.syncMode &&
-            fromDate == settings.fromDate
+            fromDate == settings.fromDate &&
+            photoFormat == settings.photoFormat
     }
 }

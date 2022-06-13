@@ -712,7 +712,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cuo-YB-vAU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="8778" y="1669"/>
+            <point key="canvasLocation" x="8855" y="1669"/>
         </scene>
         <!--Select Theme Table View Controller-->
         <scene sceneID="pbm-gZ-Aoh">
@@ -764,17 +764,17 @@
             <size key="intrinsicContentSize" width="66.5" height="24"/>
         </designable>
         <designable name="Bwo-OH-mV3">
-            <size key="intrinsicContentSize" width="190" height="20.5"/>
+            <size key="intrinsicContentSize" width="852.5" height="20.5"/>
         </designable>
         <designable name="Let-jx-exJ">
-            <size key="intrinsicContentSize" width="196" height="32"/>
+            <size key="intrinsicContentSize" width="123" height="30"/>
         </designable>
         <designable name="Orz-m0-bIR">
             <size key="intrinsicContentSize" width="188.5" height="24"/>
         </designable>
         <designable name="SeG-hp-Rwt"/>
         <designable name="Yth-Zq-eKV">
-            <size key="intrinsicContentSize" width="134.5" height="20.5"/>
+            <size key="intrinsicContentSize" width="610.5" height="20.5"/>
         </designable>
         <designable name="ahf-mt-ZbI">
             <size key="intrinsicContentSize" width="987" height="20.5"/>
@@ -809,7 +809,7 @@
             <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

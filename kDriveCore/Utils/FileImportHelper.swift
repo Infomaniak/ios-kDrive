@@ -21,6 +21,7 @@ import Foundation
 import kDriveResources
 import PDFKit
 import Photos
+import RealmSwift
 import QuickLookThumbnailing
 import VisionKit
 
@@ -45,7 +46,7 @@ public class ImportedFile {
     }
 }
 
-public enum PhotoFileFormat: Int, CaseIterable {
+public enum PhotoFileFormat: Int, CaseIterable, PersistableEnum {
     case jpg, heic, png
 
     public var title: String {
@@ -53,7 +54,18 @@ public enum PhotoFileFormat: Int, CaseIterable {
         case .jpg:
             return "JPG"
         case .heic:
-            return "HEIF"
+            return "HEIC"
+        case .png:
+            return "PNG"
+        }
+    }
+
+    public var selectionTitle: String {
+        switch self {
+        case .jpg:
+            return "JPG \(KDriveResourcesStrings.Localizable.savePhotoJpegDetail)"
+        case .heic:
+            return "HEIC"
         case .png:
             return "PNG"
         }
@@ -122,7 +134,9 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
-    public func importItems(_ itemProviders: [NSItemProvider], completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
+    public func importItems(_ itemProviders: [NSItemProvider],
+                            userPreferredPhotoFormat: PhotoFileFormat? = nil,
+                            completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
         let perItemUnitCount: Int64 = 10
         let progress = Progress(totalUnitCount: Int64(itemProviders.count) * perItemUnitCount)
         let dispatchGroup = DispatchGroup()
@@ -164,7 +178,8 @@ public class FileImportHelper {
                     dispatchGroup.leave()
                 }
                 progress.addChild(childProgress, withPendingUnitCount: perItemUnitCount)
-            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider) {
+            } else if let typeIdentifier = getPreferredTypeIdentifier(for: itemProvider,
+                                                                      userPreferredPhotoFormat: userPreferredPhotoFormat) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
                     switch result {
                     case .success((let filename, let fileURL)):
@@ -310,12 +325,16 @@ public class FileImportHelper {
         }
     }
 
-    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider) -> String? {
-        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) {
-            return UTI.heic.identifier
-        } else if itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
-            return UTI.jpeg.identifier
-        } else if !itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
+    private func getPreferredTypeIdentifier(for itemProvider: NSItemProvider, userPreferredPhotoFormat: PhotoFileFormat?) -> String? {
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier) {
+            if let userPreferredPhotoFormat = userPreferredPhotoFormat,
+               itemProvider.hasItemConformingToTypeIdentifier(userPreferredPhotoFormat.uti.identifier) {
+                return userPreferredPhotoFormat.uti.identifier
+            }
+            return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
+        }
+
+        if !itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
             // We cannot upload folders so we ignore them
             return itemProvider.registeredTypeIdentifiers.first
         } else {

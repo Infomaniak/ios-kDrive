@@ -27,6 +27,8 @@ class PhotoPickerDelegate: NSObject {
     var driveFileManager: DriveFileManager!
     var currentDirectory: File!
 
+    weak var viewController: UIViewController?
+
     @MainActor
     private func handleError(_ error: Error) {
         DDLogError("Error while uploading file: \(error)")
@@ -87,24 +89,11 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
         picker.dismiss(animated: true)
 
         if !results.isEmpty {
-            Task {
-                await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarProcessingUploads)
-            }
-            _ = FileImportHelper.instance.importItems(results.map(\.itemProvider)) { importedFiles, errorCount in
-                Task {
-                    if errorCount > 0 {
-                        await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarUploadError(errorCount))
-                    }
-                    guard !importedFiles.isEmpty else {
-                        return
-                    }
-                    do {
-                        try FileImportHelper.instance.upload(files: importedFiles, in: self.currentDirectory, drive: self.driveFileManager.drive)
-                        await self.showUploadSnackbar(count: importedFiles.count, filename: importedFiles[0].name)
-                    } catch {
-                        await self.handleError(error)
-                    }
-                }
+            let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
+            if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
+                saveViewController.itemProviders = results.map(\.itemProvider)
+                saveViewController.selectedDirectory = currentDirectory
+                viewController?.present(saveNavigationViewController, animated: true)
             }
         }
     }

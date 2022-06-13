@@ -102,7 +102,23 @@ public class PhotoLibraryUploader {
         guard let resource = bestResource(for: asset) else {
             return nil
         }
+
         let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
+
+        if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
+            do {
+                if let jpegData = try await getJpegData(for: resource) {
+                    try jpegData.write(to: targetURL)
+                    return targetURL
+                }
+            } catch {
+                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
+                breadcrumb.message = error.localizedDescription
+                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+            }
+            return nil
+        }
+
         do {
             try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
             return targetURL
@@ -111,6 +127,30 @@ public class PhotoLibraryUploader {
             breadcrumb.message = error.localizedDescription
             SentrySDK.addBreadcrumb(crumb: breadcrumb)
             return nil
+        }
+    }
+
+    func getJpegData(for resource: PHAssetResource) async throws -> Data? {
+        return try await withCheckedThrowingContinuation { continuation in
+            var imageData = Data()
+            PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
+                // Get all pieces of data
+                imageData.append(data)
+            } completionHandler: { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                if let image = CIImage(data: imageData) {
+                    let context = CIContext()
+                    let jpegData = context.jpegRepresentation(of: image,
+                                                              colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!)
+                    continuation.resume(returning: jpegData)
+                } else {
+                    continuation.resume(returning: nil)
+                }
+            }
         }
     }
 
@@ -197,7 +237,13 @@ public class PhotoLibraryUploader {
                 var correctName = "No-name-\(Date().timeIntervalSince1970)"
                 var fileExtension = ""
                 if let resource = bestResource(for: asset) {
-                    fileExtension = (resource.originalFilename as NSString).pathExtension
+                    if resource.uniformTypeIdentifier == UTI.heic.identifier,
+                       let preferredFilenameExtension = settings.photoFormat.uti.preferredFilenameExtension {
+                        fileExtension = preferredFilenameExtension
+                    } else {
+                        fileExtension = UTI(resource.uniformTypeIdentifier)?.preferredFilenameExtension
+                            ?? (resource.originalFilename as NSString).pathExtension
+                    }
                 }
                 if let creationDate = asset.creationDate {
                     correctName = dateFormatter.string(from: creationDate)

@@ -17,29 +17,11 @@
  */
 
 import InfomaniakCore
-import kDriveResources
+import kDriveCore
 import UIKit
 
-class ThemeSelectionTableViewCell: InsetTableViewCell {
-    @IBOutlet weak var themeLabel: UILabel!
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-    }
-
-    override func prepareForReuse() {
-        super.prepareForReuse()
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
-        if selected {
-            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
-            contentInsetView.borderWidth = 2
-        } else {
-            contentInsetView.borderWidth = 0
-        }
+class PhotoFormatTableViewCell: InsetTableViewCell {
+    func configure(with photoFileFormat: PhotoFileFormat) {
+        self.titleLabel.text = photoFileFormat.title
     }
 }

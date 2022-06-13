@@ -36,7 +36,7 @@ class ActionNavigationController: TitleSizeAdjustingNavigationController {
         let saveFileViewController = SaveFileViewController.instantiate(driveFileManager: accountManager.currentDriveFileManager)
 
         if let itemProviders = (self.extensionContext?.inputItems as? [NSExtensionItem])?.compactMap(\.attachments).flatMap({ $0 }) {
-            saveFileViewController.setItemProviders(itemProviders)
+            saveFileViewController.itemProviders = itemProviders
             viewControllers = [saveFileViewController]
         } else {
             // No items found

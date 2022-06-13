@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="hLG-Tj-0NS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="hLG-Tj-0NS">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -125,6 +125,45 @@
             </objects>
             <point key="canvasLocation" x="1594" y="-550"/>
         </scene>
+        <!--Sélectionner un format de photo-->
+        <scene sceneID="kvU-CS-18l">
+            <objects>
+                <viewController storyboardIdentifier="SelectImageFormatViewController" id="pj3-xM-nmc" customClass="SelectPhotoFormatViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="6Ra-Sm-OfL">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="nwh-Is-go9">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <color key="backgroundColor" name="backgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="pj3-xM-nmc" id="5iz-I0-lYb"/>
+                                    <outlet property="delegate" destination="pj3-xM-nmc" id="llC-0k-UpU"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="2fO-wu-MvI"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="nwh-Is-go9" firstAttribute="bottom" secondItem="6Ra-Sm-OfL" secondAttribute="bottom" id="LhO-rI-rLe"/>
+                            <constraint firstAttribute="top" secondItem="nwh-Is-go9" secondAttribute="top" id="Prb-b2-exs"/>
+                            <constraint firstAttribute="trailing" secondItem="nwh-Is-go9" secondAttribute="trailing" id="bRa-eY-TE0"/>
+                            <constraint firstItem="nwh-Is-go9" firstAttribute="leading" secondItem="6Ra-Sm-OfL" secondAttribute="leading" id="hww-Aw-yhb"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Sélectionner un format de photo" id="YRC-hf-LiG">
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="selectPhotoFormat"/>
+                        </userDefinedRuntimeAttributes>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="tableView" destination="nwh-Is-go9" id="ou6-UX-Ljm"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="kEe-Ye-IGX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1593" y="96"/>
+        </scene>
         <!--Enregistrer sur le kDrive-->
         <scene sceneID="KPI-yJ-YP0">
             <objects>
@@ -173,7 +212,7 @@
     </scenes>
     <designables>
         <designable name="gLb-rt-aBR">
-            <size key="intrinsicContentSize" width="85" height="32"/>
+            <size key="intrinsicContentSize" width="57" height="34"/>
         </designable>
     </designables>
     <resources>

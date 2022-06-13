@@ -51,6 +51,8 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
 
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         delegate = self
+
+        photoPickerDelegate.viewController = self
     }
 
     private func configureRootViewController(at index: Int, with viewModel: FileListViewModel) {

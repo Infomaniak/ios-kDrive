@@ -5,7 +5,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Tue, 07 Jun 2022 11:35:29 +0200
+ * Exported at: Mon, 13 Jun 2022 09:58:06 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1752,7 +1752,7 @@
 "snackBarCategoryDeleted" = "Kategorie erfolgreich gelöscht";
 
 /* loco:629f1b5bfc67572038545e23 */
-"snackBarErrorAccountDeletion-Error-while-deleting" = "Fehler beim Löschen des Kontos";
+"snackBarErrorAccountDeletion" = "Fehler beim Löschen des Kontos";
 
 /* loco:619f6999f44e9d3a394a6d62 */
 "snackBarUploadError" = "Eine Datei konnte nicht importiert werden";

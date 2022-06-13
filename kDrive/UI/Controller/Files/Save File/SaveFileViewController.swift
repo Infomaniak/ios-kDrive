@@ -30,6 +30,7 @@ class SaveFileViewController: UIViewController {
         case fileType
         case driveSelection
         case directorySelection
+        case photoFormatOption
         case importing
     }
 
@@ -39,7 +40,24 @@ class SaveFileViewController: UIViewController {
     private var originalUserId = AccountManager.instance.currentUserId
     var selectedDriveFileManager: DriveFileManager?
     var selectedDirectory: File?
+    var photoFormat = PhotoFileFormat.jpg
+    var itemProviders: [NSItemProvider]? {
+        didSet {
+            setItemProviders()
+        }
+    }
     var items = [ImportedFile]()
+    var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
+        didSet {
+            UserDefaults.shared.importPhotoFormat = userPreferredPhotoFormat
+        }
+    }
+    var itemProvidersContainHeicPhotos: Bool {
+        itemProviders?.contains {
+            $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
+            && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
+        } ?? false
+    }
     private var errorCount = 0
     private var importProgress: Progress?
     private var enableButton = false {
@@ -83,6 +101,7 @@ class SaveFileViewController: UIViewController {
         tableView.register(cellView: FileNameTableViewCell.self)
         tableView.register(cellView: ImportingTableViewCell.self)
         tableView.register(cellView: LocationTableViewCell.self)
+        tableView.register(cellView: PhotoFormatTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.listFloatingButtonPaddingBottom, right: 0)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 50
@@ -120,9 +139,10 @@ class SaveFileViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
-    func setItemProviders(_ itemProviders: [NSItemProvider]) {
+    private func setItemProviders() {
+        guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders) { [weak self] importedFiles, errorCount in
+        importProgress = FileImportHelper.instance.importItems(itemProviders,userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
             self?.errorCount = errorCount
             DispatchQueue.main.async {
@@ -147,6 +167,10 @@ class SaveFileViewController: UIViewController {
                 newSections.append(contentsOf: [.fileName, .driveSelection])
             } else {
                 newSections.append(contentsOf: [.fileName, .driveSelection, .directorySelection])
+            }
+
+            if itemProvidersContainHeicPhotos {
+                newSections.append(.photoFormatOption)
             }
         }
         sections = newSections
@@ -237,6 +261,11 @@ extension SaveFileViewController: UITableViewDataSource {
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.configure(with: selectedDirectory, drive: selectedDriveFileManager!.drive)
             return cell
+        case .photoFormatOption:
+            let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+            cell.configure(with: userPreferredPhotoFormat)
+            return cell
         case .importing:
             let cell = tableView.dequeueReusableCell(type: ImportingTableViewCell.self, for: indexPath)
             cell.importationProgressView.observedProgress = importProgress
@@ -254,6 +283,8 @@ extension SaveFileViewController: UITableViewDataSource {
             return HomeTitleView.instantiate(title: "kDrive")
         case .directorySelection:
             return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.allPathTitle)
+        case .photoFormatOption:
+            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.photoFormatTitle)
         default:
             return nil
         }
@@ -303,6 +334,10 @@ extension SaveFileViewController: UITableViewDelegate {
             guard let driveFileManager = selectedDriveFileManager else { return }
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, startDirectory: selectedDirectory, delegate: self)
             present(selectFolderNavigationController, animated: true)
+        case .photoFormatOption:
+            let selectPhotoFormatViewController = SelectPhotoFormatViewController.instantiate(selectedFormat: userPreferredPhotoFormat)
+            selectPhotoFormatViewController.delegate = self
+            navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
         default:
             break
         }
@@ -331,8 +366,22 @@ extension SaveFileViewController: SelectDriveDelegate {
             self.selectedDriveFileManager = selectedDriveFileManager
             selectedDirectory = selectedDriveFileManager.getCachedRootFile()
             sections = [.fileName, .driveSelection, .directorySelection]
+            if itemProvidersContainHeicPhotos {
+                sections.append(.photoFormatOption)
+            }
         }
         updateButton()
+    }
+}
+
+// MARK: - SelectPhotoFormatDelegate
+
+extension SaveFileViewController: SelectPhotoFormatDelegate {
+    func didSelectPhotoFormat(_ format: PhotoFileFormat) {
+        if userPreferredPhotoFormat != format {
+            userPreferredPhotoFormat = format
+            setItemProviders()
+        }
     }
 }
 

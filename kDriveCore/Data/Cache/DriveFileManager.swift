@@ -35,7 +35,7 @@ public class DriveFileManager {
         public let cacheDirectoryURL: URL
         public let openInPlaceDirectoryURL: URL?
         public let rootID = 1
-        public let currentUploadDbVersion: UInt64 = 11
+        public let currentUploadDbVersion: UInt64 = 12
         public let currentVersionCode = 1
         public lazy var migrationBlock = { [weak self] (migration: Migration, oldSchemaVersion: UInt64) in
             guard let strongSelf = self else { return }
@@ -56,6 +56,12 @@ public class DriveFileManager {
                 if oldSchemaVersion < 10 {
                     migration.enumerateObjects(ofType: UploadFile.className()) { _, newObject in
                         newObject!["conflictOption"] = ConflictOption.replace.rawValue
+                    }
+                }
+
+                if oldSchemaVersion < 12 {
+                    migration.enumerateObjects(ofType: PhotoSyncSettings.className()) { _, newObject in
+                        newObject!["photoFormat"] = PhotoFileFormat.heic.rawValue
                     }
                 }
             }

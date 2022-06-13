@@ -48,6 +48,7 @@ extension UserDefaults.Keys {
     static let homeListStyle = UserDefaults.Keys(rawValue: "homeListStyle")
     static let selectedHomeIndex = UserDefaults.Keys(rawValue: "selectedHomeIndex")
     static let fpStorageVersion = UserDefaults.Keys(rawValue: "fpStorageVersion")
+    static let importPhotoFormat = UserDefaults.Keys(rawValue: "importPhotoFormat")
 }
 
 public extension UserDefaults {
@@ -333,6 +334,15 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.fpStorageVersion))
+        }
+    }
+
+    var importPhotoFormat: PhotoFileFormat {
+        get {
+            return PhotoFileFormat(rawValue: integer(forKey: key(.importPhotoFormat))) ?? .jpg
+        }
+        set {
+            set(newValue.rawValue, forKey: key(.importPhotoFormat))
         }
     }
 }
