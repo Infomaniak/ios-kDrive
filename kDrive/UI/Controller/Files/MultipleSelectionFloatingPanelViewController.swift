@@ -221,6 +221,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     let viewController = self.view.window != nil
                     ? self
                     : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
+                    guard viewController as? UIDocumentPickerViewController == nil else { return }
                     let documentExportViewController = UIDocumentPickerViewController(url: downloadedArchiveUrl, in: .exportToService)
                     viewController?.present(documentExportViewController, animated: true)
                 }

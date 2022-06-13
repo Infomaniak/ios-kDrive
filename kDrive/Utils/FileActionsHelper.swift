@@ -97,6 +97,7 @@ public class FileActionsHelper {
         let presenterViewController = viewController != nil
         ? viewController
         : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
+        guard presenterViewController as? UIDocumentPickerViewController == nil else { return }
         switch file.convertedType {
         case .image:
             saveMedia(url: file.localUrl,
