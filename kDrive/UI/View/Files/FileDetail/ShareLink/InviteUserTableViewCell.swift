@@ -24,6 +24,7 @@ import UIKit
 protocol SearchUserDelegate: AnyObject {
     func didSelect(shareable: Shareable)
     func didSelect(email: String)
+    func didCancel()
 }
 
 class InviteUserTableViewCell: InsetTableViewCell {
@@ -71,6 +72,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     func configureDropDown() {
         dropDown.anchorView = dropDownAnchorView
+        dropDown.direction = .bottom
         dropDown.cellHeight = 65
         dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
 
@@ -88,6 +90,10 @@ class InviteUserTableViewCell: InsetTableViewCell {
         }
         dropDown.selectionAction = { [unowned self] index, _ in
             selectItem(at: index)
+        }
+
+        dropDown.cancelAction = { [weak self] in
+            self?.delegate?.didCancel()
         }
 
         dropDown.dataSource = results.map(\.displayName)
@@ -132,11 +138,16 @@ class InviteUserTableViewCell: InsetTableViewCell {
         if let email = email {
             if index == 0 {
                 delegate?.didSelect(email: email)
+                ignoredEmails.append(email)
             } else {
-                delegate?.didSelect(shareable: results[index - 1])
+                let shareable = results[index - 1]
+                delegate?.didSelect(shareable: shareable)
+                ignoredShareables.append(shareable)
             }
         } else {
+            let shareable = results[index]
             delegate?.didSelect(shareable: results[index])
+            ignoredShareables.append(shareable)
         }
     }
 
@@ -156,12 +167,8 @@ extension InviteUserTableViewCell: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Select first result on text field return
         if !results.isEmpty || email != nil {
-            // Hide the dropdown to prevent UI glitches
-            dropDown.hide()
             selectItem(at: 0)
-            return true
-        } else {
-            return false
         }
+        return false
     }
 }

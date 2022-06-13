@@ -332,4 +332,8 @@ extension ShareAndRightsViewController: SearchUserDelegate {
     func didSelect(email: String) {
         showInviteView(emails: [email])
     }
+
+    func didCancel() {
+        view.endEditing(true)
+    }
 }

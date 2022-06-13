@@ -137,13 +137,15 @@ class InviteUserViewController: UIViewController {
 
         emptyInvitation = emails.isEmpty && userIds.isEmpty && teamIds.isEmpty
 
-        if emptyInvitation {
+        if emptyInvitation && rows.contains(.invited) {
             rows = [.addUser, .rights, .message]
-        } else {
+            tableView.deleteRows(at: [IndexPath(item: 0, section: 0)], with: .automatic)
+        } else if !rows.contains(.invited) {
             rows = [.invited, .addUser, .rights, .message]
+            tableView.insertRows(at: [IndexPath(item: 0, section: 0)], with: .automatic)
+        } else {
+            tableView.reloadRows(at: [IndexPath(item: 0, section: 0)], with: .automatic)
         }
-
-        tableView.reloadSections([0], with: .automatic)
     }
 
     class func instantiateInNavigationController() -> TitleSizeAdjustingNavigationController {
@@ -293,14 +295,25 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
 extension InviteUserViewController: SearchUserDelegate {
     func didSelect(shareable: Shareable) {
         shareables.append(shareable)
-        ignoredShareables.append(shareable)
         reloadInvited()
+        scrollTableViewToLastAddedUser()
     }
 
     func didSelect(email: String) {
         emails.append(email)
         ignoredEmails.append(email)
         reloadInvited()
+        scrollTableViewToLastAddedUser()
+    }
+
+    func didCancel() {
+        view.endEditing(true)
+    }
+
+    private func scrollTableViewToLastAddedUser() {
+        if let invitedAddUserRowIndex = rows.firstIndex(of: .addUser) {
+            tableView.scrollToRow(at: IndexPath(row: invitedAddUserRowIndex, section: 0), at: .middle, animated: true)
+        }
     }
 }
 
