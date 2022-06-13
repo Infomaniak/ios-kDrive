@@ -92,7 +92,12 @@ public class FileActionsHelper {
         }
     }
 
-    public static func save(file: File, from viewController: UIViewController) {
+    #if !ISEXTENSION
+    public static func save(file: File, from viewController: UIViewController? = nil) {
+        let presenterViewController = viewController != nil
+        ? viewController
+        : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
+        guard presenterViewController as? UIDocumentPickerViewController == nil else { return }
         switch file.convertedType {
         case .image:
             saveMedia(url: file.localUrl,
@@ -104,12 +109,13 @@ public class FileActionsHelper {
                       successMessage: KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation)
         case .folder:
             let documentExportViewController = UIDocumentPickerViewController(url: file.temporaryUrl, in: .exportToService)
-            viewController.present(documentExportViewController, animated: true)
+            presenterViewController?.present(documentExportViewController, animated: true)
         default:
             let documentExportViewController = UIDocumentPickerViewController(url: file.localUrl, in: .exportToService)
-            viewController.present(documentExportViewController, animated: true)
+            presenterViewController?.present(documentExportViewController, animated: true)
         }
     }
+    #endif
 
     private static func saveMedia(url: URL, type: PHAssetMediaType, successMessage: String) {
         Task {

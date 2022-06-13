@@ -439,11 +439,9 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
                 present(alert, animated: true)
             } else {
-                downloadFile(action: action, indexPath: indexPath) { [weak self] in
-                    guard let self = self else { return }
-                    if let file = self.file {
-                        FileActionsHelper.save(file: file, from: self)
-                    }
+                downloadFile(action: action, indexPath: indexPath) { [weak self, file] in
+                    guard let file = file else { return }
+                    FileActionsHelper.save(file: file, from: self)
                 }
             }
         case .move:
@@ -579,10 +577,11 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
     }
 
     private func downloadFile(action: FloatingPanelAction, indexPath: IndexPath, completion: @escaping () -> Void) {
+        guard let observerViewController = UIApplication.shared.windows.first?.rootViewController else { return }
         downloadAction = action
         setLoading(true, action: action, at: indexPath)
         downloadObserver?.cancel()
-        downloadObserver = DownloadQueue.instance.observeFileDownloaded(self, fileId: file.id) { [weak self] _, error in
+        downloadObserver = DownloadQueue.instance.observeFileDownloaded(observerViewController, fileId: file.id) { [weak self] _, error in
             self?.downloadAction = nil
             self?.setLoading(true, action: action, at: indexPath)
             DispatchQueue.main.async {

@@ -41,6 +41,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     private static let currentStateVersion = 2
     private static let appStateVersionKey = "appStateVersionKey"
 
+    var topMostViewController: UIViewController? {
+        var topViewController = window?.rootViewController
+        while let presentedViewController = topViewController?.presentedViewController {
+            topViewController = presentedViewController
+        }
+        return topViewController
+    }
+
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
