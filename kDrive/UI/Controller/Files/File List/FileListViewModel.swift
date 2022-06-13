@@ -191,7 +191,7 @@ class FileListViewModel: SelectDelegate {
         realmObservationToken?.invalidate()
         realmObservationToken = files
             .observe(keyPaths: FileViewModel.observedProperties, on: .main) { [weak self] change in
-                guard let self = self else { return }
+                guard let self = self, !self.currentDirectory.isInvalidated else { return }
                 switch change {
                 case .initial(let results):
                     self.files = AnyRealmCollection(results)
