@@ -115,7 +115,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 self.success = isSuccess
             }
         case .download:
-            if files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) || files.count <= 1 {
+            if !allItemsSelected && (files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) || files.count <= 1) {
                 for file in files {
                     if file.isDownloaded {
                         FileActionsHelper.save(file: file, from: self)
