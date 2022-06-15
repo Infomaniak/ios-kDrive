@@ -144,6 +144,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     group.enter()
                     let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
                         operation.cancel()
+                        self.downloadError = .taskCancelled
+                        self.success = false
                         group.leave()
                     }
                     present(alert, animated: true)
@@ -205,7 +207,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     guard self.addAction else { break }
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
                 case .download:
-                    guard self.files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) else { break }
+                    guard !self.files.isEmpty && self.files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) else { break }
                     if self.files.count <= 1, let file = self.files.first {
                         let message = file.convertedType == .image
                         ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation

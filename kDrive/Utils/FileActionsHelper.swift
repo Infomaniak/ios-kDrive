@@ -124,9 +124,9 @@ public class FileActionsHelper {
         Task {
             do {
                 try await PhotoLibrarySaver.instance.save(url: url, type: type)
-				if let successMessage = successMessage {
-					UIConstants.showSnackBar(message: successMessage)
-				}
+                if let successMessage = successMessage {
+                    UIConstants.showSnackBar(message: successMessage)
+                }
             } catch let error as DriveError where error == .photoLibraryWriteAccessDenied {
                 UIConstants.showSnackBar(message: error.localizedDescription,
                                          action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
