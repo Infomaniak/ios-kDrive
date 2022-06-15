@@ -28,6 +28,12 @@ public enum DriveUserType: String, Codable {
     case main
 }
 
+public enum DriveUserRole: String, Codable {
+    case admin
+    case user
+    case external
+}
+
 public enum UserPermission: String, Codable, CaseIterable {
     case read
     case write
@@ -68,6 +74,7 @@ public class DriveUser: Object, Codable, InfomaniakUser {
     @Persisted private var _avatarUrl: String?
     @Persisted public var displayName: String = ""
     public var type: DriveUserType?
+    public var role: DriveUserRole?
 
     public var avatar: String {
         return !_avatar.isBlank ? _avatar : (_avatarUrl ?? "")
@@ -80,6 +87,7 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _avatarUrl = "avatar_url"
         case displayName = "display_name"
         case type
+        case role
     }
 
     public convenience init(user: InfomaniakCore.UserProfile) {
