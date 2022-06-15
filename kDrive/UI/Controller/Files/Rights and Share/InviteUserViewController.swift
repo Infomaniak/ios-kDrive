@@ -47,7 +47,7 @@ class InviteUserViewController: UIViewController {
         case message
     }
 
-    private var rows = InviteUserRows.allCases
+    private var rows: [InviteUserRows] = [.invited, .addUser, .rights, .message]
     private var newPermission = UserPermission.read
     private var message: String?
     private var emptyInvitation = false
@@ -139,12 +139,15 @@ class InviteUserViewController: UIViewController {
 
         if emptyInvitation && rows.contains(.invited) {
             rows = [.addUser, .rights, .message]
-            tableView.deleteRows(at: [IndexPath(item: 0, section: 0)], with: .automatic)
+            tableView.performBatchUpdates {
+                tableView.deleteRows(at: [IndexPath(row: 0, section: 0)], with: .fade)
+                tableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .fade)
+            }
         } else if !rows.contains(.invited) {
             rows = [.invited, .addUser, .rights, .message]
-            tableView.insertRows(at: [IndexPath(item: 0, section: 0)], with: .automatic)
+            tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
         } else {
-            tableView.reloadRows(at: [IndexPath(item: 0, section: 0)], with: .automatic)
+            tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .fade)
         }
     }
 
