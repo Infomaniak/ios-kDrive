@@ -21,7 +21,7 @@ import InfomaniakCore
 import RealmSwift
 import UIKit
 
-public enum FileActivityType: String, Codable {
+public enum FileActivityType: String, Codable, CaseIterable {
     case fileAccess = "file_access"
     case fileCreate = "file_create"
     case fileRename = "file_rename"
@@ -58,9 +58,9 @@ public enum FileActivityType: String, Codable {
     case fileColorUpdate = "file_color_update"
     case fileColorDelete = "file_color_delete"
 
-    public static var fileActivities: [FileActivityType] {
-        return [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileCategorize, .fileUncategorize, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete]
-    }
+    public static let fileActivities: [FileActivityType] = [.fileCreate, .fileRename, .fileMoveIn, .fileMoveOut, .fileTrash, .fileRestore, .fileDelete, .fileUpdate, .fileCategorize, .fileUncategorize, .fileFavoriteCreate, .fileFavoriteRemove, .fileShareCreate, .fileShareUpdate, .fileShareDelete, .shareLinkCreate, .shareLinkUpdate, .shareLinkDelete, .shareLinkShow, .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete]
+
+    public static let displayedFileActivities: [FileActivityType] = FileActivityType.allCases
 }
 
 public class FileActivity: Object, Decodable {

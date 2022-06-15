@@ -241,8 +241,10 @@ public class DriveApiFetcher: ApiFetcher {
     }
 
     public func fileActivities(file: ProxyFile, page: Int) async throws -> [FileActivity] {
+        var queryItems = [URLQueryItem(name: "with", value: "user")]
+        queryItems.append(contentsOf: FileActivityType.displayedFileActivities.map { URLQueryItem(name: "actions[]", value: $0.rawValue) })
         let endpoint = Endpoint.fileActivities(file: file)
-            .appending(path: "", queryItems: [URLQueryItem(name: "with", value: "user")])
+            .appending(path: "", queryItems: queryItems)
             .paginated(page: page)
         return try await perform(request: authenticatedRequest(endpoint)).data
     }
