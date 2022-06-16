@@ -163,8 +163,14 @@ class PhotoSyncSettingsViewController: UIViewController {
             if driveFileManager != nil && selectedDirectory != nil {
                 sections.append(.syncSettings)
             }
-        } else if PhotoLibrarySaver.isAccessLimited {
-            sections.append(.syncDenied)
+        } else {
+            var limited = false
+            if #available(iOS 14, *) {
+                limited = PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited
+            }
+            if limited || PHPhotoLibrary.authorizationStatus() == .denied {
+                sections.append(.syncDenied)
+            }
         }
     }
 

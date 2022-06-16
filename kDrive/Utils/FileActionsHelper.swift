@@ -123,20 +123,18 @@ public class FileActionsHelper {
                 DispatchQueue.main.async {
                     UIConstants.showSnackBar(message: successMessage)
                 }
+            } catch let error as DriveError where error == DriveError.photoLibraryWriteAccessDenied {
+                UIConstants.showSnackBar(message: error.localizedDescription,
+                                         duration: .lengthLong,
+                                         action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
+                    guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
+                          UIApplication.shared.canOpenURL(settingsURL) else { return }
+                    UIApplication.shared.open(settingsURL)
+                })
             } catch {
                 DDLogError("Cannot save media: \(error)")
                 DispatchQueue.main.async {
-                    if PhotoLibrarySaver.isAccessLimited {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPhotoLibraryAccessLimited,
-                                                 duration: .lengthLong,
-                                                 action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
-                            guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
-                                  UIApplication.shared.canOpenURL(settingsURL) else { return }
-                            UIApplication.shared.open(settingsURL)
-                        })
-                    } else {
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                    }
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
                 }
             }
         }
