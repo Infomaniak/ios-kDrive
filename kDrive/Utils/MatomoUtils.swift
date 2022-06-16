@@ -96,6 +96,7 @@ class MatomoUtils {
             MatomoUtils.track(eventWithCategory: .photoSync, name: "importScreenshots", value: settings.syncScreenshotsEnabled)
             MatomoUtils.track(eventWithCategory: .photoSync, name: "createDatedFolders", value: settings.createDatedSubFolders)
             MatomoUtils.track(eventWithCategory: .photoSync, name: "deleteAfterImport", value: settings.deleteAssetsAfterImport)
+            MatomoUtils.track(eventWithCategory: .photoSync, name: "importPhotosIn\(settings.photoFormat.title)")
         }
     }
 
