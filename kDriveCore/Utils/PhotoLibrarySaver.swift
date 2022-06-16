@@ -23,6 +23,14 @@ public class PhotoLibrarySaver: NSObject {
     private let albumName = "kDrive"
     public static let instance = PhotoLibrarySaver()
 
+    public static var isAccessLimited: Bool {
+        var limited = false
+        if #available(iOS 14, *) {
+            limited = PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited
+        }
+        return limited || PHPhotoLibrary.authorizationStatus() == .denied
+    }
+
     public private(set) var assetCollection: PHAssetCollection?
 
     override private init() {

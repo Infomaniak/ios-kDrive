@@ -115,7 +115,6 @@ public class FileActionsHelper {
             presenterViewController?.present(documentExportViewController, animated: true)
         }
     }
-    #endif
 
     private static func saveMedia(url: URL, type: PHAssetMediaType, successMessage: String) {
         Task {
@@ -127,11 +126,22 @@ public class FileActionsHelper {
             } catch {
                 DDLogError("Cannot save media: \(error)")
                 DispatchQueue.main.async {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                    if PhotoLibrarySaver.isAccessLimited {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorPhotoLibraryAccessLimited,
+                                                 duration: .lengthLong,
+                                                 action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
+                            guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
+                                  UIApplication.shared.canOpenURL(settingsURL) else { return }
+                            UIApplication.shared.open(settingsURL)
+                        })
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
+                    }
                 }
             }
         }
     }
+    #endif
 
     // MARK: - Single file or multiselection
 
