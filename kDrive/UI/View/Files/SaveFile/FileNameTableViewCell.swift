@@ -36,10 +36,20 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+
+        let clearButton = UIButton(frame: CGRect(x: 0, y: 0, width: 14, height: 14))
+        clearButton.setImage(KDriveResourcesAsset.close.image, for: .normal)
+        clearButton.addTarget(self, action: #selector(clearTextField), for: .touchUpInside)
+        textField.rightView = clearButton
+        textField.rightViewMode = .whileEditing
     }
 
     @objc func textFieldDidChange() {
         textDidChange?(textField.text)
+    }
+
+    @objc func clearTextField() {
+        textField.text = ""
     }
 
     // MARK: - Text field delegate
