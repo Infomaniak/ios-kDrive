@@ -177,21 +177,10 @@ class PhotoSyncSettingsViewController: UIViewController {
     func updateSections() {
         let previousSections = sections
         updateSectionList()
-        let newCount = sections.count
-        let previousCount = previousSections.count
-        if newCount - previousCount < 0 {
-            if Set(previousSections).intersection(sections).count != sections.count {
-                tableView.performBatchUpdates {
-                    self.tableView.deleteSections(IndexSet(1..<previousCount), with: .fade)
-                    self.tableView.insertSections(IndexSet(1..<2), with: .fade)
-                }
-            } else {
-                // Delete sections
-                tableView.deleteSections(IndexSet(newCount ..< previousCount), with: .fade)
-            }
-        } else {
-            // Insert sections
-            tableView.insertSections(IndexSet(previousCount ..< newCount), with: .fade)
+        let commonSections = Set(previousSections).intersection(sections)
+        tableView.performBatchUpdates {
+            tableView.deleteSections(IndexSet(commonSections.count..<previousSections.count), with: .fade)
+            tableView.insertSections(IndexSet(commonSections.count..<sections.count), with: .fade)
         }
         // Scroll to bottom
         let lastSection = sections.count - 1
