@@ -19,24 +19,24 @@
 import Foundation
 
 public struct ArchiveBody: Encodable {
-    /// Array of files to exclude from the request; only used when `parentId` is set, meaningless otherwise.
-    var exceptFileIds: [Int]?
     /// Array of files to include in the request; required without `parentId`.
     var fileIds: [Int]?
     /// The directory containing the files to include in the request; required without `fileIds`.
     var parentId: Int?
+    /// Array of files to exclude from the request; only used when `parentId` is set, meaningless otherwise.
+    var exceptFileIds: [Int]?
 
     public init(files: [ProxyFile]) {
-        self.init(exceptFileIds: nil, fileIds: files.map(\.id), parentId: nil)
+        self.init(parentId: nil, exceptFileIds: nil, fileIds: files.map(\.id))
     }
 
     public init(parentId: Int, exceptFileIds: [Int]? = nil) {
-        self.init(exceptFileIds: exceptFileIds, fileIds: nil, parentId: parentId)
+        self.init(parentId: parentId, exceptFileIds: exceptFileIds, fileIds: nil)
     }
 
-    private init(exceptFileIds: [Int]? = nil, fileIds: [Int]? = nil, parentId: Int? = nil) {
-        self.exceptFileIds = exceptFileIds
+    private init(parentId: Int? = nil, exceptFileIds: [Int]? = nil, fileIds: [Int]? = nil) {
         self.fileIds = fileIds
         self.parentId = parentId
+        self.exceptFileIds = exceptFileIds
     }
 }
