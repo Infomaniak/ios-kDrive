@@ -120,9 +120,7 @@ public class FileActionsHelper {
         Task {
             do {
                 try await PhotoLibrarySaver.instance.save(url: url, type: type)
-                DispatchQueue.main.async {
-                    UIConstants.showSnackBar(message: successMessage)
-                }
+                UIConstants.showSnackBar(message: successMessage)
             } catch let error as DriveError where error == .photoLibraryWriteAccessDenied {
                 UIConstants.showSnackBar(message: error.localizedDescription,
                                          action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
@@ -132,9 +130,7 @@ public class FileActionsHelper {
                 })
             } catch {
                 DDLogError("Cannot save media: \(error)")
-                DispatchQueue.main.async {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                }
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
             }
         }
     }
