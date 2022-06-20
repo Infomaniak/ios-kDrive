@@ -58,5 +58,6 @@ public extension MaterialOutlinedTextField {
 
     @objc private func didTouchClearButton() {
         text = ""
+        becomeFirstResponder()
     }
 }
