@@ -115,16 +115,16 @@ class MultipleSelectionFileListViewModel {
     func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .move:
-            FileActionsHelper.moveItems(isSelectAllModeEnabled: isSelectAllModeEnabled,
-                                        currentDirectory: currentDirectory,
-                                        selectedItems: Array(selectedItems),
-                                        exceptFileIds: Array(exceptItemIds),
-                                        observer: self,
-                                        driveFileManager: driveFileManager) { [weak self] viewController in
-                self?.onPresentViewController?(.modal, viewController, true)
-            } completion: { [weak self] in
-                self?.isMultipleSelectionEnabled = false
-            }
+            FileActionsHelper.move(files: Array(selectedItems),
+                                   exceptFileIds: Array(exceptItemIds),
+                                   from: currentDirectory,
+                                   allItemsSelected: isSelectAllModeEnabled,
+                                   observer: self,
+                                   driveFileManager: driveFileManager) { [weak self] viewController in
+                                       self?.onPresentViewController?(.modal, viewController, true)
+                                   } completion: { [weak self] in
+                                       self?.isMultipleSelectionEnabled = false
+                                   }
         case .delete:
             var message: NSMutableAttributedString
             if selectedCount == 1,
@@ -309,9 +309,9 @@ class MultipleSelectionFileListViewModel {
 
     public func performAndObserve(bulkAction: BulkAction) async {
         await FileActionsHelper.performAndObserve(bulkAction: bulkAction,
+                                                  from: currentDirectory,
                                                   observer: self,
-                                                  driveFileManager: driveFileManager,
-                                                  currentDirectory: currentDirectory) { [weak self] in
+                                                  driveFileManager: driveFileManager) { [weak self] in
             self?.isMultipleSelectionEnabled = false
         }
     }

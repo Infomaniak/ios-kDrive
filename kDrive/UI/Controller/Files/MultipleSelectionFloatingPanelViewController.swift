@@ -177,17 +177,16 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .move:
-            FileActionsHelper.moveItems(
-                isSelectAllModeEnabled: allItemsSelected,
-                currentDirectory: currentDirectory,
-                selectedItems: files,
-                exceptFileIds: exceptFileIds ?? [],
-                observer: self,
-                driveFileManager: driveFileManager) { viewController in
-                    dismiss(animated: true) {
-                        self.presentingParent?.present(viewController, animated: true)
-                    }
+            FileActionsHelper.move(files: files,
+                                   exceptFileIds: exceptFileIds ?? [],
+                                   from: currentDirectory,
+                                   allItemsSelected: allItemsSelected,
+                                   observer: self,
+                                   driveFileManager: driveFileManager) { [weak self] viewController in
+                dismiss(animated: true) {
+                    self?.presentingParent?.present(viewController, animated: true)
                 }
+            }
         case .duplicate:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
                 Task {
