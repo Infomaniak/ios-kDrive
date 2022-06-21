@@ -115,32 +115,16 @@ class MultipleSelectionFileListViewModel {
     func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .move:
-            // Current directory is always disabled.
-            var disabledDirectoriesIds = [currentDirectory.id]
-            // Selected items all have the same parent, add it to the disabled directories
-            if let firstSelectedParentId = selectedItems.first?.parentId,
-               firstSelectedParentId != currentDirectory.id,
-               selectedItems.allSatisfy({ $0.parentId == firstSelectedParentId }) {
-                disabledDirectoriesIds.append(firstSelectedParentId)
+            FileActionsHelper.moveItems(isSelectAllModeEnabled: isSelectAllModeEnabled,
+                                        currentDirectory: currentDirectory,
+                                        selectedItems: Array(selectedItems),
+                                        exceptFileIds: Array(exceptItemIds),
+                                        observer: self,
+                                        driveFileManager: driveFileManager) { [weak self] viewController in
+                self?.onPresentViewController?(.modal, viewController, true)
+            } completion: { [weak self] in
+                self?.isMultipleSelectionEnabled = false
             }
-            let selectFolderNavigationController = SelectFolderViewController
-                .instantiateInNavigationController(driveFileManager: driveFileManager,
-                                                   startDirectory: currentDirectory,
-                                                   disabledDirectoriesIdsSelection: disabledDirectoriesIds) { selectedFolder in
-                    Task { [weak self] in
-                        guard let self = self else { return }
-                        await FileActionsHelper.moveSelectedItems(to: selectedFolder,
-                                                                  isSelectAllModeEnabled: self.isSelectAllModeEnabled,
-                                                                  currentDirectory: self.currentDirectory,
-                                                                  selectedItems: Array(self.selectedItems),
-                                                                  exceptFileIds: Array(self.exceptItemIds),
-                                                                  observer: self,
-                                                                  driveFileManager: self.driveFileManager) { [weak self] in
-                            self?.isMultipleSelectionEnabled = false
-                        }
-                    }
-                }
-            onPresentViewController?(.modal, selectFolderNavigationController, true)
         case .delete:
             var message: NSMutableAttributedString
             if selectedCount == 1,
