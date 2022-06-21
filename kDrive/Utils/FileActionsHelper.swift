@@ -143,6 +143,61 @@ public class FileActionsHelper {
     }
     #endif
 
+    // MARK: - MultipleSelection
+
+    public static func observeAction(observer: AnyObject, id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?, driveFileManager: DriveFileManager, currentDirectory: File) {
+        AccountManager.instance.mqService.observeActionProgress(observer, actionId: id) { actionProgress in
+            Task {
+                switch actionProgress.progress.message {
+                case .starting:
+                    break
+                case .processing:
+                    switch actionType {
+                    case .trash:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                    case .move:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                    case .copy:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
+                    }
+                    FileActionsHelper.loadActivitiesForCurrentDirectory(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                case .done:
+                    switch actionType {
+                    case .trash:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
+                    case .move:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveDoneSnackbar
+                    case .copy:
+                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyDoneSnackbar
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        progressSnack?.dismiss()
+                    }
+                    FileActionsHelper.loadActivitiesForCurrentDirectory(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                case .canceled:
+                    let message: String
+                    switch actionType {
+                    case .trash:
+                        message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
+                    case .move:
+                        message = KDriveResourcesStrings.Localizable.allFileMoveCancelled
+                    case .copy:
+                        message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
+                    }
+                    UIConstants.showSnackBar(message: message)
+                    FileActionsHelper.loadActivitiesForCurrentDirectory(driveFileManager: driveFileManager, currentDirectory: currentDirectory)
+                }
+            }
+        }
+    }
+
+    private static func loadActivitiesForCurrentDirectory(driveFileManager: DriveFileManager, currentDirectory: File) {
+        Task {
+            _ = try await driveFileManager.fileActivities(file: currentDirectory.proxify())
+            driveFileManager.notifyObserversWith(file: currentDirectory)
+        }
+    }
+
     // MARK: - Single file or multiselection
 
     public static func favorite(files: [File], driveFileManager: DriveFileManager, completion: ((File) async -> Void)? = nil) async throws -> Bool {

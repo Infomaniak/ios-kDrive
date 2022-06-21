@@ -103,15 +103,24 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         case .favorite:
             group.enter()
             Task {
-                let isFavored = try await FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager, completion: favorite)
+                let isFavored = try await FileActionsHelper.favorite(files: files,
+                                                                     driveFileManager: driveFileManager,
+                                                                     completion: favorite)
                 addAction = isFavored
                 group.leave()
             }
         case .manageCategories:
-            FileActionsHelper.manageCategories(files: files, driveFileManager: driveFileManager, from: self, group: group, presentingParent: presentingParent, fromMultiselect: true)
+            FileActionsHelper.manageCategories(files: files,
+                                               driveFileManager: driveFileManager,
+                                               from: self, group: group,
+                                               presentingParent: presentingParent,
+                                               fromMultiselect: true)
         case .folderColor:
-            FileActionsHelper.folderColor(files: files, driveFileManager: driveFileManager, from: self,
-                                          presentingParent: presentingParent, group: group) { isSuccess in
+            FileActionsHelper.folderColor(files: files,
+                                          driveFileManager: driveFileManager,
+                                          from: self,
+                                          presentingParent: presentingParent,
+                                          group: group) { isSuccess in
                 self.success = isSuccess
             }
         case .download:
@@ -167,6 +176,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     }
                 }
             }
+        case .move:
+            print("MOVE")
         case .duplicate:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
                 Task {
