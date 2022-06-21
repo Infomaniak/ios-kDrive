@@ -145,7 +145,7 @@ public class FileActionsHelper {
 
     // MARK: - Bulk actions
 
-    public static func bulkMoveFiles(_ files: [File], destinationId: Int, observer: AnyObject, driveFileManager: DriveFileManager, currentFolder: File, completion: () -> Void) async {
+    public static func bulkMoveFiles(_ files: [File], destinationId: Int, observer: AnyObject, driveFileManager: DriveFileManager, currentFolder: File, completion: (() -> Void)?) async {
         let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
         await performAndObserve(bulkAction: action,
                                 observer: observer,
@@ -154,7 +154,7 @@ public class FileActionsHelper {
                                 completion: completion)
     }
 
-    public static func bulkMoveAll(destinationId: Int, currentFolder: File, exceptFileIds: [Int], observer: AnyObject, driveFileManager: DriveFileManager, completion: () -> Void) async {
+    public static func bulkMoveAll(destinationId: Int, currentFolder: File, exceptFileIds: [Int], observer: AnyObject, driveFileManager: DriveFileManager, completion: (() -> Void)? = nil) async {
         let action = BulkAction(action: .move, parentId: currentFolder.id, exceptFileIds: exceptFileIds, destinationDirectoryId: destinationId)
         await performAndObserve(bulkAction: action,
                                 observer: observer,
@@ -172,7 +172,7 @@ public class FileActionsHelper {
                                  observer: AnyObject,
                                  driveFileManager: DriveFileManager,
                                  presentViewController: (UIViewController) -> Void,
-                                 completion: @escaping () -> Void) {
+                                 completion: (() -> Void)? = nil) {
         // Current directory is always disabled.
         var disabledDirectoriesIds = [currentDirectory.id]
         if let firstSelectedParentId = selectedItems.first?.parentId,
@@ -205,7 +205,7 @@ public class FileActionsHelper {
                                          exceptFileIds: [Int],
                                          observer: AnyObject,
                                          driveFileManager: DriveFileManager,
-                                         completion: () -> Void) async {
+                                         completion: (() -> Void)?) async {
         if isSelectAllModeEnabled {
             await bulkMoveAll(destinationId: destinationDirectory.id,
                               currentFolder: currentDirectory,
@@ -237,7 +237,7 @@ public class FileActionsHelper {
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
             }
-            completion()
+            completion?()
         }
     }
 
@@ -245,9 +245,9 @@ public class FileActionsHelper {
                                          observer: AnyObject,
                                          driveFileManager: DriveFileManager,
                                          currentDirectory: File,
-                                         completion: () -> Void) async {
+                                         completion: (() -> Void)?) async {
         do {
-            completion()
+            completion?()
             let (actionId, progressSnackBar) = try await FileActionsHelper.perform(bulkAction: bulkAction,
                                                                                    driveFileManager: driveFileManager,
                                                                                    currentDirectory: currentDirectory)

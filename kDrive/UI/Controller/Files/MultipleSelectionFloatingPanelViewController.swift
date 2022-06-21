@@ -187,8 +187,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     dismiss(animated: true) {
                         self.presentingParent?.present(viewController, animated: true)
                     }
-                } completion: {
-                    print("MOVED!")
                 }
         case .duplicate:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
