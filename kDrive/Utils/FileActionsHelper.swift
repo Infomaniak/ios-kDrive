@@ -145,7 +145,28 @@ public class FileActionsHelper {
 
     // MARK: - MultipleSelection
 
-    public static func perform(bulkAction: BulkAction, driveFileManager: DriveFileManager, currentDirectory: File) async throws -> (actionId: String, snackBar: IKSnackBar?) {
+    public static func performAndObserve(bulkAction: BulkAction,
+                                  observer: AnyObject,
+                                  driveFileManager: DriveFileManager,
+                                  currentDirectory: File,
+                                  completion: () -> Void) async {
+        do {
+            completion()
+            let (actionId, progressSnackBar) = try await FileActionsHelper.perform(bulkAction: bulkAction,
+                                                                                   driveFileManager: driveFileManager,
+                                                                                   currentDirectory: currentDirectory)
+            FileActionsHelper.observeAction(observer: observer,
+                                            id: actionId,
+                                            ofType: bulkAction.action,
+                                            using: progressSnackBar,
+                                            driveFileManager: driveFileManager,
+                                            currentDirectory: currentDirectory)
+        } catch {
+            DDLogError("Error while performing bulk action: \(error)")
+        }
+    }
+
+    private static func perform(bulkAction: BulkAction, driveFileManager: DriveFileManager, currentDirectory: File) async throws -> (actionId: String, snackBar: IKSnackBar?) {
         let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
 
         let message: String
@@ -170,7 +191,7 @@ public class FileActionsHelper {
         return (cancelableResponse.id, progressSnack)
     }
 
-    public static func observeAction(observer: AnyObject, id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?, driveFileManager: DriveFileManager, currentDirectory: File) {
+    private static func observeAction(observer: AnyObject, id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?, driveFileManager: DriveFileManager, currentDirectory: File) {
         AccountManager.instance.mqService.observeActionProgress(observer, actionId: id) { actionProgress in
             Task {
                 switch actionProgress.progress.message {
