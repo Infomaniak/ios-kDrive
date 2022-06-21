@@ -115,16 +115,16 @@ class MultipleSelectionFileListViewModel {
     func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .move:
-            FileActionsHelper.moveItems(isSelectAllModeEnabled: isSelectAllModeEnabled,
-                                        currentDirectory: currentDirectory,
-                                        selectedItems: Array(selectedItems),
-                                        exceptFileIds: Array(exceptItemIds),
-                                        observer: self,
-                                        driveFileManager: driveFileManager) { [weak self] viewController in
-                self?.onPresentViewController?(.modal, viewController, true)
-            } completion: { [weak self] in
-                self?.isMultipleSelectionEnabled = false
-            }
+            FileActionsHelper.move(files: Array(selectedItems),
+                                   exceptFileIds: Array(exceptItemIds),
+                                   from: currentDirectory,
+                                   allItemsSelected: isSelectAllModeEnabled,
+                                   observer: self,
+                                   driveFileManager: driveFileManager) { [weak self] viewController in
+                                       self?.onPresentViewController?(.modal, viewController, true)
+                                   } completion: { [weak self] in
+                                       self?.isMultipleSelectionEnabled = false
+                                   }
         case .delete:
             var message: NSMutableAttributedString
             if selectedCount == 1,
@@ -223,44 +223,6 @@ class MultipleSelectionFileListViewModel {
         }
     }
 
-    func moveSelectedItems(to destinationDirectory: File) async {
-        if isSelectAllModeEnabled {
-            await FileActionsHelper.bulkMoveAll(destinationId: destinationDirectory.id,
-                                                currentFolder: currentDirectory,
-                                                exceptFileIds: Array(exceptItemIds),
-                                                observer: self,
-                                                driveFileManager: driveFileManager) { [weak self] in
-                self?.isMultipleSelectionEnabled = false
-            }
-        } else if selectedCount > Constants.bulkActionThreshold {
-            await FileActionsHelper.bulkMoveFiles(Array(selectedItems),
-                                                  destinationId: destinationDirectory.id,
-                                                  observer: self,
-                                                  driveFileManager: driveFileManager,
-                                                  currentFolder: currentDirectory) { [weak self] in
-                self?.isMultipleSelectionEnabled = false
-            }
-        } else {
-            do {
-                // Move files only if needed
-                let proxySelectedItems = selectedItems.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
-                let proxyDestinationDirectory = destinationDirectory.proxify()
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    for proxyFile in proxySelectedItems {
-                        group.addTask { [self] in
-                            _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
-                        }
-                    }
-                    try await group.waitForAll()
-                }
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(selectedItems.count, destinationDirectory.name))
-            } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
-            }
-            isMultipleSelectionEnabled = false
-        }
-    }
-
     func deleteSelectedItems() async {
         if isSelectAllModeEnabled {
             await bulkDeleteAll()
@@ -309,9 +271,9 @@ class MultipleSelectionFileListViewModel {
 
     public func performAndObserve(bulkAction: BulkAction) async {
         await FileActionsHelper.performAndObserve(bulkAction: bulkAction,
+                                                  from: currentDirectory,
                                                   observer: self,
-                                                  driveFileManager: driveFileManager,
-                                                  currentDirectory: currentDirectory) { [weak self] in
+                                                  driveFileManager: driveFileManager) { [weak self] in
             self?.isMultipleSelectionEnabled = false
         }
     }
