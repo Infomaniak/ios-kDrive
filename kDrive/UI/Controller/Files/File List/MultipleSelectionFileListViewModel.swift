@@ -316,7 +316,12 @@ class MultipleSelectionFileListViewModel {
         isMultipleSelectionEnabled = false
         do {
             let (actionId, progressSnackBar) = try await perform(bulkAction: bulkAction)
-            observeAction(id: actionId, ofType: bulkAction.action, using: progressSnackBar)
+            FileActionsHelper.observeAction(observer: self,
+                                            id: actionId,
+                                            ofType: bulkAction.action,
+                                            using: progressSnackBar,
+                                            driveFileManager: driveFileManager,
+                                            currentDirectory: currentDirectory)
         } catch {
             DDLogError("Error while performing bulk action: \(error)")
         }
@@ -345,58 +350,5 @@ class MultipleSelectionFileListViewModel {
                                                                parentFile: currentDirectory.proxify(),
                                                                driveFileManager: driveFileManager)
         return (cancelableResponse.id, progressSnack)
-    }
-
-    private func observeAction(id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?) {
-        AccountManager.instance.mqService.observeActionProgress(self, actionId: id) { actionProgress in
-            Task { [weak self] in
-                switch actionProgress.progress.message {
-                case .starting:
-                    break
-                case .processing:
-                    switch actionType {
-                    case .trash:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    case .move:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    case .copy:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    }
-                    self?.loadActivitiesForCurrentDirectory()
-                case .done:
-                    switch actionType {
-                    case .trash:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
-                    case .move:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveDoneSnackbar
-                    case .copy:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyDoneSnackbar
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        progressSnack?.dismiss()
-                    }
-                    self?.loadActivitiesForCurrentDirectory()
-                case .canceled:
-                    let message: String
-                    switch actionType {
-                    case .trash:
-                        message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
-                    case .move:
-                        message = KDriveResourcesStrings.Localizable.allFileMoveCancelled
-                    case .copy:
-                        message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-                    }
-                    UIConstants.showSnackBar(message: message)
-                    self?.loadActivitiesForCurrentDirectory()
-                }
-            }
-        }
-    }
-
-    private func loadActivitiesForCurrentDirectory() {
-        Task {
-            _ = try await driveFileManager.fileActivities(file: currentDirectory.proxify())
-            driveFileManager.notifyObserversWith(file: currentDirectory)
-        }
     }
 }
