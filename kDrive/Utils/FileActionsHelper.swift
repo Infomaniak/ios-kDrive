@@ -143,13 +143,33 @@ public class FileActionsHelper {
     }
     #endif
 
+    // MARK: - Bulk actions
+
+    public static func bulkMoveFiles(_ files: [File], destinationId: Int, observer: AnyObject, driveFileManager: DriveFileManager, currentFolder: File, completion: () -> Void) async {
+        let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
+        await performAndObserve(bulkAction: action,
+                                observer: observer,
+                                driveFileManager: driveFileManager,
+                                currentDirectory: currentFolder,
+                                completion: completion)
+    }
+
+    public static func bulkMoveAll(destinationId: Int, currentFolder: File, exceptFileIds: [Int], observer: AnyObject, driveFileManager: DriveFileManager, completion: () -> Void) async {
+        let action = BulkAction(action: .move, parentId: currentFolder.id, exceptFileIds: exceptFileIds, destinationDirectoryId: destinationId)
+        await performAndObserve(bulkAction: action,
+                                observer: observer,
+                                driveFileManager: driveFileManager,
+                                currentDirectory: currentFolder,
+                                completion: completion)
+    }
+
     // MARK: - MultipleSelection
 
     public static func performAndObserve(bulkAction: BulkAction,
-                                  observer: AnyObject,
-                                  driveFileManager: DriveFileManager,
-                                  currentDirectory: File,
-                                  completion: () -> Void) async {
+                                         observer: AnyObject,
+                                         driveFileManager: DriveFileManager,
+                                         currentDirectory: File,
+                                         completion: () -> Void) async {
         do {
             completion()
             let (actionId, progressSnackBar) = try await FileActionsHelper.perform(bulkAction: bulkAction,

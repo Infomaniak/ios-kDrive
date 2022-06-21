@@ -232,9 +232,21 @@ class MultipleSelectionFileListViewModel {
 
     func moveSelectedItems(to destinationDirectory: File) async {
         if isSelectAllModeEnabled {
-            await bulkMoveAll(destinationId: destinationDirectory.id)
+            await FileActionsHelper.bulkMoveAll(destinationId: destinationDirectory.id,
+                                                currentFolder: currentDirectory,
+                                                exceptFileIds: Array(exceptItemIds),
+                                                observer: self,
+                                                driveFileManager: driveFileManager) { [weak self] in
+                self?.isMultipleSelectionEnabled = false
+            }
         } else if selectedCount > Constants.bulkActionThreshold {
-            await bulkMoveFiles(Array(selectedItems), destinationId: destinationDirectory.id)
+            await FileActionsHelper.bulkMoveFiles(Array(selectedItems),
+                                                  destinationId: destinationDirectory.id,
+                                                  observer: self,
+                                                  driveFileManager: driveFileManager,
+                                                  currentFolder: currentDirectory) { [weak self] in
+                self?.isMultipleSelectionEnabled = false
+            }
         } else {
             do {
                 // Move files only if needed
@@ -291,16 +303,6 @@ class MultipleSelectionFileListViewModel {
     }
 
     // MARK: - Bulk actions
-
-    private func bulkMoveFiles(_ files: [File], destinationId: Int) async {
-        let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
-        await performAndObserve(bulkAction: action)
-    }
-
-    private func bulkMoveAll(destinationId: Int) async {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, exceptFileIds: Array(exceptItemIds), destinationDirectoryId: destinationId)
-        await performAndObserve(bulkAction: action)
-    }
 
     private func bulkDeleteFiles(_ files: [File]) async {
         let action = BulkAction(action: .trash, fileIds: files.map(\.id))
