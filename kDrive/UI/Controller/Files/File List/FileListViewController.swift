@@ -435,11 +435,11 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
                 floatingPanelViewController = AdaptiveDriveFloatingPanelController()
                 let selectViewController = MultipleSelectionFloatingPanelViewController()
                 selectViewController.presentingParent = self
+                selectViewController.currentDirectory = viewModel.currentDirectory
 
                 if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
                     selectViewController.allItemsSelected = true
                     selectViewController.exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
-                    selectViewController.parentId = viewModel.currentDirectory.id
                 } else {
                     selectViewController.allItemsSelected = false
                     selectViewController.files = files

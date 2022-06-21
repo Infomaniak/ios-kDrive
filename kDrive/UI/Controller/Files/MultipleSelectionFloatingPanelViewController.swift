@@ -27,7 +27,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     var files = [File]()
     var allItemsSelected = false
     var exceptFileIds: [Int]?
-    var parentId: Int?
+    var currentDirectory: File!
     var changedFiles: [File]? = []
     var downloadInProgress = false
     var reloadAction: (() -> Void)?
@@ -177,7 +177,19 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .move:
-            print("MOVE")
+            FileActionsHelper.moveItems(
+                isSelectAllModeEnabled: allItemsSelected,
+                currentDirectory: currentDirectory,
+                selectedItems: files,
+                exceptFileIds: exceptFileIds ?? [],
+                observer: self,
+                driveFileManager: driveFileManager) { viewController in
+                    dismiss(animated: true) {
+                        self.presentingParent?.present(viewController, animated: true)
+                    }
+                } completion: {
+                    print("MOVED!")
+                }
         case .duplicate:
             let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(driveFileManager: driveFileManager, disabledDirectoriesSelection: files.compactMap(\.parent)) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
                 Task {
@@ -261,8 +273,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         if files.count > Constants.bulkActionThreshold || allItemsSelected {
             // addAction = false // Prevents the snackbar to be displayed
             let action: BulkAction
-            if allItemsSelected, let parentId = parentId {
-                action = BulkAction(action: .copy, parentId: parentId, exceptFileIds: exceptFileIds, destinationDirectoryId: selectedDirectory.id)
+            if allItemsSelected {
+                action = BulkAction(action: .copy, parentId: currentDirectory.id, exceptFileIds: exceptFileIds, destinationDirectoryId: selectedDirectory.id)
             } else {
                 action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
             }
@@ -288,8 +300,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         Task { [proxyFiles = files.map { $0.proxify() }] in
             do {
                 let archiveBody: ArchiveBody
-                if allItemsSelected, let parentId = parentId {
-                    archiveBody = .init(parentId: parentId, exceptFileIds: exceptFileIds)
+                if allItemsSelected {
+                    archiveBody = .init(parentId: currentDirectory.id, exceptFileIds: exceptFileIds)
                 } else {
                     archiveBody = .init(files: proxyFiles)
                 }
