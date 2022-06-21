@@ -145,6 +145,31 @@ public class FileActionsHelper {
 
     // MARK: - MultipleSelection
 
+    public static func perform(bulkAction: BulkAction, driveFileManager: DriveFileManager, currentDirectory: File) async throws -> (actionId: String, snackBar: IKSnackBar?) {
+        let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
+
+        let message: String
+        let cancelMessage: String
+        switch bulkAction.action {
+        case .trash:
+            message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
+            cancelMessage = KDriveResourcesStrings.Localizable.allTrashActionCancelled
+        case .move:
+            message = KDriveResourcesStrings.Localizable.fileListMoveStartedSnackbar
+            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
+        case .copy:
+            message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
+            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
+        }
+        let progressSnack = UIConstants.showCancelableSnackBar(message: message,
+                                                               cancelSuccessMessage: cancelMessage,
+                                                               duration: .infinite,
+                                                               cancelableResponse: cancelableResponse,
+                                                               parentFile: currentDirectory.proxify(),
+                                                               driveFileManager: driveFileManager)
+        return (cancelableResponse.id, progressSnack)
+    }
+
     public static func observeAction(observer: AnyObject, id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?, driveFileManager: DriveFileManager, currentDirectory: File) {
         AccountManager.instance.mqService.observeActionProgress(observer, actionId: id) { actionProgress in
             Task {

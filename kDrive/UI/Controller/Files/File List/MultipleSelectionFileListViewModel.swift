@@ -315,7 +315,9 @@ class MultipleSelectionFileListViewModel {
     public func performAndObserve(bulkAction: BulkAction) async {
         isMultipleSelectionEnabled = false
         do {
-            let (actionId, progressSnackBar) = try await perform(bulkAction: bulkAction)
+            let (actionId, progressSnackBar) = try await FileActionsHelper.perform(bulkAction: bulkAction,
+                                                                                   driveFileManager: driveFileManager,
+                                                                                   currentDirectory: currentDirectory)
             FileActionsHelper.observeAction(observer: self,
                                             id: actionId,
                                             ofType: bulkAction.action,
@@ -325,30 +327,5 @@ class MultipleSelectionFileListViewModel {
         } catch {
             DDLogError("Error while performing bulk action: \(error)")
         }
-    }
-
-    private func perform(bulkAction: BulkAction) async throws -> (actionId: String, snackBar: IKSnackBar?) {
-        let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
-
-        let message: String
-        let cancelMessage: String
-        switch bulkAction.action {
-        case .trash:
-            message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
-            cancelMessage = KDriveResourcesStrings.Localizable.allTrashActionCancelled
-        case .move:
-            message = KDriveResourcesStrings.Localizable.fileListMoveStartedSnackbar
-            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-        case .copy:
-            message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
-            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-        }
-        let progressSnack = UIConstants.showCancelableSnackBar(message: message,
-                                                               cancelSuccessMessage: cancelMessage,
-                                                               duration: .infinite,
-                                                               cancelableResponse: cancelableResponse,
-                                                               parentFile: currentDirectory.proxify(),
-                                                               driveFileManager: driveFileManager)
-        return (cancelableResponse.id, progressSnack)
     }
 }
