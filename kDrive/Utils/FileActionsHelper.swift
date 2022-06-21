@@ -165,6 +165,39 @@ public class FileActionsHelper {
 
     // MARK: - MultipleSelection
 
+    public static func moveItems(isSelectAllModeEnabled: Bool,
+                                 currentDirectory: File,
+                                 selectedItems: [File],
+                                 exceptFileIds: [Int],
+                                 observer: AnyObject,
+                                 driveFileManager: DriveFileManager,
+                                 presentViewController: (UIViewController) -> Void,
+                                 completion: @escaping () -> Void) {
+        // Current directory is always disabled.
+        var disabledDirectoriesIds = [currentDirectory.id]
+        if let firstSelectedParentId = selectedItems.first?.parentId,
+           firstSelectedParentId != currentDirectory.id,
+           selectedItems.allSatisfy({ $0.parentId == firstSelectedParentId }) {
+            disabledDirectoriesIds.append(firstSelectedParentId)
+        }
+        let selectFolderNavigationController = SelectFolderViewController
+            .instantiateInNavigationController(driveFileManager: driveFileManager,
+                                               startDirectory: currentDirectory,
+                                               disabledDirectoriesIdsSelection: disabledDirectoriesIds) { selectedFolder in
+                Task {
+                    await moveSelectedItems(to: selectedFolder,
+                                            isSelectAllModeEnabled: isSelectAllModeEnabled,
+                                            currentDirectory: currentDirectory,
+                                            selectedItems: selectedItems,
+                                            exceptFileIds: exceptFileIds,
+                                            observer: self,
+                                            driveFileManager: driveFileManager,
+                                            completion: completion)
+                }
+            }
+        presentViewController(selectFolderNavigationController)
+    }
+
     public static func moveSelectedItems(to destinationDirectory: File,
                                          isSelectAllModeEnabled: Bool,
                                          currentDirectory: File,
