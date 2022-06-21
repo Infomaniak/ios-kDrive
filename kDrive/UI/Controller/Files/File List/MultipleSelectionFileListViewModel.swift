@@ -128,7 +128,16 @@ class MultipleSelectionFileListViewModel {
                                                    startDirectory: currentDirectory,
                                                    disabledDirectoriesIdsSelection: disabledDirectoriesIds) { selectedFolder in
                     Task { [weak self] in
-                        await self?.moveSelectedItems(to: selectedFolder)
+                        guard let self = self else { return }
+                        await FileActionsHelper.moveSelectedItems(to: selectedFolder,
+                                                                  isSelectAllModeEnabled: self.isSelectAllModeEnabled,
+                                                                  currentDirectory: self.currentDirectory,
+                                                                  selectedItems: Array(self.selectedItems),
+                                                                  exceptFileIds: Array(self.exceptItemIds),
+                                                                  observer: self,
+                                                                  driveFileManager: self.driveFileManager) { [weak self] in
+                            self?.isMultipleSelectionEnabled = false
+                        }
                     }
                 }
             onPresentViewController?(.modal, selectFolderNavigationController, true)

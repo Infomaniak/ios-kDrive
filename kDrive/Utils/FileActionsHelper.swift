@@ -165,6 +165,49 @@ public class FileActionsHelper {
 
     // MARK: - MultipleSelection
 
+    public static func moveSelectedItems(to destinationDirectory: File,
+                                         isSelectAllModeEnabled: Bool,
+                                         currentDirectory: File,
+                                         selectedItems: [File],
+                                         exceptFileIds: [Int],
+                                         observer: AnyObject,
+                                         driveFileManager: DriveFileManager,
+                                         completion: () -> Void) async {
+        if isSelectAllModeEnabled {
+            await bulkMoveAll(destinationId: destinationDirectory.id,
+                              currentFolder: currentDirectory,
+                              exceptFileIds: exceptFileIds,
+                              observer: observer,
+                              driveFileManager: driveFileManager,
+                              completion: completion)
+        } else if selectedItems.count > Constants.bulkActionThreshold {
+            await bulkMoveFiles(selectedItems,
+                                destinationId: destinationDirectory.id,
+                                observer: observer,
+                                driveFileManager: driveFileManager,
+                                currentFolder: currentDirectory,
+                                completion: completion)
+        } else {
+            do {
+                // Move files only if needed
+                let proxySelectedItems = selectedItems.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
+                let proxyDestinationDirectory = destinationDirectory.proxify()
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    for proxyFile in proxySelectedItems {
+                        group.addTask {
+                            _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
+                        }
+                    }
+                    try await group.waitForAll()
+                }
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(selectedItems.count, destinationDirectory.name))
+            } catch {
+                UIConstants.showSnackBar(message: error.localizedDescription)
+            }
+            completion()
+        }
+    }
+
     public static func performAndObserve(bulkAction: BulkAction,
                                          observer: AnyObject,
                                          driveFileManager: DriveFileManager,
