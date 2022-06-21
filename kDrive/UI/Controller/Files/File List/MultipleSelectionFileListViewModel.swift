@@ -313,19 +313,11 @@ class MultipleSelectionFileListViewModel {
     }
 
     public func performAndObserve(bulkAction: BulkAction) async {
-        isMultipleSelectionEnabled = false
-        do {
-            let (actionId, progressSnackBar) = try await FileActionsHelper.perform(bulkAction: bulkAction,
-                                                                                   driveFileManager: driveFileManager,
-                                                                                   currentDirectory: currentDirectory)
-            FileActionsHelper.observeAction(observer: self,
-                                            id: actionId,
-                                            ofType: bulkAction.action,
-                                            using: progressSnackBar,
-                                            driveFileManager: driveFileManager,
-                                            currentDirectory: currentDirectory)
-        } catch {
-            DDLogError("Error while performing bulk action: \(error)")
+        await FileActionsHelper.performAndObserve(bulkAction: bulkAction,
+                                                  observer: self,
+                                                  driveFileManager: driveFileManager,
+                                                  currentDirectory: currentDirectory) { [weak self] in
+            self?.isMultipleSelectionEnabled = false
         }
     }
 }
