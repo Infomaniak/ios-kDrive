@@ -115,13 +115,37 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 self.success = isSuccess
             }
         case .download:
-            if files.count > Constants.bulkActionThreshold || allItemsSelected || files.contains(where: \.isDirectory) {
+            if !allItemsSelected && (files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video } || files.count <= 1) {
+                for file in files {
+                    if file.isDownloaded {
+                        FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
+                    } else {
+                        guard let observerViewController = view.window?.rootViewController else { return }
+                        downloadInProgress = true
+                        collectionView.reloadItems(at: [indexPath])
+                        group.enter()
+                        DownloadQueue.instance.observeFileDownloaded(observerViewController, fileId: file.id) { [unowned self] _, error in
+                            if error == nil {
+                                DispatchQueue.main.async {
+                                    FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)
+                                }
+                            } else {
+                                success = false
+                            }
+                            group.leave()
+                        }
+                        DownloadQueue.instance.addToQueue(file: file)
+                    }
+                }
+            } else {
                 if downloadInProgress,
                    let currentArchiveId = currentArchiveId,
                    let operation = DownloadQueue.instance.archiveOperationsInQueue[currentArchiveId] {
                     group.enter()
                     let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cancelDownloadTitle, message: KDriveResourcesStrings.Localizable.cancelDownloadDescription, action: KDriveResourcesStrings.Localizable.buttonYes, destructive: true) {
                         operation.cancel()
+                        self.downloadError = .taskCancelled
+                        self.success = false
                         group.leave()
                     }
                     present(alert, animated: true)
@@ -140,28 +164,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                             self.success = false
                         }
                         group.leave()
-                    }
-                }
-            } else {
-                for file in files {
-                    if file.isDownloaded {
-                        FileActionsHelper.save(file: file, from: self)
-                    } else {
-                        guard let observerViewController = view.window?.rootViewController else { return }
-                        downloadInProgress = true
-                        collectionView.reloadItems(at: [indexPath])
-                        group.enter()
-                        DownloadQueue.instance.observeFileDownloaded(observerViewController, fileId: file.id) { [unowned self] _, error in
-                            if error == nil {
-                                DispatchQueue.main.async {
-                                    FileActionsHelper.save(file: file, from: self)
-                                }
-                            } else {
-                                success = false
-                            }
-                            group.leave()
-                        }
-                        DownloadQueue.instance.addToQueue(file: file)
                     }
                 }
             }
@@ -204,6 +206,16 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                 case .duplicate:
                     guard self.addAction else { break }
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
+                case .download:
+                    guard !self.files.isEmpty && self.files.allSatisfy({ $0.convertedType == .image || $0.convertedType == .video }) else { break }
+                    if self.files.count <= 1, let file = self.files.first {
+                        let message = file.convertedType == .image
+                        ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation
+                        : KDriveResourcesStrings.Localizable.snackbarVideoSavedConfirmation
+                        UIConstants.showSnackBar(message: message)
+                    } else {
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarImageVideoSaved(self.files.count))
+                    }
                 default:
                     break
                 }
