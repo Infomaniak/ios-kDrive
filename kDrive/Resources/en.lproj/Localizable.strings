@@ -5,7 +5,7 @@
  * Locale: en, English
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Mon, 13 Jun 2022 09:58:06 +0200
+ * Exported at: Thu, 16 Jun 2022 11:20:09 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -452,6 +452,9 @@
 /* loco:6049df4d5c2c3a04bc397967 */
 "buttonSignIn" = "Create an account";
 
+/* loco:62aaf42957e7311609525592 */
+"buttonSnackBarGoToSettings" = "Settings";
+
 /* loco:6049df4d5c2c3a04bc397968 */
 "buttonStopUpload" = "Stop uploading this file";
 
@@ -784,6 +787,9 @@
 
 /* loco:6049df4d5c2c3a04bc39799f */
 "errorNetworkDescription" = "Results may be incomplete";
+
+/* loco:62aad9bc0b461303fb5559d2 */
+"errorPhotoLibraryAccessLimited" = "kDrive does not have access to your photo library";
 
 /* loco:6049df4d5c2c3a04bc3979a0 */
 "errorPreviewDeleted" = "This file has been permanently deleted";
@@ -1754,6 +1760,9 @@
 /* loco:629f1b5bfc67572038545e23 */
 "snackBarErrorAccountDeletion" = "Error while deleting the account";
 
+/* loco:62a8409e5803ef33d9677572 */
+"snackBarImageVideoSaved" = "%d files saved in the photo library";
+
 /* loco:619f6999f44e9d3a394a6d62 */
 "snackBarUploadError" = "A file could not be imported";
 
@@ -2056,6 +2065,18 @@
 
 /* loco:6168271204d05b14c459bbe2 */
 "uploadFolderNotFoundSyncDisabledError" = "Automatic backup has been disabled because the destination folder no longer exists";
+
+/* loco:62a873924424292ffd74faf3 */
+"uploadImportedFailedAmount" = "1 import failed out of a total of %1$d";
+
+/* loco:62a874566f1e5662420d2b82 */
+"uploadImportedFailedAmount-plural" = "%2$d imports failed out of a total of %1$d";
+
+/* loco:62a870e797825a742960c0b2 */
+"uploadImportedOtherAmount" = "+1 other file";
+
+/* loco:62a8723e5ef00d1ebd2e30f4 */
+"uploadImportedOtherAmount-plural" = "+%d other files";
 
 /* loco:6049df4d5c2c3a04bc397a83 */
 "uploadInProgressCancelAllUploadTitle" = "Cancel uploads";

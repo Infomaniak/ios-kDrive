@@ -52,7 +52,7 @@ public class PhotoLibrarySaver: NSObject {
         if authorized {
             try await createAlbumIfNeeded()
         } else {
-            throw DriveError.localError
+            throw DriveError.photoLibraryWriteAccessDenied
         }
     }
 

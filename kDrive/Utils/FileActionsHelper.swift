@@ -115,23 +115,26 @@ public class FileActionsHelper {
             presenterViewController?.present(documentExportViewController, animated: true)
         }
     }
-    #endif
 
     private static func saveMedia(url: URL, type: PHAssetMediaType, successMessage: String) {
         Task {
             do {
                 try await PhotoLibrarySaver.instance.save(url: url, type: type)
-                DispatchQueue.main.async {
-                    UIConstants.showSnackBar(message: successMessage)
-                }
+                UIConstants.showSnackBar(message: successMessage)
+            } catch let error as DriveError where error == .photoLibraryWriteAccessDenied {
+                UIConstants.showSnackBar(message: error.localizedDescription,
+                                         action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
+                    guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
+                          UIApplication.shared.canOpenURL(settingsURL) else { return }
+                    UIApplication.shared.open(settingsURL)
+                })
             } catch {
                 DDLogError("Cannot save media: \(error)")
-                DispatchQueue.main.async {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
-                }
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)
             }
         }
     }
+    #endif
 
     // MARK: - Single file or multiselection
 

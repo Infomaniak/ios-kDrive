@@ -93,6 +93,7 @@ public struct DriveError: Error, Equatable {
     public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
     public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
     public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
+    public static let photoLibraryWriteAccessDenied = DriveError(type: .localError, code: "photoLibraryWriteAccessDenied", localizedString: KDriveResourcesStrings.Localizable.errorPhotoLibraryAccessLimited)
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 
