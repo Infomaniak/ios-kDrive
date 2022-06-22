@@ -27,14 +27,14 @@ public struct ArchiveBody: Encodable {
     var exceptFileIds: [Int]?
 
     public init(files: [ProxyFile]) {
-        self.init(parentId: nil, exceptFileIds: nil, fileIds: files.map(\.id))
+        self.init(fileIds: files.map(\.id), parentId: nil, exceptFileIds: nil)
     }
 
     public init(parentId: Int, exceptFileIds: [Int]? = nil) {
-        self.init(parentId: parentId, exceptFileIds: exceptFileIds, fileIds: nil)
+        self.init(fileIds: nil, parentId: parentId, exceptFileIds: exceptFileIds)
     }
 
-    private init(parentId: Int? = nil, exceptFileIds: [Int]? = nil, fileIds: [Int]? = nil) {
+    private init(fileIds: [Int]? = nil, parentId: Int? = nil, exceptFileIds: [Int]? = nil) {
         self.fileIds = fileIds
         self.parentId = parentId
         self.exceptFileIds = exceptFileIds
