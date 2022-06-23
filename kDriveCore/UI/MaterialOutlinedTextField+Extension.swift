@@ -57,7 +57,9 @@ public extension MaterialOutlinedTextField {
     }
 
     @objc private func didTouchClearButton() {
-        text = ""
+        guard let text = text else { return }
+        let startIndex = (text.lastIndex(of: ".") ?? text.startIndex)
+        self.text = String(text[startIndex...])
         becomeFirstResponder()
     }
 }

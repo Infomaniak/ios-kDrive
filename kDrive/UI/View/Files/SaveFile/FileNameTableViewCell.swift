@@ -26,6 +26,8 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
     var textDidChange: ((String?) -> Void)?
     var textDidEndEditing: ((String?) -> Void)?
 
+    private var textFieldConfiguration = TextFieldConfiguration.fileNameConfiguration
+
     override func awakeFromNib() {
         super.awakeFromNib()
 
@@ -33,9 +35,9 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
         textField.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         textField.setHint(KDriveResourcesStrings.Localizable.saveExternalFileInputFileName)
         textField.delegate = self
-        textField.autocorrectionType = .no
-        textField.autocapitalizationType = .none
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+
+        textFieldConfiguration.apply(to: textField)
     }
 
     override func layoutSubviews() {
@@ -48,6 +50,12 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
     }
 
     // MARK: - Text field delegate
+
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        guard let fileName = textField.text else { return }
+        textFieldConfiguration.selectedRange = fileName.startIndex ..< (fileName.lastIndex(where: { $0 == "." }) ?? fileName.endIndex)
+        textFieldConfiguration.selectText(in: textField)
+    }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         textDidEndEditing?(textField.text)

@@ -21,38 +21,6 @@ import UIKit
 
 /// Alert with text field
 open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
-    public struct TextFieldConfiguration {
-        public var autocapitalizationType: UITextAutocapitalizationType = .sentences
-        public var autocorrectionType: UITextAutocorrectionType = .default
-        public var spellCheckingType: UITextSpellCheckingType = .default
-        public var keyboardType: UIKeyboardType = .default
-        public var keyboardAppearance: UIKeyboardAppearance = .default
-        public var returnKeyType: UIReturnKeyType = .default
-
-        public var selectedRange: Range<String.Index>?
-
-        public func apply(to textField: UITextField) {
-            textField.autocapitalizationType = autocapitalizationType
-            textField.autocorrectionType = autocorrectionType
-            textField.spellCheckingType = spellCheckingType
-            textField.keyboardType = keyboardType
-            textField.keyboardAppearance = keyboardAppearance
-            textField.returnKeyType = returnKeyType
-        }
-
-        public func selectText(in textField: UITextField) {
-            if let selectedRange = selectedRange,
-               let str = textField.text,
-               let startPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.lowerBound.utf16Offset(in: str)),
-               let endPosition = textField.position(from: textField.beginningOfDocument, offset: selectedRange.upperBound.utf16Offset(in: str)) {
-                textField.selectedTextRange = textField.textRange(from: startPosition, to: endPosition)
-            }
-        }
-
-        public static let defaultConfiguration = TextFieldConfiguration()
-        public static let fileNameConfiguration = TextFieldConfiguration(autocapitalizationType: .none, autocorrectionType: .no, spellCheckingType: .no)
-    }
-
     private let labelText: String?
     private let placeholder: String?
     private let text: String?
