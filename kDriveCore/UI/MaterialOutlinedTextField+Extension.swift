@@ -44,4 +44,22 @@ public extension MaterialOutlinedTextField {
         placeholder = hint
         label.text = hint
     }
+
+    func setClearButton() {
+        let clearButton = UIButton(frame: rightViewRect(forBounds: bounds))
+        clearButton.setImage(UIImage(systemName: "xmark"), for: .normal)
+        clearButton.addTarget(self, action: #selector(didTouchClearButton), for: .touchUpInside)
+        clearButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 16)
+        clearButton.tintColor = KDriveResourcesAsset.infomaniakColor.color
+
+        rightView = clearButton
+        rightViewMode = .whileEditing
+    }
+
+    @objc private func didTouchClearButton() {
+        guard let text = text else { return }
+        let startIndex = text.lastIndex(of: ".") ?? text.endIndex
+        self.text = String(text[startIndex...])
+        becomeFirstResponder()
+    }
 }
