@@ -19,5 +19,5 @@
 import Foundation
 
 public class DownloadArchiveResponse: Codable {
-    public let id: String
+    public let uuid: String
 }

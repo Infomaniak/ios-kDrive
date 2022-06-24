@@ -285,16 +285,16 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     archiveBody = .init(files: proxyFiles)
                 }
                 let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, body: archiveBody)
-                self.currentArchiveId = response.id
+                self.currentArchiveId = response.uuid
                 guard let rootViewController = view.window?.rootViewController else { return }
-                DownloadQueue.instance.observeArchiveDownloaded(rootViewController, archiveId: response.id) { _, archiveUrl, error in
+                DownloadQueue.instance.observeArchiveDownloaded(rootViewController, archiveId: response.uuid) { _, archiveUrl, error in
                     if let archiveUrl = archiveUrl {
                         completion(.success(archiveUrl))
                     } else {
                         completion(.failure(error ?? .unknownError))
                     }
                 }
-                DownloadQueue.instance.addToQueue(archiveId: response.id, driveId: self.driveFileManager.drive.id)
+                DownloadQueue.instance.addToQueue(archiveId: response.uuid, driveId: self.driveFileManager.drive.id)
                 DispatchQueue.main.async {
                     self.collectionView.reloadItems(at: [downloadCellPath])
                 }
