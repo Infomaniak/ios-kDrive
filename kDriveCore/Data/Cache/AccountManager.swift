@@ -140,6 +140,11 @@ public class AccountManager: RefreshTokenDelegate {
             tokens = KeychainHelper.loadTokens()
         }
 
+        // Also update current account reference to prevent mismatch
+        if let account = accounts.first(where: { $0.userId == currentAccount?.userId }) {
+            currentAccount = account
+        }
+
         // remove accounts with no user
         for account in accounts where account.user == nil {
             removeAccount(toDeleteAccount: account)
