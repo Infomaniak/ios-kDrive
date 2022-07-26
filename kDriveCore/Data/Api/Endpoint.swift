@@ -524,7 +524,7 @@ public extension Endpoint {
             ]
         }
         if let fileType = fileType {
-            queryItems.append(URLQueryItem(name: "type", value: fileType.rawValue))
+            queryItems.append(URLQueryItem(name: "types[]", value: fileType.rawValue))
         }
         if !categories.isEmpty {
             let separator = belongToAllCategories ? "&" : "|"
