@@ -5,7 +5,7 @@
  * Locale: en, English
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Thu, 16 Jun 2022 11:20:09 +0200
+ * Exported at: Tue, 26 Jul 2022 12:03:29 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -159,7 +159,7 @@
 "allOfficePoints" = "Presentation";
 
 /* loco:6049df4d5c2c3a04bc397925 */
-"allPackAvailability" = "Available for %@ plans only 🚀";
+"allPackAvailability" = "Available for Solo, Team & Pro plans only 🚀";
 
 /* loco:6049df4d5c2c3a04bc397926 */
 "allPasswordHint" = "Password";
@@ -1702,18 +1702,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a4b */
 "shareLinkSettingsAllowDownloadTitle" = "Download from the share link";
-
-/* loco:6049df4d5c2c3a04bc397a4c */
-"shareLinkSettingsBlockCommentsDescription" = "Users with access to the files will not be able to read any comments.";
-
-/* loco:6049df4d5c2c3a04bc397a4d */
-"shareLinkSettingsBlockCommentsTitle" = "Enable this option to prevent users from reading comments";
-
-/* loco:6049df4d5c2c3a04bc397a48 */
-"shareLinkSettingsBlockUsersConsultDescription" = "Users with access to the files will not be able to read any comments.";
-
-/* loco:6049df4d5c2c3a04bc397a4e */
-"shareLinkSettingsBlockUsersConsultTitle" = "Enable this option to prevent users from seeing who is viewing the files";
 
 /* loco:618e5bf5202c3d2ffb09072a */
 "shareLinkTypeDocument" = "document";

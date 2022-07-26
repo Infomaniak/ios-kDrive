@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import kDriveResources
 import Lottie
 import UIKit
@@ -29,8 +30,7 @@ class DropBoxFloatingPanelViewController: InformationFloatingPanelViewController
         animationViewHeightConstraint.constant = 130
         titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
-        let teams = "Team & Pro"
-        additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability(teams), highlightedText: teams)
+        additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability, highlightedText: Constants.kDriveTeams)
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
         rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonUpgradeOffer, for: .normal)

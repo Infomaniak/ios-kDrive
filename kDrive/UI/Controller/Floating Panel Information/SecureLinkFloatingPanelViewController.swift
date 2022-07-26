@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import kDriveResources
 import Lottie
 import UIKit
@@ -29,8 +30,7 @@ class SecureLinkFloatingPanelViewController: InformationFloatingPanelViewControl
         animationViewHeightConstraint.constant = 105
         titleLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareTitle
         descriptionLabel.text = KDriveResourcesStrings.Localizable.secureLinkShareDescription
-        let teams = "Solo, Team & Pro"
-        additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability(teams), highlightedText: teams)
+        additionalInformationLabel.attributedText = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.allPackAvailability, highlightedText: Constants.kDriveTeams)
         copyStackView.isHidden = true
         leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonLater, for: .normal)
         rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonUpgradeOffer, for: .normal)
