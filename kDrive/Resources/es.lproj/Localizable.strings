@@ -5,7 +5,7 @@
  * Locale: es, Spanish
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Thu, 16 Jun 2022 11:20:09 +0200
+ * Exported at: Tue, 26 Jul 2022 12:03:29 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -159,7 +159,7 @@
 "allOfficePoints" = "Presentación";
 
 /* loco:6049df4d5c2c3a04bc397925 */
-"allPackAvailability" = "Disponible únicamente para los planes %@ 🚀";
+"allPackAvailability" = "Disponible únicamente para los planes Solo, Team & Pro 🚀";
 
 /* loco:6049df4d5c2c3a04bc397926 */
 "allPasswordHint" = "Contraseña";
@@ -1702,18 +1702,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a4b */
 "shareLinkSettingsAllowDownloadTitle" = "Descargar desde el enlace de uso compartido";
-
-/* loco:6049df4d5c2c3a04bc397a4c */
-"shareLinkSettingsBlockCommentsDescription" = "Los usuarios con acceso a los archivos no podrán leer los comentarios.";
-
-/* loco:6049df4d5c2c3a04bc397a4d */
-"shareLinkSettingsBlockCommentsTitle" = "Activa esta opción para impedir que los usuarios lean los comentarios";
-
-/* loco:6049df4d5c2c3a04bc397a48 */
-"shareLinkSettingsBlockUsersConsultDescription" = "Los usuarios con acceso a los archivos no podrán leer los comentarios.";
-
-/* loco:6049df4d5c2c3a04bc397a4e */
-"shareLinkSettingsBlockUsersConsultTitle" = "Activa esta opción para impedir que los usuarios vean quién consulta los ficheros";
 
 /* loco:618e5bf5202c3d2ffb09072a */
 "shareLinkTypeDocument" = "documento";

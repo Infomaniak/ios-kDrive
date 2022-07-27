@@ -58,6 +58,8 @@ public enum Constants {
     public static let activitiesReloadTimeOut: Double = 7_776_000 // 90 days
     public static let memoryCacheSizeLimit = 10 * 1024 * 1024 // 10 Mo
 
+    public static let kDriveTeams = "Solo, Team & Pro"
+
     private static var dateFormatter = DateFormatter()
     private static var fileSizeFormatter = MeasurementFormatter()
 
