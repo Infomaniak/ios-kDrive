@@ -222,9 +222,9 @@ public class FileConversion: EmbeddedObject, Codable {
     @Persisted public var onylofficeExtension: String?
 
     private enum CodingKeys: String, CodingKey {
-        case whenDownload = "when_download"
+        case whenDownload = "when_downloading"
         case downloadExtensions = "download_extensions"
-        case whenOnlyoffice = "when_onlyoffice"
+        case whenOnlyoffice = "when_onlyoffice_opening"
         case onylofficeExtension = "onlyoffice_extension"
     }
 }
@@ -346,7 +346,7 @@ public class File: Object, Codable {
         case hasOnlyoffice = "has_onlyoffice"
         case extensionType = "extension_type"
         case version
-        case conversion
+        case conversion = "conversion_capabilities"
     }
 
     public var parent: File? {
