@@ -415,7 +415,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                                     shouldRemoveAfterUpload: false)
                         group.enter()
                         shouldCleanFolder = true
-                        uploadQueue.observeFileUploaded(self, fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
+                        var observationToken: ObservationToken?
+                        observationToken = uploadQueue.observeFileUploaded(self, fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
+                            observationToken?.cancel()
                             if let error = uploadFile.error {
                                 shouldCleanFolder = false
                                 DDLogError("[OPEN-IN-PLACE UPLOAD] Error while uploading: \(error)")
