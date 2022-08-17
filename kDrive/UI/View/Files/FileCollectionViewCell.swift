@@ -100,10 +100,11 @@ protocol FileCellDelegate: AnyObject {
         imageView.layer.masksToBounds = true
         imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
         // Fetch thumbnail
-        thumbnailDownloadTask?.cancel()
-        thumbnailDownloadTask = file.getThumbnail { image, _ in
-            imageView.image = image
-            imageView.backgroundColor = nil
+        thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
+            if self?.file.id == requestFileId {
+                imageView.image = image
+                imageView.backgroundColor = nil
+            }
         }
     }
 
@@ -203,6 +204,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         availableOfflineImageView?.isHidden = true
         downloadProgressView?.isHidden = true
         downloadProgressView?.updateProgress(0, animated: false)
+        viewModel.thumbnailDownloadTask?.cancel()
     }
 
     func initStyle(isFirst: Bool, isLast: Bool) {
