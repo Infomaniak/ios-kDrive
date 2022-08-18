@@ -64,6 +64,11 @@ class OnboardingViewController: UIViewController {
         pageControl.addTarget(self, action: #selector(pageChanged), for: .valueChanged)
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        endBackgroundTask()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         signInButton.setLoading(false)
