@@ -6,13 +6,14 @@ let projectPath = "."
 let appPath = "Targets/\(nameAttribute)"
 let kitFrameworkPath = "Targets/\(nameAttribute)Kit"
 let uiFrameworkPath = "Targets/\(nameAttribute)UI"
+let taskPath = "Plugins/\(nameAttribute)"
 
 func templatePath(_ path: String) -> Path {
     "../\(path)"
 }
 
 let template = Template(
-    description: "Default template",
+    description: "SwiftUI template",
     attributes: [
         nameAttribute,
         platformAttribute,
@@ -27,27 +28,23 @@ let template = Template(
             templatePath: templatePath("AppProject.stencil")
         ),
         .file(
-            path: appPath + "/Sources/AppDelegate.swift",
-            templatePath: "AppDelegate.stencil"
+            path: appPath + "/Sources/\(nameAttribute)App.swift",
+            templatePath: "app.stencil"
         ),
         .file(
-            path: appPath + "/Sources/SceneDelegate.swift",
-            templatePath: "SceneDelegate.stencil"
-        ),
-        .file(
-            path: appPath + "/Sources/main.swift",
-            templatePath: "main.stencil"
-        ),
-        .file(
-            path: appPath + "/Sources/ContentView.swift",
+            path: uiFrameworkPath + "/Sources/ContentView.swift",
             templatePath: "ContentView.stencil"
         ),
-        .file(
-            path: appPath + "/Resources/LaunchScreen.storyboard",
-            templatePath: templatePath("LaunchScreen+\(platformAttribute).stencil")
+        .directory(
+            path: appPath + "/Resources",
+            sourcePath: "\(platformAttribute)/Assets.xcassets"
+        ),
+        .directory(
+            path: appPath + "/Resources",
+            sourcePath: "Preview Content"
         ),
         .file(
-            path: appPath + "/Tests/AppTests.swift",
+            path: appPath + "/Tests/\(nameAttribute)Tests.swift",
             templatePath: templatePath("AppTests.stencil")
         ),
         .file(
@@ -59,12 +56,24 @@ let template = Template(
             templatePath: templatePath("/KitTests.stencil")
         ),
         .file(
-            path: uiFrameworkPath + "/Sources/\(nameAttribute)UI.swift",
-            templatePath: templatePath("UISource.stencil")
-        ),
-        .file(
             path: uiFrameworkPath + "/Tests/\(nameAttribute)UITests.swift",
             templatePath: templatePath("/UITests.stencil")
+        ),
+        .file(
+            path: taskPath + "/Sources/tuist-my-cli/main.swift",
+            templatePath: templatePath("/main.stencil")
+        ),
+        .file(
+            path: taskPath + "/ProjectDescriptionHelpers/LocalHelper.swift",
+            templatePath: templatePath("/LocalHelper.stencil")
+        ),
+        .file(
+            path: taskPath + "/Package.swift",
+            templatePath: templatePath("/Package.stencil")
+        ),
+        .file(
+            path: taskPath + "/Plugin.swift",
+            templatePath: templatePath("/Plugin.stencil")
         ),
         .file(
             path: ".gitignore",
