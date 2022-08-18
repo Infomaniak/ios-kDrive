@@ -258,7 +258,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         }
@@ -343,7 +343,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                     self.navigationController?.topViewController?.present(driveFloatingPanelController, animated: true)
                     self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: dropBox)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             } else {
                 do {
@@ -354,7 +354,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         }

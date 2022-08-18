@@ -94,6 +94,8 @@ public struct DriveError: Error, Equatable {
     public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
     public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)
     public static let photoLibraryWriteAccessDenied = DriveError(type: .localError, code: "photoLibraryWriteAccessDenied", localizedString: KDriveResourcesStrings.Localizable.errorPhotoLibraryAccessLimited)
+    public static let downloadFailed = DriveError(type: .localError, code: "errorDownload", localizedString: KDriveResourcesStrings.Localizable.errorDownload)
+    public static let cachingFailed = DriveError(type: .localError, code: "errorCache", localizedString: KDriveResourcesStrings.Localizable.errorCache)
 
     public static let unknownError = DriveError(type: .localError, code: "unknownError")
 

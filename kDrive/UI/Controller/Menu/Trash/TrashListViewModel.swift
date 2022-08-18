@@ -118,7 +118,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
                 forceRefresh()
             }
         } catch {
-            UIConstants.showSnackBar(message: error.localizedDescription)
+            UIConstants.showSnackBarIfNeeded(error: error)
         }
     }
 
@@ -151,7 +151,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
                 try await group.waitForAll()
             }
         } catch {
-            UIConstants.showSnackBar(message: error.localizedDescription)
+            UIConstants.showSnackBarIfNeeded(error: error)
         }
     }
 
@@ -244,7 +244,7 @@ private enum TrashViewModelHelper {
             await UIConstants.showSnackBar(message: message)
             return definitelyDeletedFiles
         } catch {
-            await UIConstants.showSnackBar(message: error.localizedDescription)
+            await UIConstants.showSnackBarIfNeeded(error: error)
             return []
         }
     }

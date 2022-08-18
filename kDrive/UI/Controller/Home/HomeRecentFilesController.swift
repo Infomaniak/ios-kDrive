@@ -124,7 +124,7 @@ class HomeRecentFilesController {
                 }
                 self.homeViewController?.reloadWith(fetchedFiles: .file(self.files), isEmpty: self.empty)
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
             self.loading = false
         }

@@ -92,7 +92,7 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
             fileListViewController.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(fileListViewController, animated: true)
         } else {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
         }
     }
 }

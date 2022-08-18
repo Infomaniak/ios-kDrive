@@ -369,7 +369,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     _ = PhotoLibraryUploader.instance.addNewPicturesToUploadQueue()
                 }
             } catch {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 DDLogError("Error while updating user account: \(error)")
             }
         }

@@ -258,7 +258,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                     _ = try await driveFileManager.createOrRemoveShareLink(for: proxyFile, right: right)
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .automatic)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         } else {
@@ -280,7 +280,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                         }
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         }
@@ -301,7 +301,7 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
                     self.tableView.reloadSections([0, 2], with: .automatic)
                 }
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
     }

@@ -134,7 +134,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDelete)
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
             present(alert, animated: true)

@@ -359,7 +359,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                             }
                         } else {
                             setLoading(false, action: action, at: indexPath)
-                            UIConstants.showSnackBar(message: error.localizedDescription)
+                            UIConstants.showSnackBarIfNeeded(error: error)
                         }
                     }
                 }
@@ -424,8 +424,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             dismiss(animated: true)
         case .offline:
             FileActionsHelper.offline(files: [file], driveFileManager: driveFileManager, filesNotAvailable: nil) { _, error in
-                if error != nil && error as? DriveError != .taskCancelled && error as? DriveError != .taskRescheduled {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorCache)
+                if let error = error {
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
             collectionView.reloadItems(at: [IndexPath(item: 0, section: 0), indexPath])
@@ -457,7 +457,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             present(selectFolderNavigationController, animated: true)
         case .duplicate:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 return
             }
             let pathString = file.name as NSString
@@ -472,7 +472,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     _ = try await self.driveFileManager.duplicate(file: proxyFile, duplicateName: duplicateName)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
             alert.textFieldConfiguration = .fileNameConfiguration
@@ -482,7 +482,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             present(alert, animated: true)
         case .rename:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 return
             }
             let placeholder = file.isDirectory ? KDriveResourcesStrings.Localizable.hintInputDirName : KDriveResourcesStrings.Localizable.hintInputFileName
@@ -494,7 +494,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 do {
                     _ = try await self.driveFileManager.rename(file: proxyFile, newName: newName)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
             alert.textFieldConfiguration = .fileNameConfiguration
@@ -504,7 +504,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             present(alert, animated: true)
         case .delete:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalMoveTrashDescription(file.name), boldText: file.name)
@@ -534,13 +534,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                         parentFile: proxyParent,
                         driveFileManager: self.driveFileManager)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
             present(alert, animated: true)
         case .leaveShare:
             guard file.isManagedByRealm else {
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+                UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 return
             }
             let attrString = NSMutableAttributedString(string: KDriveResourcesStrings.Localizable.modalLeaveShareDescription(file.name), boldText: file.name)
@@ -554,7 +554,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                     self.presentingParent?.navigationController?.popViewController(animated: true)
                     self.dismiss(animated: true)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
             present(alert, animated: true)
@@ -587,8 +587,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             DispatchQueue.main.async {
                 if error == nil {
                     completion()
-                } else if error != .taskCancelled && error != .taskRescheduled {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
+                } else {
+                    UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
                 }
             }
         }

@@ -262,7 +262,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                             url: targetURL,
                             name: url.lastPathComponent))
                 } catch {
-                    UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 }
             }
         }

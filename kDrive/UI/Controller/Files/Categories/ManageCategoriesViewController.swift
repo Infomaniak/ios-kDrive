@@ -299,7 +299,7 @@ class ManageCategoriesViewController: UITableViewController {
                 } catch {
                     category.isSelected = false
                     tableView.deselectRow(at: indexPath, animated: true)
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         }
@@ -326,7 +326,7 @@ class ManageCategoriesViewController: UITableViewController {
                 } catch {
                     category.isSelected = true
                     tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         }

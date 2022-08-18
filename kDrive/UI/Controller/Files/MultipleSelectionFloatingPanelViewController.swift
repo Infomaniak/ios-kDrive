@@ -220,9 +220,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     break
                 }
             } else {
-                if self.downloadError != .taskCancelled {
-                    UIConstants.showSnackBar(message: self.downloadError?.localizedDescription ?? KDriveResourcesStrings.Localizable.errorGeneric)
-                }
+                UIConstants.showSnackBarIfNeeded(error: self.downloadError ?? DriveError.unknownError)
             }
             self.files = self.changedFiles ?? []
             self.downloadInProgress = false

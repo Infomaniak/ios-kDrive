@@ -372,7 +372,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
                     self.navigationController?.popViewController(animated: true)
                 }
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
         MatomoUtils.trackShareLinkSettings(protectWithPassword: getSetting(for: .optionPassword),

@@ -99,7 +99,7 @@ class DroppableFileListViewModel {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
                     }
                 } else {
-                    UIConstants.showSnackBar(message: DriveError.unknownError.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 }
             }
         }
@@ -122,7 +122,7 @@ class DroppableFileListViewModel {
                     try FileImportHelper.instance.upload(files: importedFiles, in: frozenDestination, drive: self.driveFileManager.drive)
                 } catch {
                     Task {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
+                        UIConstants.showSnackBarIfNeeded(error: error)
                     }
                 }
             }

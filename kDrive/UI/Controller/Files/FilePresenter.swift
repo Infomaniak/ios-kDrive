@@ -68,11 +68,11 @@ class FilePresenter {
                     let parent = try await driveFileManager.file(id: file.parentId)
                     present(driveFileManager: driveFileManager, file: parent, files: [], normalFolderHierarchy: true, animated: animated)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         } else {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
         }
     }
 
@@ -110,7 +110,7 @@ class FilePresenter {
                                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorRightModification)
                                 }
                             } catch {
-                                UIConstants.showSnackBar(message: error.localizedDescription)
+                                UIConstants.showSnackBarIfNeeded(error: error)
                             }
                         }
                     }
@@ -131,7 +131,7 @@ class FilePresenter {
                 DownloadQueue.instance.temporaryDownload(file: file) { error in
                     Task {
                         if let error = error {
-                            UIConstants.showSnackBar(message: error.localizedDescription)
+                            UIConstants.showSnackBarIfNeeded(error: error)
                             completion?(false)
                         } else {
                             self.presentBookmark(for: file, completion: completion)

@@ -64,10 +64,24 @@ public enum UIConstants {
 
                     UIConstants.showSnackBar(message: cancelSuccessMessage)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
         })
+    }
+
+    @MainActor
+    public static func showSnackBarIfNeeded(error: Error) {
+        if (ReachabilityListener.instance.currentStatus == .offline || ReachabilityListener.instance.currentStatus == .undefined)
+            && (error.asAFError?.isRequestAdaptationError == true || error.asAFError?.isSessionTaskError == true) {
+            // No network and refresh token failed
+        } else if error.asAFError?.isExplicitlyCancelledError == true || (error as? DriveError) == .searchCancelled {
+            // User cancelled the request
+        } else if (error as? DriveError) == .taskCancelled || (error as? DriveError) == .taskRescheduled {
+            // Task was rescheduled
+        } else {
+            UIConstants.showSnackBar(message: error.localizedDescription)
+        }
     }
 
     public static func openUrl(_ string: String, from viewController: UIViewController) {
