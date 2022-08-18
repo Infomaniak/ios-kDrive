@@ -87,13 +87,11 @@ class DroppableFileListViewModel {
     func handleLocalDrop(localItemProviders: [NSItemProvider], destinationDirectory: File) {
         let frozenDestinationDirectory = destinationDirectory.freezeIfNeeded()
         for localFile in localItemProviders {
-            localFile.loadObject(ofClass: DragAndDropFile.self) { [weak self] itemProvider, _ in
-                guard let self = self else { return }
+            localFile.loadObject(ofClass: DragAndDropFile.self) { [destinationDriveFileManager = driveFileManager] itemProvider, _ in
                 if let itemProvider = itemProvider as? DragAndDropFile,
                    let file = itemProvider.file {
-                    let destinationDriveFileManager = self.driveFileManager
                     if itemProvider.driveId == destinationDriveFileManager.drive.id && itemProvider.userId == destinationDriveFileManager.drive.userId {
-                        FileActionsHelper.instance.move(file: file, to: frozenDestinationDirectory, driveFileManager: self.driveFileManager)
+                        FileActionsHelper.instance.move(file: file, to: frozenDestinationDirectory, driveFileManager: destinationDriveFileManager)
                     } else {
                         // TODO: enable copy from different driveFileManager
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
