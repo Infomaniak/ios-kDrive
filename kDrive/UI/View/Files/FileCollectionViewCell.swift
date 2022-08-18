@@ -204,7 +204,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         availableOfflineImageView?.isHidden = true
         downloadProgressView?.isHidden = true
         downloadProgressView?.updateProgress(0, animated: false)
-        viewModel.thumbnailDownloadTask?.cancel()
+        viewModel?.thumbnailDownloadTask?.cancel()
     }
 
     func initStyle(isFirst: Bool, isLast: Bool) {
