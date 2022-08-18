@@ -496,8 +496,8 @@ class PreviewViewController: UIViewController, PreviewContentCellDelegate {
                 if error == nil {
                     completion()
                     currentCell.observeProgress(false, file: self.currentFile)
-                } else if error != .taskCancelled && error != .taskRescheduled {
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
+                } else {
+                    UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
                 }
             }
         }

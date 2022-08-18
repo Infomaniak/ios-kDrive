@@ -214,7 +214,7 @@ extension EditCategoryViewController: FooterButtonDelegate {
                     navigationController?.popViewController(animated: true)
                 }
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
     }

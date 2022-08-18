@@ -60,7 +60,7 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
                         viewController.dismiss(animated: true)
                         open(driveFileManager: driveFileManager, file: newFile, viewController: viewController)
                     } catch {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
+                        UIConstants.showSnackBarIfNeeded(error: error)
                     }
                 }
             }

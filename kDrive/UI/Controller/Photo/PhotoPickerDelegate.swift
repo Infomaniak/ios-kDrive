@@ -32,7 +32,7 @@ class PhotoPickerDelegate: NSObject {
     @MainActor
     private func handleError(_ error: Error) {
         DDLogError("Error while uploading file: \(error)")
-        UIConstants.showSnackBar(message: error.localizedDescription)
+        UIConstants.showSnackBarIfNeeded(error: error)
     }
 
     @MainActor

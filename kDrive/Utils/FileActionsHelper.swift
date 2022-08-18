@@ -34,7 +34,7 @@ public class FileActionsHelper {
     public func openWith(file: File, from rect: CGRect, in view: UIView, delegate: UIDocumentInteractionControllerDelegate) {
         guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
             DDLogError("Open in place directory not found")
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return
         }
 
@@ -66,7 +66,7 @@ public class FileActionsHelper {
             interactionController.presentOpenInMenu(from: rect, in: view, animated: true)
         } catch {
             DDLogError("Cannot present interaction controller: \(error)")
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorGeneric)
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
         }
     }
 
@@ -83,10 +83,11 @@ public class FileActionsHelper {
                         cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
                         cancelableResponse: cancelResponse,
                         parentFile: proxyParent,
-                        driveFileManager: driveFileManager)
+                        driveFileManager: driveFileManager
+                    )
                     completion?(true)
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                     completion?(false)
                 }
         }
@@ -95,8 +96,8 @@ public class FileActionsHelper {
     #if !ISEXTENSION
     public static func save(file: File, from viewController: UIViewController? = nil, showSuccessSnackBar: Bool = true) {
         let presenterViewController = viewController != nil
-        ? viewController
-        : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
+            ? viewController
+            : (UIApplication.shared.delegate as! AppDelegate).topMostViewController
         guard presenterViewController as? UIDocumentPickerViewController == nil else { return }
         switch file.convertedType {
         case .image:
@@ -130,10 +131,10 @@ public class FileActionsHelper {
             } catch let error as DriveError where error == .photoLibraryWriteAccessDenied {
                 UIConstants.showSnackBar(message: error.localizedDescription,
                                          action: .init(title: KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings) {
-                    guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
-                          UIApplication.shared.canOpenURL(settingsURL) else { return }
-                    UIApplication.shared.open(settingsURL)
-                })
+                                             guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
+                                                   UIApplication.shared.canOpenURL(settingsURL) else { return }
+                                             UIApplication.shared.open(settingsURL)
+                                         })
             } catch {
                 DDLogError("Cannot save media: \(error)")
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSave)

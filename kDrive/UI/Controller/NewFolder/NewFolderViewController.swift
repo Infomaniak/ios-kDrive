@@ -406,7 +406,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createPrivateFolderSucces)
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
                 footer.footerButton.setLoading(false)
             }
@@ -424,7 +424,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createCommonFolderSucces)
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
                 footer.footerButton.setLoading(false)
             }
@@ -453,7 +453,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                         self.showDropBoxLink(url: directory.dropbox?.url ?? "", fileName: directory.name)
                     }
                 } catch {
-                    UIConstants.showSnackBar(message: error.localizedDescription)
+                    UIConstants.showSnackBarIfNeeded(error: error)
                 }
                 footer.footerButton.setLoading(false)
             }

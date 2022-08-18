@@ -234,7 +234,7 @@ class FileDetailViewController: UIViewController {
 
                 self.reloadTableView()
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
     }
@@ -265,7 +265,7 @@ class FileDetailViewController: UIViewController {
                 self.activitiesInfo.page += 1
                 self.activitiesInfo.hasNextPage = pagedActivities.count == Endpoint.itemsPerPage
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
             self.activitiesInfo.isLoading = false
         }
@@ -292,7 +292,7 @@ class FileDetailViewController: UIViewController {
                     self.reloadTableView()
                 }
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
             self.commentsInfo.isLoading = false
         }
@@ -857,7 +857,7 @@ extension FileDetailViewController: FileCommentDelegate {
                     self.tableView.reloadRows(at: [IndexPath(row: index, section: 1)], with: .automatic)
                 }
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
     }

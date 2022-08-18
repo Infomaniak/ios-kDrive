@@ -324,7 +324,7 @@ class FileListViewModel: SelectDelegate {
                             parentFile: proxyParent,
                             driveFileManager: driveFileManager)
                     } catch {
-                        UIConstants.showSnackBar(message: error.localizedDescription)
+                        UIConstants.showSnackBarIfNeeded(error: error)
                     }
                 }
             default:

@@ -81,7 +81,7 @@ enum UniversalLinksHelper {
                 await appDelegate.present(file: file, driveFileManager: driveFileManager, office: office)
             } catch {
                 DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.drive.id) - \(id)]: \(error)")
-                await UIConstants.showSnackBar(message: error.localizedDescription)
+                await UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
     }

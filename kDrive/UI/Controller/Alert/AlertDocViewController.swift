@@ -98,7 +98,7 @@ class AlertDocViewController: AlertFieldViewController {
                 file = try await driveFileManager.createFile(in: proxyDirectory, name: name.addingExtension(fileType), type: fileType)
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackbarFileCreateConfirmation)
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
             self.setLoading(false)
             let currentRootViewController = self.view.window?.rootViewController

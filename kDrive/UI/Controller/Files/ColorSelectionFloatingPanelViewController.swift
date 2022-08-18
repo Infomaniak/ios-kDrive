@@ -197,7 +197,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 self.dismiss(animated: true)
             } catch {
                 self.completionHandler?(false)
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
                 self.dismiss(animated: true)
             }
         }

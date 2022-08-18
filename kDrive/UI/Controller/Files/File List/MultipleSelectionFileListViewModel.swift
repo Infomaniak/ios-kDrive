@@ -250,7 +250,7 @@ class MultipleSelectionFileListViewModel {
                 }
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(selectedItems.count, destinationDirectory.name))
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
             isMultipleSelectionEnabled = false
         }
@@ -283,7 +283,7 @@ class MultipleSelectionFileListViewModel {
 
                 UIConstants.showSnackBar(message: message)
             } catch {
-                UIConstants.showSnackBar(message: error.localizedDescription)
+                UIConstants.showSnackBarIfNeeded(error: error)
             }
 
             isMultipleSelectionEnabled = false
