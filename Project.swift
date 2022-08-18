@@ -81,7 +81,7 @@ let project = Project(name: "kDrive",
                                      .package(product: "MarkdownKit"),
                                      .package(product: "MatomoTracker"),
                                      .package(product: "SwiftRegex"),
-                                     .sdk(name: "StoreKit.framework", status: .required)
+                                     .sdk(name: "StoreKit", type: .framework, status: .required)
                                  ],
                                  settings: .settings(base: Constants.baseSettings),
                                  environment: ["hostname": "\(ProcessInfo.processInfo.hostName)."]),
@@ -155,7 +155,7 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: Constants.deploymentTarget,
                                  infoPlist: .file(path: "kDriveFileProvider/Info.plist"),
                                  sources: "kDriveFileProvider/**",
-                                 headers: Headers(project: "kDriveFileProvider/**"),
+                                 headers: .headers(project: "kDriveFileProvider/**"),
                                  entitlements: "kDriveFileProvider/FileProvider.entitlements",
                                  dependencies: [
                                      .target(name: "kDriveCore")

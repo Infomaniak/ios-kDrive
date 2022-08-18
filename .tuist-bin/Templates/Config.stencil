@@ -1,5 +1,7 @@
 import ProjectDescription
 
 let config = Config(
-  generationOptions: []
+    plugins: [
+        .local(path: .relativeToManifest("../../Plugins/{{ name }}")),
+    ]
 )
