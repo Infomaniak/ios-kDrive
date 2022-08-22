@@ -94,13 +94,18 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
     var progressObservers: [String: NSKeyValueObservation] = [:]
     var operations = [Operation]()
 
+    private var syncQueue = DispatchQueue(
+        label: "\(Bundle.main.bundleIdentifier ?? "com.infomaniak.drive").BackgroundUploadSessionManager.syncqueue",
+        attributes: .concurrent
+    )
+
     override private init() {
         super.init()
         backgroundSession = getSession(for: UploadQueue.backgroundIdentifier)
     }
 
     public func getSession(for identifier: String) -> URLSession {
-        if let session = managedSessions[identifier] {
+        if let session = syncQueue.sync(execute: { managedSessions[identifier] }) {
             return session
         }
 
@@ -113,13 +118,17 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         backgroundUrlSessionConfiguration.timeoutIntervalForResource = 60 * 60 * 24 * 3 // 3 days before giving up
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
-        managedSessions[identifier] = session
+        syncQueue.async(flags: .barrier) { [weak self] in
+            self?.managedSessions[identifier] = session
+        }
         return session
     }
 
     public func handleEventsForBackgroundURLSession(identifier: String, completionHandler: @escaping BackgroundCompletionHandler) {
         _ = getSession(for: identifier)
-        backgroundCompletionHandlers[identifier] = completionHandler
+        syncQueue.async(flags: .barrier) { [weak self] in
+            self?.backgroundCompletionHandlers[identifier] = completionHandler
+        }
     }
 
     public func reconnectBackgroundTasks() {
@@ -127,17 +136,23 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
         let uniqueSessionIdentifiers = Set(uploadedFiles.compactMap(\.sessionId))
         for sessionIdentifier in uniqueSessionIdentifiers {
             let session = getSession(for: sessionIdentifier)
-            session.getTasksWithCompletionHandler { _, uploadTasks, _ in
-                for task in uploadTasks {
-                    if let sessionUrl = task.originalRequest?.url?.absoluteString,
-                       let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-                       .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
-                        self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId] _, value in
-                            guard let newValue = value.newValue else {
-                                return
-                            }
-                            UploadQueue.instance.publishProgress(newValue, for: fileId)
+            session.getTasksWithCompletionHandler { [weak self] _, uploadTasks, _ in
+                self?.handleReconnectedTasks(tasks: uploadTasks, for: session)
+            }
+        }
+    }
+
+    private func handleReconnectedTasks(tasks: [URLSessionUploadTask], for session: URLSession) {
+        syncQueue.async(flags: .barrier) {
+            for task in tasks {
+                if let sessionUrl = task.originalRequest?.url?.absoluteString,
+                   let fileId = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first?.id {
+                    self.progressObservers[session.identifier(for: task)] = task.progress.observe(\.fractionCompleted, options: .new) { [fileId] _, value in
+                        guard let newValue = value.newValue else {
+                            return
                         }
+                        UploadQueue.instance.publishProgress(newValue, for: fileId)
                     }
                 }
             }
@@ -159,28 +174,36 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     public func uploadTask(with request: URLRequest, fromFile fileURL: URL, completionHandler: @escaping CompletionHandler) -> Task {
         let task = backgroundSession.uploadTask(with: request, fromFile: fileURL)
-        tasksCompletionHandler[backgroundSession.identifier(for: task)] = completionHandler
+        syncQueue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
+            self.tasksCompletionHandler[self.backgroundSession.identifier(for: task)] = completionHandler
+        }
         return task
     }
 
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         let taskIdentifier = session.identifier(for: dataTask)
-        if tasksData[taskIdentifier] != nil {
-            tasksData[taskIdentifier]!.append(data)
-        } else {
-            tasksData[taskIdentifier] = data
+        syncQueue.async(flags: .barrier) { [weak self] in
+            if self?.tasksData[taskIdentifier] != nil {
+                self?.tasksData[taskIdentifier]!.append(data)
+            } else {
+                self?.tasksData[taskIdentifier] = data
+            }
         }
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let taskIdentifier = session.identifier(for: task)
         if let task = task as? URLSessionUploadTask {
-            getCompletionHandler(for: task, session: session)?(tasksData[taskIdentifier], task.response, error)
+            let taskData = syncQueue.sync { tasksData[taskIdentifier] }
+            getCompletionHandler(for: task, session: session)?(taskData, task.response, error)
         }
-        progressObservers[taskIdentifier]?.invalidate()
-        progressObservers[taskIdentifier] = nil
-        tasksData[taskIdentifier] = nil
-        tasksCompletionHandler[taskIdentifier] = nil
+        syncQueue.async(flags: .barrier) { [weak self] in
+            self?.progressObservers[taskIdentifier]?.invalidate()
+            self?.progressObservers[taskIdentifier] = nil
+            self?.tasksData[taskIdentifier] = nil
+            self?.tasksCompletionHandler[taskIdentifier] = nil
+        }
     }
 
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
@@ -202,46 +225,55 @@ public final class BackgroundUploadSessionManager: NSObject, BackgroundSessionMa
 
     func getCompletionHandler(for task: Task, session: URLSession) -> CompletionHandler? {
         let taskIdentifier = session.identifier(for: task)
-        if let completionHandler = tasksCompletionHandler[taskIdentifier] {
+        if let completionHandler = syncQueue.sync(execute: { tasksCompletionHandler[taskIdentifier] }) {
             return completionHandler
         } else if let sessionUrl = task.originalRequest?.url?.absoluteString,
                   let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
                   .filter(NSPredicate(format: "uploadDate = nil AND sessionUrl = %@", sessionUrl)).first {
             let operation = UploadOperation(file: file, task: task, urlSession: self)
-            tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
-            operations.append(operation)
+            syncQueue.async(flags: .barrier) { [weak self] in
+                self?.tasksCompletionHandler[taskIdentifier] = operation.uploadCompletion
+                self?.operations.append(operation)
+            }
             return operation.uploadCompletion
         } else {
-            var filename: String?
-            var hasUploadDate = false
-
-            if let sessionUrl = task.originalRequest?.url?.absoluteString,
-               let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
-               .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first {
-                filename = file.name
-                hasUploadDate = file.uploadDate != nil
-            }
-
-            DDLogError("[BackgroundUploadSession] No completion handler found for session \(session.identifier) task url \(task.originalRequest?.url?.absoluteString ?? "")")
-            SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
-                scope.setContext(value: [
-                    "Session Id": session.identifier,
-                    "Task url": task.originalRequest?.url?.absoluteString ?? "",
-                    "Task error": task.error?.localizedDescription ?? "",
-                    "Upload file": filename ?? "",
-                    "Has Upload Date": hasUploadDate
-                ], key: "Session")
-            }
+            logMissingCompletionHandler(for: task, session: session)
             return nil
+        }
+    }
+
+    private func logMissingCompletionHandler(for task: Task, session: URLSession) {
+        var filename: String?
+        var hasUploadDate = false
+
+        if let sessionUrl = task.originalRequest?.url?.absoluteString,
+           let file = DriveFileManager.constants.uploadsRealm.objects(UploadFile.self)
+           .filter(NSPredicate(format: "sessionUrl = %@", sessionUrl)).first {
+            filename = file.name
+            hasUploadDate = file.uploadDate != nil
+        }
+
+        DDLogError("[BackgroundUploadSession] No completion handler found for session \(session.identifier) task url \(task.originalRequest?.url?.absoluteString ?? "")")
+        SentrySDK.capture(message: "URLSession getCompletionHandler - No completion handler found") { scope in
+            scope.setContext(value: [
+                "Session Id": session.identifier,
+                "Task url": task.originalRequest?.url?.absoluteString ?? "",
+                "Task error": task.error?.localizedDescription ?? "",
+                "Upload file": filename ?? "",
+                "Has Upload Date": hasUploadDate
+            ], key: "Session")
         }
     }
 
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
         guard let identifier = session.configuration.identifier else { return }
 
-        DispatchQueue.main.async {
-            self.backgroundCompletionHandlers[identifier]?()
-            self.backgroundCompletionHandlers[identifier] = nil
+        let completionHandler = syncQueue.sync { backgroundCompletionHandlers[identifier] }
+        DispatchQueue.main.async { [weak self] in
+            completionHandler?()
+            self?.syncQueue.async(flags: .barrier) {
+                self?.backgroundCompletionHandlers[identifier] = nil
+            }
         }
     }
 }
