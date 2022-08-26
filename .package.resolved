@@ -149,8 +149,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/airbnb/HorizonCalendar.git",
       "state" : {
-        "revision" : "93b188c52650b3999eeb20cf256b69715de515ef",
-        "version" : "1.13.4"
+        "revision" : "406d93637bd99c8606163bd69a9c81e52def6420",
+        "version" : "1.14.1"
       }
     },
     {
@@ -212,8 +212,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/airbnb/lottie-ios.git",
       "state" : {
-        "revision" : "b04b773957e3e359730590c2e7c16d8c3874ec50",
-        "version" : "3.4.1"
+        "revision" : "4ca8023b820b7d5d5ae1e2637c046e3dab0f45d0",
+        "version" : "3.4.2"
       }
     },
     {
@@ -275,8 +275,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-core",
       "state" : {
-        "revision" : "2b8def17bb8e0cddbcc754db6b6466b8487feebf",
-        "version" : "12.5.0"
+        "revision" : "6f6a0f415bd33cf2ced4467e36a47f7c84f0a1d7",
+        "version" : "12.5.1"
       }
     },
     {
@@ -284,8 +284,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-swift",
       "state" : {
-        "revision" : "a107f5660b0b6067700923af7f107b6af73c546b",
-        "version" : "10.28.5"
+        "revision" : "5629961d905387b40fb2e1e9d8594c87a2ab8811",
+        "version" : "10.28.6"
       }
     },
     {
@@ -329,8 +329,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "8fc79cae9d03a5e623c52cc2dbd2df165a7832b0",
-        "version" : "1.4.3"
+        "revision" : "6fe203dc33195667ce1759bf0182975e4653ba1c",
+        "version" : "1.4.4"
       }
     },
     {
@@ -347,8 +347,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "0265283d3539ced108b9b8287eb3328c9d85acdc",
-        "version" : "2.21.0"
+        "revision" : "a6f9a034e5903024c6bac4ce2c56b157688d844f",
+        "version" : "2.22.0"
       }
     },
     {
@@ -365,8 +365,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-protobuf.git",
       "state" : {
-        "revision" : "fa0fcd43f272a260e7f734f23e6dc55e16fcae0a",
-        "version" : "1.19.1"
+        "revision" : "131a3fc8097ef2f30b4170e88cdc234b615b6a29",
+        "version" : "1.20.0"
       }
     },
     {
