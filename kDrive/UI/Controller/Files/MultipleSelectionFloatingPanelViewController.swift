@@ -27,7 +27,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     var files = [File]()
     var allItemsSelected = false
     var exceptFileIds: [Int]?
-    var parentId: Int?
+    var currentDirectory: File!
     var changedFiles: [File]? = []
     var downloadInProgress = false
     var reloadAction: (() -> Void)?
@@ -103,15 +103,24 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         case .favorite:
             group.enter()
             Task {
-                let isFavored = try await FileActionsHelper.favorite(files: files, driveFileManager: driveFileManager, completion: favorite)
+                let isFavored = try await FileActionsHelper.favorite(files: files,
+                                                                     driveFileManager: driveFileManager,
+                                                                     completion: favorite)
                 addAction = isFavored
                 group.leave()
             }
         case .manageCategories:
-            FileActionsHelper.manageCategories(files: files, driveFileManager: driveFileManager, from: self, group: group, presentingParent: presentingParent, fromMultiselect: true)
+            FileActionsHelper.manageCategories(files: files,
+                                               driveFileManager: driveFileManager,
+                                               from: self, group: group,
+                                               presentingParent: presentingParent,
+                                               fromMultiselect: true)
         case .folderColor:
-            FileActionsHelper.folderColor(files: files, driveFileManager: driveFileManager, from: self,
-                                          presentingParent: presentingParent, group: group) { isSuccess in
+            FileActionsHelper.folderColor(files: files,
+                                          driveFileManager: driveFileManager,
+                                          from: self,
+                                          presentingParent: presentingParent,
+                                          group: group) { isSuccess in
                 self.success = isSuccess
             }
         case .download:
@@ -165,6 +174,17 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         }
                         group.leave()
                     }
+                }
+            }
+        case .move:
+            FileActionsHelper.move(files: files,
+                                   exceptFileIds: exceptFileIds ?? [],
+                                   from: currentDirectory,
+                                   allItemsSelected: allItemsSelected,
+                                   observer: self,
+                                   driveFileManager: driveFileManager) { [weak self] viewController in
+                dismiss(animated: true) {
+                    self?.presentingParent?.present(viewController, animated: true)
                 }
             }
         case .duplicate:
@@ -250,8 +270,8 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         if files.count > Constants.bulkActionThreshold || allItemsSelected {
             // addAction = false // Prevents the snackbar to be displayed
             let action: BulkAction
-            if allItemsSelected, let parentId = parentId {
-                action = BulkAction(action: .copy, parentId: parentId, exceptFileIds: exceptFileIds, destinationDirectoryId: selectedDirectory.id)
+            if allItemsSelected {
+                action = BulkAction(action: .copy, parentId: currentDirectory.id, exceptFileIds: exceptFileIds, destinationDirectoryId: selectedDirectory.id)
             } else {
                 action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
             }
@@ -274,16 +294,16 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     private func downloadArchivedFiles(downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
-        Task { [proxyFiles = files.map { $0.proxify() }] in
+        Task { [proxyFiles = files.map { $0.proxify() }, currentProxyDirectory = currentDirectory.proxify()] in
             do {
                 let archiveBody: ArchiveBody
-                if allItemsSelected, let parentId = parentId {
-                    archiveBody = .init(parentId: parentId, exceptFileIds: exceptFileIds)
+                if allItemsSelected {
+                    archiveBody = .init(parentId: currentProxyDirectory.id, exceptFileIds: exceptFileIds)
                 } else {
                     archiveBody = .init(files: proxyFiles)
                 }
                 let response = try await driveFileManager.apiFetcher.buildArchive(drive: driveFileManager.drive, body: archiveBody)
-                self.currentArchiveId = response.uuid
+                currentArchiveId = response.uuid
                 guard let rootViewController = view.window?.rootViewController else { return }
                 DownloadQueue.instance.observeArchiveDownloaded(rootViewController, archiveId: response.uuid) { _, archiveUrl, error in
                     if let archiveUrl = archiveUrl {
@@ -293,9 +313,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                     }
                 }
                 DownloadQueue.instance.addToQueue(archiveId: response.uuid, driveId: self.driveFileManager.drive.id)
-                DispatchQueue.main.async {
-                    self.collectionView.reloadItems(at: [downloadCellPath])
-                }
+                self.collectionView.reloadItems(at: [downloadCellPath])
             } catch {
                 completion(.failure(error as? DriveError ?? .unknownError))
             }

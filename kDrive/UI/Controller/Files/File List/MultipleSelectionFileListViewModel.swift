@@ -115,23 +115,16 @@ class MultipleSelectionFileListViewModel {
     func actionButtonPressed(action: MultipleSelectionAction) {
         switch action {
         case .move:
-            // Current directory is always disabled.
-            var disabledDirectoriesIds = [currentDirectory.id]
-            // Selected items all have the same parent, add it to the disabled directories
-            if let firstSelectedParentId = selectedItems.first?.parentId,
-               firstSelectedParentId != currentDirectory.id,
-               selectedItems.allSatisfy({ $0.parentId == firstSelectedParentId }) {
-                disabledDirectoriesIds.append(firstSelectedParentId)
-            }
-            let selectFolderNavigationController = SelectFolderViewController
-                .instantiateInNavigationController(driveFileManager: driveFileManager,
-                                                   startDirectory: currentDirectory,
-                                                   disabledDirectoriesIdsSelection: disabledDirectoriesIds) { selectedFolder in
-                    Task { [weak self] in
-                        await self?.moveSelectedItems(to: selectedFolder)
-                    }
-                }
-            onPresentViewController?(.modal, selectFolderNavigationController, true)
+            FileActionsHelper.move(files: Array(selectedItems),
+                                   exceptFileIds: Array(exceptItemIds),
+                                   from: currentDirectory,
+                                   allItemsSelected: isSelectAllModeEnabled,
+                                   observer: self,
+                                   driveFileManager: driveFileManager) { [weak self] viewController in
+                                       self?.onPresentViewController?(.modal, viewController, true)
+                                   } completion: { [weak self] in
+                                       self?.isMultipleSelectionEnabled = false
+                                   }
         case .delete:
             var message: NSMutableAttributedString
             if selectedCount == 1,
@@ -230,32 +223,6 @@ class MultipleSelectionFileListViewModel {
         }
     }
 
-    func moveSelectedItems(to destinationDirectory: File) async {
-        if isSelectAllModeEnabled {
-            await bulkMoveAll(destinationId: destinationDirectory.id)
-        } else if selectedCount > Constants.bulkActionThreshold {
-            await bulkMoveFiles(Array(selectedItems), destinationId: destinationDirectory.id)
-        } else {
-            do {
-                // Move files only if needed
-                let proxySelectedItems = selectedItems.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
-                let proxyDestinationDirectory = destinationDirectory.proxify()
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    for proxyFile in proxySelectedItems {
-                        group.addTask { [self] in
-                            _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
-                        }
-                    }
-                    try await group.waitForAll()
-                }
-                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(selectedItems.count, destinationDirectory.name))
-            } catch {
-                UIConstants.showSnackBarIfNeeded(error: error)
-            }
-            isMultipleSelectionEnabled = false
-        }
-    }
-
     func deleteSelectedItems() async {
         if isSelectAllModeEnabled {
             await bulkDeleteAll()
@@ -292,16 +259,6 @@ class MultipleSelectionFileListViewModel {
 
     // MARK: - Bulk actions
 
-    private func bulkMoveFiles(_ files: [File], destinationId: Int) async {
-        let action = BulkAction(action: .move, fileIds: files.map(\.id), destinationDirectoryId: destinationId)
-        await performAndObserve(bulkAction: action)
-    }
-
-    private func bulkMoveAll(destinationId: Int) async {
-        let action = BulkAction(action: .move, parentId: currentDirectory.id, exceptFileIds: Array(exceptItemIds), destinationDirectoryId: destinationId)
-        await performAndObserve(bulkAction: action)
-    }
-
     private func bulkDeleteFiles(_ files: [File]) async {
         let action = BulkAction(action: .trash, fileIds: files.map(\.id))
         await performAndObserve(bulkAction: action)
@@ -313,90 +270,11 @@ class MultipleSelectionFileListViewModel {
     }
 
     public func performAndObserve(bulkAction: BulkAction) async {
-        isMultipleSelectionEnabled = false
-        do {
-            let (actionId, progressSnackBar) = try await perform(bulkAction: bulkAction)
-            observeAction(id: actionId, ofType: bulkAction.action, using: progressSnackBar)
-        } catch {
-            DDLogError("Error while performing bulk action: \(error)")
-        }
-    }
-
-    private func perform(bulkAction: BulkAction) async throws -> (actionId: String, snackBar: IKSnackBar?) {
-        let cancelableResponse = try await driveFileManager.apiFetcher.bulkAction(drive: driveFileManager.drive, action: bulkAction)
-
-        let message: String
-        let cancelMessage: String
-        switch bulkAction.action {
-        case .trash:
-            message = KDriveResourcesStrings.Localizable.fileListDeletionStartedSnackbar
-            cancelMessage = KDriveResourcesStrings.Localizable.allTrashActionCancelled
-        case .move:
-            message = KDriveResourcesStrings.Localizable.fileListMoveStartedSnackbar
-            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-        case .copy:
-            message = KDriveResourcesStrings.Localizable.fileListCopyStartedSnackbar
-            cancelMessage = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-        }
-        let progressSnack = UIConstants.showCancelableSnackBar(message: message,
-                                                               cancelSuccessMessage: cancelMessage,
-                                                               duration: .infinite,
-                                                               cancelableResponse: cancelableResponse,
-                                                               parentFile: currentDirectory.proxify(),
-                                                               driveFileManager: driveFileManager)
-        return (cancelableResponse.id, progressSnack)
-    }
-
-    private func observeAction(id: String, ofType actionType: BulkActionType, using progressSnack: IKSnackBar?) {
-        AccountManager.instance.mqService.observeActionProgress(self, actionId: id) { actionProgress in
-            Task { [weak self] in
-                switch actionProgress.progress.message {
-                case .starting:
-                    break
-                case .processing:
-                    switch actionType {
-                    case .trash:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    case .move:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    case .copy:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyInProgressSnackbar(actionProgress.progress.total - actionProgress.progress.todo, actionProgress.progress.total)
-                    }
-                    self?.loadActivitiesForCurrentDirectory()
-                case .done:
-                    switch actionType {
-                    case .trash:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListDeletionDoneSnackbar
-                    case .move:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListMoveDoneSnackbar
-                    case .copy:
-                        progressSnack?.message = KDriveResourcesStrings.Localizable.fileListCopyDoneSnackbar
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        progressSnack?.dismiss()
-                    }
-                    self?.loadActivitiesForCurrentDirectory()
-                case .canceled:
-                    let message: String
-                    switch actionType {
-                    case .trash:
-                        message = KDriveResourcesStrings.Localizable.allTrashActionCancelled
-                    case .move:
-                        message = KDriveResourcesStrings.Localizable.allFileMoveCancelled
-                    case .copy:
-                        message = KDriveResourcesStrings.Localizable.allFileDuplicateCancelled
-                    }
-                    UIConstants.showSnackBar(message: message)
-                    self?.loadActivitiesForCurrentDirectory()
-                }
-            }
-        }
-    }
-
-    private func loadActivitiesForCurrentDirectory() {
-        Task {
-            _ = try await driveFileManager.fileActivities(file: currentDirectory.proxify())
-            driveFileManager.notifyObserversWith(file: currentDirectory)
+        await FileActionsHelper.performAndObserve(bulkAction: bulkAction,
+                                                  from: currentDirectory,
+                                                  observer: self,
+                                                  driveFileManager: driveFileManager) { [weak self] in
+            self?.isMultipleSelectionEnabled = false
         }
     }
 }
