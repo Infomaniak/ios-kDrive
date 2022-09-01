@@ -294,11 +294,11 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     }
 
     private func downloadArchivedFiles(downloadCellPath: IndexPath, completion: @escaping (Result<URL, DriveError>) -> Void) {
-        Task { [proxyFiles = files.map { $0.proxify() }] in
+        Task { [proxyFiles = files.map { $0.proxify() }, currentProxyDirectory = currentDirectory.proxify()] in
             do {
                 let archiveBody: ArchiveBody
                 if allItemsSelected {
-                    archiveBody = .init(parentId: currentDirectory.id, exceptFileIds: exceptFileIds)
+                    archiveBody = .init(parentId: currentProxyDirectory.id, exceptFileIds: exceptFileIds)
                 } else {
                     archiveBody = .init(files: proxyFiles)
                 }
