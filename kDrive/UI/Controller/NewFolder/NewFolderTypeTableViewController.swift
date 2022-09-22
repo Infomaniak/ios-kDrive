@@ -94,7 +94,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if content[indexPath.row] == .dropbox && (driveFileManager.drive.pack == .free || driveFileManager.drive.pack == .solo) {
+        if content[indexPath.row] == .dropbox && driveFileManager.drive.packFunctionality?.dropbox == false {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DropBoxFloatingPanelViewController
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
