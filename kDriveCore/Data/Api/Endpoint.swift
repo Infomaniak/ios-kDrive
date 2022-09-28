@@ -24,7 +24,7 @@ import RealmSwift
 
 public extension ApiEnvironment {
     var driveHost: String {
-        return "drive.\(host)"
+        return "kdrive.\(host)"
     }
 
     var apiDriveHost: String {
