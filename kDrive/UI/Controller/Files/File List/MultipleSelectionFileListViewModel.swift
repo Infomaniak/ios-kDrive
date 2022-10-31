@@ -240,15 +240,7 @@ class MultipleSelectionFileListViewModel {
                     try await group.waitForAll()
                 }
 
-                let message: String
-                if selectedCount == 1,
-                   let firstItem = selectedItems.first {
-                    message = KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(firstItem.name)
-                } else {
-                    message = KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmationPlural(selectedCount)
-                }
-
-                UIConstants.showSnackBar(message: message)
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListMoveTrashConfirmationSnackbar(proxySelectedItems.count))
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }

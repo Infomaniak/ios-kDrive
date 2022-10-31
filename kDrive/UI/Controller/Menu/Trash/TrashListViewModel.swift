@@ -234,14 +234,7 @@ private enum TrashViewModelHelper {
                 return successFullyDeletedFile
             }
 
-            let message: String
-            if definitelyDeletedFiles.count == 1 {
-                message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmation(firstFilename)
-            } else {
-                message = KDriveResourcesStrings.Localizable.snackbarDeleteConfirmationPlural(definitelyDeletedFiles.count)
-            }
-
-            await UIConstants.showSnackBar(message: message)
+            await UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileDeletedPermanentlyConfirmationSnackbar(definitelyDeletedFiles.count))
             return definitelyDeletedFiles
         } catch {
             await UIConstants.showSnackBarIfNeeded(error: error)

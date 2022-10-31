@@ -354,5 +354,37 @@
 			<string>%d fichiers retirés de la disponibilité hors ligne</string>
 		</dict>
 	</dict>
+	<key>fileListMoveTrashConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un élément déplacé dans la corbeille</string>
+			<key>other</key>
+			<string>%d éléments déplacés dans la corbeille</string>
+		</dict>
+	</dict>
+	<key>trashedFileDeletedPermanentlyConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un élément supprimé définitivement</string>
+			<key>other</key>
+			<string>%d éléments supprimés définitivement</string>
+		</dict>
+	</dict>
 </dict>
 </plist>
