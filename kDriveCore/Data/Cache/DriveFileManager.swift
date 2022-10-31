@@ -476,7 +476,16 @@ public class DriveFileManager {
         do {
             return try await remoteFiles(in: DriveFileManager.searchFilesRootFile.proxify(),
                                          fetchFiles: {
-                                             let searchResults = try await apiFetcher.searchFiles(drive: drive, query: query, date: date, fileType: fileType, categories: categories, belongToAllCategories: belongToAllCategories, page: page, sortType: sortType)
+                                             let searchResults = try await apiFetcher.searchFiles(
+                                                 drive: drive,
+                                                 query: query,
+                                                 date: date,
+                                                 fileTypes: [fileType].compactMap { $0 },
+                                                 categories: categories,
+                                                 belongToAllCategories: belongToAllCategories,
+                                                 page: page,
+                                                 sortType: sortType
+                                             )
                                              return (searchResults, nil)
                                          },
                                          page: page,

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -25,6 +26,8 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var fileImage: UIImageView!
     @IBOutlet weak var darkLayer: UIView!
     @IBOutlet weak var checkmarkImage: UIImageView!
+    @IBOutlet weak var videoData: UIView!
+    @IBOutlet weak var durationLabel: IKLabel!
 
     override var isSelected: Bool {
         didSet {
@@ -77,11 +80,27 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         if roundedCorners {
             contentInsetView.cornerRadius = UIConstants.cornerRadius
         }
+        configureForVideo()
         configureForSelection()
     }
 
     private func configureForSelection() {
         guard selectionMode else { return }
         checkmarkImage.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+    }
+
+    private func configureForVideo() {
+        if file?.uti.conforms(to: .video) == true || file?.uti.conforms(to: .movie) == true {
+            let gradient = CAGradientLayer()
+            gradient.frame = videoData.bounds
+            gradient.colors = [
+                UIColor.black.withAlphaComponent(0).cgColor,
+                UIColor.black.cgColor
+            ]
+            videoData.layer.insertSublayer(gradient, at: 0)
+            videoData.isHidden = false
+        } else {
+            videoData.isHidden = true
+        }
     }
 }
