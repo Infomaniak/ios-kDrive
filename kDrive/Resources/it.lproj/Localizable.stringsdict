@@ -2,6 +2,38 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>fileListMoveTrashConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un elemento spostato nel cestino</string>
+			<key>other</key>
+			<string>%d elementi spostati nel cestino</string>
+		</dict>
+	</dict>
+	<key>trashedFileDeletedPermanentlyConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Un elemento eliminato definitivamente</string>
+			<key>other</key>
+			<string>%d elementi eliminati definitivamente</string>
+		</dict>
+	</dict>
 	<key>fileActivityCommentCreate</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

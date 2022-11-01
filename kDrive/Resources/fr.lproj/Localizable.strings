@@ -5,7 +5,7 @@
  * Locale: fr, French
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Tue, 26 Jul 2022 12:03:29 +0200
+ * Exported at: Mon, 31 Oct 2022 11:16:08 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -40,9 +40,6 @@
 
 /* loco:61695fa9dedbed08b1748152 */
 "addCategoriesTitle" = "Ajouter des catégories";
-
-/* loco:6049df4d5c2c3a04bc39790a */
-"addFileSelectUploadFile" = "Sélectionner un fichier à importer";
 
 /* loco:617a7155e4ec9a5deb713a03 */
 "addPassword" = "Protéger avec un mot de passe";
@@ -1154,6 +1151,12 @@
 /* loco:611b6e2b9ad5ad3c690608e3 */
 "fileListMoveStartedSnackbar" = "Début des déplacements";
 
+/* loco:62eaa060d01213511f5281e3 */
+"fileListMoveTrashConfirmationSnackbar" = "Un élément déplacé dans la corbeille";
+
+/* loco:62ea9ff6026cf83c626561b3 */
+"fileListMoveTrashConfirmationSnackbar-plural" = "%d éléments déplacés dans la corbeille";
+
 /* loco:6049df4d5c2c3a04bc397aa6 */
 "fileListMultiSelectedTitle" = "%d sélectionné";
 
@@ -1226,6 +1229,9 @@
 /* loco:6049df4d5c2c3a04bc3979ed */
 "folderDescription" = "Dossier privé ou partagé";
 
+/* loco:62e01023bdd522033953b8c5 */
+"galleryTitle" = "Galerie";
+
 /* loco:60c75903284c670edb7a7b72 */
 "goToInfomaniakWebsite" = "Pour créer un compte, rendez-vous sur le site officiel d'Infomaniak";
 
@@ -1243,9 +1249,6 @@
 
 /* loco:6049df4d5c2c3a04bc3979f1 */
 "homeLastFilesTitle" = "Mes dernières modifications";
-
-/* loco:6049df4d5c2c3a04bc3979f2 */
-"homeMyLastPictures" = "Mes dernières images";
 
 /* loco:6049df4d5c2c3a04bc3979f3 */
 "homeNetworkUnavailableDescription" = "Des éléments peuvent ne pas être visibles si l’appareil est hors connexion.";
@@ -1270,12 +1273,6 @@
 
 /* loco:614c87900f32e257ec7c34b5 */
 "importDirectory" = "Importations";
-
-/* loco:62989ec01960bf009c5ca342 */
-"importFailedDescription" = "%1$s n’a pas pu être importé";
-
-/* loco:62989ee53bb1931c832ecd62 */
-"importFailedDescription-plural" = "%1$d fichiers n’ont pas pu être importés";
 
 /* loco:6049df4d5c2c3a04bc3979fb */
 "inputExpirationDate" = "Date d’expiration";
@@ -1760,9 +1757,6 @@
 /* loco:6049df4d5c2c3a04bc397a9c */
 "snackbarDeleteConfirmation" = "%@ supprimé définitivement";
 
-/* loco:6049dfb2105eca5bbd0801b8 */
-"snackbarDeleteConfirmation-plural" = "%d éléments supprimés définitivement";
-
 /* loco:606d68683b8add66d9636d33 */
 "snackbarEmptyTrashConfirmation" = "La corbeille a été vidée";
 
@@ -1777,9 +1771,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a98 */
 "snackbarMoveTrashConfirmation" = "%@ déplacé dans la corbeille";
-
-/* loco:6049dfb2105eca5bbd0801b6 */
-"snackbarMoveTrashConfirmation-plural" = "%d éléments déplacés dans la corbeille";
 
 /* loco:60db1a607e10290db82d6d72 */
 "snackbarProcessingUploads" = "Traitement des importations";
@@ -2014,6 +2005,12 @@
 
 /* loco:6049df4d5c2c3a04bc397a7c */
 "trashTitle" = "Corbeille";
+
+/* loco:62ea9dff60bfdf445359b452 */
+"trashedFileDeletedPermanentlyConfirmationSnackbar" = "Un élément supprimé définitivement";
+
+/* loco:62ea981f2f0ec46bf97ff552 */
+"trashedFileDeletedPermanentlyConfirmationSnackbar-plural" = "%@ éléments supprimés définitivement";
 
 /* loco:6049df4d5c2c3a04bc397a79 */
 "trashedFileRestoreFileInSuccess" = "%1$@ restauré dans %2$@";

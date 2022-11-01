@@ -162,6 +162,22 @@
 			<string>%d Dateien offline verfügbar</string>
 		</dict>
 	</dict>
+	<key>trashedFileDeletedPermanentlyConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Ein Element dauerhaft gelöscht</string>
+			<key>other</key>
+			<string>%d Elemente endgültig gelöscht</string>
+		</dict>
+	</dict>
 	<key>fileListColorFolderConfirmationSnackbar</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -208,6 +224,22 @@
 			<string>Datei verschoben</string>
 			<key>other</key>
 			<string>%1$d Dateien verschoben</string>
+		</dict>
+	</dict>
+	<key>fileListMoveTrashConfirmationSnackbar</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@items@</string>
+		<key>items</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Ein Gegenstand wurde in den Papierkorb verschoben</string>
+			<key>other</key>
+			<string>%d Elemente in den Papierkorb verschoben</string>
 		</dict>
 	</dict>
 	<key>fileListMultiSelectedTitle</key>
