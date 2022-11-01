@@ -81,7 +81,14 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
     }
 
     override func loadView() {
+        /*
+         With iOS 16.1, WKWebView cannot handle SharedWorkers
+         We have to use this workaround while waiting for a solution from Apple
+         https://developer.apple.com/forums/thread/718757?answerId=734292022#734292022
+         */
         let webConfiguration = WKWebViewConfiguration()
+        let dropSharedWorkersScript = WKUserScript(source: "delete window.SharedWorker;", injectionTime: WKUserScriptInjectionTime.atDocumentStart, forMainFrameOnly: false)
+        webConfiguration.userContentController.addUserScript(dropSharedWorkersScript)
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.scrollView.isScrollEnabled = false
         webView.navigationDelegate = self
