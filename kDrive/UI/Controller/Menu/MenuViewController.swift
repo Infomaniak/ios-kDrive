@@ -56,7 +56,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
 
         static let sharedWithMe = MenuAction(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle, image: KDriveResourcesAsset.folderSelect2.image, segue: "toDriveListSegue")
         static let lastModifications = MenuAction(name: KDriveResourcesStrings.Localizable.lastEditsTitle, image: KDriveResourcesAsset.clock.image, segue: nil)
-        static let images = MenuAction(name: KDriveResourcesStrings.Localizable.allPictures, image: KDriveResourcesAsset.images.image, segue: nil)
+        static let images = MenuAction(name: KDriveResourcesStrings.Localizable.galleryTitle, image: KDriveResourcesAsset.images.image, segue: nil)
         static let myShares = MenuAction(name: KDriveResourcesStrings.Localizable.mySharesTitle, image: KDriveResourcesAsset.folderSelect.image, segue: nil)
         static let offline = MenuAction(name: KDriveResourcesStrings.Localizable.offlineFileTitle, image: KDriveResourcesAsset.availableOffline.image, segue: nil)
         static let trash = MenuAction(name: KDriveResourcesStrings.Localizable.trashTitle, image: KDriveResourcesAsset.delete.image, segue: nil)

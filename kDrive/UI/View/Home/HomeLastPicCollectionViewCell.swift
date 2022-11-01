@@ -16,9 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AVFoundation
-
-import InfomaniakCore
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -29,7 +26,6 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var darkLayer: UIView!
     @IBOutlet weak var checkmarkImage: UIImageView!
     @IBOutlet weak var videoData: UIView!
-    @IBOutlet weak var durationLabel: IKLabel!
 
     override var isSelected: Bool {
         didSet {
@@ -49,7 +45,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         gradient.frame = videoData.bounds
         gradient.colors = [
             UIColor.black.withAlphaComponent(0).cgColor,
-            UIColor.black.cgColor
+            UIColor.black.withAlphaComponent(0.3).cgColor
         ]
         videoData.layer.insertSublayer(gradient, at: 0)
     }
@@ -90,42 +86,12 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         if roundedCorners {
             contentInsetView.cornerRadius = UIConstants.cornerRadius
         }
-        configureForVideo()
+        videoData.isHidden = !(file.uti.conforms(to: .video) || file.uti.conforms(to: .movie))
         configureForSelection()
     }
 
     private func configureForSelection() {
         guard selectionMode else { return }
         checkmarkImage.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
-    }
-
-    private func configureForVideo() {
-        guard let file else { return }
-        if file.uti.conforms(to: .video) || file.uti.conforms(to: .movie) {
-            videoData.isHidden = false
-
-            if !file.isLocalVersionOlderThanRemote {
-                let asset = AVURLAsset(url: file.localUrl)
-                let duration = asset.duration
-
-                let totalSeconds = CMTimeGetSeconds(duration)
-                let hours = Int(totalSeconds / 3600)
-                let minutes = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
-                let seconds = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
-
-                let time: String
-                if hours > 0 {
-                    time = String(format: "%i:%02i:%02i", hours, minutes, seconds)
-                } else {
-                    time = String(format: "%02i:%02i", minutes, seconds)
-                }
-                durationLabel.text = time
-                durationLabel.isHidden = false
-            } else {
-                durationLabel.isHidden = true
-            }
-        } else {
-            videoData.isHidden = true
-        }
     }
 }

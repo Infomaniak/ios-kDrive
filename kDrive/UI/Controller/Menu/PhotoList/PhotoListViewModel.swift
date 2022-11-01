@@ -65,7 +65,7 @@ class PhotoListViewModel: FileListViewModel {
         super.init(configuration: Configuration(normalFolderHierarchy: false,
                                                 showUploadingFiles: false,
                                                 selectAllSupported: false,
-                                                rootTitle: KDriveResourcesStrings.Localizable.allPictures,
+                                                rootTitle: KDriveResourcesStrings.Localizable.galleryTitle,
                                                 emptyViewType: .noImages,
                                                 rightBarButtons: [.search, .photoSort],
                                                 matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
