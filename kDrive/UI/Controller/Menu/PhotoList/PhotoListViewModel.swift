@@ -56,7 +56,7 @@ class PhotoListViewModel: FileListViewModel {
     private var moreComing = false
     private var currentPage = 1
     private var sortMode: PhotoSortMode = UserDefaults.shared.photoSortMode {
-        didSet { updateSort() }
+        didSet { sortingChanged() }
     }
 
     var onReloadWithChangeset: ((StagedChangeset<[PhotoListViewModel.Section]>, ([PhotoListViewModel.Section]) -> Void) -> Void)?
@@ -151,12 +151,9 @@ class PhotoListViewModel: FileListViewModel {
         sortMode = mode
     }
 
-    private func updateSort() {
+    override func sortingChanged() {
         UserDefaults.shared.photoSortMode = sortMode
-        let changeset = insertAndSort(pictures: files)
-        onReloadWithChangeset?(changeset) { newSections in
-            self.sections = newSections
-        }
+        updateRealmObservation()
     }
 
     private func insertAndSort(pictures: AnyRealmCollection<File>) -> StagedChangeset<[PhotoListViewModel.Section]> {
