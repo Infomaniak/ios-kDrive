@@ -242,7 +242,7 @@ public class AccountManager: RefreshTokenDelegate {
         DriveInfosManager.instance.storeDriveResponse(user: user, driveResponse: driveResponse)
         guard let mainDrive = driveResponse.drives.main.first(where: { !$0.maintenance }) else {
             removeAccount(toDeleteAccount: newAccount)
-            throw DriveError.maintenance
+            throw driveResponse.drives.main.first?.isInTechnicalMaintenance ? DriveError.maintenance : DriveError.blocked
         }
 
         setCurrentDriveForCurrentAccount(drive: mainDrive.freeze())

@@ -70,6 +70,13 @@ public enum DrivePack: String, Codable {
     case free
 }
 
+public enum MaintenanceReason: String, PersistableEnum, Codable {
+    case notRenew = "not_renew"
+    case demoEnd = "demo_end"
+    case invoiceOverdue = "invoice_overdue"
+    case technical
+}
+
 public class DrivePackFunctionality: EmbeddedObject, Codable {
     @Persisted public var versionsNumber: Int = 0
     @Persisted public var dropbox = false
@@ -126,6 +133,8 @@ public class Drive: Object, Codable {
     @Persisted public var categories: List<Category>
     @Persisted private var _categoryRights: CategoryRights?
     @Persisted public var maintenance = false
+    @Persisted public var maintenanceReason: MaintenanceReason?
+    @Persisted public var updatedAt: Date
     /// Is manager admin.
     @Persisted public var accountAdmin = false
     /// Was product purchased with in-app purchase.
@@ -164,6 +173,10 @@ public class Drive: Object, Codable {
         return pack == .pro || pack == .team
     }
 
+    public var isInTechnicalMaintenance: Bool {
+        return maintenance && maintenanceReason == .technical
+    }
+
     public required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         accountId = try values.decode(Int.self, forKey: .accountId)
@@ -183,6 +196,8 @@ public class Drive: Object, Codable {
         hasTechnicalRight = try values.decode(Bool.self, forKey: .hasTechnicalRight)
         canCreateTeamFolder = try values.decode(Bool.self, forKey: .canCreateTeamFolder)
         maintenance = try values.decode(Bool.self, forKey: .maintenance)
+        maintenanceReason = try values.decodeIfPresent(MaintenanceReason.self, forKey: .maintenanceReason)
+        updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         accountAdmin = try values.decode(Bool.self, forKey: .accountAdmin)
         productIsInApp = try values.decode(Bool.self, forKey: .productIsInApp)
     }
@@ -220,6 +235,8 @@ public class Drive: Object, Codable {
         case hasTechnicalRight = "has_technical_right"
         case canCreateTeamFolder = "can_create_team_folder"
         case maintenance
+        case maintenanceReason = "maintenance_reason"
+        case updatedAt = "updated_at"
         case accountAdmin = "account_admin"
         case productIsInApp = "product_is_in_app"
     }

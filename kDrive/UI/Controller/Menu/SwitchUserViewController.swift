@@ -100,8 +100,8 @@ extension SwitchUserViewController: UITableViewDelegate {
         if drives.count == 1 && drives[0].maintenance {
             let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
             let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
-            driveErrorViewController?.driveErrorViewType = .maintenance
-            driveErrorViewController?.driveName = drives[0].name
+            driveErrorViewController?.driveErrorViewType = drives[0].isInTechnicalMaintenance ? .maintenance : .blocked
+            driveErrorViewController?.drive = drives[0]
             tableView.deselectRow(at: indexPath, animated: true)
             present(driveErrorViewControllerNav, animated: true)
         } else {

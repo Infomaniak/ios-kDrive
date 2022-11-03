@@ -268,9 +268,17 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                     let driveErrorVC = DriveErrorViewController.instantiate()
                     driveErrorVC.driveErrorViewType = .noDrive
                     present(driveErrorVC, animated: true)
-                } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance {
+                } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance || driveError == .blocked {
                     let driveErrorVC = DriveErrorViewController.instantiate()
-                    driveErrorVC.driveErrorViewType = driveError == .noDrive ? .noDrive : .maintenance
+                    let errorViewType: DriveErrorViewController.DriveErrorViewType
+                    if driveError == .maintenance {
+                        errorViewType = .maintenance
+                    } else if driveError == .blocked {
+                        errorViewType = .blocked
+                    } else {
+                        errorViewType = .noDrive
+                    }
+                    driveErrorVC.driveErrorViewType = errorViewType
                     present(driveErrorVC, animated: true)
                 } else {
                     SentrySDK.capture(error: error) { scope in
