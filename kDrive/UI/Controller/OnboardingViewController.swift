@@ -271,11 +271,12 @@ extension OnboardingViewController: InfomaniakLoginDelegate {
                 } else if let driveError = error as? DriveError, driveError == .noDrive || driveError == .maintenance || driveError == .blocked {
                     let driveErrorVC = DriveErrorViewController.instantiate()
                     let errorViewType: DriveErrorViewController.DriveErrorViewType
-                    if driveError == .maintenance {
+                    switch driveError {
+                    case .maintenance:
                         errorViewType = .maintenance
-                    } else if driveError == .blocked {
+                    case .blocked:
                         errorViewType = .blocked
-                    } else {
+                    default:
                         errorViewType = .noDrive
                     }
                     driveErrorVC.driveErrorViewType = errorViewType

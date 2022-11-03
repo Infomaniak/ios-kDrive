@@ -103,14 +103,17 @@ class DriveErrorViewController: UIViewController {
             mainButton.isHidden = true
         case .blocked:
             imageView.image = KDriveResourcesAsset.driveBlocked.image
+            mainButton.isHidden = true
             if let drive {
                 titleLabel.text = KDriveResourcesStrings.Localizable.driveBlockedTitle(drive.name)
                 descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescription(Constants.formatDate(drive.updatedAt, style: .date))
-                mainButton.setTitle(KDriveResourcesStrings.Localizable.buttonRenew, for: .normal)
+                if drive.isUserAdmin {
+                    mainButton.isHidden = false
+                    mainButton.setTitle(KDriveResourcesStrings.Localizable.buttonRenew, for: .normal)
+                }
             } else {
                 titleLabel.text = KDriveResourcesStrings.Localizable.driveBlockedTitlePlural
                 descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescriptionPlural
-                mainButton.isHidden = true
             }
         }
     }
