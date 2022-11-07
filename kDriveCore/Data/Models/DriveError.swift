@@ -90,6 +90,7 @@ public struct DriveError: Error, Equatable {
     public static let noDrive = DriveError(type: .serverError, code: "no_drive")
     public static let conflict = DriveError(type: .serverError, code: "conflict_error", localizedString: KDriveResourcesStrings.Localizable.errorConflict)
     public static let maintenance = DriveError(type: .serverError, code: "product_maintenance", localizedString: KDriveResourcesStrings.Localizable.driveMaintenanceDescription)
+    public static let blocked = DriveError(type: .serverError, code: "product_blocked", localizedString: KDriveResourcesStrings.Localizable.driveBlockedDescriptionPlural)
     public static let lock = DriveError(type: .serverError, code: "lock_error", localizedString: KDriveResourcesStrings.Localizable.errorFileLocked)
     public static let donwloadPermission = DriveError(type: .serverError, code: "you_must_add_at_least_one_file", localizedString: KDriveResourcesStrings.Localizable.errorDownloadPermission)
     public static let categoryAlreadyExists = DriveError(type: .serverError, code: "category_already_exist_error", localizedString: KDriveResourcesStrings.Localizable.errorCategoryAlreadyExists)

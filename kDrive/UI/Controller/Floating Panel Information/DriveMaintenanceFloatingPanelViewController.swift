@@ -24,20 +24,37 @@ class DriveMaintenanceFloatingPanelViewController: InformationFloatingPanelViewC
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        imageView.image = KDriveResourcesAsset.maintenance.image
         imageViewHeightConstraint.constant = 70
         imageView.tintColor = KDriveResourcesAsset.iconColor.color
         animationView.isHidden = true
-        descriptionLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceDescription
         additionalInformationLabel.isHidden = true
         copyStackView.isHidden = true
-        leftButton.isHidden = true
         rightButton.setTitle(KDriveResourcesStrings.Localizable.buttonClose, for: .normal)
+        leftButton.isHidden = true
+
+        if let drive, !drive.isInTechnicalMaintenance {
+            titleLabel.text = KDriveResourcesStrings.Localizable.driveBlockedTitle(drive.name)
+            imageView.image = KDriveResourcesAsset.driveBlocked.image
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescription(Constants.formatDate(drive.updatedAt, style: .date))
+            #if !ISEXTENSION
+            if drive.isUserAdmin {
+                leftButton.setTitle(KDriveResourcesStrings.Localizable.buttonRenew, for: .normal)
+                leftButton.isHidden = false
+            }
+            #endif
+        } else {
+            titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitle(drive?.name ?? "")
+            imageView.image = KDriveResourcesAsset.maintenance.image
+            descriptionLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceDescription
+        }
     }
 
-    func setTitleLabel(with driveName: String) {
-        titleLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceTitle(driveName)
+    #if !ISEXTENSION
+    override func leftButtonPressed(_ sender: UIButton) {
+        guard let drive else { return }
+        UIApplication.shared.open(URLConstants.renewDrive(accountId: drive.accountId).url)
     }
+    #endif
 
     override func rightButtonPressed(_ sender: UIButton) {
         floatingPanelViewController.dismiss(animated: true)

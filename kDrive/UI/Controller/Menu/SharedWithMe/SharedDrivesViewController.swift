@@ -81,9 +81,7 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
             return
         }
         if drive.maintenance {
-            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
-            let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DriveMaintenanceFloatingPanelViewController
-            floatingPanelViewController?.setTitleLabel(with: drive.name)
+            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel(drive: drive)
             tableView.deselectRow(at: indexPath, animated: true)
             present(driveFloatingPanelController, animated: true)
         } else if let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {

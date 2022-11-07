@@ -354,9 +354,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     } else {
                         let driveErrorViewControllerNav = DriveErrorViewController.instantiateInNavigationController()
                         let driveErrorViewController = driveErrorViewControllerNav.viewControllers.first as? DriveErrorViewController
-                        driveErrorViewController?.driveErrorViewType = .maintenance
+                        driveErrorViewController?.driveErrorViewType = currentDrive.isInTechnicalMaintenance ? .maintenance : .blocked
                         if DriveInfosManager.instance.getDrives(for: currentAccount.userId).count == 1 {
-                            driveErrorViewController?.driveName = currentDrive.name
+                            driveErrorViewController?.drive = currentDrive
                         }
                         setRootViewController(driveErrorViewControllerNav)
                     }

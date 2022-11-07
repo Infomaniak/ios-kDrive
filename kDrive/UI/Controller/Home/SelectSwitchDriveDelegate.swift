@@ -26,9 +26,7 @@ extension SelectSwitchDriveDelegate {
     func didSelect(option: Selectable) {
         guard let drive = option as? Drive else { return }
         if drive.maintenance {
-            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel()
-            let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DriveMaintenanceFloatingPanelViewController
-            floatingPanelViewController?.setTitleLabel(with: drive.name)
+            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel(drive: drive)
             present(driveFloatingPanelController, animated: true)
         } else {
             MatomoUtils.track(eventWithCategory: .drive, name: "switch")

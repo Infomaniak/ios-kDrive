@@ -32,6 +32,10 @@ public struct URLConstants {
     public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2631")
     public static let matomo = URLConstants(urlString: "https://analytics.infomaniak.com/matomo.php")
 
+    public static func renewDrive(accountId: Int) -> URLConstants {
+        return URLConstants(urlString: "https://manager.infomaniak.com/v3/\(accountId)/accounts/accounting/renewal")
+    }
+
     private var urlString: String
 
     public var url: URL {

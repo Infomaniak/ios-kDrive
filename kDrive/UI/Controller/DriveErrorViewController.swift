@@ -26,6 +26,7 @@ class DriveErrorViewController: UIViewController {
     enum DriveErrorViewType {
         case noDrive
         case maintenance
+        case blocked
     }
 
     @IBOutlet weak var circleView: UIView!
@@ -37,6 +38,8 @@ class DriveErrorViewController: UIViewController {
 
     var driveErrorViewType = DriveErrorViewType.noDrive
     var driveName: String?
+    var updatedAt: Date?
+    var drive: Drive?
 
     var isRootViewController: Bool {
         if let navigationController = view.window?.rootViewController as? UINavigationController {
@@ -65,8 +68,12 @@ class DriveErrorViewController: UIViewController {
         MatomoUtils.track(view: ["DriveError"])
     }
 
-    @IBAction func testButtonPressed(_ sender: Any) {
-        UIApplication.shared.open(URLConstants.shop.url)
+    @IBAction func mainButtonPressed(_ sender: Any) {
+        if driveErrorViewType == .noDrive {
+            UIApplication.shared.open(URLConstants.shop.url)
+        } else if driveErrorViewType == .blocked {
+            UIApplication.shared.open(URLConstants.renewDrive(accountId: drive!.accountId).url)
+        }
     }
 
     @IBAction func otherProfileButtonPressed(_ sender: Any) {
@@ -83,6 +90,7 @@ class DriveErrorViewController: UIViewController {
             imageView.image = KDriveResourcesAsset.noDrive.image
             titleLabel.text = KDriveResourcesStrings.Localizable.noDriveTitle
             descriptionLabel.text = KDriveResourcesStrings.Localizable.noDriveDescription
+            mainButton.setTitle(KDriveResourcesStrings.Localizable.buttonNoDriveFreeTest, for: .normal)
         case .maintenance:
             imageView.image = KDriveResourcesAsset.maintenance.image
             imageView.tintColor = KDriveResourcesAsset.iconColor.color
@@ -93,6 +101,20 @@ class DriveErrorViewController: UIViewController {
             }
             descriptionLabel.text = KDriveResourcesStrings.Localizable.driveMaintenanceDescription
             mainButton.isHidden = true
+        case .blocked:
+            imageView.image = KDriveResourcesAsset.driveBlocked.image
+            mainButton.isHidden = true
+            if let drive {
+                titleLabel.text = KDriveResourcesStrings.Localizable.driveBlockedTitle(drive.name)
+                descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescription(Constants.formatDate(drive.updatedAt, style: .date))
+                if drive.isUserAdmin {
+                    mainButton.isHidden = false
+                    mainButton.setTitle(KDriveResourcesStrings.Localizable.buttonRenew, for: .normal)
+                }
+            } else {
+                titleLabel.text = KDriveResourcesStrings.Localizable.driveBlockedTitlePlural
+                descriptionLabel.text = KDriveResourcesStrings.Localizable.driveBlockedDescriptionPlural
+            }
         }
     }
 
