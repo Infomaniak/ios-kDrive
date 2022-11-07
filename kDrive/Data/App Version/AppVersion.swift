@@ -36,7 +36,6 @@ struct AppVersion: Codable {
         let request = URLRequest(url: URLConstants.appVersion.url)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
-
             if let data = data {
                 if let decodedResponse = try? JSONDecoder().decode(Response.self, from: data) {
                     DispatchQueue.main.async {
@@ -81,6 +80,7 @@ struct AppVersion: Codable {
             showUpdateFloatingPanel = appVersion.showUpdateFloatingPanel()
             group.leave()
         }
+        group.wait()
         return showUpdateFloatingPanel
     }
 }
