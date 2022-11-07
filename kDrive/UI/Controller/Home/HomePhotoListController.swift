@@ -28,7 +28,7 @@ class HomePhotoListController: HomeRecentFilesController {
     required convenience init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.init(driveFileManager: driveFileManager, homeViewController: homeViewController,
                   listCellType: HomeLastPicCollectionViewCell.self, gridCellType: HomeLastPicCollectionViewCell.self, emptyCellType: .noImages,
-                  title: KDriveResourcesStrings.Localizable.allPictures, selectorTitle: KDriveResourcesStrings.Localizable.allPictures,
+                  title: KDriveResourcesStrings.Localizable.galleryTitle, selectorTitle: KDriveResourcesStrings.Localizable.galleryTitle,
                   listStyleEnabled: false)
     }
 

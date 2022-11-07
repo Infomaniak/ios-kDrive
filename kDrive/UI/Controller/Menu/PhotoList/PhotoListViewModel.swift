@@ -65,7 +65,7 @@ class PhotoListViewModel: FileListViewModel {
         super.init(configuration: Configuration(normalFolderHierarchy: false,
                                                 showUploadingFiles: false,
                                                 selectAllSupported: false,
-                                                rootTitle: KDriveResourcesStrings.Localizable.allPictures,
+                                                rootTitle: KDriveResourcesStrings.Localizable.galleryTitle,
                                                 emptyViewType: .noImages,
                                                 rightBarButtons: [.search, .photoSort],
                                                 matomoViewPath: [MatomoUtils.Views.menu.displayName, "PhotoList"]),
@@ -73,7 +73,7 @@ class PhotoListViewModel: FileListViewModel {
                    currentDirectory: DriveFileManager.lastPicturesRootFile)
         self.files = AnyRealmCollection(driveFileManager.getRealm()
             .objects(File.self)
-            .filter(NSPredicate(format: "extensionType = %@", ConvertedType.image.rawValue))
+            .filter(NSPredicate(format: "extensionType IN %@", [ConvertedType.image.rawValue, ConvertedType.video.rawValue]))
             .sorted(by: [SortType.newer.value.sortDescriptor]))
     }
 

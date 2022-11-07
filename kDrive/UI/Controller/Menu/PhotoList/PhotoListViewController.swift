@@ -71,6 +71,9 @@ class PhotoListViewController: FileListViewController {
         photoListViewModel?.onReloadWithChangeset = { [weak self] changeset, completion in
             self?.collectionView.reload(using: changeset, interrupt: { $0.changeCount > Endpoint.itemsPerPage }, setData: completion)
             self?.showEmptyView(.noImages)
+            if let collectionView = self?.collectionView {
+                self?.scrollViewDidScroll(collectionView)
+            }
         }
     }
 

@@ -25,6 +25,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var fileImage: UIImageView!
     @IBOutlet weak var darkLayer: UIView!
     @IBOutlet weak var checkmarkImage: UIImageView!
+    @IBOutlet weak var videoData: UIView!
 
     override var isSelected: Bool {
         didSet {
@@ -39,6 +40,14 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         super.awakeFromNib()
         fileImage.layer.masksToBounds = true
         darkLayer.isHidden = true
+
+        let gradient = CAGradientLayer()
+        gradient.frame = videoData.bounds
+        gradient.colors = [
+            UIColor.black.withAlphaComponent(0).cgColor,
+            UIColor.black.withAlphaComponent(0.3).cgColor
+        ]
+        videoData.layer.insertSublayer(gradient, at: 0)
     }
 
     override func prepareForReuse() {
@@ -77,6 +86,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         if roundedCorners {
             contentInsetView.cornerRadius = UIConstants.cornerRadius
         }
+        videoData.isHidden = !(file.uti.conforms(to: .video) || file.uti.conforms(to: .movie))
         configureForSelection()
     }
 
