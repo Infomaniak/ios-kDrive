@@ -111,13 +111,13 @@ class ManageCategoriesViewController: UITableViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        completionHandler?()
         Task {
            try await fileListViewController?.viewModel.loadActivities()
         }
     }
 
     @objc func closeButtonPressed() {
+        completionHandler?()
         searchController.dismiss(animated: true)
         dismiss(animated: true)
     }
@@ -382,5 +382,13 @@ extension ManageCategoriesViewController: CategoryCellDelegate {
         floatingPanelViewController.set(contentViewController: manageCategoryViewController)
         floatingPanelViewController.track(scrollView: manageCategoryViewController.collectionView)
         present(floatingPanelViewController, animated: true)
+    }
+}
+
+// MARK: - UIAdaptivePresentationControllerDelegate
+
+extension ManageCategoriesViewController: UIAdaptivePresentationControllerDelegate {
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        completionHandler?()
     }
 }
