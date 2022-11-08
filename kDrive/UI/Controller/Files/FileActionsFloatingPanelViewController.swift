@@ -312,7 +312,8 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
         case .add:
             let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
             let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
-                                                                                       folder: file, presentedFromPlusButton: false)
+                                                                                       folder: file,
+                                                                                       presentedFromPlusButton: false)
             floatingPanelViewController.isRemovalInteractionEnabled = true
             floatingPanelViewController.delegate = fileInformationsViewController
 

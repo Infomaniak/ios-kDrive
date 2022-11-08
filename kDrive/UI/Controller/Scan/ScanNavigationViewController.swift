@@ -24,7 +24,7 @@ import kDriveCore
 class ScanNavigationViewController: UINavigationController {
 
     var currentDriveFileManager: DriveFileManager?
-    var currentDirectory: File!
+    var currentDirectory: File?
 
     override func viewDidLoad() {
         super.viewDidLoad()
