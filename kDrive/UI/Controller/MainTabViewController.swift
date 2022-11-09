@@ -144,7 +144,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,
-            presentedFromFileList: fromFileList
+            presentedAboveFileList: fromFileList
         )
         floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = plusButtonFloatingPanel

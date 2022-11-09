@@ -34,6 +34,10 @@ class SaveFileViewController: UIViewController {
         case importing
     }
 
+    var lastSelectedDirectory: File? {
+        selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
+    }
+
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
 
     private var originalDriveId = AccountManager.instance.currentDriveId
@@ -88,7 +92,7 @@ class SaveFileViewController: UIViewController {
             if let driveFileManager = AccountManager.instance.getDriveFileManager(for: UserDefaults.shared.lastSelectedDrive, userId: UserDefaults.shared.lastSelectedUser) {
                 selectedDriveFileManager = driveFileManager
             }
-            selectedDirectory = getDefaultDirectory()
+            selectedDirectory = lastSelectedDirectory
         }
 
         closeBarButtonItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
@@ -137,10 +141,6 @@ class SaveFileViewController: UIViewController {
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-
-    func getDefaultDirectory() -> File? {
-        return selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
     }
 
     private func setItemProviders() {

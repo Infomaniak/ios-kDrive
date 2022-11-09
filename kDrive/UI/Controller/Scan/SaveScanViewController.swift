@@ -34,7 +34,7 @@ class SaveScanViewController: SaveFileViewController {
         sections = [.fileName, .fileType, .directorySelection]
         detectFileName()
         if selectedDirectory == nil {
-            selectedDirectory = getDefaultDirectory() ?? selectedDriveFileManager?.getCachedRootFile()
+            selectedDirectory = lastSelectedDirectory ?? selectedDriveFileManager?.getCachedRootFile()
         }
     }
 
