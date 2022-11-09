@@ -258,6 +258,7 @@ public class UploadQueue {
             if !file.isManagedByRealm {
                 realm.add(file, update: .modified)
             }
+            file.name = file.name.trimmingCharacters(in: .whitespacesAndNewlines)
             if file.error != nil {
                 file.error = nil
             }

@@ -121,7 +121,7 @@ open class AlertFieldViewController: AlertViewController, UITextFieldDelegate {
     // MARK: - Actions
 
     @objc override open func action() {
-        guard let name = textField.text else {
+        guard let name = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) else {
             return
         }
 
