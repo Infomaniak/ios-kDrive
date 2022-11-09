@@ -460,14 +460,12 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                 return
             }
-            let pathString = file.name as NSString
-            let text = KDriveResourcesStrings.Localizable.allDuplicateFileName(pathString.deletingPathExtension, pathString.pathExtension.isEmpty ? "" : ".\(pathString.pathExtension)")
+            let fileName = file.name
             let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate,
                                                  placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile,
-                                                 text: text,
+                                                 text: fileName,
                                                  action: KDriveResourcesStrings.Localizable.buttonCopy,
-                                                 loading: true) { [proxyFile = file.proxify(), filename = file.name] duplicateName in
-                guard duplicateName != filename else { return }
+                                                 loading: true) { [proxyFile = file.proxify()] duplicateName in
                 do {
                     _ = try await self.driveFileManager.duplicate(file: proxyFile, duplicateName: duplicateName)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
@@ -477,7 +475,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             }
             alert.textFieldConfiguration = .fileNameConfiguration
             if !file.isDirectory {
-                alert.textFieldConfiguration.selectedRange = text.startIndex ..< (text.lastIndex(where: { $0 == "." }) ?? text.endIndex)
+                alert.textFieldConfiguration.selectedRange = fileName.startIndex ..< (fileName.lastIndex(where: { $0 == "." }) ?? fileName.endIndex)
             }
             present(alert, animated: true)
         case .rename:
