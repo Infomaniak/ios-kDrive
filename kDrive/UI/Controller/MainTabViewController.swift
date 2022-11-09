@@ -138,9 +138,9 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func plusButtonPressed() {
-        let fromFileList = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController != nil
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+        let fromFileList = (selectedViewController as? UINavigationController)?.topViewController as? FileListViewController != nil
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,

@@ -34,17 +34,13 @@ class SaveScanViewController: SaveFileViewController {
         sections = [.fileName, .fileType, .directorySelection]
         detectFileName()
         if selectedDirectory == nil {
-            selectDefaultDirectory()
+            selectedDirectory = getDefaultDirectory() ?? selectedDriveFileManager?.getCachedRootFile()
         }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: true)
-    }
-
-    override func selectDefaultDirectory() {
-        selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastScanSelectedDirectory) ?? selectedDriveFileManager?.getCachedRootFile()
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -79,8 +75,6 @@ class SaveScanViewController: SaveFileViewController {
             footer.footerButton.setLoading(false)
             return
         }
-
-        UserDefaults.shared.lastScanSelectedDirectory = selectedDirectory.id
 
         DispatchQueue.global(qos: .userInteractive).async { [self] in
             do {
