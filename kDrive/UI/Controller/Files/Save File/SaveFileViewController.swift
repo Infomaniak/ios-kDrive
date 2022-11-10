@@ -34,6 +34,10 @@ class SaveFileViewController: UIViewController {
         case importing
     }
 
+    var lastSelectedDirectory: File? {
+        selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
+    }
+
     var sections: [SaveFileSection] = [.fileName, .driveSelection, .directorySelection]
 
     private var originalDriveId = AccountManager.instance.currentDriveId
@@ -88,7 +92,7 @@ class SaveFileViewController: UIViewController {
             if let driveFileManager = AccountManager.instance.getDriveFileManager(for: UserDefaults.shared.lastSelectedDrive, userId: UserDefaults.shared.lastSelectedUser) {
                 selectedDriveFileManager = driveFileManager
             }
-            selectedDirectory = selectedDriveFileManager?.getCachedFile(id: UserDefaults.shared.lastSelectedDirectory)
+            selectedDirectory = lastSelectedDirectory
         }
 
         closeBarButtonItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
@@ -142,7 +146,7 @@ class SaveFileViewController: UIViewController {
     private func setItemProviders() {
         guard let itemProviders = itemProviders else { return }
         sections = [.importing]
-        importProgress = FileImportHelper.instance.importItems(itemProviders,userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
+        importProgress = FileImportHelper.instance.importItems(itemProviders, userPreferredPhotoFormat: userPreferredPhotoFormat) { [weak self] importedFiles, errorCount in
             self?.items = importedFiles
             self?.errorCount = errorCount
             DispatchQueue.main.async {

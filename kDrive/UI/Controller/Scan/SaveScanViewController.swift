@@ -33,6 +33,9 @@ class SaveScanViewController: SaveFileViewController {
         super.viewDidLoad()
         sections = [.fileName, .fileType, .directorySelection]
         detectFileName()
+        if selectedDirectory == nil {
+            selectedDirectory = lastSelectedDirectory ?? selectedDriveFileManager?.getCachedRootFile()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -75,7 +78,13 @@ class SaveScanViewController: SaveFileViewController {
 
         DispatchQueue.global(qos: .userInteractive).async { [self] in
             do {
-                try FileImportHelper.instance.upload(scan: scan, name: filename, scanType: scanType, in: selectedDirectory, drive: selectedDriveFileManager.drive)
+                try FileImportHelper.instance.upload(
+                    scan: scan,
+                    name: filename,
+                    scanType: scanType,
+                    in: selectedDirectory,
+                    drive: selectedDriveFileManager.drive
+                )
                 Task {
                     let parent = presentingViewController
                     footer.footerButton.setLoading(false)

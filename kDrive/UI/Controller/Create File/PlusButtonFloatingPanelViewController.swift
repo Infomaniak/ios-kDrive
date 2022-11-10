@@ -30,6 +30,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
     var driveFileManager: DriveFileManager!
 
     let presentedFromPlusButton: Bool
+    let presentedAboveFileList: Bool
 
     private struct PlusButtonMenuAction: Equatable {
         let name: String
@@ -57,10 +58,11 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
         [.docsAction, .gridsAction, .pointsAction, .noteAction]
     ]
 
-    init(driveFileManager: DriveFileManager, folder: File, presentedFromPlusButton: Bool = true) {
+    init(driveFileManager: DriveFileManager, folder: File, presentedFromPlusButton: Bool = true, presentedAboveFileList: Bool = true) {
         self.driveFileManager = driveFileManager
         self.currentDirectory = folder
         self.presentedFromPlusButton = presentedFromPlusButton
+        self.presentedAboveFileList = presentedAboveFileList
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -167,7 +169,9 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 let navigationViewController = ScanNavigationViewController(rootViewController: scanDoc)
                 navigationViewController.modalPresentationStyle = .fullScreen
                 navigationViewController.currentDriveFileManager = driveFileManager
-                navigationViewController.currentDirectory = currentDirectory.freezeIfNeeded()
+                if presentedAboveFileList {
+                    navigationViewController.currentDirectory = currentDirectory.freezeIfNeeded()
+                }
                 scanDoc.delegate = navigationViewController
                 mainTabViewController.present(navigationViewController, animated: true)
             } else {
