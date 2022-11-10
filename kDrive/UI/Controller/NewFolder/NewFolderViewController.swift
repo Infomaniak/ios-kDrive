@@ -213,7 +213,7 @@ class NewFolderViewController: UIViewController {
 
 extension NewFolderViewController: NewFolderTextFieldDelegate {
     func textFieldUpdated(content: String) {
-        newFolderName = content
+        newFolderName = content.trimmingCharacters(in: .whitespacesAndNewlines)
         updateButton()
     }
 }
