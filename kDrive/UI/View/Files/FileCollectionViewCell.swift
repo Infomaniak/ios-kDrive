@@ -27,7 +27,7 @@ protocol FileCellDelegate: AnyObject {
 }
 
 @MainActor class FileViewModel {
-    static let observedProperties = ["name", "rawType", "_capabilities", "dropbox", "rawVisibility", "extensionType", "isFavorite", "deletedAt", "lastModifiedAt", "isAvailableOffline", "categories", "size", "hasThumbnail"]
+    static let observedProperties = ["name", "rawType", "_capabilities", "dropbox", "rawVisibility", "extensionType", "isFavorite", "deletedAt", "lastModifiedAt", "isAvailableOffline", "categories", "size", "hasThumbnail", "color"]
     var file: File
     var selectionMode: Bool
     private var downloadProgressObserver: ObservationToken?
