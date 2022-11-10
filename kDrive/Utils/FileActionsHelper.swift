@@ -383,6 +383,7 @@ public class FileActionsHelper {
         manageCategoriesViewController?.completionHandler = {
             group?.leave()
         }
+        navigationManageCategoriesViewController.presentationController?.delegate = manageCategoriesViewController
         viewController.present(navigationManageCategoriesViewController, animated: true)
     }
 
