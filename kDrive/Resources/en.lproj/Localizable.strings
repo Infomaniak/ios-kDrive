@@ -5,7 +5,7 @@
  * Locale: en, English
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Mon, 31 Oct 2022 11:16:08 +0100
+ * Exported at: Wed, 09 Nov 2022 14:51:32 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -85,9 +85,6 @@
 
 /* loco:6049df4d5c2c3a04bc397914 */
 "allDisabled" = "Disabled";
-
-/* loco:6049df4d5c2c3a04bc397915 */
-"allDuplicateFileName" = "%1$@ - Copy%2$@";
 
 /* loco:6049df4d5c2c3a04bc397916 */
 "allEmptyInputError" = "This field cannot be empty";
