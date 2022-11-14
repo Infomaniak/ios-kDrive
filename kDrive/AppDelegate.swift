@@ -425,6 +425,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                 // Update file to get the new modification date
                                 Task {
                                     let file = try await driveFileManager.file(id: fileId, forceRefresh: true)
+                                    try? FileManager.default.setAttributes([.modificationDate: file.lastModifiedAt], ofItemAtPath: file.localUrl.path)
                                     driveFileManager.notifyObserversWith(file: file)
                                 }
                             }
