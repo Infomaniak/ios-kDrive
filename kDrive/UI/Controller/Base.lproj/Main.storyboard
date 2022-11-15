@@ -418,7 +418,7 @@
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="primaryButton"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="testButtonPressed:" destination="8Hf-Au-xo5" eventType="touchUpInside" id="Hfd-86-TsC"/>
+                                            <action selector="mainButtonPressed:" destination="8Hf-Au-xo5" eventType="touchUpInside" id="Mof-RU-ygW"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OXD-Rc-0Y2" customClass="IKButton" customModule="kDriveCore">
