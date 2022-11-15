@@ -375,6 +375,9 @@ public class AccountManager: RefreshTokenDelegate {
         if let account = account(for: token) {
             removeAccount(toDeleteAccount: account)
         }
+        InfomaniakLogin.deleteApiToken(token: token) { error in
+            DDLogError("Failed to delete api token: \(error.localizedDescription)")
+        }
     }
 
     public func account(for token: ApiToken) -> Account? {
