@@ -121,7 +121,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
             localizedKey = "fileActivityCollaborativeFolderDelete"
         case .collaborativeUserAccess:
             localizedKey = "fileActivityCollaborativeUserAccess"
-        case .collaborativeUserCreare:
+        case .collaborativeUserCreate:
             localizedKey = "fileActivityCollaborativeUserCreate"
         case .collaborativeUserDelete:
             localizedKey = "fileActivityCollaborativeUserDelete"

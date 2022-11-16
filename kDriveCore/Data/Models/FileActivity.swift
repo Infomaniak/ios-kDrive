@@ -53,7 +53,7 @@ public enum FileActivityType: String, Codable, CaseIterable {
     case collaborativeFolderUpdate = "collaborative_folder_update"
     case collaborativeFolderDelete = "collaborative_folder_delete"
     case collaborativeUserAccess = "collaborative_user_access"
-    case collaborativeUserCreare = "collaborative_user_create"
+    case collaborativeUserCreate = "collaborative_user_create"
     case collaborativeUserDelete = "collaborative_user_delete"
     case fileColorUpdate = "file_color_update"
     case fileColorDelete = "file_color_delete"
