@@ -272,13 +272,11 @@ class MultipleSelectionTrashViewModel: MultipleSelectionFileListViewModel {
     private func removeFromRealm(_ realmConfiguration: Realm.Configuration, deletedFiles: [ProxyFile]) {
         Task {
             isMultipleSelectionEnabled = false
-            Task.detached {
-                guard let realm = try? await Realm(configuration: realmConfiguration) else { return }
-                try? realm.write {
-                    for file in deletedFiles {
-                        if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
-                            realm.delete(file)
-                        }
+            guard let realm = try? Realm(configuration: realmConfiguration) else { return }
+            try? realm.write {
+                for file in deletedFiles {
+                    if let file = realm.object(ofType: File.self, forPrimaryKey: file.id) {
+                        realm.delete(file)
                     }
                 }
             }
