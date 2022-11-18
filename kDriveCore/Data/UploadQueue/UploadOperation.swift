@@ -269,6 +269,9 @@ public class UploadOperation: Operation {
                 let queue = BackgroundRealm.getQueue(for: driveFileManager.realmConfiguration)
                 queue.execute { realm in
                     if driveFileManager.getCachedFile(id: driveFile.id, freeze: false, using: realm) != nil || file.relativePath.isEmpty {
+                        if let oldFile = realm.object(ofType: File.self, forPrimaryKey: driveFile.id), oldFile.isAvailableOffline {
+                            driveFile.isAvailableOffline = true
+                        }
                         let parent = driveFileManager.getCachedFile(id: file.parentDirectoryId, freeze: false, using: realm)
                         queue.bufferedWrite(in: parent, file: driveFile)
                         result.driveFile = File(value: driveFile)
