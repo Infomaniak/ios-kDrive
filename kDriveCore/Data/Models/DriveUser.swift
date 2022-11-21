@@ -23,11 +23,6 @@ import Kingfisher
 import RealmSwift
 import UIKit
 
-public enum DriveUserType: String, Codable {
-    case shared
-    case main
-}
-
 public enum DriveUserRole: String, Codable {
     case admin
     case user
@@ -73,7 +68,6 @@ public class DriveUser: Object, Codable, InfomaniakUser {
     @Persisted private var _avatar: String = ""
     @Persisted private var _avatarUrl: String?
     @Persisted public var displayName: String = ""
-    public var type: DriveUserType?
     public var role: DriveUserRole?
 
     public var avatar: String {
@@ -86,7 +80,6 @@ public class DriveUser: Object, Codable, InfomaniakUser {
         case _avatar = "avatar"
         case _avatarUrl = "avatar_url"
         case displayName = "display_name"
-        case type
         case role
     }
 
