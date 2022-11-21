@@ -233,7 +233,8 @@ public class DriveInfosManager {
     public func getDrives(for userId: Int? = nil, sharedWithMe: Bool? = false, using realm: Realm? = nil) -> [Drive] {
         let realm = realm ?? getRealm()
         var realmDriveList = realm.objects(Drive.self)
-            .sorted(byKeyPath: "id", ascending: true)
+            .sorted(byKeyPath: "name", ascending: true)
+            .sorted(byKeyPath: "sharedWithMe", ascending: true)
         if let userId = userId {
             let filterPredicate: NSPredicate
             if let sharedWithMe = sharedWithMe {
