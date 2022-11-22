@@ -20,6 +20,7 @@ import FileProvider
 import Foundation
 import InfomaniakCore
 import RealmSwift
+import UIKit
 
 public class DownloadTask: Object {
     @Persisted(primaryKey: true) var fileId: Int = 0
@@ -87,12 +88,15 @@ public class DownloadQueue {
                 return
             }
 
+            self.setIdleTimer(enabled: false)
+
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.bestSession, itemIdentifier: itemIdentifier)
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
                     self.publishFileDownloaded(fileId: fileId, error: operation.error)
                 }
+                self.setIdleTimer(enabled: true)
             }
             self.operationQueue.addOperation(operation)
             self.operationsInQueue[file.id] = operation
@@ -106,12 +110,15 @@ public class DownloadQueue {
                 return
             }
 
+            self.setIdleTimer(enabled: false)
+
             let operation = DownloadArchiveOperation(archiveId: archiveId, driveFileManager: driveFileManager, urlSession: self.bestSession)
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
                 }
+                self.setIdleTimer(enabled: true)
             }
             self.operationQueue.addOperation(operation)
             self.archiveOperationsInQueue[archiveId] = operation
@@ -127,10 +134,13 @@ public class DownloadQueue {
                 return
             }
 
+            self.setIdleTimer(enabled: false)
+
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
+                    self.setIdleTimer(enabled: true)
                     completion(operation.error)
                 }
             }
@@ -190,6 +200,20 @@ public class DownloadQueue {
         observations.didChangeArchiveProgress.values.forEach { closure in
             closure(archiveId, progress)
         }
+    }
+
+    func setIdleTimer(enabled: Bool) {
+        #if !ISEXTENSION
+        DispatchQueue.main.async {
+            if enabled {
+                if self.operationsInQueue.isEmpty {
+                    UIApplication.shared.isIdleTimerDisabled = false
+                }
+            } else {
+                UIApplication.shared.isIdleTimerDisabled = true
+            }
+        }
+        #endif
     }
 }
 
