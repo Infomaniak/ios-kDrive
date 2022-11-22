@@ -245,22 +245,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func configure(with viewModel: FileViewModel) {
         self.viewModel = viewModel
-        if viewModel.isImporting {
-            logoImage.isHidden = true
-            importProgressView.isHidden = false
-            importProgressView.enableIndeterminate()
-        } else {
-            logoImage.isHidden = false
-            importProgressView.isHidden = true
-            logoImage.isAccessibilityElement = true
-            logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
-            logoImage.image = viewModel.icon
-            logoImage.tintColor = viewModel.iconTintColor
-            if !viewModel.selectionMode || checkmarkImage != logoImage {
-                // In list mode, we don't fetch the thumbnail if we are in selection mode
-                viewModel.setThumbnail(on: logoImage)
-            }
-        }
+        configureLogoImage()
         titleLabel.text = viewModel.title
         detailLabel?.text = viewModel.subtitle
         favoriteImageView?.isHidden = !viewModel.isFavorite
@@ -290,15 +275,36 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         configure(with: viewModel)
     }
 
+    private func configureLogoImage() {
+        if viewModel.isImporting {
+            logoImage.isHidden = true
+            importProgressView.isHidden = false
+            importProgressView.enableIndeterminate()
+        } else {
+            logoImage.isAccessibilityElement = true
+            logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
+            logoImage.image = viewModel.icon
+            logoImage.tintColor = viewModel.iconTintColor
+            importProgressView.isHidden = true
+            if !isSelected {
+                viewModel.setThumbnail(on: logoImage)
+            }
+        }
+    }
+
     private func configureForSelection() {
         guard viewModel?.selectionMode == true else { return }
-        checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
-        checkmarkImage?.isAccessibilityElement = true
-        checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
-        checkmarkImage?.backgroundColor = nil
-        checkmarkImage?.contentMode = .scaleAspectFit
-        checkmarkImage?.layer.cornerRadius = 0
-        checkmarkImage?.layer.masksToBounds = false
+        if isSelected {
+            checkmarkImage?.image = KDriveResourcesAsset.select.image
+            checkmarkImage?.isAccessibilityElement = true
+            checkmarkImage?.accessibilityLabel = KDriveResourcesStrings.Localizable.contentDescriptionIsSelected
+            checkmarkImage?.backgroundColor = nil
+            checkmarkImage?.contentMode = .scaleAspectFit
+            checkmarkImage?.layer.cornerRadius = 0
+            checkmarkImage?.layer.masksToBounds = false
+        } else {
+            configureLogoImage()
+        }
     }
 
     func configureLoading() {
