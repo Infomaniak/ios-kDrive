@@ -87,7 +87,6 @@ extension SharedDrivesViewController: UITableViewDelegate, UITableViewDataSource
         } else if let driveFileManager = AccountManager.instance.getDriveFileManager(for: drive) {
             let viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: nil)
             let fileListViewController = FileListViewController.instantiate(viewModel: viewModel)
-            fileListViewController.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(fileListViewController, animated: true)
         } else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)

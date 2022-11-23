@@ -263,7 +263,7 @@ extension MainTabViewController: UIDocumentPickerDelegate {
                         UploadFile(
                             parentDirectoryId: documentPicker.importDriveDirectory.id,
                             userId: AccountManager.instance.currentUserId,
-                            driveId: driveFileManager.drive.id,
+                            driveId: documentPicker.importDrive.id,
                             url: targetURL,
                             name: url.lastPathComponent))
                 } catch {

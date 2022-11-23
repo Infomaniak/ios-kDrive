@@ -20,7 +20,6 @@ import UIKit
 import kDriveCore
 
 class DriveImportDocumentPickerViewController: UIDocumentPickerViewController {
-
+    var importDrive: Drive!
     var importDriveDirectory: File!
-
 }
