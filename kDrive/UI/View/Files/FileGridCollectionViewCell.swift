@@ -127,4 +127,9 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         moreButton.isHidden = true
         checkmarkImage?.isHidden = true
     }
+
+    override func configureForSelection() {
+        guard viewModel.selectionMode else { return }
+        configureCheckmarkImage(isSelected: isSelected)
+    }
 }

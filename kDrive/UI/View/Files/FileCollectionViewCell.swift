@@ -143,7 +143,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
-    private var viewModel: FileViewModel!
+    var viewModel: FileViewModel!
 
     weak var delegate: FileCellDelegate?
 
@@ -275,6 +275,15 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         configure(with: viewModel)
     }
 
+    func configureForSelection() {
+        guard viewModel?.selectionMode == true else { return }
+        if isSelected {
+            configureCheckmarkImage(isSelected: true)
+        } else {
+            configureLogoImage()
+        }
+    }
+
     private func configureLogoImage() {
         if viewModel.isImporting {
             logoImage.isHidden = true
@@ -292,19 +301,14 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         }
     }
 
-    private func configureForSelection() {
-        guard viewModel?.selectionMode == true else { return }
-        if isSelected {
-            checkmarkImage?.image = KDriveResourcesAsset.select.image
-            checkmarkImage?.isAccessibilityElement = true
-            checkmarkImage?.accessibilityLabel = KDriveResourcesStrings.Localizable.contentDescriptionIsSelected
-            checkmarkImage?.backgroundColor = nil
-            checkmarkImage?.contentMode = .scaleAspectFit
-            checkmarkImage?.layer.cornerRadius = 0
-            checkmarkImage?.layer.masksToBounds = false
-        } else {
-            configureLogoImage()
-        }
+    func configureCheckmarkImage(isSelected: Bool) {
+        checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : Self.emptyCheckmarkImage
+        checkmarkImage?.isAccessibilityElement = true
+        checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
+        checkmarkImage?.backgroundColor = nil
+        checkmarkImage?.contentMode = .scaleAspectFit
+        checkmarkImage?.layer.cornerRadius = 0
+        checkmarkImage?.layer.masksToBounds = false
     }
 
     func configureLoading() {
