@@ -89,10 +89,15 @@ class SaveFileViewController: UIViewController {
 
         // Set selected drive and directory to last values
         if selectedDirectory == nil {
-            if let driveFileManager = AccountManager.instance.getDriveFileManager(for: UserDefaults.shared.lastSelectedDrive, userId: UserDefaults.shared.lastSelectedUser) {
+            if selectedDriveFileManager == nil, let driveFileManager = AccountManager.instance.getDriveFileManager(
+                for: UserDefaults.shared.lastSelectedDrive,
+                userId: UserDefaults.shared.lastSelectedUser
+            ) {
                 selectedDriveFileManager = driveFileManager
             }
-            selectedDirectory = lastSelectedDirectory
+            selectedDirectory = lastSelectedDirectory?.driveId == selectedDriveFileManager?.drive.id
+                ? lastSelectedDirectory
+                : selectedDriveFileManager?.getCachedRootFile()
         }
 
         closeBarButtonItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
