@@ -264,11 +264,7 @@ public class UploadQueue {
             }
         }
 
-        #if !ISEXTENSION
-        DispatchQueue.main.async {
-            UIApplication.shared.isIdleTimerDisabled = true
-        }
-        #endif
+        OperationQueueHelper.disableIdleTimer(true)
 
         let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
         operation.queuePriority = file.priority
@@ -278,13 +274,7 @@ public class UploadQueue {
                 if operation.result.uploadFile.error != .taskRescheduled {
                     self.publishFileUploaded(result: operation.result)
                     self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
-                    #if !ISEXTENSION
-                    if self.operationsInQueue.isEmpty {
-                        DispatchQueue.main.async {
-                            UIApplication.shared.isIdleTimerDisabled = false
-                        }
-                    }
-                    #endif
+                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
                 }
             }
         }
