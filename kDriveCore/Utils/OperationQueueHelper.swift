@@ -19,9 +19,7 @@
 import Foundation
 import UIKit
 
-struct OperationQueueHelper {
-    private init() {}
-
+enum OperationQueueHelper {
     static func disableIdleTimer(_ shouldBeDisabled: Bool, queue: [AnyHashable: Operation]? = nil) {
         #if !ISEXTENSION
         DispatchQueue.main.async {
