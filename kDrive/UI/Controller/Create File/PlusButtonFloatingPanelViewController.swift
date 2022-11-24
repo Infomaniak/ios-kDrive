@@ -184,7 +184,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
             if #available(iOS 14, *), action == .importMediaAction {
                 // Present new photo picker
-                var configuration = PHPickerConfiguration()
+                var configuration = PHPickerConfiguration(photoLibrary: .shared())
                 configuration.selectionLimit = 0
 
                 let picker = PHPickerViewController(configuration: configuration)

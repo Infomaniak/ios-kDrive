@@ -334,12 +334,11 @@ public class FileImportHelper {
             return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
         }
 
-        if !itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
             // We cannot upload folders so we ignore them
-            return itemProvider.registeredTypeIdentifiers.first
-        } else {
             return nil
         }
+        return itemProvider.registeredTypeIdentifiers.first
     }
 
     private func getURL(from itemProvider: NSItemProvider, completion: @escaping (Result<URL, Error>) -> Void) -> Progress {
