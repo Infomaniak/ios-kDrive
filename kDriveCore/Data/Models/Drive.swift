@@ -168,12 +168,8 @@ public class Drive: Object, Codable {
         return role == "admin"
     }
 
-    public var isFree: Bool {
+    public var isFreePack: Bool {
         return pack == DrivePack.free.rawValue
-    }
-
-    public var isProOrTeam: Bool {
-        return pack == DrivePack.pro.rawValue || pack == DrivePack.team.rawValue
     }
 
     public var isInTechnicalMaintenance: Bool {

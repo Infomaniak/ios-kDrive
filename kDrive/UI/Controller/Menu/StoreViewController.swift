@@ -184,7 +184,7 @@ class StoreViewController: UICollectionViewController {
             // If we already have a receipt but the product isn't an IAP, prevent user to make a new one
             showBlockingMessage(existingIAP: true)
             purchaseEnabled = false
-        } else if !driveFileManager.drive.productIsInApp && !driveFileManager.drive.isFree {
+        } else if !driveFileManager.drive.productIsInApp && !driveFileManager.drive.isFreePack {
             // Show a warning message to inform that they have a different subscription method
             sections.insert(.warning, at: 1)
             purchaseEnabled = false

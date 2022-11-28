@@ -61,9 +61,9 @@ class ShareLinkSettingsViewController: UIViewController {
         }
 
         func isEnabled(drive: Drive) -> Bool {
-            if self == .optionDate && drive.isFree {
+            if self == .optionDate && drive.isFreePack {
                 return false
-            } else if self == .optionPassword && drive.isFree {
+            } else if self == .optionPassword && drive.isFreePack {
                 return false
             } else {
                 return true
@@ -364,7 +364,7 @@ extension ShareLinkSettingsViewController: FooterButtonDelegate {
                                          password: password,
                                          right: right,
                                          validUntil: validUntil,
-                                         isFreeDrive: driveFileManager.drive.isFree)
+                                         isFreeDrive: driveFileManager.drive.isFreePack)
         Task { [proxyFile = file.proxify()] in
             do {
                 let response = try await driveFileManager.updateShareLink(for: proxyFile, settings: settings)

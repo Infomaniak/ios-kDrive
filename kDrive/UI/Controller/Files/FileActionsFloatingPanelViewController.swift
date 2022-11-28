@@ -396,7 +396,7 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
         case .convertToDropbox:
-            if driveFileManager.drive.isFree {
+            if driveFileManager.drive.isFreePack {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController.contentViewController as? DropBoxFloatingPanelViewController
                 floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
