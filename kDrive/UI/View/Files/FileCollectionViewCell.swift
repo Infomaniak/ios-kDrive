@@ -27,7 +27,7 @@ protocol FileCellDelegate: AnyObject {
 }
 
 @MainActor class FileViewModel {
-    static let observedProperties = ["name", "rawType", "_capabilities", "dropbox", "rawVisibility", "extensionType", "isFavorite", "deletedAt", "lastModifiedAt", "isAvailableOffline", "categories", "size", "hasThumbnail", "color"]
+    static let observedProperties = ["name", "rawType", "_capabilities", "dropbox", "rawVisibility", "extensionType", "isFavorite", "deletedAt", "lastModifiedAt", "isAvailableOffline", "categories", "size", "hasThumbnail", "color", "externalImport.status"]
     var file: File
     var selectionMode: Bool
     private var downloadProgressObserver: ObservationToken?
@@ -57,7 +57,9 @@ protocol FileCellDelegate: AnyObject {
     }
 
     var subtitle: String {
-        if let fileSize = file.getFileSize() {
+        if isImporting {
+            return KDriveResourcesStrings.Localizable.uploadInProgressTitle + "…"
+        } else if let fileSize = file.getFileSize() {
             return fileSize + " • " + formattedDate
         } else {
             return formattedDate
@@ -67,6 +69,8 @@ protocol FileCellDelegate: AnyObject {
     var isAvailableOffline: Bool {
         file.isAvailableOffline && FileManager.default.fileExists(atPath: file.localUrl.path)
     }
+
+    var isImporting: Bool { file.isImporting }
 
     init(driveFileManager: DriveFileManager, file: File, selectionMode: Bool) {
         self.file = file
@@ -127,7 +131,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var accessoryImage: UIImageView?
     @IBOutlet weak var moreButton: UIButton!
     @IBOutlet weak var favoriteImageView: UIImageView?
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var collectionView: UICollectionView?
     @IBOutlet weak var availableOfflineImageView: UIImageView!
     @IBOutlet weak var centerTitleConstraint: NSLayoutConstraint!
     @IBOutlet weak var innerViewTrailingConstraint: NSLayoutConstraint!
@@ -135,6 +139,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var swipeActionsView: UIStackView?
     @IBOutlet weak var stackViewTrailingConstraint: NSLayoutConstraint?
     @IBOutlet weak var detailsStackView: UIStackView?
+    @IBOutlet weak var importProgressView: RPCircularProgress!
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
@@ -177,6 +182,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        importProgressView.setInfomaniakStyle()
         favoriteImageView?.isAccessibilityElement = true
         favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         availableOfflineImageView?.isAccessibilityElement = true
@@ -239,13 +245,21 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func configure(with viewModel: FileViewModel) {
         self.viewModel = viewModel
-        logoImage.isAccessibilityElement = true
-        logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
-        logoImage.image = viewModel.icon
-        logoImage.tintColor = viewModel.iconTintColor
-        if !viewModel.selectionMode || checkmarkImage != logoImage {
-            // In list mode, we don't fetch the thumbnail if we are in selection mode
-            viewModel.setThumbnail(on: logoImage)
+        if viewModel.isImporting {
+            logoImage.isHidden = true
+            importProgressView.isHidden = false
+            importProgressView.enableIndeterminate()
+        } else {
+            logoImage.isHidden = false
+            importProgressView.isHidden = true
+            logoImage.isAccessibilityElement = true
+            logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
+            logoImage.image = viewModel.icon
+            logoImage.tintColor = viewModel.iconTintColor
+            if !viewModel.selectionMode || checkmarkImage != logoImage {
+                // In list mode, we don't fetch the thumbnail if we are in selection mode
+                viewModel.setThumbnail(on: logoImage)
+            }
         }
         titleLabel.text = viewModel.title
         detailLabel?.text = viewModel.subtitle

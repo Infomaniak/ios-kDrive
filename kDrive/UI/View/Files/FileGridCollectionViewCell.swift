@@ -75,16 +75,24 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         super.configure(with: viewModel)
         guard let viewModel = viewModel as? FileGridViewModel else { return }
         iconImageView.isHidden = viewModel.iconImageHidden
-        if viewModel.hasThumbnail {
+        if viewModel.isImporting {
+            logoImage.isHidden = true
+            largeIconImageView.isHidden = true
+            importProgressView.isHidden = false
+            moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+            moreButton.backgroundColor = nil
+        } else if viewModel.hasThumbnail {
             logoImage.isHidden = false
             largeIconImageView.isHidden = true
             iconImageView.isHidden = false
+            importProgressView.isHidden = true
             moreButton.tintColor = .white
             moreButton.backgroundColor = UIColor.black.withAlphaComponent(0.3)
             moreButton.cornerRadius = moreButton.frame.width / 2
         } else {
             logoImage.isHidden = true
             largeIconImageView.isHidden = false
+            importProgressView.isHidden = true
             moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
             moreButton.backgroundColor = nil
         }

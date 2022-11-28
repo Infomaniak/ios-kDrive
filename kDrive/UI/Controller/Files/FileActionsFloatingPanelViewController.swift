@@ -62,20 +62,21 @@ public class FloatingPanelAction: Equatable {
     static let rename = FloatingPanelAction(id: 12, name: KDriveResourcesStrings.Localizable.buttonRename, image: KDriveResourcesAsset.edit.image)
     static let delete = FloatingPanelAction(id: 13, name: KDriveResourcesStrings.Localizable.modalMoveTrashTitle, image: KDriveResourcesAsset.delete.image, tintColor: KDriveResourcesAsset.binColor.color)
     static let leaveShare = FloatingPanelAction(id: 14, name: KDriveResourcesStrings.Localizable.buttonLeaveShare, image: KDriveResourcesAsset.linkBroken.image)
+    static let cancelImport = FloatingPanelAction(id: 15, name: KDriveResourcesStrings.Localizable.buttonCancelImport, image: KDriveResourcesAsset.remove.image, tintColor: KDriveCoreAsset.binColor.color)
 
     static var listActions: [FloatingPanelAction] {
         return [openWith, edit, manageCategories, favorite, seeFolder, offline, download, move, duplicate, rename, leaveShare, delete].map { $0.reset() }
     }
 
     static var folderListActions: [FloatingPanelAction] {
-        return [manageCategories, favorite, folderColor, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, leaveShare, delete].map { $0.reset() }
+        return [manageCategories, favorite, folderColor, convertToDropbox, manageDropbox, seeFolder, download, move, duplicate, rename, leaveShare, delete, cancelImport].map { $0.reset() }
     }
 
-    static let informations = FloatingPanelAction(id: 15, name: KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, image: KDriveResourcesAsset.info.image)
-    static let add = FloatingPanelAction(id: 16, name: KDriveResourcesStrings.Localizable.buttonAdd, image: KDriveResourcesAsset.add.image)
-    static let sendCopy = FloatingPanelAction(id: 17, name: KDriveResourcesStrings.Localizable.buttonSendCopy, image: KDriveResourcesAsset.exportIos.image)
-    static let shareAndRights = FloatingPanelAction(id: 18, name: KDriveResourcesStrings.Localizable.buttonFileRights, image: KDriveResourcesAsset.share.image)
-    static let shareLink = FloatingPanelAction(id: 19,
+    static let informations = FloatingPanelAction(id: 16, name: KDriveResourcesStrings.Localizable.fileDetailsInfosTitle, image: KDriveResourcesAsset.info.image)
+    static let add = FloatingPanelAction(id: 17, name: KDriveResourcesStrings.Localizable.buttonAdd, image: KDriveResourcesAsset.add.image)
+    static let sendCopy = FloatingPanelAction(id: 18, name: KDriveResourcesStrings.Localizable.buttonSendCopy, image: KDriveResourcesAsset.exportIos.image)
+    static let shareAndRights = FloatingPanelAction(id: 19, name: KDriveResourcesStrings.Localizable.buttonFileRights, image: KDriveResourcesAsset.share.image)
+    static let shareLink = FloatingPanelAction(id: 20,
                                                name: KDriveResourcesStrings.Localizable.buttonCreatePublicLink,
                                                reverseName: KDriveResourcesStrings.Localizable.buttonSharePublicLink,
                                                image: KDriveResourcesAsset.link.image)
@@ -280,11 +281,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .duplicate:
                 return !sharedWithMe && file.capabilities.canRead && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace
             case .rename:
-                return file.capabilities.canRename && !sharedWithMe
+                return file.capabilities.canRename && !sharedWithMe && !file.isImporting
             case .delete:
-                return file.capabilities.canDelete
+                return file.capabilities.canDelete && !file.isImporting
             case .leaveShare:
                 return file.capabilities.canLeave
+            case .cancelImport:
+                return file.isImporting
             default:
                 return true
             }
@@ -557,6 +560,17 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
                 }
             }
             present(alert, animated: true)
+        case .cancelImport:
+            guard let importId = file.externalImport?.id else { return }
+            Task {
+                do {
+                    _ = try await driveFileManager.apiFetcher.cancelImport(drive: driveFileManager.drive, id: importId)
+                    // Dismiss panel
+                    self.dismiss(animated: true)
+                } catch {
+                    UIConstants.showSnackBar(message: error.localizedDescription)
+                }
+            }
         default:
             break
         }

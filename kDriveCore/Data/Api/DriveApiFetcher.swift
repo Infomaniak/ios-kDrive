@@ -251,7 +251,7 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func fileActivities(file: ProxyFile, from date: Date, page: Int) async throws -> (data: [FileActivity], responseAt: Int?) {
         var queryItems = [
-            Endpoint.fileActivitiesWithQueryItem,
+            Endpoint.fileActivitiesWithExtraQueryItem,
             URLQueryItem(name: "depth", value: "children"),
             URLQueryItem(name: "from_date", value: "\(Int(date.timeIntervalSince1970))")
         ]
@@ -406,6 +406,10 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func updateColor(directory: ProxyFile, color: String) async throws -> Bool {
         try await perform(request: authenticatedRequest(.directoryColor(file: directory), method: .post, parameters: ["color": color])).data
+    }
+
+    public func cancelImport(drive: AbstractDrive, id: Int) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.cancelImport(drive: drive, id: id), method: .put)).data
     }
 }
 

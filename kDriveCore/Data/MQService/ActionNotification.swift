@@ -26,3 +26,11 @@ class ActionNotification: Codable {
     let simpleAction: SimpleAction?
     let action: Action
 }
+
+struct ExternalImportNotification: Codable {
+    let uid: String
+    let driveId: Int
+    let userId: Int
+    let importId: Int
+    let action: ExternalImportAction
+}
