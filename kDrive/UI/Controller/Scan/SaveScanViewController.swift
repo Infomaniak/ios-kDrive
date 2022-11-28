@@ -33,9 +33,6 @@ class SaveScanViewController: SaveFileViewController {
         super.viewDidLoad()
         sections = [.fileName, .fileType, .directorySelection]
         detectFileName()
-        if selectedDirectory == nil {
-            selectedDirectory = lastSelectedDirectory ?? selectedDriveFileManager?.getCachedRootFile()
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
