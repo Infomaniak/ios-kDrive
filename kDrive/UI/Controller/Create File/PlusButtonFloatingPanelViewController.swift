@@ -183,13 +183,29 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
             mainTabViewController.photoPickerDelegate.currentDirectory = currentDirectory.freezeIfNeeded()
 
             if #available(iOS 14, *), action == .importMediaAction {
-                // Present new photo picker
-                var configuration = PHPickerConfiguration(photoLibrary: .shared())
-                configuration.selectionLimit = 0
+                // Check permission
+                PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
+                    if authorizationStatus == .denied || authorizationStatus == .limited {
+                        let alert = AlertTextViewController(
+                            title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
+                            message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
+                            action: KDriveResourcesStrings.Localizable.buttonGoToSettings) {
+                                if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
+                                    await UIApplication.shared.open(settingsUrl)
+                                }
+                            }
+                        mainTabViewController.present(alert, animated: true)
+                    } else {
+                        var configuration = PHPickerConfiguration(photoLibrary: .shared())
+                        configuration.selectionLimit = 0
 
-                let picker = PHPickerViewController(configuration: configuration)
-                picker.delegate = mainTabViewController.photoPickerDelegate
-                mainTabViewController.present(picker, animated: true)
+                        DispatchQueue.main.async {
+                            let picker = PHPickerViewController(configuration: configuration)
+                            picker.delegate = mainTabViewController.photoPickerDelegate
+                            mainTabViewController.present(picker, animated: true)
+                        }
+                    }
+                }
             } else {
                 // Present camera or old photo picker
                 let sourceType: UIImagePickerController.SourceType = action == .takePictureAction ? .camera : .photoLibrary
