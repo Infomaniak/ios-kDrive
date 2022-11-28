@@ -114,8 +114,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                                                driveFileManager: driveFileManager,
                                                from: self,
                                                group: group,
-                                               presentingParent: presentingParent,
-                                               fromMultiselect: true)
+                                               presentingParent: presentingParent)
         case .folderColor:
             FileActionsHelper.folderColor(files: files,
                                           driveFileManager: driveFileManager,
