@@ -68,6 +68,9 @@ public enum DrivePack: String, Codable {
     case pro
     case team
     case free
+    case kSuiteStandard = "ksuite_standard"
+    case kSuitePro = "ksuite_pro"
+    case kSuiteEntreprise = "ksuite_entreprise"
 }
 
 public enum MaintenanceReason: String, PersistableEnum, Codable {
