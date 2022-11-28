@@ -87,11 +87,14 @@ public class DownloadQueue {
                 return
             }
 
+            OperationQueueHelper.disableIdleTimer(true)
+
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.bestSession, itemIdentifier: itemIdentifier)
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
                     self.publishFileDownloaded(fileId: fileId, error: operation.error)
+                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -106,11 +109,14 @@ public class DownloadQueue {
                 return
             }
 
+            OperationQueueHelper.disableIdleTimer(true)
+
             let operation = DownloadArchiveOperation(archiveId: archiveId, driveFileManager: driveFileManager, urlSession: self.bestSession)
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
+                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -127,10 +133,13 @@ public class DownloadQueue {
                 return
             }
 
+            OperationQueueHelper.disableIdleTimer(true)
+
             let operation = DownloadOperation(file: file, driveFileManager: driveFileManager, urlSession: self.foregroundSession)
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.operationsInQueue.removeValue(forKey: fileId)
+                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
                     completion(operation.error)
                 }
             }

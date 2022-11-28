@@ -264,6 +264,8 @@ public class UploadQueue {
             }
         }
 
+        OperationQueueHelper.disableIdleTimer(true)
+
         let operation = UploadOperation(file: file, urlSession: bestSession, itemIdentifier: itemIdentifier)
         operation.queuePriority = file.priority
         operation.completionBlock = { [parentId = file.parentDirectoryId, fileId = file.id, userId = file.userId, driveId = file.driveId] in
@@ -272,6 +274,7 @@ public class UploadQueue {
                 if operation.result.uploadFile.error != .taskRescheduled {
                     self.publishFileUploaded(result: operation.result)
                     self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+                    OperationQueueHelper.disableIdleTimer(false, queue: self.operationsInQueue)
                 }
             }
         }
