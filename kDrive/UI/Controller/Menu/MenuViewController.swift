@@ -136,7 +136,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
 
     private func updateTableContent() {
         // Show upgrade section if free drive
-        if driveFileManager.drive.pack == .free {
+        if driveFileManager.drive.isFree {
             sections = [.header, .upgrade, .more, .options]
         } else {
             sections = [.header, .more, .options]

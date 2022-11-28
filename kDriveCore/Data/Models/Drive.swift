@@ -126,7 +126,7 @@ public class Drive: Object, Codable {
     /// Account id of the drive CREATOR
     @Persisted public var accountId: Int = -1
     @Persisted public var id: Int = -1
-    @Persisted private var _pack: String = ""
+    @Persisted public var pack: String = ""
     @Persisted public var packFunctionality: DrivePackFunctionality?
     @Persisted public var sharedWithMe = false
     @Persisted public var size: Int64 = 0
@@ -146,10 +146,6 @@ public class Drive: Object, Codable {
         didSet {
             self.objectId = DriveInfosManager.getObjectId(driveId: id, userId: userId)
         }
-    }
-
-    public var pack: DrivePack {
-        return DrivePack(rawValue: _pack)!
     }
 
     public var preferences: DrivePreferences {
@@ -172,8 +168,12 @@ public class Drive: Object, Codable {
         return role == "admin"
     }
 
+    public var isFree: Bool {
+        return pack == DrivePack.free.rawValue
+    }
+
     public var isProOrTeam: Bool {
-        return pack == .pro || pack == .team
+        return pack == DrivePack.pro.rawValue || pack == DrivePack.team.rawValue
     }
 
     public var isInTechnicalMaintenance: Bool {
@@ -185,7 +185,7 @@ public class Drive: Object, Codable {
         accountId = try values.decode(Int.self, forKey: .accountId)
         id = try values.decode(Int.self, forKey: .id)
         name = try values.decode(String.self, forKey: .name)
-        _pack = try values.decode(String.self, forKey: ._pack)
+        pack = try values.decode(String.self, forKey: .pack)
         role = try values.decode(String.self, forKey: .role)
         _preferences = try values.decode(DrivePreferences.self, forKey: ._preferences)
         _users = try values.decode(DriveUsersCategories.self, forKey: ._users)
@@ -224,7 +224,7 @@ public class Drive: Object, Codable {
         case accountId = "account_id"
         case id
         case name
-        case _pack = "pack"
+        case pack = "pack"
         case role
         case _preferences = "preferences"
         case size

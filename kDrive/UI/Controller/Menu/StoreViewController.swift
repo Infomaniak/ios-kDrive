@@ -62,7 +62,7 @@ class StoreViewController: UICollectionViewController {
 
     private var purchaseEnabled = true
     private var items = Item.allItems
-    private lazy var selectedPack = driveFileManager.drive.pack
+    private lazy var selectedPack = DrivePack(rawValue: driveFileManager.drive.pack) ?? .free
     private var selectedStorage = 1
     private var selectedPeriod = PeriodTab.yearly {
         didSet { updateOffers() }
@@ -184,7 +184,7 @@ class StoreViewController: UICollectionViewController {
             // If we already have a receipt but the product isn't an IAP, prevent user to make a new one
             showBlockingMessage(existingIAP: true)
             purchaseEnabled = false
-        } else if !driveFileManager.drive.productIsInApp && driveFileManager.drive.pack != .free {
+        } else if !driveFileManager.drive.productIsInApp && !driveFileManager.drive.isFree {
             // Show a warning message to inform that they have a different subscription method
             sections.insert(.warning, at: 1)
             purchaseEnabled = false
