@@ -151,7 +151,12 @@ public class FileImportHelper {
             dispatchGroup.enter()
             Task {
                 if let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) {
-                    items.append(ImportedFile(name: url.lastPathComponent, path: url, uti: UTI(filenameExtension: url.pathExtension) ?? .data))
+                    let uti = UTI(filenameExtension: url.pathExtension)
+                    var name = url.lastPathComponent
+                    if let uti, let originalName = asset.getName(uti: uti) {
+                        name = originalName
+                    }
+                    items.append(ImportedFile(name: name, path: url, uti: UTI(filenameExtension: url.pathExtension) ?? .data))
                 } else {
                     errorCount += 1
                 }
