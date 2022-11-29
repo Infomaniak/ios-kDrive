@@ -186,15 +186,18 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                 // Check permission
                 PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
                     if authorizationStatus == .denied || authorizationStatus == .limited {
-                        let alert = AlertTextViewController(
-                            title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
-                            message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
-                            action: KDriveResourcesStrings.Localizable.buttonGoToSettings) {
+                        DispatchQueue.main.async {
+                            let alert = AlertTextViewController(
+                                title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
+                                message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
+                                action: KDriveResourcesStrings.Localizable.buttonGoToSettings
+                            ) {
                                 if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
                                     await UIApplication.shared.open(settingsUrl)
                                 }
                             }
-                        mainTabViewController.present(alert, animated: true)
+                            mainTabViewController.present(alert, animated: true)
+                        }
                     } else {
                         var configuration = PHPickerConfiguration(photoLibrary: .shared())
                         configuration.selectionLimit = 0

@@ -91,7 +91,7 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
         if !results.isEmpty {
             let saveNavigationViewController = SaveFileViewController.instantiateInNavigationController(driveFileManager: driveFileManager)
             if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
-                saveViewController.itemProviders = results.map(\.itemProvider)
+                saveViewController.assetIdentifiers = results.compactMap(\.assetIdentifier)
                 saveViewController.selectedDirectory = currentDirectory
                 viewController?.present(saveNavigationViewController, animated: true)
             }
