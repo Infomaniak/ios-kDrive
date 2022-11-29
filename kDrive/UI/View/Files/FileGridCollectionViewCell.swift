@@ -79,6 +79,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
             logoImage.isHidden = true
             largeIconImageView.isHidden = true
             importProgressView.isHidden = false
+            importProgressView.enableIndeterminate()
             moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
             moreButton.backgroundColor = nil
         } else if viewModel.hasThumbnail {
@@ -129,7 +130,7 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
     }
 
     override func configureForSelection() {
-        guard viewModel.selectionMode else { return }
-        configureCheckmarkImage(isSelected: isSelected)
+        guard viewModel?.selectionMode == true else { return }
+        configureCheckmarkImage()
     }
 }

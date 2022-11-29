@@ -278,30 +278,25 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     func configureForSelection() {
         guard viewModel?.selectionMode == true else { return }
         if isSelected {
-            configureCheckmarkImage(isSelected: true)
+            configureCheckmarkImage()
+            configureImport(shouldDisplay: false)
         } else {
             configureLogoImage()
         }
     }
 
     private func configureLogoImage() {
-        if viewModel.isImporting {
-            logoImage.isHidden = true
-            importProgressView.isHidden = false
-            importProgressView.enableIndeterminate()
-        } else {
-            logoImage.isAccessibilityElement = true
-            logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
-            logoImage.image = viewModel.icon
-            logoImage.tintColor = viewModel.iconTintColor
-            importProgressView.isHidden = true
-            if !isSelected {
-                viewModel.setThumbnail(on: logoImage)
-            }
+        logoImage.isAccessibilityElement = true
+        logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
+        logoImage.image = viewModel.icon
+        logoImage.tintColor = viewModel.iconTintColor
+        configureImport(shouldDisplay: !isSelected)
+        if !isSelected {
+            viewModel.setThumbnail(on: logoImage)
         }
     }
 
-    func configureCheckmarkImage(isSelected: Bool) {
+    func configureCheckmarkImage() {
         checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : Self.emptyCheckmarkImage
         checkmarkImage?.isAccessibilityElement = true
         checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
@@ -309,6 +304,17 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         checkmarkImage?.contentMode = .scaleAspectFit
         checkmarkImage?.layer.cornerRadius = 0
         checkmarkImage?.layer.masksToBounds = false
+    }
+
+    func configureImport(shouldDisplay: Bool) {
+        if shouldDisplay && viewModel.isImporting {
+            logoImage.isHidden = true
+            importProgressView.isHidden = false
+            importProgressView.enableIndeterminate()
+        } else {
+            logoImage.isHidden = false
+            importProgressView.isHidden = true
+        }
     }
 
     func configureLoading() {
