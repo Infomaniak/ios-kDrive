@@ -150,7 +150,7 @@ public class FileImportHelper {
         assets.enumerateObjects { asset, _, _ in
             dispatchGroup.enter()
             Task {
-                if let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg, requestResourceOption: PHAssetResourceRequestOptions()) {
+                if let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) {
                     items.append(ImportedFile(name: url.lastPathComponent, path: url, uti: UTI(filenameExtension: url.pathExtension) ?? .data))
                 } else {
                     errorCount += 1

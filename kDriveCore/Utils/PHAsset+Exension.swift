@@ -21,7 +21,7 @@ import Photos
 import Sentry
 
 extension PHAsset {
-    private func bestResource() -> PHAssetResource? {
+    public func bestResource() -> PHAssetResource? {
         let resources = PHAssetResource.assetResources(for: self)
 
         if mediaType == .video {
@@ -41,6 +41,40 @@ extension PHAsset {
                 return originalImageResource
             }
             return resources.first
+        }
+        return nil
+    }
+
+    public func getUrl(preferJPEGFormat: Bool) async -> URL? {
+        guard let resource = bestResource() else { return nil }
+
+        let requestResourceOption = PHAssetResourceRequestOptions()
+        requestResourceOption.isNetworkAccessAllowed = true
+
+        let uti = UTI(resource.uniformTypeIdentifier)
+        let targetURL = FileImportHelper.instance.generateImportURL(for: uti)
+
+        if uti == .heic && preferJPEGFormat {
+            do {
+                if let jpegData = try await getJpegData(for: resource, requestResourceOption: requestResourceOption) {
+                    try jpegData.write(to: targetURL)
+                    return targetURL
+                }
+            } catch {
+                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
+                breadcrumb.message = error.localizedDescription
+                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+            }
+            return nil
+        }
+
+        do {
+            try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
+            return targetURL
+        } catch {
+            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+            breadcrumb.message = error.localizedDescription
+            SentrySDK.addBreadcrumb(crumb: breadcrumb)
         }
         return nil
     }
@@ -71,36 +105,5 @@ extension PHAsset {
                 }
             }
         }
-    }
-
-    public func getUrl(preferJPEGFormat: Bool, requestResourceOption: PHAssetResourceRequestOptions) async -> URL? {
-        guard let resource = bestResource() else { return nil }
-
-        let uti = UTI(resource.uniformTypeIdentifier)
-        let targetURL = FileImportHelper.instance.generateImportURL(for: uti)
-
-        if uti == .heic && preferJPEGFormat {
-            do {
-                if let jpegData = try await getJpegData(for: resource, requestResourceOption: requestResourceOption) {
-                    try jpegData.write(to: targetURL)
-                    return targetURL
-                }
-            } catch {
-                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
-                breadcrumb.message = error.localizedDescription
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
-            }
-            return nil
-        }
-
-        do {
-            try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
-            return targetURL
-        } catch {
-            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
-            breadcrumb.message = error.localizedDescription
-            SentrySDK.addBreadcrumb(crumb: breadcrumb)
-        }
-        return nil
     }
 }
