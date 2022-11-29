@@ -134,6 +134,7 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
+    @MainActor
     public func importAssets(
         _ assetIdentifiers: [String],
         userPreferredPhotoFormat: PhotoFileFormat? = nil,
@@ -153,10 +154,11 @@ public class FileImportHelper {
                 if let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) {
                     let uti = UTI(filenameExtension: url.pathExtension)
                     var name = url.lastPathComponent
-                    if let uti, let originalName = asset.getName(uti: uti) {
+                    if let uti, let originalName = asset.getFilename(uti: uti) {
                         name = originalName
                     }
-                    items.append(ImportedFile(name: name, path: url, uti: UTI(filenameExtension: url.pathExtension) ?? .data))
+
+                    items.append(ImportedFile(name: name, path: url, uti: uti ?? .data))
                 } else {
                     errorCount += 1
                 }

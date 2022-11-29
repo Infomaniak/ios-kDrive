@@ -21,8 +21,9 @@ import Photos
 import Sentry
 
 extension PHAsset {
-    public func getName(uti: UTI) -> String? {
+    public func getFilename(uti: UTI) -> String? {
         guard let resource = bestResource() else { return nil }
+
         let lastPathComponent = resource.originalFilename.split(separator: ".")
         return "\(lastPathComponent[0]).\(uti.preferredFilenameExtension ?? "")"
     }
