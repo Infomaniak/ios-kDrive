@@ -24,11 +24,6 @@ class ParameterAccessDeniedTableViewCell: UITableViewCell {
     @IBOutlet weak var descriptionLabel: IKLabel!
 
     @IBAction func goToSettingsButtonPressed(_ sender: Any) {
-        guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
-            return
-        }
-        if UIApplication.shared.canOpenURL(settingsUrl) {
-            UIApplication.shared.open(settingsUrl)
-        }
+        Constants.openSettings()
     }
 }

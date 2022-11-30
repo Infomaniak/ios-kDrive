@@ -71,33 +71,25 @@ extension PHAsset {
         requestResourceOption.isNetworkAccessAllowed = true
 
         var resourceUTI = UTI(resource.uniformTypeIdentifier)
-        var shouldTransformToJPEG = false
+        var shouldTransformIntoJPEG = false
         if resourceUTI == .heic && preferJPEGFormat {
-            shouldTransformToJPEG = true
             resourceUTI = .jpeg
+            shouldTransformIntoJPEG = true
         }
 
         let targetURL = FileImportHelper.instance.generateImportURL(for: resourceUTI)
-
-        if shouldTransformToJPEG {
-            do {
+        do {
+            if shouldTransformIntoJPEG {
                 if let jpegData = try await getJpegData(for: resource, requestResourceOption: requestResourceOption) {
                     try jpegData.write(to: targetURL)
                     return targetURL
                 }
-            } catch {
-                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
-                breadcrumb.message = error.localizedDescription
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
+                return nil
             }
-            return nil
-        }
-
-        do {
             try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
             return targetURL
         } catch {
-            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
+            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
             breadcrumb.message = error.localizedDescription
             SentrySDK.addBreadcrumb(crumb: breadcrumb)
         }

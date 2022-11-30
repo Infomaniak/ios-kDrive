@@ -18,6 +18,7 @@
 
 import Foundation
 import kDriveResources
+import UIKit
 
 public struct URLConstants {
     public static let signUp = URLConstants(urlString: "https://welcome.infomaniak.com/signup/ikdrive/steps")
@@ -144,5 +145,11 @@ public enum Constants {
         let numberOfDays = calendar.dateComponents([.day], from: fromDate, to: toDate) // <3>
 
         return numberOfDays.day!
+    }
+
+    public static func openSettings() {
+        if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
+            UIApplication.shared.open(settingsUrl)
+        }
     }
 }

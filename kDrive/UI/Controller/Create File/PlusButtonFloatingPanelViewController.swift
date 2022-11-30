@@ -185,20 +185,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
             if #available(iOS 14, *), action == .importMediaAction {
                 // Check permission
                 PHPhotoLibrary.requestAuthorization(for: .readWrite) { authorizationStatus in
-                    if authorizationStatus == .denied || authorizationStatus == .limited {
-                        DispatchQueue.main.async {
-                            let alert = AlertTextViewController(
-                                title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
-                                message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
-                                action: KDriveResourcesStrings.Localizable.buttonGoToSettings
-                            ) {
-                                if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
-                                    await UIApplication.shared.open(settingsUrl)
-                                }
-                            }
-                            mainTabViewController.present(alert, animated: true)
-                        }
-                    } else {
+                    if authorizationStatus == .authorized {
                         var configuration = PHPickerConfiguration(photoLibrary: .shared())
                         configuration.selectionLimit = 0
 
@@ -206,6 +193,17 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
                             let picker = PHPickerViewController(configuration: configuration)
                             picker.delegate = mainTabViewController.photoPickerDelegate
                             mainTabViewController.present(picker, animated: true)
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            let alert = AlertTextViewController(
+                                title: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedTitle,
+                                message: KDriveResourcesStrings.Localizable.photoLibraryAccessLimitedDescription,
+                                action: KDriveResourcesStrings.Localizable.buttonGoToSettings
+                            ) {
+                                Constants.openSettings()
+                            }
+                            mainTabViewController.present(alert, animated: true)
                         }
                     }
                 }
@@ -215,9 +213,7 @@ class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPane
 
                 guard sourceType != .camera || AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
                     let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.cameraAccessDeniedTitle, message: KDriveResourcesStrings.Localizable.cameraAccessDeniedDescription, action: KDriveResourcesStrings.Localizable.buttonGoToSettings) {
-                        if let settingsUrl = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(settingsUrl) {
-                            await UIApplication.shared.open(settingsUrl)
-                        }
+                        Constants.openSettings()
                     }
                     mainTabViewController.present(alert, animated: true)
                     return
