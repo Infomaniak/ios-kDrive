@@ -62,10 +62,16 @@ class SaveFileViewController: UIViewController {
         }
     }
     var itemProvidersContainHeicPhotos: Bool {
-        itemProviders?.contains {
-            $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
-            && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
-        } ?? false
+        if let itemProviders, !itemProviders.isEmpty {
+            return itemProviders.contains {
+                $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
+                && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
+            }
+        }
+        if let assetIdentifiers, !assetIdentifiers.isEmpty {
+            return PHAsset.containsPhotosAvailableInHEIC(assetIdentifiers: assetIdentifiers)
+        }
+        return false
     }
     private var errorCount = 0
     private var importProgress: Progress?
@@ -404,7 +410,11 @@ extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         if userPreferredPhotoFormat != format {
             userPreferredPhotoFormat = format
-            setItemProviders()
+            if itemProviders?.isEmpty == false {
+                setItemProviders()
+            } else {
+                setAssetIdentifiers()
+            }
         }
     }
 }

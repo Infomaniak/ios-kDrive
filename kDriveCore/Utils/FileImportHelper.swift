@@ -141,7 +141,6 @@ public class FileImportHelper {
         completion: @escaping ([ImportedFile], Int) -> Void
     ) -> Progress {
         let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
-
         let progress = Progress(totalUnitCount: Int64(assets.count))
 
         let dispatchGroup = DispatchGroup()

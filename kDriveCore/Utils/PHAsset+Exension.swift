@@ -21,6 +21,18 @@ import Photos
 import Sentry
 
 extension PHAsset {
+    public static func containsPhotosAvailableInHEIC(assetIdentifiers: [String]) -> Bool {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
+        var containsHEICPhotos = false
+        assets.enumerateObjects { asset, _, stop in
+            if let resource = asset.bestResource(), resource.uniformTypeIdentifier == UTI.heic.identifier {
+                containsHEICPhotos = true
+                stop.pointee = true
+            }
+        }
+        return containsHEICPhotos
+    }
+
     public func getFilename(uti: UTI) -> String? {
         guard let resource = bestResource() else { return nil }
 
@@ -58,10 +70,16 @@ extension PHAsset {
         let requestResourceOption = PHAssetResourceRequestOptions()
         requestResourceOption.isNetworkAccessAllowed = true
 
-        let uti = UTI(resource.uniformTypeIdentifier)
-        let targetURL = FileImportHelper.instance.generateImportURL(for: uti)
+        var resourceUTI = UTI(resource.uniformTypeIdentifier)
+        var shouldTransformToJPEG = false
+        if resourceUTI == .heic && preferJPEGFormat {
+            shouldTransformToJPEG = true
+            resourceUTI = .jpeg
+        }
 
-        if uti == .heic && preferJPEGFormat {
+        let targetURL = FileImportHelper.instance.generateImportURL(for: resourceUTI)
+
+        if shouldTransformToJPEG {
             do {
                 if let jpegData = try await getJpegData(for: resource, requestResourceOption: requestResourceOption) {
                     try jpegData.write(to: targetURL)
