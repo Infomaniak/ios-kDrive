@@ -20,23 +20,6 @@ import kDriveResources
 import LocalAuthentication
 import UIKit
 
-struct AppLockHelper {
-    static var shared = AppLockHelper()
-
-    private var lastAppLock: Double = 0
-    private let appUnlockTime: Double = 10 * 60 // 10 minutes
-
-    private init() {}
-
-    var isAppLocked: Bool {
-        return lastAppLock + appUnlockTime < Date().timeIntervalSince1970
-    }
-
-    mutating func setTime() {
-        lastAppLock = Date().timeIntervalSince1970
-    }
-}
-
 class AppLockSettingsViewController: UIViewController {
     @IBOutlet weak var faceIdSwitch: UISwitch!
     @IBOutlet weak var navigationBar: UINavigationBar!
