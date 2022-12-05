@@ -68,15 +68,13 @@ extension OfficePreviewCollectionViewCell: UIGestureRecognizerDelegate {
 
 extension OfficePreviewCollectionViewCell: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-        switch navigationAction.navigationType {
-        case .linkActivated:
+        if navigationAction.navigationType == .linkActivated {
             if let url = navigationAction.request.url {
                 await UIApplication.shared.open(url)
             }
             return .cancel
-        default:
-            return .allow
         }
+        return .allow
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
