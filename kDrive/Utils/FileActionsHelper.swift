@@ -412,7 +412,7 @@ public class FileActionsHelper {
     public static func folderColor(files: [File], driveFileManager: DriveFileManager, from viewController: UIViewController,
                                    presentingParent: UIViewController?, group: DispatchGroup? = nil, completion: @escaping (Bool) -> Void) {
         group?.enter()
-        if driveFileManager.drive.pack == .free {
+        if driveFileManager.drive.isFreePack {
             let driveFloatingPanelController = FolderColorFloatingPanelViewController.instantiatePanel()
             let floatingPanelViewController = driveFloatingPanelController.contentViewController as? FolderColorFloatingPanelViewController
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin

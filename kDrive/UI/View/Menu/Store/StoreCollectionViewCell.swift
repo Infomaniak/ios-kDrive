@@ -51,8 +51,6 @@ class StoreCollectionViewCell: UICollectionViewCell {
         self.item = item
 
         switch item.pack {
-        case .free:
-            break
         case .solo:
             imageView.image = KDriveResourcesAsset.circleSolo.image
             titleLabel.text = "Solo"
@@ -73,6 +71,8 @@ class StoreCollectionViewCell: UICollectionViewCell {
             titleLabel.text = "Pro"
             descriptionLabel.text = ""
             features = []
+        default:
+            break
         }
 
         if let formattedPrice = item.product?.regularPrice, let subscriptionPeriod = item.product?.subscriptionPeriod {
