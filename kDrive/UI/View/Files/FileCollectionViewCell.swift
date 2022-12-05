@@ -143,7 +143,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
-    private var viewModel: FileViewModel!
+    var viewModel: FileViewModel!
 
     weak var delegate: FileCellDelegate?
 
@@ -245,22 +245,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func configure(with viewModel: FileViewModel) {
         self.viewModel = viewModel
-        if viewModel.isImporting {
-            logoImage.isHidden = true
-            importProgressView.isHidden = false
-            importProgressView.enableIndeterminate()
-        } else {
-            logoImage.isHidden = false
-            importProgressView.isHidden = true
-            logoImage.isAccessibilityElement = true
-            logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
-            logoImage.image = viewModel.icon
-            logoImage.tintColor = viewModel.iconTintColor
-            if !viewModel.selectionMode || checkmarkImage != logoImage {
-                // In list mode, we don't fetch the thumbnail if we are in selection mode
-                viewModel.setThumbnail(on: logoImage)
-            }
-        }
+        configureLogoImage()
         titleLabel.text = viewModel.title
         detailLabel?.text = viewModel.subtitle
         favoriteImageView?.isHidden = !viewModel.isFavorite
@@ -290,15 +275,46 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         configure(with: viewModel)
     }
 
-    private func configureForSelection() {
+    func configureForSelection() {
         guard viewModel?.selectionMode == true else { return }
-        checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : FileCollectionViewCell.emptyCheckmarkImage
+        if isSelected {
+            configureCheckmarkImage()
+            configureImport(shouldDisplay: false)
+        } else {
+            configureLogoImage()
+        }
+    }
+
+    private func configureLogoImage() {
+        logoImage.isAccessibilityElement = true
+        logoImage.accessibilityLabel = viewModel.iconAccessibilityLabel
+        logoImage.image = viewModel.icon
+        logoImage.tintColor = viewModel.iconTintColor
+        configureImport(shouldDisplay: !isSelected)
+        if !isSelected {
+            viewModel.setThumbnail(on: logoImage)
+        }
+    }
+
+    func configureCheckmarkImage() {
+        checkmarkImage?.image = isSelected ? KDriveResourcesAsset.select.image : Self.emptyCheckmarkImage
         checkmarkImage?.isAccessibilityElement = true
         checkmarkImage?.accessibilityLabel = isSelected ? KDriveResourcesStrings.Localizable.contentDescriptionIsSelected : ""
         checkmarkImage?.backgroundColor = nil
         checkmarkImage?.contentMode = .scaleAspectFit
         checkmarkImage?.layer.cornerRadius = 0
         checkmarkImage?.layer.masksToBounds = false
+    }
+
+    func configureImport(shouldDisplay: Bool) {
+        if shouldDisplay && viewModel.isImporting {
+            logoImage.isHidden = true
+            importProgressView.isHidden = false
+            importProgressView.enableIndeterminate()
+        } else {
+            logoImage.isHidden = false
+            importProgressView.isHidden = true
+        }
     }
 
     func configureLoading() {
