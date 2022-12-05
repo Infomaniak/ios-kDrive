@@ -23,7 +23,7 @@ import Sentry
 import UIKit
 import WebKit
 
-class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
+class OnlyOfficeViewController: UIViewController {
     var driveFileManager: DriveFileManager!
     var file: File!
     weak var previewParent: PreviewViewController?
@@ -89,11 +89,12 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
         let webConfiguration = WKWebViewConfiguration()
         let dropSharedWorkersScript = WKUserScript(source: "delete window.SharedWorker;", injectionTime: WKUserScriptInjectionTime.atDocumentStart, forMainFrameOnly: false)
         webConfiguration.userContentController.addUserScript(dropSharedWorkersScript)
+        // Force mobile mode for better usage on iPadOS
+        webConfiguration.defaultWebpagePreferences.preferredContentMode = .mobile
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.scrollView.isScrollEnabled = false
+        webView.uiDelegate = self
         webView.navigationDelegate = self
-        // Force mobile mode for better usage on iPadOS
-        webView.configuration.defaultWebpagePreferences.preferredContentMode = .mobile
 
         progressObserver = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, value in
             guard let newValue = value.newValue else {
@@ -162,11 +163,31 @@ class OnlyOfficeViewController: UIViewController, WKNavigationDelegate {
     private func dismiss() {
         dismiss(animated: true)
     }
+}
 
-    // MARK: - Web view navigation delegate
+// MARK: - WKUIDelegate
 
+extension OnlyOfficeViewController: WKUIDelegate {
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        // Open target="_blank" links in Safari
+        if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
+            UIApplication.shared.open(url)
+        }
+        return nil
+    }
+}
+
+// MARK: - WKNavigationDelegate
+
+extension OnlyOfficeViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let url = navigationAction.request.url {
+            if navigationAction.navigationType == .linkActivated {
+                UIApplication.shared.open(url)
+                decisionHandler(.cancel)
+                return
+            }
+
             let urlString = url.absoluteString
             if url == file.officeUrl
                 || urlString.starts(with: "https://\(ApiEnvironment.current.managerHost)/v3/mobile_login")
