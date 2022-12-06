@@ -139,7 +139,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet weak var swipeActionsView: UIStackView?
     @IBOutlet weak var stackViewTrailingConstraint: NSLayoutConstraint?
     @IBOutlet weak var detailsStackView: UIStackView?
-    @IBOutlet weak var importProgressView: RPCircularProgress!
+    @IBOutlet weak var importProgressView: RPCircularProgress?
     @IBOutlet weak var downloadProgressView: RPCircularProgress?
     @IBOutlet weak var highlightedView: UIView!
 
@@ -182,12 +182,12 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        importProgressView.setInfomaniakStyle()
         favoriteImageView?.isAccessibilityElement = true
         favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         availableOfflineImageView?.isAccessibilityElement = true
         availableOfflineImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAvailableOffline
         moreButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
+        importProgressView?.setInfomaniakStyle()
         downloadProgressView?.setInfomaniakStyle()
         collectionView?.delegate = self
         collectionView?.dataSource = self
@@ -309,11 +309,11 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     func configureImport(shouldDisplay: Bool) {
         if shouldDisplay && viewModel.isImporting {
             logoImage.isHidden = true
-            importProgressView.isHidden = false
-            importProgressView.enableIndeterminate()
+            importProgressView?.isHidden = false
+            importProgressView?.enableIndeterminate()
         } else {
             logoImage.isHidden = false
-            importProgressView.isHidden = true
+            importProgressView?.isHidden = true
         }
     }
 

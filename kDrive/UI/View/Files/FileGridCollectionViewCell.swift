@@ -78,22 +78,22 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
         if viewModel.isImporting {
             logoImage.isHidden = true
             largeIconImageView.isHidden = true
-            importProgressView.isHidden = false
-            importProgressView.enableIndeterminate()
+            importProgressView?.isHidden = false
+            importProgressView?.enableIndeterminate()
             moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
             moreButton.backgroundColor = nil
         } else if viewModel.hasThumbnail {
             logoImage.isHidden = false
             largeIconImageView.isHidden = true
             iconImageView.isHidden = false
-            importProgressView.isHidden = true
+            importProgressView?.isHidden = true
             moreButton.tintColor = .white
             moreButton.backgroundColor = UIColor.black.withAlphaComponent(0.3)
             moreButton.cornerRadius = moreButton.frame.width / 2
         } else {
             logoImage.isHidden = true
             largeIconImageView.isHidden = false
-            importProgressView.isHidden = true
+            importProgressView?.isHidden = true
             moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
             moreButton.backgroundColor = nil
         }
