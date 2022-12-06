@@ -5,7 +5,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Wed, 09 Nov 2022 14:51:32 +0100
+ * Exported at: Mon, 28 Nov 2022 09:03:39 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -1528,6 +1528,12 @@
 
 /* loco:627cf1dad81a13018111e4f2 */
 "photoFormatTitle" = "Optionen";
+
+/* loco:638469dc5d9b75142a430ac2 */
+"photoLibraryAccessLimitedDescription" = "Der Zugriff auf Ihre Bilderdatenbank ist erforderlich, um Ihre Fotos zu speichern.";
+
+/* loco:63846ac1f8786f515b61f752 */
+"photoLibraryAccessLimitedTitle" = "Eingeschränkter oder verweigerter Zugang";
 
 /* loco:627cf782146a6d748e5e7262 */
 "photosHeaderDateFormat" = "MMMM yyyy";

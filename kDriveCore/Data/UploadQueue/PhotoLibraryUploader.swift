@@ -29,13 +29,9 @@ public class PhotoLibraryUploader {
         return settings != nil
     }
 
-    private let requestResourceOption = PHAssetResourceRequestOptions()
-
     private let dateFormatter = DateFormatter()
 
     private init() {
-        requestResourceOption.isNetworkAccessAllowed = true
-
         dateFormatter.dateFormat = "yyyyMMdd_HHmmss_SSSS"
 
         if let settings = DriveFileManager.constants.uploadsRealm.objects(PhotoSyncSettings.self).first {
@@ -73,89 +69,6 @@ public class PhotoLibraryUploader {
         }
     }
 
-    private func bestResource(for asset: PHAsset) -> PHAssetResource? {
-        let resources = PHAssetResource.assetResources(for: asset)
-
-        // We take the edited asset if there is one else we take the original
-        if asset.mediaType == .video {
-            if let modifiedVideoResource = resources.first(where: { $0.type == .fullSizeVideo }) {
-                return modifiedVideoResource
-            } else if let originalVideoResource = resources.first(where: { $0.type == .video }) {
-                return originalVideoResource
-            } else {
-                return resources.first
-            }
-        } else if asset.mediaType == .image {
-            if let modifiedImageResource = resources.first(where: { $0.type == .fullSizePhoto }) {
-                return modifiedImageResource
-            } else if let originalImageResource = resources.first(where: { $0.type == .photo }) {
-                return originalImageResource
-            } else {
-                return resources.first
-            }
-        }
-
-        return nil
-    }
-
-    func getUrl(for asset: PHAsset) async -> URL? {
-        guard let resource = bestResource(for: asset) else {
-            return nil
-        }
-
-        let targetURL = FileImportHelper.instance.generateImportURL(for: nil)
-
-        if resource.uniformTypeIdentifier == UTI.heic.identifier && settings?.photoFormat == .jpg {
-            do {
-                if let jpegData = try await getJpegData(for: resource) {
-                    try jpegData.write(to: targetURL)
-                    return targetURL
-                }
-            } catch {
-                let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
-                breadcrumb.message = error.localizedDescription
-                SentrySDK.addBreadcrumb(crumb: breadcrumb)
-            }
-            return nil
-        }
-
-        do {
-            try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
-            return targetURL
-        } catch {
-            let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request")
-            breadcrumb.message = error.localizedDescription
-            SentrySDK.addBreadcrumb(crumb: breadcrumb)
-            return nil
-        }
-    }
-
-    func getJpegData(for resource: PHAssetResource) async throws -> Data? {
-        return try await withCheckedThrowingContinuation { continuation in
-            var imageData = Data()
-            PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
-                // Get all pieces of data
-                imageData.append(data)
-            } completionHandler: { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-
-                if let image = CIImage(data: imageData) {
-                    autoreleasepool {
-                        let context = CIContext()
-                        let jpegData = context.jpegRepresentation(of: image,
-                                                                  colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!)
-                        continuation.resume(returning: jpegData)
-                    }
-                } else {
-                    continuation.resume(returning: nil)
-                }
-            }
-        }
-    }
-
     class AsyncResult<T> {
         private var result: T?
         private let group = DispatchGroup()
@@ -178,7 +91,7 @@ public class PhotoLibraryUploader {
     func getUrlSync(for asset: PHAsset) -> URL? {
         let result = AsyncResult<URL?>()
         Task {
-            await result.set(getUrl(for: asset))
+            await result.set(asset.getUrl(preferJPEGFormat: settings?.photoFormat == .jpg))
         }
         return result.get()
     }
@@ -238,7 +151,7 @@ public class PhotoLibraryUploader {
                 }
                 var correctName = "No-name-\(Date().timeIntervalSince1970)"
                 var fileExtension = ""
-                if let resource = bestResource(for: asset) {
+                if let resource = asset.bestResource() {
                     if resource.uniformTypeIdentifier == UTI.heic.identifier,
                        let preferredFilenameExtension = settings.photoFormat.uti.preferredFilenameExtension {
                         fileExtension = preferredFilenameExtension

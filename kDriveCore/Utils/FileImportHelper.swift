@@ -21,8 +21,8 @@ import Foundation
 import kDriveResources
 import PDFKit
 import Photos
-import RealmSwift
 import QuickLookThumbnailing
+import RealmSwift
 import VisionKit
 
 public class ImportedFile {
@@ -134,6 +134,46 @@ public class FileImportHelper {
 
     // MARK: - Public methods
 
+    @MainActor
+    public func importAssets(
+        _ assetIdentifiers: [String],
+        userPreferredPhotoFormat: PhotoFileFormat? = nil,
+        completion: @escaping ([ImportedFile], Int) -> Void
+    ) -> Progress {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
+        let progress = Progress(totalUnitCount: Int64(assets.count))
+
+        let dispatchGroup = DispatchGroup()
+        var items = [ImportedFile]()
+        var errorCount = 0
+
+        assets.enumerateObjects { asset, _, _ in
+            dispatchGroup.enter()
+            Task {
+                if let url = await asset.getUrl(preferJPEGFormat: userPreferredPhotoFormat == .jpg) {
+                    let uti = UTI(filenameExtension: url.pathExtension)
+                    var name = url.lastPathComponent
+                    if let uti, let originalName = asset.getFilename(uti: uti) {
+                        name = originalName
+                    }
+
+                    items.append(ImportedFile(name: name, path: url, uti: uti ?? .data))
+                } else {
+                    errorCount += 1
+                }
+
+                progress.completedUnitCount += 1
+                dispatchGroup.leave()
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) {
+            completion(items, errorCount)
+        }
+
+        return progress
+    }
+
     public func importItems(_ itemProviders: [NSItemProvider],
                             userPreferredPhotoFormat: PhotoFileFormat? = nil,
                             completion: @escaping ([ImportedFile], Int) -> Void) -> Progress {
@@ -182,9 +222,9 @@ public class FileImportHelper {
                                                                       userPreferredPhotoFormat: userPreferredPhotoFormat) {
                 let childProgress = getFile(from: itemProvider, typeIdentifier: typeIdentifier) { result in
                     switch result {
-                    case .success((let filename, let fileURL)):
+                    case let .success((filename, fileURL)):
                         items.append(ImportedFile(name: filename, path: fileURL, uti: UTI(typeIdentifier) ?? .data))
-                    case .failure(let error):
+                    case let .failure(error):
                         DDLogError("[FileImportHelper] Error while getting file: \(error)")
                         errorCount += 1
                     }
@@ -315,11 +355,11 @@ public class FileImportHelper {
                                         importedItems: inout [ImportedFile],
                                         errorCount: inout Int) {
         switch result {
-        case .success(let fileURL):
+        case let .success(fileURL):
             let name = (itemProvider.suggestedName ?? FileImportHelper.getDefaultFileName()).addingExtension(`extension`)
 
             importedItems.append(ImportedFile(name: name, path: fileURL, uti: uti))
-        case .failure(let error):
+        case let .failure(error):
             DDLogError("[FileImportHelper] Error while getting image: \(error)")
             errorCount += 1
         }
@@ -334,12 +374,11 @@ public class FileImportHelper {
             return itemProvider.hasItemConformingToTypeIdentifier(UTI.heic.identifier) ? UTI.heic.identifier : UTI.jpeg.identifier
         }
 
-        if !itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
+        if itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) {
             // We cannot upload folders so we ignore them
-            return itemProvider.registeredTypeIdentifiers.first
-        } else {
             return nil
         }
+        return itemProvider.registeredTypeIdentifiers.first
     }
 
     private func getURL(from itemProvider: NSItemProvider, completion: @escaping (Result<URL, Error>) -> Void) -> Progress {
@@ -368,7 +407,11 @@ public class FileImportHelper {
         return progress
     }
 
-    private func getTextFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (Result<URL, Error>) -> Void) -> Progress {
+    private func getTextFile(
+        from itemProvider: NSItemProvider,
+        typeIdentifier: String,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) -> Progress {
         let progress = Progress(totalUnitCount: 1)
         itemProvider.loadItem(forTypeIdentifier: typeIdentifier) { coding, error in
             if let error = error {
@@ -397,7 +440,11 @@ public class FileImportHelper {
         return progress
     }
 
-    private func getFile(from itemProvider: NSItemProvider, typeIdentifier: String, completion: @escaping (Result<(String, URL), Error>) -> Void) -> Progress {
+    private func getFile(
+        from itemProvider: NSItemProvider,
+        typeIdentifier: String,
+        completion: @escaping (Result<(String, URL), Error>) -> Void
+    ) -> Progress {
         let progress = Progress(totalUnitCount: 10)
         let childProgress = itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
             if let error = error {

@@ -31,7 +31,7 @@ public class PhotoLibrarySaver: NSObject {
 
     private func requestAuthorization() async -> PHAuthorizationStatus {
         if #available(iOS 14, *) {
-            return await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+            return await PHPhotoLibrary.requestAuthorization(for: .readWrite)
         } else {
             return await withCheckedContinuation { continuation in
                 PHPhotoLibrary.requestAuthorization { status in

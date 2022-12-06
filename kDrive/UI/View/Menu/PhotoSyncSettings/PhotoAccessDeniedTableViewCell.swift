@@ -16,16 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveCore
 import UIKit
 
 class PhotoAccessDeniedTableViewCell: UITableViewCell {
 
     @IBAction func goToSettingsButtonPressed(_ sender: Any) {
-        guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
-            return
-        }
-        if UIApplication.shared.canOpenURL(settingsUrl) {
-            UIApplication.shared.open(settingsUrl)
-        }
+        Constants.openSettings()
     }
 }

@@ -50,6 +50,11 @@ class SaveFileViewController: UIViewController {
             setItemProviders()
         }
     }
+    var assetIdentifiers: [String]? {
+        didSet {
+            setAssetIdentifiers()
+        }
+    }
     var items = [ImportedFile]()
     var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
         didSet {
@@ -57,10 +62,16 @@ class SaveFileViewController: UIViewController {
         }
     }
     var itemProvidersContainHeicPhotos: Bool {
-        itemProviders?.contains {
-            $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
-            && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
-        } ?? false
+        if let itemProviders, !itemProviders.isEmpty {
+            return itemProviders.contains {
+                $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
+                && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
+            }
+        }
+        if let assetIdentifiers, !assetIdentifiers.isEmpty {
+            return PHAsset.containsPhotosAvailableInHEIC(assetIdentifiers: assetIdentifiers)
+        }
+        return false
     }
     private var errorCount = 0
     private var importProgress: Progress?
@@ -146,6 +157,21 @@ class SaveFileViewController: UIViewController {
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    private func setAssetIdentifiers() {
+        guard let assetIdentifiers else { return }
+        sections = [.importing]
+        importProgress = FileImportHelper.instance.importAssets(
+            assetIdentifiers,
+            userPreferredPhotoFormat: userPreferredPhotoFormat
+        ) { [weak self] importedFiles, errorCount in
+            self?.items = importedFiles
+            self?.errorCount = errorCount
+            DispatchQueue.main.async {
+                self?.updateTableViewAfterImport()
+            }
+        }
     }
 
     private func setItemProviders() {
@@ -393,7 +419,11 @@ extension SaveFileViewController: SelectPhotoFormatDelegate {
     func didSelectPhotoFormat(_ format: PhotoFileFormat) {
         if userPreferredPhotoFormat != format {
             userPreferredPhotoFormat = format
-            setItemProviders()
+            if itemProviders?.isEmpty == false {
+                setItemProviders()
+            } else {
+                setAssetIdentifiers()
+            }
         }
     }
 }
