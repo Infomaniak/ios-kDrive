@@ -263,13 +263,13 @@ class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .manageCategories:
                 return driveFileManager.drive.categoryRights.canPutCategoryOnFile && !file.isDisabled
             case .favorite:
-                return file.capabilities.canUseFavorite && !sharedWithMe
+                return file.capabilities.canUseFavorite
             case .convertToDropbox:
                 return file.capabilities.canBecomeDropbox
             case .manageDropbox:
                 return file.isDropbox
             case .folderColor:
-                return !sharedWithMe && file.visibility != .isSharedSpace && file.visibility != .isTeamSpace && !file.isDisabled
+                return file.canBeColored
             case .seeFolder:
                 return !normalFolderHierarchy && (file.parent != nil || file.parentId != 0)
             case .offline:

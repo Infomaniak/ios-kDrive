@@ -555,6 +555,10 @@ public class File: Object, Codable {
         return fullyDownloaded && versionCode == DriveFileManager.constants.currentVersionCode
     }
 
+    public var canBeColored: Bool {
+        return !isDisabled && visibility != .isSharedSpace && visibility != .isTeamSpace
+    }
+
     /// Is this File currently importing
     public var isImporting: Bool {
         return externalImport?.status == .inProgress
