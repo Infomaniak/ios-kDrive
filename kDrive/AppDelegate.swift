@@ -20,7 +20,6 @@ import Atlantis
 import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
-import Firebase
 import InfomaniakCore
 import InfomaniakLogin
 import kDriveCore
@@ -95,8 +94,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        FirebaseApp.configure()
-
         // Register for remote notifications. This shows a permission dialog on first run, to
         // show the dialog at a more appropriate time move this registration accordingly.
         // [START register_for_notifications]
@@ -105,20 +102,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
         application.registerForRemoteNotifications()
-        Messaging.messaging().delegate = self
-
-        if UserDefaults.shared.importNotificationsEnabled {
-            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicUpload)
-        }
-        if UserDefaults.shared.sharingNotificationsEnabled {
-            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicShared)
-        }
-        if UserDefaults.shared.newCommentNotificationsEnabled {
-            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicComments)
-        }
-        if UserDefaults.shared.generalNotificationEnabled {
-            Messaging.messaging().subscribe(toTopic: Constants.notificationTopicGeneral)
-        }
 
         return true
     }
@@ -126,10 +109,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Remove the observer.
         SKPaymentQueue.default().remove(StoreObserver.shared)
-    }
-
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Messaging.messaging().apnsToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -642,14 +621,5 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 //        }
 //
 //        Messaging.messaging().appDidReceiveMessage(userInfo)
-    }
-}
-
-// MARK: - MessagingDelegate
-
-extension AppDelegate: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        let dataDict = ["token": fcmToken ?? ""]
-        NotificationCenter.default.post(name: Notification.Name("FCMToken"), object: nil, userInfo: dataDict)
     }
 }
