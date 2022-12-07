@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FirebaseMessaging
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -72,14 +71,6 @@ class NotificationsSettingsTableViewController: UITableViewController {
         }
     }
 
-    private func subscriptionTo(topic: String, subscribe: Bool) {
-        if subscribe {
-            Messaging.messaging().subscribe(toTopic: topic)
-        } else {
-            Messaging.messaging().unsubscribe(fromTopic: topic)
-        }
-    }
-
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -112,7 +103,6 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.generalNotificationEnabled
             cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.generalNotificationEnabled = sender.isOn
-                self?.subscriptionTo(topic: Constants.notificationTopicGeneral, subscribe: sender.isOn)
                 self?.updateSwitchViews()
             }
             return cell
@@ -125,7 +115,6 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.importNotificationsEnabled
             cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.importNotificationsEnabled = sender.isOn
-                self?.subscriptionTo(topic: Constants.notificationTopicUpload, subscribe: sender.isOn)
                 self?.updateSwitchViews()
             }
             return cell
@@ -138,7 +127,6 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.sharingNotificationsEnabled
             cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.sharingNotificationsEnabled = sender.isOn
-                self?.subscriptionTo(topic: Constants.notificationTopicShared, subscribe: sender.isOn)
                 self?.updateSwitchViews()
             }
             return cell
@@ -150,7 +138,6 @@ class NotificationsSettingsTableViewController: UITableViewController {
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled
             cell.switchHandler = { [weak self] sender in
                 UserDefaults.shared.newCommentNotificationsEnabled = sender.isOn
-                self?.subscriptionTo(topic: Constants.notificationTopicComments, subscribe: sender.isOn)
                 self?.updateSwitchViews()
             }
             return cell
@@ -166,7 +153,6 @@ class NotificationsSettingsTableViewController: UITableViewController {
         UserDefaults.shared.importNotificationsEnabled = activate
         UserDefaults.shared.newCommentNotificationsEnabled = activate
         UserDefaults.shared.generalNotificationEnabled = activate
-        updateSubscriptions()
         tableView.reloadData()
     }
 
@@ -181,12 +167,5 @@ class NotificationsSettingsTableViewController: UITableViewController {
             tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
             return
         }
-    }
-
-    private func updateSubscriptions() {
-        subscriptionTo(topic: Constants.notificationTopicComments, subscribe: UserDefaults.shared.newCommentNotificationsEnabled)
-        subscriptionTo(topic: Constants.notificationTopicShared, subscribe: UserDefaults.shared.sharingNotificationsEnabled)
-        subscriptionTo(topic: Constants.notificationTopicUpload, subscribe: UserDefaults.shared.importNotificationsEnabled)
-        subscriptionTo(topic: Constants.notificationTopicGeneral, subscribe: UserDefaults.shared.generalNotificationEnabled)
     }
 }
