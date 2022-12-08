@@ -42,6 +42,7 @@ class SharedDrivesViewController: UIViewController {
         if let selectedPath = tableView.indexPathForSelectedRow {
             tableView.deselectRow(at: selectedPath, animated: true)
         }
+        (tabBarController as? MainTabViewController)?.enableCenterButton(isEnabled: false)
     }
 
     private func showEmptyView() {
