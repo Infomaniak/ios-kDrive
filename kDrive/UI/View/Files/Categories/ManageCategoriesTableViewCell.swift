@@ -46,6 +46,7 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
         super.awakeFromNib()
         collectionView.register(cellView: CategoryCollectionViewCell.self)
         collectionView.dataSource = self
+        (collectionView.collectionViewLayout as? AlignedCollectionViewFlowLayout)?.horizontalAlignment = .leading
         // Observe content size to adjust table view cell height (need to call `cell.layoutIfNeeded()`)
         contentSizeObservation = collectionView.observe(\.contentSize) { [weak self] collectionView, _ in
             self?.collectionViewHeightConstraint.constant = collectionView.contentSize.height
