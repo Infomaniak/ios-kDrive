@@ -166,7 +166,7 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
     }
 
     func enableCenterButton(isEnabled: Bool) {
-        tabBar.centerButton.isEnabled = isEnabled
+        tabBar.centerButton?.isEnabled = isEnabled
     }
 
     func enableCenterButton(from file: File) {
