@@ -593,7 +593,11 @@ public extension Endpoint {
         // let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
         // return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
         // Using upload v1 for now
-        let queryItems = file.queryItems + [fileMinimalWithQueryItem]
+        let uploadFileQueryItem = URLQueryItem(
+            name: fileMinimalWithQueryItem.name,
+            value: fileMinimalWithQueryItem.value?.replacingOccurrences(of: ",external_import", with: "")
+        )
+        let queryItems = file.queryItems + [uploadFileQueryItem]
         return .driveV1.appending(path: "/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
     }
 
