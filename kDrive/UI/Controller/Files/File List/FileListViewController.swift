@@ -608,7 +608,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         } else {
             if multipleSelectionViewModel.isMultipleSelectionEnabled && !multipleSelectionViewModel.selectedItems.isEmpty {
                 for i in 0 ..< viewModel.files.count where multipleSelectionViewModel.selectedItems.contains(viewModel.getFile(at: IndexPath(item: i, section: 0))!) {
-                    collectionView.selectItem(at: IndexPath(item: i, section: 0), animated: false, scrollPosition: .centeredVertically)
+                    collectionView.selectItem(at: IndexPath(item: i, section: 0), animated: false, scrollPosition: [])
                 }
             }
         }
