@@ -217,7 +217,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             updateEmptyView(emptyView)
         }
         coordinator.animate { _ in
-            self.collectionView?.reloadItems(at: self.collectionView.indexPathsForVisibleItems)
+            self.collectionView?.reloadData()
             self.setSelectedCells()
         }
     }
