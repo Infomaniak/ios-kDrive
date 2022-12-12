@@ -282,6 +282,9 @@ class ManageCategoriesViewController: UITableViewController {
             if let searchText = searchText {
                 editCategoryViewController.name = searchText
             }
+            if let files {
+                editCategoryViewController.filesToAdd = Array(files)
+            }
             navigationController?.pushViewController(editCategoryViewController, animated: true)
             return
         }
@@ -332,6 +335,9 @@ class ManageCategoriesViewController: UITableViewController {
             viewController?.driveFileManager = driveFileManager
             if let searchText = searchText {
                 viewController?.name = searchText
+            }
+            if let files {
+                viewController?.filesToAdd = Array(files)
             }
         }
     }

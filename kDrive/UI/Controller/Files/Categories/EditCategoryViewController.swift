@@ -26,6 +26,7 @@ class EditCategoryViewController: UITableViewController {
     var category: kDriveCore.Category?
     /// The file to add the category to after creating it.
     var fileToAdd: File?
+    var filesToAdd: [File]?
     var name = ""
 
     var color = "#1abc9c"
@@ -97,8 +98,8 @@ class EditCategoryViewController: UITableViewController {
         if let categoryId = category?.id {
             coder.encode(categoryId, forKey: "CategoryId")
         }
-        if let fileId = fileToAdd?.id {
-            coder.encode(fileId, forKey: "FileId")
+        if let filesIdToAdd = filesToAdd?.map({ $0.id }) {
+            coder.encode(filesIdToAdd, forKey: "FilesId")
         }
         coder.encode(name, forKey: "Name")
         coder.encode(color, forKey: "Color")
@@ -109,7 +110,7 @@ class EditCategoryViewController: UITableViewController {
 
         let driveId = coder.decodeInteger(forKey: "DriveId")
         let categoryId = coder.decodeInteger(forKey: "CategoryId")
-        let fileId = coder.decodeInteger(forKey: "FileId")
+        let filesId = coder.decodeObject(of: [NSNumber.self], forKey: "FilesId") as? [NSNumber]
         if let name = coder.decodeObject(of: NSString.self, forKey: "Name") {
             self.name = name as String
         }
@@ -122,7 +123,7 @@ class EditCategoryViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
         category = driveFileManager.drive.categories.first { $0.id == categoryId }
-        fileToAdd = driveFileManager.getCachedFile(id: fileId)
+        filesToAdd = filesId?.compactMap { driveFileManager.getCachedFile(id: Int(truncating: $0)) }
         // Reload view
         updateTitle()
         setRows()
@@ -198,7 +199,7 @@ extension EditCategoryViewController: ColorSelectionDelegate {
 extension EditCategoryViewController: FooterButtonDelegate {
     @objc func didClickOnButton() {
         MatomoUtils.track(eventWithCategory: .categories, name: category != nil ? "update" : "add")
-        Task { [proxyFileToAdd = fileToAdd?.proxify()] in
+        Task { [proxyFilesToAdd = filesToAdd?.map { $0.proxify() }] in
             do {
                 if let category = category {
                     // Edit category
@@ -207,9 +208,9 @@ extension EditCategoryViewController: FooterButtonDelegate {
                 } else {
                     // Create category
                     let category = try await driveFileManager.createCategory(name: name, color: color)
-                    // If a file was given, add the new category to it
-                    if let file = proxyFileToAdd {
-                        try await driveFileManager.add(category: category, to: file)
+                    // If files were given, add the new category to them
+                    if let proxyFilesToAdd {
+                        try await driveFileManager.add(category: category, to: proxyFilesToAdd)
                     }
                     navigationController?.popViewController(animated: true)
                 }
