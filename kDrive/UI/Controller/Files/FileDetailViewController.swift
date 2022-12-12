@@ -218,7 +218,6 @@ class FileDetailViewController: UIViewController {
     }
 
     private func loadFileInformation() {
-        guard !file.isDisabled else { return }
         Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
                 async let currentFile = driveFileManager.file(id: proxyFile.id, forceRefresh: true)
