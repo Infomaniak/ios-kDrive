@@ -135,6 +135,7 @@ class MainTabBar: UITabBar {
     }
 
     private func setupMiddleButton() {
+        let oldButton = centerButton
         let originY = tabBarHeight * -18 / 60 + offsetY
         if centerButton?.superview != nil {
             centerButton.removeFromSuperview()
@@ -144,6 +145,8 @@ class MainTabBar: UITabBar {
         centerButton.setImage(KDriveResourcesAsset.plus.image, for: .normal)
         centerButton.imageEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         centerButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAdd
+        // Keep old button property
+        centerButton.isEnabled = oldButton?.isEnabled ?? true
         // Shadow
         centerButton.layer.shadowPath = UIBezierPath(ovalIn: centerButton.bounds).cgPath
         centerButton.elevated = true

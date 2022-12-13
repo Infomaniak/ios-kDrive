@@ -90,6 +90,7 @@ class MenuViewController: UIViewController, SelectSwitchDriveDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: false)
+        (tabBarController as? MainTabViewController)?.enableCenterButton(isEnabled: true)
     }
 
     override func viewWillDisappear(_ animated: Bool) {

@@ -165,6 +165,14 @@ class MainTabViewController: UITabBarController, MainTabBarDelegate {
         }
     }
 
+    func enableCenterButton(isEnabled: Bool) {
+        tabBar.centerButton?.isEnabled = isEnabled
+    }
+
+    func enableCenterButton(from file: File) {
+        enableCenterButton(isEnabled: file.capabilities.canCreateFile)
+    }
+
     private func setDriveFileManager(_ driveFileManager: DriveFileManager?, completion: (DriveFileManager) -> Void) {
         if let driveFileManager = driveFileManager {
             completion(driveFileManager)
@@ -203,7 +211,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         let (_, currentDirectory) = getCurrentDirectory()
-        (tabBarController as? MainTabViewController)?.tabBar.centerButton.isEnabled = currentDirectory.capabilities.canCreateFile
+        (tabBarController as? MainTabViewController)?.enableCenterButton(from: currentDirectory)
     }
 }
 

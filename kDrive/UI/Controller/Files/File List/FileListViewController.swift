@@ -200,7 +200,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
             } else {
                 plusButtonDirectory = viewModel.driveFileManager.getCachedRootFile()
             }
-            (tabBarController as? MainTabViewController)?.tabBar.centerButton?.isEnabled = plusButtonDirectory.capabilities.canCreateFile
+            (tabBarController as? MainTabViewController)?.enableCenterButton(from: plusButtonDirectory)
         #endif
 
         tryLoadingFilesOrDisplayError()
