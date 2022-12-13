@@ -5,7 +5,7 @@
  * Locale: it, Italian
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Mon, 28 Nov 2022 09:03:39 +0100
+ * Exported at: Tue, 13 Dec 2022 12:00:53 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -255,7 +255,7 @@
 "buttonCancel" = "Annulla";
 
 /* loco:624e99d3adb6372fb56e5ab8 */
-"buttonCancelImport" = "Annullare l'importazione";
+"buttonCancelImport" = "Annullare l‘importazione";
 
 /* loco:619624bcb9b09f02f0102733 */
 "buttonChangeFolderColor" = "Cambia il colore della cartella";
@@ -542,6 +542,9 @@
 /* loco:616961b8961fc207bc6ebf24 */
 "categoryQuotation" = "Quotazione";
 
+/* loco:63985af2b769ef1fe1344c23 */
+"categoryResume" = "Curriculum";
+
 /* loco:616961c2dd624e5cbb6cf8f4 */
 "categoryTaxation" = "Imposte";
 
@@ -807,7 +810,7 @@
 "errorShareLink" = "Errore durante la creazione del link";
 
 /* loco:624e97877d7de2125354cfc2 */
-"errorStillUploading" = "L'articolo è ancora in fase di importazione";
+"errorStillUploading" = "L’articolo è ancora in fase di importazione";
 
 /* loco:6049df4d5c2c3a04bc3979a7 */
 "errorTitle" = "Errore";

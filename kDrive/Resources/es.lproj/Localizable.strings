@@ -5,7 +5,7 @@
  * Locale: es, Spanish
  * Tagged: ios
  * Exported by: Valentin Perignon
- * Exported at: Mon, 28 Nov 2022 09:03:39 +0100
+ * Exported at: Tue, 13 Dec 2022 12:00:53 +0100
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -541,6 +541,9 @@
 
 /* loco:616961b8961fc207bc6ebf24 */
 "categoryQuotation" = "Presupuesto";
+
+/* loco:63985af2b769ef1fe1344c23 */
+"categoryResume" = "Curriculum vitae";
 
 /* loco:616961c2dd624e5cbb6cf8f4 */
 "categoryTaxation" = "Impuestos";
