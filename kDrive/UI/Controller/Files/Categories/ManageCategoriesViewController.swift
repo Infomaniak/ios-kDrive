@@ -30,7 +30,7 @@ class ManageCategoriesViewController: UITableViewController {
     @IBOutlet weak var createButton: UIBarButtonItem!
 
     var driveFileManager: DriveFileManager!
-    var files: Set<File>?
+    var files: [File]?
     /// Disable category edition (can just add/remove).
     var canEdit = true
     var selectedCategories = [kDriveCore.Category]()
@@ -178,9 +178,9 @@ class ManageCategoriesViewController: UITableViewController {
                         }
                         return
                     }
-                    // Update with new file
-                    self?.files?.remove(file)
-                    self?.files?.insert(newFile)
+                    // Update list of files with new file
+                    self?.files?.removeAll { $0.id == file.id }
+                    self?.files?.append(newFile)
                 }
             }
         }
@@ -198,7 +198,7 @@ class ManageCategoriesViewController: UITableViewController {
     static func instantiate(files: [File]? = nil, driveFileManager: DriveFileManager) -> ManageCategoriesViewController {
         let viewController = Storyboard.files.instantiateViewController(withIdentifier: "ManageCategoriesViewController") as! ManageCategoriesViewController
         if let files = files {
-            viewController.files = Set(files)
+            viewController.files = files
         }
         viewController.driveFileManager = driveFileManager
         return viewController
@@ -231,7 +231,7 @@ class ManageCategoriesViewController: UITableViewController {
         }
         self.driveFileManager = driveFileManager
         let realm = driveFileManager.getRealm()
-        files = Set(filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) })
+        files = filesId.compactMap { driveFileManager.getCachedFile(id: $0, using: realm) }
         // Reload view
         updateTitle()
         updateNavigationItem()
