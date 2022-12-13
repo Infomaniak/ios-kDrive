@@ -64,6 +64,7 @@ public enum PredefinedCategory: String {
     case id = "PREDEF_CAT_ID"
     case insurance = "PREDEF_CAT_INSURANCE"
     case quotation = "PREDEF_CAT_QUOTATION"
+    case resume = "PREDEF_CAT_RESUME"
     case taxation = "PREDEF_CAT_TAXATION"
     case transportation = "PREDEF_CAT_TRANSPORTATION"
     case warranty = "PREDEF_CAT_WARRANTY"
@@ -87,6 +88,8 @@ public enum PredefinedCategory: String {
             return KDriveResourcesStrings.Localizable.categoryInsurance
         case .quotation:
             return KDriveResourcesStrings.Localizable.categoryQuotation
+        case .resume:
+            return KDriveResourcesStrings.Localizable.categoryResume
         case .taxation:
             return KDriveResourcesStrings.Localizable.categoryTaxation
         case .transportation:
