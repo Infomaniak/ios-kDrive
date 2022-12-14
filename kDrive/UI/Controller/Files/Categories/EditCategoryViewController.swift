@@ -98,7 +98,7 @@ class EditCategoryViewController: UITableViewController {
         if let categoryId = category?.id {
             coder.encode(categoryId, forKey: "CategoryId")
         }
-        if let filesIdToAdd = filesToAdd?.map({ $0.id }) {
+        if let filesIdToAdd = filesToAdd?.map(\.id) {
             coder.encode(filesIdToAdd, forKey: "FilesId")
         }
         coder.encode(name, forKey: "Name")

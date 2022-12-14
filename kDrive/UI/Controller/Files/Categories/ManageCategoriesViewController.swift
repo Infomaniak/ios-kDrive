@@ -279,11 +279,9 @@ class ManageCategoriesViewController: UITableViewController {
 
         if category == dummyCategory {
             let editCategoryViewController = EditCategoryViewController.instantiate(driveFileManager: driveFileManager)
+            editCategoryViewController.filesToAdd = files
             if let searchText = searchText {
                 editCategoryViewController.name = searchText
-            }
-            if let files {
-                editCategoryViewController.filesToAdd = Array(files)
             }
             navigationController?.pushViewController(editCategoryViewController, animated: true)
             return
@@ -333,11 +331,9 @@ class ManageCategoriesViewController: UITableViewController {
         if segue.identifier == "createCategory" {
             let viewController = segue.destination as? EditCategoryViewController
             viewController?.driveFileManager = driveFileManager
+            viewController?.filesToAdd = files
             if let searchText = searchText {
                 viewController?.name = searchText
-            }
-            if let files {
-                viewController?.filesToAdd = Array(files)
             }
         }
     }
