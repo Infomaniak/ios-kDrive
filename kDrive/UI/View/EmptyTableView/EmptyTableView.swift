@@ -24,8 +24,8 @@ class EmptyTableView: UIView {
         case noNetwork
         case noOffline
         case noTrash
+        case emptyFolderWithCreationRights
         case emptyFolder
-        case emptyFolderSelectFolder
         case noFavorite
         case noShared
         case noSharedWithMe
@@ -81,9 +81,9 @@ class EmptyTableView: UIView {
         case .noTrash:
             view = self.instantiate(logo: KDriveResourcesAsset.delete.image, message: KDriveResourcesStrings.Localizable.trashNoFile)
         case .emptyFolder:
-            view = self.instantiate(logo: KDriveResourcesAsset.folderFilled.image, message: KDriveResourcesStrings.Localizable.noFilesDescriptionWithCreationRights)
-        case .emptyFolderSelectFolder:
             view = self.instantiate(logo: KDriveResourcesAsset.folderFilled.image, message: KDriveResourcesStrings.Localizable.noFilesDescription)
+        case .emptyFolderWithCreationRights:
+            view = self.instantiate(logo: KDriveResourcesAsset.folderFilled.image, message: KDriveResourcesStrings.Localizable.noFilesDescriptionWithCreationRights)
         case .noFavorite:
             view = self.instantiate(logo: KDriveResourcesAsset.favorite.image, message: KDriveResourcesStrings.Localizable.favoritesNoFile)
             view.emptyImageView.tintColor = KDriveResourcesAsset.favoriteColor.color

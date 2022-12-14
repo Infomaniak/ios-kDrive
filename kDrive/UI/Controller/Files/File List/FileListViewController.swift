@@ -562,7 +562,12 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func showEmptyView(_ isHidden: Bool) {
         guard (collectionView.backgroundView == nil) != isHidden || headerView?.sortView.isHidden == isHidden else { return }
-        let emptyView = EmptyTableView.instantiate(type: viewModel.configuration.emptyViewType, button: false)
+        var type = viewModel.configuration.emptyViewType
+        if type == .emptyFolder || type == .noShared || type == .noSharedWithMe,
+           viewModel.currentDirectory.capabilities.canCreateFile {
+            type = .emptyFolderWithCreationRights
+        }
+        let emptyView = EmptyTableView.instantiate(type: type, button: false)
         emptyView.actionHandler = { [weak self] _ in
             self?.forceRefresh()
         }
