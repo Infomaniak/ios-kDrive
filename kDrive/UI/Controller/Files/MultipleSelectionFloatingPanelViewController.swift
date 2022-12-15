@@ -222,7 +222,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListRemoveFavoritesConfirmationSnackbar(self.files.count))
                     }
                 case .folderColor:
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.isDirectory).count))
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.canBeColored).count))
                 case .duplicate:
                     guard self.addAction else { break }
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
