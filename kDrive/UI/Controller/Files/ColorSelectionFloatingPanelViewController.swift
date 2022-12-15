@@ -186,7 +186,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         Task {
             do {
                 let success = try await withThrowingTaskGroup(of: Bool.self, returning: Bool.self) { group in
-                    for file in frozenFiles where file.isDirectory {
+                    for file in frozenFiles where file.canBeColored {
                         group.addTask {
                             try await self.driveFileManager.updateColor(directory: file, color: color.hex)
                         }
