@@ -350,7 +350,16 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
         let action = actions[indexPath.item]
-        cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+        cell.configure(
+            with: action,
+            filesAreFavorite: filesAreFavorite,
+            filesAvailableOffline: filesAvailableOffline,
+            filesAreDirectory: files.allSatisfy(\.isDirectory),
+            filesAreDisabled: files.allSatisfy(\.isDisabled),
+            containsColorableFiles: files.contains(where: \.canBeColored),
+            showProgress: downloadInProgress,
+            archiveId: currentArchiveId
+        )
         return cell
     }
 

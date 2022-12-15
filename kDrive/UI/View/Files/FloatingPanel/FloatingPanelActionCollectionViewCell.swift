@@ -71,7 +71,16 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         }
     }
 
-    func configure(with action: FloatingPanelAction, filesAreFavorite: Bool, filesAvailableOffline: Bool, filesAreDirectory: Bool, containsDirectory: Bool, showProgress: Bool, archiveId: String?) {
+    func configure(
+        with action: FloatingPanelAction,
+        filesAreFavorite: Bool,
+        filesAvailableOffline: Bool,
+        filesAreDirectory: Bool,
+        filesAreDisabled: Bool,
+        containsColorableFiles: Bool,
+        showProgress: Bool,
+        archiveId: String?
+    ) {
         configure(with: action, file: nil, showProgress: false)
 
         if action == .favorite && filesAreFavorite {
@@ -93,7 +102,9 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
             }
         } else if action == .folderColor {
             // Disable cell if all selected items are files
-            setEnabled(containsDirectory)
+            setEnabled(containsColorableFiles)
+        } else if action == .manageCategories {
+            setEnabled(!filesAreDisabled)
         }
     }
 
