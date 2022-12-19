@@ -24,8 +24,7 @@ class EditCategoryViewController: UITableViewController {
     var driveFileManager: DriveFileManager!
     // If we have a category we edit it, otherwise, we create a new one
     var category: kDriveCore.Category?
-    /// The file to add the category to after creating it.
-    var fileToAdd: File?
+    /// The files to add the category to after creating it.
     var filesToAdd: [File]?
     var name = ""
 
