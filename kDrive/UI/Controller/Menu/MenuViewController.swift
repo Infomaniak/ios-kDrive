@@ -228,15 +228,31 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         let action = section.actions[indexPath.row]
         switch action {
         case .lastModifications:
-            createAndPushFileListViewController(with: LastModificationsViewModel(driveFileManager: driveFileManager), as: FileListViewController.self)
+            createAndPushFileListViewController(
+                with: LastModificationsViewModel(driveFileManager: driveFileManager),
+                as: FileListViewController.self
+            )
         case .trash:
-            createAndPushFileListViewController(with: TrashListViewModel(driveFileManager: driveFileManager), as: FileListViewController.self)
+            createAndPushFileListViewController(
+                with: TrashListViewModel(driveFileManager: driveFileManager),
+                as: FileListViewController.self
+            )
         case .myShares:
-            createAndPushFileListViewController(with: MySharesViewModel(driveFileManager: driveFileManager), as: FileListViewController.self)
+            createAndPushFileListViewController(
+                with: MySharesViewModel(driveFileManager: driveFileManager),
+                as: FileListViewController.self,
+                shouldHideBottomBar: false
+            )
         case .offline:
-            createAndPushFileListViewController(with: OfflineFilesViewModel(driveFileManager: driveFileManager), as: FileListViewController.self)
+            createAndPushFileListViewController(
+                with: OfflineFilesViewModel(driveFileManager: driveFileManager),
+                as: FileListViewController.self
+            )
         case .images:
-            createAndPushFileListViewController(with: PhotoListViewModel(driveFileManager: driveFileManager), as: PhotoListViewController.self)
+            createAndPushFileListViewController(
+                with: PhotoListViewModel(driveFileManager: driveFileManager),
+                as: PhotoListViewController.self
+            )
         case .disconnect:
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle, message: KDriveResourcesStrings.Localizable.alertRemoveUserDescription(currentAccount.user.displayName), action: KDriveResourcesStrings.Localizable.buttonConfirm, destructive: true) {
                 AccountManager.instance.removeTokenAndAccount(token: AccountManager.instance.currentAccount.token)
@@ -259,9 +275,13 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    private func createAndPushFileListViewController<T: FileListViewController>(with viewModel: FileListViewModel, as: T.Type) {
+    private func createAndPushFileListViewController<T: FileListViewController>(
+        with viewModel: FileListViewModel,
+        as _: T.Type,
+        shouldHideBottomBar: Bool = true
+    ) {
         let fileListViewController = T.instantiate(viewModel: viewModel)
-        fileListViewController.hidesBottomBarWhenPushed = true
+        fileListViewController.hidesBottomBarWhenPushed = shouldHideBottomBar
         navigationController?.pushViewController(fileListViewController, animated: true)
     }
 
