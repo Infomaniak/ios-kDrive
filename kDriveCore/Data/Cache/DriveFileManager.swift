@@ -928,7 +928,7 @@ public class DriveFileManager {
         if let drive = drive {
             self.drive = drive.freeze()
         }
-        return category
+        return category.freeze()
     }
 
     public func edit(category: Category, name: String?, color: String) async throws -> Category {
