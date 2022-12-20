@@ -71,29 +71,39 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         }
     }
 
-    func configure(with action: FloatingPanelAction, filesAreFavorite: Bool, filesAvailableOffline: Bool, filesAreDirectory: Bool, containsDirectory: Bool, showProgress: Bool, archiveId: String?) {
+    func configure(with action: FloatingPanelAction, files: [File], showProgress: Bool, archiveId: String?) {
         configure(with: action, file: nil, showProgress: false)
 
-        if action == .favorite && filesAreFavorite {
-            titleLabel.text = action.reverseName
-            iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
-        } else if action == .offline {
+        switch action {
+        case .favorite:
+            if files.allSatisfy(\.isFavorite) {
+                titleLabel.text = action.reverseName
+                iconImageView.tintColor = KDriveResourcesAsset.favoriteColor.color
+            }
+        case .offline:
+            let filesAvailableOffline = files.allSatisfy(\.isAvailableOffline)
             switchView.isHidden = false
             iconImageView.image = filesAvailableOffline ? KDriveResourcesAsset.check.image : action.image
             iconImageView.tintColor = filesAvailableOffline ? KDriveResourcesAsset.greenColor.color : action.tintColor
             switchView.isOn = filesAvailableOffline
             setProgress(showProgress ? -1 : nil)
             // Disable cell if all selected items are folders
+            let filesAreDirectory = files.allSatisfy(\.isDirectory)
             setEnabled(!filesAreDirectory)
-        } else if action == .download {
+        case .download:
             if let archiveId = archiveId {
                 observeProgress(showProgress, archiveId: archiveId)
             } else {
                 setProgress(showProgress ? -1 : nil)
             }
-        } else if action == .folderColor {
-            // Disable cell if all selected items are files
-            setEnabled(containsDirectory)
+        case .folderColor:
+            let containsColorableFiles = files.contains(where: \.canBeColored)
+            setEnabled(containsColorableFiles)
+        case .manageCategories:
+            let filesAreDisabled = files.allSatisfy(\.isDisabled)
+            setEnabled(!filesAreDisabled)
+        default:
+            break
         }
     }
 

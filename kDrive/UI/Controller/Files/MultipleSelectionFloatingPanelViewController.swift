@@ -38,14 +38,6 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
         return driveFileManager?.drive.sharedWithMe ?? false
     }
 
-    var filesAvailableOffline: Bool {
-        return files.allSatisfy(\.isAvailableOffline)
-    }
-
-    var filesAreFavorite: Bool {
-        return files.allSatisfy(\.isFavorite)
-    }
-
     var actions = FloatingPanelAction.listActions
 
     private var addAction = true
@@ -222,7 +214,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListRemoveFavoritesConfirmationSnackbar(self.files.count))
                     }
                 case .folderColor:
-                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.isDirectory).count))
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListColorFolderConfirmationSnackbar(self.files.filter(\.canBeColored).count))
                 case .duplicate:
                     guard self.addAction else { break }
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(self.files.count))
@@ -350,7 +342,7 @@ class MultipleSelectionFloatingPanelViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(type: FloatingPanelActionCollectionViewCell.self, for: indexPath)
         let action = actions[indexPath.item]
-        cell.configure(with: action, filesAreFavorite: filesAreFavorite, filesAvailableOffline: filesAvailableOffline, filesAreDirectory: files.allSatisfy(\.isDirectory), containsDirectory: files.contains(where: \.isDirectory), showProgress: downloadInProgress, archiveId: currentArchiveId)
+        cell.configure(with: action, files: files, showProgress: downloadInProgress, archiveId: currentArchiveId)
         return cell
     }
 
