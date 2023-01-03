@@ -562,12 +562,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
 
     func showEmptyView(_ isHidden: Bool) {
         guard (collectionView.backgroundView == nil) != isHidden || headerView?.sortView.isHidden == isHidden else { return }
-        var type = viewModel.configuration.emptyViewType
-        if type == .emptyFolder && viewModel.currentDirectory != DriveFileManager.trashRootFile,
-           viewModel.currentDirectory.capabilities.canCreateFile {
-            type = .emptyFolderWithCreationRights
-        }
-        let emptyView = EmptyTableView.instantiate(type: type, button: false)
+        let emptyView = EmptyTableView.instantiate(type: bestEmptyViewType(), button: false)
         emptyView.actionHandler = { [weak self] _ in
             self?.forceRefresh()
         }
@@ -575,6 +570,15 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
         if let headerView = headerView {
             setUpHeaderView(headerView, isEmptyViewHidden: isHidden)
         }
+    }
+
+    private func bestEmptyViewType() -> EmptyTableView.EmptyTableViewType {
+        var type = viewModel.configuration.emptyViewType
+        if tabBarController?.tabBar.isHidden == false,
+           type == .emptyFolder && viewModel.currentDirectory.capabilities.canCreateFile {
+            type = .emptyFolderWithCreationRights
+        }
+        return type
     }
 
     class func instantiate(viewModel: FileListViewModel) -> Self {
