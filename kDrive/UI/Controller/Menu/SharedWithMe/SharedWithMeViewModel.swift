@@ -23,7 +23,7 @@ class SharedWithMeViewModel: ConcreteFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File?) {
         let isRoot = currentDirectory?.isRoot != false
         let configuration = Configuration(selectAllSupported: !isRoot,
-                                          emptyViewType: .noSharedWithMe,
+                                          emptyViewType: isRoot ? .noSharedWithMe : .emptyFolder,
                                           supportsDrop: !isRoot,
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "SharedWithMe"])
 

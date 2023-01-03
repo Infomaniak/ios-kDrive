@@ -27,7 +27,7 @@ class TrashListViewModel: InMemoryFileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
         let configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveResourcesStrings.Localizable.trashTitle,
-                                          emptyViewType: .noTrash,
+                                          emptyViewType: currentDirectory == nil ? .noTrash : .emptyFolder,
                                           sortingOptions: [.nameAZ, .nameZA, .newerDelete, .olderDelete, .biggest, .smallest],
                                           matomoViewPath: [MatomoUtils.Views.menu.displayName, "TrashList"])
         super.init(configuration: configuration,

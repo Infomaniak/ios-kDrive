@@ -563,7 +563,7 @@ class FileListViewController: UIViewController, UICollectionViewDataSource, Swip
     func showEmptyView(_ isHidden: Bool) {
         guard (collectionView.backgroundView == nil) != isHidden || headerView?.sortView.isHidden == isHidden else { return }
         var type = viewModel.configuration.emptyViewType
-        if type == .emptyFolder || type == .noShared || type == .noSharedWithMe,
+        if type == .emptyFolder && viewModel.currentDirectory != DriveFileManager.trashRootFile,
            viewModel.currentDirectory.capabilities.canCreateFile {
             type = .emptyFolderWithCreationRights
         }
