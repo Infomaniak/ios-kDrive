@@ -80,8 +80,7 @@ extension PHAsset {
         let targetURL = FileImportHelper.instance.generateImportURL(for: resourceUTI)
         do {
             if shouldTransformIntoJPEG {
-                if let jpegData = try await getJpegData(for: resource, requestResourceOption: requestResourceOption) {
-                    try jpegData.write(to: targetURL)
+                if try await writeJpegData(to: targetURL, resource: resource, options: requestResourceOption) {
                     return targetURL
                 }
                 return nil
@@ -96,14 +95,27 @@ extension PHAsset {
         return nil
     }
 
-    private func getJpegData(for resource: PHAssetResource, requestResourceOption: PHAssetResourceRequestOptions) async throws -> Data? {
+    private func writeJpegData(to url: URL, resource: PHAssetResource, options: PHAssetResourceRequestOptions) async throws -> Bool {
+        if let jpegData = try await getJpegData(for: resource, options: options) {
+            try jpegData.write(to: url)
+            let attributes = [
+                FileAttributeKey.creationDate: creationDate ?? Date(),
+                FileAttributeKey.modificationDate: modificationDate ?? Date()
+            ]
+            try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)
+            return true
+        }
+        return false
+    }
+
+    private func getJpegData(for resource: PHAssetResource, options: PHAssetResourceRequestOptions) async throws -> Data? {
         return try await withCheckedThrowingContinuation { continuation in
             var imageData = Data()
-            PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
+            PHAssetResourceManager.default().requestData(for: resource, options: options) { data in
                 // Get all pieces of data
                 imageData.append(data)
             } completionHandler: { error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                     return
                 }

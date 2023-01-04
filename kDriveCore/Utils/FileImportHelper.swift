@@ -29,13 +29,11 @@ public class ImportedFile {
     public var name: String
     public var path: URL
     public var uti: UTI
-    public var asset: PHAsset?
 
-    public init(name: String, path: URL, uti: UTI, asset: PHAsset? = nil) {
+    public init(name: String, path: URL, uti: UTI) {
         self.name = name
         self.path = path
         self.uti = uti
-        self.asset = asset
     }
 
     @discardableResult
@@ -159,7 +157,7 @@ public class FileImportHelper {
                         name = originalName
                     }
 
-                    items.append(ImportedFile(name: name, path: url, uti: uti ?? .data, asset: asset))
+                    items.append(ImportedFile(name: name, path: url, uti: uti ?? .data))
                 } else {
                     errorCount += 1
                 }
@@ -254,24 +252,13 @@ public class FileImportHelper {
         }
 
         for file in files {
-            let uploadFile: UploadFile
-            if let asset = file.asset {
-                uploadFile = UploadFile(
-                    parentDirectoryId: directory.id,
-                    userId: drive.userId,
-                    driveId: drive.id,
-                    name: file.name,
-                    asset: asset
-                )
-            } else {
-                uploadFile = UploadFile(
-                    parentDirectoryId: directory.id,
-                    userId: drive.userId,
-                    driveId: drive.id,
-                    url: file.path,
-                    name: file.name
-                )
-            }
+            let uploadFile = UploadFile(
+                parentDirectoryId: directory.id,
+                userId: drive.userId,
+                driveId: drive.id,
+                url: file.path,
+                name: file.name
+            )
             UploadQueue.instance.addToQueue(file: uploadFile)
         }
     }
