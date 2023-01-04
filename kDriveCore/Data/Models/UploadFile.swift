@@ -168,7 +168,7 @@ public class UploadFile: Object {
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.rawType = UploadFileType.phAsset.rawValue
         self.creationDate = asset.creationDate
-        self.modificationDate = asset.modificationDate
+        self.modificationDate = asset.creationDate
         self.taskCreationDate = Date()
         self.conflictOption = conflictOption
         self.rawPriority = priority.rawValue

@@ -100,7 +100,7 @@ extension PHAsset {
             try jpegData.write(to: url)
             let attributes = [
                 FileAttributeKey.creationDate: creationDate ?? Date(),
-                FileAttributeKey.modificationDate: modificationDate ?? Date()
+                FileAttributeKey.modificationDate: creationDate ?? Date()
             ]
             try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)
             return true
