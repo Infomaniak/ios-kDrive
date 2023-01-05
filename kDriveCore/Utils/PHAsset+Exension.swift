@@ -79,14 +79,15 @@ extension PHAsset {
 
         let targetURL = FileImportHelper.instance.generateImportURL(for: resourceUTI)
         do {
-            if shouldTransformIntoJPEG {
-                if let jpegData = try await getJpegData(for: resource, requestResourceOption: requestResourceOption) {
-                    try jpegData.write(to: targetURL)
-                    return targetURL
-                }
+            guard shouldTransformIntoJPEG else {
+                try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
+                return targetURL
+            }
+
+            guard try await writeJpegData(to: targetURL, resource: resource, options: requestResourceOption) else {
                 return nil
             }
-            try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
+
             return targetURL
         } catch {
             let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
@@ -96,14 +97,31 @@ extension PHAsset {
         return nil
     }
 
-    private func getJpegData(for resource: PHAssetResource, requestResourceOption: PHAssetResourceRequestOptions) async throws -> Data? {
+    private func writeJpegData(to url: URL, resource: PHAssetResource, options: PHAssetResourceRequestOptions) async throws -> Bool {
+        guard let jpegData = try await getJpegData(for: resource, options: options) else { return false }
+        try jpegData.write(to: url)
+        let attributes = [
+            FileAttributeKey.creationDate: creationDate ?? Date(),
+            /*
+             We use the creationDate instead of the modificationDate
+             because this date is not always accurate.
+             (It does not seem to correspond to a real modification of the image)
+             Apple Feedback: FB11923430
+             */
+            FileAttributeKey.modificationDate: creationDate ?? Date()
+        ]
+        try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)
+        return true
+    }
+
+    private func getJpegData(for resource: PHAssetResource, options: PHAssetResourceRequestOptions) async throws -> Data? {
         return try await withCheckedThrowingContinuation { continuation in
             var imageData = Data()
-            PHAssetResourceManager.default().requestData(for: resource, options: requestResourceOption) { data in
+            PHAssetResourceManager.default().requestData(for: resource, options: options) { data in
                 // Get all pieces of data
                 imageData.append(data)
             } completionHandler: { error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                     return
                 }
