@@ -168,6 +168,12 @@ public class UploadFile: Object {
         self.shouldRemoveAfterUpload = shouldRemoveAfterUpload
         self.rawType = UploadFileType.phAsset.rawValue
         self.creationDate = asset.creationDate
+        /*
+         We use the creationDate instead of the modificationDate
+         because this date is not always accurate.
+         (It does not seem to correspond to a real modification of the image)
+         Apple Feedback: FB11923430
+         */
         self.modificationDate = asset.creationDate
         self.taskCreationDate = Date()
         self.conflictOption = conflictOption

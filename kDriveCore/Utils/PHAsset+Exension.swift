@@ -102,6 +102,12 @@ extension PHAsset {
         try jpegData.write(to: url)
         let attributes = [
             FileAttributeKey.creationDate: creationDate ?? Date(),
+            /*
+             We use the creationDate instead of the modificationDate
+             because this date is not always accurate.
+             (It does not seem to correspond to a real modification of the image)
+             Apple Feedback: FB11923430
+             */
             FileAttributeKey.modificationDate: creationDate ?? Date()
         ]
         try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)
