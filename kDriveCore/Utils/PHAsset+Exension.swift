@@ -79,13 +79,15 @@ extension PHAsset {
 
         let targetURL = FileImportHelper.instance.generateImportURL(for: resourceUTI)
         do {
-            if shouldTransformIntoJPEG {
-                if try await writeJpegData(to: targetURL, resource: resource, options: requestResourceOption) {
-                    return targetURL
-                }
+            guard shouldTransformIntoJPEG else {
+                try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
+                return targetURL
+            }
+
+            guard try await writeJpegData(to: targetURL, resource: resource, options: requestResourceOption) else {
                 return nil
             }
-            try await PHAssetResourceManager.default().writeData(for: resource, toFile: targetURL, options: requestResourceOption)
+
             return targetURL
         } catch {
             let breadcrumb = Breadcrumb(level: .error, category: "PHAsset request data and write")
@@ -96,16 +98,14 @@ extension PHAsset {
     }
 
     private func writeJpegData(to url: URL, resource: PHAssetResource, options: PHAssetResourceRequestOptions) async throws -> Bool {
-        if let jpegData = try await getJpegData(for: resource, options: options) {
-            try jpegData.write(to: url)
-            let attributes = [
-                FileAttributeKey.creationDate: creationDate ?? Date(),
-                FileAttributeKey.modificationDate: creationDate ?? Date()
-            ]
-            try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)
-            return true
-        }
-        return false
+        guard let jpegData = try await getJpegData(for: resource, options: options) else { return false }
+        try jpegData.write(to: url)
+        let attributes = [
+            FileAttributeKey.creationDate: creationDate ?? Date(),
+            FileAttributeKey.modificationDate: creationDate ?? Date()
+        ]
+        try? FileManager.default.setAttributes(attributes, ofItemAtPath: url.path)
+        return true
     }
 
     private func getJpegData(for resource: PHAssetResource, options: PHAssetResourceRequestOptions) async throws -> Data? {
