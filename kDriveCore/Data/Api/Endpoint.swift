@@ -584,11 +584,8 @@ public extension Endpoint {
     }
 
     // MARK: Upload
-
-    static func upload(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/upload")
-    }
-
+    
+    // V1
     static func directUpload(file: UploadFile) -> Endpoint {
         // let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
         // return .upload(file: parentDirectory).appending(path: "/direct", queryItems: file.queryItems)
@@ -600,17 +597,15 @@ public extension Endpoint {
         let queryItems = file.queryItems + [uploadFileQueryItem]
         return .driveV1.appending(path: "/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
     }
-
-    static func uploadStatus(file: AbstractFile, token: String) -> Endpoint {
-        return .upload(file: file).appending(path: "/\(token)")
+    
+    // V2
+  
+    static func startSession(drive: AbstractDrive) -> Endpoint {
+        return .uploadSession(drive: drive).appending(path: "start")
     }
-
-    static func chunkUpload(file: AbstractFile, token: String) -> Endpoint {
-        return .uploadStatus(file: file, token: token).appending(path: "/chunk")
-    }
-
-    static func commitUpload(file: AbstractFile, token: String) -> Endpoint {
-        return .uploadStatus(file: file, token: token).appending(path: "/file")
+  
+    static func uploadSession(drive: AbstractDrive) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "upload/session")
     }
 
     // MARK: User invitation

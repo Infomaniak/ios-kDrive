@@ -304,6 +304,7 @@ public class DriveApiFetcher: ApiFetcher {
         }
     }
 
+    // MARK: Upload V1
     public func getPublicUploadToken(with token: ApiToken, drive: AbstractDrive, completion: @escaping (Result<UploadToken, Error>) -> Void) {
         let url = Endpoint.uploadToken(drive: drive).url
         performAuthenticatedRequest(token: token) { token, error in
@@ -321,6 +322,8 @@ public class DriveApiFetcher: ApiFetcher {
             }
         }
     }
+    
+    // MARK: -
 
     public func trashedFiles(drive: AbstractDrive, page: Int = 1, sortType: SortType = .nameAZ) async throws -> [File] {
         try await perform(request: authenticatedRequest(.trash(drive: drive).paginated(page: page).sorted(by: [sortType]))).data

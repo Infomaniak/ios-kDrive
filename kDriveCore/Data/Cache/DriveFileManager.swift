@@ -73,6 +73,7 @@ public class DriveFileManager {
             migrationBlock: migrationBlock,
             objectTypes: [DownloadTask.self, UploadFile.self, PhotoSyncSettings.self])
 
+        /// realm db used for file upload
         public var uploadsRealm: Realm {
             do {
                 return try Realm(configuration: uploadsRealmConfiguration)
@@ -153,6 +154,7 @@ public class DriveFileManager {
         }
     }
 
+    // autorelease frequecy so cleaner serialized realm base
     let backgroundQueue = DispatchQueue(label: "background-db", autoreleaseFrequency: .workItem)
     public var realmConfiguration: Realm.Configuration
     public var drive: Drive
