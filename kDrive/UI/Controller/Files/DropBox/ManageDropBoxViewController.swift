@@ -141,7 +141,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             ]
             let sizeLimit: BinaryDisplaySize?
             if let size = dropBox.capabilities.size.limit {
-                sizeLimit = .bytes(size)
+                sizeLimit = .bytes(UInt64(size))
             } else {
                 sizeLimit = nil
             }

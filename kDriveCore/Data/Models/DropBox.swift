@@ -58,23 +58,23 @@ public class DropBoxSize: EmbeddedObject, Codable {
     @Persisted public var remaining: Int?
 }
 
-/// Something that 
+/// Something to display human friendly storage size
 public enum BinaryDisplaySize: Encodable {
-    case bytes(Int)
+    case bytes(UInt64)
     case kilobytes(Double)
     case megabytes(Double)
     case gigabytes(Double)
 
-    public var toBytes: Int {
+    public var toBytes: UInt64 {
         switch self {
         case .bytes(let bytes):
             return bytes
         case .kilobytes(let kilobytes):
-            return Int(kilobytes * 1_024)
+            return UInt64(kilobytes * 1_024)
         case .megabytes(let megabytes):
-            return Int(megabytes * 1_048_576)
+            return UInt64(megabytes * 1_048_576)
         case .gigabytes(let gigabytes):
-            return Int(gigabytes * 1_073_741_824)
+            return UInt64(gigabytes * 1_073_741_824)
         }
     }
 
