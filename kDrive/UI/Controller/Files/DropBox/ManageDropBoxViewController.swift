@@ -139,7 +139,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                 .optionDate: dropBox.capabilities.hasValidity,
                 .optionSize: dropBox.capabilities.hasSizeLimit
             ]
-            let sizeLimit: BinarySize?
+            let sizeLimit: BinaryDisplaySize?
             if let size = dropBox.capabilities.size.limit {
                 sizeLimit = .bytes(size)
             } else {
@@ -321,7 +321,7 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
     func didClickOnButton() {
         let password = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : ""
         let validUntil = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-        let limitFileSize: BinarySize?
+        let limitFileSize: BinaryDisplaySize?
         if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Double {
             limitFileSize = .gigabytes(size)
         } else {

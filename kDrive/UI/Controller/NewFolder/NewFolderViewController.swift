@@ -432,7 +432,7 @@ extension NewFolderViewController: FooterButtonDelegate {
             let onlyForMe = tableView.indexPathForSelectedRow?.row == 0
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
-            let limitFileSize: BinarySize?
+            let limitFileSize: BinaryDisplaySize?
             if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Double {
                 limitFileSize = .gigabytes(size)
             } else {

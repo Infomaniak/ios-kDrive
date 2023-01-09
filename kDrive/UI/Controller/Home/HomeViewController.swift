@@ -159,6 +159,9 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
 
     private var refreshControl = UIRefreshControl()
 
+    // TODO: remove
+    var button: UIButton!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.register(supplementaryView: HomeRecentFilesHeaderView.self, forSupplementaryViewOfKind: .header)
@@ -192,6 +195,39 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         }
 
         setSelectedHomeIndex(UserDefaults.shared.selectedHomeIndex)
+
+        // TODO: clean
+        let button = UIButton(type: .roundedRect)
+        button.frame = CGRect(x: 0, y: 50, width: 120, height: 40)
+        button.setTitle("Button", for: .normal)
+        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        view.addSubview(button)
+        self.button = button
+    }
+
+    // TODO: clean
+    @objc func buttonAction() {
+        // chunk provider
+        let aFileUrl = "/dev/null"
+        let aFileSize = UInt64(123)
+        let aFileChunks = UInt64(1)
+        let rootDirectoryID = 1
+        let fileName = "\(UUID())"
+
+        Task {
+            do {
+                let result = try await driveFileManager.apiFetcher.startSession(drive: driveFileManager.drive,
+                                                                                totalSize: aFileSize,
+                                                                                fileName: fileName,
+                                                                                totalChunks: aFileChunks,
+                                                                                conflictResolution: .throwError,
+                                                                                directoryID: rootDirectoryID)
+
+                print("result: \(result)")
+            } catch {
+                print("\(error)")
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -236,7 +272,8 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             guard let self = self else { return }
             if let index = self.viewModel.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
                let cell = (self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? WrapperCollectionViewCell)?.subviews.first as? UploadsInProgressTableViewCell,
-               self.uploadCountManager.uploadCount > 0 {
+               self.uploadCountManager.uploadCount > 0
+            {
                 // Update cell
                 cell.setUploadCount(self.uploadCountManager.uploadCount)
             } else {
@@ -613,7 +650,7 @@ extension HomeViewController {
                 present(SearchViewController.instantiateInNavigationController(viewModel: viewModel), animated: true)
             }
         case .recentFiles:
-            if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1) && !viewModel.recentFilesEmpty {
+            if !(viewModel.isLoading && indexPath.row > viewModel.recentFilesCount - 1), !viewModel.recentFilesEmpty {
                 switch viewModel.recentFiles {
                 case .file(let files):
                     filePresenter.present(driveFileManager: driveFileManager, file: files[indexPath.row], files: files, normalFolderHierarchy: false)

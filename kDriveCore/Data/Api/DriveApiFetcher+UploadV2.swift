@@ -16,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Foundation
 import InfomaniakCore
-import Alamofire
 
 public extension DriveApiFetcher {
-    
     // MARK: Upload V2
     
     /// Conflict resolution options
@@ -40,15 +39,28 @@ public extension DriveApiFetcher {
     /// You should send at least one chunk
     static let APIMinChunks = 1
     
+    enum APIParameters: String {
+        case driveID = "drive_id"
+        case conflict
+        case createdAt = "created_at"
+        case directoryID = "directory_id"
+        case directoryPath = "directory_path"
+        case fileID = "file_id"
+        case fileName = "file_name"
+        case lastModifiedAt = "last_modified_at"
+        case totalChunks = "total_chunks"
+        case totalSize = "total_size"
+    }
+    
     /// Starts a session to upload a file in multiple parts
     ///
     /// https://developer.infomaniak.com/docs/api/post/2/drive/%7Bdrive_id%7D/upload/session/start
     ///
     /// - Parameters:
-    ///   - drive: the abstract drive
+    ///   - drive: the abstract drive, REQUIRED
+    ///   - totalSize: the total size of the file, in Bytes REQUIRED
     ///   - fileName: name of the file
     ///   - conflictResolution: conflict resolution selection
-    ///   - totalSize: the total size of the file, in Bytes
     ///   - totalChunks: the count of chunks the backend should expect
     ///   - lastModifiedAt: override last modified date
     ///   - createdAt: override created at
@@ -63,49 +75,81 @@ public extension DriveApiFetcher {
     ///   - fileID: File identifier of uploaded file.
     ///
     /// - Returns: Void, the method will return without error in a success
-    public func startSession(drive: AbstractDrive,
-                             fileName: String,
-                             conflictResolution: ConflictResolution,
-                             totalSize: Int,
-                             totalChunks: Int,
-                             lastModifiedAt: String? = nil,
-                             createdAt: Date? = nil,
-                             directoryID: Int? = nil,
-                             directoryPath: String? = nil,
-                             fileID: Int? = nil) async throws -> Bool /* Void not encodable, what do you use for a success ? */ {
+    func startSession(drive: AbstractDrive,
+                      totalSize: UInt64,
+                      fileName: String,
+                      totalChunks: UInt64,
+                      conflictResolution: ConflictResolution? = nil,
+                      lastModifiedAt: Date? = nil,
+                      createdAt: Date? = nil,
+                      directoryID: Int? = nil,
+                      directoryPath: String? = nil,
+                      fileID: Int? = nil) async throws -> UploadSessionData
+    {
         // Parameter validation
         guard directoryID != nil || directoryPath != nil else {
-            throw DriveError.UploadSession.invalidDirectoryParameters
+            throw DriveError.UploadSessionError.invalidDirectoryParameters
         }
         
         guard !fileName.isEmpty else {
-            throw DriveError.UploadSession.fileNameIsEmpty
+            throw DriveError.UploadSessionError.fileNameIsEmpty
         }
         
         guard totalChunks < Self.APIMaxChunks && totalChunks >= Self.APIMinChunks else {
-            throw DriveError.UploadSession.chunksNumberOutOfBounds
+            throw DriveError.UploadSessionError.chunksNumberOutOfBounds
         }
         
-        let parameters: Parameters = [:]
+        // Build parameters
+        var parameters: Parameters = [APIParameters.driveID.rawValue: drive.id,
+                                      APIParameters.totalSize.rawValue: totalSize,
+                                      APIParameters.fileName.rawValue: fileName,
+                                      APIParameters.totalChunks.rawValue: totalChunks]
+        
+        if let conflictResolution {
+            parameters[APIParameters.conflict.rawValue] = conflictResolution.rawValue
+        }
+        
+        // TODO: ask if expecting ts, doc does not say
+        if let lastModifiedAt {
+            parameters[APIParameters.lastModifiedAt.rawValue] = "\(lastModifiedAt.timeIntervalSince1970)"
+        }
+        
+        // TODO: ask if expecting ts, doc does not say
+        if let createdAt {
+            parameters[APIParameters.createdAt.rawValue] = "\(createdAt.timeIntervalSince1970)"
+        }
+        
+        if let directoryID {
+            parameters[APIParameters.directoryID.rawValue] = directoryID
+        }
+        
+        if let directoryPath {
+            parameters[APIParameters.directoryPath.rawValue] = directoryPath
+        }
+        
+        if let fileID {
+            parameters[APIParameters.fileID.rawValue] = fileID
+        }
+        
         let request = authenticatedRequest(.startSession(drive: drive), method: .post, parameters: parameters)
 
-        return try await perform(request: request).data
+        let result: UploadSessionData = try await perform(request: request).data
+        return result
     }
     
-    public func getSession(drive: AbstractDrive) async throws -> [Int] {
+    func getSession(drive: AbstractDrive) async throws -> [Int] {
         return []
     }
     
-    public func cancelSession(drive: AbstractDrive) async throws -> [Int] {
+    func cancelSession(drive: AbstractDrive) async throws -> [Int] {
         return []
     }
     
-    public func closeSession(drive: AbstractDrive) async throws -> [Int] {
+    func closeSession(drive: AbstractDrive) async throws -> [Int] {
         return []
     }
     
-    public func appendChunk(drive: AbstractDrive, Session: String) async throws -> [Int] {
+    func appendChunk(drive: AbstractDrive, Session: String) async throws -> [Int] {
         return []
     }
-    
 }

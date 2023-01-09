@@ -58,7 +58,8 @@ public class DropBoxSize: EmbeddedObject, Codable {
     @Persisted public var remaining: Int?
 }
 
-public enum BinarySize: Encodable {
+/// Something that 
+public enum BinaryDisplaySize: Encodable {
     case bytes(Int)
     case kilobytes(Double)
     case megabytes(Double)
@@ -102,13 +103,13 @@ public struct DropBoxSettings: Encodable {
     /// Send an email when done
     public var emailWhenFinished: Bool
     /// Limit total size of folder (bytes)
-    @NullEncodable public var limitFileSize: BinarySize?
+    @NullEncodable public var limitFileSize: BinaryDisplaySize?
     /// Password for protecting the dropbox
     public var password: String?
     /// Date of validity
     @NullEncodable public var validUntil: Date?
 
-    public init(alias: String?, emailWhenFinished: Bool, limitFileSize: BinarySize?, password: String?, validUntil: Date?) {
+    public init(alias: String?, emailWhenFinished: Bool, limitFileSize: BinaryDisplaySize?, password: String?, validUntil: Date?) {
         self.alias = alias
         self.emailWhenFinished = emailWhenFinished
         self.limitFileSize = limitFileSize

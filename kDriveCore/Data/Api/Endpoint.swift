@@ -584,7 +584,7 @@ public extension Endpoint {
     }
 
     // MARK: Upload
-    
+
     // V1
     static func directUpload(file: UploadFile) -> Endpoint {
         // let parentDirectory = ProxyFile(driveId: file.driveId, id: file.parentDirectoryId)
@@ -597,15 +597,14 @@ public extension Endpoint {
         let queryItems = file.queryItems + [uploadFileQueryItem]
         return .driveV1.appending(path: "/\(file.driveId)/public/file/\(file.parentDirectoryId)/upload", queryItems: queryItems)
     }
-    
+
     // V2
-  
     static func startSession(drive: AbstractDrive) -> Endpoint {
-        return .uploadSession(drive: drive).appending(path: "start")
+        return .uploadSession(drive: drive).appending(path: "/start")
     }
-  
+
     static func uploadSession(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "upload/session")
+        return .driveInfo(drive: drive).appending(path: "/upload/session")
     }
 
     // MARK: User invitation

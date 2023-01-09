@@ -662,8 +662,11 @@ public class File: Object, Codable {
         id = try container.decode(Int.self, forKey: .id)
         parentId = try container.decode(Int.self, forKey: .parentId)
         driveId = try container.decode(Int.self, forKey: .driveId)
-        name = try container.decode(String.self, forKey: .name)
-        sortedName = try container.decode(String.self, forKey: .sortedName)
+        let name = try container.decode(String.self, forKey: .name)
+        self.name = name
+        
+        // TODO: check
+        sortedName = try container.decodeIfPresent(String.self, forKey: .sortedName) ?? name
         path = try container.decodeIfPresent(String.self, forKey: .path)
         rawType = try container.decode(String.self, forKey: .rawType)
         rawStatus = try container.decodeIfPresent(String.self, forKey: .rawStatus)
@@ -675,9 +678,9 @@ public class File: Object, Codable {
         deletedBy = try container.decodeIfPresent(Int.self, forKey: .deletedBy)
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         users = try container.decodeIfPresent(List<Int>.self, forKey: .users) ?? List<Int>()
-        isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         sharelink = try container.decodeIfPresent(ShareLink.self, forKey: .sharelink)
-        _capabilities = try container.decode(Rights.self, forKey: ._capabilities)
+        _capabilities = try container.decodeIfPresent(Rights.self, forKey: ._capabilities)
         categories = try container.decodeIfPresent(List<FileCategory>.self, forKey: .categories) ?? List<FileCategory>()
         color = try container.decodeIfPresent(String.self, forKey: .color)
         dropbox = try container.decodeIfPresent(DropBox.self, forKey: .dropbox)

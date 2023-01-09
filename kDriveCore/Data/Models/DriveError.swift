@@ -50,17 +50,17 @@ public struct DriveError: Error, Equatable {
     }
 
     /// Errors related to upload session
-    public enum UploadSession: Error {
+    public enum UploadSessionError: Error {
         /// Not following some of the API requirements
         case invalidDirectoryParameters
-        
+
         /// File name is required
         case fileNameIsEmpty
-        
+
         /// Too many chunks for the API
         case chunksNumberOutOfBounds
     }
-    
+
     public enum UserInfoKey: String, Codable {
         case fileId
         case status
