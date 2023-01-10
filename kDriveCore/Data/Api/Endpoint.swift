@@ -604,7 +604,7 @@ public extension Endpoint {
     }
 
     static func uploadSession(drive: AbstractDrive) -> Endpoint {
-        return .driveInfo(drive: drive).appending(path: "/upload/session")
+        return .driveInfo(drive: drive).appending(path: "/upload/session", queryItems: [fileMinimalWithQueryItem])
     }
 
     // MARK: User invitation

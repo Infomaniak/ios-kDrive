@@ -18,7 +18,7 @@
 
 import Foundation
 
-public struct UploadSessionData: Decodable {
+public struct UploadSession: Decodable {
     public var directoryID: UInt64?
     
     public var directoryPath: String?
@@ -29,7 +29,7 @@ public struct UploadSessionData: Decodable {
     
     public var message: String?
     
-    public var result: UploadResult?
+    public var result: Bool?
     
     public var token: String?
     
@@ -42,16 +42,4 @@ public struct UploadSessionData: Decodable {
         case result
         case token
     }
-}
-
-// TODO: find all possible values
-public enum UploadResult: Decodable {
-    case success
-    case failure
-}
-
-public struct UploadSession: Decodable {
-    public var data: UploadSessionData
-    
-    public var result: UploadResult?
 }

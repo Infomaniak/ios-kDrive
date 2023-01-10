@@ -84,7 +84,7 @@ public extension DriveApiFetcher {
                       createdAt: Date? = nil,
                       directoryID: Int? = nil,
                       directoryPath: String? = nil,
-                      fileID: Int? = nil) async throws -> UploadSessionData
+                      fileID: Int? = nil) async throws -> UploadSession
     {
         // Parameter validation
         guard directoryID != nil || directoryPath != nil else {
@@ -133,7 +133,7 @@ public extension DriveApiFetcher {
         
         let request = authenticatedRequest(.startSession(drive: drive), method: .post, parameters: parameters)
 
-        let result: UploadSessionData = try await perform(request: request).data
+        let result: UploadSession = try await perform(request: request).data
         return result
     }
     
