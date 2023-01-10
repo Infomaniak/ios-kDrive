@@ -16,118 +16,380 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import kDriveCore
 import XCTest
-@testable import kDrive
 
 final class BinaryDisplaySizeTests: XCTestCase {
-    
     // MARK: - toBytes
-    
+
     func testToBytesFromBytes() {
         // GIVEN
         let bytes: UInt64 = 1024
         let displayBytes = BinaryDisplaySize.bytes(bytes)
-        
+
         // WHEN
         let recBytes = displayBytes.toBytes
-        
+
         // THEN
         XCTAssertEqual(recBytes, bytes)
     }
-    
-    func testToBytesFromKilobytes() {
+
+    func testToBytesFromKibibytes() {
         // GIVEN
-        let kilobytes: Double = 1
-        let expectedBytes: UInt64 = 1024 /* 1024 is a kibibyte, not a kilobyte*/
-        let displayKilobytes = BinaryDisplaySize.kilobytes(kilobytes)
-        
+        let kibibytes: Double = 1
+        let expectedBytes: UInt64 = 1024
+        let displayKibibytes = BinaryDisplaySize.kibibytes(kibibytes)
+
         // WHEN
-        let recBytes = displayKilobytes.toBytes
-        
-        // THEN
-        XCTAssertEqual(recBytes, expectedBytes)
-    }
-    
-    func testToBytesFromMBytes() {
-        // GIVEN
-        let megabytes: Double = 1
-        let expectedBytes: UInt64 =  1 * 1024 * 1024 /* 1024^2 is a Mbibyte, not a Mbyte */
-        let displayMegabytes = BinaryDisplaySize.megabytes(megabytes)
-        
-        // WHEN
-        let recBytes = displayMegabytes.toBytes
-        
-        // THEN
-        XCTAssertEqual(recBytes, expectedBytes)
-    }
-    
-    func testToBytesFromGBytes() {
-        // GIVEN
-        let gigabytes: Double = 1
-        let expectedBytes: UInt64 = 1 * 1024 * 1024 * 1024 /* 1024^3 is a Gbibyte, not a Gbyte */
-        let displayGigabytes = BinaryDisplaySize.gigabytes(gigabytes)
-        
-        // WHEN
-        let recBytes = displayGigabytes.toBytes
-        
+        let recBytes = displayKibibytes.toBytes
+
         // THEN
         XCTAssertEqual(recBytes, expectedBytes)
     }
 
-    // MARK: - toGigabytes
+    func testToBytesFromMebibytes() {
+        // GIVEN
+        let mebibytes: Double = 1
+        let expectedBytes: UInt64 = 1 * 1024 * 1024
+        let displayMebibytes = BinaryDisplaySize.mebibytes(mebibytes)
+
+        // WHEN
+        let recBytes = displayMebibytes.toBytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedBytes)
+    }
+
+    func testToBytesFromGibibytes() {
+        // GIVEN
+        let gibibytes: Double = 1
+        let expectedBytes: UInt64 = 1 * 1024 * 1024 * 1024
+        let displayGibibytes = BinaryDisplaySize.gibibytes(gibibytes)
+
+        // WHEN
+        let recBytes = displayGibibytes.toBytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedBytes)
+    }
     
+    func testToBytesFromTebibytes() {
+        // GIVEN
+        let tebibytes: Double = 1
+        let expectedBytes: UInt64 = 1 * 1024 * 1024 * 1024 * 1024
+        let displayTebibytes = BinaryDisplaySize.tebibytes(tebibytes)
+
+        // WHEN
+        let recBytes = displayTebibytes.toBytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedBytes)
+    }
+    
+    func testToBytesFromPebibytes() {
+        // GIVEN
+        let pebibytes: Double = 1
+        let expectedBytes: UInt64 = 1 * 1024 * 1024 * 1024 * 1024 * 1024
+        let displayPebibytes = BinaryDisplaySize.pebibytes(pebibytes)
+
+        // WHEN
+        let recBytes = displayPebibytes.toBytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedBytes)
+    }
+    
+    func testToBytesFromExbibytes() {
+        // GIVEN
+        let exbibytes: Double = 1
+        let expectedBytes: UInt64 = 1 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024
+        let displayExbibytes = BinaryDisplaySize.exbibytes(exbibytes)
+
+        // WHEN
+        let recBytes = displayExbibytes.toBytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedBytes)
+    }
+
+    // MARK: - toKibibytes
+
+    func testToKibibytesFromBytes() {
+        // GIVEN
+        let bytes: UInt64 = 1 * 1024
+        let expectedKibibytes: Double = 1
+        let displayBytes = BinaryDisplaySize.bytes(bytes)
+
+        // WHEN
+        let recBytes = displayBytes.toKibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedKibibytes)
+    }
+
+    func testToKibibytesFromKibibytes() {
+        // GIVEN
+        let kibibytes: Double = 1
+        let expectedKibibytes: Double = 1
+        let displayKibibytes = BinaryDisplaySize.kibibytes(kibibytes)
+
+        // WHEN
+        let recBytes = displayKibibytes.toKibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedKibibytes)
+    }
+
+    func testToKibibytesFromMebibytes() {
+        // GIVEN
+        let mebibytes: Double = 1
+        let expectedKibibytes: Double = 1 * 1024
+        let displayMebibytes = BinaryDisplaySize.mebibytes(mebibytes)
+
+        // WHEN
+        let recBytes = displayMebibytes.toKibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedKibibytes)
+    }
+
+    func testToKibibytesFromGibibytes() {
+        // GIVEN
+        let gibibytes: Double = 1
+        let expectedKibibytes: Double = 1 * 1024 * 1024
+        let displayGibibytes = BinaryDisplaySize.gibibytes(gibibytes)
+
+        // WHEN
+        let recBytes = displayGibibytes.toKibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedKibibytes)
+    }
+    
+    func testToKibibytesFromTebibytes() {
+        // GIVEN
+        let tebibytes: Double = 1
+        let expectedKibibytes: Double = 1 * 1024 * 1024 * 1024
+        let displayTebibytes = BinaryDisplaySize.tebibytes(tebibytes)
+
+        // WHEN
+        let recBytes = displayTebibytes.toKibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedKibibytes)
+    }
+    
+    func testToKibibytesFromPebibytes() {
+        // GIVEN
+        let pebibytes: Double = 1
+        let expectedKibibytes: Double = 1 * 1024 * 1024 * 1024 * 1024
+        let displayPebibytes = BinaryDisplaySize.pebibytes(pebibytes)
+
+        // WHEN
+        let recBytes = displayPebibytes.toKibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedKibibytes)
+    }
+    
+    func testToKibibytesFromExbibytes() {
+        // GIVEN
+        let exbibytes: Double = 1
+        let expectedKibibytes: Double = 1 * 1024 * 1024 * 1024 * 1024 * 1024
+        let displayExbibytes = BinaryDisplaySize.exbibytes(exbibytes)
+
+        // WHEN
+        let recBytes = displayExbibytes.toKibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedKibibytes)
+    }
+
+    
+    // MARK: - toMebibytes
+
+    func testToMebibytesFromBytes() {
+        // GIVEN
+        let bytes: UInt64 = 1 * 1024 * 1024
+        let expectedMebibytes: Double = 1
+        let displayBytes = BinaryDisplaySize.bytes(bytes)
+
+        // WHEN
+        let recBytes = displayBytes.toMebibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedMebibytes)
+    }
+
+    func testToMebibytesFromKibibytes() {
+        // GIVEN
+        let kibibytes: Double = 1 * 1024
+        let expectedMebibytes: Double = 1
+        let displayKibibytes = BinaryDisplaySize.kibibytes(kibibytes)
+
+        // WHEN
+        let recBytes = displayKibibytes.toMebibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedMebibytes)
+    }
+
+    func testToMebibytesFromMebibytes() {
+        // GIVEN
+        let mebibytes: Double = 1
+        let expectedMebibytes: Double = 1
+        let displayMebibytes = BinaryDisplaySize.mebibytes(mebibytes)
+
+        // WHEN
+        let recBytes = displayMebibytes.toMebibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedMebibytes)
+    }
+
+    func testToMebibytesFromGibibytes() {
+        // GIVEN
+        let gibibytes: Double = 1
+        let expectedMebibytes: Double = 1 * 1024
+        let displayGibibytes = BinaryDisplaySize.gibibytes(gibibytes)
+
+        // WHEN
+        let recBytes = displayGibibytes.toMebibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedMebibytes)
+    }
+    
+    func testToMebibytesFromTebibytes() {
+        // GIVEN
+        let tebibytes: Double = 1
+        let expectedMebibytes: Double = 1 * 1024 * 1024
+        let displayTebibytes = BinaryDisplaySize.tebibytes(tebibytes)
+
+        // WHEN
+        let recBytes = displayTebibytes.toMebibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedMebibytes)
+    }
+    
+    func testToMebibytesFromPebibytes() {
+        // GIVEN
+        let pebibytes: Double = 1
+        let expectedMebibytes: Double = 1 * 1024 * 1024 * 1024
+        let displayPebibytes = BinaryDisplaySize.pebibytes(pebibytes)
+
+        // WHEN
+        let recBytes = displayPebibytes.toMebibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedMebibytes)
+    }
+    
+    func testToMebibytesFromExbibytes() {
+        // GIVEN
+        let exbibytes: Double = 1
+        let expectedMebibytes: Double = 1 * 1024 * 1024 * 1024 * 1024
+        let displayExbibytes = BinaryDisplaySize.exbibytes(exbibytes)
+
+        // WHEN
+        let recBytes = displayExbibytes.toMebibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedMebibytes)
+    }
+
+    // MARK: - toGibibytes
+
     func testToGigabytesFromBytes() {
         // GIVEN
-        let bytes: UInt64 = 1 * 1024 * 1024 * 1024 /* 1024^3 bytes is a Gbibyte, not a Gbyte */
-        let expectedGb: Double = 1
+        let bytes: UInt64 = 1 * 1024 * 1024 * 1024
+        let expectedGibibytes: Double = 1
         let displayBytes = BinaryDisplaySize.bytes(bytes)
-        
+
         // WHEN
-        let recBytes = displayBytes.toGigabytes
-        
+        let recBytes = displayBytes.toGibibytes
+
         // THEN
-        XCTAssertEqual(recBytes, expectedGb)
+        XCTAssertEqual(recBytes, expectedGibibytes)
     }
 
-    func testToGigabytesFromKilobytes() {
+    func testToGigabytesFromKibibytes() {
         // GIVEN
-        let kilobytes: Double = 1 * 1024 * 1024 /* 1024^2 Kbytes is a Gbibyte, not a Gbyte */
-        let expectedGb: Double = 1
-        let displayKilobytes = BinaryDisplaySize.kilobytes(kilobytes)
+        let kibibytes: Double = 1 * 1024 * 1024
+        let expectedGibibytes: Double = 1
+        let displayKibibytes = BinaryDisplaySize.kibibytes(kibibytes)
 
         // WHEN
-        let recBytes = displayKilobytes.toGigabytes
+        let recBytes = displayKibibytes.toGibibytes
 
         // THEN
-        XCTAssertEqual(recBytes, expectedGb)
+        XCTAssertEqual(recBytes, expectedGibibytes)
     }
 
-    func testToGigabytesFromMBytes() {
+    func testToGigabytesFromMebibytes() {
         // GIVEN
-        let megabytes: Double = 1 * 1024
-        let expectedGb: Double = 1
-        let displayMegabytes = BinaryDisplaySize.megabytes(megabytes)
+        let mebibytes: Double = 1 * 1024
+        let expectedGibibytes: Double = 1
+        let displayMebibytes = BinaryDisplaySize.mebibytes(mebibytes)
 
         // WHEN
-        let recBytes = displayMegabytes.toGigabytes
+        let recBytes = displayMebibytes.toGibibytes
 
         // THEN
-        XCTAssertEqual(recBytes, expectedGb)
+        XCTAssertEqual(recBytes, expectedGibibytes)
     }
 
-    func testToGigabytesFromGBytes() {
+    func testToGigabytesFromGibibytes() {
         // GIVEN
-        let gigabytes: Double = 1
-        let expectedGb: Double = 1
-        let displayGigabytes = BinaryDisplaySize.gigabytes(gigabytes)
+        let gibibytes: Double = 1
+        let expectedGibibytes: Double = 1
+        let displayGibibytes = BinaryDisplaySize.gibibytes(gibibytes)
 
         // WHEN
-        let recBytes = displayGigabytes.toGigabytes
+        let recBytes = displayGibibytes.toGibibytes
 
         // THEN
-        XCTAssertEqual(recBytes, expectedGb)
+        XCTAssertEqual(recBytes, expectedGibibytes)
+    }
+    
+    func testToGigabytesFromTebibytes() {
+        // GIVEN
+        let tebibytes: Double = 1
+        let expectedGibibytes: Double = 1 * 1024
+        let displayTebibytes = BinaryDisplaySize.tebibytes(tebibytes)
+
+        // WHEN
+        let recBytes = displayTebibytes.toGibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedGibibytes)
+    }
+    
+    func testToGigabytesFromPebibytes() {
+        // GIVEN
+        let pebibytes: Double = 1
+        let expectedGibibytes: Double = 1 * 1024 * 1024
+        let displayPebibytes = BinaryDisplaySize.pebibytes(pebibytes)
+
+        // WHEN
+        let recBytes = displayPebibytes.toGibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedGibibytes)
+    }
+    
+    func testToGigabytesFromExbibytes() {
+        // GIVEN
+        let exbibytes: Double = 1
+        let expectedGibibytes: Double = 1 * 1024 * 1024 * 1024
+        let displayExbibytes = BinaryDisplaySize.exbibytes(exbibytes)
+
+        // WHEN
+        let recBytes = displayExbibytes.toGibibytes
+
+        // THEN
+        XCTAssertEqual(recBytes, expectedGibibytes)
     }
     
 }

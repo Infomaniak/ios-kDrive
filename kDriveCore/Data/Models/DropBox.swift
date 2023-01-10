@@ -61,34 +61,63 @@ public class DropBoxSize: EmbeddedObject, Codable {
 /// Something to display human friendly storage size
 public enum BinaryDisplaySize: Encodable {
     case bytes(UInt64)
-    case kilobytes(Double)
-    case megabytes(Double)
-    case gigabytes(Double)
+    case kibibytes(Double)
+    case mebibytes(Double)
+    case gibibytes(Double)
+    case tebibytes(Double)
+    case pebibytes(Double)
+    case exbibytes(Double)
 
     public var toBytes: UInt64 {
-        switch self {
-        case .bytes(let bytes):
+        // No need to convert bytes to bytes.
+        if case .bytes(let bytes) = self {
             return bytes
-        case .kilobytes(let kilobytes):
-            return UInt64(kilobytes * 1_024)
-        case .megabytes(let megabytes):
-            return UInt64(megabytes * 1_048_576)
-        case .gigabytes(let gigabytes):
-            return UInt64(gigabytes * 1_073_741_824)
         }
+
+        let scaled = scaled(to: .bytes)
+        return UInt64(scaled)
     }
 
-    public var toGigabytes: Double {
+    public var toKibibytes: Double {
+        let scaled = scaled(to: .kibibytes)
+        return scaled
+    }
+    
+    public var toMebibytes: Double {
+        let scaled = scaled(to: .mebibytes)
+        return scaled
+    }
+    
+    public var toGibibytes: Double {
+        let scaled = scaled(to: .gibibytes)
+        return scaled
+    }
+    
+    /// Returns a storage space in the requested scale
+    /// - Parameter requestedUnit: the requested scale
+    /// - Returns: a scaled value
+    private func scaled(to requestedUnit: UnitInformationStorage) -> Double {
+        let measurement: Measurement<UnitInformationStorage>
+
         switch self {
         case .bytes(let bytes):
-            return Double(bytes) / 1_073_741_824
-        case .kilobytes(let kilobytes):
-            return Double(kilobytes) / 1_048_576
-        case .megabytes(let megabytes):
-            return Double(megabytes) / 1_024
-        case .gigabytes(let gigabytes):
-            return Double(gigabytes)
+            measurement = Measurement(value: Double(bytes), unit: UnitInformationStorage.bytes)
+        case .kibibytes(let kibibytes):
+            measurement = Measurement(value: kibibytes, unit: UnitInformationStorage.kibibytes)
+        case .mebibytes(let mebibytes):
+            measurement = Measurement(value: mebibytes, unit: UnitInformationStorage.mebibytes)
+        case .gibibytes(let gibibytes):
+            measurement = Measurement(value: gibibytes, unit: UnitInformationStorage.gibibytes)
+        case .tebibytes(let tebibytes):
+            measurement = Measurement(value: tebibytes, unit: UnitInformationStorage.tebibytes)
+        case .pebibytes(let pebibytes):
+            measurement = Measurement(value: pebibytes, unit: UnitInformationStorage.pebibytes)
+        case .exbibytes(let exbibytes):
+            measurement = Measurement(value: exbibytes, unit: UnitInformationStorage.exbibytes)
         }
+
+        let bytes = measurement.converted(to: requestedUnit).value
+        return bytes
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -109,7 +138,11 @@ public struct DropBoxSettings: Encodable {
     /// Date of validity
     @NullEncodable public var validUntil: Date?
 
-    public init(alias: String?, emailWhenFinished: Bool, limitFileSize: BinaryDisplaySize?, password: String?, validUntil: Date?) {
+    public init(alias: String?,
+                emailWhenFinished: Bool,
+                limitFileSize: BinaryDisplaySize?,
+                password: String?,
+                validUntil: Date?) {
         self.alias = alias
         self.emailWhenFinished = emailWhenFinished
         self.limitFileSize = limitFileSize

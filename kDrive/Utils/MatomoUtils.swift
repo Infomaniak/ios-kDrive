@@ -81,7 +81,7 @@ class MatomoUtils {
         track(eventWithCategory: .dropbox, name: "switchExpirationDate", value: settings.validUntil != nil)
         track(eventWithCategory: .dropbox, name: "switchLimitStorageSpace", value: settings.limitFileSize != nil)
         if let size = settings.limitFileSize {
-            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size.toGigabytes))
+            track(eventWithCategory: .dropbox, action: .input, name: "changeLimitStorage", value: Float(size.toGibibytes))
         }
     }
 

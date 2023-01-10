@@ -434,7 +434,7 @@ extension NewFolderViewController: FooterButtonDelegate {
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
             let limitFileSize: BinaryDisplaySize?
             if getSetting(for: .optionSize), let size = getValue(for: .optionSize) as? Double {
-                limitFileSize = .gigabytes(size)
+                limitFileSize = .gibibytes(size)
             } else {
                 limitFileSize = nil
             }
