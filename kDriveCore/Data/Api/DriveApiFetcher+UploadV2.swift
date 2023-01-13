@@ -126,9 +126,14 @@ public extension DriveApiFetcher {
             parameters[APIParameters.fileID.rawValue] = fileID
         }
         
-        let request = authenticatedRequest(.startSession(drive: drive), method: .post, parameters: parameters)
-
-        let result: UploadSession = try await perform(request: request).data
+        let route: Endpoint = .startSession(drive: drive)
+        
+        let request = Request(method: .POST,
+                              route: route,
+                              GETParameters: parameters,
+                              body: .none)
+        
+        let result: UploadSession = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
     
@@ -144,20 +149,19 @@ public extension DriveApiFetcher {
         return []
     }
     
-    func appendChunk(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadChunk {
-        // Build parameters
-//        var parameters: Parameters = [:]
-//
-//        let request = .appendChunk(drive: drive, sessionToken: sessionToken), method: .post, parameters: parameters)
-//
-//        let dataRequest: DataRequest = authenticatedRequest(.appendChunk(drive: drive, sessionToken: sessionToken),
-//                                                            method: .post,
-//                                                            parameters: parameters)
-//        var request = try dataRequest.convertible.asURLRequest()
-//        request.httpBody = Data()
-//
-//        let result: UploadChunk = try await perform(request: request).data
-//        return UploadChunk()
-        fatalError()
+    func appendChunk(drive: AbstractDrive,
+                     sessionToken: AbstractToken,
+                     chunkRange: DataRange,
+                     chunk: Data) async throws -> UploadChunk {
+        var parameters: Parameters = [:]
+        let route: Endpoint = .appendChunk(drive: drive,sessionToken: sessionToken)
+        
+        let request = Request(method: .POST,
+                              route: route,
+                              GETParameters: parameters,
+                              body: .requestBody(chunk))
+        
+        let result: UploadChunk = try await self.dispatch(request, networkStack: .NSURLSession)
+        return result
     }
 }

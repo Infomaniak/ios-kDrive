@@ -27,21 +27,18 @@ public typealias DataRange = ClosedRange<UInt64>
 ///
 /// Throws if file too large or too small. Also if file system issue
 public protocol RangeProvidable {
-    
     var fileURL: URL { get }
     
     var allRanges: [DataRange] { get throws }
-    
 }
 
 public struct RangeProvider: RangeProvidable {
-    
     /// Encapsulating API parameters used to compute ranges
     public enum APIConsts {
         static let chunkMinSize: UInt64 = 1 * 1024 * 1024
         static let chunkMaxSize: UInt64 = 50 * 1024 * 1024
         static let optimalChunkCount: UInt64 = 200
-        static let maxTotalChunks: UInt64 = 10_000
+        static let maxTotalChunks: UInt64 = 10000
         static let minTotalChunks: UInt64 = 1
     }
     
@@ -82,12 +79,12 @@ public struct RangeProvider: RangeProvidable {
     }
     
     func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) -> [DataRange] {
-        let chunckedSize = totalChunksCount*chunkSize
+        let chunckedSize = totalChunksCount * chunkSize
         assert(chunckedSize <= fileSize, "sanity file size check")
         
         var ranges: [DataRange] = []
         for index in 0...totalChunksCount {
-            let startOffset = index*chunckedSize
+            let startOffset = index * chunckedSize
             let endOffset = startOffset+chunckedSize
             let range: DataRange = startOffset...endOffset
             
@@ -97,8 +94,8 @@ public struct RangeProvider: RangeProvidable {
         // Add the remainder in a last chuck
         let lastChunkSize = fileSize - chunckedSize
         if lastChunkSize > 0 {
-            let startOffset = totalChunksCount*chunkSize
-            assert((startOffset+lastChunkSize)==fileSize, "sanity, this should match")
+            let startOffset = totalChunksCount * chunkSize
+            assert((startOffset+lastChunkSize) == fileSize, "sanity, this should match")
             
             let endOffset = fileSize
             let range: DataRange = startOffset...endOffset
@@ -125,12 +122,12 @@ public struct RangeProvider: RangeProvidable {
     func preferedChunkSize(for fileSize: UInt64) -> UInt64 {
         let potentialChunkSize = fileSize / APIConsts.optimalChunkCount
         
-        assert(potentialChunkSize<=APIConsts.chunkMaxSize, "should be smaller than max size")
-        assert(potentialChunkSize>=APIConsts.chunkMinSize, "should be smaller than min size")
+        assert(potentialChunkSize <= APIConsts.chunkMaxSize, "should be smaller than max size")
+        assert(potentialChunkSize >= APIConsts.chunkMinSize, "should be smaller than min size")
         
         let chunkSize: UInt64
         switch potentialChunkSize {
-        case 0..<APIConsts.chunkMinSize:
+        case 0 ..< APIConsts.chunkMinSize:
             chunkSize = APIConsts.chunkMinSize
         
         case APIConsts.chunkMinSize...APIConsts.chunkMaxSize:
@@ -143,5 +140,4 @@ public struct RangeProvider: RangeProvidable {
         
         return chunkSize
     }
-    
 }
