@@ -18,6 +18,7 @@
 
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -222,8 +223,13 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                                                                                 totalChunks: aFileChunks,
                                                                                 conflictResolution: .throwError,
                                                                                 directoryID: rootDirectoryID)
-
                 print("result: \(result)")
+                guard let token = result.token else {
+                    fatalError("Missing token")
+                }
+
+//                let result = try await driveFileManager.apiFetcher.
+
             } catch {
                 print("\(error)")
             }
@@ -272,8 +278,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             guard let self = self else { return }
             if let index = self.viewModel.topRows.firstIndex(where: { $0 == .uploadsInProgress }),
                let cell = (self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? WrapperCollectionViewCell)?.subviews.first as? UploadsInProgressTableViewCell,
-               self.uploadCountManager.uploadCount > 0
-            {
+               self.uploadCountManager.uploadCount > 0 {
                 // Update cell
                 cell.setUploadCount(self.uploadCountManager.uploadCount)
             } else {

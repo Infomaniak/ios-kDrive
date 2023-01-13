@@ -18,6 +18,7 @@
 
 import CocoaLumberjackSwift
 import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
 import Photos
@@ -166,13 +167,13 @@ public class FileActionsHelper {
                                                disabledDirectoriesIdsSelection: disabledDirectoriesIds) { destinationDirectory in
                 Task {
                     await moveToDestination(destinationDirectory,
-                                      from: currentDirectory,
-                                      files: files,
-                                      exceptFileIds: exceptFileIds,
-                                      allItemsSelected: allItemsSelected,
-                                      observer: observer,
-                                      driveFileManager: driveFileManager,
-                                      completion: completion)
+                                            from: currentDirectory,
+                                            files: files,
+                                            exceptFileIds: exceptFileIds,
+                                            allItemsSelected: allItemsSelected,
+                                            observer: observer,
+                                            driveFileManager: driveFileManager,
+                                            completion: completion)
                 }
             }
         presentViewController(selectFolderNavigationController)

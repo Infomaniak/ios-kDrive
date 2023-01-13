@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCoreUI
 import kDriveResources
 import RealmSwift
 import UIKit

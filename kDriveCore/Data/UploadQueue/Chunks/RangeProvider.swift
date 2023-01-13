@@ -36,11 +36,13 @@ public protocol RangeProvidable {
 
 public struct RangeProvider: RangeProvidable {
     
-    enum APIConsts {
+    /// Encapsulating API parameters used to compute ranges
+    public enum APIConsts {
         static let chunkMinSize: UInt64 = 1 * 1024 * 1024
         static let chunkMaxSize: UInt64 = 50 * 1024 * 1024
         static let optimalChunkCount: UInt64 = 200
         static let maxTotalChunks: UInt64 = 10_000
+        static let minTotalChunks: UInt64 = 1
     }
     
     public let fileURL: URL

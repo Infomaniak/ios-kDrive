@@ -31,7 +31,7 @@ public struct UploadSession: Decodable {
     
     public var result: Bool?
     
-    public var token: String?
+    public var token: UploadSessionToken?
     
     enum CodingKeys: String, CodingKey {
         case directoryID = "directory_id"

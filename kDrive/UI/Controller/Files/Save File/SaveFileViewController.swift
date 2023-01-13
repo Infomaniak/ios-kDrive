@@ -17,7 +17,7 @@
  */
 
 import CocoaLumberjackSwift
-import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
 import PhotosUI
@@ -50,22 +50,25 @@ class SaveFileViewController: UIViewController {
             setItemProviders()
         }
     }
+
     var assetIdentifiers: [String]? {
         didSet {
             setAssetIdentifiers()
         }
     }
+
     var items = [ImportedFile]()
     var userPreferredPhotoFormat = UserDefaults.shared.importPhotoFormat {
         didSet {
             UserDefaults.shared.importPhotoFormat = userPreferredPhotoFormat
         }
     }
+
     var itemProvidersContainHeicPhotos: Bool {
         if let itemProviders, !itemProviders.isEmpty {
             return itemProviders.contains {
                 $0.hasItemConformingToTypeIdentifier(UTI.heic.identifier)
-                && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
+                    && $0.hasItemConformingToTypeIdentifier(UTI.jpeg.identifier)
             }
         }
         if let assetIdentifiers, !assetIdentifiers.isEmpty {
@@ -73,6 +76,7 @@ class SaveFileViewController: UIViewController {
         }
         return false
     }
+
     private var errorCount = 0
     private var importProgress: Progress?
     private var enableButton = false {

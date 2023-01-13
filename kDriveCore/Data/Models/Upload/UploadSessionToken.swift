@@ -16,18 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUI
-import UIKit
+import Foundation
 
-class DriveTitleTableViewCell: InsetTableViewCell {
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+/// An upload session token
+/// Can be used in another `Decodable` type, it will decode the root object as a `String` and store it to `token`
+public struct UploadSessionToken: AbstractToken, Decodable {
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        token = try container.decode(String.self)
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
+    
+    public var token: String
 }

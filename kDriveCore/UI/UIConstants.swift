@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveResources
 import LinkPresentation
 import SnackBar

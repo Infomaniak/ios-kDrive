@@ -16,14 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUI
 import UIKit
-import InfomaniakCore
 
 class DropBoxDisableTableViewCell: InsetTableViewCell {
-
     override func awakeFromNib() {
         super.awakeFromNib()
         accessibilityTraits = .button
     }
-
 }

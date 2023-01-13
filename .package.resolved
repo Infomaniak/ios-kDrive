@@ -39,7 +39,7 @@
     {
       "identity" : "dropdown",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/RomanTysiachnik/DropDown.git",
+      "location" : "https://github.com/RomanTysiachnik/DropDown",
       "state" : {
         "branch" : "master",
         "revision" : "d040a7d331a978d0e6b6568a40bb017aac127720"
@@ -86,8 +86,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core.git",
       "state" : {
-        "revision" : "41a14e9e4444e85c4a1b53479e45514365486d11",
-        "version" : "1.1.16"
+        "revision" : "3435692e2069eb21a20b6d8f4e81d3f7ec6d83c6",
+        "version" : "2.0.2"
+      }
+    },
+    {
+      "identity" : "ios-core-ui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-core-ui.git",
+      "state" : {
+        "revision" : "9eacdd0dc62514b39ed213da23613f8cce88084d",
+        "version" : "1.1.0"
       }
     },
     {
@@ -95,8 +104,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login.git",
       "state" : {
-        "revision" : "ba10750bd4774a1c9c55ac88bfb01604f26f3b92",
-        "version" : "2.2.0"
+        "revision" : "3bdfc87c7a8e62a360eff9047efdcac71f56c26b",
+        "version" : "3.0.0"
       }
     },
     {
@@ -120,7 +129,7 @@
     {
       "identity" : "localizekit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/immortal79/LocalizeKit",
+      "location" : "https://github.com/PhilippeWeidmann/LocalizeKit",
       "state" : {
         "revision" : "1abb86ce614ae8d925bf82123c7360ab95827975",
         "version" : "1.0.1"

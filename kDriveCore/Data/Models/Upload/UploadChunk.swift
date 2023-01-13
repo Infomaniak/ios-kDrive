@@ -16,18 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InfomaniakCoreUI
-import UIKit
+import Foundation
 
-class DriveTitleTableViewCell: InsetTableViewCell {
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
+public struct UploadChunk: Decodable {
+    
 }

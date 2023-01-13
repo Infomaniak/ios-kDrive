@@ -32,13 +32,7 @@ public extension DriveApiFetcher {
         /// Replace the content of the existing file (create a new version of the file).
         case version
     }
-    
-    /// The maximun number of chunks supported
-    static let APIMaxChunks = 10000
-    
-    /// You should send at least one chunk
-    static let APIMinChunks = 1
-    
+
     enum APIParameters: String {
         case driveID = "drive_id"
         case conflict
@@ -74,7 +68,7 @@ public extension DriveApiFetcher {
     /// Required without directory_id.
     ///   - fileID: File identifier of uploaded file.
     ///
-    /// - Returns: Void, the method will return without error in a success
+    /// - Returns: an UploadSession struct.
     func startSession(drive: AbstractDrive,
                       totalSize: UInt64,
                       fileName: String,
@@ -95,7 +89,8 @@ public extension DriveApiFetcher {
             throw DriveError.UploadSessionError.fileNameIsEmpty
         }
         
-        guard totalChunks < Self.APIMaxChunks && totalChunks >= Self.APIMinChunks else {
+        guard totalChunks < RangeProvider.APIConsts.maxTotalChunks,
+                totalChunks >= RangeProvider.APIConsts.minTotalChunks else {
             throw DriveError.UploadSessionError.chunksNumberOutOfBounds
         }
         
@@ -149,7 +144,20 @@ public extension DriveApiFetcher {
         return []
     }
     
-    func appendChunk(drive: AbstractDrive, Session: String) async throws -> [Int] {
-        return []
+    func appendChunk(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadChunk {
+        // Build parameters
+//        var parameters: Parameters = [:]
+//
+//        let request = .appendChunk(drive: drive, sessionToken: sessionToken), method: .post, parameters: parameters)
+//
+//        let dataRequest: DataRequest = authenticatedRequest(.appendChunk(drive: drive, sessionToken: sessionToken),
+//                                                            method: .post,
+//                                                            parameters: parameters)
+//        var request = try dataRequest.convertible.asURLRequest()
+//        request.httpBody = Data()
+//
+//        let result: UploadChunk = try await perform(request: request).data
+//        return UploadChunk()
+        fatalError()
     }
 }

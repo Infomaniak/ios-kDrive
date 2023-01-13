@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Combine
 import DifferenceKit
 import InfomaniakCore
+import InfomaniakCoreUI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -60,8 +61,12 @@ class PhotoListViewController: FileListViewController {
 
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: photoHeaderView.frame.height, left: 0, bottom: 0, right: 0)
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
-        collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: footerIdentifier)
-        collectionView.register(UINib(nibName: "PhotoSectionHeaderView", bundle: nil), forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
+        collectionView.register(UICollectionReusableView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+                                withReuseIdentifier: footerIdentifier)
+        collectionView.register(UINib(nibName: "PhotoSectionHeaderView", bundle: nil),
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: headerIdentifier)
         selectView = photoHeaderView
         selectView?.delegate = self
         bindPhotoListViewModel()
@@ -69,7 +74,9 @@ class PhotoListViewController: FileListViewController {
 
     private func bindPhotoListViewModel() {
         photoListViewModel?.onReloadWithChangeset = { [weak self] changeset, completion in
-            self?.collectionView.reload(using: changeset, interrupt: { $0.changeCount > Endpoint.itemsPerPage }, setData: completion)
+            self?.collectionView.reload(using: changeset,
+                                        interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                                        setData: completion)
             self?.showEmptyView(.noImages)
             if let collectionView = self?.collectionView {
                 self?.scrollViewDidScroll(collectionView)
