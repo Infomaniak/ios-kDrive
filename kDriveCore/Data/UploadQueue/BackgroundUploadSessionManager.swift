@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import Sentry
 
+// check for existing url session switcheroo
 protocol BackgroundSessionManager: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
 

@@ -214,20 +214,31 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         let aFileChunks = UInt64(1)
         let rootDirectoryID = 1
         let fileName = "\(UUID())"
-
+        
+        let apiFetcher = driveFileManager.apiFetcher
+        let drive = driveFileManager.drive
+        
         Task {
             do {
-                let result = try await driveFileManager.apiFetcher.startSession(drive: driveFileManager.drive,
-                                                                                totalSize: aFileSize,
-                                                                                fileName: fileName,
-                                                                                totalChunks: aFileChunks,
-                                                                                conflictResolution: .throwError,
-                                                                                directoryID: rootDirectoryID)
+                let result = try await apiFetcher.startSession(drive: drive,
+                                                               totalSize: aFileSize,
+                                                               fileName: fileName,
+                                                               totalChunks: aFileChunks,
+                                                               conflictResolution: .throwError,
+                                                               directoryID: rootDirectoryID)
                 print("result: \(result)")
                 guard let token = result.token else {
                     fatalError("Missing token")
                 }
+                
+                let mckRange = DataRange(uncheckedBounds: (lower: 0, upper: 1337))
+                let mckData = Data()
 
+                let uploadedChunk = try await apiFetcher.appendChunk(drive: drive,
+                                                                     sessionToken: token,
+                                                                     chunkRange: mckRange,
+                                                                     chunk: mckData)
+                print("\(result)")
 //                let result = try await driveFileManager.apiFetcher.
 
             } catch {
