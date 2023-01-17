@@ -16,30 +16,126 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@testable import kDriveCore
 import XCTest
-import kDriveCore
 
 /// Unit Tests of the RangeProvider
 final class UTRangeProvider: XCTestCase {
-
-    /// Image from wikimedia under CC.
-    static let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
     
-    func testFileSplit() throws {
+    override func setUpWithError() throws {
+        // usualy prepare mocking solver
+    }
+    
+    override func tearDownWithError() throws {
+        // usualy teardown mocking solver so the next test is stable
+    }
+
+    
+    func testAllRanges_zeroes() throws {
         // GIVEN
-        let bundle = Bundle(for: type(of: self))
-        guard let path = bundle.path(forResource: Self.file, ofType: "jpg"),
-              let imageData = NSData(contentsOfFile: path) else {
-            XCTFail("unexpected")
-            return
-        }
+        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
+        var rangeProvider = RangeProvider(fileURL: stubURL)
+        let mckGuts = MCKRangeProviderGuts( /* all zeroes by default */ )
         
-        guard let pathURL = bundle.url(forResource: Self.file, withExtension: "jpg") else {
-            XCTFail("unexpected")
-            return
-        }
+        rangeProvider.guts = mckGuts
         
-        let rangeProvider = RangeProvider(fileURL: pathURL)
+        // WHEN
+        do {
+            let _ = try rangeProvider.allRanges
+            
+            // THEN
+            XCTFail("Unexpected")
+        } catch {
+            // success if some execption has shown
+        }
+    }
+    
+    func testAllRanges_FileTooSmall() throws {
+        // GIVEN
+        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
+        var rangeProvider = RangeProvider(fileURL: stubURL)
+        let mckGuts = MCKRangeProviderGuts()
+        mckGuts.readFileByteSizeReturnValue = 1024
+        
+        rangeProvider.guts = mckGuts
+        
+        // WHEN
+        do {
+            let _ = try rangeProvider.allRanges
+            
+            // THEN
+            XCTFail("Unexpected")
+        } catch {
+            // Expecting a .FileTooSmall error
+            guard case .FileTooSmall = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
+            
+            // success
+        }
+    }
+    
+    func testAllRanges_FileExactlyMinSize() throws {
+        // GIVEN
+        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
+        var rangeProvider = RangeProvider(fileURL: stubURL)
+        let mckGuts = MCKRangeProviderGuts()
+        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.chunkMinSize
+        
+        rangeProvider.guts = mckGuts
+        
+        // WHEN
+        do {
+            let _ = try rangeProvider.allRanges
+            
+            // THEN
+            XCTFail("Unexpected")
+        } catch {
+            // Expecting a .FileTooSmall error
+            guard case .FileTooSmall = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
+            
+            // success
+        }
+    }
+    
+    func testAllRanges_FileTooLarge() throws {
+        // GIVEN
+        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
+        var rangeProvider = RangeProvider(fileURL: stubURL)
+        let mckGuts = MCKRangeProviderGuts()
+        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.fileMaxSize
+        
+        rangeProvider.guts = mckGuts
+        
+        // WHEN
+        do {
+            let _ = try rangeProvider.allRanges
+            
+            // THEN
+            XCTFail("Unexpected")
+        } catch {
+            // Expecting a .FileTooLarge error
+            guard case .FileTooLarge = error as? RangeProvider.ErrorDomain else {
+                XCTFail("Unexpected")
+                return
+            }
+            
+            // success
+        }
+    }
+    
+    func testAllRanges_Success() throws {
+        // GIVEN
+        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
+        var rangeProvider = RangeProvider(fileURL: stubURL)
+        let mckGuts = MCKRangeProviderGuts()
+        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.chunkMinSize + 1
+        
+        rangeProvider.guts = mckGuts
         
         // WHEN
         do {
@@ -47,13 +143,13 @@ final class UTRangeProvider: XCTestCase {
             
             // THEN
             XCTAssertNotNil(ranges)
-        } catch {
+            XCTAssertEqual(ranges.count, 0)
             
+            XCTAssertTrue(mckGuts.buildRangesCalled)
+            XCTAssertTrue(mckGuts.preferedChunkSizeCalled)
+            XCTAssertTrue(mckGuts.readFileByteSizeCalled)
+        } catch {
+            XCTFail("Unexpected \(error)")
         }
-        
-        // THEN
-        XCTAssertNotNil(rangeProvider)
-        XCTAssertNotNil(imageData)
     }
-
 }

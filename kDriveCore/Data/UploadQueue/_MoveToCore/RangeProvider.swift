@@ -19,17 +19,17 @@
 import Foundation
 
 /// A range of Bytes on a `Data` buffer
-///   - start: start byte index
-///   - end: end byte index
+///   - start: start byte index, first index at 0 by convention.
+///   - end: end byte index, last index at fileSize -1 by convention.
 public typealias DataRange = ClosedRange<UInt64>
 
-/// Something that can provide a view on where the files should be split if necessary
+/// Something that can provide a sequence of ranges where the file should be split if necessary.
 public protocol RangeProvidable {
-    
-    /// Computes and return all the ranges for a file at the moment of calling.
+    /// Computes and return all the contiguous ranges for a file at the moment of calling.
     ///
     /// Result may change over time if file is modified in between calls.
-    /// Throws if file too large or too small. Also if file system issue.
+    /// Throws if file too large or too small, also if file system issue.
+    /// Minimum size support is one byte (low bound == high bound)
     var allRanges: [DataRange] { get throws }
 }
 
@@ -39,8 +39,9 @@ public struct RangeProvider: RangeProvidable {
         static let chunkMinSize: UInt64 = 1 * 1024 * 1024
         static let chunkMaxSize: UInt64 = 50 * 1024 * 1024
         static let optimalChunkCount: UInt64 = 200
-        static let maxTotalChunks: UInt64 = 10000
+        static let maxTotalChunks: UInt64 = 10_000
         static let minTotalChunks: UInt64 = 1
+        static let fileMaxSize: UInt64 = chunkMaxSize * maxTotalChunks
     }
     
     enum ErrorDomain: Error {
@@ -55,7 +56,7 @@ public struct RangeProvider: RangeProvidable {
     }
     
     /// The internal methods split into another type, make testing easier
-    let guts: RangeProviderGutsable
+    var guts: RangeProviderGutsable
     
     public init(fileURL: URL) {
         self.guts = RangeProviderGuts(fileURL: fileURL)

@@ -19,7 +19,9 @@
 import Foundation
 
 /// The internal methods of RangeProviderGuts, made testable
-protocol RangeProviderGutsable {
+///
+// TODO: Remove public (protocol and implementation) as soon as moved to Core
+public protocol RangeProviderGutsable {
     
     /// Build ranges for a file
     /// - Parameters:
@@ -46,9 +48,14 @@ public struct RangeProviderGuts: RangeProviderGutsable {
     /// The URL of the local file to scan
     public let fileURL: URL
     
-    func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) -> [DataRange] {
-        let totalChunckedSize = totalChunksCount * chunkSize
+    public func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) -> [DataRange] {
+        guard fileSize > 0,
+              totalChunksCount > 0,
+              chunkSize > 0 else {
+            return []
+        }
         
+        let totalChunckedSize = totalChunksCount * chunkSize
         // sanity file size check
         guard totalChunckedSize <= fileSize else {
             return []
@@ -72,8 +79,8 @@ public struct RangeProviderGuts: RangeProviderGutsable {
             let startOffset = totalChunksCount * chunkSize
             assert((startOffset+lastChunkSize) == fileSize, "sanity, this should match")
             
-            let endOffset = fileSize
-            let range: DataRange = startOffset...endOffset
+            let EoFoffset = fileSize-1
+            let range: DataRange = startOffset...EoFoffset
             
             ranges.append(range)
         }
@@ -81,7 +88,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         return ranges
     }
     
-    func readFileByteSize() throws -> UInt64 {
+    public func readFileByteSize() throws -> UInt64 {
         let fileAttributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
         guard let fileSize = fileAttributes[.size] as? UInt64 else {
             throw RangeProvider.ErrorDomain.UnableToReadFileAttributes
@@ -90,7 +97,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         return fileSize
     }
     
-    func preferedChunkSize(for fileSize: UInt64) -> UInt64 {
+    public func preferedChunkSize(for fileSize: UInt64) -> UInt64 {
         let potentialChunkSize = fileSize / RangeProvider.APIConsts.optimalChunkCount
         
         let chunkSize: UInt64
@@ -105,9 +112,6 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         default:
             chunkSize = RangeProvider.APIConsts.chunkMaxSize
         }
-        
-        assert(potentialChunkSize <= RangeProvider.APIConsts.chunkMaxSize, "should be smaller than max size")
-        assert(chunkSize >= RangeProvider.APIConsts.chunkMinSize, "should be smaller than min size")
         
         return chunkSize
     }

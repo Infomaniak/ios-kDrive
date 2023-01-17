@@ -1,4 +1,3 @@
-//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2023 Infomaniak Network SA
@@ -17,12 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import XCTest
 @testable import kDriveCore
+import XCTest
 
 /// Integration Tests of the RangeProviderGuts
 final class ITRangeProviderGuts: XCTestCase {
-    
     // MARK: - readFileByteSize
     
     func testReadFileByteSize() {
@@ -40,7 +38,7 @@ final class ITRangeProviderGuts: XCTestCase {
             // THEN
             XCTAssertEqual(size, expectedFileBytes)
         } catch {
-            XCTFail("Unexpected")
+            XCTFail("Unexpected \(error)")
         }
     }
     
@@ -65,6 +63,62 @@ final class ITRangeProviderGuts: XCTestCase {
     
     // MARK: - buildRanges(fileSize: totalChunksCount: chunkSize:)
 
-    // Covered by UT
+    func testBuildRanges_fromImage() {
+        // GIVEN
+        let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
+        let bundle = Bundle(for: type(of: self))
+        let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
+        let guts = RangeProviderGuts(fileURL: pathURL)
+        let fileChunks = UInt64(4)
+        let expectedChunks = 5
+        let chunksSize = UInt64(1*1024*1024)
+        
+        // WHEN
+        do {
+            let size = try guts.readFileByteSize()
+            let chunks = guts.buildRanges(fileSize: size, totalChunksCount: fileChunks, chunkSize: chunksSize)
+            
+            // THEN
+            try UTRangeProviderGuts.checkContinuity(ranges: chunks)
+            XCTAssertEqual(chunks.count, expectedChunks)
+            
+            // Check that last range is the end of the file
+            let lastChunk = chunks[expectedChunks-1]
+            // The last offset is size -1
+            let EoFOffset = size-1
+            guard lastChunk.upperBound == EoFOffset else {
+                XCTFail("EOF not reached")
+                return
+            }
+            
+        } catch {
+            XCTFail("Unexpected \(error)")
+        }
+    }
     
+    // MARK: - preferedChunkSize(for fileSize:)
+    
+    func testPreferedChunkSize_fromImage() {
+        // GIVEN
+        let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
+        let bundle = Bundle(for: type(of: self))
+        let pathURL = bundle.url(forResource: file, withExtension: "jpg")!
+        let guts = RangeProviderGuts(fileURL: pathURL)
+        
+        // WHEN
+        do {
+            let size = try guts.readFileByteSize()
+            let preferedChunkSize = guts.preferedChunkSize(for: size)
+            
+            // THEN
+            XCTAssertTrue(preferedChunkSize > 0)
+            XCTAssertTrue(preferedChunkSize <= size)
+            
+            // this should not be strictly imposed but I can quickly check behaviour here
+            // XCTAssertTrue(preferedChunkSize >= RangeProvider.APIConsts.chunkMinSize)
+            // XCTAssertTrue(preferedChunkSize <= RangeProvider.APIConsts.chunkMaxSize)
+        } catch {
+            XCTFail("Unexpected \(error)")
+        }
+    }
 }
