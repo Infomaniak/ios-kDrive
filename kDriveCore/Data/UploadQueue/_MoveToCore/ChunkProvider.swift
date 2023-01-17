@@ -38,6 +38,14 @@ public final class ChunkProvider: ChunkProvidable {
     let fileHandle: FileHandle
     
     var ranges: [DataRange]
+
+    deinit {
+        do {
+            // For the sake of consistency
+            try fileHandle.close()
+        } catch  {
+        }
+    }
     
     public init?(fileURL: URL, ranges: [DataRange]) {
         self.ranges = ranges.reversed()
@@ -58,7 +66,7 @@ public final class ChunkProvider: ChunkProvidable {
         
         do {
             try fileHandle.seek(toOffset: range.lowerBound)
-            let chunk = try fileHandle.read(upToCount: Int(range.upperBound))
+            let chunk = try readChunk(range: range)
             
             return chunk
         } catch {
@@ -67,13 +75,44 @@ public final class ChunkProvider: ChunkProvidable {
         }
     }
     
+    // MARK: Internal
+    
+    func readChunk(range: DataRange) throws -> Data? {
+        try fileHandle.seek(toOffset: range.lowerBound)
+        
+        #if DEBUG
+        let offset = try fileHandle.offset()
+        print(fileHandle, "\n~> Range Offset: \(offset)")
+        assert(offset == range.lowerBound)
+        #endif
+        
+        let byteCount = Int(range.upperBound - range.lowerBound)
+        let chunk = try fileHandle.read(upToCount: byteCount)
+        return chunk
+    }
+    
 }
 
-
-/*
- 
- let rangeProvider: RangeProvider
- rangeProvider = RangeProvider(fileURL: fileURL)
- rangeProvider.allRanges
- 
- */
+/// Print the FileHandle shows the current offset
+extension FileHandle {
+    
+    open override var description: String {
+        let superDescription = super.description
+        
+        let offsetString: String
+        do {
+            let offset = try self.offset()
+            offsetString = "\(offset)"
+        } catch {
+            offsetString = "\(error)"
+        }
+        
+        let buffer = """
+        <\(superDescription)>
+        <offset:\(offsetString)>
+        """
+        
+        return buffer
+    }
+    
+}

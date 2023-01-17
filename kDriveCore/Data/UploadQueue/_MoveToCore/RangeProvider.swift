@@ -41,7 +41,9 @@ public struct RangeProvider: RangeProvidable {
         static let optimalChunkCount: UInt64 = 200
         static let maxTotalChunks: UInt64 = 10_000
         static let minTotalChunks: UInt64 = 1
-        static let fileMaxSize: UInt64 = chunkMaxSize * maxTotalChunks
+        
+        /// On kDrive a file cannot exceed 50GiB, not linked to chunk API
+        static let fileMaxSize: UInt64 = 50 * 1024 * 1024 * 1024
     }
     
     enum ErrorDomain: Error {
@@ -72,13 +74,19 @@ public struct RangeProvider: RangeProvidable {
             }
             
             // Check for files too large to be processed
-            let totalChunksCount = fileSize / APIConsts.chunkMaxSize
-            guard totalChunksCount < APIConsts.maxTotalChunks else {
+            guard fileSize < APIConsts.fileMaxSize else {
                 // TODO: notify Sentry
                 throw ErrorDomain.FileTooLarge
             }
             
             let preferedChunkSize = guts.preferedChunkSize(for: fileSize)
+            
+            // Check the file is larger than one chunk
+            guard fileSize > preferedChunkSize else {
+                throw ErrorDomain.FileTooSmall
+            }
+            let totalChunksCount = fileSize / preferedChunkSize
+            
             let ranges = guts.buildRanges(fileSize: fileSize, totalChunksCount: totalChunksCount, chunkSize: preferedChunkSize)
             
             return ranges

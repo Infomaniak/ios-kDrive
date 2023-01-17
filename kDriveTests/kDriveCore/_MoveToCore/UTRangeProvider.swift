@@ -21,7 +21,6 @@ import XCTest
 
 /// Unit Tests of the RangeProvider
 final class UTRangeProvider: XCTestCase {
-    
     override func setUpWithError() throws {
         // usualy prepare mocking solver
     }
@@ -30,7 +29,6 @@ final class UTRangeProvider: XCTestCase {
         // usualy teardown mocking solver so the next test is stable
     }
 
-    
     func testAllRanges_zeroes() throws {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
@@ -107,8 +105,7 @@ final class UTRangeProvider: XCTestCase {
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
         let mckGuts = MCKRangeProviderGuts()
-        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.fileMaxSize
-        
+        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.fileMaxSize + 1
         rangeProvider.guts = mckGuts
         
         // WHEN
@@ -134,6 +131,7 @@ final class UTRangeProvider: XCTestCase {
         var rangeProvider = RangeProvider(fileURL: stubURL)
         let mckGuts = MCKRangeProviderGuts()
         mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.chunkMinSize + 1
+        mckGuts.preferedChunkSizeReturnValue = 1 * 1024 * 1024
         
         rangeProvider.guts = mckGuts
         

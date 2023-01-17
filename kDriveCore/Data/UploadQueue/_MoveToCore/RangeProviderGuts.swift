@@ -22,7 +22,6 @@ import Foundation
 ///
 // TODO: Remove public (protocol and implementation) as soon as moved to Core
 public protocol RangeProviderGutsable {
-    
     /// Build ranges for a file
     /// - Parameters:
     ///   - fileSize: the total file size, in **Bytes**
@@ -39,12 +38,10 @@ public protocol RangeProviderGutsable {
     /// - Parameter fileSize: the input file size, in **Bytes**
     /// - Returns: The _prefered_ size of one chunk
     func preferedChunkSize(for fileSize: UInt64) -> UInt64
-    
 }
 
 /// Subdivided **RangeProvider**, so it is easier to test
 public struct RangeProviderGuts: RangeProviderGutsable {
-    
     /// The URL of the local file to scan
     public let fileURL: URL
     
@@ -65,7 +62,7 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         let chunkBound = chunkSize - 1
         
         var ranges: [DataRange] = []
-        for index in 0...totalChunksCount-1 {
+        for index in 0...totalChunksCount - 1 {
             let startOffset = index * chunkBound + index
             let endOffset = startOffset + chunkBound
             let range: DataRange = startOffset...endOffset
@@ -77,9 +74,9 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         let lastChunkSize = fileSize - totalChunckedSize
         if lastChunkSize != 0 {
             let startOffset = totalChunksCount * chunkSize
-            assert((startOffset+lastChunkSize) == fileSize, "sanity, this should match")
+            assert((startOffset + lastChunkSize) == fileSize, "sanity, this should match")
             
-            let EoFoffset = fileSize-1
+            let EoFoffset = fileSize - 1
             let range: DataRange = startOffset...EoFoffset
             
             ranges.append(range)

@@ -16,11 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@testable import kDriveCore
 import XCTest
+@testable import kDriveCore
 
 /// Unit tests of the RangeProviderGuts
 final class UTRangeProviderGuts: XCTestCase {
+
     // MARK: - readFileByteSize
     
     // covered by IT
@@ -31,7 +32,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testBuildRanges_0ChunkSize() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(0)
         
@@ -73,7 +74,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testBuildRanges_0Chunk() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(0)
         let chunksSize = UInt64(10*1024*1024)
         
@@ -96,7 +97,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testBuildRanges_1ChunkSize() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(1)
         
@@ -138,7 +139,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testBuildRanges_1Chunk() {
         // GIVEN
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(1)
         let chunksSize = UInt64(10*1024*1024)
         
@@ -162,7 +163,7 @@ final class UTRangeProviderGuts: XCTestCase {
     func testBuildRanges_ChunkBiggerThanFile() {
         // GIVEN
         // Asking for 4 chunks of 10Mi is larger than the file, should exit
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(10*1024*1024)
         
@@ -206,7 +207,7 @@ final class UTRangeProviderGuts: XCTestCase {
     func testBuildRanges_ChunksWithRemainder() {
         // GIVEN
         // Asking for 4 chunks of 1Mi + some extra chunk with the remainder
-        let fileBytes = UInt64(4865229)
+        let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(4)
         let chunksSize = UInt64(1*1024*1024)
         
@@ -305,7 +306,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testPreferedChunkSize_10KTimes() {
         // GIVEN
-        let fileBytes = UInt64(10000*RangeProvider.APIConsts.chunkMaxSize)
+        let fileBytes = UInt64(10_000*RangeProvider.APIConsts.chunkMaxSize)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -319,7 +320,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testPreferedChunkSize_100KTimes() {
         // GIVEN
-        let fileBytes = UInt64(100000*RangeProvider.APIConsts.chunkMaxSize)
+        let fileBytes = UInt64(100_000*RangeProvider.APIConsts.chunkMaxSize)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -333,7 +334,7 @@ final class UTRangeProviderGuts: XCTestCase {
     
     func testPreferedChunkSize_100MTimes() {
         // GIVEN
-        let fileBytes = UInt64(100000000*RangeProvider.APIConsts.chunkMaxSize)
+        let fileBytes = UInt64(100_000_000*RangeProvider.APIConsts.chunkMaxSize)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -387,6 +388,7 @@ final class UTRangeProviderGuts: XCTestCase {
         }
     }
     
+    
     func testContinuityHelper_empty() {
         // GIVEN
         // note: Is ø formally continuous? No, but easier this way.
@@ -419,7 +421,7 @@ final class UTRangeProviderGuts: XCTestCase {
             let leftUpperBound = tuple.0.upperBound
             let rightLowerBound = tuple.1.lowerBound
             
-            // print("range [leftUpperBound: \(leftUpperBound), rightLowerBound: \(rightLowerBound)]")
+            //print("range [leftUpperBound: \(leftUpperBound), rightLowerBound: \(rightLowerBound)]")
             
             guard leftUpperBound + 1 == rightLowerBound else {
                 throw DomainError.gap(leftUpper: leftUpperBound, rightLower: rightLowerBound)
