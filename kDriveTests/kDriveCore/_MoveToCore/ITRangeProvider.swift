@@ -24,6 +24,9 @@ final class ITRangeProvider: XCTestCase {
     /// Image from wikimedia under CC.
     static let file = "Matterhorn_as_seen_from_Zermatt,_Wallis,_Switzerland,_2012_August,Wikimedia_Commons"
 
+    // MARK: - allRanges
+    
+    /// Here I test that I can chunk a file and re-glue it together.
     func testAllRanges_image() throws {
         // GIVEN
         let bundle = Bundle(for: type(of: self))

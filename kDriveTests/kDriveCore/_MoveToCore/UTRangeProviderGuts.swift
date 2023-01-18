@@ -141,6 +141,28 @@ final class UTRangeProviderGuts: XCTestCase {
         // GIVEN
         let fileBytes = UInt64(4_865_229)
         let fileChunks = UInt64(1)
+        let chunksSize = UInt64(1*1024*1024)
+        let expectedChunks = 2 // One plus remainer
+        
+        let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
+        let guts = RangeProviderGuts(fileURL: stubURL)
+        
+        // WHEN
+        let ranges = guts.buildRanges(fileSize: fileBytes, totalChunksCount: fileChunks, chunkSize: chunksSize)
+        
+        // THEN
+        XCTAssertEqual(ranges.count, expectedChunks)
+        do {
+            try Self.checkContinuity(ranges: ranges)
+        } catch {
+            XCTFail("Chunks not continuous: \(error)")
+        }
+    }
+    
+    func testBuildRanges_1ChunkBiggerThanFile() {
+        // GIVEN
+        let fileBytes = UInt64(4_865_229)
+        let fileChunks = UInt64(1)
         let chunksSize = UInt64(10*1024*1024)
         
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
