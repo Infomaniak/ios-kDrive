@@ -16,12 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDrive
 import kDriveCore
-import XCTest
 
 /// A manualy written mock of the RangeProviderGutsable protocol
-final class MCKRangeProviderGuts: RangeProviderGutsable {
+final class MCKRangeProviderGutsable: RangeProviderGutsable {
     var buildRangesCalled: Bool = false
     var buildRangesReturnValue: [DataRange] = []
     func buildRanges(fileSize: UInt64, totalChunksCount: UInt64, chunkSize: UInt64) -> [DataRange] {

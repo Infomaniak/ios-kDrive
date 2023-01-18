@@ -114,6 +114,9 @@ final class UTChunkProvider: XCTestCase {
         let range: DataRange = 0...1
         let mckFileHandle = MCKFileHandlable()
         mckFileHandle.readUpToCountClosure = { _ in Data() }
+        mckFileHandle.seekToOffsetClosure =  { index in
+            XCTAssertEqual(index, range.lowerBound)
+        }
         
         let chunkProvider = ChunkProvider(mockedHandlable: mckFileHandle, ranges: [])
 

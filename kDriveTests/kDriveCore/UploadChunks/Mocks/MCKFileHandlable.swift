@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2023 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,130 +17,7 @@
  */
 
 import Foundation
-
-/// Something that builds chunks and provide them with an iterator.
-public protocol ChunkProvidable: IteratorProtocol {
-    init?(fileURL: URL, ranges: [DataRange])
-}
-
-/// Something that can chunk a file part by part, in memory, given specified ranges.
-///
-/// Memory considerations: Max memory use ~= sizeOf(one chunk). So between 1Mb to 50Mb
-/// Thread safety: Not thread safe
-///
-@available(iOS 13.4, *)
-public final class ChunkProvider: ChunkProvidable {
-    public typealias Element = Data
-    
-    let fileHandle: FileHandlable
-    
-    var ranges: [DataRange]
-
-    deinit {
-        do {
-            // For the sake of consistency
-            try fileHandle.close()
-        } catch {}
-    }
-    
-    public init?(fileURL: URL, ranges: [DataRange]) {
-        self.ranges = ranges
-        
-        do {
-            self.fileHandle = try FileHandle(forReadingFrom: fileURL)
-        } catch {
-            return nil
-        }
-    }
-    
-    /// Internal testing method
-    init(mockedHandlable: FileHandlable, ranges: [DataRange]) {
-        self.ranges = ranges
-        self.fileHandle = mockedHandlable
-    }
-    
-    /// Will provide chunks one by one, using the IteratorProtocol
-    /// Starting by the first range availlable.
-    public func next() -> Data? {
-        guard ranges.isEmpty == false else {
-            return nil
-        }
-        
-        let range = ranges.removeFirst()
-        
-        do {
-            let chunk = try readChunk(range: range)
-            return chunk
-        } catch {
-            return nil
-        }
-    }
-    
-    // MARK: Internal
-    
-    func readChunk(range: DataRange) throws -> Data? {
-        let offset = range.lowerBound
-        try fileHandle.seek(toOffset: offset)
-        
-//        #if DEBUG
-//        let fileHandleOffset = try fileHandle.offset()
-//        print(fileHandle, "\n~> Range Offset: \(offset)")
-//        assert(fileHandleOffset == offset)
-//        #endif
-        
-        let byteCount = Int(range.upperBound - range.lowerBound) + 1
-        let chunk = try fileHandle.read(upToCount: byteCount)
-        return chunk
-    }
-}
-
-/// Print the FileHandle shows the current offset
-extension FileHandle {
-    override open var description: String {
-        let superDescription = super.description
-        
-        let offsetString: String
-        do {
-            let offset = try self.offset()
-            offsetString = "\(offset)"
-        } catch {
-            offsetString = "\(error)"
-        }
-        
-        let buffer = """
-        <\(superDescription)>
-        <offset:\(offsetString)>
-        """
-        
-        return buffer
-    }
-}
-
-/// Protocol conformance
-extension FileHandle: FileHandlable {}
-
-/// Something that matches most of the FileHandle specification
-protocol FileHandlable {
-    var availableData: Data { get }
-    
-    var description: String { get }
-    
-    func seek(toOffset offset: UInt64) throws
-    
-    func truncate(atOffset offset: UInt64) throws
-    
-    func synchronize() throws
-    
-    func close() throws
-    
-    func readToEnd() throws -> Data?
-    
-    func read(upToCount count: Int) throws -> Data?
-    
-    func offset() throws -> UInt64
-    
-    func seekToEnd() throws -> UInt64
-}
+@testable import kDriveCore
 
 /// Mocking part of the `FileHandle` API
 ///

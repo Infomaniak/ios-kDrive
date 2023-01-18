@@ -33,7 +33,7 @@ final class UTRangeProvider: XCTestCase {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
-        let mckGuts = MCKRangeProviderGuts( /* all zeroes by default */ )
+        let mckGuts = MCKRangeProviderGutsable( /* all zeroes by default */ )
         
         rangeProvider.guts = mckGuts
         
@@ -52,7 +52,7 @@ final class UTRangeProvider: XCTestCase {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
-        let mckGuts = MCKRangeProviderGuts()
+        let mckGuts = MCKRangeProviderGutsable()
         mckGuts.readFileByteSizeReturnValue = 1024
         
         rangeProvider.guts = mckGuts
@@ -78,7 +78,7 @@ final class UTRangeProvider: XCTestCase {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
-        let mckGuts = MCKRangeProviderGuts()
+        let mckGuts = MCKRangeProviderGutsable()
         mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.chunkMinSize
         
         rangeProvider.guts = mckGuts
@@ -104,7 +104,7 @@ final class UTRangeProvider: XCTestCase {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
-        let mckGuts = MCKRangeProviderGuts()
+        let mckGuts = MCKRangeProviderGutsable()
         mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.fileMaxSize + 1
         rangeProvider.guts = mckGuts
         
@@ -129,7 +129,7 @@ final class UTRangeProvider: XCTestCase {
         // GIVEN
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
-        let mckGuts = MCKRangeProviderGuts()
+        let mckGuts = MCKRangeProviderGutsable()
         mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.chunkMinSize + 1
         mckGuts.preferedChunkSizeReturnValue = 1 * 1024 * 1024
         

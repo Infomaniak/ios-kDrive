@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import kDriveCore
 import XCTest
 
@@ -33,22 +32,22 @@ final class ITChunkProvider: XCTestCase {
             XCTFail("unexpected")
             return
         }
-        
+
         do {
             let expectedData = try Data(contentsOf: pathURL)
             let rangeProvider = RangeProvider(fileURL: pathURL)
             let ranges = try rangeProvider.allRanges
-            guard  let chunkProvider = ChunkProvider(fileURL: pathURL, ranges: ranges) else {
+            guard let chunkProvider = ChunkProvider(fileURL: pathURL, ranges: ranges) else {
                 XCTFail("Unexpected")
                 return
             }
-            
+
             // WHEN
             var chunks: [Data] = []
             while let chunk = chunkProvider.next() {
                 chunks.append(chunk)
             }
-        
+
             // THEN
             XCTAssertNotNil(ranges)
             XCTAssertEqual(ranges.count,
@@ -56,7 +55,7 @@ final class ITChunkProvider: XCTestCase {
                            "we should get the same data chunks \(chunks.count) as what we asked for \(ranges.count)")
             XCTAssertEqual(ranges.count, expectedParts)
             XCTAssertEqual(chunks.count, expectedParts)
-            
+
             // ZIP data and ranges, check consistency
             let zip = zip(ranges, chunks)
             for tuple in zip {
@@ -67,17 +66,16 @@ final class ITChunkProvider: XCTestCase {
                 let byteCounts = range.upperBound - range.lowerBound + 1
                 XCTAssertEqual(byteCounts, UInt64(data.count))
             }
-            
+
             // Merge chunks and check file matches the original
             let magic = chunks.reduce(Data()) { partialResult, chunk in
                 var partialResult = partialResult
                 partialResult.append(chunk)
                 return partialResult
             }
-            
-             // 4865229 - 4865224 = 5. Missing 5
+
             XCTAssertEqual(magic, expectedData, "files are not matching, something is corrupted")
-            
+
         } catch {
             XCTFail("Unexpected \(error)")
         }

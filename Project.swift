@@ -90,6 +90,9 @@ let project = Project(name: "kDrive",
                                  deploymentTarget: .iOS(targetVersion: "13.4", devices: [.iphone]),
                                  infoPlist: .file(path: "kDriveTests/Tests.plist"),
                                  sources: "kDriveTests/**",
+                                 resources: [
+                                     "kDriveTests/**/*.jpg"
+                                 ],
                                  dependencies: [
                                      .target(name: "kDrive")
                                  ],
