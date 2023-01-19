@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Foundation
 import InfomaniakCore
-import Alamofire
 
 public typealias Parameters = [String: Any]
 
@@ -31,7 +31,7 @@ public enum RequestBody {
 /// An abstract representation of an HTTP request
 public protocol Requestable {
     var method: Method { get set }
-    
+
     var route: Endpoint { get set }
 
     var GETParameters: Parameters? { get set }
@@ -54,7 +54,7 @@ public enum Method: String {
 
 public struct Request: Requestable {
     public var method: Method
-    
+
     public var route: InfomaniakCore.Endpoint
 
     public var GETParameters: Parameters?
@@ -83,9 +83,9 @@ extension ApiFetcher: RequestDispatchable {
         case .Alamofire:
             return try await dispatchAlamofire(requestable)
         case .NSURLSession:
-            return try await dispatchNSURLSession(requestable)
+            return try await dispatchNSURLSession(requestable, inBackground: false)
         case .NSURLSessionBackground:
-            return try await dispatchNSURLSessionBackground(requestable)
+            return try await dispatchNSURLSession(requestable, inBackground: true)
         }
     }
 
@@ -99,62 +99,49 @@ extension ApiFetcher: RequestDispatchable {
         return try await perform(request: request).data
     }
 
-    func dispatchNSURLSession<Result: Decodable>(_ requestable: Requestable) async throws -> Result {
-        let endpoint = requestable.route.url
-        let parameters = requestable.GETParameters
-        
-        let defaultSession = URLSession(configuration: .default)
-        
+    func dispatchNSURLSession<Result: Decodable>(_ requestable: Requestable, inBackground: Bool) async throws -> Result {
+        var endpoint = requestable.route.url
+        if let parameters = requestable.GETParameters,
+           let queryItems = parameters.urlComponents.queryItems {
+            if #available(iOS 16.0, *) {
+                endpoint.append(queryItems: queryItems)
+            } else {
+                var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
+                components.queryItems = queryItems
+                if let url = components.url {
+                    endpoint = url
+                }
+            }
+        }
+
         var urlRequest = URLRequest(url: endpoint)
         urlRequest.httpMethod = requestable.method.rawValue
-        
+
         // append body
         switch requestable.body {
         case .requestBody(let data):
-            urlRequest.httpBody = data // TODO missing data header and footer ?
+            urlRequest.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+            urlRequest.httpBody = data
         case .POSTParameters(let parameters):
-            urlRequest.httpBody = Data() // TODO encode fields
+            urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.httpBody = parameters.urlEncodedData
         case .none:
             break
         }
+
+        let session: URLSession
+        if inBackground {
+            session = URLSession(configuration: .default)
+        } else {
+            /// TODO bgsession handling
+            session = URLSession(configuration: .background(withIdentifier: "1337"))
+        }
         
-        let tuple = try await defaultSession.data(for: urlRequest)
+        let tuple = try await session.data(for: urlRequest)
         print("data: \(tuple.0)\n response: \(tuple.1) \n")
-        
-        fatalError()
-        
-//        return (tuple.0, tuple.1)
-//        return tuple
-        
-        // TODO: Split code
-//        let json = try response.result.get()
-//        if let result = json.data {
-//            return (result, json.responseAt)
-//        } else if let apiError = json.error {
-//            throw InfomaniakError.apiError(apiError)
-//        } else {
-//            throw InfomaniakError.serverError(statusCode: response.response?.statusCode ?? -1)
-//        }
-        
-//        let uploadedChunk = UploadChunk(from: tuple.0)
-//        return uploadedChunk
+
+        let object = try JSONDecoder().decode(Result.self, from: tuple.0)
+        return object
     }
 
-    func dispatchNSURLSessionBackground<Result: Decodable>(_ requestable: Requestable) async throws -> Result {
-        let endpoint = requestable.route.url
-        let parameters = requestable.GETParameters
-        
-        let defaultSession = URLSession(configuration: .default)
-        
-        var urlRequest = URLRequest(url: endpoint)
-        urlRequest.httpMethod = requestable.method.rawValue
-        
-        // TODO: BG
-//        let delegate = : BackgroundSessionManager() …
-//
-//        try await defaultSession.data(for: urlRequest, delegate: delegate)
-        
-        fatalError()
-    }
-    
 }

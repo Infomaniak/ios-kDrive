@@ -44,6 +44,8 @@ public extension DriveApiFetcher {
         case lastModifiedAt = "last_modified_at"
         case totalChunks = "total_chunks"
         case totalSize = "total_size"
+        case chunkNumber = "chunk_number"
+        case chunkSize = "chunk_size"
     }
     
     /// Starts a session to upload a file in multiple parts
@@ -104,12 +106,12 @@ public extension DriveApiFetcher {
             parameters[APIParameters.conflict.rawValue] = conflictResolution.rawValue
         }
         
-        // TODO: ask if expecting ts, doc does not say
+        // TODO: check if doc details data format
         if let lastModifiedAt {
             parameters[APIParameters.lastModifiedAt.rawValue] = "\(lastModifiedAt.timeIntervalSince1970)"
         }
         
-        // TODO: ask if expecting ts, doc does not say
+        // TODO: check if doc details data format
         if let createdAt {
             parameters[APIParameters.createdAt.rawValue] = "\(createdAt.timeIntervalSince1970)"
         }
@@ -151,9 +153,11 @@ public extension DriveApiFetcher {
     
     func appendChunk(drive: AbstractDrive,
                      sessionToken: AbstractToken,
-                     chunkRange: DataRange,
+                     chunkNumber: UInt64,
                      chunk: Data) async throws -> UploadChunk {
-        var parameters: Parameters = [:]
+        let chunkSize = chunk.count
+        let parameters: Parameters = [APIParameters.chunkNumber.rawValue: chunkNumber,
+                                      APIParameters.chunkSize.rawValue: chunkSize]
         let route: Endpoint = .appendChunk(drive: drive,sessionToken: sessionToken)
         
         let request = Request(method: .POST,

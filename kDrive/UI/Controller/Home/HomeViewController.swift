@@ -231,13 +231,32 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                     fatalError("Missing token")
                 }
                 
-                let mckRange = DataRange(uncheckedBounds: (lower: 0, upper: 1337))
-                let mckData = Data()
+                let file = "REMOVE_ME"
+                let bundle = Bundle(for: type(of: self))
+                guard let pathURL = bundle.url(forResource: file, withExtension: "jpg") else {
+                    fatalError("unable to read file")
+                }
 
+                var chunks: [Data] = []
+                do {
+                    let expectedData = try Data(contentsOf: pathURL)
+                    let rangeProvider = RangeProvider(fileURL: pathURL)
+                    let ranges = try rangeProvider.allRanges
+                    guard let chunkProvider = ChunkProvider(fileURL: pathURL, ranges: ranges) else {
+                        fatalError("unable to init a ChunkProvider")
+                    }
+                    
+                    while let chunk = chunkProvider.next() {
+                        chunks.append(chunk)
+                    }
+                } catch {
+                    fatalError("Unexpected: \(error)")
+                }
+                
                 let uploadedChunk = try await apiFetcher.appendChunk(drive: drive,
                                                                      sessionToken: token,
-                                                                     chunkRange: mckRange,
-                                                                     chunk: mckData)
+                                                                     chunkNumber: 1337,
+                                                                     chunk: chunks[0])
                 print("\(result)")
 //                let result = try await driveFileManager.apiFetcher.
 
