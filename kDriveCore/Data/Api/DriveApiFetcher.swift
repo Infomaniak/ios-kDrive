@@ -276,31 +276,34 @@ public class DriveApiFetcher: ApiFetcher {
 
     public func performAuthenticatedRequest(token: ApiToken, request: @escaping (ApiToken?, Error?) -> Void) {
         AccountManager.instance.refreshTokenLockedQueue.async {
-            if token.requiresRefresh {
-                AccountManager.instance.reloadTokensAndAccounts()
-                if let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) {
-                    if reloadedToken.requiresRefresh {
-                        let group = DispatchGroup()
-                        group.enter()
-                        InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
-                            if let newToken = newToken {
-                                AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
-                                request(newToken, nil)
-                            } else {
-                                request(nil, error)
-                            }
-                            group.leave()
-                        }
-                        group.wait()
-                    } else {
-                        request(reloadedToken, nil)
-                    }
-                } else {
-                    request(nil, DriveError.unknownToken)
-                }
-            } else {
+            guard !token.requiresRefresh else {
                 request(token, nil)
+                return
             }
+
+            AccountManager.instance.reloadTokensAndAccounts()
+            guard let reloadedToken = AccountManager.instance.getTokenForUserId(token.userId) else {
+                request(nil, DriveError.unknownToken)
+                return
+            }
+
+            guard !reloadedToken.requiresRefresh else {
+                request(reloadedToken, nil)
+                return
+            }
+
+            let group = DispatchGroup()
+            group.enter()
+            InfomaniakLogin.refreshToken(token: reloadedToken) { newToken, error in
+                if let newToken = newToken {
+                    AccountManager.instance.updateToken(newToken: newToken, oldToken: reloadedToken)
+                    request(newToken, nil)
+                } else {
+                    request(nil, error)
+                }
+                group.leave()
+            }
+            group.wait()
         }
     }
 
@@ -312,7 +315,9 @@ public class DriveApiFetcher: ApiFetcher {
             if let token = token {
                 Task {
                     do {
-                        let token: UploadToken = try await self.perform(request: AF.request(url, method: .get, headers: ["Authorization": "Bearer \(token.accessToken)"])).data
+                        let token: UploadToken = try await self.perform(request: AF.request(url,
+                                                                                            method: .get,
+                                                                                            headers: ["Authorization": "Bearer \(token.accessToken)"])).data
                         completion(.success(token))
                     } catch {
                         completion(.failure(error))
