@@ -45,7 +45,7 @@ class SwitchUserViewController: UIViewController {
                         _ = try await self.accountManager.updateUser(for: account, registerToken: false)
                     }
                 }
-                try await group.waitForAll()
+                try await group.waitForAll() // This wait in an async task ?
             }
         }
     }
