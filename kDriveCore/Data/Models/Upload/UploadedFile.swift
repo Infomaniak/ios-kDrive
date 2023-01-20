@@ -16,29 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDriveCore
+import Foundation
 
-/// A mock of RangeProvidable
-public final class MCKRangeProvidable: RangeProvidable {
+/// When upload APIV2 returns back with success
+public struct UploadedFile: Decodable {
     
-    var allRangesCalled: Bool { allRangesCallCount > 0 }
-    var allRangesCallCount: Int = 0
-    var allRangesThrows: Error?
-    var allRangesClosure: (()->[DataRange])?
-    public var allRanges: [DataRange] {
-        get throws {
-            allRangesCallCount += 1
-            if let allRangesThrows {
-                throw allRangesThrows
-            }
-            else if let allRangesClosure {
-                return allRangesClosure()
-            }
-            else {
-                return []
-            }
-        }
-     }
+    var token: String
+    var file: File
     
-    public var fileSize: UInt64 = 0
 }

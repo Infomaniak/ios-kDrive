@@ -74,14 +74,13 @@ public extension DriveApiFetcher {
     func startSession(drive: AbstractDrive,
                       totalSize: UInt64,
                       fileName: String,
-                      totalChunks: UInt64,
+                      totalChunks: Int,
                       conflictResolution: ConflictResolution? = nil,
                       lastModifiedAt: Date? = nil,
                       createdAt: Date? = nil,
                       directoryID: Int? = nil,
                       directoryPath: String? = nil,
-                      fileID: Int? = nil) async throws -> UploadSession
-    {
+                      fileID: Int? = nil) async throws -> UploadSession {
         // Parameter validation
         guard directoryID != nil || directoryPath != nil else {
             throw DriveError.UploadSessionError.invalidDirectoryParameters
@@ -92,7 +91,7 @@ public extension DriveApiFetcher {
         }
         
         guard totalChunks < RangeProvider.APIConsts.maxTotalChunks,
-                totalChunks >= RangeProvider.APIConsts.minTotalChunks else {
+              totalChunks >= RangeProvider.APIConsts.minTotalChunks else {
             throw DriveError.UploadSessionError.chunksNumberOutOfBounds
         }
         
@@ -132,40 +131,78 @@ public extension DriveApiFetcher {
         
         let request = Request(method: .POST,
                               route: route,
-                              GETParameters: parameters,
-                              body: .none)
+                              GETParameters: nil,
+                              body: .POSTParameters(parameters))
         
         let result: UploadSession = try await self.dispatch(request, networkStack: .Alamofire)
         return result
     }
-    
-    func getSession(drive: AbstractDrive) async throws -> [Int] {
-        return []
+
+    func getSession(drive: AbstractDrive) async throws -> UploadLiveSession {
+        let route: Endpoint = .uploadSession(drive: drive)
+        let request = Request(method: .GET,
+                              route: route,
+                              GETParameters: nil,
+                              body: .none)
+        
+        let result: UploadLiveSession = try await self.dispatch(request, networkStack: .Alamofire)
+        return result
     }
     
-    func cancelSession(drive: AbstractDrive) async throws -> [Int] {
-        return []
+    func cancelSession(drive: AbstractDrive) async throws -> Bool {
+        let route: Endpoint = .uploadSession(drive: drive)
+        let request = Request(method: .DELETE,
+                              route: route,
+                              GETParameters: nil,
+                              body: .none)
+        
+        let result: Bool = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+        return result
     }
     
-    func closeSession(drive: AbstractDrive) async throws -> [Int] {
-        return []
+    func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadedFile {
+        let route: Endpoint = .closeSession(drive: drive, sessionToken: sessionToken)
+        let request = Request(method: .POST,
+                              route: route,
+                              GETParameters: nil,
+                              body: .none)
+        
+        let result: UploadedFile = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+        return result
     }
     
     func appendChunk(drive: AbstractDrive,
                      sessionToken: AbstractToken,
-                     chunkNumber: UInt64,
+                     chunkNumber: Int,
                      chunk: Data) async throws -> UploadChunk {
         let chunkSize = chunk.count
         let parameters: Parameters = [APIParameters.chunkNumber.rawValue: chunkNumber,
                                       APIParameters.chunkSize.rawValue: chunkSize]
-        let route: Endpoint = .appendChunk(drive: drive,sessionToken: sessionToken)
+        let route: Endpoint = .appendChunk(drive: drive, sessionToken: sessionToken)
         
         let request = Request(method: .POST,
                               route: route,
                               GETParameters: parameters,
                               body: .requestBody(chunk))
         
-        let result: UploadChunk = try await self.dispatch(request, networkStack: .NSURLSession)
+        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
+        return result
+    }
+    
+    func upload(drive: AbstractDrive,
+                sessionToken: AbstractToken,
+                chunkNumber: Int,
+                chunk: Data) async throws -> UploadChunk {
+        let chunkSize = chunk.count
+        let parameters: Parameters = [APIParameters.chunkSize.rawValue: chunkSize]
+        let route: Endpoint = .upload(drive: drive)
+        
+        let request = Request(method: .POST,
+                              route: route,
+                              GETParameters: parameters,
+                              body: .none)
+        
+        let result: UploadChunk = try await self.dispatch(request, networkStack: .Alamofire /* .NSURLSession w8 for MEP to re-enable this */ )
         return result
     }
 }

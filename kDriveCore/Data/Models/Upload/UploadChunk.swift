@@ -20,4 +20,18 @@ import Foundation
 
 public struct UploadChunk: Decodable {
     
+    var number: UInt
+    var status: String
+    var createdAt: UInt64 // TODO date
+    var size: UInt64
+    var hash: String
+    
+    enum CodingKeys: String, CodingKey {
+        case number
+        case status
+        case createdAt = "created_at"
+        case size
+        case hash
+    }
+    
 }

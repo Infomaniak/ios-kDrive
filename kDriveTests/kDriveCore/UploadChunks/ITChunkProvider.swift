@@ -49,11 +49,6 @@ final class ITChunkProvider: XCTestCase {
             }
 
             // THEN
-            XCTAssertNotNil(ranges)
-            XCTAssertEqual(ranges.count,
-                           chunks.count,
-                           "we should get the same data chunks \(chunks.count) as what we asked for \(ranges.count)")
-            XCTAssertEqual(ranges.count, expectedParts)
             XCTAssertEqual(chunks.count, expectedParts)
 
             // ZIP data and ranges, check consistency

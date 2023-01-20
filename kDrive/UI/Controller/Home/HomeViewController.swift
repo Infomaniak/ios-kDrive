@@ -209,21 +209,30 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
     // TODO: clean
     @objc func buttonAction() {
         // chunk provider
-        let aFileUrl = "/dev/null"
-        let aFileSize = UInt64(123)
-        let aFileChunks = UInt64(1)
         let rootDirectoryID = 1
-        let fileName = "\(UUID())"
+        let fileName = "\(UUID()).jpg"
         
         let apiFetcher = driveFileManager.apiFetcher
         let drive = driveFileManager.drive
         
         Task {
             do {
+                // get Ranges for file at path
+                let file = "REMOVE_ME"
+                let bundle = Bundle(for: type(of: self))
+                guard let pathURL = bundle.url(forResource: file, withExtension: "jpg") else {
+                    fatalError("unable to read file")
+                }
+
+                let rangeProvider = RangeProvider(fileURL: pathURL)
+                let fileSize = try rangeProvider.fileSize
+                let ranges = try rangeProvider.allRanges
+                
+                // Get valid session
                 let result = try await apiFetcher.startSession(drive: drive,
-                                                               totalSize: aFileSize,
+                                                               totalSize: fileSize,
                                                                fileName: fileName,
-                                                               totalChunks: aFileChunks,
+                                                               totalChunks: ranges.count,
                                                                conflictResolution: .throwError,
                                                                directoryID: rootDirectoryID)
                 print("result: \(result)")
@@ -231,35 +240,28 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
                     fatalError("Missing token")
                 }
                 
-                let file = "REMOVE_ME"
-                let bundle = Bundle(for: type(of: self))
-                guard let pathURL = bundle.url(forResource: file, withExtension: "jpg") else {
-                    fatalError("unable to read file")
-                }
-
-                var chunks: [Data] = []
-                do {
-                    let expectedData = try Data(contentsOf: pathURL)
-                    let rangeProvider = RangeProvider(fileURL: pathURL)
-                    let ranges = try rangeProvider.allRanges
-                    guard let chunkProvider = ChunkProvider(fileURL: pathURL, ranges: ranges) else {
-                        fatalError("unable to init a ChunkProvider")
-                    }
-                    
-                    while let chunk = chunkProvider.next() {
-                        chunks.append(chunk)
-                    }
-                } catch {
-                    fatalError("Unexpected: \(error)")
+                // Chunks creation from ranges
+                guard let chunkProvider = ChunkProvider(fileURL: pathURL, ranges: ranges) else {
+                    fatalError("unable to init a ChunkProvider")
                 }
                 
-                let uploadedChunk = try await apiFetcher.appendChunk(drive: drive,
-                                                                     sessionToken: token,
-                                                                     chunkNumber: 1337,
-                                                                     chunk: chunks[0])
-                print("\(result)")
-//                let result = try await driveFileManager.apiFetcher.
+                // send each chunk one by one
+                var index = 0
+                while let chunk = chunkProvider.next() {
+                    index += 1 // index start at 1
 
+                    // send each chunk one by one
+                    let uploadedChunk = try await apiFetcher.appendChunk(drive: drive,
+                                                                         sessionToken: token,
+                                                                         chunkNumber: index,
+                                                                         chunk: chunk)
+                    print("\(uploadedChunk)")
+                }
+                
+                // finalize upload
+                let remoteFile = try await apiFetcher.closeSession(drive: drive, sessionToken: token)
+                print("🎉🎉🎉 file upload success: \(remoteFile)")
+                
             } catch {
                 print("\(error)")
             }

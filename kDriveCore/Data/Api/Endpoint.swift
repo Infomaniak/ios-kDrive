@@ -604,12 +604,20 @@ public extension Endpoint {
     }
 
     // V2
+    static func upload(drive: AbstractDrive) -> Endpoint {
+        return .driveInfo(drive: drive).appending(path: "/upload", queryItems: [fileMinimalWithQueryItem])
+    }
+    
     static func uploadSession(drive: AbstractDrive) -> Endpoint {
         return .driveInfo(drive: drive).appending(path: "/upload/session", queryItems: [fileMinimalWithQueryItem])
     }
 
     static func startSession(drive: AbstractDrive) -> Endpoint {
         return .uploadSession(drive: drive).appending(path: "/start")
+    }
+    
+    static func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {
+        return .uploadSession(drive: drive).appending(path: "/\(sessionToken.token)/finish")
     }
 
     static func appendChunk(drive: AbstractDrive, sessionToken: AbstractToken) -> Endpoint {

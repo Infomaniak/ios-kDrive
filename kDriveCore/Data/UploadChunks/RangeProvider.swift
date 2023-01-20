@@ -31,6 +31,9 @@ public protocol RangeProvidable {
     /// Throws if file too large or too small, also if file system issue.
     /// Minimum size support is one byte (low bound == high bound)
     var allRanges: [DataRange] { get throws }
+    
+    /// Return the file size in bytes at the moment of calling.
+    var fileSize: UInt64 { get throws }
 }
 
 public struct RangeProvider: RangeProvidable {
@@ -39,7 +42,7 @@ public struct RangeProvider: RangeProvidable {
         static let chunkMinSize: UInt64 = 1 * 1024 * 1024
         static let chunkMaxSize: UInt64 = 50 * 1024 * 1024
         static let optimalChunkCount: UInt64 = 200
-        static let maxTotalChunks: UInt64 = 10_000
+        static let maxTotalChunks: UInt64 = 10000
         static let minTotalChunks: UInt64 = 1
         
         /// On kDrive a file cannot exceed 50GiB, not linked to chunk API
@@ -64,9 +67,16 @@ public struct RangeProvider: RangeProvidable {
         self.guts = RangeProviderGuts(fileURL: fileURL)
     }
     
-    public var allRanges: [DataRange] {
+    public var fileSize: UInt64 {
         get throws {
             let fileSize = try guts.readFileByteSize()
+            return fileSize
+        }
+    }
+    
+    public var allRanges: [DataRange] {
+        get throws {
+            let fileSize = try fileSize
             
             // Small (including empty) files are not suited for chunk upload
             guard fileSize > APIConsts.chunkMinSize else {
@@ -93,4 +103,3 @@ public struct RangeProvider: RangeProvidable {
         }
     }
 }
-

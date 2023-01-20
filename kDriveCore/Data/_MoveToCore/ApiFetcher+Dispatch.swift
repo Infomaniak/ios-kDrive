@@ -20,59 +20,6 @@ import Alamofire
 import Foundation
 import InfomaniakCore
 
-public typealias Parameters = [String: Any]
-
-/// Wrapping the body of an HTTP Request with common types
-public enum RequestBody {
-    case POSTParameters(Parameters)
-    case requestBody(Data)
-}
-
-/// An abstract representation of an HTTP request
-public protocol Requestable {
-    var method: Method { get set }
-
-    var route: Endpoint { get set }
-
-    var GETParameters: Parameters? { get set }
-
-    var body: RequestBody? { get set }
-}
-
-// TODO: Remove
-public enum Method: String {
-    case GET
-    case POST
-    case PUT
-    case DELETE
-    case CONNECT
-    case OPTIONS
-    case TRACE
-    case PATCH
-    case TEAPOT
-}
-
-public struct Request: Requestable {
-    public var method: Method
-
-    public var route: InfomaniakCore.Endpoint
-
-    public var GETParameters: Parameters?
-
-    public var body: RequestBody?
-}
-
-public enum NetworkStack {
-    case Alamofire
-    case NSURLSession
-    case NSURLSessionBackground
-}
-
-public protocol RequestDispatchable {
-    func dispatch<Result: Decodable>(_ requestable: Requestable,
-                                     networkStack: NetworkStack) async throws -> Result
-}
-
 /// A strcuture to select the stack to use
 ///
 /// this is a draft, there is probably a more aestetic way to do it
@@ -88,14 +35,49 @@ extension ApiFetcher: RequestDispatchable {
             return try await dispatchNSURLSession(requestable, inBackground: true)
         }
     }
+    
+    // TODO: Update existing method in core with encoding
+    func __authenticatedRequest(_ endpoint: Endpoint,
+                                method: HTTPMethod = .get,
+                                parameters: Parameters? = nil,
+                                encoding: ParameterEncoding = JSONEncoding.default,
+                                headers: HTTPHeaders? = nil) -> DataRequest {
+        return authenticatedSession
+            .request(endpoint.url, method: method, parameters: parameters, encoding: encoding, headers: headers)
+    }
 
+    /// A bit of overhead is required to make Alamofire perform a request from simple abstracted types.
     func dispatchAlamofire<Result: Decodable>(_ requestable: Requestable) async throws -> Result {
-        let endpoint = requestable.route
-        let parameters = requestable.GETParameters
-        let request = authenticatedRequest(endpoint,
-                                           method: .post,
+        // Set up URL and associated GET parametes
+        let endpoint: Endpoint
+        if let queryItems = requestable.GETParameters?.urlComponents.queryItems {
+            endpoint = requestable.route.appending(path: "", queryItems: queryItems)
+        } else {
+            endpoint = requestable.route
+        }
+        
+        // Set up body and associated POST parameters or multipart Data
+        let request: DataRequest
+        let body = requestable.body
+        let method = requestable.method.alamofireMethod
+        switch body {
+        case .POSTParameters(let parameters):
+            request = authenticatedRequest(endpoint,
+                                           method: method,
                                            parameters: parameters)
-
+        case .requestBody(let data):
+                        let headers: HTTPHeaders = ["Content-Type": "application/octet-stream"]
+                        request = __authenticatedRequest(endpoint,
+                                                         method: method,
+                                                         parameters: nil,
+                                                         encoding: BodyDataEncoding(data: data),
+                                                         headers: headers)
+        case .none:
+            request = authenticatedRequest(endpoint,
+                                           method: method,
+                                           parameters: nil)
+        }
+        
         return try await perform(request: request).data
     }
 

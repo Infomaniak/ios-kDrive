@@ -1,3 +1,4 @@
+//
 /*
  Infomaniak kDrive - iOS App
  Copyright (C) 2023 Infomaniak Network SA
@@ -16,29 +17,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDriveCore
+import Foundation
 
-/// A mock of RangeProvidable
-public final class MCKRangeProvidable: RangeProvidable {
+public struct UploadLiveSession: Decodable {
+    var expectedChunks: UInt64
+    var receivedChunks: UInt64
+    var uploadingChunks: UInt64
+    var failedChunks: UInt64
+    var expectedSize: UInt64
+    var uploadedSize: UInt64
     
-    var allRangesCalled: Bool { allRangesCallCount > 0 }
-    var allRangesCallCount: Int = 0
-    var allRangesThrows: Error?
-    var allRangesClosure: (()->[DataRange])?
-    public var allRanges: [DataRange] {
-        get throws {
-            allRangesCallCount += 1
-            if let allRangesThrows {
-                throw allRangesThrows
-            }
-            else if let allRangesClosure {
-                return allRangesClosure()
-            }
-            else {
-                return []
-            }
-        }
-     }
-    
-    public var fileSize: UInt64 = 0
+    private enum CodingKeys: String, CodingKey {
+        case expectedChunks = "expected_chunks"
+        case receivedChunks = "received_chunks"
+        case uploadingChunks = "uploading_chunks"
+        case failedChunks = "failed_chunks"
+        case expectedSize = "expected_size"
+        case uploadedSize = "uploaded_size"
+    }
 }
