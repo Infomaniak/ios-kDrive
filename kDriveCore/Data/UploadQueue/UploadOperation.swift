@@ -108,14 +108,18 @@ public class UploadOperation: Operation {
 
     // MARK: - Public methods
 
-    public init(file: UploadFile, urlSession: FileUploadSession = URLSession.shared, itemIdentifier: NSFileProviderItemIdentifier? = nil) {
+    public init(file: UploadFile,
+                urlSession: FileUploadSession = URLSession.shared,
+                itemIdentifier: NSFileProviderItemIdentifier? = nil) {
         self.file = UploadFile(value: file)
         self.urlSession = urlSession
         self.itemIdentifier = itemIdentifier
         self.result = UploadCompletionResult()
     }
 
-    public init(file: UploadFile, task: URLSessionUploadTask, urlSession: FileUploadSession = URLSession.shared) {
+    public init(file: UploadFile,
+                task: URLSessionUploadTask,
+                urlSession: FileUploadSession = URLSession.shared) {
         self.file = UploadFile(value: file)
         self.file.error = nil
         self.task = task
@@ -171,21 +175,24 @@ public class UploadOperation: Operation {
 
         if let filePath = file.pathURL,
            FileManager.default.isReadableFile(atPath: filePath.path) {
-            task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
-            task?.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
-            task?.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
-            progressObservation = task?.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
+            let task = urlSession.uploadTask(with: request, fromFile: filePath, completionHandler: uploadCompletion)
+            self.task = task
+            
+            task.countOfBytesClientExpectsToSend = file.size + 512 // Extra 512 bytes for request headers
+            task.countOfBytesClientExpectsToReceive = 1024 * 5 // 5KB is a very reasonable upper bound size for a file server response (max observed: 1.47KB)
+            
+            progressObservation = task.progress.observe(\.fractionCompleted, options: .new) { [fileId = file.id] _, value in
                 guard let newValue = value.newValue else {
                     return
                 }
                 UploadQueue.instance.publishProgress(newValue, for: fileId)
             }
-            if let itemIdentifier = itemIdentifier, let task = task {
+            if let itemIdentifier = itemIdentifier {
                 DriveInfosManager.instance.getFileProviderManager(driveId: file.driveId, userId: file.userId) { manager in
                     manager.register(task, forItemWithIdentifier: itemIdentifier) { _ in }
                 }
             }
-            task?.resume()
+            task.resume()
 
             // Save UploadFile state (we are mainly interested in saving sessionUrl)
             BackgroundRealm.uploads.execute { uploadsRealm in

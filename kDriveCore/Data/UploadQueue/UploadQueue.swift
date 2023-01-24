@@ -50,7 +50,7 @@ public class UploadQueue {
         urlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
         urlSessionConfiguration.httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         urlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
-        urlSessionConfiguration.networkServiceType = .default
+        urlSessionConfiguration.networkServiceType = .default  // dzr .avStreaming
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
     }()
 
@@ -107,7 +107,9 @@ public class UploadQueue {
     public func addToQueueFromRealm() {
         foregroundSession.getTasksWithCompletionHandler { _, uploadTasks, _ in
             self.dispatchQueue.async {
-                let uploadingFiles = self.realm.objects(UploadFile.self).filter("uploadDate = nil AND maxRetryCount > 0").sorted(byKeyPath: "taskCreationDate")
+                let uploadingFiles = self.realm.objects(UploadFile.self)
+                    .filter("uploadDate = nil AND maxRetryCount > 0")
+                    .sorted(byKeyPath: "taskCreationDate")
                 autoreleasepool {
                     uploadingFiles.forEach { uploadFile in
                         // If the upload file has a session URL but it's foreground and doesn't exist anymore (e.g. app was killed), we add it again
@@ -126,15 +128,22 @@ public class UploadQueue {
         }
     }
 
-    public func getUploadingFiles(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+    public func getUploadingFiles(withParent parentId: Int,
+                                  userId: Int = AccountManager.instance.currentUserId,
+                                  driveId: Int,
+                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return getUploadingFiles(userId: userId, driveId: driveId, using: realm).filter("parentDirectoryId = %d", parentId)
     }
 
-    public func getUploadingFiles(userId: Int, driveId: Int, using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+    public func getUploadingFiles(userId: Int,
+                                  driveId: Int,
+                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId = %d", userId, driveId)).sorted(byKeyPath: "taskCreationDate")
     }
 
-    public func getUploadingFiles(userId: Int, driveIds: [Int], using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
+    public func getUploadingFiles(userId: Int,
+                                  driveIds: [Int],
+                                  using realm: Realm = DriveFileManager.constants.uploadsRealm) -> Results<UploadFile> {
         return realm.objects(UploadFile.self).filter(NSPredicate(format: "uploadDate = nil AND userId = %d AND driveId IN %@", userId, driveIds)).sorted(byKeyPath: "taskCreationDate")
     }
 
@@ -161,7 +170,11 @@ public class UploadQueue {
     }
 
     public func cancel(_ file: UploadFile) {
-        dispatchQueue.async { [fileId = file.id, parentId = file.parentDirectoryId, userId = file.userId, driveId = file.driveId, realm = realm!] in
+        dispatchQueue.async { [fileId = file.id,
+                               parentId = file.parentDirectoryId,
+                               userId = file.userId,
+                               driveId = file.driveId,
+                               realm = realm!] in
             let operation = self.operationsInQueue[fileId]
             if operation?.isExecuting != true {
                 if let toDelete = realm.object(ofType: UploadFile.self, forPrimaryKey: fileId) {
@@ -178,10 +191,15 @@ public class UploadQueue {
         }
     }
 
-    public func cancelAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
+    public func cancelAllOperations(withParent parentId: Int,
+                                    userId: Int = AccountManager.instance.currentUserId,
+                                    driveId: Int) {
         dispatchQueue.async {
             self.suspendAllOperations()
-            let uploadingFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+            let uploadingFiles = self.getUploadingFiles(withParent: parentId,
+                                                        userId: userId,
+                                                        driveId: driveId,
+                                                        using: self.realm)
             uploadingFiles.forEach { file in
                 if !file.isInvalidated,
                    let operation = self.operationsInQueue[file.id] {
@@ -191,7 +209,10 @@ public class UploadQueue {
             try? self.realm.safeWrite {
                 self.realm.delete(uploadingFiles)
             }
-            self.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId, using: self.realm)
+            self.publishUploadCount(withParent: parentId,
+                                    userId: userId,
+                                    driveId: driveId,
+                                    using: self.realm)
             self.resumeAllOperations()
         }
     }
@@ -209,9 +230,14 @@ public class UploadQueue {
         }
     }
 
-    public func retryAllOperations(withParent parentId: Int, userId: Int = AccountManager.instance.currentUserId, driveId: Int) {
+    public func retryAllOperations(withParent parentId: Int,
+                                   userId: Int = AccountManager.instance.currentUserId,
+                                   driveId: Int) {
         dispatchQueue.async {
-            let failedUploadFiles = self.getUploadingFiles(withParent: parentId, userId: userId, driveId: driveId, using: self.realm).filter("_error != nil")
+            let failedUploadFiles = self.getUploadingFiles(withParent: parentId,
+                                                           userId: userId,
+                                                           driveId: driveId,
+                                                           using: self.realm).filter("_error != nil")
             try? self.realm.safeWrite {
                 failedUploadFiles.forEach { file in
                     file.error = nil

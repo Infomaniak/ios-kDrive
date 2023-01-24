@@ -39,16 +39,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     private var reachabilityListener: ReachabilityListener!
     private static let currentStateVersion = 2
     private static let appStateVersionKey = "appStateVersionKey"
+    
+    // MARK: - UIApplicationDelegate
 
-    var topMostViewController: UIViewController? {
-        var topViewController = window?.rootViewController
-        while let presentedViewController = topViewController?.presentedViewController {
-            topViewController = presentedViewController
-        }
-        return topViewController
-    }
-
-    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+    func application(_ application: UIApplication,
+                     willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logging.initLogging()
         DDLogInfo("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.memoryCacheSizeLimit
@@ -93,7 +88,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         return true
     }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // setup DI ASAP
+        FactoryService.setupDependencyInjection()
+        
         // Register for remote notifications. This shows a permission dialog on first run, to
         // show the dialog at a more appropriate time move this registration accordingly.
         // [START register_for_notifications]
@@ -115,37 +114,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         DDLogError("Unable to register for remote notifications: \(error.localizedDescription)")
     }
 
-    private func registerBackgroundTasks() {
-        var registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: Constants.backgroundRefreshIdentifier, using: nil) { task in
-            self.scheduleBackgroundRefresh()
-
-            task.expirationHandler = {
-                UploadQueue.instance.suspendAllOperations()
-                UploadQueue.instance.cancelRunningOperations()
-                task.setTaskCompleted(success: false)
-            }
-
-            self.handleBackgroundRefresh { _ in
-                task.setTaskCompleted(success: true)
-            }
-        }
-        DDLogInfo("Task \(Constants.backgroundRefreshIdentifier) registered ? \(registered)")
-        registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: Constants.longBackgroundRefreshIdentifier, using: nil) { task in
-            self.scheduleBackgroundRefresh()
-
-            task.expirationHandler = {
-                UploadQueue.instance.suspendAllOperations()
-                UploadQueue.instance.cancelRunningOperations()
-                task.setTaskCompleted(success: false)
-            }
-
-            self.handleBackgroundRefresh { _ in
-                task.setTaskCompleted(success: true)
-            }
-        }
-        DDLogInfo("Task \(Constants.longBackgroundRefreshIdentifier) registered ? \(registered)")
-    }
-
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
         // User installed the app but never logged in
         if accountManager.accounts.isEmpty {
@@ -159,36 +127,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         }
     }
 
-    private func scheduleBackgroundRefresh() {
-        let backgroundRefreshRequest = BGAppRefreshTaskRequest(identifier: Constants.backgroundRefreshIdentifier)
-        backgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
-
-        let longBackgroundRefreshRequest = BGProcessingTaskRequest(identifier: Constants.longBackgroundRefreshIdentifier)
-        longBackgroundRefreshRequest.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
-        longBackgroundRefreshRequest.requiresNetworkConnectivity = true
-        longBackgroundRefreshRequest.requiresExternalPower = true
-        do {
-            try BGTaskScheduler.shared.submit(backgroundRefreshRequest)
-            try BGTaskScheduler.shared.submit(longBackgroundRefreshRequest)
-        } catch {
-            DDLogError("Error scheduling background task: \(error)")
-        }
-    }
-
     func applicationDidEnterBackground(_ application: UIApplication) {
-        /* To debug background tasks:
-          Launch ->
-          e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
-          Force early termination ->
-          e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.infomaniak.background.refresh"]
-         */
         scheduleBackgroundRefresh()
-        if UserDefaults.shared.isAppLockEnabled && !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
+        if UserDefaults.shared.isAppLockEnabled,
+           !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
             AppLockHelper.shared.setTime()
         }
     }
 
-    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    func application(_ application: UIApplication,
+                     performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         // Old Nextcloud based app only supports this way for background fetch so it's the only place it will be called in the background.
         if MigrationHelper.canMigrate() {
             NotificationsHelper.sendMigrateNotification()
@@ -211,8 +159,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             return false
         }
 
-        if components.path == "store", let userId = params.first(where: { $0.name == "userId" })?.value, let driveId = params.first(where: { $0.name == "driveId" })?.value {
-            if var viewController = window?.rootViewController, let userId = Int(userId), let driveId = Int(driveId), let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
+        if components.path == "store",
+            let userId = params.first(where: { $0.name == "userId" })?.value,
+            let driveId = params.first(where: { $0.name == "driveId" })?.value {
+            if var viewController = window?.rootViewController,
+                let userId = Int(userId), let driveId = Int(driveId),
+                let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) {
                 // Get presented view controller
                 while let presentedViewController = viewController.presentedViewController {
                     viewController = presentedViewController
@@ -275,7 +227,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
             uploadEditedFiles()
             // Ask to remove uploaded pictures
             if let toRemoveItems = PhotoLibraryUploader.instance.getPicturesToRemove() {
-                let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle, message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription, action: KDriveResourcesStrings.Localizable.buttonDelete, destructive: true, loading: false) {
+                let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
+                                                    message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
+                                                    action: KDriveResourcesStrings.Localizable.buttonDelete,
+                                                    destructive: true,
+                                                    loading: false) {
                     // Proceed with removal
                     PhotoLibraryUploader.instance.removePicturesFromPhotoLibrary(toRemoveItems)
                 }
@@ -355,7 +311,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
     }
 
     private func uploadEditedFiles() {
-        guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL, FileManager.default.fileExists(atPath: folderURL.path) else { return }
+        guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,
+              FileManager.default.fileExists(atPath: folderURL.path) else {
+            return
+        }
+        
         let group = DispatchGroup()
         var shouldCleanFolder = false
         let driveFolders = (try? FileManager.default.contentsOfDirectory(atPath: folderURL.path)) ?? []
@@ -369,6 +329,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer drive from \(driveFolderURL)")
                 continue
             }
+            
             for fileFolder in fileFolders {
                 // Read file folder
                 let fileFolderURL = driveFolderURL.appendingPathComponent(fileFolder)
@@ -378,6 +339,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                     DDLogInfo("[OPEN-IN-PLACE UPLOAD] Could not infer file from \(fileFolderURL)")
                     continue
                 }
+                
                 let fileURL = fileFolderURL.appendingPathComponent(file.name)
                 if FileManager.default.fileExists(atPath: fileURL.path) {
                     // Compare modification date
@@ -395,7 +357,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                         group.enter()
                         shouldCleanFolder = true
                         var observationToken: ObservationToken?
-                        observationToken = uploadQueue.observeFileUploaded(self, fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
+                        observationToken = uploadQueue.observeFileUploaded(self,
+                                                                           fileId: uploadFile.id) { [fileId = file.id] uploadFile, _ in
                             observationToken?.cancel()
                             if let error = uploadFile.error {
                                 shouldCleanFolder = false
@@ -404,7 +367,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                                 // Update file to get the new modification date
                                 Task {
                                     let file = try await driveFileManager.file(id: fileId, forceRefresh: true)
-                                    try? FileManager.default.setAttributes([.modificationDate: file.lastModifiedAt], ofItemAtPath: file.localUrl.path)
+                                    try? FileManager.default.setAttributes([.modificationDate: file.lastModifiedAt],
+                                                                           ofItemAtPath: file.localUrl.path)
                                     driveFileManager.notifyObserversWith(file: file)
                                 }
                             }
@@ -415,6 +379,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 }
             }
         }
+        
         // Clean folder after completing all uploads
         group.notify(queue: DispatchQueue.global(qos: .utility)) {
             if shouldCleanFolder {
@@ -445,22 +410,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
         }
     }
 
-    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
+    func application(_ application: UIApplication,
+                     handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
         DDLogInfo("[Background Session] background session relaunched \(identifier)")
         if identifier == DownloadQueue.backgroundIdentifier {
             BackgroundDownloadSessionManager.instance.backgroundCompletionHandler = completionHandler
         } else if identifier.hasSuffix(UploadQueue.backgroundBaseIdentifier) {
-            BackgroundUploadSessionManager.instance.handleEventsForBackgroundURLSession(identifier: identifier, completionHandler: completionHandler)
+            BackgroundUploadSessionManager.instance.handleEventsForBackgroundURLSession(identifier: identifier,
+                                                                                        completionHandler: completionHandler)
         } else {
             completionHandler()
         }
     }
 
-    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+    func application(_ application: UIApplication,
+                     open url: URL,
+                     sourceApplication: String?,
+                     annotation: Any) -> Bool {
         return InfomaniakLogin.handleRedirectUri(url: url)
     }
 
-    func setRootViewController(_ vc: UIViewController, animated: Bool = true) {
+    func setRootViewController(_ vc: UIViewController,
+                               animated: Bool = true) {
         guard animated, let window = window else {
             self.window?.rootViewController = vc
             self.window?.makeKeyAndVisible()
@@ -469,7 +441,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
         window.rootViewController = vc
         window.makeKeyAndVisible()
-        UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
+        UIView.transition(with: window, duration: 0.3,
+                          options: .transitionCrossDissolve,
+                          animations: nil,
+                          completion: nil)
     }
 
     func present(file: File, driveFileManager: DriveFileManager, office: Bool = false) {
@@ -493,10 +468,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
                 // Present file
                 guard let fileListViewController = navController.topViewController as? FileListViewController else { return }
                 if office {
-                    OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: file, viewController: fileListViewController)
+                    OnlyOfficeViewController.open(driveFileManager: driveFileManager,
+                                                  file: file,
+                                                  viewController: fileListViewController)
                 } else {
                     let filePresenter = FilePresenter(viewController: fileListViewController)
-                    filePresenter.present(driveFileManager: driveFileManager, file: file, files: [file], normalFolderHierarchy: false)
+                    filePresenter.present(driveFileManager: driveFileManager,
+                                          file: file,
+                                          files: [file],
+                                          normalFolderHierarchy: false)
                 }
             }
         }
@@ -536,7 +516,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
     // MARK: - User activity
 
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    func application(_ application: UIApplication,
+                     continue userActivity: NSUserActivity,
+                     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         // Get URL components from the incoming user activity.
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let incomingURL = userActivity.webpageURL,
@@ -553,14 +535,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AccountManagerDelegate {
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
     // In Foreground
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         _ = notification.request.content.userInfo
 
         // Change this to your preferred presentation option
         completionHandler([.alert, .sound])
     }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
 
         switch response.notification.request.trigger {
@@ -622,4 +608,19 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 //
 //        Messaging.messaging().appDidReceiveMessage(userInfo)
     }
+    
+}
+
+// MARK: - Navigation
+
+extension AppDelegate {
+        
+    var topMostViewController: UIViewController? {
+        var topViewController = window?.rootViewController
+        while let presentedViewController = topViewController?.presentedViewController {
+            topViewController = presentedViewController
+        }
+        return topViewController
+    }
+    
 }

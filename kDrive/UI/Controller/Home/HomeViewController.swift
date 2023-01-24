@@ -215,7 +215,12 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         let apiFetcher = driveFileManager.apiFetcher
         let drive = driveFileManager.drive
         
-        Task {
+        // Test trigger DI
+        let upload = UploadOperationV2()
+        
+        
+        
+        /*Task {
             do {
                 // get Ranges for file at path
                 let file = "REMOVE_ME"
@@ -265,7 +270,7 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
             } catch {
                 print("\(error)")
             }
-        }
+        }*/
     }
 
     override func viewWillAppear(_ animated: Bool) {

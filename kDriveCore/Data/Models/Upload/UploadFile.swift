@@ -31,7 +31,20 @@ public enum ConflictOption: String, PersistableEnum {
     case error, replace, rename, ignore
 }
 
-public class UploadFile: Object {
+/// An abstract file to upload
+public protocol UploadFilable {
+    var name: String { get }
+    var parentDirectoryId: Int { get }
+    var userId: Int { get }
+    var driveId: Int { get }
+    var uploadDate: Date? { get }
+    var creationDate: Date? { get }
+    var modificationDate: Date? { get }
+    var taskCreationDate: Date? { get }
+    var maxRetryCount: Int { get }
+}
+
+public class UploadFile: Object, UploadFilable {
     public static let defaultMaxRetryCount = 3
 
     @Persisted(primaryKey: true) public var id: String = ""

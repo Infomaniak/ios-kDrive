@@ -88,10 +88,11 @@ extension ApiFetcher: RequestDispatchable {
             if #available(iOS 16.0, *) {
                 endpoint.append(queryItems: queryItems)
             } else {
-                var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
-                components.queryItems = queryItems
-                if let url = components.url {
-                    endpoint = url
+                if var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false) {
+                    components.queryItems = queryItems
+                    if let url = components.url {
+                        endpoint = url
+                    }
                 }
             }
         }
