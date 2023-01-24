@@ -46,6 +46,7 @@ public extension DriveApiFetcher {
         case totalSize = "total_size"
         case chunkNumber = "chunk_number"
         case chunkSize = "chunk_size"
+        case chunkHash = "chunk_hash"
     }
     
     /// Starts a session to upload a file in multiple parts
@@ -176,8 +177,10 @@ public extension DriveApiFetcher {
                      chunkNumber: Int,
                      chunk: Data) async throws -> UploadChunk {
         let chunkSize = chunk.count
+        let chunkHash = "sha256:\(chunk.SHA256DigestString)"
         let parameters: Parameters = [APIParameters.chunkNumber.rawValue: chunkNumber,
-                                      APIParameters.chunkSize.rawValue: chunkSize]
+                                      APIParameters.chunkSize.rawValue: chunkSize,
+                                      APIParameters.chunkHash.rawValue: chunkHash]
         let route: Endpoint = .appendChunk(drive: drive, sessionToken: sessionToken)
         
         let request = Request(method: .POST,
