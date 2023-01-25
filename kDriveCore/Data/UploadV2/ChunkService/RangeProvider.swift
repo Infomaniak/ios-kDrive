@@ -40,13 +40,17 @@ public struct RangeProvider: RangeProvidable {
     /// Encapsulating API parameters used to compute ranges
     public enum APIConsts {
         static let chunkMinSize: UInt64 = 1 * 1024 * 1024
-        static let chunkMaxSize: UInt64 = 50 * 1024 * 1024
+        static let chunkMaxSizeClient: UInt64 = 50 * 1024 * 1024
+        static let chunkMaxSizeServer: UInt64 = 1 * 1024 * 1024 * 1024
         static let optimalChunkCount: UInt64 = 200
-        static let maxTotalChunks: UInt64 = 10000
+        static let maxTotalChunks: UInt64 = 10_000
         static let minTotalChunks: UInt64 = 1
+  
+        /// the limit supported by the app
+        static let fileMaxSizeClient = APIConsts.maxTotalChunks * APIConsts.chunkMaxSizeClient
         
-        /// On kDrive a file cannot exceed 50GiB, not linked to chunk API
-        static let fileMaxSize: UInt64 = 50 * 1024 * 1024 * 1024
+        /// the limit supported by the server
+        static let fileMaxSizeServer = APIConsts.maxTotalChunks * APIConsts.chunkMaxSizeServer
     }
     
     enum ErrorDomain: Error {
@@ -83,8 +87,9 @@ public struct RangeProvider: RangeProvidable {
                 throw ErrorDomain.FileTooSmall
             }
             
-            // Check for files too large to be processed
-            guard fileSize < APIConsts.fileMaxSize else {
+            // Check for files too large to be processed by mobile app or the server
+            guard fileSize < APIConsts.fileMaxSizeClient,
+                  fileSize < APIConsts.fileMaxSizeServer else {
                 // TODO: notify Sentry
                 throw ErrorDomain.FileTooLarge
             }
@@ -95,6 +100,7 @@ public struct RangeProvider: RangeProvidable {
             guard fileSize > preferedChunkSize else {
                 throw ErrorDomain.FileTooSmall
             }
+            
             let totalChunksCount = fileSize / preferedChunkSize
             
             let ranges = guts.buildRanges(fileSize: fileSize, totalChunksCount: totalChunksCount, chunkSize: preferedChunkSize)

@@ -18,9 +18,22 @@
 
 import Foundation
 
-/// Something that oversees the splitting of a file or a collection of files.
-public struct ChunkService {
+/// Something that can build a type
+public struct Factory {
     
-    var test = "something"
+    public typealias FactoryClosure = ((_ parameters: [String: Any]?, _ resolver: SimpleResolvable)->Any)
+
+    var closure: FactoryClosure
+    var type :Any.Type
+    
+    public init<Service>(type: Service.Type, closure: @escaping FactoryClosure) {
+        self.closure = closure
+        self.type = type
+    }
+    
+    public func build(factoryParameters: [String: Any]? = nil,
+                      resolver: SimpleResolvable = SimpleResolver.sharedResolver) -> Any {
+        closure(factoryParameters, resolver)
+    }
     
 }

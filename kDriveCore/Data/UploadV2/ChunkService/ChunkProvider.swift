@@ -25,10 +25,9 @@ public protocol ChunkProvidable: IteratorProtocol {
 
 /// Something that can chunk a file part by part, in memory, given specified ranges.
 ///
-/// Memory considerations: Max memory use ~= sizeOf(one chunk). So between 1Mb to 50Mb
+/// Memory considerations: Max memory use ≈sizeOf(one chunk). So from 1Mb to 50Mb
 /// Thread safety: Not thread safe
 ///
-@available(iOS 13.4, *)
 public final class ChunkProvider: ChunkProvidable {
     public typealias Element = Data
     

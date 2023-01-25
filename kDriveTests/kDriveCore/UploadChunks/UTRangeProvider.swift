@@ -105,7 +105,7 @@ final class UTRangeProvider: XCTestCase {
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         var rangeProvider = RangeProvider(fileURL: stubURL)
         let mckGuts = MCKRangeProviderGutsable()
-        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.fileMaxSize + 1
+        mckGuts.readFileByteSizeReturnValue = RangeProvider.APIConsts.fileMaxSizeClient + 1
         rangeProvider.guts = mckGuts
         
         // WHEN

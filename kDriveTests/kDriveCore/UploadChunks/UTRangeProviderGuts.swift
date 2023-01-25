@@ -285,7 +285,7 @@ final class UTRangeProviderGuts: XCTestCase {
         // GIVEN
         let fileBytes = UInt64(5*1025*1024)
         XCTAssertGreaterThanOrEqual(fileBytes, RangeProvider.APIConsts.chunkMinSize)
-        XCTAssertLessThanOrEqual(fileBytes, RangeProvider.APIConsts.chunkMaxSize)
+        XCTAssertLessThanOrEqual(fileBytes, RangeProvider.APIConsts.chunkMaxSizeClient)
         
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
@@ -295,12 +295,12 @@ final class UTRangeProviderGuts: XCTestCase {
         
         // THEN
         XCTAssertGreaterThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMinSize)
-        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSize)
+        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSizeClient)
     }
     
     func testPreferedChunkSize_EqualMax() {
         // GIVEN
-        let fileBytes = RangeProvider.APIConsts.chunkMaxSize
+        let fileBytes = RangeProvider.APIConsts.chunkMaxSizeClient
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -309,12 +309,12 @@ final class UTRangeProviderGuts: XCTestCase {
         
         // THEN
         XCTAssertGreaterThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMinSize)
-        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSize)
+        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSizeClient)
     }
     
     func testPreferedChunkSize_10Times() {
         // GIVEN
-        let fileBytes = UInt64(10*RangeProvider.APIConsts.chunkMaxSize)
+        let fileBytes = UInt64(10*RangeProvider.APIConsts.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -323,12 +323,12 @@ final class UTRangeProviderGuts: XCTestCase {
         
         // THEN
         XCTAssertGreaterThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMinSize)
-        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSize)
+        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSizeClient)
     }
     
     func testPreferedChunkSize_10KTimes() {
         // GIVEN
-        let fileBytes = UInt64(10_000*RangeProvider.APIConsts.chunkMaxSize)
+        let fileBytes = UInt64(10_000*RangeProvider.APIConsts.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -337,12 +337,12 @@ final class UTRangeProviderGuts: XCTestCase {
         
         // THEN
         XCTAssertGreaterThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMinSize)
-        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSize)
+        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSizeClient)
     }
     
     func testPreferedChunkSize_100KTimes() {
         // GIVEN
-        let fileBytes = UInt64(100_000*RangeProvider.APIConsts.chunkMaxSize)
+        let fileBytes = UInt64(100_000*RangeProvider.APIConsts.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -351,12 +351,12 @@ final class UTRangeProviderGuts: XCTestCase {
         
         // THEN
         XCTAssertGreaterThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMinSize)
-        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSize)
+        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSizeClient)
     }
     
     func testPreferedChunkSize_100MTimes() {
         // GIVEN
-        let fileBytes = UInt64(100_000_000*RangeProvider.APIConsts.chunkMaxSize)
+        let fileBytes = UInt64(100_000_000*RangeProvider.APIConsts.chunkMaxSizeClient)
         let stubURL = URL(string: "file:///Arcalod_2117.jpg")!
         let guts = RangeProviderGuts(fileURL: stubURL)
         
@@ -365,7 +365,7 @@ final class UTRangeProviderGuts: XCTestCase {
         
         // THEN
         XCTAssertGreaterThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMinSize)
-        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSize)
+        XCTAssertLessThanOrEqual(preferedChunkSize, RangeProvider.APIConsts.chunkMaxSizeClient)
     }
     
     // MARK: - Helpers

@@ -312,6 +312,7 @@ public class UploadOperation: Operation {
         completionLock.leave()
     }
 
+    // over 30sec
     private func backgroundTaskExpired() {
         completionLock.wait()
         // Task has called end() in uploadCompletion
@@ -342,6 +343,7 @@ public class UploadOperation: Operation {
         DDLogInfo("[UploadOperation] Expiration handler end block job \(file.id)")
     }
 
+    // did finish in time
     private func end() {
         DDLogInfo("[UploadOperation] Job \(file.id) ended error: \(file.error?.code ?? "")")
 

@@ -12,7 +12,7 @@ open class AsynchronousOperation: Operation {
     // MARK: - Properties
 
     private let stateQueue = DispatchQueue(
-        label: "com.calebd.operation.state",
+        label: "com.infomaniak.drive.async-operation-state",
         attributes: .concurrent)
 
     private var rawState = OperationState.ready

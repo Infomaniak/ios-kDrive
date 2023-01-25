@@ -17,34 +17,29 @@
  */
 
 import Foundation
-import kDriveCore
 
-/// Something that setups the service factories
-///
-/// Trick : enum as no init, perfect for namespacing
-enum FactoryService {
+/// Something that oversees the splitting of a file or a collection of files.
+public final class ChunkService {
     
-    static func setupDependencyInjection() {
-        for factory in serviceFactories() {
-            do {
-                try SimpleResolver.sharedResolver.store(factory: factory)
-            }
-            catch {
-                assertionFailure("unexpected DI error \(error)")
-            }
-        }
+    public init() {
+        
     }
     
-    private static func serviceFactories() -> [Factory] {
-        let factories = [
-            // ChunkService factory
-            Factory(type: ChunkService.self) { _, _ in
-               ChunkService()
-            },
-            
-        ]
-
-        return factories
-    }
+//    func chunkFile(url: URL, ) -> <#return type#> {
+//        <#function body#>
+//    }
     
 }
+
+//struct ChunkTask {
+//
+//    let chunkProvider: ChunkProvider
+//    let rangeProvider: RangeProvider
+//
+//    init?(fileURL: URL) {
+//        self.chunkProvider =
+//        self.rangeProvider = RangeProvider(fileURL: <#T##URL#>)
+//    }
+//
+//
+//}

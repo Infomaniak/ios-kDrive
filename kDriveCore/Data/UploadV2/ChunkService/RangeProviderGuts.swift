@@ -19,8 +19,6 @@
 import Foundation
 
 /// The internal methods of RangeProviderGuts, made testable
-///
-// TODO: Remove public (protocol and implementation) as soon as moved to Core
 public protocol RangeProviderGutsable {
     /// Build ranges for a file
     /// - Parameters:
@@ -102,12 +100,12 @@ public struct RangeProviderGuts: RangeProviderGutsable {
         case 0 ..< RangeProvider.APIConsts.chunkMinSize:
             chunkSize = RangeProvider.APIConsts.chunkMinSize
         
-        case RangeProvider.APIConsts.chunkMinSize...RangeProvider.APIConsts.chunkMaxSize:
+        case RangeProvider.APIConsts.chunkMinSize...RangeProvider.APIConsts.chunkMaxSizeClient:
             chunkSize = potentialChunkSize
         
         /// Strictly higher than `APIConsts.chunkMaxSize`
         default:
-            chunkSize = RangeProvider.APIConsts.chunkMaxSize
+            chunkSize = RangeProvider.APIConsts.chunkMaxSizeClient
         }
         
         return chunkSize

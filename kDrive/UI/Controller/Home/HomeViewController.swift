@@ -218,8 +218,6 @@ class HomeViewController: UICollectionViewController, SwitchDriveDelegate, Switc
         // Test trigger DI
         let upload = UploadOperationV2()
         
-        
-        
         /*Task {
             do {
                 // get Ranges for file at path

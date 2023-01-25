@@ -17,18 +17,9 @@
  */
 
 import Foundation
-import kDriveCore
 
-/// The factory of the ChunkService
-struct ChunkServiceFactory: FactoryProvidable {
-    
-    var factory: FactoryClosure =  { _ in
-        let service = ChunkService()
-        return service
-    }
-    
-    var identifier: String {
-        "\(ChunkService.self)"
-    }
+public struct UploadSessionService {
+ 
+    @InjectService var chunkService: ChunkService
     
 }
