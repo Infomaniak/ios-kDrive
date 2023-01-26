@@ -17,9 +17,8 @@
  */
 
 import Foundation
+import InfomaniakDI
 
 public struct UploadSessionService {
- 
     @InjectService var chunkService: ChunkService
-    
 }

@@ -17,21 +17,21 @@
  */
 
 import Foundation
+import InfomaniakDI
 
 /// Something that can create an monitor the uploading of a chunk
 public final class UploadOperationV2: AsynchronousOperation {
-
     @InjectService public var chunkService: ChunkService
-    
+
     override public init() {
         super.init()
-        
+
         print("init :\(chunkService)")
     }
-    
-    public override func execute() {
-        // TODO
-        
+
+    override public func execute() {
+        // TODO:
+
         finish()
     }
 }

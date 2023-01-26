@@ -17,13 +17,13 @@
  */
 
 import Foundation
+import InfomaniakDI
 import kDriveCore
 
 /// Something that setups the service factories
 ///
 /// Trick : enum as no init, perfect for namespacing
 enum FactoryService {
-    
     static func setupDependencyInjection() {
         for factory in serviceFactories() {
             do {
@@ -34,17 +34,15 @@ enum FactoryService {
             }
         }
     }
-    
+
     private static func serviceFactories() -> [Factory] {
         let factories = [
             // ChunkService factory
             Factory(type: ChunkService.self) { _, _ in
-               ChunkService()
+                ChunkService()
             },
-            
         ]
 
         return factories
     }
-    
 }
