@@ -18,7 +18,11 @@
 
 import Foundation
 
+// MARK: - Protocols
+
 /// Something minimalist that can resolve a concrete type
+///
+/// Servicies are kept alive for the duration of the app's life
 public protocol SimpleResolvable {
     /// The main solver funtion, tries to fetch an existing object or apply a factory if availlable
     /// - Parameters:
@@ -46,19 +50,29 @@ public protocol SimpleStorable {
                forCustomTypeIdentifier customIdentifier: String?) throws
 }
 
+// MARK: - SimpleResolver
+
 /// A minimalist DI solution
 /// For now, once initiated, stores types as long as the app lives
 ///
 /// Access from Main Queue only
 public final class SimpleResolver: SimpleResolvable, SimpleStorable {
     enum ErrorDomain: Error {
-        case factoryMissing
-        case typeMissmatch
+        case factoryMissing(identifier: String)
+        case typeMissmatch(expected: String)
         case notMainThread
     }
     
     // The last singleton that will exist on our code in the end
     public static let sharedResolver = SimpleResolver()
+    
+    /// Factory collection
+    var factories = [String: Factory]()
+    
+    /// Resolved object collection
+    var store = [String: Any]()
+
+    // MARK: SimpleStorable
     
     public func store(factory: Factory,
                       forCustomTypeIdentifier customIdentifier: String? = nil) throws {
@@ -71,11 +85,8 @@ public final class SimpleResolver: SimpleResolvable, SimpleStorable {
         let identifier = buildIdentifier(type: type, forIdentifier: customIdentifier)
         factories[identifier] = factory
     }
-    
-    var factories = [String: Factory]()
-    var store = [String: Any]()
-    
-    // MARK: - SimpleResolvable
+        
+    // MARK: SimpleResolvable
     
     public func resolve<Service>(type: Service.Type,
                                  forCustomTypeIdentifier customIdentifier: String?,
@@ -87,32 +98,31 @@ public final class SimpleResolver: SimpleResolvable, SimpleStorable {
         
         let serviceIdentifier = buildIdentifier(type: type, forIdentifier: customIdentifier)
         
-        // try to load form store
+        // load form store
         if let service = store[serviceIdentifier] as? Service {
             return service
         }
         
-        // try to load service from factory
+        // load service from factory
         guard let factory = factories[serviceIdentifier] else {
-            throw ErrorDomain.factoryMissing
+            throw ErrorDomain.factoryMissing(identifier: serviceIdentifier)
         }
         
         // Apply factory closure
         guard let service = factory.build(factoryParameters: factoryParameters, resolver: resolver) as? Service else {
-            throw ErrorDomain.typeMissmatch
+            throw ErrorDomain.typeMissmatch(expected: "\(Service.Type.self)")
         }
         
-        // set in store
+        // keep in store built object for later
         store[serviceIdentifier] = service
-        
         
         return service
     }
     
-    // MARK: - internal
+    // MARK: internal
     
     func buildIdentifier(type: Any.Type,
-                                  forIdentifier identifier: String? = nil) -> String {
+                         forIdentifier identifier: String? = nil) -> String {
         let serviceIdentifier: String
         if let identifier {
             serviceIdentifier = "\(type):\(identifier)"
@@ -123,7 +133,7 @@ public final class SimpleResolver: SimpleResolvable, SimpleStorable {
         return serviceIdentifier
     }
     
-    // MARK: - testing
+    // MARK: testing
     
     func removeAll() {
         self.factories.removeAll()
@@ -131,7 +141,9 @@ public final class SimpleResolver: SimpleResolvable, SimpleStorable {
     }
 }
 
-/// A property wrapper that resolves (shared) objects
+// MARK: - InjectService<Service>
+
+/// A property wrapper that resolves shared objects
 @propertyWrapper public struct InjectService<Service> {
     private var service: Service!
     

@@ -21,6 +21,7 @@ import Foundation
 /// Something that can build a type
 public struct Factory {
     
+    /// Something that can build a type, given some extra parameters and a resolver for chained dependency
     public typealias FactoryClosure = ((_ parameters: [String: Any]?, _ resolver: SimpleResolvable)->Any)
 
     var closure: FactoryClosure
